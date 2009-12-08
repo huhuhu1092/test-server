@@ -1,0 +1,7 @@
+SET(CMAKE_BUILD_TYPE Debug)
+SET(Sources 
+    SMessageStream.cpp 
+    SUtil.cpp
+    SMutex.cpp
+    )
+ADD_LIBRARY(server ${Sources})
