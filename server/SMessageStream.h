@@ -10,6 +10,19 @@ struct SMessage
         data = NULL;
         len = 0;
     }
+    ~SMessage()
+    {
+        release();
+    }
+    void release()
+    {
+        if(data != NULL)
+        {
+            delete[] data;
+            len = 0;
+            data = NULL;
+        }
+    }
     unsigned char* data;
     int len;
 };

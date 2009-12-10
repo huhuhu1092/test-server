@@ -35,7 +35,7 @@ int main(int argc, char** argv)
         SASSERT(dataStart[i] == 'a');
     }
     delete []data;
-    delete []m.data;
+    //delete []m.data;
     fprintf(stderr, "case 1 pass\n");
 
     data = new uint8_t[1000];
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     SASSERT(ret == SMessageStream::NO_ERROR);
     SASSERT(ss.getMessagePacketCount() == 0);
     delete[] data;
-    delete[] m.data;
+    //delete[] m.data;
     fprintf(stderr, "case 2 pass\n");
 
 

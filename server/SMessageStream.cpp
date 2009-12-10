@@ -17,6 +17,11 @@ public:
         len = 0;
         offset = 0;
     }
+    ~SMessagePacket()
+    {
+        if(mData != NULL)
+            delete[] mData;
+    }
     //SMessagePacket* mPrev;
     //SMessagePacket* mNext;
     bool isAllConsumed() const
@@ -32,6 +37,7 @@ public:
 class SMessageStream::SMessageStreamImpl
 {
 public:
+    ~SMessageStreamImpl();
     typedef list<SMessagePacket*> SMessagePacketList;
     int getDataLen();
     void backupOffset(vector<int>& offsetBackup);
@@ -39,6 +45,15 @@ public:
     SMessagePacketList mMessagePacketList;
     SMutex mMessagePacketListMutex;
 };
+SMessageStream::SMessageStreamImpl::~SMessageStreamImpl()
+{
+    SAutoMutex mutex(&mMessagePacketListMutex);
+    SMessagePacketList::iterator it;
+    for(it = mMessagePacketList.begin() ; it != mMessagePacketList.end() ; it++)
+    {
+        delete *it;
+    } 
+}
 int SMessageStream::SMessageStreamImpl::getDataLen()
 {
     SMessagePacket* front = mMessagePacketList.front();
@@ -196,6 +211,7 @@ int SMessageStream::getNextMessage(SMessage* out)
 }
 int SMessageStream::addMessagePacket(unsigned char* data, int len)
 {
+    SASSERT(data != NULL && len > 0);
     SMessagePacket* newPacket = new SMessagePacket;
     /*
     if(mTail == NULL)

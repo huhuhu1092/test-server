@@ -4,5 +4,9 @@ SET(Sources
     SUtil.cpp
     SMutex.cpp
     SSocket.cpp
+    SNetAddress.cpp
+    SCommandFactory.cpp
+    SClientManager.cpp
+    SClient.cpp
     )
 ADD_LIBRARY(server ${Sources})
