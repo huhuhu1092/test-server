@@ -11,4 +11,7 @@ public:
     static uint32_t Host2NetInt32(uint32_t data);
 };
 #define SASSERT(x) assert(x)
+#define S_DECLARE_NONECOPY(Class) \
+    Class(const Class&);
+    Class& operator=(const Class&);
 #endif

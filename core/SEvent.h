@@ -23,10 +23,9 @@ class SEvent
 public:
     enum Type {
         CREATE_CLIENT,
-        LOG_IN,
-        QUIT,
         EXIT_THREAD_LOOP,
         DESTROY_CLIENT,
+        Command,
         User = 1000,
         MaxUser = 65535
     };

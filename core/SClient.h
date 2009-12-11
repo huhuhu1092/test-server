@@ -10,6 +10,24 @@ public:
     SClient(const SNetAddress& address, const SSocket& s);
     bool canRemove();
     void process();
+    SSocket* getSocket()
+    {
+        return &mSocket;
+    }
+    SNetAddress getNetAddress()
+    {
+        return mAddress;
+    }
+    SMessageStream* getInputStream()
+    {
+        return &mInputStream;
+    }
+    SMessageStream& getOutputStream()
+    {
+        return mOutputStream;
+    }
+    void readData();
+    void writeData();
 private:
     SNetAddress mAddress;
     SSocket mSocket;

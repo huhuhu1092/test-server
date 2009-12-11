@@ -1,14 +1,13 @@
 #include "SActivityThread.h"
-#include "SEvent.h"
 #include <algorithm>
 #include <functional>
-SActivityThread::SActivityThread(const char* name = 0) : SObject(name)
+SActivityThread::SActivityThread(const char* name) : SObject(name)
 {
     mCanPostEvent = true;
     mExit = false;
-    retCode = 0;
+    mRetCode = 0;
 }
-SActivityThread::~SActivityThread
+SActivityThread::~SActivityThread()
 {
     mPostEventListMutex.lock();
     try
@@ -49,7 +48,7 @@ void SActivityThread::postEvent(SObject* receiver, SEvent* event, int priority)
     if(receiver == NULL)
         receiver = this;
     SPostEvent* pe = new SPostEvent(receiver, event, priority);
-    SAutoMetux mutex(&mPostEventListMutex);
+    SAutoMutex mutex(&mPostEventListMutex);
     if(mPostEventList.empty())
     {
         mPostEventList.push_back(pe);
@@ -70,7 +69,7 @@ void SActivityThread::postEvent(SObject* receiver, SEvent* event, int priority)
 bool SActivityThread::sendEvent(SObject* receiver, SEvent* event)
 {
     if(event == NULL)
-        return;
+        return false;
     if(receiver == NULL)
         receiver = NULL;
     receiver->event(event);
@@ -119,7 +118,7 @@ void SActivityThread::setCanPostEvent(bool v)
     SAutoMutex mutex(&mCanPostEventMutex);
     mCanPostEvent = v;
 }
-void SActivityThread::getCanPostEvent()
+bool SActivityThread::getCanPostEvent()
 {
     bool canPost = true;
     mCanPostEventMutex.lock();
@@ -130,11 +129,11 @@ void SActivityThread::getCanPostEvent()
 
 void SActivityThread::releasePostEventList(SPostEventList& pl)
 {
-    SPostEventList::itertor it;
+    SPostEventList::iterator it;
     for(it = pl.begin(); it != pl.end() ; it++)
     {
         SPostEvent* pe = *it;
-        delete *pe;
+        delete pe;
     }
 
 }
