@@ -1,9 +1,9 @@
 SET(CMAKE_BUILD_TYPE Debug)
-SET(ServerLibDir ../../build/server)
+SET(CoreLibDir ../../build/core)
 SET(Source
     testSClientManager.cpp
     )
-INCLUDE_DIRECTORIES(../../server)
-LINK_DIRECTORIES(${SeverLibDir})
+INCLUDE_DIRECTORIES(../../core)
+LINK_DIRECTORIES(${CoreLibDir})
 ADD_EXECUTABLE(testSClientManager ${Source})
-target_link_libraries(testSClientManager server)
+target_link_libraries(testSClientManager core)

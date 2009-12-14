@@ -12,6 +12,6 @@ public:
 };
 #define SASSERT(x) assert(x)
 #define S_DECLARE_NONECOPY(Class) \
-    Class(const Class&);
+    Class(const Class&); \
     Class& operator=(const Class&);
 #endif

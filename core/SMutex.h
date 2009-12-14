@@ -10,8 +10,8 @@ public:
     bool lock();
     bool unlock();
 private:
-    class SMutexImpl;
-    auto_ptr<SMutexImpl> mImpl;
+    //class SMutexImpl;
+    //auto_ptr<SMutexImpl> mImpl;
 };
 class SAutoMutex
 {

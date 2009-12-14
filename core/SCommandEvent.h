@@ -6,7 +6,7 @@ using namespace std;
 class SCommandEvent : public SEvent
 {
 public:
-    SCommandEvent() : SEvent(SEvnet::Command)
+    SCommandEvent() : SEvent(SEvent::Command)
     {}
     virtual ~SCommandEvent() {}
     virtual bool handle() = 0;
