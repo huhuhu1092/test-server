@@ -4,6 +4,7 @@
 #include "SClient.h"
 #include "SCommunicationThreadManager.h"
 #include "SWorkingThreadManager.h"
+#include "SLog.h"
 #include <map>
 class SResourceThreadManager::SImplData
 {
@@ -50,6 +51,10 @@ void SResourceThreadManager::createNewClient(SCreateClientEvent* event)
     SResourceThreadManager::SImplData::SClientSet::iterator it = mImplData->mClientSet.find(event->getAddress());
     if(it != mImplData->mClientSet.end())
         return;
+    char ipBuf[100];
+    uint16_t port;
+    event->getAddress().toString(ipBuf, 100, port);
+    SLog::msg("### create new client ip = %s , port = %d ###", ipBuf, port);
     mImplData->mClientSet[event->getAddress()] = new SClient(event->getAddress(), event->getSocket());    
     SClient* sc = mImplData->mClientSet[event->getAddress()];
     SEventWithData<SClient>* cData = new SEventWithData<SClient>(SEvent::CREATE_CLIENT, sc, false);

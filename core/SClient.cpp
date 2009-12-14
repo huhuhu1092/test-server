@@ -14,6 +14,7 @@ void SClient::process()
     while((ret = mInputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
     {
         SCommandEvent* event = SResourceThreadManager::getInstance()->create(m.data[0], m.data); 
+        event->setData(this);
         SWorkingThreadManager::getInstance()->postEvent(NULL, event);
         m.release();
     }

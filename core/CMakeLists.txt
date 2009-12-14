@@ -31,6 +31,8 @@ SET(Sources
     SResourceThreadManager.cpp
     SThread.h
     SThread.cpp
+    SLog.h
+    SLog.cpp
     )
 INCLUDE_DIRECTORIES(/usr/include)
 LINK_DIRECTORIES(${ThreadLibDir})

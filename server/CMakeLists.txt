@@ -2,6 +2,9 @@ SET(CMAKE_BUILD_TYPE Debug)
 SET(CoreLibDir ../build/core)
 SET(Source
     SMainServer.cpp
+    SCommandEventFactoryImpl.h
+    SCommandEventFactoryImpl.cpp
+    SCommandEventDefine.h
     )
 INCLUDE_DIRECTORIES(../core)
 LINK_DIRECTORIES(${CoreLibDir})

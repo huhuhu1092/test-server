@@ -3,7 +3,7 @@
 #include "SResourceThreadManager.h"
 #include "SThread.h"
 #include "SNetAddress.h"
-#include "SCommandEventFactory.h"
+#include "SCommandEventFactoryImpl.h"
 class SCommunicationThread : public SThread
 {
 public:
@@ -39,7 +39,7 @@ private:
 SResourceThread::SResourceThread()
 {
     mRMT = SResourceThreadManager::getInstance();
-    SCommandEventFactory* factory = new SCommandEventFactory();
+    SCommandEventFactory* factory = new SCommandEventFactoryImpl();
     mRMT->startup(factory);
 }
 void SResourceThread::readyToRun()
