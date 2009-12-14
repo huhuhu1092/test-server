@@ -1,5 +1,8 @@
 #ifndef SEVENT_H
 #define SEVENT_H
+#include "SType.h"
+#include "SNetAddress.h"
+#include "SSocket.h"
 class SObject;
 class SEvent;
 class SPostEvent
@@ -29,8 +32,9 @@ public:
         User = 1000,
         MaxUser = 65535
     };
-    SEvent(Type t);
-    virtual ~SEvent();
+    SEvent(Type t): mType(t)
+    {}
+    virtual ~SEvent() {}
     Type type()
     {
         return mType;
@@ -38,5 +42,42 @@ public:
 private:
     Type mType;
 
+};
+template <class T>
+class SEventWithData : public SEvent
+{
+public:
+    SEventWithData(Type t, T* data, bool own) : SEvent(t)
+    {
+        this->data = data;
+        this->own = own;
+    }
+    ~SEventWithData()
+    {
+        if(own)
+            delete data;
+    }
+    T* data;
+    bool own;
+};
+class SCreateClientEvent : public SEvent
+{
+public:
+    SCreateClientEvent(const SNetAddress& address, const SSocket& s) : SEvent(CREATE_CLIENT)
+    {
+        mAddress = address;
+        mSocket = s;
+    }
+    SNetAddress getAddress()
+    {
+        return mAddress;
+    }
+    SSocket getSocket()
+    {
+        return mSocket;
+    }
+private:
+    SNetAddress mAddress;
+    SSocket mSocket;
 };
 #endif

@@ -1,6 +1,7 @@
 #include "SCommunicationThreadManager.h"
 #include "SType.h"
 #include "SSocket.h"
+#include "SClient.h"
 SCommunicationThreadManager* SCommunicationThreadManager::instance = NULL;
 SCommunicationThreadManager* SCommunicationThreadManager::getInstance()
 {
@@ -18,7 +19,7 @@ SCommunicationThreadManager::~SCommunicationThreadManager()
 {
     delete[] mBuffer;
 }
-SCommunicationThreadManager::processEvents()
+void SCommunicationThreadManager::processEvents()
 {
     SActivityThread::processEvents();
     SClientList::iterator it;
@@ -44,3 +45,18 @@ void SCommunicationThreadManager::clearBuffer()
 {
     memset(mBuffer, 0, mBufferSize);
 }
+bool SCommunicationThreadManager::event(SEvent* event)
+{
+    switch(event->type())
+    {
+    case SEvent::CREATE_CLIENT:
+        {
+            SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
+            mClientList.push_back(e->data);
+            delete event;
+        }
+    }
+}
+bool SCommunicationThreadManager::eventFilter(SObject* r, SEvent* event)
+{}
+

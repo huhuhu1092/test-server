@@ -2,8 +2,8 @@
 #include "SMutex.h"
 #include "SClient.h"
 #include "SNetAddress.h"
-#include "SCommand.h"
-#include "SCommandFactory.h"
+#include "SCommandEvent.h"
+#include "SCommandEventFactory.h"
 #include "SUtil.h"
 #include <map>
 #include <list>
@@ -22,7 +22,7 @@ public:
     SMessageStream mResponseStream;
     typedef list<SClient*> RemovedClientList;
     RemovedClientList mRemovedClientList;
-    auto_ptr<SCommandFactory> mCommandFactory;
+    auto_ptr<SCommandEventFactory> mCommandFactory;
     SClientManager* mParent;
 };
 void SClientManager::Impl::removeClient(const SNetAddress& address)
@@ -66,7 +66,7 @@ void SClientManager::Impl::processRequest()
             }
         default:
             {
-                SCommand* command = mCommandFactory->create(commandId, m.data);
+                SCommandEvent* command = mCommandFactory->create(commandId, m.data);
                 if(command)
                     command->handle();
             }
@@ -100,7 +100,7 @@ SClientManager::SClientManager() : mImpl(new Impl)
 {
     mImpl->mParent = this;
 }
-void SClientManager::init(SCommandFactory* factory)
+void SClientManager::init(SCommandEventFactory* factory)
 {
     mImpl->mCommandFactory.reset(factory);
 }

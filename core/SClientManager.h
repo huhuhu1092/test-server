@@ -4,7 +4,7 @@
 class SNetAddress;
 class SSocket;
 class SClient;
-class SCommandFactory;
+class SCommandEventFactory;
 //this class can not be inherited
 using namespace std;
 class SDoMapFunction
@@ -47,20 +47,21 @@ class SClientManager
 public:
     enum COMMAND {DELETE_CLIENT, SEND_MSG};
     static SClientManager* getInstance();
+    SClientManager();
     SClient* addClient(const SNetAddress&, const SSocket&);
+    void removeClient(const SNetAddress&);
     // SClientManager will release factory. So dont do release by yourself.
-    void init(SCommandFactory* factory);
+    void init(SCommandEventFactory* factory);
     //handler must not handle long computing, otherwise it will lock client manager too long.
     //don't invoke this method in different thread with SClientManager master thread
     void handle(SDoMapCondition* condition, SDoMapFunction* handler) const; 
     void process();
 private:
-    SClientManager();
     SClientManager(const SClientManager&);
     SClientManager& operator=(const SClientManager&);
 private:
     static SClientManager* mInstance;
     class Impl;
-    auto_ptr<Impl> mImpl;
+    Impl*  mImpl;
 };
 #endif

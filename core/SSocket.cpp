@@ -139,6 +139,11 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     {
         s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
+    if(s == -1)
+    {
+        mError = CREATE_ERROR;
+        return;
+    }
     mRemote.setSocket(s);
     struct sockaddr_in remote;
     bzero(&remote, sizeof(remote));
@@ -146,7 +151,10 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     remote.sin_addr.s_addr = address.getIp();
     remote.sin_port = address.getPort();
     //bind(socket, &remote, sizeof(remote));
-    connect(s, (const sockaddr*)&remote, sizeof(remote));
+    if(connect(s, (const sockaddr*)&remote, sizeof(remote)) == -1)
+    {
+        mError = CONNECT_ERROR;
+    }
 }
 SSocketClient::~SSocketClient()
 {}
@@ -158,4 +166,7 @@ int SSocketClient::read(unsigned char* outBuffer, int size)
 {
     return mRemote.read(outBuffer, size);
 }
-
+int SSocketClient::getError()
+{
+    return mError;
+}

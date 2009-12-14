@@ -54,10 +54,12 @@ private:
 class SSocketClient
 {
 public:
+    enum {NO_ERROR, CREATE_ERROR, CONNECT_ERROR};
     SSocketClient(int tranferType,const SNetAddress& address);
     ~SSocketClient();
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
+    int getError();
 private:
     SSocket mRemote;
     int mError;

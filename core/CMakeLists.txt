@@ -1,4 +1,5 @@
 SET(CMAKE_BUILD_TYPE Debug)
+SET(ThreadLibDir /usr/lib)
 SET(Sources 
     SMessageStream.cpp
     SMessageStream.h 
@@ -22,5 +23,16 @@ SET(Sources
     SObject.cpp
     SType.h
     SEvent.h
+    SCommunicationThreadManager.h
+    SCommunicationThreadManager.cpp
+    SWorkingThreadManager.h
+    SWorkingThreadManager.cpp
+    SResourceThreadManager.h
+    SResourceThreadManager.cpp
+    SThread.h
+    SThread.cpp
     )
+INCLUDE_DIRECTORIES(/usr/include)
+LINK_DIRECTORIES(${ThreadLibDir})
 ADD_LIBRARY(core STATIC ${Sources})
+target_link_libraries(core pthread)

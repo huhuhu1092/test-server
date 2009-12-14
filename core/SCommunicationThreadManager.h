@@ -9,10 +9,12 @@ class SCommunicationThreadManager : public SActivityThread
 {
 public:
     static SCommunicationThreadManager* getInstance();
+    virtual bool event(SEvent*);
+    virtual bool eventFilter(SObject*, SEvent*);
 protected:
     virtual void processEvents();
 private:
-    clearBuffer();
+    void clearBuffer();
     SCommunicationThreadManager(int bufferSize = 256 * 1024);
     ~SCommunicationThreadManager();
     S_DECLARE_NONECOPY(SCommunicationThreadManager);
