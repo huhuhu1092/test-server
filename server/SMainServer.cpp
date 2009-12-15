@@ -4,6 +4,7 @@
 #include "SThread.h"
 #include "SNetAddress.h"
 #include "SCommandEventFactoryImpl.h"
+#include "SLog.h"
 class SCommunicationThread : public SThread
 {
 public:
@@ -90,9 +91,16 @@ int main(int argc, char** argv)
     sWorkingThread->run();
     SNetAddress serverAddress((const char*)NULL, SUtil::Host2NetInt16(10000));
     SSocketServer ss(STREAM, serverAddress);
+    if(ss.getError() != SSocketServer::NO_ERROR)
+        return -1;
     while(true)
     {
         SClientProp cp = ss.accept();
+        if(ss.getError() != SSocketServer::NO_ERROR)
+        {
+            SLog::msg("## accept error ###\n");
+            continue;
+        }
         SEvent* e = new SCreateClientEvent(cp.address, cp.socket);
         SResourceThreadManager::getInstance()->postEvent(NULL, e, SPostEvent::HIGH_PRIORITY);
     }

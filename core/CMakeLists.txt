@@ -33,6 +33,8 @@ SET(Sources
     SThread.cpp
     SLog.h
     SLog.cpp
+    SBufferStream.h
+    SBufferStream.cpp
     )
 INCLUDE_DIRECTORIES(/usr/include)
 LINK_DIRECTORIES(${ThreadLibDir})

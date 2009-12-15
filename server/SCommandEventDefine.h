@@ -3,11 +3,12 @@
 #include <string>
 #include <cstring>
 #include "SCommandEvent.h"
+#include "SBufferStream.h"
 #include "SLog.h"
 using namespace std;
 enum MSG_ID
 {
-    LOGIN,
+    LOGIN = 1,
     LOGOUT,
     SENDFILE
 };
@@ -38,8 +39,20 @@ public:
         this->password = new char[this->passwordLen];
         strncpy(this->password, password, this->passwordLen);
     }
-    void pack(char* out)
-    {}
+    void pack(char*& out, int& len)
+    {
+        int nameLen = strlen(name);
+        int passwordLen = strlen(password);
+        int dataLen = 1 + sizeof(int) + sizeof(int) + sizeof(int) + nameLen + passwordLen;
+        char messageId = LOGIN;
+        out = new char[dataLen];
+        SBufferStream  ss(out, dataLen, 0);
+        ss.writeChar(messageId);
+        ss.writeInt(dataLen);
+        ss.writeString(name);
+        ss.writeString(password);
+        len = dataLen;
+    }
     void unpack(const char* input)
     {
         const char* data = input + MSG_HEADER_LEN;

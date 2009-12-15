@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include    <errno.h>
+#include <fcntl.h>
+
 ///////////////////////////
 /*
 class SNetAddress::SNetAddressImpl
@@ -28,13 +30,19 @@ SSocket::SSocket(int fd)
 }
 SSocket::~SSocket()
 {
-    close(mSocket);
+    //close(mSocket);
+}
+int SSocket::close()
+{
+    ::close(mSocket);
+    return 1;
 }
 int SSocket::send(const unsigned char* data, int size)
 {
     SASSERT(data != NULL && size > 0);
     int nleft;
     int nwritten;
+    int totalWritten = 0;
     const unsigned char* ptr = data;
     nleft = size;
     while(nleft > 0)
@@ -45,10 +53,11 @@ int SSocket::send(const unsigned char* data, int size)
             if(nwritten < 0 && errno == EINTR)
                 nwritten = 0;
             else
-                return -1;
-            nleft -= nwritten;
-            ptr += nwritten;
+                return totalWritten;
         }
+        nleft -= nwritten;
+        ptr += nwritten;
+        totalWritten += nwritten;
     }
     return size;
 }
@@ -58,6 +67,7 @@ int SSocket::read(unsigned char* outBuffer, int size)
     int nread;
     unsigned char* ptr = outBuffer;
     nleft = size;
+    int totalRead = 0;
     while(nleft > 0)
     {
         nread = ::read(mSocket, ptr, nleft);
@@ -66,10 +76,11 @@ int SSocket::read(unsigned char* outBuffer, int size)
             if(errno == EINTR)
                 nread = 0;
             else 
-                return -1;
+                return totalRead;
         }
         nleft -= nread;
         ptr += nread;
+        totalRead += nread;
     }
     return size - nleft;
 }
@@ -121,7 +132,9 @@ SClientProp SSocketServer::accept()
     if(clientSocket == -1)
     {
         mError = ACCEPT_ERROR;
+        return SClientProp();
     }
+    fcntl(clientSocket, F_SETFL, O_NONBLOCK );
     SSocket c(clientSocket);
     SClientProp ss( c, SNetAddress(clientAddr.sin_addr.s_addr, clientAddr.sin_port));
     return ss;
@@ -157,7 +170,9 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     }
 }
 SSocketClient::~SSocketClient()
-{}
+{
+    mRemote.close();
+}
 int SSocketClient::send(const unsigned char* data, int size)
 {
     return mRemote.send(data, size);

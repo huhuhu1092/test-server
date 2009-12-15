@@ -17,7 +17,7 @@ public:
     {
         return mDataRef;
     }
-    virtual void pack(char* out) = 0;
+    virtual void pack(char*& out, int& len) = 0;
     virtual void unpack(const char* input) = 0;
     virtual bool handle() = 0;
 private:

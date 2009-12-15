@@ -89,11 +89,14 @@ bool operator !=(const SNetAddress& left, const SNetAddress& right)
 }
 bool SNetAddress::toString(char* outIp, int size, uint16_t& outPort)
 {
+    memset(outIp, 0, size);
     struct in_addr in_ip;
     in_ip.s_addr = mIp;
     char* strIP = inet_ntoa(in_ip);
     int strIpLen = strlen(strIP);
-    strncpy(outIp, strIP, strIpLen <= size ? strIpLen : size);
+    int copyLen = strIpLen <= size ? strIpLen : size ;
+    strncpy(outIp, strIP, copyLen);
+    outIp[size - 1] = 0;
     outPort = ntohs(mPort);
 }
 

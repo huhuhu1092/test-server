@@ -4,14 +4,23 @@
 #include "SNetAddress.h"
 #include "SSocket.h"
 #include "SUtil.h"
+#include "SBufferStream.h"
+#include "SLog.h"
+#include "../../server/SCommandEventDefine.h"
 int main(int argc, char** argv)
 {
     SNetAddress na("192.168.2.184", SUtil::Host2NetInt16(10000));
     SSocketClient client(STREAM, na);
     if(client.getError() != SSocketClient::NO_ERROR)
         return -1;
-    char buf[100];
-    buf[0] = 1;
+    SLoginCommandEvent se("aa", "bb");
+    char* out;
+    int len;
+    se.pack(out, len);
+    int ret = client.send((unsigned char*)out, len);
+    SLog::msg("#### write num = %d ####\n", ret);
+    unsigned char buffer[258 * 1024];
+    client.read(buffer, 258 * 1024);
     return 0;
     /*
     SCommandEventFactory* factory = new SCommandEventFactory;

@@ -22,6 +22,7 @@ public:
     }
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
+    int close();
 private:
     int mSocket;
 };

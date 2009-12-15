@@ -4,6 +4,7 @@
 #include "SCommandEvent.h"
 #include "SResourceThreadManager.h"
 #include "SWorkingThreadManager.h"
+#include "SLog.h"
 static const int BUFSIZE = 256 * 1024;
 SClient::SClient(const SNetAddress& address, const SSocket& s) : mAddress(address), mSocket(s)
 {}
@@ -15,6 +16,7 @@ void SClient::process()
     {
         SCommandEvent* event = SResourceThreadManager::getInstance()->create(m.data[0], m.data); 
         event->setData(this);
+        SLog::msg("##### read event: %d ####\n", event->type());
         SWorkingThreadManager::getInstance()->postEvent(NULL, event);
         m.release();
     }
@@ -31,6 +33,7 @@ void SClient::readData()
     int readNum = mSocket.read(buffer, BUFSIZE);
     if(readNum > 0)
     {
+        SLog::msg("#### read num = %d ###\n", readNum);
         mInputStream.addMessagePacket(buffer, readNum);
     }
 }

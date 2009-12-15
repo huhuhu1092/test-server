@@ -2,6 +2,7 @@
 #include "SType.h"
 #include "SSocket.h"
 #include "SClient.h"
+#include "SLog.h"
 SCommunicationThreadManager* SCommunicationThreadManager::instance = NULL;
 SCommunicationThreadManager* SCommunicationThreadManager::getInstance()
 {
@@ -52,6 +53,7 @@ bool SCommunicationThreadManager::event(SEvent* event)
     case SEvent::CREATE_CLIENT:
         {
             SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
+            SLog::msg("### new client in SCommunicationThreadManager::event @@@");
             mClientList.push_back(e->data);
             delete event;
         }

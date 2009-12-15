@@ -2,6 +2,7 @@
 #include "SCommandEvent.h"
 #include "SClient.h"
 #include "SEvent.h"
+#include "SLog.h"
 #include <list>
 using namespace std;
 class SWorkingThreadManager::SImplData
@@ -27,8 +28,10 @@ bool SWorkingThreadManager::event(SEvent* event)
     case SEvent::CREATE_CLIENT:
         {
             SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
+            SLog::msg("### create client in SWorkingThreadManager ####");
             mImplData->mClientList.push_back(e->data);
             delete event;
+            return true;
         }
     case SEvent::Command:
 	    return processCommandEvent((SCommandEvent*)event);

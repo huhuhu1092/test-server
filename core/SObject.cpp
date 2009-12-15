@@ -1,7 +1,8 @@
 #include "SObject.h"
-SObject::SObject(const char* name) : mName(name)
+SObject::SObject(const char* name)
 {
-
+    if(name != 0)
+        mName = name;
 }
 SObject::~SObject()
 {
