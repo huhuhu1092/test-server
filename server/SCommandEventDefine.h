@@ -5,6 +5,8 @@
 #include "SCommandEvent.h"
 #include "SBufferStream.h"
 #include "SLog.h"
+#include "SUtil.h"
+#include "SType.h"
 using namespace std;
 enum MSG_ID
 {
@@ -12,7 +14,11 @@ enum MSG_ID
     LOGOUT,
     SENDFILE
 };
-#define MSG_HEADER_LEN (sizeof(unsigned char) + sizeof(int));
+/**
+ * message format:
+ * one byte messageid : two byte message len : data
+ * */
+static const int MSG_HEADER_LEN = (sizeof(unsigned char) + sizeof(short int));
 
 class SLoginCommandEvent : public SCommandEvent
 {
@@ -43,12 +49,12 @@ public:
     {
         int nameLen = strlen(name);
         int passwordLen = strlen(password);
-        int dataLen = 1 + sizeof(int) + sizeof(int) + sizeof(int) + nameLen + passwordLen;
+        int dataLen = MSG_HEADER_LEN + sizeof(int) + sizeof(int) + nameLen + passwordLen;
         char messageId = LOGIN;
         out = new char[dataLen];
-        SBufferStream  ss(out, dataLen, 0);
+        SBufferStreamOutput  ss(out, dataLen, 0);
         ss.writeChar(messageId);
-        ss.writeInt(dataLen);
+        ss.writeShort(dataLen);
         ss.writeString(name);
         ss.writeString(password);
         len = dataLen;
@@ -56,17 +62,25 @@ public:
     void unpack(const char* input)
     {
         const char* data = input + MSG_HEADER_LEN;
+        uint16_t dataLen ;
+        memcpy(&dataLen, input + 1, sizeof(dataLen));
+        dataLen = SUtil::Net2HostInt16(dataLen);
+        SBufferStreamInput ssi(data, dataLen - MSG_HEADER_LEN);
+        ssi.readString(name, nameLen);
+        ssi.readString(password, passwordLen);
+        /*
         nameLen = data[0];
         name = new char[nameLen];
         strncpy(name, data + sizeof(unsigned char), nameLen);
         passwordLen = data[nameLen + sizeof(unsigned char)];
         password = new char[passwordLen];
         strncpy(password, data + nameLen + sizeof(unsigned char) + sizeof(unsigned char), passwordLen);
+        */
     }
     bool handle()
     {
-        string tmpname(name);
-        string tmppass(password);
+        string tmpname(name, nameLen);
+        string tmppass(password, passwordLen);
         if(tmpname == "aa" && tmppass == "bb")
         {
             SLog::msg("#### handle login msg ####");
@@ -74,9 +88,9 @@ public:
         }
         return false;
     }
-    unsigned char nameLen;
+    int nameLen;
     char* name;
-    unsigned char passwordLen;
+    int passwordLen;
     char* password;
 };
 #endif

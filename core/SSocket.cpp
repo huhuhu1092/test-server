@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include    <errno.h>
 #include <fcntl.h>
+#include "SLog.h"
 
 ///////////////////////////
 /*
@@ -47,7 +48,7 @@ int SSocket::send(const unsigned char* data, int size)
     nleft = size;
     while(nleft > 0)
     {
-        nwritten = write(mSocket, ptr, nleft);
+        nwritten = ::write(mSocket, ptr, nleft);
         if(nwritten <= 0)
         {
             if(nwritten < 0 && errno == EINTR)
@@ -71,7 +72,8 @@ int SSocket::read(unsigned char* outBuffer, int size)
     while(nleft > 0)
     {
         nread = ::read(mSocket, ptr, nleft);
-        if(nread < 0)
+        //SLog::msg("#### read num = %d #########\n", nread);
+        if(nread <= 0)
         {
             if(errno == EINTR)
                 nread = 0;

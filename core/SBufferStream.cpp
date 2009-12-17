@@ -3,19 +3,16 @@
 #include "SLog.h"
 #include <cstring>
 using namespace std;
-SBufferStream::SBufferStream(char* data, int len, bool readOnly, bool own, bool netOrder)
+SBufferStreamOutput::SBufferStreamOutput(char* data, int len, bool own, bool netOrder)
 {
     SASSERT(data != 0 && len > 0);
     mBuffer = data;
     mLen = len;
     mOwn = own;
-    //mWriteOffset = 0;
-    //mReadOffset = 0;
     mNetOrder = netOrder;
     mOffset = 0;
-    mReadOnly = readOnly;
 }
-SBufferStream::SBufferStream(int len, bool readOnly, bool netOrder)
+SBufferStreamOutput::SBufferStreamOutput(int len, bool netOrder)
 {
     SASSERT(len > 0);
     mLen = len;
@@ -23,33 +20,26 @@ SBufferStream::SBufferStream(int len, bool readOnly, bool netOrder)
     mOwn = true;
     mNetOrder = netOrder;
     mOffset = 0;
-    mReadOnly = readOnly;
-    //mWriteOffset = 0;
-    //mReadOffset = 0;
 }
-SBufferStream::~SBufferStream()
+SBufferStreamOutput::~SBufferStreamOutput()
 {
     if(mOwn)
         delete[] mBuffer;
 }
-const char* SBufferStream::getBuffer()
+const char* SBufferStreamOutput::getBuffer()
 {
     return mBuffer;
 }
-bool SBufferStream::writeChar(char c)
+bool SBufferStreamOutput::writeChar(char c)
 {
-    if(mReadOnly)
-        return false;
     if(mOffset + 1 > mLen)
         return false;
     memcpy(mBuffer + mOffset, &c, 1);
     mOffset++;
     return true;
 }
-bool SBufferStream::writeString(const char* str)
+bool SBufferStreamOutput::writeString(const char* str)
 {
-    if(mReadOnly)
-        return false;
     int strLen = strlen(str);
     int strHeaderLen = sizeof(int);
     if(mOffset + strLen + strHeaderLen > mLen)
@@ -65,11 +55,8 @@ bool SBufferStream::writeString(const char* str)
     mOffset += (strLen + strHeaderLen);
     return true;
 }
-bool SBufferStream::writeInt(int i)
+bool SBufferStreamOutput::writeInt(int i)
 {
-    if(mReadOnly)
-        return false;
-    
     if(mOffset + sizeof(int) > mLen)
         return false;
     if(mNetOrder)
@@ -82,11 +69,8 @@ bool SBufferStream::writeInt(int i)
     mOffset += sizeof(int);
     return true;
 }
-bool SBufferStream::writeShort(short int i)
+bool SBufferStreamOutput::writeShort(short int i)
 {
-    if(mReadOnly)
-        return false;
-
     if(mOffset + sizeof(short int) > mLen)
         return false;
     if(mNetOrder)
@@ -99,11 +83,8 @@ bool SBufferStream::writeShort(short int i)
     mOffset += sizeof(short int);
     return true;
 }
-bool SBufferStream::writeFloat(float f)
+bool SBufferStreamOutput::writeFloat(float f)
 {
-    if(mReadOnly)
-        return false;
-
     if(mOffset + sizeof(float) > mLen)
         return false;
     if(mNetOrder)
@@ -115,27 +96,41 @@ bool SBufferStream::writeFloat(float f)
     mOffset += sizeof(float);
     return true;
 }
-bool SBufferStream::writeDouble(double d)
-{}
-bool SBufferStream::writeNetAddress(const SNetAddress& na)
+bool SBufferStreamOutput::writeDouble(double d)
 {
+    return false;
+}
+bool SBufferStreamOutput::writeNetAddress(const SNetAddress& na)
+{
+    return false;
+}
+///////////////////////////////////////////
+SBufferStreamInput::SBufferStreamInput(const char* data, int len, bool own, bool netOrder)
+{
+    SASSERT(data != 0 && len > 0);
+    mBuffer = data;
+    mLen = len;
+    mOwn = own;
+    mNetOrder = netOrder;
+    mOffset = 0;
 
 }
-bool SBufferStream::readChar(char& c)
-{    
-    if(!mReadOnly)
-        return false;
+SBufferStreamInput::~SBufferStreamInput()
+{
+    if(mOwn)
+        delete[] mBuffer;
+}
 
+bool SBufferStreamInput::readChar(char& c)
+{    
     if(mOffset + 1 > mLen)
         return false;
     memcpy(&c, mBuffer + mOffset, 1);
     mOffset += 1;
     return true;
 }
-bool SBufferStream::readString(char* str, int& len)
+bool SBufferStreamInput::readString(char*& str, int& len)
 {
-    if(!mReadOnly)
-        return false;
     if(mOffset + sizeof(int) > mLen)
         return false;
     if(mNetOrder)
@@ -162,10 +157,8 @@ bool SBufferStream::readString(char* str, int& len)
         return true;
     }
 }
-bool SBufferStream::readInt(int& i)
+bool SBufferStreamInput::readInt(int& i)
 {
-    if(!mReadOnly)
-        return false;
     if(mOffset + sizeof(int) > mLen)
         return false;
     if(mNetOrder)
@@ -179,10 +172,8 @@ bool SBufferStream::readInt(int& i)
     mOffset += sizeof(int);
     return true;
 }
-bool SBufferStream::readShort(short int& i)
+bool SBufferStreamInput::readShort(short int& i)
 {
-    if(!mReadOnly)
-        return false;
     if(mOffset + sizeof(short int) > mLen)
         return false;
     if(mNetOrder)
@@ -197,10 +188,8 @@ bool SBufferStream::readShort(short int& i)
     return true;
 
 }
-bool SBufferStream::readFloat(float& f)
+bool SBufferStreamInput::readFloat(float& f)
 {
-    if(!mReadOnly)
-        return false;
     if(mOffset + sizeof(float) > mLen)
         return false;
     if(mNetOrder)
@@ -219,8 +208,12 @@ bool SBufferStream::readFloat(float& f)
     mOffset += sizeof(float);
     return true;
 }
-bool SBufferStream::readDouble(double& d)
-{}
-bool SBufferStream::readNetAddress(SNetAddress& na)
-{}
+bool SBufferStreamInput::readDouble(double& d)
+{
+    return false;
+}
+bool SBufferStreamInput::readNetAddress(SNetAddress& na)
+{
+    return false;
+}
 

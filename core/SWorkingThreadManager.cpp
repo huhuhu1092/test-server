@@ -48,7 +48,12 @@ bool SWorkingThreadManager::processCommandEvent(SCommandEvent* event)
 {
     if(event == NULL)
 	    return false;
-    return event->handle();    
+    bool ret = event->handle();    
+    if(event->canDelete())
+    {
+        delete event;
+    }
+    return ret;
 }
 SWorkingThreadManager::SWorkingThreadManager() : mImplData(new SImplData)
 {}

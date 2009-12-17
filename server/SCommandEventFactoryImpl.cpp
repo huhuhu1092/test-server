@@ -7,7 +7,7 @@ SCommandEvent* SCommandEventFactoryImpl::create(int commandId, unsigned char* da
     case LOGIN:
         {
             SLoginCommandEvent* se = new SLoginCommandEvent;
-            se->unpack((char*)data);
+            se->unpack((const char*)data);
             return se;
         }
     }

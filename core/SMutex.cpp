@@ -6,7 +6,14 @@
 class SMutex::SMutexImpl
 {
 public:
-    SMutexImpl() {}
+    SMutexImpl() 
+    {
+#if defined(WIN32)
+#else
+    pthread_mutex_init(&mutex, NULL);
+#endif
+
+    }
     ~SMutexImpl() {}
 #if defined(WIN32)
 #else

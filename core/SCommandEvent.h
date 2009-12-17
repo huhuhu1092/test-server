@@ -7,7 +7,9 @@ class SCommandEvent : public SEvent
 {
 public:
     SCommandEvent() : SEvent(SEvent::Command)
-    {}
+    {
+        mCanDelete = true;
+    }
     virtual ~SCommandEvent() {}
     void setData(void* dataRef)
     {
@@ -17,10 +19,19 @@ public:
     {
         return mDataRef;
     }
+    bool canDelete()
+    {
+        return mCanDelete;
+    }
+    bool setCanDelete(bool canDelete)
+    {
+        mCanDelete = canDelete;
+    }
     virtual void pack(char*& out, int& len) = 0;
     virtual void unpack(const char* input) = 0;
     virtual bool handle() = 0;
 private:
+    bool mCanDelete;
     void* mDataRef;
 };
 #endif

@@ -201,7 +201,23 @@ int SMessageStream::getNextMessage(SMessage* out)
         {
             ret = WAIT_MORE;
         }
+        //delete message packet
+        SMessageStreamImpl::SMessagePacketList deleteMessagePackets;
+        for(it = mImpl->mMessagePacketList.begin(); it != mImpl->mMessagePacketList.end(); it++)
+        {
+            SMessagePacket* data = *it;
+            if(data->isAllConsumed())
+            {
+                deleteMessagePackets.push_back(data);
+            }
+        }
         mImpl->mMessagePacketList.remove_if(canDelete);
+        for(it = deleteMessagePackets.begin() ; it != deleteMessagePackets.end(); it++)
+        {
+            SMessagePacket* data = *it;
+            delete data;
+        }
+        //end
     }
     catch(...)
     {
