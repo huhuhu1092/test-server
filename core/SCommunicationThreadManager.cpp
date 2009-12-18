@@ -3,6 +3,8 @@
 #include "SSocket.h"
 #include "SClient.h"
 #include "SLog.h"
+#include "SEvent.h"
+#include "SCommandEvent.h"
 SCommunicationThreadManager* SCommunicationThreadManager::instance = NULL;
 SCommunicationThreadManager* SCommunicationThreadManager::getInstance()
 {
@@ -56,8 +58,20 @@ bool SCommunicationThreadManager::event(SEvent* event)
             SLog::msg("### new client in SCommunicationThreadManager::event @@@");
             mClientList.push_back(e->data);
             delete event;
+            return true;
+        }
+    case SEvent::Command:
+        {
+            SCommandEvent* ce = (SCommandEvent*)event;
+            bool ret = ce->handle();
+            if(ce->canDelete())
+            {
+                delete ce;
+            }
+            return true;
         }
     }
+    return false;
 }
 bool SCommunicationThreadManager::eventFilter(SObject* r, SEvent* event)
 {}

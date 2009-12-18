@@ -5,6 +5,7 @@ SET(Source
     SCommandEventFactoryImpl.h
     SCommandEventFactoryImpl.cpp
     SCommandEventDefine.h
+    SCommandEventDefine.cpp
     )
 INCLUDE_DIRECTORIES(../core)
 LINK_DIRECTORIES(${CoreLibDir})

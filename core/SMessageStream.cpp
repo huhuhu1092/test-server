@@ -148,10 +148,9 @@ int SMessageStream::getNextMessage(SMessage* out)
     }
     */
     int ret = WAIT_MORE;
+    SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
     if(mImpl->mMessagePacketList.empty())
         return ret;
-//    mImpl->mMessagePacketListMutex.lock();
-    SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
     try
     {
         uint16_t dataLen = mImpl->getDataLen();

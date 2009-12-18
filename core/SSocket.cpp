@@ -3,6 +3,7 @@
 #include <netinet/in.h> 
 #include <arpa/inet.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +49,7 @@ int SSocket::send(const unsigned char* data, int size)
     nleft = size;
     while(nleft > 0)
     {
-        nwritten = ::write(mSocket, ptr, nleft);
+        nwritten = ::send(mSocket, ptr, nleft, 0);
         if(nwritten <= 0)
         {
             if(nwritten < 0 && errno == EINTR)
@@ -71,14 +72,21 @@ int SSocket::read(unsigned char* outBuffer, int size)
     int totalRead = 0;
     while(nleft > 0)
     {
-        nread = ::read(mSocket, ptr, nleft);
+        nread = ::recv(mSocket, ptr, nleft, 0);
         //SLog::msg("#### read num = %d #########\n", nread);
         if(nread <= 0)
         {
             if(errno == EINTR)
                 nread = 0;
             else 
-                return totalRead;
+            {
+                if(totalRead == 0 && nread ==0)
+                    return 0;
+                else if(totalRead == 0 && nread < 0)
+                    return nread;
+                else
+                    return totalRead;
+            }
         }
         nleft -= nread;
         ptr += nread;
@@ -168,8 +176,11 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     //bind(socket, &remote, sizeof(remote));
     if(connect(s, (const sockaddr*)&remote, sizeof(remote)) == -1)
     {
+        SLog::msg("### connect error ####\n");
         mError = CONNECT_ERROR;
     }
+
+    //fcntl(s, F_SETFL, O_NONBLOCK );
 }
 SSocketClient::~SSocketClient()
 {

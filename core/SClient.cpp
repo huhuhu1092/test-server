@@ -36,6 +36,10 @@ void SClient::readData()
         SLog::msg("#### read num = %d ###\n", readNum);
         mInputStream.addMessagePacket(buffer, readNum);
     }
+    else if(readNum == 0)
+    {
+
+    }
 }
 void SClient::writeData()
 {
@@ -43,6 +47,7 @@ void SClient::writeData()
     int ret;
     while((ret = mOutputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
     {
+        SLog::msg("### out put len = %d ###\n", m.len);
         mSocket.send(m.data, m.len);
         m.release();
     }

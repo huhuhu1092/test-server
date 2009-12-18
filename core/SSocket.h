@@ -61,6 +61,10 @@ public:
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
     int getError();
+    int getSocket()
+    {
+        return mRemote.getSocket();
+    }
 private:
     SSocket mRemote;
     int mError;
