@@ -14,6 +14,7 @@ SLoginCommandEvent::SLoginCommandEvent()
 }
 SLoginCommandEvent::~SLoginCommandEvent()
 {
+
     delete[] name;
     delete[] password;
 }
@@ -55,13 +56,18 @@ void SLoginCommandEvent::unpack(const char* input)
 }
 bool SLoginCommandEvent::handle()
 {
+    SClient* clientHandler = SResourceThreadManager::getInstance()->findClient(getClientID());
+    if(clientHandler == NULL)
+        return false;
+    if(!clientHandler->canHandleEvent(this))
+        return false;
     string tmpname(name, nameLen);
     string tmppass(password, passwordLen);
     if(tmpname == "aa" && tmppass == "bb")
     {
         SLog::msg("#### handle login msg ####");
         SLoginReplyCommandEvent* reply = new SLoginReplyCommandEvent;
-        reply->setData(getData());
+        reply->setClientID(getClientID());
         SCommunicationThreadManager::getInstance()->postEvent(NULL, reply);
         /*
         char* outData;
@@ -122,7 +128,11 @@ bool SLoginReplyCommandEvent::handle()
     char* outData;
     int len;
     pack(outData, len);
-    SClient* client = (SClient*)getData();
+    SClient* client = SResourceThradManager::getInstance()->findClient(getClientID());//(SClient*)getData();
+    if(client == NULL)
+        return false;
+    if(!client->canHandleEvent(this))
+        return false;
     client->getOutputStream().addMessagePacket((unsigned char*)outData, len);
     delete[] outData;
     

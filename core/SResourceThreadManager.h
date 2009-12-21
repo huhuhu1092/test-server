@@ -15,6 +15,9 @@ public:
     SCommandEvent* create(int commandId, unsigned char* data);
     virtual bool event(SEvent*);
     virtual bool eventFilter(SObject*, SEvent*);
+    SClient* findClient(const SNetAddress& sa);
+private:
+    virtual void processEvents();
 private:
     void createNewClient(SCreateClientEvent*);
 private:

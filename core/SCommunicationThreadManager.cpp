@@ -55,9 +55,19 @@ bool SCommunicationThreadManager::event(SEvent* event)
     case SEvent::CREATE_CLIENT:
         {
             SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
-            SLog::msg("### new client in SCommunicationThreadManager::event @@@");
+            SLog::msg("### new client in SCommunicationThreadManager::event @@@\n");
             mClientList.push_back(e->data);
+            e->data->setState(SClient::CONNECTED);
             delete event;
+            return true;
+        }
+    case SEvent::DESTROY_CLIENT:
+        {
+            SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
+            SLog::msg("### remove client in SCommunicationThreadManager::event ####\n");
+            mClientList.remove(e->data);
+            e->data->setState(SClient::EXITED);
+            delete e;
             return true;
         }
     case SEvent::Command:
