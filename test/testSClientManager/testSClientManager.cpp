@@ -7,7 +7,7 @@
 #include "SBufferStream.h"
 #include "SLog.h"
 #include "SMessageStream.h"
-#include "../../server/SCommandEventDefine.h"
+#include "SCommandEventDefine.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

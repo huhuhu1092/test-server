@@ -1,5 +1,0 @@
-cmake_minimum_required(VERSION 2.6)
-PROJECT(StreamServer)
-ADD_SUBDIRECTORY(server)
-ADD_SUBDIRECTORY(core)
-ADD_SUBDIRECTORY(test)

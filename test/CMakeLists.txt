@@ -1,4 +1,0 @@
-ADD_SUBDIRECTORY(testSMessageStream)
-ADD_SUBDIRECTORY(testServer)
-ADD_SUBDIRECTORY(testSClientManager)
-
