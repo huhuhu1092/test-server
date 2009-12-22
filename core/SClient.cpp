@@ -58,6 +58,8 @@ void SClient::readData()
     {
         SLog::msg("#### read num = %d ###\n", readNum);
         mInputStream.addMessagePacket(buffer, readNum);
+	SEventWithData<SCleint>* e = new SEventWithData<SCleint>(NEW_INCOMING_DATA, this, false);
+	SWorkingThreadManager::getInstance()->postEvent(NULL, e);
     }
     else if(readNum == 0)
     {

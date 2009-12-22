@@ -71,6 +71,7 @@ bool SWorkingThreadManager::SImplData::mapClient(SClient* client, SNetAddress& c
 }
 bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
 {
+    SAutoMutex mutex(&mImplData->mClientsMutex);
     SClient* client = event->mClient;
     SClientList::iterator listIt = find(mRemovedClientList.begin(), mRemovedClientList.end(), client);
     if(listIt != mRemovedClientList.end())
@@ -83,12 +84,18 @@ bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
         mRemovedClientList.push_back(client);
         client->setState(SClient::EXITED);
     }
+    SRemoveClientEvent* rcEvent = new SRemoveClientEvent();
+    rcEvent->client = client;
+    rcEvent->address = client->getNetAddress();
+    rcEvent->createTime = client->getCreateTime();
+    SCommunicationThreadManager::getInstance()->postEvent(NULL, rcEvent);
     delete event;
     return true;
 }
 bool SWorkingThreadManager::SImplData::createNewClient(SCreateClientEvent* event)
 {
     SASSERT(event);
+    SAutoMutex mutex(&mImplData->mClientsMutex);
     SClientMap::iterator it = mClients.find(event->getAddress());
     if(it != mClients.end())
         return false;
@@ -128,6 +135,14 @@ bool SWorkingThreadManager::event(SEvent* event)
             SLog::msg("### destroy client ####\n");
             return mImplData->destroyClient((SDestroyClientEvent*)event);
         }
+    case SEvent::NEW_INCOMING_DATA:
+	{
+	    SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
+	    SClient* client =  e->data;
+	    client->processMessageFromClient();
+	    delete e;
+	    return true; 
+	}
     case SEvent::Command:
 	    return processCommandEvent((SCommandEvent*)event);
     default:

@@ -34,13 +34,15 @@ void SCommunicationThreadManager::processEvents()
         SClient* sc = *it;
         if(!isClientInRemovingList(sc))
             sc->readData();
-    }  
+    } 
+    /* 
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
         if(!isClientInRemovingList(sc))
             sc->processMessageFromClient();
-    }  
+    }
+    */  
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
@@ -54,6 +56,11 @@ void SCommunicationThreadManager::clearBuffer()
 {
     memset(mBuffer, 0, mBufferSize);
 }
+class RemoveClientFunctor
+{
+public:
+private:
+};
 bool SCommunicationThreadManager::event(SEvent* event)
 {
     switch(event->type())
@@ -80,6 +87,16 @@ bool SCommunicationThreadManager::event(SEvent* event)
             */
             return true;
         }
+    case SEvent::REMOVE_CLIENT:
+	{
+	    SRemoveClientEvent* rcEvent = (SRemoveClientEvent*)event;
+	    ClientData cd;
+	    cd.client = rcEvent->client;
+	    cd.clientAddress = rcEvent->address;
+	    cd.clientCreateTime = rcEvent->createTime;
+            mRemovingClientDataList.remove(cd);
+	    return true;
+	}
     case SEvent::Command:
         {
             SCommandEvent* ce = (SCommandEvent*)event;
@@ -105,4 +122,18 @@ void SCommunicationThreadManager::addRemovedClientData(SClient* client, STimeMS 
     if(it != mRemovingClientDataList.end())
         return;
     mRemovingClientDataList.push_back(cd);
+}
+bool SCommunicationThreadManager::isClientInRemovingList(SClient* client)
+{
+    SClientDataList::iterator it;
+    for(it = mRemovingClientDataList.begin() ; it != mRemovingClientDataList.end() ; it++)
+    {
+	ClientData cd;
+	cd.client = client;
+	cd.clientAddress = client->getNetAddress();
+	cd.clientCreateTime = client->getCreateTime();
+        if(*it == cd)
+	    return true;
+    }
+    return false;
 }

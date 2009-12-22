@@ -3,6 +3,7 @@
 #include "SType.h"
 #include "SNetAddress.h"
 #include "SSocket.h"
+#include "STime.h"
 class SObject;
 class SEvent;
 class SClient;
@@ -26,9 +27,11 @@ class SEvent
 {
 public:
     enum Type {
-        CREATE_CLIENT,
+        CREATE_CLIENT, // when a new client connection arrive
         EXIT_THREAD_LOOP,
-        DESTROY_CLIENT,
+        DESTROY_CLIENT, //when client disconnect
+	REMOVE_CLIENT, // remove client from communication's remove client list
+	NEW_INCOMING_DATA, // read data from socket and the data lenght is geater than zero. that means client send data to server
         Command,
         User = 1000,
         MaxUser = 65535
@@ -89,5 +92,14 @@ public:
         mClient = client;
     }
     SClient* mClient;
+};
+class SRemoveClientEvent : public SEvent
+{
+public:
+    SRemoveClientEvent() : SEvent(REMOVE_CLIENT)
+    {}
+    SClient* client;
+    SNetAddress address;
+    STimeMS createTime;
 };
 #endif
