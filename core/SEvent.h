@@ -5,6 +5,7 @@
 #include "SSocket.h"
 class SObject;
 class SEvent;
+class SClient;
 class SPostEvent
 {
 public:
@@ -79,5 +80,14 @@ public:
 private:
     SNetAddress mAddress;
     SSocket mSocket;
+};
+class SDestroyClientEvent : public SEvent
+{
+public:
+    SDestroyClientEvent(SClient* client) : SEvent(DESTROY_CLIENT)
+    {
+        mClient = client;
+    }
+    SClient* mClient;
 };
 #endif

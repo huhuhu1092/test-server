@@ -33,6 +33,7 @@ bool SResourceThreadManager::event(SEvent* event)
         return true;
     case SEvent::DESTROY_CLIENT:
         {
+            /*
             SEventWithData<SClient>* swd = (SEventWithData<SClient>*)event;
             SClient* client = swd->data;
             mImplData->mClientSet.erase(client->getNetAddress());
@@ -43,6 +44,8 @@ bool SResourceThreadManager::event(SEvent* event)
             mImplData->mRemovedClientList.push_back(client);   
             SEventWithData<SClient>* cData = new SEventWithData<SClient>(SEvent::DESTROY_CLIENT, client, false);
             SCommunicationThreadManager::getInstance()->postEvent(NULL, cData);
+            */
+            return false;
         }
     }
     return false;
@@ -68,7 +71,7 @@ void SResourceThreadManager::createNewClient(SCreateClientEvent* event)
     SResourceThreadManager::SImplData::SClientSet::iterator it = mImplData->mClientSet.find(event->getAddress());
     if(it != mImplData->mClientSet.end())
     {
-        SLog.msg("#### this client has been add to server ####\n");
+        SLog::msg("#### this client has been add to server ####\n");
         return;
     }
     char ipBuf[100];
@@ -84,6 +87,7 @@ void SResourceThreadManager::createNewClient(SCreateClientEvent* event)
     SWorkingThreadManager::getInstance()->postEvent(NULL, wData, SPostEvent::HIGH_PRIORITY);
     delete event;
 }
+/*
 class RemoveClientFunctor
 {
 public:
@@ -100,13 +104,16 @@ public:
 private:
     list<SClient*>& mRemoveList;
 };
+
 static bool whetherRemove(const SClient* client)
 {
     return client->canRemove();
 }
+*/
 void SResourceThreadManager::processEvents()
 {
     SActivityThread::processEvents();
+    /*
     list<SClient*> canDeletedList;
     for_each(mImplData->mRemovedClientList.begin(), mImplData->mRemovedClientList.end(), RemovedClientFunctor(canDeletedList));
     mImplData->mRemovedClientList.remove_if(whetherRemove);
@@ -116,14 +123,17 @@ void SResourceThreadManager::processEvents()
         SClient* client = *it;
         delete client;
     }
-
+*/
 }
 SClient* SResourceThreadManager::findClient(const SNetAddress& sa)
 {
+    return NULL;
+    /*
     SAutoMutex mutex(&mItemData->mClientSetMutex);
     SResourceThreadManager::SImplData::SClientSet::iterator it = mImplData->mClientSet.find(sa);
     if(it == mImplData->mClientSet.end())
         return NULL;
     else
         return it.second;
+        */
 }

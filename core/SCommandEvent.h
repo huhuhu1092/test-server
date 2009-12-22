@@ -9,10 +9,9 @@ class SCommandEvent : public SEvent
 public:
     SCommandEvent() : SEvent(SEvent::Command)
     {
-        //mCanDelete = false;
+        mCanDelete = true;
     }
     virtual ~SCommandEvent() {}
-    /*
     void setData(void* dataRef)
     {
         mDataRef = dataRef;
@@ -29,7 +28,6 @@ public:
     {
         mCanDelete = canDelete;
     }
-    */
     virtual void pack(char*& out, int& len) = 0;
     virtual void unpack(const char* input) = 0;
     virtual bool handle() = 0;
@@ -43,7 +41,7 @@ public:
     }
 private:
     SNetAddress mClientId;
-   // bool mCanDelete;
-    //void* mDataRef;
+    bool mCanDelete;
+    void* mDataRef;
 };
 #endif

@@ -28,6 +28,7 @@ void SCommunicationThread::threadLoop()
 
 }
 /////////////////
+/*
 class SResourceThread : public SThread
 {
 public:
@@ -52,7 +53,7 @@ void SResourceThread::threadLoop()
     int ret = mRMT->exec();
 
 }
-
+*/
 //////////////////////////////////
 class SWorkingThread : public SThread
 {
@@ -66,6 +67,9 @@ private:
 SWorkingThread::SWorkingThread()
 {
     mSTM = SWorkingThreadManager::getInstance();
+    SCommandEventFactory* factory = new SCommandEventFactoryImpl();
+    mSTM->setCommandEventFactory(factory);
+
 }
 void SWorkingThread::readyToRun()
 {
@@ -78,17 +82,17 @@ void SWorkingThread::threadLoop()
 }
 ///////////////////////////////////
 static SCommunicationThread* sCommunicationThread;
-static SResourceThread* sResourceThread;
+//static SResourceThread* sResourceThread;
 static SWorkingThread* sWorkingThread;
 ///////////////////////////////////
 int main(int argc, char** argv)
 {
-    sCommunicationThread = new SCommunicationThread();
-    sResourceThread = new SResourceThread();
     sWorkingThread = new SWorkingThread();
-    sCommunicationThread->run();
-    sResourceThread->run();
+    sCommunicationThread = new SCommunicationThread();
+    //sResourceThread = new SResourceThread();
     sWorkingThread->run();
+    sCommunicationThread->run();
+    //sResourceThread->run();
     SNetAddress serverAddress((const char*)NULL, SUtil::Host2NetInt16(10000));
     SSocketServer ss(STREAM, serverAddress);
     if(ss.getError() != SSocketServer::NO_ERROR)
@@ -102,7 +106,7 @@ int main(int argc, char** argv)
             continue;
         }
         SEvent* e = new SCreateClientEvent(cp.address, cp.socket);
-        SResourceThreadManager::getInstance()->postEvent(NULL, e, SPostEvent::HIGH_PRIORITY);
+        SWorkingThreadManager::getInstance()->postEvent(NULL, e, SPostEvent::HIGH_PRIORITY);
     }
 
 }

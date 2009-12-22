@@ -2,9 +2,11 @@
 #define SCOMMUNICATIONTHREADMANAGER_H
 #include "SActivityThread.h"
 #include "SUtil.h"
+/*
 #include <list>
 using namespace std;
 class SClient;
+*/
 class SCommunicationThreadManager : public SActivityThread
 {
 public:
@@ -20,7 +22,7 @@ private:
     S_DECLARE_NONECOPY(SCommunicationThreadManager);
 private:
     static SCommunicationThreadManager* instance;
-    typedef list<SClient*> SClientList;
+    //typedef list<SClient*> SClientList;
     SClientList mClientList;
     int mBufferSize;
     unsigned char* mBuffer;

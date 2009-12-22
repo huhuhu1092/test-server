@@ -19,11 +19,13 @@ SClient::~SClient()
 }
 void SClient::processMessageFromClient()
 {
+    if(getState() == EXITED)
+        return;
     SMessage m;
     int ret;
     while((ret = mInputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
     {
-        SCommandEvent* event = SResourceThreadManager::getInstance()->create(m.data[0], m.data); 
+        SCommandEvent* event = SWorkingThreadManager::getInstance()->create(m.data[0], m.data); 
         //event->setData(this);
         event->setClientID(mAddress);
         SLog::msg("##### read event: %d ####\n", event->type());
@@ -38,7 +40,7 @@ void SClient::setCanRemove(bool r)
     mCanRemove = r;
     mCanRemoveMutex.unlock();
 }
-bool SClient::canRemove()
+bool SClient::canRemove() const
 {
     bool canRemove;
     mCanRemoveMutex.lock();
@@ -48,6 +50,8 @@ bool SClient::canRemove()
 }
 void SClient::readData()
 {
+    if(getState() == EXITED)
+        return;
     unsigned char buffer[BUFSIZE];
     int readNum = mSocket.read(buffer, BUFSIZE);
     if(readNum > 0)
@@ -58,19 +62,18 @@ void SClient::readData()
     else if(readNum == 0)
     {
         STATE currentState = getState();
-        if(currentState == EXITING)
-            return;
         char ip[100];
         uint16_t port;
-        mAddress.toString(ip, port);
-        SLog::msg("#### client %s, %d disconnected ####", ip, port);
-        SEventWithData<SClient>* event = new SEventWithData<Client>(SEvent::DESTROY_CLIENT, this, false);
-        setState(SClient::EXITING);
-        SResourceManagerThread::postEvent(NULL, event);
+        mAddress.toString(ip, 100, port);
+        SLog::msg("#### client %s, %d disconnected ####\n", ip, port);
+        SDestroyClientEvent* event = new SDestroyClientEvent(this);
+        SWorkingThreadManager::getInstance()->postEvent(NULL, event, SPostEvent::LOW_PRIORITY);
     }
 }
 void SClient::writeData()
 {
+    if(getState() == EXITED)
+        return;
     SMessage m;
     int ret;
     while((ret = mOutputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
@@ -88,7 +91,7 @@ bool SClient::connectionStateTransition(SClientConnectionState* conState)
     }
     mCurrentConnectionState = conState;
 }
-bool SClient::canHandleEvent(SEvent* se)
+bool SClient::canHandleEvent(SEvent* se) const
 {
     return true; 
 }

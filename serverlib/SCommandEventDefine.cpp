@@ -5,6 +5,7 @@
 #include "SType.h"
 #include "SClient.h"
 #include "SCommunicationThreadManager.h"
+#include "SWorkingThreadManager.h"
 SLoginCommandEvent::SLoginCommandEvent()
 {
     nameLen = 0;
@@ -56,7 +57,7 @@ void SLoginCommandEvent::unpack(const char* input)
 }
 bool SLoginCommandEvent::handle()
 {
-    SClient* clientHandler = SResourceThreadManager::getInstance()->findClient(getClientID());
+    SClient* clientHandler = SWorkingThreadManager::getInstance()->findClient(getClientID());
     if(clientHandler == NULL)
         return false;
     if(!clientHandler->canHandleEvent(this))
@@ -128,7 +129,7 @@ bool SLoginReplyCommandEvent::handle()
     char* outData;
     int len;
     pack(outData, len);
-    SClient* client = SResourceThradManager::getInstance()->findClient(getClientID());//(SClient*)getData();
+    SClient* client = SWorkingThreadManager::getInstance()->findClient(getClientID());//(SClient*)getData();
     if(client == NULL)
         return false;
     if(!client->canHandleEvent(this))

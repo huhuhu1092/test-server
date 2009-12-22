@@ -12,9 +12,9 @@ public:
     enum STATE {CONNECTING, CONNECTED, EXITING, EXITED};
     SClient(const SNetAddress& address, const SSocket& s);
     ~SClient();
-    bool canRemove();
+    bool canRemove() const;
     void setCanRemove(bool r);
-    bool canHandleEvent(SEvent*);
+    bool canHandleEvent(SEvent*) const;
     void processMessageFromClient();
     SSocket* getSocket()
     {
@@ -37,16 +37,16 @@ public:
     STATE getState()
     {
         STATE s;
-        mStateMutex->lock();
+        mStateMutex.lock();
         s = mState;
-        mStateMutex->unlock();
+        mStateMutex.unlock();
         return s;
     }
     void setState(STATE s)
     {
-        mStateMutex->lock();
+        mStateMutex.lock();
         mState = s;
-        mStateMutex->unlock();
+        mStateMutex.unlock();
     }
 protected:
     bool connectionStateTransition(SClientConnectionState* conState);
@@ -55,10 +55,10 @@ private:
     SSocket mSocket;
     SMessageStream mInputStream;
     SMessageStream mOutputStream;
-    bool mCanRemove;
-    SMutex mCanRemoveMutex;
-    STATE mState;
-    SMutex mStateMutex;
+    mutable bool mCanRemove;
+    mutable SMutex mCanRemoveMutex;
+    mutable STATE mState;
+    mutable SMutex mStateMutex;
     SClientConnectionState* mCurrentConnectionState;
 private:
     friend class SWorkingThreadManager;

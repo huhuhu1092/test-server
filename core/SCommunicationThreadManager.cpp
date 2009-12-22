@@ -5,6 +5,7 @@
 #include "SLog.h"
 #include "SEvent.h"
 #include "SCommandEvent.h"
+#include "SWorkingThreadManager.h"
 SCommunicationThreadManager* SCommunicationThreadManager::instance = NULL;
 SCommunicationThreadManager* SCommunicationThreadManager::getInstance()
 {
@@ -26,6 +27,8 @@ void SCommunicationThreadManager::processEvents()
 {
     SActivityThread::processEvents();
     SClientList::iterator it;
+    mClientList.clear();
+    bool ret = SWorkingThreadManager::getInstance()->getClientList(mClientList);
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
@@ -34,7 +37,7 @@ void SCommunicationThreadManager::processEvents()
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
-        sc->process();
+        sc->processMessageFromClient();
     }  
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
@@ -54,20 +57,24 @@ bool SCommunicationThreadManager::event(SEvent* event)
     {
     case SEvent::CREATE_CLIENT:
         {
+            /*
             SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
             SLog::msg("### new client in SCommunicationThreadManager::event @@@\n");
             mClientList.push_back(e->data);
             e->data->setState(SClient::CONNECTED);
             delete event;
+            */
             return true;
         }
     case SEvent::DESTROY_CLIENT:
         {
+            /*
             SEventWithData<SClient>* e = (SEventWithData<SClient>*)event;
             SLog::msg("### remove client in SCommunicationThreadManager::event ####\n");
             mClientList.remove(e->data);
             e->data->setState(SClient::EXITED);
             delete e;
+            */
             return true;
         }
     case SEvent::Command:

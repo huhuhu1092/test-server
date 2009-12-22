@@ -25,7 +25,7 @@ protected:
 class SClientConnectedState : public SClientConnectionState
 {
 public:
-    SClietnConnectedState(SClient* client);
+    SClientConnectedState(SClient* client);
     virtual ~SClientConnectedState();
     virtual bool transition();
 };
