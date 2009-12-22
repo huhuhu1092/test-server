@@ -4,13 +4,14 @@
 #include "SSocket.h"
 #include "SMessageStream.h"
 #include "SMutex.h"
+#include "STime.h"
 class SEvent;
 class SClientConnectionState;
 class SClient
 {
 public:
     enum STATE {CONNECTING, CONNECTED, EXITING, EXITED};
-    SClient(const SNetAddress& address, const SSocket& s);
+    SClient(const SNetAddress& address, const SSocket& s, const STimeMS& createTime);
     ~SClient();
     bool canRemove() const;
     void setCanRemove(bool r);
@@ -32,6 +33,8 @@ public:
     {
         return mOutputStream;
     }
+    //readData and writeData are used by communication thread
+    //other thread can not use this two function.
     void readData();
     void writeData();
     STATE getState()
@@ -48,6 +51,10 @@ public:
         mState = s;
         mStateMutex.unlock();
     }
+    STimeMS getCreateTime()
+    {
+        return mCreateTime;
+    }
 protected:
     bool connectionStateTransition(SClientConnectionState* conState);
 private:
@@ -60,6 +67,7 @@ private:
     mutable STATE mState;
     mutable SMutex mStateMutex;
     SClientConnectionState* mCurrentConnectionState;
+    const STimeMS mCreateTime;
 private:
     friend class SWorkingThreadManager;
     friend class SResourceThreadManager;

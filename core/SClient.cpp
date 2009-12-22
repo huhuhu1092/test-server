@@ -7,7 +7,7 @@
 #include "SLog.h"
 #include "SClientConnectionState.h"
 static const int BUFSIZE = 256 * 1024;
-SClient::SClient(const SNetAddress& address, const SSocket& s) : mAddress(address), mSocket(s)
+SClient::SClient(const SNetAddress& address, const SSocket& s, const STimeMS& createTime) : mAddress(address), mSocket(s), mCreateTime(createTime)
 {
     mCurrentConnectionState = new SClientExitedState(this);
     mState = EXITED;
@@ -61,6 +61,7 @@ void SClient::readData()
     }
     else if(readNum == 0)
     {
+        SComunicationThreadManager::getInstance()->addRemovedClientData(this, mCreateTime, mAddress);
         STATE currentState = getState();
         char ip[100];
         uint16_t port;
@@ -70,10 +71,24 @@ void SClient::readData()
         SWorkingThreadManager::getInstance()->postEvent(NULL, event, SPostEvent::LOW_PRIORITY);
     }
 }
+class SOutputMessagePacket : public SMessagePacketFunctor
+{
+public:
+    SOutputMessagePacket(SSocket& s) : ss(s)
+    {}
+    void handleMessagePacket(SMessagePacket* packet)
+    {
+        SLog::msg("### output len = %d ####\n", packet->len);
+        ss.send(packet->mData, packet->len);
+    }
+    SSocket& ss;
+};
+
 void SClient::writeData()
 {
-    if(getState() == EXITED)
-        return;
+    SOutputMessagePacket outputMessageFunctor(mSocket);
+    mOutputStream.mapMessagePacket(outputMessageFunctor, true);
+    /*
     SMessage m;
     int ret;
     while((ret = mOutputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
@@ -82,6 +97,7 @@ void SClient::writeData()
         mSocket.send(m.data, m.len);
         m.release();
     }
+    */
 }
 bool SClient::connectionStateTransition(SClientConnectionState* conState)
 {

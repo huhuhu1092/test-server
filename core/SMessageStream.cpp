@@ -7,31 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 //////////////////////////////////
-class SMessagePacket
-{
-public:
-    SMessagePacket()
-    {
-        //mPrev = mNext = NULL;
-        mData = NULL;
-        len = 0;
-        offset = 0;
-    }
-    ~SMessagePacket()
-    {
-        if(mData != NULL)
-            delete[] mData;
-    }
-    //SMessagePacket* mPrev;
-    //SMessagePacket* mNext;
-    bool isAllConsumed() const
-    {
-        return offset == len;
-    }
-    unsigned char* mData;
-    int len;
-    int offset;
-};
 
 //////////////////////////////////
 class SMessageStream::SMessageStreamImpl
@@ -224,25 +199,20 @@ int SMessageStream::getNextMessage(SMessage* out)
     }
     return ret;
 }
-int SMessageStream::addMessagePacket(unsigned char* data, int len)
+int SMessageStream::addMessagePacket(unsigned char* data, int len, bool own)
 {
     SASSERT(data != NULL && len > 0);
     SMessagePacket* newPacket = new SMessagePacket;
-    /*
-    if(mTail == NULL)
+    newPacket->mOwn = own;
+    if(!own)
     {
-        mTail = newPacket;
-        mHead = newPacket;
-    }    
+        newPacket->mData = new unsigned char[len];
+        memcpy(newPacket->mData, data, len);
+    }
     else
     {
-        newPacket->mPrev = mTail;
-        mTail->mNext = newPacket;
-        mTail = newPacket;
+        newPacket->mData = data;
     }
-    */
-    newPacket->mData = new unsigned char[len];
-    memcpy(newPacket->mData, data, len);
     newPacket->len = len;
     //mImpl->mMessagePacketListMutex.lock();
     SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
@@ -265,4 +235,23 @@ int SMessageStream::getMessagePacketCount()
     count = mImpl->mMessagePacketList.size();
     //mImpl->mMessagePacketListMutex.unlock();
     return count;
+}
+void SMessageStream::mapMessagePacket(SMessagePacketFunctor& functor, bool clearPacketList)
+{
+    SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    SMessageStreamImpl::SMessagePacketList::iterator it;
+    for(it = mImpl->mMessagePacketList.begin() ; it != mImpl->mMessagePacketList.end(); it++)
+    {
+        SMessagePacket* smp = *it;
+        functor.handleMessagePacket(smp);
+    }
+    if(clearPacketList)
+    {
+        for(it = mImpl->mMessagePacketList.begin() ; it != mImpl->mMessagePacketList.end(); it++)
+        {
+            SMessagePacket* smp = *it;
+            delete smp;
+        }
+        mImpl->mMessagePacketList.clear();
+    }
 }

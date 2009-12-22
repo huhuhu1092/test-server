@@ -4,6 +4,7 @@
 #include "SEvent.h"
 #include "SLog.h"
 #include "SCommandEventFactory.h"
+#include "STime.h"
 #include <list>
 #include <map>
 #include <memory>
@@ -97,7 +98,7 @@ bool SWorkingThreadManager::SImplData::createNewClient(SCreateClientEvent* event
     event->getAddress().toString(ipBuf, 100, port);
     SLog::msg("### create new client ip = %s , port = %d ###\n", ipBuf, port);
     ////end
-    mClients[event->getAddress()] = new SClient(event->getAddress(), event->getSocket());
+    mClients[event->getAddress()] = new SClient(event->getAddress(), event->getSocket(), STime::getCurrentTimeMS());
     SClient* client = mClients[event->getAddress()];
     client->setState(SClient::CONNECTED);
     delete event;

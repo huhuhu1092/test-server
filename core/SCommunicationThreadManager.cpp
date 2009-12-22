@@ -32,17 +32,20 @@ void SCommunicationThreadManager::processEvents()
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
-        sc->readData();
+        if(!isClientInRemovingList(sc))
+            sc->readData();
     }  
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
-        sc->processMessageFromClient();
+        if(!isClientInRemovingList(sc))
+            sc->processMessageFromClient();
     }  
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
-        sc->writeData();
+        if(!isClientInRemovingList(sc))
+            sc->writeData();
     }  
 
 
@@ -92,4 +95,14 @@ bool SCommunicationThreadManager::event(SEvent* event)
 }
 bool SCommunicationThreadManager::eventFilter(SObject* r, SEvent* event)
 {}
-
+void SCommunicationThreadManager::addRemovedClientData(SClient* client, STimeMS createTime, SNetAddress address)
+{
+    ClientData cd;
+    cd.client = client;
+    cd.clientAddress = address;
+    cd.clientCreateTime = createTime;
+    SClientDataList::iterator it = find(mRemovingClientDataList.begin(), mRemovingClientDataList.end(), cd);
+    if(it != mRemovingClientDataList.end())
+        return;
+    mRemovingClientDataList.push_back(cd);
+}
