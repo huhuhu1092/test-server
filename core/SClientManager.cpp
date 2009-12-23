@@ -110,7 +110,7 @@ SClient* SClientManager::addClient(const SNetAddress& address, const SSocket& s)
     SClientManager::Impl::ClientSet::iterator it = mImpl->mClientSet.find(address);
     if(it != mImpl->mClientSet.end())
         return it->second;
-    mImpl->mClientSet[address] = new SClient(address, s);    
+    //mImpl->mClientSet[address] = new SClient(address, s);    
     return mImpl->mClientSet[address];
 }
 

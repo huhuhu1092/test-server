@@ -39,7 +39,7 @@ public:
     }
     ~SMessagePacket()
     {
-        if(mData != NULL && mOwn)
+        if(mData != NULL)
             delete[] mData;
     }
     bool isAllConsumed() const
@@ -68,6 +68,8 @@ public:
     SMessageStream();
     ~SMessageStream();
     int getNextMessage(SMessage* out);
+    //if own is false, addMessagePacket will copy data to its own buffer
+    //
     int addMessagePacket(unsigned char* data, int len, bool own = false);
     int getMessagePacketCount();
     void mapMessagePacket(SMessagePacketFunctor& functor, bool clearPacketList = false);

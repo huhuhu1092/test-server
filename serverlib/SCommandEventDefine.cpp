@@ -58,15 +58,17 @@ void SLoginCommandEvent::unpack(const char* input)
 bool SLoginCommandEvent::handle()
 {
     SClient* clientHandler = SWorkingThreadManager::getInstance()->findClient(getClientID());
+    SLog::msg("#### clientHandler = %p ####\n", clientHandler);
     if(clientHandler == NULL)
         return false;
     if(!clientHandler->canHandleEvent(this))
         return false;
+    SLog::msg("#### clientHandler = %p ####\n", clientHandler);
     string tmpname(name, nameLen);
     string tmppass(password, passwordLen);
     if(tmpname == "aa" && tmppass == "bb")
     {
-        SLog::msg("#### handle login msg ####");
+        SLog::msg("#### handle login msg ###\n");
         SLoginReplyCommandEvent* reply = new SLoginReplyCommandEvent;
         reply->setClientID(getClientID());
         SCommunicationThreadManager::getInstance()->postEvent(NULL, reply);

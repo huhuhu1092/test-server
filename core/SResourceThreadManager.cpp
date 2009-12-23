@@ -78,7 +78,7 @@ void SResourceThreadManager::createNewClient(SCreateClientEvent* event)
     uint16_t port;
     event->getAddress().toString(ipBuf, 100, port);
     SLog::msg("### create new client ip = %s , port = %d ###\n", ipBuf, port);
-    mImplData->mClientSet[event->getAddress()] = new SClient(event->getAddress(), event->getSocket());    
+    //mImplData->mClientSet[event->getAddress()] = new SClient(event->getAddress(), event->getSocket());    
     SClient* sc = mImplData->mClientSet[event->getAddress()];
     sc->setState(SClient::CONNECTING);
     SEventWithData<SClient>* cData = new SEventWithData<SClient>(SEvent::CREATE_CLIENT, sc, false);

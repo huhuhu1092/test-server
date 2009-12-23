@@ -5,6 +5,7 @@
 #include "SLog.h"
 #include "SCommandEventFactory.h"
 #include "STime.h"
+#include "SCommunicationThreadManager.h"
 #include <list>
 #include <map>
 #include <memory>
@@ -71,7 +72,7 @@ bool SWorkingThreadManager::SImplData::mapClient(SClient* client, SNetAddress& c
 }
 bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
 {
-    SAutoMutex mutex(&mImplData->mClientsMutex);
+    SAutoMutex mutex(&mClientsMutex);
     SClient* client = event->mClient;
     SClientList::iterator listIt = find(mRemovedClientList.begin(), mRemovedClientList.end(), client);
     if(listIt != mRemovedClientList.end())
@@ -95,7 +96,7 @@ bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
 bool SWorkingThreadManager::SImplData::createNewClient(SCreateClientEvent* event)
 {
     SASSERT(event);
-    SAutoMutex mutex(&mImplData->mClientsMutex);
+    SAutoMutex mutex(&mClientsMutex);
     SClientMap::iterator it = mClients.find(event->getAddress());
     if(it != mClients.end())
         return false;

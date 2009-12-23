@@ -4,6 +4,7 @@
 #include "SCommandEvent.h"
 #include "SResourceThreadManager.h"
 #include "SWorkingThreadManager.h"
+#include "SCommunicationThreadManager.h"
 #include "SLog.h"
 #include "SClientConnectionState.h"
 static const int BUFSIZE = 256 * 1024;
@@ -58,12 +59,12 @@ void SClient::readData()
     {
         SLog::msg("#### read num = %d ###\n", readNum);
         mInputStream.addMessagePacket(buffer, readNum);
-	SEventWithData<SCleint>* e = new SEventWithData<SCleint>(NEW_INCOMING_DATA, this, false);
+	SEventWithData<SClient>* e = new SEventWithData<SClient>(SEvent::NEW_INCOMING_DATA, this, false);
 	SWorkingThreadManager::getInstance()->postEvent(NULL, e);
     }
     else if(readNum == 0)
     {
-        SComunicationThreadManager::getInstance()->addRemovedClientData(this, mCreateTime, mAddress);
+        SCommunicationThreadManager::getInstance()->addRemovedClientData(this, mCreateTime, mAddress);
         STATE currentState = getState();
         char ip[100];
         uint16_t port;
