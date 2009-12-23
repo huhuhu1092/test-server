@@ -1,5 +1,9 @@
 #include "SUtil.h"
+#if defined(WIN32)
+#include <winsock2.h>
+#else
 #include <netinet/in.h>
+#endif
 uint16_t SUtil::Net2HostInt16(uint16_t data)
 {
     return ntohs(data);

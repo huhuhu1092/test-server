@@ -11,6 +11,7 @@ public:
     {}
 };
 #if defined(WIN32)
+
 #else
 typedef uint32_t STimeMS;
 typedef uint64_t STimeUS;

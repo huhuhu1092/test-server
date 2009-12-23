@@ -2,17 +2,27 @@
 #define SSOCKET_H
 #include "SType.h"
 #include "SNetAddress.h"
+#if defined(WIN32)
+#include <winsock2.h>
+typedef SOCKET SSOCKET_TYPE;
+typedef int socklen_t;
+#else
+typedef int SSOCKET_TYPE;
+typedef -1 SOCKET_ERROR;
+typedef -1 INVALID_SOCKET;
+#endif
 enum {STREAM, DATAGRAM};
+enum {S_NO_ERROR, CREATE_ERROR, BIND_ERROR, LISTEN_ERROR, CONNECT_ERROR, ACCEPT_ERROR};
 class SSocket
 {
 public:
-    SSocket(int fd);
+    SSocket(SSOCKET_TYPE fd);
     SSocket()
     {
-        mSocket = -1;
+        mSocket = INVALID_SOCKET;
     }
     ~SSocket();
-    void setSocket(int fd)
+    void setSocket(SSOCKET_TYPE fd)
     {
         mSocket = fd;
     }
@@ -24,7 +34,7 @@ public:
     int read(unsigned char* outBuffer, int size);
     int close();
 private:
-    int mSocket;
+    SSOCKET_TYPE mSocket;
 };
 struct SClientProp
 {
@@ -39,7 +49,7 @@ struct SClientProp
 class SSocketServer
 {
 public:
-    enum {NO_ERROR, CREATE_ERROR, BIND_ERROR, LISTEN_ERROR, ACCEPT_ERROR};
+
     SSocketServer(int transferType, const SNetAddress& address);
     ~SSocketServer();
     int getError()
@@ -55,7 +65,7 @@ private:
 class SSocketClient
 {
 public:
-    enum {NO_ERROR, CREATE_ERROR, CONNECT_ERROR};
+    //enum {NO_ERROR, CREATE_ERROR, CONNECT_ERROR};
     SSocketClient(int tranferType,const SNetAddress& address);
     ~SSocketClient();
     int send(const unsigned char* data, int size);

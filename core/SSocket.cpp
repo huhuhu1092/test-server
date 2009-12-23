@@ -1,31 +1,25 @@
 #include "SSocket.h"
 #include "SUtil.h"
-#include <netinet/in.h> 
-#include <arpa/inet.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include    <errno.h>
+#include <errno.h>
 #include <fcntl.h>
 #include "SLog.h"
-
+#if defined(WIN32)
+#else
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#endif
 ///////////////////////////
-/*
-class SNetAddress::SNetAddressImpl
-{
-public:
-    struct in_addr mIp;
-    uint16_t mPort;
-};
-*/
 ////////////////////////////
 //SNetAddress SNetAddress::nullAddress(NULL, 0);
 ////////////////////////////
-SSocket::SSocket(int fd)
+SSocket::SSocket(SSOCKET_TYPE fd)
 {
     SASSERT(fd > 0);
     mSocket = fd;
@@ -36,7 +30,11 @@ SSocket::~SSocket()
 }
 int SSocket::close()
 {
+#if defined(WIN32)
+    ::closesocket(mSocket);
+#else
     ::close(mSocket);
+#endif
     return 1;
 }
 int SSocket::send(const unsigned char* data, int size)
@@ -49,7 +47,13 @@ int SSocket::send(const unsigned char* data, int size)
     nleft = size;
     while(nleft > 0)
     {
-        nwritten = ::send(mSocket, ptr, nleft, 0);
+        nwritten = ::send(mSocket, (const char*)ptr, nleft, 0);
+#if defined(WIN32)
+        if(nwritten == SOCKET_ERROR && totalWritten == 0)
+            return -1;
+        else if(nwritten == SOCKET_ERROR && totalWritten > 0)
+            return totalWritten;
+#else
         if(nwritten <= 0)
         {
             if(nwritten < 0 && errno == EINTR)
@@ -57,6 +61,7 @@ int SSocket::send(const unsigned char* data, int size)
             else
                 return totalWritten;
         }
+#endif
         nleft -= nwritten;
         ptr += nwritten;
         totalWritten += nwritten;
@@ -72,8 +77,24 @@ int SSocket::read(unsigned char* outBuffer, int size)
     int totalRead = 0;
     while(nleft > 0)
     {
-        nread = ::recv(mSocket, ptr, nleft, 0);
+        nread = ::recv(mSocket, (char*)ptr, nleft, 0);
         //SLog::msg("#### read num = %d #########\n", nread);
+#if defined(WIN32)
+        if(nread == SOCKET_ERROR)
+        {
+            if(totalRead == 0)
+                return -1;
+            else
+                return totalRead;
+        }
+        else if(nread == 0)
+        {
+            if(totalRead == 0)
+                return 0;
+            else
+                return totalRead;
+        }
+#else
         if(nread <= 0)
         {
             if(errno == EINTR)
@@ -88,6 +109,7 @@ int SSocket::read(unsigned char* outBuffer, int size)
                     return totalRead;
             }
         }
+#endif
         nleft -= nread;
         ptr += nread;
         totalRead += nread;
@@ -95,43 +117,54 @@ int SSocket::read(unsigned char* outBuffer, int size)
     return size - nleft;
 }
 //////////////////////////////////////////////
-SSocketServer::SSocketServer(int transferType, const SNetAddress& address) : mError(NO_ERROR)
+SSocketServer::SSocketServer(int transferType, const SNetAddress& address) : mError(S_NO_ERROR)
 {
-    int s = 0;
+    SSOCKET_TYPE s = INVALID_SOCKET;
+#if defined(WIN32)
+    WSADATA wsd;
+    if(WSAStartup(MAKEWORD(2, 2), &wsd ) != 0)
+    {
+        SLog::msg("#### socket startup error #####\n");
+        mError = CREATE_ERROR;
+        return;
+    }
+#else
+#endif
     if(transferType == STREAM)
     {
-        s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        s = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     }
     else if(transferType == DATAGRAM)
     {
         s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
-    if(s == -1)
+    if(s == SOCKET_ERROR)
     {
         mError = CREATE_ERROR;
         return;
     }
     mServer.setSocket(s);
     struct sockaddr_in servaddr;
-    bzero(&servaddr, sizeof(servaddr));
+    memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = address.getIp();
     servaddr.sin_port = address.getPort();
     int ret = bind(s, (const struct sockaddr *)&servaddr, sizeof(servaddr));
-    if(ret == -1)
+    if(ret == SOCKET_ERROR)
     {
         mError = BIND_ERROR;
         return;
     }
     mListenNum = 50;
     ret = listen(s, mListenNum); 
-    if(ret == -1)
+    if(ret == SOCKET_ERROR)
     {
         mError = LISTEN_ERROR;
     }
 }
 SSocketServer::~SSocketServer()
 {
+    mServer.close();
 }
 
 SClientProp SSocketServer::accept()
@@ -139,12 +172,17 @@ SClientProp SSocketServer::accept()
     struct sockaddr_in clientAddr;
     socklen_t clilen = sizeof(clientAddr);
     int clientSocket = ::accept(mServer.getSocket(), (sockaddr*)&clientAddr, &clilen);
-    if(clientSocket == -1)
+    if(clientSocket == INVALID_SOCKET)
     {
         mError = ACCEPT_ERROR;
         return SClientProp();
     }
+#if defined(WIN32)
+    u_long iMode = 1;
+    ioctlsocket(clientSocket, FIONBIO, &iMode);
+#else
     fcntl(clientSocket, F_SETFL, O_NONBLOCK );
+#endif
     SSocket c(clientSocket);
     SClientProp ss( c, SNetAddress(clientAddr.sin_addr.s_addr, clientAddr.sin_port));
     return ss;
@@ -153,7 +191,7 @@ SClientProp SSocketServer::accept()
 //////////////////////////////////////////////////////////////
 SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
 {
-    int s = 0;
+    SSOCKET_TYPE s = INVALID_SOCKET;
     if(transferType == STREAM)
     {
         s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -162,19 +200,19 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     {
         s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
-    if(s == -1)
+    if(s == SOCKET_ERROR)
     {
         mError = CREATE_ERROR;
         return;
     }
     mRemote.setSocket(s);
     struct sockaddr_in remote;
-    bzero(&remote, sizeof(remote));
+    memset(&remote, 0, sizeof(remote));
     remote.sin_family = AF_INET;
     remote.sin_addr.s_addr = address.getIp();
     remote.sin_port = address.getPort();
     //bind(socket, &remote, sizeof(remote));
-    if(connect(s, (const sockaddr*)&remote, sizeof(remote)) == -1)
+    if(connect(s, (const sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR)
     {
         SLog::msg("### connect error ####\n");
         mError = CONNECT_ERROR;

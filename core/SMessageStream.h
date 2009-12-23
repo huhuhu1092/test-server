@@ -64,7 +64,7 @@ public:
 class SMessageStream
 {
 public:
-    enum {NO_ERROR, WAIT_MORE};
+    enum {S_NO_ERROR, S_WAIT_MORE};
     SMessageStream();
     ~SMessageStream();
     int getNextMessage(SMessage* out);
