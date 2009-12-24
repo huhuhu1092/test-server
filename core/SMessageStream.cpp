@@ -122,7 +122,7 @@ int SMessageStream::getNextMessage(SMessage* out)
         mHead = p->mNext;
     }
     */
-    int ret = WAIT_MORE;
+    int ret = S_WAIT_MORE;
     SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
     if(mImpl->mMessagePacketList.empty())
         return ret;
@@ -131,7 +131,7 @@ int SMessageStream::getNextMessage(SMessage* out)
         uint16_t dataLen = mImpl->getDataLen();
         if(dataLen == 0)
         {
-            ret = WAIT_MORE;
+            ret = S_WAIT_MORE;
             return ret;
         }
         uint8_t* outData = new uint8_t[dataLen];
@@ -166,14 +166,14 @@ int SMessageStream::getNextMessage(SMessage* out)
         }
         if(leftDataLen == 0)
         {
-            ret = NO_ERROR;
+            ret = S_NO_ERROR;
             out->data = outDataHead;
             out->len = dataLen;
             mImpl->changeOffset(offsetBackup);
         }
         else
         {
-            ret = WAIT_MORE;
+            ret = S_WAIT_MORE;
         }
         //delete message packet
         SMessageStreamImpl::SMessagePacketList deleteMessagePackets;
@@ -225,7 +225,7 @@ int SMessageStream::addMessagePacket(unsigned char* data, int len, bool own)
 
     }
     //mImpl->mMessagePacketListMutex.unlock();
-    return NO_ERROR;
+    return S_NO_ERROR;
 }
 int SMessageStream::getMessagePacketCount()
 {

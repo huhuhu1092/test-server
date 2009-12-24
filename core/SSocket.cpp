@@ -125,7 +125,7 @@ SSocketServer::SSocketServer(int transferType, const SNetAddress& address) : mEr
     if(WSAStartup(MAKEWORD(2, 2), &wsd ) != 0)
     {
         SLog::msg("#### socket startup error #####\n");
-        mError = CREATE_ERROR;
+        mError = S_CREATE_ERROR;
         return;
     }
 #else
@@ -140,7 +140,7 @@ SSocketServer::SSocketServer(int transferType, const SNetAddress& address) : mEr
     }
     if(s == SOCKET_ERROR)
     {
-        mError = CREATE_ERROR;
+        mError = S_CREATE_ERROR;
         return;
     }
     mServer.setSocket(s);
@@ -152,14 +152,14 @@ SSocketServer::SSocketServer(int transferType, const SNetAddress& address) : mEr
     int ret = bind(s, (const struct sockaddr *)&servaddr, sizeof(servaddr));
     if(ret == SOCKET_ERROR)
     {
-        mError = BIND_ERROR;
+        mError = S_BIND_ERROR;
         return;
     }
     mListenNum = 50;
     ret = listen(s, mListenNum); 
     if(ret == SOCKET_ERROR)
     {
-        mError = LISTEN_ERROR;
+        mError = S_LISTEN_ERROR;
     }
 }
 SSocketServer::~SSocketServer()
@@ -174,7 +174,7 @@ SClientProp SSocketServer::accept()
     int clientSocket = ::accept(mServer.getSocket(), (sockaddr*)&clientAddr, &clilen);
     if(clientSocket == INVALID_SOCKET)
     {
-        mError = ACCEPT_ERROR;
+        mError = S_ACCEPT_ERROR;
         return SClientProp();
     }
 #if defined(WIN32)
@@ -202,7 +202,7 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     }
     if(s == SOCKET_ERROR)
     {
-        mError = CREATE_ERROR;
+        mError = S_CREATE_ERROR;
         return;
     }
     mRemote.setSocket(s);
@@ -215,7 +215,7 @@ SSocketClient::SSocketClient(int transferType, const SNetAddress& address)
     if(connect(s, (const sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR)
     {
         SLog::msg("### connect error ####\n");
-        mError = CONNECT_ERROR;
+        mError = S_CONNECT_ERROR;
     }
 
     //fcntl(s, F_SETFL, O_NONBLOCK );

@@ -95,12 +95,12 @@ int main(int argc, char** argv)
     //sResourceThread->run();
     SNetAddress serverAddress((const char*)NULL, SUtil::Host2NetInt16(10000));
     SSocketServer ss(STREAM, serverAddress);
-    if(ss.getError() != SSocketServer::NO_ERROR)
+    if(ss.getError() != S_NO_ERROR)
         return -1;
     while(true)
     {
         SClientProp cp = ss.accept();
-        if(ss.getError() != SSocketServer::NO_ERROR)
+        if(ss.getError() != S_NO_ERROR)
         {
             SLog::msg("## accept error ###\n");
             continue;

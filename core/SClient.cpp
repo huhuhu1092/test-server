@@ -24,7 +24,7 @@ void SClient::processMessageFromClient()
         return;
     SMessage m;
     int ret;
-    while((ret = mInputStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
+    while((ret = mInputStream.getNextMessage(&m)) == SMessageStream::S_NO_ERROR)
     {
         SCommandEvent* event = SWorkingThreadManager::getInstance()->create(m.data[0], m.data); 
         //event->setData(this);

@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     //SNetAddress na("192.168.2.184", SUtil::Host2NetInt16(10000));
     SNetAddress na("127.0.0.1", SUtil::Host2NetInt16(10000));
     SSocketClient client(STREAM, na);
-    if(client.getError() != SSocketClient::NO_ERROR)
+    if(client.getError() != S_NO_ERROR)
         return -1;
     SLoginCommandEvent se("aa", "bb");
     char* out;
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
             SLog::msg("len = %d\n", len);
             ms.addMessagePacket(buffer, len);
             SMessage m;
-            while((ret = ms.getNextMessage(&m)) == SMessageStream::NO_ERROR)
+            while((ret = ms.getNextMessage(&m)) == SMessageStream::S_NO_ERROR)
             {
                 int msgid = m.data[0];
                 switch(msgid)

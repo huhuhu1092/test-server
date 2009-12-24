@@ -8,11 +8,11 @@ typedef SOCKET SSOCKET_TYPE;
 typedef int socklen_t;
 #else
 typedef int SSOCKET_TYPE;
-typedef -1 SOCKET_ERROR;
-typedef -1 INVALID_SOCKET;
+const int SOCKET_ERROR = -1;
+const int INVALID_SOCKET = -1;
 #endif
 enum {STREAM, DATAGRAM};
-enum {S_NO_ERROR, CREATE_ERROR, BIND_ERROR, LISTEN_ERROR, CONNECT_ERROR, ACCEPT_ERROR};
+enum {S_NO_ERROR, S_CREATE_ERROR, S_BIND_ERROR, S_LISTEN_ERROR, S_CONNECT_ERROR, S_ACCEPT_ERROR};
 class SSocket
 {
 public:

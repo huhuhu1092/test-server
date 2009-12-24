@@ -21,9 +21,9 @@ int main(int argc, char** argv)
     SMessage m;
     int ret = ss.getNextMessage(&m);
     SASSERT(ss.getMessagePacketCount() == 0);
-    SASSERT(ret == SMessageStream::NO_ERROR);
+    SASSERT(ret == SMessageStream::S_NO_ERROR);
     ret = ss.getNextMessage(&m);
-    SASSERT(ret == SMessageStream::WAIT_MORE);
+    SASSERT(ret == SMessageStream::S_WAIT_MORE);
     SASSERT(m.len == 50);
     memcpy(&data_len, m.data + 1, 2);
     data_len = SUtil::Net2HostInt16(data_len);
@@ -45,11 +45,11 @@ int main(int argc, char** argv)
     ss.addMessagePacket(data, 100);
     ss.addMessagePacket(data + 100, 500);
     ret = ss.getNextMessage(&m);
-    SASSERT(ret == SMessageStream::WAIT_MORE);
+    SASSERT(ret == SMessageStream::S_WAIT_MORE);
     SASSERT(ss.getMessagePacketCount() == 2);
     ss.addMessagePacket(data + 600, 400);
     ret = ss.getNextMessage(&m);
-    SASSERT(ret == SMessageStream::NO_ERROR);
+    SASSERT(ret == SMessageStream::S_NO_ERROR);
     SASSERT(ss.getMessagePacketCount() == 0);
     delete[] data;
     //delete[] m.data;

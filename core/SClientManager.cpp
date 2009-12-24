@@ -42,9 +42,9 @@ void SClientManager::Impl::removeClient(const SNetAddress& address)
 }
 void SClientManager::Impl::processRequest()
 {
-    int ret = SMessageStream::NO_ERROR;
+    int ret = SMessageStream::S_NO_ERROR;
     SMessage m;
-    while((ret = mCommandStream.getNextMessage(&m)) == SMessageStream::NO_ERROR)
+    while((ret = mCommandStream.getNextMessage(&m)) == SMessageStream::S_NO_ERROR)
     {
         int commandId = m.data[0];
         switch(commandId)
