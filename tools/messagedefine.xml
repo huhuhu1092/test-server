@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<msgdefine version="1.0" language="c++">
+    <client>
+	<message>
+            <id name="CREATE_OBJ" class="SCreateObjEvent"/>
+	    <pack>
+		    {
+		        
+		    }
+	    </pack>
+	    <unpack>
+		    {
+		    }
+	    </unpack>
+	    <handle>
+		    {
+		    }
+	    </handle>
+	    <constructor param="()">
+		    {
+		    }
+	    </constructor>
+	    <constructor param="(const SObjectID& objID)">
+		    {
+		    }
+	    </constructor>
+	    <destructor>
+	            {
+		    }
+	    </destructor>
+	    <attribute type="SObjectID" name="mObjId" />
+        </message>	
+	<message>
+            <id name="DELETE_OBJ" class="SDeleteObjEvent"/>
+	    <pack>
+		    {
+		        
+		    }
+	    </pack>
+	    <unpack>
+		    {
+		    }
+	    </unpack>
+	    <handle>
+		    {
+		    }
+	    </handle>
+	    <constructor>
+		    {
+		    }
+	    </constructor>
+	    <destructor>
+	            {
+		    }
+	    </destructor>
+	</message>	
+    </client>
+</msgdefine>

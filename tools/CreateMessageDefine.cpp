@@ -1,6 +1,11 @@
 #include "CreateMessageDefine.h"
-CreateMessageDefine::CreateMessageDefine()
-{}
+#include <QFile>
+#include <QIODevice>
+CreateMessageDefine::CreateMessageDefine(const QString& saveFileName)
+{
+    mOutputFileName = saveFileName;
+    
+}
 int CreateMessageDefine::read(QIODevice* device)
 {
     setDevice(device);
@@ -9,7 +14,7 @@ int CreateMessageDefine::read(QIODevice* device)
         readNext();
         if(isStartElement())
         {
-            if(name() == "msgdefine" && attributes().value("version") == "1.0")
+            if(name() == "msgdefine" && attributes().value("version").toString() == "1.0")
             {
                 readMessageDefine();
             }
@@ -19,13 +24,14 @@ int CreateMessageDefine::read(QIODevice* device)
             }
         }
     }
+    return !error();
 }
 void CreateMessageDefine::readMessageDefine()
 {
     while(!atEnd())
     {
         readNext();
-        if(isEndElement())
+        if(isEndElement() && name() == "msgdefine")
             break;
         if(isStartElement())
         {
@@ -53,7 +59,26 @@ void CreateMessageDefine::readClientMessage()
     while(!atEnd())
     {
         readNext();
-        if(isEndElement())
+        if(isEndElement() && name() == "client")
+            break;
+        if(isStartElement())
+        {
+            if(name() == "message")
+            {
+                mCurrentClassItem.clear();
+                readMessage();
+                mOutputText.push_back(mCurrentClassItem);
+            }
+        }
+    }
+
+}
+void CreateMessageDefine::readServerMessage()
+{
+    while(!atEnd())
+    {
+        readNext();
+        if(isEndElement() && name() == "server")
             break;
         if(isStartElement())
         {
@@ -65,38 +90,20 @@ void CreateMessageDefine::readClientMessage()
         }
         mOutputText.push_back(mCurrentClassItem);
     }
-
-}
-void CreateMessageDefine::readServerMessage()
-{
-    while(!atEnd())
-    {
-        readNext();
-        if(isEndElement())
-            break;
-        if(isStartElement())
-        {
-            if(name() == "message")
-            {
-                mCurrentString.clear();
-                readMessage();
-            }
-        }
-        mOutputText.push_back(mCurrentClassItem);
-    }
 }
 void CreateMessageDefine::readMessage()
 {
     while(!atEnd())
     {
         readNext();
-        if(isEndElement())
+        QString n = name().toString();
+        if(isEndElement() && name() == "message")
             break;
         if(isStartElement())
         {
             if(name() == "id")
             {
-                readId();
+                readMessageId();
             }
             else if(name() == "pack")
             {
@@ -110,9 +117,17 @@ void CreateMessageDefine::readMessage()
             {
                 readHandle();
             }
+            else if(name() == "constructor")
+            {
+                readConstructor();
+            }
+            else if(name() == "destructor")
+            {
+                readDestructor();
+            }
             else if(name() == "attribute")
             {
-                readAttribute();
+                readMessageAttribute();
             }
         }
     }
@@ -139,13 +154,15 @@ void CreateMessageDefine::readHandle()
 }
 void CreateMessageDefine::readMessageAttribute()
 {
-    QString type = attributes().value("type");
-    QString name = attributes().value("name");
+    QString type = attributes().value("type").toString();
+    QString name = attributes().value("name").toString();
+    mCurrentClassItem.attrType.push_back(type);
+    mCurrentClassItem.attrName.push_back(name);
 }
 void CreateMessageDefine::readMessageId()
 {
-    QString idname = attributes().value("name");
-    QString className = attributes().value("class");
+    QString idname = attributes().value("name").toString();
+    QString className = attributes().value("class").toString();
     if(mMsgType == CLIENT)
     {
         mClientMsgID.push_back(idname);
@@ -156,3 +173,74 @@ void CreateMessageDefine::readMessageId()
     }
     mCurrentClassItem.name = className;
 }
+void CreateMessageDefine::readConstructor()
+{
+    Q_ASSERT(isStartElement() && name() == "constructor");
+    Constructor c;
+    c.param =  attributes().value("param").toString();
+    QString text = readElementText();
+    c.body = text;
+    mCurrentClassItem.constructors.push_back(c); 
+}
+void CreateMessageDefine::readDestructor()
+{
+    Q_ASSERT(isStartElement() && name() == "destructor");
+    QString text = readElementText();
+    mCurrentClassItem.destructor = text; 
+}
+void CreateMessageDefine::save()
+{        
+    QFile file(mOutputFileName);
+    if(!file.open(QFile::WriteOnly))
+    {
+        return;
+    }    
+    QString output;
+    output += (QString("#ifndef SMESSAGEDEFINE_H\n") + QString("#define SMESSAGEDEFINE_H\n"));
+    output += QString("enum CLIENT_MSG_TYPE {\n");
+    for(int i = 0 ; i < mClientMsgID.count() ; i++)
+    {
+        QString str = mClientMsgID.at(i);
+        output += QString("    ") + str + QString(",\n");
+    }
+    output += QString("    ") + QString("NUM") + QString("\n") + QString("};\n"); 
+    output += QString("enum SERVER_MSG_TYPE {\n");
+    for(int i = 0 ; i < mServerMsgID.count(); i++)
+    {
+        QString str = mServerMsgID.at(i);
+        output += QString("    ") + str + QString(",\n");
+    }
+    output += QString("    ") + QString("NUM") + QString("\n") + QString("};\n");
+    for(int i = 0 ; i < mOutputText.count() ; i++)
+    {
+        MsgClassItemSet mcis = mOutputText.at(i);
+        output += QString("class") + QString(" ") + mcis.name + QString(" :") + QString(" public SCommandEvent\n");
+        output += QString("{\n");
+        output += QString("public:\n");
+        for(int j = 0 ; j < mcis.constructors.count() ; j++)
+        { 
+            Constructor c = mcis.constructors.at(j);
+            output += QString("    ") + mcis.name + QString("param") + QString("\n");
+            output += QString("    ") + c.body + QString("\n");
+        }
+        output += QString("    ") + QString("void pack(char*& out, int& len)") + QString("\n");
+        output += QString("    ") + mcis.packFun + QString("\n");
+        output += QString("    ") + QString("void unpack(const char* input)") + QString("\n");
+        output += QString("    ") + mcis.unpackFun + QString("\n");
+        output += QString("    ") + QString("bool handle()") + QString("\n");
+        output += QString("    ") + mcis.handleFun + QString("\n");
+        output += QString("protected:\n");
+        for(int i = 0 ; i < mcis.attrType.count() ; i++)
+        {
+            QString type = mcis.attrType.at(i);
+            QString name = mcis.attrName.at(i);
+            output += QString("    ") + type + QString(" ") + name + QString(";\n");
+        }
+        output += QString("\n};\n");
+    }
+    output += QString("#endif\n");
+    QByteArray data = output.toAscii();
+    int i = file.write(data);
+    
+}
+
