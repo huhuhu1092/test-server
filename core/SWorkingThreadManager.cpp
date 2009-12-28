@@ -72,7 +72,6 @@ bool SWorkingThreadManager::SImplData::mapClient(SClient* client, SNetAddress& c
 }
 bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
 {
-    SAutoMutex mutex(&mClientsMutex);
     SClient* client = event->mClient;
     SClientList::iterator listIt = find(mRemovedClientList.begin(), mRemovedClientList.end(), client);
     if(listIt != mRemovedClientList.end())

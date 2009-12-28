@@ -103,15 +103,26 @@ void SActivityThread::processEvents()
         mRetCode = PROCESS_EVENT_ERROR;
         return;
     }
+    SPostEventList eventHasNotHandle;
+    STimeMS currTime = STime::getCurrentTimeMS();
     for(SPostEventList::iterator it = postEventList.begin(); 
         it != postEventList.end(); it++)
     {
         SPostEvent* pe = *it;
         SEvent* e = pe->event;
         SObject* r = pe->receiver;
-        sendEvent(r, e);
+        if(e->getTriggerTime() <= currTime)
+            sendEvent(r, e);
+        else
+            eventHasNotHandle.push_back(pe);
     } 
     releasePostEventList(postEventList);
+    mPostEventListMutex.lock();
+    for(SPostEventList::iterator it = eventHasNotHandle.begin() ; it != eventHasNotHandle.end() ; it++)
+    {
+        mPostEventList.push_back(*it);
+    }
+    mPostEventListMutex.unlock();
 }
 void SActivityThread::setCanPostEvent(bool v)
 {

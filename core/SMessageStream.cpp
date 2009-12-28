@@ -1,6 +1,7 @@
 #include "SMessageStream.h"
 #include "SMutex.h"
 #include "SUtil.h"
+#include "SLog.h"
 #include <list>
 #include <vector>
 #include <stdio.h>
@@ -238,11 +239,14 @@ int SMessageStream::getMessagePacketCount()
 }
 void SMessageStream::mapMessagePacket(SMessagePacketFunctor& functor, bool clearPacketList)
 {
+    //SLog::msg("map lock start\n");
     SAutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    //SLog::msg("map lock end\n");
     SMessageStreamImpl::SMessagePacketList::iterator it;
     for(it = mImpl->mMessagePacketList.begin() ; it != mImpl->mMessagePacketList.end(); it++)
     {
         SMessagePacket* smp = *it;
+        //SLog::msg("### output packe %p ####\n", smp);
         functor.handleMessagePacket(smp);
     }
     if(clearPacketList)

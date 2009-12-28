@@ -30,22 +30,32 @@ public:
         CREATE_CLIENT, // when a new client connection arrive
         EXIT_THREAD_LOOP,
         DESTROY_CLIENT, //when client disconnect
-	REMOVE_CLIENT, // remove client from communication's remove client list
-	NEW_INCOMING_DATA, // read data from socket and the data lenght is geater than zero. that means client send data to server
+	    REMOVE_CLIENT, // remove client from communication's remove client list
+	    NEW_INCOMING_DATA, // read data from socket and the data lenght is geater than zero. that means client send data to server
         Command,
         User = 1000,
         MaxUser = 65535
     };
     SEvent(Type t): mType(t)
-    {}
+    {
+        mTriggerTime = STime::getCurrentTimeMS();
+    }
     virtual ~SEvent() {}
     Type type()
     {
         return mType;
-    }    
+    }   
+    STimeMS getTriggerTime()
+    {
+        return mTriggerTime;
+    } 
+    void setTriggerTime(STimeMS tt)
+    {
+        mTriggerTime = tt;
+    }
 private:
     Type mType;
-
+    STimeMS mTriggerTime;
 };
 template <class T>
 class SEventWithData : public SEvent

@@ -6,6 +6,12 @@
 #include "SEvent.h"
 #include "SCommandEvent.h"
 #include "SWorkingThreadManager.h"
+#include <vector>
+using namespace std;
+#if defined(WIN32)
+#else
+#include <poll.h>
+#endif
 SCommunicationThreadManager* SCommunicationThreadManager::instance = NULL;
 SCommunicationThreadManager* SCommunicationThreadManager::getInstance()
 {
@@ -28,29 +34,48 @@ void SCommunicationThreadManager::processEvents()
     SActivityThread::processEvents();
     SClientList::iterator it;
     mClientList.clear();
+    //SLog::msg("### before get Clients ####\n");
     bool ret = SWorkingThreadManager::getInstance()->getClientList(mClientList);
+    //vector<struct pollfd> readClientPollList(mClientList.size());
+    //struct pollfd* readClientPollList = (struct pollfd*)malloc(sizeof(struct pollfd) * mClientList.size());
+    //vector<SClient*> clients(mClientList.size());
+    //SLog::msg("### current connection num = %d #####\n", mClientList.size());
+    //int maxi = 0;
+    //int i = 0;
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
         if(!isClientInRemovingList(sc))
+        {
+            //readClientPollList[i].fd = sc->mSocket.getSocket();
+            //readClientPollList[i].events = POLLRDNORM;
+            //clients[i] = sc;
+            //i++;
+            //maxi++;
             sc->readData();
-    } 
-    /* 
-    for(it = mClientList.begin() ; it != mClientList.end() ; it++)
-    {
-        SClient* sc = *it;
-        if(!isClientInRemovingList(sc))
-            sc->processMessageFromClient();
+        }
     }
-    */  
+    /*
+    poll(readClientPollList, maxi, 0);
+    for(i = 0 ; i < maxi ; i++)
+    {
+        if(readClientPollList[i].revents & (POLLRDNORM | POLLERR))
+        {
+            clients[i]->readData();
+        }
+    } 
+    */
+    //SLog::msg("### start write #####\n");
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
         if(!isClientInRemovingList(sc))
+        {
+            //SLog::msg("### start write client %p #####\n", sc);
             sc->writeData();
+        }
     }  
-
-
+    //free(readClientPollList);
 }
 void SCommunicationThreadManager::clearBuffer()
 {
@@ -94,7 +119,7 @@ bool SCommunicationThreadManager::event(SEvent* event)
 	    cd.client = rcEvent->client;
 	    cd.clientAddress = rcEvent->address;
 	    cd.clientCreateTime = rcEvent->createTime;
-            mRemovingClientDataList.remove(cd);
+        mRemovingClientDataList.remove(cd);
 	    return true;
 	}
     case SEvent::Command:

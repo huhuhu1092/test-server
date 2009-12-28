@@ -96,7 +96,10 @@ int main(int argc, char** argv)
     SNetAddress serverAddress((const char*)NULL, SUtil::Host2NetInt16(10000));
     SSocketServer ss(STREAM, serverAddress);
     if(ss.getError() != S_NO_ERROR)
+    {
+        SLog::msg("#### server init error : %d ####\n", ss.getError());
         return -1;
+    }
     while(true)
     {
         SClientProp cp = ss.accept();
