@@ -12,7 +12,7 @@ class SClient
 public:
     enum STATE {CONNECTING, CONNECTED, EXITING, EXITED};
     SClient(const SNetAddress& address, const SSocket& s, const STimeMS& createTime);
-    ~SClient();
+    virtual ~SClient();
     bool canRemove() const;
     void setCanRemove(bool r);
     bool canHandleEvent(SEvent*) const;
