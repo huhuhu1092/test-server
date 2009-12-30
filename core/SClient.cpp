@@ -17,6 +17,7 @@ SClient::SClient(const SNetAddress& address, const SSocket& s, const STimeMS& cr
 SClient::~SClient()
 {
     delete mCurrentConnectionState;
+    mSocket.close();
 }
 void SClient::processMessageFromClient()
 {

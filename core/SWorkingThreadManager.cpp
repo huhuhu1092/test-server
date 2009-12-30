@@ -82,7 +82,7 @@ bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
     if(found)
     {
         mRemovedClientList.push_back(client);
-        client->setState(SClient::EXITED);
+        client->setState(SClient::EXITING);
     }
     SRemoveClientEvent* rcEvent = new SRemoveClientEvent();
     rcEvent->client = client;
@@ -203,7 +203,6 @@ void SWorkingThreadManager::processEvents()
         const SClient* client = *it;
         delete client;
     }
-
 }
 bool SWorkingThreadManager::getClientList(SClientList& clientList)
 {
