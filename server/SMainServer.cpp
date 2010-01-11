@@ -4,6 +4,7 @@
 #include "SThread.h"
 #include "SNetAddress.h"
 #include "SCommandEventFactoryImpl.h"
+#include "SOutputThreadManager.h"
 #include "SLog.h"
 class SCommunicationThread : public SThread
 {
@@ -54,6 +55,29 @@ void SResourceThread::threadLoop()
 
 }
 */
+///////////////////////////////////
+class SOutputThread : public SThread
+{
+public:
+    SOutputThread();
+    void readyToRun();
+    void threadLoop();
+private:
+    SOutputThreadManager* mOTM;
+};
+SOutputThread::SOutputThread()
+{
+    mOTM = SOutputThreadManager::getInstance();
+}
+void SOutputThread::readyToRun()
+{
+
+}
+void SOutputThread::threadLoop()
+{
+    int ret = mOTM->exec();
+}
+
 //////////////////////////////////
 class SWorkingThread : public SThread
 {
@@ -84,12 +108,15 @@ void SWorkingThread::threadLoop()
 static SCommunicationThread* sCommunicationThread;
 //static SResourceThread* sResourceThread;
 static SWorkingThread* sWorkingThread;
+static SOutputThread* sOutputThread;
 ///////////////////////////////////
 int main(int argc, char** argv)
 {
     sWorkingThread = new SWorkingThread();
     sCommunicationThread = new SCommunicationThread();
+    sOutputThread = new SOutputThread();
     //sResourceThread = new SResourceThread();
+    sOutputThread->run();
     sWorkingThread->run();
     sCommunicationThread->run();
     //sResourceThread->run();

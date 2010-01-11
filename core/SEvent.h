@@ -32,6 +32,7 @@ public:
         DESTROY_CLIENT, //when client disconnect
 	    REMOVE_CLIENT, // remove client from communication's remove client list
 	    NEW_INCOMING_DATA, // read data from socket and the data lenght is geater than zero. that means client send data to server
+        OUTPUT_DATA, //send the data to remote client, this event is used by output thread
         Command,
         User = 1000,
         MaxUser = 65535
@@ -93,6 +94,21 @@ public:
 private:
     SNetAddress mAddress;
     SSocket mSocket;
+};
+class SOutputDataEvent : public SEvent
+{
+public:
+    SOutputDataEvent() : SEvent(OUTPUT_DATA)
+    {}
+    ~SOutputDataEvent()
+    {
+        delete[] data;
+    }
+    SNetAddress address;
+    SClient* client;
+    STimeMS clientCreateTime;
+    char* data;
+    int len;
 };
 class SDestroyClientEvent : public SEvent
 {
