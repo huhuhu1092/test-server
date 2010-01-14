@@ -36,7 +36,6 @@ void SCommunicationThreadManager::processEvents()
     mClientList.clear();
     //SLog::msg("### before get Clients ####\n");
     bool ret = SWorkingThreadManager::getInstance()->getClientList(mClientList);
-    //vector<struct pollfd> readClientPollList(mClientList.size());
     //struct pollfd* readClientPollList = (struct pollfd*)malloc(sizeof(struct pollfd) * mClientList.size());
     //vector<SClient*> clients(mClientList.size());
     //SLog::msg("### current connection num = %d #####\n", mClientList.size());
@@ -55,8 +54,8 @@ void SCommunicationThreadManager::processEvents()
             sc->readData();
         }
     }
-    /*
-    poll(readClientPollList, maxi, 0);
+    /* 
+    poll(readClientPollList, maxi, INFTIM);
     for(i = 0 ; i < maxi ; i++)
     {
         if(readClientPollList[i].revents & (POLLRDNORM | POLLERR))
@@ -66,6 +65,7 @@ void SCommunicationThreadManager::processEvents()
     } 
     */
     //SLog::msg("### start write #####\n");
+    /*
     for(it = mClientList.begin() ; it != mClientList.end() ; it++)
     {
         SClient* sc = *it;
@@ -74,7 +74,8 @@ void SCommunicationThreadManager::processEvents()
             //SLog::msg("### start write client %p #####\n", sc);
             sc->writeData();
         }
-    }  
+    } 
+   */ 
     //free(readClientPollList);
 }
 void SCommunicationThreadManager::clearBuffer()
@@ -120,6 +121,7 @@ bool SCommunicationThreadManager::event(SEvent* event)
 	    cd.clientAddress = rcEvent->address;
 	    cd.clientCreateTime = rcEvent->createTime;
         mRemovingClientDataList.remove(cd);
+        delete rcEvent;
 	    return true;
 	}
     case SEvent::Command:

@@ -1,9 +1,9 @@
 #include "SSem.h"
-SSem::SSem(int initVlaue)
+SSem::SSem(int initValue)
 {
 #if defined(WIN32)
 #else
-    mInitValue = initValue
+    mInitValue = initValue;
     sem_init(&mSem, 0, mInitValue);
 #endif
     

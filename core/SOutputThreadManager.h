@@ -21,5 +21,6 @@ private:
 private:
     static SOutputThreadManager* instance;
     SSem mSem;
+    SClientList mClientsHasData;
 };
 #endif

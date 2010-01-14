@@ -6,6 +6,7 @@
 #include "SCommandEventFactory.h"
 #include "STime.h"
 #include "SCommunicationThreadManager.h"
+#include "SOutputThreadManager.h"
 #include <list>
 #include <map>
 #include <memory>
@@ -89,6 +90,13 @@ bool SWorkingThreadManager::SImplData::destroyClient(SDestroyClientEvent* event)
     rcEvent->address = client->getNetAddress();
     rcEvent->createTime = client->getCreateTime();
     SCommunicationThreadManager::getInstance()->postEvent(NULL, rcEvent);
+    //////////// send remove client event to output thread ////
+    SRemoveClientEvent* rcEventOut = new SRemoveClientEvent();
+    rcEventOut->client = client;
+    rcEventOut->address = client->getNetAddress();
+    rcEventOut->createTime = client->getCreateTime();
+    SOutputThreadManager::getInstance()->postEvent(NULL, rcEventOut, SPostEvent::LOW_PRIORITY);
+    ////////////
     delete event;
     return true;
 }
@@ -143,6 +151,22 @@ bool SWorkingThreadManager::event(SEvent* event)
 	    delete e;
 	    return true; 
 	}
+    case SEvent::REMOVE_CLIENT:
+    {
+        SRemoveClientEvent* removeClientEvent = (SRemoveClientEvent*)event;
+        SClient* client = removeClientEvent->client;
+        //SNetAddress address = removeClientEvent->address;
+        client->setState(SClient::EXITED);
+        delete removeClientEvent;
+        return true;
+    }
+    case SEvent::OUTPUT_RESPONSE:
+    {
+        SOutputDataResponse* response = (SOutputDataResponse*)event;
+        SLog::msg("### write error = %d #####\n", response->error);
+        delete response;
+        return true;
+    }
     case SEvent::Command:
 	    return processCommandEvent((SCommandEvent*)event);
     default:

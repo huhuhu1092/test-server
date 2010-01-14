@@ -10,6 +10,7 @@ class SClientConnectionState;
 class SClient
 {
 public:
+    // if SClient is at EXITING state , all event about this client will not post
     enum STATE {CONNECTING, CONNECTED, EXITING, EXITED};
     SClient(const SNetAddress& address, const SSocket& s, const STimeMS& createTime);
     virtual ~SClient();

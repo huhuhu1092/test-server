@@ -33,6 +33,7 @@ public:
 	    REMOVE_CLIENT, // remove client from communication's remove client list
 	    NEW_INCOMING_DATA, // read data from socket and the data lenght is geater than zero. that means client send data to server
         OUTPUT_DATA, //send the data to remote client, this event is used by output thread
+        OUTPUT_RESPONSE, // when output thread output data to client , it will send a response to working thread
         Command,
         User = 1000,
         MaxUser = 65535
@@ -109,6 +110,14 @@ public:
     STimeMS clientCreateTime;
     char* data;
     int len;
+};
+class SOutputDataResponse : public SEvent
+{
+public:
+    enum {OK, ERROR};
+    SOutputDataResponse() : SEvent(OUTPUT_RESPONSE)
+    {}
+    int error;
 };
 class SDestroyClientEvent : public SEvent
 {

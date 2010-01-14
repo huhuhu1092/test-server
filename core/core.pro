@@ -22,6 +22,8 @@ HEADERS +=  SClient.h \
             STime.h \
             SResourceThreadManager.h \
             SType.h \
+            SSem.h \
+            SOutputThreadManager.h \
             SClientConnectionState.h
 
 SOURCES +=  SLog.cpp \ 
@@ -41,5 +43,7 @@ SOURCES +=  SLog.cpp \
             SCommandEventFactory.cpp \
             SActivityThread.cpp   \
             STime.cpp \
+            SSem.cpp \
+            SOutputThreadManager.cpp \
             SClientConnectionState.cpp
 OBJECTS_DIR = ../build/core

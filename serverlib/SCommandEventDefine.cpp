@@ -6,6 +6,7 @@
 #include "SClient.h"
 #include "SCommunicationThreadManager.h"
 #include "SWorkingThreadManager.h"
+#include "SOutputThreadManager.h"
 SLoginCommandEvent::SLoginCommandEvent()
 {
     nameLen = 0;
@@ -70,8 +71,20 @@ bool SLoginCommandEvent::handle()
     {
         SLog::msg("#### handle login msg ###\n");
         SLoginReplyCommandEvent* reply = new SLoginReplyCommandEvent;
-        reply->setClientID(getClientID());
-        SCommunicationThreadManager::getInstance()->postEvent(NULL, reply);
+        char* outData;
+        int len;
+        reply->pack(outData, len);
+        SOutputDataEvent* outputDataEvent = new SOutputDataEvent();
+        outputDataEvent->client = clientHandler;
+        outputDataEvent->address = clientHandler->getNetAddress();
+        outputDataEvent->clientCreateTime = clientHandler->getCreateTime();
+        outputDataEvent->data = outData;
+        outputDataEvent->len = len;
+        SLog::msg("### output len = %d ####\n", len);
+        SOutputThreadManager::getInstance()->sendOutput(outputDataEvent); 
+        delete reply;
+        //reply->setClientID(getClientID());
+        //SCommunicationThreadManager::getInstance()->postEvent(NULL, reply);
         /*
         char* outData;
         int len;
