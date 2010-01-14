@@ -3,6 +3,24 @@
 #include "SMath.h"
 #include <vector>
 using namespace std;
+/*
+ *
+ * ---- |-----
+ * | 0  | 1   |
+ * |----|-----|
+ * | 2  | 3   |
+ * |----|-----|
+ *
+ * ---- |-----
+ * | 4  | 5   |
+ * |----|-----|
+ * | 6  | 7   |
+ * |----|-----|
+
+ *
+ * */
+// right > left, top > bottom, near > far
+// this is for right hand coordinate
 class SOctBox
 {
 public:
