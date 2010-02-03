@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<project name="javaserver" default="compile" basedir=".">
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
+	<property name="build.prod.dir" location="${build.dir}/prod" />
+	<property name="build.test.dir" location="${build.dir}/test" />
+	<property name="test.dir" location="test" />
+	<property name="vendor.lib.dir" location="vendor/lib" />
+	<path id="project.classpath">
+		<pathelement location="${build.prod.dir}" />
+		<pathelement location="${build.test.dir}" />
+		<fileset dir="${vendor.lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<target name="prepare" >
+		<mkdir dir="${build.prod.dir}" />
+		<mkdir dir="${build.test.dir}" />
+	</target>
+	<target name="compile" depends="prepare" >
+		<javac srcdir="${src.dir}" destdir="${build.prod.dir}">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+	<target name="compile-tests" depends="compile" >
+		<javac srcdir="${test.dir}" destdir="${build.test.dir}" >
+                        <classpath refid="project.classpath" />
+		</javac>
+	</target>
+	<target name="test" depends="compile-tests">
+		<junit haltonfailure="true">
+			<classpath refid="project.classpath" />
+			<formatter type="brief" usefile="false" />
+			<batchtest>
+				<fileset dir="${build.test.dir}" includes="**/*Test.class" />
+			</batchtest>
+		</junit>
+	</target>
+</project>
