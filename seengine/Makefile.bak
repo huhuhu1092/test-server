@@ -1,0 +1,35 @@
+CC = g++
+CFLAGS = -g
+RM = rm -f
+SRCS = SE_Vector.c \
+		   SE_Math.c \
+		   SE_Matrix.c \
+		   SE_Quat.c \
+		   SE_Memory.c \
+		   SE_Element.c \
+		   SE_String.c \
+		   SE_List.c \
+		   SE_HashMap.c \
+		   SE_Log.c \
+		   SE_Utils.c \
+		   SE_GeometryData.c \
+		   SE_ResourceManager.c \
+		   ./renderer/SE_TextureID.c \
+		   ./renderer/SE_Renderer.c \
+		   ./cscript/hashmap.c \
+		   ./cscript/acc.c \
+		   ./ase/aselib.c \
+		   main.o
+
+OBJ_FILE = $(SRC:.c=.o)
+OUTPUT_NAME = test
+INCLUDE_PATH = -I./ -I../ -I/usr/include
+INPUT_LIB = -L/usr/lib -lm -lGL
+all: $(OBJ_FILE) depend
+	$(CC) $? $(CFLAGS) -o $(OUTPUT_NAME) $(INPUT_LIB)
+depend: 
+	makedepend -- $(CFLAGS) -- $(SRCS)
+%.o: %.c
+	$(CC) -c $(CFLAGS) $? -o $@ $(INCLUDE_PATH)
+clean:
+	$(RM) *.o *~ $(OUTPUT_NAME)
