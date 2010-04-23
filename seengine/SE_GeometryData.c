@@ -1,5 +1,6 @@
 #include "SE_GeometryData.h"
 #include "SE_Memory.h"
+#include "SE_Log.h"
 #undef SE_ARRAY_COPY
 #undef SE_ARRAY_FREE
 #define SE_ARRAY_COPY(type, srcArray, srcArrayNum, elementSize, dstArray, dstArrayNum) do{ \
@@ -115,12 +116,31 @@ void SE_GeometryData_Release(void* gd)
 {
     SE_ASSERT(gd);
     SE_GeometryData* data = (SE_GeometryData*)gd;
-    SE_ARRAY_FREE(data->ownVertexArray , data->vertexArray);
-    SE_ARRAY_FREE(data->ownTexVertexArray , data->texVertexArray);
-    SE_ARRAY_FREE(data->ownNormalArray, data->normalArray);
-    SE_ARRAY_FREE(data->ownFaceArray, data->faceArray);
-    SE_ARRAY_FREE(data->ownTexFaceArray, data->texFaceArray);
-    SE_ARRAY_FREE(data->ownColorArray, data->colorArray);
+    if(data->ownVertexArray && data->vertexArray != NULL)
+    {
+        SE_Free(data->vertexArray);
+    }
+    if(data->ownTexVertexArray && data->texVertexArray != NULL)
+    {
+        SE_Free(data->texVertexArray);
+    }
+    if(data->ownNormalArray && data->normalArray)
+    {
+        SE_Free(data->normalArray);
+    }
+    LOGI("... free array own = %d, %p\n", data->ownFaceArray, data->faceArray); 
+    if(data->ownFaceArray && data->faceArray)
+    {
+        SE_Free(data->faceArray);
+    }
+    if(data->ownTexFaceArray && data->texFaceArray)
+    {
+        SE_Free(data->texFaceArray);
+    }
+    if(data->ownColorArray && data->colorArray)
+    {
+        SE_Free(data->colorArray);
+    }
 }
 SE_Result SE_GeometryData_Copy(const SE_GeometryData* gdSrc, SE_GeometryData* gdDst)
 {

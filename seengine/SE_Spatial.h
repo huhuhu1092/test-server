@@ -9,10 +9,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-enum SE_SPATIAL_TYPE {SPATIAL, NODE, GEOMETRY};
-enum SE_SPATIAL_RENDER_TYPE {NO_RENDER, RENDERABLE};
-enum SE_SPATIAL_COLLISION_TYPE {NO_COLLISION, COLLISIONALBE};
-enum SE_SPATIAL_MOVE_TYPE {STATIC, MOVABLE};
+enum SE_SPATIAL_TYPE {SE_SPATIAL, SE_NODE, SE_GEOMETRY};
+enum SE_SPATIAL_RENDER_TYPE {SE_NO_RENDER, SE_RENDERABLE};
+enum SE_SPATIAL_COLLISION_TYPE {SE_NO_COLLISION, SE_COLLISIONALBE};
+enum SE_SPATIAL_MOVE_TYPE {SE_STATIC, SE_MOVABLE};
 typedef SE_Result (*SE_SPATIAL_UPDATEWORLDTRANSLATION)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEWORLDSCALE)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEWORLDROTATION)(void* spatial);
@@ -35,8 +35,8 @@ typedef SE_Spatial_tag
     SE_RenderState renderState;
     SE_String name;
     SE_List* childrent;
-    SE_GeometryData* geometryData;
-    SE_FaceList* geometryFaces;
+    SE_Mesh* mesh;
+    int subMeshIndex; //-1 : indicate this is not submesh
     SE_SPATIAL_UPDATEWORLDTRANSLATION fUpdateWorldTranslation;
     SE_SPATIAL_UPDATEWORLDSCALE fUpdateWorldScale;
     SE_SPATIAL_UPDATEWORLDROTATION fUpdateWorldRotation;
@@ -44,19 +44,8 @@ typedef SE_Spatial_tag
     SE_SPATIAL_UPDATEWORLDBV fUpdateBV;
     SE_SPATIAL_UPDATEGEOMETRICSTATE fUpdateGeometricState;
 } SE_Spatial;
-#define SE_Spatial_GetParent(spatial) (spatial->parent)
-#define SE_Spatial_GetLocalRotation(spatial) (&spatial->localRotation)
-#define SE_Spatial_GetLocalTranslation(spatial) (&spatial->localTranslation)
-#define SE_Spatial_GetLocalScale(spatial) (&spatial->localScale)
-#define SE_Spatial_GetWorldTransform(spatial) (&spatial->worldTransform)
-#define SE_Spatial_GetWorldBV(spatial) (&spatial->worldBV)
-#define SE_Spatial_GetLocalBV(spatial) (&spatial->localBV)
-#define SE_Spatial_GetRenderState(spatial) (&spatial->renderState)
-#define SE_Spatial_GetName(spatial) (&spatial->name)
-#define SE_Spatial_GetGeometryData(spatial) (&spatial->geometryData)
-#define SE_Spatial_GetChildren(spatial) (&spatial->children)
 extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType ,const char* name);
-extern SE_Result SE_Spatial_Release(void* spatial);
+extern void SE_Spatial_Release(void* spatial);
 extern SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst);
 extern SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial);

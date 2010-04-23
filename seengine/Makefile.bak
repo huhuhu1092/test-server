@@ -1,5 +1,4 @@
 CC = g++
-CFLAGS = -g
 RM = rm -f
 SRCS = SE_Vector.c \
 		   SE_Math.c \
@@ -21,15 +20,329 @@ SRCS = SE_Vector.c \
 		   ./ase/aselib.c \
 		   main.o
 
-OBJ_FILE = $(SRC:.c=.o)
+OBJ_FILE = $(SRCS:.c=.o)
 OUTPUT_NAME = test
 INCLUDE_PATH = -I./ -I../ -I/usr/include
 INPUT_LIB = -L/usr/lib -lm -lGL
+CFLAGS = -g $(INCLUDE_PATH)
 all: $(OBJ_FILE) depend
-	$(CC) $? $(CFLAGS) -o $(OUTPUT_NAME) $(INPUT_LIB)
+	$(CC) $(INPUT_LIB) $(OBJ_FILE) -o $(OUTPUT_NAME)
 depend: 
 	makedepend -- $(CFLAGS) -- $(SRCS)
 %.o: %.c
-	$(CC) -c $(CFLAGS) $? -o $@ $(INCLUDE_PATH)
+	$(CC) -c $(CFLAGS) $< -o $@ 
 clean:
-	$(RM) *.o *~ $(OUTPUT_NAME)
+	$(RM) $(OBJ_FILE) $(OUTPUT_NAME)
+# DO NOT DELETE
+
+SE_Vector.o: SE_Vector.h SE_Common.h /usr/include/assert.h
+SE_Vector.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Vector.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Vector.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Vector.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Vector.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Vector.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Vector.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Vector.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Vector.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Vector.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Vector.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Vector.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Vector.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Vector.o: SE_Math.h
+SE_Math.o: SE_Math.h SE_Common.h /usr/include/assert.h
+SE_Math.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Math.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Math.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Math.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Math.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Math.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Math.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Math.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Math.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Math.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Math.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Math.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Math.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Math.o: /usr/include/math.h /usr/include/bits/huge_val.h
+SE_Math.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
+SE_Matrix.o: SE_Matrix.h SE_Vector.h SE_Common.h /usr/include/assert.h
+SE_Matrix.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Matrix.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Matrix.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Matrix.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Matrix.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Matrix.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Matrix.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Matrix.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Matrix.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Matrix.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Matrix.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Matrix.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Matrix.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Matrix.o: SE_Math.h
+SE_Quat.o: SE_Quat.h SE_Vector.h SE_Common.h /usr/include/assert.h
+SE_Quat.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Quat.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Quat.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Quat.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Quat.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Quat.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Quat.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Quat.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Quat.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Quat.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Quat.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Quat.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Quat.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Quat.o: SE_Matrix.h SE_Math.h
+SE_Memory.o: SE_Memory.h SE_Common.h /usr/include/assert.h
+SE_Memory.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Memory.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Memory.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Memory.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Memory.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Memory.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Memory.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Memory.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Memory.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Memory.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Memory.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Memory.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Memory.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Element.o: SE_Element.h SE_Common.h /usr/include/assert.h
+SE_Element.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Element.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Element.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Element.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Element.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Element.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Element.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Element.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Element.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Element.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Element.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Element.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Element.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Element.o: SE_String.h SE_Memory.h
+SE_String.o: SE_String.h SE_Common.h /usr/include/assert.h
+SE_String.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_String.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_String.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_String.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_String.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_String.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_String.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_String.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_String.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_String.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_String.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_String.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_String.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_String.o: SE_Memory.h
+SE_List.o: SE_List.h SE_Common.h /usr/include/assert.h
+SE_List.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_List.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_List.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_List.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_List.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_List.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_List.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_List.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_List.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_List.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_List.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_List.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_List.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_List.o: SE_Element.h SE_String.h SE_Memory.h
+SE_HashMap.o: SE_HashMap.h SE_Common.h /usr/include/assert.h
+SE_HashMap.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_HashMap.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_HashMap.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_HashMap.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_HashMap.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_HashMap.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_HashMap.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_HashMap.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_HashMap.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_HashMap.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_HashMap.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_HashMap.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_HashMap.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_HashMap.o: SE_Element.h SE_String.h SE_Memory.h /usr/include/errno.h
+SE_HashMap.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+SE_HashMap.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+SE_HashMap.o: /usr/include/asm-generic/errno-base.h
+SE_Log.o: SE_Log.h SE_Common.h /usr/include/assert.h /usr/include/features.h
+SE_Log.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+SE_Log.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+SE_Log.o: /usr/include/stdlib.h /usr/include/sys/types.h
+SE_Log.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+SE_Log.o: /usr/include/time.h /usr/include/endian.h
+SE_Log.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+SE_Log.o: /usr/include/sys/select.h /usr/include/bits/select.h
+SE_Log.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+SE_Log.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+SE_Log.o: /usr/include/alloca.h /usr/include/string.h /usr/include/stdio.h
+SE_Log.o: /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h
+SE_Log.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Utils.o: SE_Utils.h SE_Vector.h SE_Common.h /usr/include/assert.h
+SE_Utils.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Utils.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Utils.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Utils.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Utils.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Utils.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Utils.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Utils.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Utils.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Utils.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Utils.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Utils.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Utils.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Utils.o: SE_Matrix.h SE_Quat.h SE_Math.h SE_Log.h SE_Memory.h
+SE_GeometryData.o: SE_GeometryData.h SE_Common.h /usr/include/assert.h
+SE_GeometryData.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_GeometryData.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_GeometryData.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_GeometryData.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_GeometryData.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_GeometryData.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_GeometryData.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_GeometryData.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_GeometryData.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_GeometryData.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_GeometryData.o: /usr/include/string.h /usr/include/stdio.h
+SE_GeometryData.o: /usr/include/libio.h /usr/include/_G_config.h
+SE_GeometryData.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+SE_GeometryData.o: /usr/include/bits/sys_errlist.h SE_Vector.h SE_Memory.h
+SE_GeometryData.o: SE_Log.h
+SE_ResourceManager.o: SE_ResourceManager.h SE_Common.h /usr/include/assert.h
+SE_ResourceManager.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_ResourceManager.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_ResourceManager.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_ResourceManager.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_ResourceManager.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_ResourceManager.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_ResourceManager.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_ResourceManager.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_ResourceManager.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_ResourceManager.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_ResourceManager.o: /usr/include/string.h /usr/include/stdio.h
+SE_ResourceManager.o: /usr/include/libio.h /usr/include/_G_config.h
+SE_ResourceManager.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+SE_ResourceManager.o: /usr/include/bits/sys_errlist.h SE_GeometryData.h
+SE_ResourceManager.o: SE_Vector.h SE_HashMap.h SE_Element.h SE_String.h
+SE_ResourceManager.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
+SE_ResourceManager.o: /usr/include/GL/glext.h /usr/include/inttypes.h
+SE_ResourceManager.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+SE_ResourceManager.o: SE_Memory.h SE_Log.h SE_Utils.h SE_Matrix.h SE_Quat.h
+./renderer/SE_TextureID.o: ./renderer/SE_TextureID.h SE_Common.h
+./renderer/SE_TextureID.o: /usr/include/assert.h /usr/include/features.h
+./renderer/SE_TextureID.o: /usr/include/sys/cdefs.h
+./renderer/SE_TextureID.o: /usr/include/bits/wordsize.h
+./renderer/SE_TextureID.o: /usr/include/gnu/stubs.h
+./renderer/SE_TextureID.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+./renderer/SE_TextureID.o: /usr/include/sys/types.h /usr/include/bits/types.h
+./renderer/SE_TextureID.o: /usr/include/bits/typesizes.h /usr/include/time.h
+./renderer/SE_TextureID.o: /usr/include/endian.h /usr/include/bits/endian.h
+./renderer/SE_TextureID.o: /usr/include/bits/byteswap.h
+./renderer/SE_TextureID.o: /usr/include/sys/select.h
+./renderer/SE_TextureID.o: /usr/include/bits/select.h
+./renderer/SE_TextureID.o: /usr/include/bits/sigset.h
+./renderer/SE_TextureID.o: /usr/include/bits/time.h
+./renderer/SE_TextureID.o: /usr/include/sys/sysmacros.h
+./renderer/SE_TextureID.o: /usr/include/bits/pthreadtypes.h
+./renderer/SE_TextureID.o: /usr/include/alloca.h /usr/include/string.h
+./renderer/SE_TextureID.o: /usr/include/stdio.h /usr/include/libio.h
+./renderer/SE_TextureID.o: /usr/include/_G_config.h /usr/include/wchar.h
+./renderer/SE_TextureID.o: /usr/include/bits/stdio_lim.h
+./renderer/SE_TextureID.o: /usr/include/bits/sys_errlist.h
+./renderer/SE_TextureID.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
+./renderer/SE_TextureID.o: /usr/include/inttypes.h /usr/include/stdint.h
+./renderer/SE_TextureID.o: /usr/include/bits/wchar.h SE_Memory.h
+./renderer/SE_Renderer.o: ./renderer/SE_Renderer.h SE_Vector.h SE_Common.h
+./renderer/SE_Renderer.o: /usr/include/assert.h /usr/include/features.h
+./renderer/SE_Renderer.o: /usr/include/sys/cdefs.h
+./renderer/SE_Renderer.o: /usr/include/bits/wordsize.h
+./renderer/SE_Renderer.o: /usr/include/gnu/stubs.h
+./renderer/SE_Renderer.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+./renderer/SE_Renderer.o: /usr/include/sys/types.h /usr/include/bits/types.h
+./renderer/SE_Renderer.o: /usr/include/bits/typesizes.h /usr/include/time.h
+./renderer/SE_Renderer.o: /usr/include/endian.h /usr/include/bits/endian.h
+./renderer/SE_Renderer.o: /usr/include/bits/byteswap.h
+./renderer/SE_Renderer.o: /usr/include/sys/select.h
+./renderer/SE_Renderer.o: /usr/include/bits/select.h
+./renderer/SE_Renderer.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+./renderer/SE_Renderer.o: /usr/include/sys/sysmacros.h
+./renderer/SE_Renderer.o: /usr/include/bits/pthreadtypes.h
+./renderer/SE_Renderer.o: /usr/include/alloca.h /usr/include/string.h
+./renderer/SE_Renderer.o: /usr/include/stdio.h /usr/include/libio.h
+./renderer/SE_Renderer.o: /usr/include/_G_config.h /usr/include/wchar.h
+./renderer/SE_Renderer.o: /usr/include/bits/stdio_lim.h
+./renderer/SE_Renderer.o: /usr/include/bits/sys_errlist.h SE_Matrix.h
+./renderer/SE_Renderer.o: SE_Quat.h SE_List.h SE_Element.h SE_String.h
+./renderer/SE_Renderer.o: SE_GeometryData.h
+./cscript/hashmap.o: ./cscript/hashmap.h /usr/include/stdlib.h
+./cscript/hashmap.o: /usr/include/features.h /usr/include/sys/cdefs.h
+./cscript/hashmap.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+./cscript/hashmap.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+./cscript/hashmap.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+./cscript/hashmap.o: /usr/include/time.h /usr/include/endian.h
+./cscript/hashmap.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+./cscript/hashmap.o: /usr/include/sys/select.h /usr/include/bits/select.h
+./cscript/hashmap.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+./cscript/hashmap.o: /usr/include/sys/sysmacros.h
+./cscript/hashmap.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+./cscript/hashmap.o: /usr/include/assert.h /usr/include/errno.h
+./cscript/hashmap.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+./cscript/hashmap.o: /usr/include/asm/errno.h
+./cscript/hashmap.o: /usr/include/asm-generic/errno.h
+./cscript/hashmap.o: /usr/include/asm-generic/errno-base.h
+./cscript/hashmap.o: /usr/include/string.h
+./cscript/acc.o: /usr/include/ctype.h /usr/include/features.h
+./cscript/acc.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+./cscript/acc.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+./cscript/acc.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+./cscript/acc.o: /usr/include/endian.h /usr/include/bits/endian.h
+./cscript/acc.o: /usr/include/bits/byteswap.h /usr/include/errno.h
+./cscript/acc.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+./cscript/acc.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+./cscript/acc.o: /usr/include/asm-generic/errno-base.h /usr/include/limits.h
+./cscript/acc.o: /usr/include/limits.h /usr/include/bits/posix1_lim.h
+./cscript/acc.o: /usr/include/bits/local_lim.h /usr/include/linux/limits.h
+./cscript/acc.o: /usr/include/bits/posix2_lim.h /usr/include/stdint.h
+./cscript/acc.o: /usr/include/bits/wchar.h /usr/include/stdio.h
+./cscript/acc.o: /usr/include/libio.h /usr/include/_G_config.h
+./cscript/acc.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+./cscript/acc.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+./cscript/acc.o: /usr/include/sys/types.h /usr/include/time.h
+./cscript/acc.o: /usr/include/sys/select.h /usr/include/bits/select.h
+./cscript/acc.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+./cscript/acc.o: /usr/include/sys/sysmacros.h
+./cscript/acc.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+./cscript/acc.o: /usr/include/string.h /usr/include/unistd.h
+./cscript/acc.o: /usr/include/bits/posix_opt.h /usr/include/bits/confname.h
+./cscript/acc.o: /usr/include/getopt.h ./cscript/hashmap.h ./cscript/acc.h
+./cscript/acc.o: SE_Common.h /usr/include/assert.h SE_Log.h
+./cscript/acc.o: /usr/include/sys/mman.h /usr/include/bits/mman.h
+./ase/aselib.o: ./ase/aselib.h ./SE_Log.h ./SE_GeometryData.h SE_Common.h
+./ase/aselib.o: /usr/include/assert.h /usr/include/features.h
+./ase/aselib.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+./ase/aselib.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+./ase/aselib.o: /usr/include/stdlib.h /usr/include/sys/types.h
+./ase/aselib.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+./ase/aselib.o: /usr/include/time.h /usr/include/endian.h
+./ase/aselib.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+./ase/aselib.o: /usr/include/sys/select.h /usr/include/bits/select.h
+./ase/aselib.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+./ase/aselib.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+./ase/aselib.o: /usr/include/alloca.h /usr/include/string.h
+./ase/aselib.o: /usr/include/stdio.h /usr/include/libio.h
+./ase/aselib.o: /usr/include/_G_config.h /usr/include/wchar.h
+./ase/aselib.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+./ase/aselib.o: SE_Vector.h ./SE_ResourceManager.h SE_GeometryData.h
+./ase/aselib.o: SE_HashMap.h SE_Element.h SE_String.h
+./ase/aselib.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
+./ase/aselib.o: /usr/include/GL/glext.h /usr/include/inttypes.h
+./ase/aselib.o: /usr/include/stdint.h /usr/include/bits/wchar.h ./SE_Memory.h

@@ -98,6 +98,9 @@ static void getMeshes(ASE_SceneObject* mSceneObject, std::list<SE_Mesh*>& meshLi
         SE_Object_Clear(semesh, sizeof(SE_Mesh));
         semesh->geomDataIndex = i;
         semesh->materialIndex = go->materialref;
+        semesh->defaultColor.x = go->defaultColor[0];
+        semesh->defaultColor.y = go->defaultColor[1];
+        semesh->defaultColor.z = go->defaultColor[2];
         COPY_MESHP(rotateAxis);
         COPY_MESHP(scale);
         COPY_MESHP(scaleAxis);
@@ -143,9 +146,9 @@ void ASE_Loader::Write(const char* filename)
         COPY_MATERIAL(diffuse);
         COPY_MATERIAL(specular);
         SE_String_Init(&dstm->materialData.texturename, srcm->materialData.texName);
+        dstm->subMaterialNum = srcm->numsubmaterials;
         if(srcm->numsubmaterials > 0)
         {
-            dstm->subMaterialNum = srcm->numsubmaterials;
             dstm->subMaterialArray = (SE_MaterialData*)SE_Malloc(sizeof(SE_MaterialData) * dstm->subMaterialNum);
             for(int j = 0 ; j < dstm->subMaterialNum ; j++)
             {
@@ -187,6 +190,7 @@ void ASE_Loader::Write(const char* filename)
         {
             dstgd->texVertexArray[j].x = mesh->tvertexes[j].s;
             dstgd->texVertexArray[j].y = mesh->tvertexes[j].t;
+            dstgd->texVertexArray[j].z = 0;
         }
         dstgd->ownTexVertexArray = 1;
         dstgd->faceNum = mesh->numFaces;
@@ -948,6 +952,19 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 	{
 		ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyNODETM );
 	}
+    else if(!strcmp(token, "*WIREFRAME_COLOR"))
+    {
+        ASE_GetToken(false);
+        float r = atof(s_token);
+        ASE_GetToken(false);
+        float g = atof(s_token);
+        ASE_GetToken(false);
+        float b = atof(s_token);
+        mCurrGeomObject->defaultColor[0]= r;
+        mCurrGeomObject->defaultColor[1]= g;
+        mCurrGeomObject->defaultColor[2]= b;
+    }
+
 	// skip unused info
 	else if ( !strcmp( token, "*PROP_MOTIONBLUR" ) ||
 		      !strcmp( token, "*PROP_CASTSHADOW" ) ||
@@ -999,6 +1016,8 @@ void ASE_Loader::ASE_AdjustSubMtl()
     for(it = mSceneObject->mGeomObjects.begin() ; it != mSceneObject->mGeomObjects.end() ; it++)
     {
         ASE_GeometryObject* obj = *it;
+        if(obj->materialref == -1)
+            continue;
         ASE_Material* pMat = &mSceneObject->mMats[obj->materialref];
         if(pMat->submaterials != NULL)
         {

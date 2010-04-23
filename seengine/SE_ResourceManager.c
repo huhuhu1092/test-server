@@ -100,6 +100,7 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
             z = readFloat(data, &startPos);
             SE_Vec3f_Init(x, y, z, &m->materialData.specular);
             int subMtlNum = readInt(data, &startPos);
+            m->subMaterialNum = subMtlNum;
             if(subMtlNum > 0)
             {
                 m->subMaterialArray = (SE_MaterialData*)SE_Malloc(subMtlNum * sizeof(SE_MaterialData));
@@ -168,6 +169,11 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                 faceArray[i].v[1] = readInt(data, &startPos);
                 faceArray[i].v[2] = readInt(data, &startPos);
             }
+            /*
+             * debug
+             */
+            SE_Free(faceArray);
+            /* end */
             SE_Face* texFaceArray = NULL;
             if(texVertexNum > 0)
             {
@@ -205,7 +211,7 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                     colorArray[i].z = readFloat(data, &startPos);
                 }
             }
-            SE_GeometryData_Init(type, vertexArray, vertexNum, 1, texVertexArray, texVertexNum, 1, faceArray, faceNum, 1, texFaceArray, faceNum, 1, NULL, 0, 1, colorArray, colorNum, 1, gd);
+            SE_GeometryData_Init(type, vertexArray, vertexNum, 1, texVertexArray, texVertexNum, 1, NULL, 0, 1, texFaceArray, faceNum, 1, NULL, 0, 1, colorArray, colorNum, 1, gd);
         }
         else if(currChunckId == MESH_ID)
         {
@@ -240,6 +246,7 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
             SE_String meshName = readString(data, &startPos);
             SE_String_SetString(&mesh->name, &meshName);
             int subMeshNum = readInt(data, &startPos);
+            mesh->subMeshNum = subMeshNum;
             LOGI("...subMeshNum = %d\n", subMeshNum);
             if(subMeshNum > 0)
             {
@@ -267,12 +274,14 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
         }
     }
 
+    SE_ASSERT(startPos == dataLen);
 }
 SE_Result SE_MeshLoad(const char* fileName, SE_ResourceManager* resource)
 {
     SE_ASSERT(resource);
     SE_String* dataPath = SE_ResourceManager_GetDataPath(resource);
     SE_String filePath;
+    SE_Object_Clear(&filePath, sizeof(SE_String));
     SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(dataPath), fileName);
     FILE* fin = fopen(SE_String_GetData(&filePath), "rb");
     SE_String_Release(&filePath);

@@ -10,8 +10,9 @@ SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, cons
     SE_Vec3f_Init(1, 1, 1, &spatial->localScale);
     return SE_VALID;
 }
-SE_Result SE_Spatial_Release(SE_Spatial* spatial)
+void SE_Spatial_Release(void* s)
 {
+    SE_Spatial* spatial = (SE_Spatial*)s;
     SE_ASSERT(spatial);
     SE_BoundingVolume_Release(&spatial->worldBV);
     SE_BoungingVolume_Release(&spatial->localBV);
@@ -22,17 +23,6 @@ SE_Result SE_Spatial_Release(SE_Spatial* spatial)
         SE_List_Release(spatial->children);
         SE_Free(spatial->children);
     }
-    if(spatial->geometryData)
-    {
-        SE_GeometryData_Release(spatial->geometryData);
-        SE_Free(spatial->geometryData);
-    }
-    if(spatial->geometryFaces)
-    {
-        SE_FaceList_Release(spatial->geometryFaces);
-        SE_Free(spatial->geometryFaces);
-    }
-    return SE_VALID;
 }
 SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst)
 {
@@ -69,14 +59,6 @@ SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial)
     }
     return SE_VALID;
 }
-/*
-SE_Result SE_Spatial_UpdateWorldScale(SE_Spatial* spatial)
-{}
-SE_Result SE_Spatial_UpdateWorldRotation(SE_Spatial* spatial)
-{}
-SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial)
-{}
-*/
 SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial)
 {
     return SE_VALID;

@@ -16,7 +16,11 @@ typedef struct SE_World_tag
     SE_ResourceManager resourceManager;
 } SE_World;
 extern SE_Result SE_World_Init(SE_World* world);
-extern SE_Result SE_World_Release(SE_World* world);
+extern void SE_World_Release(void* world);
+extern SE_Camera* SE_World_GetMainCamera(SE_World* world);
+extern SE_Spatial* SE_World_GetSceneRoot(SE_World* world);
+extern SE_Spatial* SE_World_GetPlayerController(SE_World* world);
+extern SE_ResourceManager* SE_World_GetResourceManager(SE_World* world);
 extern SE_Result SE_World_Update(SE_World* world, float time);
 extern SE_Result SE_World_FixUpdate(SE_World* world, float fixTime);
 #ifdef __cplusplus
