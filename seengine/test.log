@@ -1,0 +1,19 @@
+==17356== Memcheck, a memory error detector.
+==17356== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
+==17356== Using LibVEX rev 1884, a library for dynamic binary translation.
+==17356== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
+==17356== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
+==17356== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
+==17356== For more details, rerun with: -v
+==17356== 
+==17356== My PID = 17356, parent PID = 7499.  Prog and args are:
+==17356==    ./test
+==17356==    home.ASE
+==17356==    home.cbf
+==17356== 
+==17356== 
+==17356== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 43 from 1)
+==17356== malloc/free: in use at exit: 0 bytes in 0 blocks.
+==17356== malloc/free: 1,147 allocs, 1,147 frees, 1,070,071 bytes allocated.
+==17356== For counts of detected errors, rerun with: -v
+==17356== All heap blocks were freed -- no leaks are possible.

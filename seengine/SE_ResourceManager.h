@@ -98,6 +98,9 @@ typedef struct SE_Texture_tag
 } SE_Texture;
 extern SE_ImageData* SE_Texture_GetImageData(SE_Texture* tex);
 extern void SE_Texture_Release(void* tex);
+/**
+ * SE_TextureIDManager
+ * */
 /*
  * SE_GeometryDataManager
  * */
@@ -122,6 +125,7 @@ extern SE_Texture* SE_TextureManager_GetTexture(SE_TextureManager* tm, const cha
 extern SE_Texture* SE_TextureManager_LoadTexture(SE_TextureManager* tm, const char* textureName);
 extern SE_Texture* SE_TextureManager_PutTexture(SE_TextureManager* tm, const char* textureName, SE_ImageData* imageData);
 extern void SE_TextureManager_Release(void* tm);
+
 /**
  * SE_MaterialManager
  * */
@@ -164,6 +168,7 @@ typedef struct SE_ResourceManager_tag
     SE_TextureManager textureManager;
     SE_ScriptManager scriptManager;
     SE_String dataPath;
+    SE_HashMap textureIDMap;
 } SE_ResourceManager;
 extern SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, const char* dataPath, const char* fileName);
 extern void SE_ResourceManager_Release(void* resourceManager);
@@ -176,8 +181,15 @@ extern SE_String* SE_ResourceManager_GetDataPath(SE_ResourceManager* rm);
 extern SE_Texture* SE_ResourceManager_GetTexture(SE_ResourceManager* resourceManager, const char* textureName);
 extern int SE_ResourceManager_Contains(SE_ResourceManager* resourceManager, const char* textureName);
 extern SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, const char* textureName);
-extern SE_Mesh* SE_ResourceManager_GetMesh(SE_ResourceManager* resourceManager, const char* meshName);
+extern SE_Mesh* SE_ResourceManager_GetMesh(SE_ResourceManager* resourceManager, int index);
+extern int SE_ResourceManager_GetMeshCount(SE_ResourceManager* resourceManager);
 extern SE_Mesh* SE_ResourceManager_FindMeshByIndex(SE_ResourceManager* resourceManager, int index);
+/**
+ * return the texid about this texture name. if it is in hashmap it will return it, if it is not in hash map, it will put it in hash map and then return it.
+ * */
+extern SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager, const char* texName, int isCreate);
+extern SE_Result SE_ResourceManager_PutTextureID(SE_ResourceManager* resourceManager, const char* texName, SE_TextureID texID);
+extern SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager, const char* texName);
 
 #ifdef __cplusplus
 }

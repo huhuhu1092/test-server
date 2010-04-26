@@ -13,22 +13,16 @@ static SE_ListNode* createListNode(SE_Element e)
 static void freeListNode(SE_ListNode* ln)
 {
     SE_Element d = ln->data;
-    if(d.type == SE_DATA)
-    {
-        if(d.dp.fRelease != NULL)
-        {
-            (*d.dp.fRelease)(d.dp.data);
-        }
-        SE_Free(d.dp.data);
-    }
+    SE_Element_Release(&d);
     SE_Free(ln);
 }
 SE_Result SE_List_Init(SE_List* list)
 {
     SE_ASSERT(list);
+    SE_Object_Clear(list, sizeof(SE_List));
     SE_ASSERT(list->head == NULL);
-    SE_ASSERT(list->tail = NULL);
-    SE_ASSERT(list->size = 0);
+    SE_ASSERT(list->tail == NULL);
+    SE_ASSERT(list->size == 0);
     SE_ListNode* ln = (SE_ListNode*)SE_Malloc(sizeof(SE_ListNode));
     if(ln == NULL)
     {
@@ -186,6 +180,44 @@ void SE_List_Release(void* l)
     }    
     SE_Object_Clear(list, sizeof(SE_List));
 }
+static void removeListNode(SE_List* l, SE_ListNode* p)
+{
+    SE_ListNode* head = l->head;
+    SE_ListNode* tail = l->tail;
+    SE_ListNode* prev = p->prev;
+    SE_ListNode* next = p->next;
+    prev->next = next;
+    if(next != NULL)
+    {
+        next->prev = prev;
+    } 
+    else
+    {
+        SE_ASSERT(p == tail);
+        l->tail = prev;
+    }
+}
+SE_Result SE_List_RemoveElement(SE_List* list, SE_Element e)
+{
+    SE_ASSERT(list);
+    SE_ListNode* p = list->head->next;
+    if(p == NULL)
+        return SE_VALID;
+    while(p)
+    {
+        SE_Element d = p->data;
+        if(SE_Element_Compare(d, e) == 0)
+            break;
+        p = p->next;
+    }
+    if(p == NULL)
+        return SE_VALID;
+    removeListNode(list, p);
+    SE_Element_Release(&p->data);
+    SE_Free(p);
+    return SE_VALID;
+}
+
 int SE_List_Size(SE_List* list)
 {
     SE_ASSERT(list);

@@ -49,13 +49,21 @@ typedef struct SE_FaceList_tag
 extern SE_Result SE_FaceList_Init(SE_FaceList* fl, SE_GeometryData* s, int faceNum, int* faces);
 extern SE_Result SE_FaceList_Release(void* fl);
 
-/****/
+/**
+ * if own** is true, SE_GeometryData_Init will copy  the *Array to out
+ * **/
 extern SE_Result SE_GeometryData_Init(int type, SE_Vector3f* vertexArray, int vertexNum, int ownVertexArray,
                                       SE_Vector3f* texVertexArray, int texVertexNum, int ownTexVertexArray,
                                       SE_Face* faceArray, int faceNum, int ownFaceArray,
                                       SE_Face* texFaceArray, int texFaceNum, int ownTexFaceArray,
                                       SE_Vector3f* normalArray, int normalNum, int ownNormalArray, 
                                       SE_Vector3f* colorArray, int colorNum, int ownColorArray, SE_GeometryData* out);
+extern SE_Result SE_GeometryData_SetVertexes(SE_GeometryData* gd, SE_Vector3f* vertexArray, int vertexNum, int isCopy);
+extern SE_Result SE_GeometryData_SetFaces(SE_GeometryData* gd, SE_Face* faceArray, int faceNum , int isCopy);
+extern SE_Result SE_GeometryData_SetTexVertexes(SE_GeometryData* gd, SE_Vector3f* texVertexArray, int texVertexNum, int isCopy);
+extern SE_Result SE_GeometryData_SetTexFaces(SE_GeometryData* gd, SE_Face* texFaceArray, int texFaceNum , int isCopy);
+extern SE_Result SE_GeometryData_SetNormals(SE_GeometryData* gd, SE_Vector3f* normalArray, int normalNum, int isCopy);
+extern SE_Result SE_GeometryData_SetColors(SE_GeometryData* gd, SE_Vector3f* colorArray, int colorNum , int isCopy);
 extern void SE_GeometryData_Release(void* gd);
 extern SE_Result SE_GeometryData_Copy(const SE_GeometryData* gdSrc, SE_GeometryData* gdDst);
 

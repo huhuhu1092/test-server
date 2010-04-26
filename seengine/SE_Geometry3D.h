@@ -1,6 +1,6 @@
 #ifndef SE_GEOMETRY3D_H
 #define SE_GEOMETRY3D_H
-#include "SE_Vector3f.h"
+#include "SE_Vector.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -26,7 +26,9 @@ void SE_DataPointer_Release(void* dp)
  * */
 int SE_Element_Compare(SE_Element v1, SE_Element v2)
 {
-    SE_ASSERT(v1.type == v2.type);
+    //SE_ASSERT(v1.type == v2.type);
+    if(v1.type != v2.type)
+        return -1;
     if(v1.type == SE_NONE)
         return 0;
     int ret = 0;
@@ -155,9 +157,9 @@ int SE_Element_Compare(SE_Element v1, SE_Element v2)
         ret = SE_String_Compare(v1.str, v2.str);
         break; 
     case SE_DATA: 
-        if(v1.dp.fCompare)
+        if(v2.dp.fCompare)
         {
-            ret = (*v1.dp.fCompare)(v1.dp.data, v2.dp.data);
+            ret = (*v2.dp.fCompare)(v1.dp.data, v2.dp.data);
         }
         else
         { 

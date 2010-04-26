@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-enum SE_BVType {Sphere, AABB, OBB, Capsule};
+enum SE_BVType {SE_Sphere, SE_AABB, SE_OBB, SE_Capsule};
 struct SE_BoundingVolume_tag;
 typedef SE_Result (*SE_BV_TRANSFORM)(struct SE_BoundingVolume_tag* bv, const SE_Quat* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale);
 typedef SE_Plane_Side (*SE_BV_WHICH_SIDE)(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane);
@@ -27,6 +27,8 @@ typedef struct SE_BoundingVolume_tag
     SE_BV_INTERSECT_RAY_DETAIL fIntersectRayDetail;
     SE_BV_INTERSECT_BV fIntersectBV;
 } SE_BoundingVolume;
+extern SE_Result SE_BoundingVolume_Init(SE_BoundingVolume* bv);
+extern void SE_BoundingVolume_Release(void* bv);
 #ifdef __cplusplus
 }
 #endif

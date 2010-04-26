@@ -15,6 +15,12 @@ int SE_TextureID_IsValid(SE_TextureID* texId)
 {
     return texId->created && glIsTexture(texId->textureid);
 }
+SE_Result SE_TextureID_Delete(SE_TextureID* texId)
+{
+    glDeleteTextures(1, &texId->textureid);
+    return SE_VALID;
+}
+
 SE_Result SE_TextureID_CreateArray(SE_TextureID* texId, int texNum)
 {
     

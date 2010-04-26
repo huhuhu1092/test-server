@@ -1,6 +1,7 @@
 #include "SE_Geometry3D.h"
 #include "SE_Math.h"
 #include "SE_Common.h"
+#include "SE_Math.h"
 SE_Result SE_Line_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, SE_Line* out)
 {
     SE_ASSERT(p0);
@@ -30,7 +31,7 @@ SE_Result SE_Line_GetDirection(const SE_Line* line, SE_Vector3f* out, int normal
 {
     SE_ASSERT(line);
     SE_ASSERT(out);
-    SE_Vector r;
+    SE_Vector3f r;
     if(normal)
     {
         SE_Vec3f_Subtract(&line->p1, &line->p0, &r);
@@ -165,12 +166,12 @@ SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far, 
     float e = 1.0 / SE_Tanf(fovRadian / 2);
     float param1 = 1.0 / SE_Sqrtf(e * e + 1);
     float param2 = 1.0 / SE_Sqrtf(e * e + ratio * ratio);
-    out->left.n = SE_Vec3f_Init(e / param1, 0, -1 / param1);
-    out->right.n = SE_Vec3f_Init(-e / param1, 0, -1 / param1);
-    out->top.n = SE_Vec3f_Init(0, -e / param2, -ratio / param2);
-    out->bottom.n = SE_Vec3f_Init(0, e / param2, -ratio / param2);
-    out->near.n = SE_Vec3f_Init(0,0, -1);
-    out->far.n = SE_Vec3f_Init(0, 0, 1);
+    SE_Vec3f_Init(e / param1, 0, -1 / param1, &out->left.n);
+    SE_Vec3f_Init(-e / param1, 0, -1 / param1, &out->right.n);
+    SE_Vec3f_Init(0, -e / param2, -ratio / param2, &out->top.n);
+    SE_Vec3f_Init(0, e / param2, -ratio / param2, &out->bottom.n);
+    SE_Vec3f_Init(0,0, -1, &out->near.n );
+    SE_Vec3f_Init(0, 0, 1, &out->far.n);
     out->left.d = 0;
     out->right.d = 0;
     out->top.d = 0;
@@ -187,12 +188,12 @@ SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out)
 {
     SE_ASSERT(ft);
     SE_ASSERT(out);
-    float fovRaidan = SE_AngleToRaidan(ft->fovAngle);
+    float fovRaidan = SE_AngleToRadian(ft->fovAngle);
     float e = 1.0 / SE_Tanf(fovRaidan / 2);
     out->left = - ft->n / e;
     out->right = ft->n / e;
     out->top = ft->n * ft->ratio / e;
-    out->bottom = - ft->n * ft->ration / e;
+    out->bottom = - ft->n * ft->ratio / e;
     return SE_VALID;
 }
 

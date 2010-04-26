@@ -2,13 +2,16 @@
 #define SE_SPATIAL_H
 
 #include "SE_Common.h"
-#include "SE_Geometry3D.h"
 #include "SE_Vector.h"
 #include "SE_BoundingVolume.h"
 #include "SE_Matrix.h"
+#include "SE_RenderState.h"
+#include "SE_String.h"
+#include "SE_List.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+struct SE_Mesh_tag;
 enum SE_SPATIAL_TYPE {SE_SPATIAL, SE_NODE, SE_GEOMETRY};
 enum SE_SPATIAL_RENDER_TYPE {SE_NO_RENDER, SE_RENDERABLE};
 enum SE_SPATIAL_COLLISION_TYPE {SE_NO_COLLISION, SE_COLLISIONALBE};
@@ -19,7 +22,7 @@ typedef SE_Result (*SE_SPATIAL_UPDATEWORLDROTATION)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEWORLDTRANSFORM)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEWORLDBV)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEGEOMETRICSTATE)(void* spatial);
-typedef SE_Spatial_tag
+typedef struct SE_Spatial_tag
 {
     SE_SPATIAL_TYPE spatialType;
     SE_SPATIAL_RENDER_TYPE renderType;
@@ -34,8 +37,8 @@ typedef SE_Spatial_tag
     SE_BoundingVolume localBV;
     SE_RenderState renderState;
     SE_String name;
-    SE_List* childrent;
-    SE_Mesh* mesh;
+    SE_List* children;
+    SE_Mesh_tag* mesh;
     int subMeshIndex; //-1 : indicate this is not submesh
     SE_SPATIAL_UPDATEWORLDTRANSLATION fUpdateWorldTranslation;
     SE_SPATIAL_UPDATEWORLDSCALE fUpdateWorldScale;
@@ -44,18 +47,22 @@ typedef SE_Spatial_tag
     SE_SPATIAL_UPDATEWORLDBV fUpdateBV;
     SE_SPATIAL_UPDATEGEOMETRICSTATE fUpdateGeometricState;
 } SE_Spatial;
-extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType ,const char* name);
+/**
+ * this function create a new SE_Spatial, you has the responsibility to release it, or add it to its parent spatial.
+ * */
+extern SE_Spatial* SE_Spatial_Create();
+extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType ,const char* name, SE_Mesh_tag* mesh);
 extern void SE_Spatial_Release(void* spatial);
 extern SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst);
 extern SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateGeometricState(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateRenderState(SE_Spatial* spatial);
-extern int SE_Spaital_HasChildren(SE_Spatial* spatial);
+extern int SE_Spatial_HasChildren(SE_Spatial* spatial);
 extern int SE_Spatial_GetChildrenNum(SE_Spatial* spatial);
-extern SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatail* child);
+extern SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child);
 extern SE_Result SE_Spatial_RemoveChild(SE_Spatial* parent, SE_Spatial* child);
-extern SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String* name);
+extern SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name);
 #ifdef __cplusplus
 }
 #endif

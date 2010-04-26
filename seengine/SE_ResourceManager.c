@@ -169,11 +169,6 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                 faceArray[i].v[1] = readInt(data, &startPos);
                 faceArray[i].v[2] = readInt(data, &startPos);
             }
-            /*
-             * debug
-             */
-            SE_Free(faceArray);
-            /* end */
             SE_Face* texFaceArray = NULL;
             if(texVertexNum > 0)
             {
@@ -211,7 +206,11 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                     colorArray[i].z = readFloat(data, &startPos);
                 }
             }
-            SE_GeometryData_Init(type, vertexArray, vertexNum, 1, texVertexArray, texVertexNum, 1, NULL, 0, 1, texFaceArray, faceNum, 1, NULL, 0, 1, colorArray, colorNum, 1, gd);
+            SE_Object_Clear(gd, sizeof(SE_GeometryData));
+            SE_GeometryData_SetVertexes(gd, vertexArray, vertexNum, 0);
+            SE_GeometryData_SetTexVertexes(gd, texVertexArray, texVertexNum, 0);
+            SE_GeometryData_SetFaces(gd, faceArray, faceNum, 0);
+            SE_GeometryData_SetTexFaces(gd, texFaceArray, faceNum , 0);
         }
         else if(currChunckId == MESH_ID)
         {
@@ -672,6 +671,7 @@ void SE_ResourceManager_Release(void* resourceManager)
     SE_TextureManager_Release(&rm->textureManager);
     SE_ScriptManager_Release(&rm->scriptManager);
     SE_String_Release(&rm->dataPath);
+    SE_HashMap_Release(&rm->textureIDMap);
 }
 SE_Texture* SE_ResourceManager_GetTexture(SE_ResourceManager* resourceManager, const char* textureName)
 {
@@ -768,5 +768,82 @@ SE_String* SE_ResourceManager_GetDataPath(SE_ResourceManager* rm)
 {
     return &rm->dataPath;
 }
+SE_Mesh* SE_ResourceManager_GetMesh(SE_ResourceManager* resourceManager, int index)
+{
+    return SE_MeshManager_GetMesh(&resourceManager->meshManager, index);
+}
 
-
+int SE_ResourceManager_GetMeshCount(SE_ResourceManager* resourceManager)
+{
+    return resourceManager->meshManager.meshNum;
+}
+SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager, const char* texName, int isCreate)
+{
+    SE_ASSERT(resourceManager);
+    if(texName == NULL)
+    {
+        SE_TextureID id;
+        SE_Object_Clear(&id, sizeof(SE_TextureID));
+        return id;
+    }
+    SE_TextureID nullTexID;
+    SE_Object_Clear(&nullTexID, sizeof(SE_TextureID));
+    SE_HashMap* texIDMap = &resourceManager->textureIDMap;
+    SE_Element key;
+    key.type = SE_STRING;
+    SE_String_Init(&key.str, texName);
+    SE_Element* id = SE_HashMap_Get(texIDMap, key);
+    if(id != NULL)
+    {
+        return *((SE_TextureID*)(id->dp.data));
+    }
+    else
+    {
+        if(!isCreate)
+            return nullTexID;
+        SE_TextureID* texID = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
+        if(texID == NULL)
+        {
+            SE_Element_Release(&key);
+            return nullTexID;
+        }
+        SE_TextureID_Create(texID);
+        SE_Element value;
+        SE_Object_Clear(&value, sizeof(SE_Element));
+        value.type = SE_DATA;
+        value.dp.data = texID;
+        SE_HashMap_Put(texIDMap, key, value);
+        return *texID; 
+    }
+}
+SE_Result SE_ResourceManager_PutTextureID(SE_ResourceManager* resourceManager, const char* texName, SE_TextureID texID)
+{
+    SE_ASSERT(resourceManager);
+    if(texName == NULL)
+        return SE_INVALID;
+    SE_Element value;
+    SE_Object_Clear(&value, sizeof(SE_Element));
+    value.type = SE_DATA;
+    value.dp.data = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
+    if(value.dp.data == NULL)
+        return SE_INVALID;
+    *(SE_TextureID*)value.dp.data = texID;
+    SE_Element key;
+    SE_Object_Clear(&key, sizeof(SE_Element));
+    key.type = SE_STRING;
+    SE_String_Init(&key.str, texName);
+    SE_HashMap_Put(&resourceManager->textureIDMap, key, value);
+    return SE_VALID;
+}
+SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager, const char* texName)
+{
+    SE_ASSERT(resourceManager);
+    if(texName == NULL)
+        return SE_INVALID;
+    SE_TextureID texID = SE_ResourceManager_GetTextureID(resourceManager, texName, false);
+    if(SE_TextureID_IsValid(&texID))
+    {
+        SE_TextureID_Delete(&texID);
+    }
+    return SE_VALID;
+}

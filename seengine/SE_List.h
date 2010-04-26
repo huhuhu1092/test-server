@@ -27,6 +27,7 @@ extern SE_Result SE_List_AddBefore(SE_List* list, int index, SE_Element e);
 extern SE_Result SE_List_RemoveAt(SE_List* list, int index);
 extern SE_Result SE_List_RemoveFront(SE_List* list);
 extern SE_Result SE_List_RemoveLast(SE_List* list);
+extern SE_Result SE_List_RemoveElement(SE_List* list, SE_Element e);
 extern void SE_List_Release(void* l);
 extern int SE_List_Size(SE_List* list);
 extern SE_Element SE_List_GetAt(SE_List* list , int index);
