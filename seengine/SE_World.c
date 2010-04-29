@@ -14,7 +14,7 @@ void SE_World_Release(void* world)
 }
 SE_Camera* SE_World_GetMainCamera(SE_World* world)
 {
-    return world->mainCamera;
+    return &world->mainCamera;
 }
 SE_Spatial* SE_World_GetSceneRoot(SE_World* world)
 {

@@ -145,7 +145,7 @@ extern SE_Result SE_Triangle_GetPoint2(const SE_Triangle* tri, SE_Vector3f* out)
  * fov is the horizonal angle
  * ratio is the ratio of height / width
  * */
-extern SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far);
+extern SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far,SE_Frustum* out);
 extern SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out);
 #define SE_Frustum_GetLeftPlane(ft) (&ft->left)
 #define SE_Frustum_GetRightPlane(ft) (&ft->right)

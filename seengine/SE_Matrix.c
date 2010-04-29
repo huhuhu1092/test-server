@@ -568,4 +568,20 @@ SE_Result SE_Mat4f_InitFromMT(const SE_Matrix3f* m, const SE_Vector3f* t, SE_Mat
     return SE_VALID;
 }
 
-
+void SE_Mat4f_GetMatrixColumnSequence(const SE_Matrix4f*m, float out[16])
+{
+    SE_Vector4f col[4];
+    SE_Mat4f_GetColumn(m, 0, &col[0]);
+    SE_Mat4f_GetColumn(m, 1, &col[1]);
+    SE_Mat4f_GetColumn(m, 2, &col[2]);
+    SE_Mat4f_GetColumn(m, 3, &col[3]);
+    int i, j;
+    for(i = 0 ; i < 4 ; i++)
+    {
+        SE_Vector4f* c = &col[i];
+        for(j = 0 ; j < 4 ; j++)
+        {
+            out[i * 4 + j] = c->d[j];
+        }
+    }
+}

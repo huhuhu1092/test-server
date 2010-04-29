@@ -1,19 +1,76 @@
-==17356== Memcheck, a memory error detector.
-==17356== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
-==17356== Using LibVEX rev 1884, a library for dynamic binary translation.
-==17356== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
-==17356== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
-==17356== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
-==17356== For more details, rerun with: -v
-==17356== 
-==17356== My PID = 17356, parent PID = 7499.  Prog and args are:
-==17356==    ./test
-==17356==    home.ASE
-==17356==    home.cbf
-==17356== 
-==17356== 
-==17356== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 43 from 1)
-==17356== malloc/free: in use at exit: 0 bytes in 0 blocks.
-==17356== malloc/free: 1,147 allocs, 1,147 frees, 1,070,071 bytes allocated.
-==17356== For counts of detected errors, rerun with: -v
-==17356== All heap blocks were freed -- no leaks are possible.
+==13878== Memcheck, a memory error detector.
+==13878== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
+==13878== Using LibVEX rev 1884, a library for dynamic binary translation.
+==13878== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
+==13878== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
+==13878== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
+==13878== For more details, rerun with: -v
+==13878== 
+==13878== My PID = 13878, parent PID = 18637.  Prog and args are:
+==13878==    ./test
+==13878==    home.ASE
+==13878==    home.cbf
+==13878== 
+==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
+==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
+==13878==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
+==13878==    by 0x495B06C: driDrawableInitVBlank (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x496552A: intelMakeCurrent (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x495BD8C: (within /usr/lib/dri/i965_dri.so)
+==13878==    by 0x407B19B: (within /usr/lib/libGL.so.1.2)
+==13878==    by 0x405915F: glXMakeContextCurrent (in /usr/lib/libGL.so.1.2)
+==13878==    by 0x4059482: glXMakeCurrent (in /usr/lib/libGL.so.1.2)
+==13878==    by 0x40BDFB5: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x80686C0: main (main.c:265)
+==13878==  Address 0xbed98ecc is on thread 1's stack
+==13878== 
+==13878== Mismatched free() / delete / delete []
+==13878==    at 0x402599A: operator delete(void*) (vg_replace_malloc.c:342)
+==13878==    by 0x8060206: acc::ACCscript::~ACCscript() (acc.c:6066)
+==13878==    by 0x8056B28: accDeleteScript (acc.c:6104)
+==13878==    by 0x8068657: runScript() (main.c:113)
+==13878==    by 0x8068717: main (main.c:272)
+==13878==  Address 0x7616730 is 0 bytes inside a block of size 296 alloc'd
+==13878==    at 0x402630E: operator new[](unsigned int) (vg_replace_malloc.c:268)
+==13878==    by 0x8056A6D: accScriptSource (acc.c:6131)
+==13878==    by 0x8068423: runScript() (main.c:73)
+==13878==    by 0x8068717: main (main.c:272)
+==13878== 
+==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
+==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
+==13878==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
+==13878==    by 0x495B18C: driWaitForVBlank (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x4981D71: intelSwapBuffers (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x495B9D5: (within /usr/lib/dri/i965_dri.so)
+==13878==    by 0x407B1D7: (within /usr/lib/libGL.so.1.2)
+==13878==    by 0x40589DA: glXSwapBuffers (in /usr/lib/libGL.so.1.2)
+==13878==    by 0x40B056E: glutSwapBuffers (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x8067FCA: display() (main.c:201)
+==13878==    by 0x40B9420: glutMainLoop (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x806871C: main (main.c:273)
+==13878==  Address 0xbed98f74 is on thread 1's stack
+==13878== 
+==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
+==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
+==13878==    by 0x4963B50: LOCK_HARDWARE (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x49618CF: intelCopyBuffer (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x4981DB3: intelSwapBuffers (in /usr/lib/dri/i965_dri.so)
+==13878==    by 0x495B9D5: (within /usr/lib/dri/i965_dri.so)
+==13878==    by 0x407B1D7: (within /usr/lib/libGL.so.1.2)
+==13878==    by 0x40589DA: glXSwapBuffers (in /usr/lib/libGL.so.1.2)
+==13878==    by 0x40B056E: glutSwapBuffers (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x8067FCA: display() (main.c:201)
+==13878==    by 0x40B9420: glutMainLoop (in /usr/lib/libglut.so.3.8.0)
+==13878==    by 0x806871C: main (main.c:273)
+==13878==  Address 0xbed98ea4 is on thread 1's stack
+==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
+==13878==    This could cause spurious value errors to appear.
+==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
+==13878==    This could cause spurious value errors to appear.
+==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
+==13878==    This could cause spurious value errors to appear.
+==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.

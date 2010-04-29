@@ -243,4 +243,27 @@ SE_Element SE_List_GetAt(SE_List* list , int index)
     }
     return p->data;
 }
+SE_Result SE_ListIterator_Init(SE_ListIterator* li, SE_List* list)
+{
+    li->list = list;
+    li->curr = list->head;
+}
+int SE_ListIterator_Next(SE_ListIterator* li, SE_Element* out)
+{
+    SE_ASSERT(out);
+    SE_Object_Clear(out, sizeof(SE_Element));
+    SE_ListNode* curr = li->curr;
+    if(curr == NULL)
+    {
+        return 0;
+    }
+    SE_ListNode* next = curr->next;
+    if(next == NULL)
+    {
+        return 0;
+    }
+    *out = next->data;
+    li->curr = next;
+    return 1;
+}
 

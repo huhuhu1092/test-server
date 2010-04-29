@@ -353,6 +353,7 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
         return SE_INVALID;
     }
     memcpy(imageData->data, data + startPos, pixelDataLen);
+    SE_Free(data);
     return SE_VALID;
     
 }
@@ -362,8 +363,7 @@ static void getFileExt(const char* fileName, SE_String* ext)
     SE_ASSERT(ext);
     int index;
     int len = strlen(fileName);
-    int i;
-    for(index  = (len - 1) ; i >= 0  ; i--)
+    for(index  = (len - 1) ; index >= 0  ; index--)
     {
         if(fileName[index] == '.')
             break;
@@ -606,8 +606,9 @@ void SE_MaterialManager_Release(void* mm)
     }
     SE_Free(materialManager->materialArray);
 }
+
 /**
- * function about SE_ScriptManager
+ * function about SE_MeshManager
  * */
 SE_Result SE_MeshManager_Init(SE_MeshManager* mm, int count)
 {
@@ -659,7 +660,8 @@ SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, c
     SE_String_Init(&resourceManager->dataPath, dataPath);
     SE_MeshLoad(fileName, resourceManager);
     SE_TextureManager* textureManager = &resourceManager->textureManager;
-    SE_HashMap_Init(50, NULL, &textureManager->textureMap);
+    SE_HashMap_Init(256, NULL, &textureManager->textureMap);
+    SE_HashMap_Init(128, NULL, &resourceManager->scriptMap);
     return SE_VALID;
 }
 void SE_ResourceManager_Release(void* resourceManager)
@@ -669,9 +671,9 @@ void SE_ResourceManager_Release(void* resourceManager)
     SE_MaterialManager_Release(&rm->materialManager);
     SE_MeshManager_Release(&rm->meshManager);
     SE_TextureManager_Release(&rm->textureManager);
-    SE_ScriptManager_Release(&rm->scriptManager);
     SE_String_Release(&rm->dataPath);
     SE_HashMap_Release(&rm->textureIDMap);
+    SE_HashMap_Release(&rm->scriptMap);
 }
 SE_Texture* SE_ResourceManager_GetTexture(SE_ResourceManager* resourceManager, const char* textureName)
 {
@@ -723,11 +725,14 @@ SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, 
     }
     SE_Object_Clear(currTex, sizeof(SE_Texture));
     SE_String strTexPath;
+    SE_Object_Clear(&strTexPath, sizeof(SE_String));
     SE_String_Concate(&strTexPath, "%s/%s", (SE_String_GetData(&resourceManager->dataPath)), textureName);
     SE_Result ret = SE_ImageLoad(SE_String_GetData(&strTexPath), &currTex->imageData);
     SE_String_Release(&strTexPath);
     if(ret != SE_VALID)
     {
+        SE_Texture_Release(currTex);
+        SE_Free(currTex);
         return SE_INVALID;
     }
     SE_String_Init(&currTex->texturename, textureName);
@@ -759,10 +764,6 @@ SE_MeshManager* SE_ResourceManager_GetMeshManager(SE_ResourceManager* rm)
 SE_TextureManager* SE_ResourceManager_GetTextureManager(SE_ResourceManager* rm)
 {
     return &rm->textureManager;
-}
-SE_ScriptManager* SE_ResourceManager_GetScriptManager(SE_ResourceManager* rm)
-{
-    return &rm->scriptManager;
 }
 SE_String* SE_ResourceManager_GetDataPath(SE_ResourceManager* rm)
 {
@@ -847,3 +848,73 @@ SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager
     }
     return SE_VALID;
 }
+SE_MaterialData* SE_ResourceManager_GetMaterialData(SE_ResourceManager* resourceManager, int index)
+{
+    SE_MaterialManager* mm = SE_ResourceManager_GetMaterialManager(resourceManager);
+    SE_Material* m = SE_MaterialManager_GetMaterial(mm, index);
+    if(m)
+    {
+        return &m->materialData;
+    }
+    else
+        return NULL;
+}
+SE_GeometryData* SE_ResourceManager_GetGeometryData(SE_ResourceManager* resourceManager, int index)
+{
+    SE_GeometryDataManager* gdm = SE_ResourceManager_GetGeometryDataManager(resourceManager);
+    return SE_GeometryDataManager_GetGeomData(gdm, index);
+}
+
+SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, const char* name)
+{
+    SE_Element key;
+    key.type = SE_STRING;
+    SE_String_Init(&key.str, name);
+    SE_Element* value = SE_HashMap_Get(&resourceManager->scriptMap, key);
+    if(value)
+    {
+        SE_String_Release(&key);
+        return (SE_Script*)value->dp.data;
+    } 
+    SE_String filePath;
+    SE_Object_Clear(&filePath, sizeof(SE_String));
+    SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(&resourceManager->dataPath), SE_String_GetData(&key.str));
+    char* data = NULL;
+    int len;
+    SE_ReadFileAllByName(name, &data, &len);
+    if(data == NULL)
+    {
+        SE_Element_Release(&key);
+        SE_String_Release(&filePath);
+        LOGI("can not find script %s\n", name);
+        return NULL;
+    }
+    SE_Script* script = (SE_Script*)SE_Malloc(sizeof(SE_Script));
+    if(script == NULL)
+    {
+        SE_String_Release(&key);
+        SE_String_Release(&filePath);
+        LOGI("out of memory when alloc script %s\n", name);
+        return NULL;
+    }
+    SE_Script_Init(script, data);
+    SE_Free(data);
+    SE_Script_Compile(script);
+    SE_Element v;
+    v.type =SE_DATA;
+    v.dp.data = script;
+    v.dp.fRelease = &SE_Script_Release;
+    SE_HashMap_Put(&resourceManager->scriptMap, key, v);
+    return script;
+}
+SE_Script* SE_ResourceManager_RunScript(SE_ResourceManager* resourceManager, const char* name)
+{
+    SE_Script* script = SE_ResourceManager_GetScript(resourceManager, name);
+    if(script == NULL)
+    {
+        return script;
+    }
+    SE_Script_Run(script);
+    return script;
+}
+

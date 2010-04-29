@@ -10,7 +10,7 @@ extern "C" {
 typedef struct SE_World_tag
 {
     SE_List cameraList;
-    SE_Camera* mainCamera;
+    SE_Camera mainCamera;
     SE_Spatial sceneRoot;
     SE_Spatial playerController;
     SE_ResourceManager resourceManager;

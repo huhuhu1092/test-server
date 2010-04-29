@@ -82,7 +82,7 @@ extern SE_Result SE_Mat4f_Sub(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_M
 extern SE_Result SE_Mat4f_CofactorM(const SE_Matrix4f* m, int row, int column, SE_Matrix3f* out);
 extern SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out);
 extern SE_Result SE_Mat4f_Transpose(const SE_Matrix4f* m, SE_Matrix4f* out);
-
+extern void SE_Mat4f_GetMatrixColumnSequence(const SE_Matrix4f*m, float out[16]);
 #ifdef __cplusplus
 }
 #endif

@@ -2,13 +2,14 @@
 #include "SE_Memory.h"
 #include "SE_Utils.h"
 #include "SE_ResourceManager.h"
+#include "SE_Script.h"
 SE_Spatial* SE_Spatial_Create()
 {
     SE_Spatial* s = (SE_Spatial*)SE_Malloc(sizeof(SE_Spatial));
     SE_Object_Clear(s, sizeof(SE_Spatial));
     return s;
 }
-SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, const char* name, SE_Mesh_tag* mesh)
+SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, const char* name, SE_ResourceManager* resourceManager,SE_Mesh_tag* mesh)
 {
     SE_ASSERT(spatial);
     SE_Object_Clear(spatial, sizeof(SE_Spatial));
@@ -19,6 +20,8 @@ SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, cons
     SE_Vec3f_Init(1, 1, 1, &spatial->localScale);
     spatial->subMeshIndex = -1;
     spatial->mesh = mesh;
+    spatial->resourceManager = resourceManager;
+    SE_RenderState_Init(&spatial->renderState, resourceManager);
     return SE_VALID;
 }
 void SE_Spatial_Release(void* s)
@@ -80,8 +83,51 @@ SE_Result SE_Spatial_UpdateGeometricState(SE_Spatial* spatial)
     SE_Spatial_UpdateWorldBV(spatial);
     return SE_VALID;
 }
+static void updateRenderStateFromRoot(SE_Spatial* spatial)
+{
+    if(spatial == NULL)
+    {
+        return ;
+    }
+    SE_Spatial* parent = spatial->parent;
+    updateRenderStateFromRoot(parent);
+    if(parent != NULL)
+    {
+        SE_RenderState* rs = &parent->renderState;
+        SE_RenderState_Update(&spatial->renderState, rs);
+    }
+}
+static void updateRenderStateToChild(SE_Spatial* child, SE_RenderState* parentState)
+{
+    SE_RenderState_Update(&child->renderState, parentState);
+    if(child->children != NULL)
+    {
+        SE_ListIterator li;
+        SE_ListIterator_Init(&li, child->children);
+        SE_Element n;
+        while(SE_ListIterator_Next(&li, &n))
+        {
+            SE_Spatial* c = (SE_Spatial*)n.dp.data;
+            updateRenderStateToChild(c, &c->renderState);
+        }
+    }
+}
 SE_Result SE_Spatial_UpdateRenderState(SE_Spatial* spatial)
-{}
+{
+    updateRenderStateFromRoot(spatial);
+    if(spatial->children != NULL)
+    {
+        SE_ListIterator li;
+        SE_ListIterator_Init(&li, spatial->children);
+        SE_Element n;
+        while(SE_ListIterator_Next(&li, &n))
+        {
+            SE_Spatial* child = (SE_Spatial*)n.dp.data;
+            updateRenderStateToChild(child, &spatial->renderState);    
+        }
+    } 
+    return SE_VALID;
+}
 int SE_Spatial_HasChildren(SE_Spatial* spatial)
 {
     return spatial->children != NULL;
@@ -165,4 +211,12 @@ SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name)
     e.dp.fCompare = &compareSpatialByName;
     return SE_List_RemoveElement(parent->children, e); 
 }
-
+SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType, const char* scriptname)
+{
+    if(scriptname == NULL)
+        return SE_INVALID;
+    SE_String* str = &spatial->renderState.rsu[rsType].scriptName;
+    SE_String_CopyCharArray(str, scriptname);
+    spatial->renderState.resourceManager = spatial->resourceManager;
+    return SE_VALID;
+}
