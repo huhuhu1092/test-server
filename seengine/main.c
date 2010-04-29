@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "./renderer/SE_Renderer.h"
 
 int window;
 static SE_World seWorld;
@@ -123,6 +123,7 @@ int init(int argc, char** argv)
     //ASE_Loader loader(argv[1], 0, 0);
     //loader.Load();
     //loader.Write(argv[2]);
+    SE_World_Init(&seWorld);
     SE_ResourceManager* resourceManager = SE_World_GetResourceManager(&seWorld);
     SE_ResourceManager_InitFromFile(resourceManager, "/home/luwei/model/jme/home/newhome3", argv[2]);
     SE_Spatial* root = SE_World_GetSceneRoot(&seWorld);
@@ -190,6 +191,7 @@ void display ( void )   // Create The Display Function
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SE_Renderer_DrawWorld(&seWorld);
     //debug
     glBegin(GL_TRIANGLES);
     glVertex3f(1, 2, -5);
@@ -263,14 +265,18 @@ int main ( int argc, char** argv )
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH );
   glutInitWindowSize  ( 640, 480 );
   window = glutCreateWindow( "NeHe's OpenGL Framework" ); 
+  /*
   glutIdleFunc(display);
   glutDisplayFunc     ( display );  // Matching Earlier Functions To Their Counterparts
   glutReshapeFunc     ( reshape );
   glutKeyboardFunc    ( keyboard );
   glutSpecialFunc     ( arrow_keys );
+  */
   init(argc, argv);
-  runScript();
-  glutMainLoop        ( );          // Initialize The Main Loop
+  //runScript();
+  //glutMainLoop        ( );          // Initialize The Main Loop
+  reshape(640, 480);
+  display();
   SE_World_Release(&seWorld);
   return 0;
 }

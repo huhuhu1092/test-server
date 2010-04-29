@@ -404,6 +404,7 @@ static SE_Result SE_ImageLoad(const char* fileName, SE_ImageData* imageData)
         LOGE("can not file the image loader for : %s\n", fileName);
     }
     SE_String_Release(&fileExt);
+    return SE_VALID;
 }
 /** 
  * function about SE_MaterialData 
@@ -416,6 +417,13 @@ void SE_MaterialData_Release(void* md)
 /** 
  * function about SE_Material
  * */
+SE_MaterialData* SE_Material_GetSubMaterialData(SE_Material* m, int index)
+{
+    SE_ASSERT(m);
+    if(index < 0 || index >= m->subMaterialNum)
+        return NULL;
+    return &m->subMaterialArray[index];
+}
 void SE_Material_Release(void* material)
 {
     SE_Material* m = (SE_Material*)material;
@@ -661,6 +669,7 @@ SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, c
     SE_MeshLoad(fileName, resourceManager);
     SE_TextureManager* textureManager = &resourceManager->textureManager;
     SE_HashMap_Init(256, NULL, &textureManager->textureMap);
+    SE_HashMap_Init(256, NULL, &resourceManager->textureIDMap);
     SE_HashMap_Init(128, NULL, &resourceManager->scriptMap);
     return SE_VALID;
 }
@@ -867,13 +876,15 @@ SE_GeometryData* SE_ResourceManager_GetGeometryData(SE_ResourceManager* resource
 
 SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, const char* name)
 {
+    if(name == NULL)
+        return NULL;
     SE_Element key;
     key.type = SE_STRING;
     SE_String_Init(&key.str, name);
     SE_Element* value = SE_HashMap_Get(&resourceManager->scriptMap, key);
     if(value)
     {
-        SE_String_Release(&key);
+        SE_Element_Release(&key);
         return (SE_Script*)value->dp.data;
     } 
     SE_String filePath;
@@ -881,7 +892,7 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
     SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(&resourceManager->dataPath), SE_String_GetData(&key.str));
     char* data = NULL;
     int len;
-    SE_ReadFileAllByName(name, &data, &len);
+    SE_ReadCScriptFile(SE_String_GetData(&filePath), &data, &len);
     if(data == NULL)
     {
         SE_Element_Release(&key);
@@ -892,11 +903,12 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
     SE_Script* script = (SE_Script*)SE_Malloc(sizeof(SE_Script));
     if(script == NULL)
     {
-        SE_String_Release(&key);
+        SE_Element_Release(&key);
         SE_String_Release(&filePath);
         LOGI("out of memory when alloc script %s\n", name);
         return NULL;
     }
+    SE_String_Release(&filePath);
     SE_Script_Init(script, data);
     SE_Free(data);
     SE_Script_Compile(script);
@@ -916,5 +928,16 @@ SE_Script* SE_ResourceManager_RunScript(SE_ResourceManager* resourceManager, con
     }
     SE_Script_Run(script);
     return script;
+}
+SE_MaterialData* SE_ResourceManager_GetSubMaterialData(SE_ResourceManager* resourceManager, int materialIndex, int subMaterialIndex)
+{
+    SE_MaterialManager* mm = &resourceManager->materialManager;
+    SE_Material* m = SE_MaterialManager_GetMaterial(mm, materialIndex);
+    if(m)
+    {
+        SE_MaterialData* md = SE_Material_GetSubMaterialData(m, subMaterialIndex);
+        return md;
+    }
+    return NULL;
 }
 

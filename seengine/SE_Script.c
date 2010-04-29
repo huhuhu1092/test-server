@@ -3,6 +3,7 @@
 #include "SE_Spatial.h"
 #include "SE_Log.h"
 #include "./cscript/acc.h"
+#include "./renderer/SE_Renderer.h"
 #include <dlfcn.h>
 typedef int (*MainPtr)(void*);
 /**
@@ -15,16 +16,46 @@ static const char* SEC_GetTextureName(void* runEnv)
 {
     return "DB.raw";
 }
-static void SEC_LOGI(const char* fmt, ...)
+static void SEC_LOGF(float f)
 {
-    va_list ap;
-    va_start(ap, fmt);
-    LOGVA(fmt, ap);
-    va_end(ap);
+    LOGI("%f\n", f);
+}
+static void SEC_LOGP(void* p)
+{
+    LOGI("%p\n", p);
+}
+static void SEC_BindTexture(void* runEnv, int target)
+{
+    SE_Script_RunEnv* currEnv = (SE_Script_RunEnv*)runEnv;
+    LOGI("spatial = %p\n", currEnv->spatial); 
+    SE_ASSERT(currEnv->spatial != NULL);
+    SE_Spatial* spatial = currEnv->spatial;
+    SE_ResourceManager* resourceManager = spatial->resourceManager;
+    SE_ASSERT(resourceManager != NULL);
+    SE_Mesh* mesh = currEnv->spatial->mesh;
+    if(spatial->spatialType == SE_GEOMETRY)
+    {
+        SE_MaterialData* md = NULL;
+        if(spatial->subMeshIndex != -1)
+        {
+            SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, spatial->subMeshIndex);
+            md = SE_ResourceManager_GetSubMaterialData(resourceManager, mesh->materialIndex, subMesh->subMaterialIndex);
+        }
+        else
+        {
+            md = SE_ResourceManager_GetMaterialData(resourceManager, mesh->materialIndex);
+        } 
+        if(md != NULL && !SE_String_IsEmpty(&md->texturename))
+        {
+            SE_Renderer_BindTexture(resourceManager, (enum SE_TEX_TARGET)target, SE_String_GetData(&md->texturename));
+        } 
+    } 
 }
 static SE_Script_GlobalEntry entryMap[] = {
     {"SEC_GetTextureName", (void *)&SEC_GetTextureName},
-    {"SEC_LOGI", (void*)&SEC_LOGI}
+    {"SEC_LOGF", (void*)&SEC_LOGF},
+    {"SEC_LOGP", (void*)&SEC_LOGP},
+    {"SEC_BindTexture", (void*)&SEC_BindTexture}
 };
 
 static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) 

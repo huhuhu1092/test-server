@@ -15,6 +15,10 @@ extern int SE_GetFileSize(FILE* fp);
 /** user need to free the data of this function return */
 extern void SE_ReadFileAll(FILE* fp, char** outData, int* outLen);
 extern void SE_ReadFileAllByName(const char* name, char** outData, int* outLen);
+/**
+ * this function is used to read csript file. cscript file has a special point, it need the last char of buffer must be '\0', so we alloc a buffer with file size plus 1.
+ * */
+extern void SE_ReadCScriptFile(const char* name, char** outData, int* outLen);
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/

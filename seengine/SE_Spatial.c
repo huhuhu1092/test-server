@@ -20,6 +20,7 @@ SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, cons
     SE_Vec3f_Init(1, 1, 1, &spatial->localScale);
     spatial->subMeshIndex = -1;
     spatial->mesh = mesh;
+    spatial->renderType = SE_RENDERABLE;
     spatial->resourceManager = resourceManager;
     SE_RenderState_Init(&spatial->renderState, resourceManager);
     return SE_VALID;

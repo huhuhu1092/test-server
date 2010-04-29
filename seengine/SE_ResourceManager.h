@@ -31,6 +31,7 @@ typedef struct SE_Material_tag
     SE_MaterialData* subMaterialArray;
     int subMaterialNum;
 } SE_Material;
+extern SE_MaterialData* SE_Material_GetSubMaterialData(SE_Material* m, int index);
 extern void SE_Material_Release(void* material);
 /*
  * SE_SubMesh dont release by yourself
@@ -188,6 +189,7 @@ extern SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resource
 extern SE_Result SE_ResourceManager_PutTextureID(SE_ResourceManager* resourceManager, const char* texName, SE_TextureID texID);
 extern SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager, const char* texName);
 extern SE_MaterialData* SE_ResourceManager_GetMaterialData(SE_ResourceManager* resourceManager, int index);
+extern SE_MaterialData* SE_ResourceManager_GetSubMaterialData(SE_ResourceManager* resourceManager, int materialIndex, int subMaterialIndex);
 extern SE_GeometryData* SE_ResourceManager_GetGeometryData(SE_ResourceManager* resourceManager, int index);
 extern SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* scriptManager, const char* name);
 extern SE_Script* SE_ResourceManager_RunScript(SE_ResourceManager* resourceManager, const char* name);

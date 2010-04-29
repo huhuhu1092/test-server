@@ -376,6 +376,7 @@ SE_Script.o: SE_HashMap.h SE_Element.h ./renderer/SE_TextureID.h
 SE_Script.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
 SE_Script.o: /usr/include/inttypes.h /usr/include/stdint.h
 SE_Script.o: /usr/include/bits/wchar.h SE_List.h SE_Log.h ./cscript/acc.h
+SE_Script.o: ./renderer/SE_Renderer.h SE_World.h SE_Camera.h
 SE_Script.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
 ./renderer/SE_TextureID.o: ./renderer/SE_TextureID.h SE_Common.h
 ./renderer/SE_TextureID.o: /usr/include/assert.h /usr/include/features.h

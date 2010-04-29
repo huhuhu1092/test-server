@@ -28,6 +28,18 @@ int SE_GetFileSize(FILE* fp)
 	return end;
 
 }
+static void readFile(char* out, int fileSize, FILE* fp)
+{
+    size_t lenLeft = fileSize;
+    char* p = out;
+    while(lenLeft > 0)
+    {
+        size_t readNum = fread(p, 1, lenLeft, fp);
+        lenLeft -= readNum;
+        p += readNum;
+    }
+
+}
 void SE_ReadFileAll(FILE* fp, char** outData, int* outLen)
 {
     *outData = NULL;
@@ -39,15 +51,7 @@ void SE_ReadFileAll(FILE* fp, char** outData, int* outLen)
         LOGE("out of memory when read file\n");
     }
     *outLen = fileSize;
-    size_t lenLeft = fileSize;
-    char* p = *outData;
-    while(lenLeft > 0)
-    {
-        size_t readNum = fread(p, 1, lenLeft, fp);
-        lenLeft -= readNum;
-        p += readNum;
-    }
-    
+    readFile(*outData, fileSize, fp); 
 }
 void SE_ReadFileAllByName(const char* name, char** outData, int* outLen)
 {
@@ -59,4 +63,22 @@ void SE_ReadFileAllByName(const char* name, char** outData, int* outLen)
     SE_ReadFileAll(fin, outData, outLen);
     fclose(fin);
 }
+void SE_ReadCScriptFile(const char* name, char** outData, int* outLen)
+{
+    *outData = NULL;
+    *outLen = 0;
+    FILE* fin = fopen(name, "rb");
+    if(!fin)
+        return;
+    int fileSize = SE_GetFileSize(fin);
+    *outData = (char*)SE_Malloc(fileSize + 1) ;
+    if(!(*outData))
+    {
+        LOGE("out of memory when read file\n");
+    }
+    *outLen = fileSize + 1;
+    readFile(*outData, fileSize, fin); 
+    outData[fileSize] = '\0';
+    fclose(fin);
 
+}

@@ -2,6 +2,7 @@
 SE_Result SE_World_Init(SE_World* world)
 {
     SE_Object_Clear(world, sizeof(SE_World));
+    SE_List_Init(&world->cameraList);
     return SE_VALID;
 }
 void SE_World_Release(void* world)

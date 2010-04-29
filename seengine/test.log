@@ -1,76 +1,96 @@
-==13878== Memcheck, a memory error detector.
-==13878== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
-==13878== Using LibVEX rev 1884, a library for dynamic binary translation.
-==13878== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
-==13878== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
-==13878== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
-==13878== For more details, rerun with: -v
-==13878== 
-==13878== My PID = 13878, parent PID = 18637.  Prog and args are:
-==13878==    ./test
-==13878==    home.ASE
-==13878==    home.cbf
-==13878== 
-==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
-==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
-==13878==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
-==13878==    by 0x495B06C: driDrawableInitVBlank (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x496552A: intelMakeCurrent (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x495BD8C: (within /usr/lib/dri/i965_dri.so)
-==13878==    by 0x407B19B: (within /usr/lib/libGL.so.1.2)
-==13878==    by 0x405915F: glXMakeContextCurrent (in /usr/lib/libGL.so.1.2)
-==13878==    by 0x4059482: glXMakeCurrent (in /usr/lib/libGL.so.1.2)
-==13878==    by 0x40BDFB5: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x80686C0: main (main.c:265)
-==13878==  Address 0xbed98ecc is on thread 1's stack
-==13878== 
-==13878== Mismatched free() / delete / delete []
-==13878==    at 0x402599A: operator delete(void*) (vg_replace_malloc.c:342)
-==13878==    by 0x8060206: acc::ACCscript::~ACCscript() (acc.c:6066)
-==13878==    by 0x8056B28: accDeleteScript (acc.c:6104)
-==13878==    by 0x8068657: runScript() (main.c:113)
-==13878==    by 0x8068717: main (main.c:272)
-==13878==  Address 0x7616730 is 0 bytes inside a block of size 296 alloc'd
-==13878==    at 0x402630E: operator new[](unsigned int) (vg_replace_malloc.c:268)
-==13878==    by 0x8056A6D: accScriptSource (acc.c:6131)
-==13878==    by 0x8068423: runScript() (main.c:73)
-==13878==    by 0x8068717: main (main.c:272)
-==13878== 
-==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
-==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
-==13878==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
-==13878==    by 0x495B18C: driWaitForVBlank (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x4981D71: intelSwapBuffers (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x495B9D5: (within /usr/lib/dri/i965_dri.so)
-==13878==    by 0x407B1D7: (within /usr/lib/libGL.so.1.2)
-==13878==    by 0x40589DA: glXSwapBuffers (in /usr/lib/libGL.so.1.2)
-==13878==    by 0x40B056E: glutSwapBuffers (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x8067FCA: display() (main.c:201)
-==13878==    by 0x40B9420: glutMainLoop (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x806871C: main (main.c:273)
-==13878==  Address 0xbed98f74 is on thread 1's stack
-==13878== 
-==13878== Syscall param ioctl(generic) points to uninitialised byte(s)
-==13878==    at 0x40007F2: (within /lib/ld-2.9.so)
-==13878==    by 0x4963B50: LOCK_HARDWARE (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x49618CF: intelCopyBuffer (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x4981DB3: intelSwapBuffers (in /usr/lib/dri/i965_dri.so)
-==13878==    by 0x495B9D5: (within /usr/lib/dri/i965_dri.so)
-==13878==    by 0x407B1D7: (within /usr/lib/libGL.so.1.2)
-==13878==    by 0x40589DA: glXSwapBuffers (in /usr/lib/libGL.so.1.2)
-==13878==    by 0x40B056E: glutSwapBuffers (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x8067FCA: display() (main.c:201)
-==13878==    by 0x40B9420: glutMainLoop (in /usr/lib/libglut.so.3.8.0)
-==13878==    by 0x806871C: main (main.c:273)
-==13878==  Address 0xbed98ea4 is on thread 1's stack
-==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
-==13878==    This could cause spurious value errors to appear.
-==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
-==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
-==13878==    This could cause spurious value errors to appear.
-==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
-==13878== Warning: noted but unhandled ioctl 0x6458 with no size/direction hints
-==13878==    This could cause spurious value errors to appear.
-==13878==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==13140== Memcheck, a memory error detector.
+==13140== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
+==13140== Using LibVEX rev 1884, a library for dynamic binary translation.
+==13140== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
+==13140== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
+==13140== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
+==13140== For more details, rerun with: -v
+==13140== 
+==13140== My PID = 13140, parent PID = 10930.  Prog and args are:
+==13140==    ./test
+==13140==    home.ASE
+==13140==    home.cbf
+==13140== 
+==13140== Syscall param ioctl(generic) points to uninitialised byte(s)
+==13140==    at 0x40007F2: (within /lib/ld-2.9.so)
+==13140==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
+==13140==    by 0x495B06C: driDrawableInitVBlank (in /usr/lib/dri/i965_dri.so)
+==13140==    by 0x496552A: intelMakeCurrent (in /usr/lib/dri/i965_dri.so)
+==13140==    by 0x495BD8C: (within /usr/lib/dri/i965_dri.so)
+==13140==    by 0x407B19B: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x405915F: glXMakeContextCurrent (in /usr/lib/libGL.so.1.2)
+==13140==    by 0x4059482: glXMakeCurrent (in /usr/lib/libGL.so.1.2)
+==13140==    by 0x40BDFB5: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x806839C: main (main.c:266)
+==13140==  Address 0xbee71eec is on thread 1's stack
+==13140== 
+==13140== Conditional jump or move depends on uninitialised value(s)
+==13140==    at 0x40276F7: strlen (mc_replace_strmem.c:242)
+==13140==    by 0x80569D1: accScriptSource (acc.c:6126)
+==13140==    by 0x8055049: SE_Script_Init (SE_Script.c:52)
+==13140==    by 0x8051FD1: SE_ResourceManager_GetScript (SE_ResourceManager.c:903)
+==13140==    by 0x80548D8: SE_RenderState_Activate (SE_RenderState.c:24)
+==13140==    by 0x8055D9A: SE_Renderer_DrawSpatial (SE_Renderer.c:130)
+==13140==    by 0x8055E51: SE_Renderer_DrawSpatial (SE_Renderer.c:151)
+==13140==    by 0x8055ED5: SE_Renderer_DrawWorld (SE_Renderer.c:36)
+==13140==    by 0x8067EFB: display() (main.c:193)
+==13140==    by 0x80683CB: main (main.c:278)
+==13140== 
+==13140== Conditional jump or move depends on uninitialised value(s)
+==13140==    at 0x40276F7: strlen (mc_replace_strmem.c:242)
+==13140==    by 0x8056A69: accScriptSource (acc.c:6142)
+==13140==    by 0x8055049: SE_Script_Init (SE_Script.c:52)
+==13140==    by 0x8051FD1: SE_ResourceManager_GetScript (SE_ResourceManager.c:903)
+==13140==    by 0x80548D8: SE_RenderState_Activate (SE_RenderState.c:24)
+==13140==    by 0x8055D9A: SE_Renderer_DrawSpatial (SE_Renderer.c:130)
+==13140==    by 0x8055E51: SE_Renderer_DrawSpatial (SE_Renderer.c:151)
+==13140==    by 0x8055ED5: SE_Renderer_DrawWorld (SE_Renderer.c:36)
+==13140==    by 0x8067EFB: display() (main.c:193)
+==13140==    by 0x80683CB: main (main.c:278)
+==13140== 
+==13140== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 80 from 5)
+==13140== malloc/free: in use at exit: 7,174,948 bytes in 1,989 blocks.
+==13140== malloc/free: 3,594 allocs, 1,605 frees, 71,856,404 bytes allocated.
+==13140== For counts of detected errors, rerun with: -v
+==13140== Use --track-origins=yes to see where uninitialised values come from
+==13140== searching for pointers to 1,989 not-freed blocks.
+==13140== checked 2,383,132 bytes.
+==13140== 
+==13140== 
+==13140== 28 bytes in 1 blocks are definitely lost in loss record 20 of 90
+==13140==    at 0x4026FDE: malloc (vg_replace_malloc.c:207)
+==13140==    by 0x407DA45: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x405A7B5: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
+==13140==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x806839C: main (main.c:266)
+==13140== 
+==13140== 
+==13140== 2,156 (76 direct, 2,080 indirect) bytes in 1 blocks are definitely lost in loss record 66 of 90
+==13140==    at 0x4025092: calloc (vg_replace_malloc.c:397)
+==13140==    by 0x49FDF64: _mesa_calloc (in /usr/lib/dri/i965_dri.so)
+==13140==    by 0x4958EAD: driCreateConfigs (in /usr/lib/dri/i965_dri.so)
+==13140==    by 0x496E783: (within /usr/lib/dri/i965_dri.so)
+==13140==    by 0x496F15A: (within /usr/lib/dri/i965_dri.so)
+==13140==    by 0x495C24E: (within /usr/lib/dri/i965_dri.so)
+==13140==    by 0x407B9F1: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x405A90A: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
+==13140==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
+==13140==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
+==13140==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==13140== 
+==13140== LEAK SUMMARY:
+==13140==    definitely lost: 104 bytes in 2 blocks.
+==13140==    indirectly lost: 2,080 bytes in 10 blocks.
+==13140==      possibly lost: 0 bytes in 0 blocks.
+==13140==    still reachable: 7,172,764 bytes in 1,977 blocks.
+==13140==         suppressed: 0 bytes in 0 blocks.
+==13140== Reachable blocks (those to which a pointer was found) are not shown.
+==13140== To see them, rerun with: --leak-check=full --show-reachable=yes
