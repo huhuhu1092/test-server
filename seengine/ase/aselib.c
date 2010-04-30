@@ -118,15 +118,16 @@ static void getMeshes(ASE_SceneObject* mSceneObject, std::list<SE_Mesh*>& meshLi
         SE_Object_Clear(semesh, sizeof(SE_Mesh));
         semesh->geomDataIndex = i;
         semesh->materialIndex = go->materialref;
-        semesh->defaultColor.x = go->defaultColor[0];
-        semesh->defaultColor.y = go->defaultColor[1];
-        semesh->defaultColor.z = go->defaultColor[2];
+        semesh->wireframeColor.x = go->wireframeColor[0];
+        semesh->wireframeColor.y = go->wireframeColor[1];
+        semesh->wireframeColor.z = go->wireframeColor[2];
         COPY_MESHP(rotateAxis);
         COPY_MESHP(scale);
         COPY_MESHP(scaleAxis);
         COPY_MESHP(translate);
         semesh->rotateAngle = go->rotateAngle;
         SE_String_Init(&semesh->name, go->name);
+        LOGI("... numFaceGroup = %d\n", mesh->numFaceGroup);
         if(mesh->numFaceGroup > 0)
         {
             semesh->subMeshArray = (SE_SubMesh*)SE_Malloc(sizeof(SE_SubMesh) * mesh->numFaceGroup);
@@ -346,9 +347,9 @@ void ASE_Loader::Write(const char* filename)
         fwrite(&MESH_ID, sizeof(short), 1, fout);
         fwrite(&smesh->geomDataIndex, sizeof(int), 1, fout);
         fwrite(&smesh->materialIndex, sizeof(int), 1, fout);
-        fwrite(&smesh->defaultColor.x, sizeof(float), 1, fout);
-        fwrite(&smesh->defaultColor.y, sizeof(float), 1, fout);
-        fwrite(&smesh->defaultColor.z, sizeof(float), 1, fout);
+        fwrite(&smesh->wireframeColor.x, sizeof(float), 1, fout);
+        fwrite(&smesh->wireframeColor.y, sizeof(float), 1, fout);
+        fwrite(&smesh->wireframeColor.z, sizeof(float), 1, fout);
 
         fwrite(&smesh->rotateAxis.x, sizeof(float), 1, fout);
         fwrite(&smesh->rotateAxis.y, sizeof(float), 1, fout);
@@ -371,6 +372,7 @@ void ASE_Loader::Write(const char* filename)
         fwrite(&smesh->subMeshNum, sizeof(int), 1, fout);
         if(smesh->subMeshNum > 0)
         {
+            LOGI("...submesh num = %d\n", smesh->subMeshNum);
             int i;
             for(i = 0 ; i < smesh->subMeshNum ; i++)
             {
@@ -980,9 +982,9 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
         float g = atof(s_token);
         ASE_GetToken(false);
         float b = atof(s_token);
-        mCurrGeomObject->defaultColor[0]= r;
-        mCurrGeomObject->defaultColor[1]= g;
-        mCurrGeomObject->defaultColor[2]= b;
+        mCurrGeomObject->wireframeColor[0]= r;
+        mCurrGeomObject->wireframeColor[1]= g;
+        mCurrGeomObject->wireframeColor[2]= b;
     }
 
 	// skip unused info

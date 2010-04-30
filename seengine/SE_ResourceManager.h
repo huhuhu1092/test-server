@@ -51,7 +51,7 @@ typedef struct SE_Mesh_tag
 {
     int geomDataIndex;
     int materialIndex;
-    SE_Vector3f defaultColor;
+    SE_Vector3f wireframeColor;
     SE_SubMesh* subMeshArray;
     int subMeshNum;
     SE_Vector3f rotateAxis;

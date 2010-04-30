@@ -224,7 +224,7 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
             x = readFloat(data, &startPos);
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
-            SE_Vec3f_Init(x, y, z, &mesh->defaultColor);
+            SE_Vec3f_Init(x, y, z, &mesh->wireframeColor);
             x = readFloat(data, &startPos);
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
@@ -355,6 +355,26 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
     }
     memcpy(imageData->data, data + startPos, pixelDataLen);
     SE_Free(data);
+    /// flip pixmap
+    data = imageData->data;
+    imageData->data = (char*)SE_Malloc(pixelDataLen);
+    if(imageData->data)
+    {
+        int i,j;
+        int width = imageData->width;
+        int height = imageData->height;
+        int rowbytes = imageData->bytesPerRow;
+        for(i = 0 ; i < height ; i++)
+        {
+            memcpy(imageData->data + i * rowbytes, data + (height - 1 - i) * rowbytes, rowbytes);
+        }
+        SE_Free(data);
+    }
+    else
+    {
+        imageData->data = data;
+    }
+    //end
     return SE_VALID;
     
 }

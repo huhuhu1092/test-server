@@ -11,7 +11,6 @@
 #include "cscript/acc.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <stdarg.h>
@@ -20,109 +19,43 @@
 #include <stdlib.h>
 #include <string.h>
 #include "./renderer/SE_Renderer.h"
+#include <SDL.h>
 
-int window;
+/* screen width, height, and bit depth */
+#define SCREEN_WIDTH  640
+#define SCREEN_HEIGHT 400
+#define SCREEN_BPP     16
+
+/* Set up some booleans */
+#define TRUE  1
+#define FALSE 0
+
+/* This is our SDL surface */
+SDL_Surface *surface;
 static SE_World seWorld;
-typedef void (*ScriptPtr)();
-void run(ScriptPtr scriptFn)
+void Quit( int returnCode )
 {
-    (*scriptFn)();
-}
-int globalVar;
+    /* clean up the window */
+    SDL_Quit( );
 
-void op_int(int a) {
-    printf("op_int(%d)\n", a);
-}
-
-void op_float12(float a, float b, float c, float d,
-                float e, float f, float g, float h,
-                float i, float j, float k, float l) {
-    printf("op_float12(%g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g)\n",
-           a, b, c, d, e, f, g, h, i, j, k, l);
-}
-
-const char* text = "void op_int(int a);\n"
-    "void op_float12(float a, float b, float c, float d,\n"
-    "           float e, float f, float g, float h,\n"
-    "           float i, float j, float k, float l);\n"
-    "void script() {\n"
-    "  globalVar += 3;\n"
-    "  op_int(123);\n"
-    "  op_float12(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0);\n"
-    "}\n";
-
-ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) {
-    if (strcmp("op_int", name) == 0) {
-        return (ACCvoid*) op_int;
-    }
-    if (strcmp("op_float12", name) == 0) {
-        return (ACCvoid*) op_float12;
-    }
-    if (strcmp("globalVar", name) == 0) {
-        return (ACCvoid*) &globalVar;
-    }
-    return NULL;
-}
-int runScript()
-{
-    ACCscript* script = accCreateScript();
-
-    accRegisterSymbolCallback(script, symbolLookup, NULL);
-
-    const ACCchar* scriptSource[] = {text};
-    accScriptSource(script, 1, scriptSource, NULL);
-
-    accCompileScript(script);
-    int result = accGetError(script);
-    ScriptPtr scriptPointer = 0;
-    if (result != 0) {
-        char buf[1024];
-        accGetScriptInfoLog(script, sizeof(buf), NULL, buf);
-        fprintf(stderr, "%s", buf);
-        goto exit;
-    }
-
-    {
-        ACCsizei numPragmaStrings;
-        accGetPragmas(script, &numPragmaStrings, 0, NULL);
-        if (numPragmaStrings) {
-            char** strings = new char*[numPragmaStrings];
-            accGetPragmas(script, NULL, numPragmaStrings, strings);
-            for(ACCsizei i = 0; i < numPragmaStrings; i += 2) {
-                fprintf(stderr, "#pragma %s(%s)\n", strings[i], strings[i+1]);
-            }
-            delete[] strings;
-        }
-    }
-
-    accGetScriptLabel(script, "script", (ACCvoid**) & scriptPointer);
-
-    result = accGetError(script);
-    if (result != ACC_NO_ERROR) {
-        fprintf(stderr, "Could not find script: %d\n", result);
-    } else {
-        fprintf(stderr, "Executing script:\n");
-        globalVar = 17;
-        run(scriptPointer);
-        fprintf(stderr, "After script globalVar = %d\n", globalVar);
-    }
-
-
-exit:
-
-    accDeleteScript(script);
-
-    return result;
-    
+    exit( returnCode );
 }
 
 int init(int argc, char** argv)
 {
     if(argc < 3)
         return 1;
-    //ASE_Loader loader(argv[1], 0, 0);
-    //loader.Load();
-    //loader.Write(argv[2]);
+    SE_String outPath;
+    SE_String inPath;
+    SE_Object_Clear(&inPath, sizeof(SE_String));
+    SE_Object_Clear(&outPath, sizeof(SE_String));
+    SE_String_Concate(&outPath, "%s/%s", "/home/luwei/model/jme/home/newhome3", argv[2]);
+    SE_String_Concate(&inPath, "%s/%s", "/home/luwei/model/jme/home/newhome3", argv[1]);
+    ASE_Loader loader(SE_String_GetData(&inPath), 0, 0);
+    loader.Load();
+    loader.Write(SE_String_GetData(&outPath));
+    SE_String_Release(&outPath);
+    SE_String_Release(&inPath);
     SE_World_Init(&seWorld, "world_init.rs");
     SE_ResourceManager* resourceManager = SE_World_GetResourceManager(&seWorld);
     SE_ResourceManager_InitFromFile(resourceManager, "/home/luwei/model/jme/home/newhome3", argv[2]);
@@ -134,6 +67,7 @@ int init(int argc, char** argv)
     int i;
     SE_List nameList;
     SE_List_Init(&nameList);
+    int geometryNum = 0;
     for(i = 0 ; i < meshCount; i++)
     {
         SE_Mesh* mesh = SE_ResourceManager_GetMesh(resourceManager, i);
@@ -144,6 +78,7 @@ int init(int argc, char** argv)
         if(mesh->subMeshNum == 0)
         {
             SE_Spatial_Init(spatial, SE_GEOMETRY, SE_String_GetData(&strName), resourceManager, mesh);
+            geometryNum++;
         }
         else
         {
@@ -174,6 +109,7 @@ int init(int argc, char** argv)
                 SE_Texture* tex = SE_ResourceManager_LoadTexture(resourceManager, SE_String_GetData(&m->texturename));
         }
     }
+    LOGI("... geometry with no sub mesh num = %d\n", geometryNum);
     SE_Spatial_UpdateRenderState(root);
     /*
     int nameCount = SE_List_Size(&nameList);
@@ -187,26 +123,7 @@ int init(int argc, char** argv)
     SE_List_Release(&nameList);
     return 0;
 }
-void display ( void )   // Create The Display Function
-{
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SE_Renderer_DrawWorld(&seWorld);
-    /*
-    //debug
-    glBegin(GL_TRIANGLES);
-    glVertex3f(1, 2, -5);
-    glVertex3f(0, 2, -5);
-    glVertex3f(0, 0.8, -5);
-    glEnd();
-    //end
-    */
-  // Swap The Buffers To Not Be Left With A Clear Screen
-    glutSwapBuffers ( );
-
-}
-
-void reshape ( int w, int h )   // Create The Reshape Function (the viewport)
+int resizeWindow( int w, int h )
 {
     if(w <= 0)
         w = 1;
@@ -226,65 +143,212 @@ void reshape ( int w, int h )   // Create The Reshape Function (the viewport)
     glFrustum(nearrect.left, nearrect.right, nearrect.top, nearrect.bottom, 1.0f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity(); 
-}
 
-void keyboard ( unsigned char key, int x, int y )  // Create Keyboard Function
+}
+void handleKeyPress( SDL_keysym *keysym )
 {
-  switch ( key ) {
-    case 27:        // When Escape Is Pressed...
-      glutDestroyWindow(window);
-      exit( 0 );   // Exit The Program
-      break;        // Ready For Next Case
-    case 'a':
-      break;
-    case 'w':
-      break;
-    case 's':
-      break;
-    default:        // Now Wrap It Up
-      break;
-  }
+    switch ( keysym->sym )
+	{
+	case SDLK_ESCAPE:
+	    /* ESC key was pressed */
+	    Quit( 0 );
+	    break;
+	case SDLK_F1:
+	    /* F1 key was pressed
+	     * this toggles fullscreen mode
+	     */
+	    SDL_WM_ToggleFullScreen( surface );
+	    break;
+	case SDLK_RIGHT:
+	    /* Right arrow key was pressed
+	     * this effectively turns the camera right, but does it by
+	     * rotating the scene left
+	     */
+	    break;
+	case SDLK_LEFT:
+	    /* Left arrow key was pressed
+	     * this effectively turns the camera left, but does it by
+	     * rotating the scene right
+	     */
+	    break;
+	case SDLK_UP:
+	    break;
+	case SDLK_DOWN:
+	    break;
+	default:
+	    break;
+	}
+
+    return;
 }
 
-void arrow_keys ( int a_keys, int x, int y )  // Create Special Function (required for arrow keys)
+int drawScene ()   // Create The Display Function
 {
-  switch ( a_keys ) {
-    case GLUT_KEY_UP:     // When Up Arrow Is Pressed...
-      break;
-    case GLUT_KEY_DOWN:  
-      break;
-    case GLUT_KEY_LEFT:
-      break;
-    case GLUT_KEY_RIGHT:
-      break;
-    default:
-      break;
-  }
+    static GLint T0     = 0;
+    static GLint Frames = 0;
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SE_Renderer_DrawWorld(&seWorld);
+    /*
+    //debug
+    glBegin(GL_TRIANGLES);
+    glVertex3f(1, 2, -5);
+    glVertex3f(0, 2, -5);
+    glVertex3f(0, 0.8, -5);
+    glEnd();
+    //end
+    */
+  // Swap The Buffers To Not Be Left With A Clear Screen
+        /* Draw it to the screen */
+    SDL_GL_SwapBuffers( );
+
+    /* Gather our frames per second */
+    Frames++;
+    {
+        GLint t = SDL_GetTicks();
+        if (t - T0 >= 5000) 
+        {
+            GLfloat seconds = (t - T0) / 1000.0;
+            GLfloat fps = Frames / seconds;
+            printf("%d frames in %g seconds = %g FPS\n", Frames, seconds, fps);
+            T0 = t;
+            Frames = 0;
+        }
+    }
+
+    return 1;
+
+
 }
-int main ( int argc, char** argv )
+
+int main( int argc, char **argv )
 {
-  glutInit            ( &argc, argv );
-  glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH );
-  glutInitWindowSize  ( 640, 480 );
-  window = glutCreateWindow( "NeHe's OpenGL Framework" ); 
+    /* Flags to pass to SDL_SetVideoMode */
+    int videoFlags;
+    /* main loop variable */
+    int done = FALSE;
+    /* used to collect events */
+    SDL_Event event;
+    /* this holds some info about our display */
+    const SDL_VideoInfo *videoInfo;
+    /* whether or not the window is active */
+    int isActive = TRUE;
 
-  glutIdleFunc(display);
-  glutDisplayFunc     ( display );  // Matching Earlier Functions To Their Counterparts
-  glutReshapeFunc     ( reshape );
-  glutKeyboardFunc    ( keyboard );
-  glutSpecialFunc     ( arrow_keys );
-  
-  init(argc, argv);
-  /*
-  int count = 100000;
-  reshape(640, 480);
-  while((count--) > 0)
-  {
-      display();
-  }
-  */
-  glutMainLoop        ( );          // Initialize The Main Loop
-  SE_World_Release(&seWorld);
-  return 0;
+    /* initialize SDL */
+    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+	{
+	    fprintf( stderr, "Video initialization failed: %s\n",
+		     SDL_GetError( ) );
+	    Quit( 1 );
+	}
+
+    /* Fetch the video info */
+    videoInfo = SDL_GetVideoInfo( );
+
+    if ( !videoInfo )
+	{
+	    fprintf( stderr, "Video query failed: %s\n",
+		     SDL_GetError( ) );
+	    Quit( 1 );
+	}
+
+    /* the flags to pass to SDL_SetVideoMode */
+    videoFlags  = SDL_OPENGL;          /* Enable OpenGL in SDL */
+    videoFlags |= SDL_GL_DOUBLEBUFFER; /* Enable double buffering */
+    videoFlags |= SDL_HWPALETTE;       /* Store the palette in hardware */
+    videoFlags |= SDL_RESIZABLE;       /* Enable window resizing */
+
+    /* This checks to see if surfaces can be stored in memory */
+    if ( videoInfo->hw_available )
+	videoFlags |= SDL_HWSURFACE;
+    else
+	videoFlags |= SDL_SWSURFACE;
+
+    /* This checks if hardware blits can be done */
+    if ( videoInfo->blit_hw )
+	videoFlags |= SDL_HWACCEL;
+
+    /* Sets up OpenGL double buffering */
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+    /* get a SDL surface */
+    surface = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP,
+				videoFlags );
+
+    /* Verify there is a surface */
+    if ( !surface )
+	{
+	    fprintf( stderr,  "Video mode set failed: %s\n", SDL_GetError( ) );
+	    Quit( 1 );
+	}
+
+    /* Enable key repeat */
+    if ( ( SDL_EnableKeyRepeat( 100, SDL_DEFAULT_REPEAT_INTERVAL ) ) )
+	{
+	    fprintf( stderr, "Setting keyboard repeat failed: %s\n",
+		     SDL_GetError( ) );
+	    Quit( 1 );
+	}
+
+    /* initialize OpenGL */
+    init(argc, argv );
+
+    /* resize the initial window */
+    resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+    /* wait for events */
+    while ( !done )
+	{
+	    /* handle the events in the queue */
+
+	    while ( SDL_PollEvent( &event ) )
+		{
+		    switch( event.type )
+			{
+			case SDL_ACTIVEEVENT:
+			    /* Something's happend with our focus
+			     * If we lost focus or we are iconified, we
+			     * shouldn't draw the screen
+			     */
+			    if ( event.active.gain == 0 )
+				isActive = FALSE;
+			    else
+				isActive = TRUE;
+			    break;			    
+			case SDL_VIDEORESIZE:
+			    /* handle resize event */
+			    surface = SDL_SetVideoMode( event.resize.w,
+							event.resize.h,
+							16, videoFlags );
+			    if ( !surface )
+				{
+				    fprintf( stderr, "Could not get a surface after resize: %s\n", SDL_GetError( ) );
+				    Quit( 1 );
+				}
+			    resizeWindow( event.resize.w, event.resize.h );
+			    break;
+			case SDL_KEYDOWN:
+			    /* handle key presses */
+			    handleKeyPress( &event.key.keysym );
+			    break;
+			case SDL_QUIT:
+			    /* handle quit requests */
+			    done = TRUE;
+			    break;
+			default:
+			    break;
+			}
+		}
+
+	    /* draw the scene */
+	    if ( isActive )
+		    drawScene( );
+	}
+
+    /* clean ourselves up and exit */
+    Quit( 0 );
+
+    /* Should never get here */
+    return( 0 );
 }
-

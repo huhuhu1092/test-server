@@ -28,9 +28,9 @@ SRCS = SE_Vector.c \
 		   main.o
 
 OBJ_FILE = $(SRCS:.c=.o)
-OUTPUT_NAME = test
-INCLUDE_PATH = -I./ -I../ -I/usr/include
-INPUT_LIB = -L/usr/lib -lm -lGL -lglut
+OUTPUT_NAME = seapp
+INCLUDE_PATH = -I./ -I../ -I/usr/include -I/usr/include/SDL
+INPUT_LIB = -L/usr/lib -lm -lGL `sdl-config --libs`
 CFLAGS = -g $(INCLUDE_PATH)
 all: $(OBJ_FILE) depend
 	$(CC) $(INPUT_LIB) $(OBJ_FILE) -o $(OUTPUT_NAME)

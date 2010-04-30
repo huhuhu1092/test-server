@@ -1,0 +1,37 @@
+CC = g++
+RM = rm -f
+SRCS = test.c
+
+OBJ_FILE = $(SRCS:.c=.o)
+OUTPUT_NAME = test
+INCLUDE_PATH = -I./ -I../ -I/usr/include 
+INPUT_LIB = -L/usr/lib -lm -lGL -lglut
+CFLAGS = -g $(INCLUDE_PATH)
+all: $(OBJ_FILE) depend
+	$(CC) $(INPUT_LIB) $(OBJ_FILE) -o $(OUTPUT_NAME)
+depend: 
+	makedepend -- $(CFLAGS) -- $(SRCS)
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@ 
+clean:
+	$(RM) $(OBJ_FILE) $(OUTPUT_NAME)
+# DO NOT DELETE
+
+test.o: /usr/include/GL/gl.h /usr/include/GL/glext.h /usr/include/inttypes.h
+test.o: /usr/include/features.h /usr/include/sys/cdefs.h
+test.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+test.o: /usr/include/gnu/stubs-32.h /usr/include/stdint.h
+test.o: /usr/include/bits/wchar.h /usr/include/GL/glu.h
+test.o: /usr/include/GL/glut.h /usr/include/GL/freeglut_std.h
+test.o: /usr/include/stdio.h /usr/include/bits/types.h
+test.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+test.o: /usr/include/_G_config.h /usr/include/wchar.h
+test.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+test.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+test.o: /usr/include/bits/confname.h /usr/include/getopt.h
+test.o: /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h
+test.o: /usr/include/endian.h /usr/include/bits/endian.h
+test.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+test.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+test.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+test.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h

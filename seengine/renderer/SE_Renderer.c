@@ -74,10 +74,7 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
         SE_Free(texVertexArray);
     }
-    else
-    {
-        glColor4f(mesh->defaultColor.x, mesh->defaultColor.y, mesh->defaultColor.z, 1.0f);
-    }
+    glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
     LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
@@ -98,10 +95,10 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
         vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[2]];
     }
     glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    SE_Free(vertexArray);
+    SE_Vector2f* texVertexArray = NULL;
     if(gd->texVertexArray)
     {
-        SE_Vector2f* texVertexArray = (SE_Vector2f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector2f));
+        texVertexArray = (SE_Vector2f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector2f));
         int i;
         int k = 0 ; 
         for(i = 0 ; i < gd->faceNum ; i++)
@@ -117,14 +114,16 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
             k++;
         }
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
-        SE_Free(texVertexArray);
     }
-    else
-    {
-        glColor4f(mesh->defaultColor.x, mesh->defaultColor.y, mesh->defaultColor.z, 1.0f);
-    }
+    glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
     LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    /*
+     * the Free must do after glDrawArrarys else it will make draw error
+     * */
+    SE_Free(vertexArray);
+    if(texVertexArray)
+        SE_Free(texVertexArray);
 }
 void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
 {
@@ -148,11 +147,11 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
         if(spatial->renderType != SE_RENDERABLE)
             return;
         SE_List* children = spatial->children;
-        int count = SE_List_Size(children);
-        int i;
-        for(i = 0 ; i < count ; i++)
+        SE_ListIterator li;
+        SE_ListIterator_Init(&li, children);
+        SE_Element e;
+        while(SE_ListIterator_Next(&li, &e))
         {
-            SE_Element e = SE_List_GetAt(children, i);
             SE_Spatial* sc = (SE_Spatial*)e.dp.data;
             SE_Renderer_DrawSpatial(sc);
         }

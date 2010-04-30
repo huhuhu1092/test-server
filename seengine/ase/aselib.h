@@ -67,7 +67,7 @@ struct ASE_GeometryObject
     Vector3 scaleAxis;
     float rotateAngle;
     Vector3 translate;
-    Vector3 defaultColor;
+    Vector3 wireframeColor;
     ASE_GeometryObject()
     {
         memset(name, 0, 256);
@@ -78,7 +78,7 @@ struct ASE_GeometryObject
         rotateAngle = 0;
         translate[0] = translate[1] = translate[2] = 0;
         materialref = -1;
-        defaultColor[0] = defaultColor[1] = defaultColor[2] = 0;
+        wireframeColor[0] = wireframeColor[1] = wireframeColor[2] = 0;
     }
 };
 struct ASE_MaterialData
