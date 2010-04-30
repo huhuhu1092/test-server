@@ -79,20 +79,28 @@ void ASE_Loader::Load()
 static void writeString(const char* str, FILE* fout)
 {
     int len = strlen(str);
-    char buf[256];
-    char* p = buf;
-    memset(buf, 0, 256);
-    while(*str != '\0')
+    if(len > 0)
     {
-        *p++ = *str++;
+        char buf[256];
+        char* p = buf;
+        memset(buf, 0, 256);
+        while(*str != '\0')
+        {
+            *p++ = *str++;
+            if(*(p - 1) == '.')
+                break;
+        }
         if(*(p - 1) == '.')
-            break;
+            strcpy(p, "raw");
+        LOGI("### string = %s ####\n", buf);
+        len = strlen(buf);
+        fwrite(&len, sizeof(int), 1, fout);
+        fwrite(buf, 1, len, fout);
     }
-    strcpy(p, "raw");
-    LOGI("### string = %s ####\n", buf);
-    len = strlen(buf);
-    fwrite(&len, sizeof(int), 1, fout);
-    fwrite(buf, 1, len, fout);
+    else
+    {
+        fwrite(&len, sizeof(int), 1, fout);
+    }
 }
 static void getMeshes(ASE_SceneObject* mSceneObject, std::list<SE_Mesh*>& meshList)
 {

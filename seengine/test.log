@@ -1,96 +1,72 @@
-==13140== Memcheck, a memory error detector.
-==13140== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
-==13140== Using LibVEX rev 1884, a library for dynamic binary translation.
-==13140== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
-==13140== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
-==13140== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
-==13140== For more details, rerun with: -v
-==13140== 
-==13140== My PID = 13140, parent PID = 10930.  Prog and args are:
-==13140==    ./test
-==13140==    home.ASE
-==13140==    home.cbf
-==13140== 
-==13140== Syscall param ioctl(generic) points to uninitialised byte(s)
-==13140==    at 0x40007F2: (within /lib/ld-2.9.so)
-==13140==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
-==13140==    by 0x495B06C: driDrawableInitVBlank (in /usr/lib/dri/i965_dri.so)
-==13140==    by 0x496552A: intelMakeCurrent (in /usr/lib/dri/i965_dri.so)
-==13140==    by 0x495BD8C: (within /usr/lib/dri/i965_dri.so)
-==13140==    by 0x407B19B: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x405915F: glXMakeContextCurrent (in /usr/lib/libGL.so.1.2)
-==13140==    by 0x4059482: glXMakeCurrent (in /usr/lib/libGL.so.1.2)
-==13140==    by 0x40BDFB5: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x806839C: main (main.c:266)
-==13140==  Address 0xbee71eec is on thread 1's stack
-==13140== 
-==13140== Conditional jump or move depends on uninitialised value(s)
-==13140==    at 0x40276F7: strlen (mc_replace_strmem.c:242)
-==13140==    by 0x80569D1: accScriptSource (acc.c:6126)
-==13140==    by 0x8055049: SE_Script_Init (SE_Script.c:52)
-==13140==    by 0x8051FD1: SE_ResourceManager_GetScript (SE_ResourceManager.c:903)
-==13140==    by 0x80548D8: SE_RenderState_Activate (SE_RenderState.c:24)
-==13140==    by 0x8055D9A: SE_Renderer_DrawSpatial (SE_Renderer.c:130)
-==13140==    by 0x8055E51: SE_Renderer_DrawSpatial (SE_Renderer.c:151)
-==13140==    by 0x8055ED5: SE_Renderer_DrawWorld (SE_Renderer.c:36)
-==13140==    by 0x8067EFB: display() (main.c:193)
-==13140==    by 0x80683CB: main (main.c:278)
-==13140== 
-==13140== Conditional jump or move depends on uninitialised value(s)
-==13140==    at 0x40276F7: strlen (mc_replace_strmem.c:242)
-==13140==    by 0x8056A69: accScriptSource (acc.c:6142)
-==13140==    by 0x8055049: SE_Script_Init (SE_Script.c:52)
-==13140==    by 0x8051FD1: SE_ResourceManager_GetScript (SE_ResourceManager.c:903)
-==13140==    by 0x80548D8: SE_RenderState_Activate (SE_RenderState.c:24)
-==13140==    by 0x8055D9A: SE_Renderer_DrawSpatial (SE_Renderer.c:130)
-==13140==    by 0x8055E51: SE_Renderer_DrawSpatial (SE_Renderer.c:151)
-==13140==    by 0x8055ED5: SE_Renderer_DrawWorld (SE_Renderer.c:36)
-==13140==    by 0x8067EFB: display() (main.c:193)
-==13140==    by 0x80683CB: main (main.c:278)
-==13140== 
-==13140== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 80 from 5)
-==13140== malloc/free: in use at exit: 7,174,948 bytes in 1,989 blocks.
-==13140== malloc/free: 3,594 allocs, 1,605 frees, 71,856,404 bytes allocated.
-==13140== For counts of detected errors, rerun with: -v
-==13140== Use --track-origins=yes to see where uninitialised values come from
-==13140== searching for pointers to 1,989 not-freed blocks.
-==13140== checked 2,383,132 bytes.
-==13140== 
-==13140== 
-==13140== 28 bytes in 1 blocks are definitely lost in loss record 20 of 90
-==13140==    at 0x4026FDE: malloc (vg_replace_malloc.c:207)
-==13140==    by 0x407DA45: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x405A7B5: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
-==13140==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x806839C: main (main.c:266)
-==13140== 
-==13140== 
-==13140== 2,156 (76 direct, 2,080 indirect) bytes in 1 blocks are definitely lost in loss record 66 of 90
-==13140==    at 0x4025092: calloc (vg_replace_malloc.c:397)
-==13140==    by 0x49FDF64: _mesa_calloc (in /usr/lib/dri/i965_dri.so)
-==13140==    by 0x4958EAD: driCreateConfigs (in /usr/lib/dri/i965_dri.so)
-==13140==    by 0x496E783: (within /usr/lib/dri/i965_dri.so)
-==13140==    by 0x496F15A: (within /usr/lib/dri/i965_dri.so)
-==13140==    by 0x495C24E: (within /usr/lib/dri/i965_dri.so)
-==13140==    by 0x407B9F1: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x405A90A: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
-==13140==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
-==13140==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
-==13140==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
-==13140== 
-==13140== LEAK SUMMARY:
-==13140==    definitely lost: 104 bytes in 2 blocks.
-==13140==    indirectly lost: 2,080 bytes in 10 blocks.
-==13140==      possibly lost: 0 bytes in 0 blocks.
-==13140==    still reachable: 7,172,764 bytes in 1,977 blocks.
-==13140==         suppressed: 0 bytes in 0 blocks.
-==13140== Reachable blocks (those to which a pointer was found) are not shown.
-==13140== To see them, rerun with: --leak-check=full --show-reachable=yes
+==12333== Memcheck, a memory error detector.
+==12333== Copyright (C) 2002-2008, and GNU GPL'd, by Julian Seward et al.
+==12333== Using LibVEX rev 1884, a library for dynamic binary translation.
+==12333== Copyright (C) 2004-2008, and GNU GPL'd, by OpenWorks LLP.
+==12333== Using valgrind-3.4.1-Debian, a dynamic binary instrumentation framework.
+==12333== Copyright (C) 2000-2008, and GNU GPL'd, by Julian Seward et al.
+==12333== For more details, rerun with: -v
+==12333== 
+==12333== My PID = 12333, parent PID = 3657.  Prog and args are:
+==12333==    ./test
+==12333==    home.ASE
+==12333==    home.cbf
+==12333== 
+==12333== Syscall param ioctl(generic) points to uninitialised byte(s)
+==12333==    at 0x40007F2: (within /lib/ld-2.9.so)
+==12333==    by 0x495AF6C: (within /usr/lib/dri/i965_dri.so)
+==12333==    by 0x495B06C: driDrawableInitVBlank (in /usr/lib/dri/i965_dri.so)
+==12333==    by 0x496552A: intelMakeCurrent (in /usr/lib/dri/i965_dri.so)
+==12333==    by 0x495BD8C: (within /usr/lib/dri/i965_dri.so)
+==12333==    by 0x407B19B: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x405915F: glXMakeContextCurrent (in /usr/lib/libGL.so.1.2)
+==12333==    by 0x4059482: glXMakeCurrent (in /usr/lib/libGL.so.1.2)
+==12333==    by 0x40BDFB5: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x806872C: main (main.c:269)
+==12333==  Address 0xbeef0eec is on thread 1's stack
+==12333== 
+==12333== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 80 from 5)
+==12333== malloc/free: in use at exit: 62,364,438 bytes in 2,825 blocks.
+==12333== malloc/free: 229,838 allocs, 227,013 frees, 466,942,364 bytes allocated.
+==12333== For counts of detected errors, rerun with: -v
+==12333== Use --track-origins=yes to see where uninitialised values come from
+==12333== searching for pointers to 2,825 not-freed blocks.
+==12333== checked 32,081,076 bytes.
+==12333== 
+==12333== 
+==12333== 28 bytes in 1 blocks are definitely lost in loss record 15 of 94
+==12333==    at 0x4026FDE: malloc (vg_replace_malloc.c:207)
+==12333==    by 0x407DA45: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x405A7B5: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
+==12333==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BC4FE: fgCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BD884: glutCreateWindow (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x806872C: main (main.c:269)
+==12333== 
+==12333== 
+==12333== 2,156 (76 direct, 2,080 indirect) bytes in 1 blocks are definitely lost in loss record 69 of 94
+==12333==    at 0x4025092: calloc (vg_replace_malloc.c:397)
+==12333==    by 0x49FDF64: _mesa_calloc (in /usr/lib/dri/i965_dri.so)
+==12333==    by 0x4958EAD: driCreateConfigs (in /usr/lib/dri/i965_dri.so)
+==12333==    by 0x496E783: (within /usr/lib/dri/i965_dri.so)
+==12333==    by 0x496F15A: (within /usr/lib/dri/i965_dri.so)
+==12333==    by 0x495C24E: (within /usr/lib/dri/i965_dri.so)
+==12333==    by 0x407B9F1: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x405A90A: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x40560C9: (within /usr/lib/libGL.so.1.2)
+==12333==    by 0x4056E75: glXChooseVisual (in /usr/lib/libGL.so.1.2)
+==12333==    by 0x40BDBB1: fgChooseVisual (in /usr/lib/libglut.so.3.8.0)
+==12333==    by 0x40BDCFB: fgOpenWindow (in /usr/lib/libglut.so.3.8.0)
+==12333== 
+==12333== LEAK SUMMARY:
+==12333==    definitely lost: 104 bytes in 2 blocks.
+==12333==    indirectly lost: 2,080 bytes in 10 blocks.
+==12333==      possibly lost: 0 bytes in 0 blocks.
+==12333==    still reachable: 62,362,254 bytes in 2,813 blocks.
+==12333==         suppressed: 0 bytes in 0 blocks.
+==12333== Reachable blocks (those to which a pointer was found) are not shown.
+==12333== To see them, rerun with: --leak-check=full --show-reachable=yes

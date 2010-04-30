@@ -24,7 +24,7 @@ void SE_RenderState_Activate(SE_RenderState* rs, SE_Spatial_tag* spatial)
         SE_Script* s = SE_ResourceManager_GetScript(rs->resourceManager, SE_String_GetData(&ru->scriptName));
         if(s != NULL)
         {
-            s->runEnv.spatial = spatial;
+            s->runEnv.data = spatial;
             SE_ResourceManager_RunScript(rs->resourceManager, SE_String_GetData(&ru->scriptName));
         }
     }

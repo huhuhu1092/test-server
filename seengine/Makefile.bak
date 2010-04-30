@@ -176,9 +176,10 @@ SE_HashMap.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 SE_HashMap.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_HashMap.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_HashMap.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-SE_HashMap.o: SE_Element.h SE_String.h SE_Memory.h /usr/include/errno.h
-SE_HashMap.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
-SE_HashMap.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+SE_HashMap.o: SE_Element.h SE_String.h SE_Memory.h SE_Log.h
+SE_HashMap.o: /usr/include/errno.h /usr/include/bits/errno.h
+SE_HashMap.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+SE_HashMap.o: /usr/include/asm-generic/errno.h
 SE_HashMap.o: /usr/include/asm-generic/errno-base.h
 SE_Log.o: SE_Log.h SE_Common.h /usr/include/assert.h /usr/include/features.h
 SE_Log.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
@@ -429,7 +430,7 @@ SE_Script.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
 ./renderer/SE_Renderer.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 ./renderer/SE_Renderer.o: /usr/include/GL/glext.h /usr/include/inttypes.h
 ./renderer/SE_Renderer.o: /usr/include/stdint.h /usr/include/bits/wchar.h
-./renderer/SE_Renderer.o: SE_World.h SE_Camera.h SE_Memory.h
+./renderer/SE_Renderer.o: SE_World.h SE_Camera.h SE_Memory.h SE_Log.h
 ./cscript/hashmap.o: ./cscript/hashmap.h /usr/include/stdlib.h
 ./cscript/hashmap.o: /usr/include/features.h /usr/include/sys/cdefs.h
 ./cscript/hashmap.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h

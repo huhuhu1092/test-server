@@ -123,7 +123,7 @@ int init(int argc, char** argv)
     //ASE_Loader loader(argv[1], 0, 0);
     //loader.Load();
     //loader.Write(argv[2]);
-    SE_World_Init(&seWorld);
+    SE_World_Init(&seWorld, "world_init.rs");
     SE_ResourceManager* resourceManager = SE_World_GetResourceManager(&seWorld);
     SE_ResourceManager_InitFromFile(resourceManager, "/home/luwei/model/jme/home/newhome3", argv[2]);
     SE_Spatial* root = SE_World_GetSceneRoot(&seWorld);
@@ -170,7 +170,7 @@ int init(int argc, char** argv)
         if(m)
         {
             SE_String str = m->texturename;
-            if(strcmp(SE_String_GetData(&str), "raw") != 0)
+            if(!SE_String_IsEmpty(&str))
                 SE_Texture* tex = SE_ResourceManager_LoadTexture(resourceManager, SE_String_GetData(&m->texturename));
         }
     }
@@ -192,6 +192,7 @@ void display ( void )   // Create The Display Function
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     SE_Renderer_DrawWorld(&seWorld);
+    /*
     //debug
     glBegin(GL_TRIANGLES);
     glVertex3f(1, 2, -5);
@@ -199,6 +200,7 @@ void display ( void )   // Create The Display Function
     glVertex3f(0, 0.8, -5);
     glEnd();
     //end
+    */
   // Swap The Buffers To Not Be Left With A Clear Screen
     glutSwapBuffers ( );
 
@@ -213,8 +215,8 @@ void reshape ( int w, int h )   // Create The Reshape Function (the viewport)
     glViewport(0, 0, w, h);
     SE_Camera* mainCamera = SE_World_GetMainCamera(&seWorld);
     SE_Vector3f loc, target;
-    SE_Vec3f_Init(0, 0, 0, &loc);
-    SE_Vec3f_Init(0, 0, -1, &target);
+    SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
+    SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
     SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
     SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
     SE_Rectf nearrect;
@@ -265,18 +267,23 @@ int main ( int argc, char** argv )
   glutInitDisplayMode ( GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH );
   glutInitWindowSize  ( 640, 480 );
   window = glutCreateWindow( "NeHe's OpenGL Framework" ); 
-  /*
+
   glutIdleFunc(display);
   glutDisplayFunc     ( display );  // Matching Earlier Functions To Their Counterparts
   glutReshapeFunc     ( reshape );
   glutKeyboardFunc    ( keyboard );
   glutSpecialFunc     ( arrow_keys );
-  */
+  
   init(argc, argv);
-  //runScript();
-  //glutMainLoop        ( );          // Initialize The Main Loop
+  /*
+  int count = 100000;
   reshape(640, 480);
-  display();
+  while((count--) > 0)
+  {
+      display();
+  }
+  */
+  glutMainLoop        ( );          // Initialize The Main Loop
   SE_World_Release(&seWorld);
   return 0;
 }

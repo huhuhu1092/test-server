@@ -46,7 +46,8 @@ static SE_String readString(char* data, int* currPos)
     SE_String str;
     char* buf = (char*)SE_Malloc(len + 1);
     memset(buf, 0 , len + 1);
-    strncpy(buf, data + (*currPos), len);
+    if(len > 0)
+        strncpy(buf, data + (*currPos), len);
     SE_String_Set(&str, buf);
     (*currPos) += len;
     return str;
@@ -506,6 +507,7 @@ SE_ImageData* SE_Texture_GetImageData(SE_Texture* tex)
 void SE_Texture_Release(void* tex)
 {
     SE_Texture* texture = (SE_Texture*)tex;
+    SE_String_Release(&texture->texturename);
     SE_ImageData_Release(&texture->imageData);
     if(texture->mipMapNum > 0)
     {
@@ -805,12 +807,16 @@ SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager
     SE_Element* id = SE_HashMap_Get(texIDMap, key);
     if(id != NULL)
     {
+        SE_Element_Release(&key);
         return *((SE_TextureID*)(id->dp.data));
     }
     else
     {
         if(!isCreate)
+        {
+            SE_Element_Release(&key);
             return nullTexID;
+        }
         SE_TextureID* texID = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
         if(texID == NULL)
         {
@@ -892,7 +898,9 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
     SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(&resourceManager->dataPath), SE_String_GetData(&key.str));
     char* data = NULL;
     int len;
-    SE_ReadCScriptFile(SE_String_GetData(&filePath), &data, &len);
+    //SE_ReadCScriptFile(SE_String_GetData(&filePath), &data, &len);
+    SE_ReadFileAllByName(SE_String_GetData(&filePath), &data, &len);
+    LOGI("## script len = %d ####\n", len);
     if(data == NULL)
     {
         SE_Element_Release(&key);
@@ -909,7 +917,7 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
         return NULL;
     }
     SE_String_Release(&filePath);
-    SE_Script_Init(script, data);
+    SE_Script_Init(script, data, len);
     SE_Free(data);
     SE_Script_Compile(script);
     SE_Element v;

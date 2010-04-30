@@ -6063,7 +6063,7 @@ struct ACCscript {
     }
 
     ~ACCscript() {
-        delete text;
+        delete[] text;
     }
 
     void registerSymbolCallback(ACCSymbolLookupFn pFn, ACCvoid* pContext) {
@@ -6116,6 +6116,7 @@ void accScriptSource(ACCscript* script,
     const ACCchar ** string,
     const ACCint * length) {
     int totalLength = 0;
+    fprintf(stderr, "##%d##\n", count);
     for(int i = 0; i < count; i++) {
         int len = -1;
         const ACCchar* s = string[i];
@@ -6127,7 +6128,7 @@ void accScriptSource(ACCscript* script,
         }
         totalLength += len;
     }
-    delete script->text;
+    delete[] script->text;
     char* text = new char[totalLength + 1];
     script->text = text;
     script->textLength = totalLength;

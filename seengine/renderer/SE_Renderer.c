@@ -4,6 +4,7 @@
 #include "SE_ResourceManager.h"
 #include "SE_Spatial.h"
 #include "SE_Memory.h"
+#include "SE_Log.h"
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld)
 {}
 SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
@@ -25,6 +26,7 @@ void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vert
 void SE_Renderer_DrawWorld(SE_World* world)
 {
     SE_Camera* mainCamera = SE_World_GetMainCamera(world);
+    SE_ResourceManager_RunScript(SE_World_GetResourceManager(world), SE_String_GetData(&world->initScript));
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity( );
     SE_Matrix4f worldToView;
@@ -76,6 +78,9 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
     {
         glColor4f(mesh->defaultColor.x, mesh->defaultColor.y, mesh->defaultColor.z, 1.0f);
     }
+    LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
 }
 static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
 {
@@ -118,6 +123,7 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
     {
         glColor4f(mesh->defaultColor.x, mesh->defaultColor.y, mesh->defaultColor.z, 1.0f);
     }
+    LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
 void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
@@ -267,6 +273,7 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
         switch(t)
         {
         case SE_2D:
+            LOGI("### texuture id = %d ####\n", texID.textureid);
             glBindTexture(GL_TEXTURE_2D, texID.textureid);
             break;
         }
@@ -274,6 +281,7 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
     } 
     else
     {
+        SE_Object_Clear(&texID, sizeof(SE_TextureID));
         SE_TextureID_Create(&texID);
         SE_ResourceManager_PutTextureID(resourceManager, texName, texID);
         switch(t)
@@ -288,14 +296,14 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
     switch(t)
     {
     case SE_2D:
-        glTexImage2D(GL_TEXTURE_2D, 0, getGLInternalFormat(imd), imd->width, imd->height, 
-                     0, getGLFormat(imd), getGLType(imd), imd->data);
+        LOGI("## texture %s : w = %d, h = %d, pixelFormat = %d, data = %p ##\n", texName, imd->width , imd->height, imd->pixelFormat, imd->data);
+        glTexImage2D(GL_TEXTURE_2D, 0, getGLInternalFormat(imd), imd->width, imd->height, 0, getGLFormat(imd), getGLType(imd), imd->data);
         break;
     default:
         break;
     }
 }
-void SE_Renderer_SetTexEnv(SE_Renderer* renderer, enum SE_TEX_ENV env)
+void SE_Renderer_SetTexEnv(enum SE_TEX_ENV env)
 {
     GLint param = GL_REPLACE;
     switch(env)
@@ -312,3 +320,31 @@ void SE_Renderer_SetTexEnv(SE_Renderer* renderer, enum SE_TEX_ENV env)
     }
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, param);
 }
+void SE_Renderer_EnableState(enum SE_GL_STATE s)
+{
+    switch(s)
+    {
+    case SE_TEX_2D:
+        glEnable(GL_TEXTURE_2D);
+        break;
+    case SE_DEPTH:
+        break;
+    case SE_LIGHT:
+        break;
+    }
+}
+void SE_Renderer_DisableState(enum SE_GL_STATE s)
+{
+    switch(s)
+    {
+    case SE_TEX_2D:
+        glDisable(GL_TEXTURE_2D);
+        break;
+    case SE_DEPTH:
+        break;
+    case SE_LIGHT:
+        break;
+    }
+
+}
+

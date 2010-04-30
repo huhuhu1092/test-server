@@ -1,8 +1,9 @@
 #include "SE_World.h"
-SE_Result SE_World_Init(SE_World* world)
+SE_Result SE_World_Init(SE_World* world, const char* initScriptName)
 {
     SE_Object_Clear(world, sizeof(SE_World));
     SE_List_Init(&world->cameraList);
+    SE_String_Init(&world->initScript, initScriptName);
     return SE_VALID;
 }
 void SE_World_Release(void* world)
@@ -12,6 +13,7 @@ void SE_World_Release(void* world)
     SE_Spatial_Release(&w->sceneRoot);
     SE_Spatial_Release(&w->playerController);
     SE_ResourceManager_Release(&w->resourceManager);
+    SE_String_Release(&w->initScript);
 }
 SE_Camera* SE_World_GetMainCamera(SE_World* world)
 {

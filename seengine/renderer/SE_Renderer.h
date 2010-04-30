@@ -13,6 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+enum SE_GL_STATE {SE_TEX_2D, SE_LIGHT, SE_DEPTH};
 enum SE_TEX_FILTER {SE_NEAREST, SE_LINEAR};
 enum SE_TEX_WRAP_VALUE {SE_REPEAT, SE_CLAMP, SE_CLAMP_TO_EDGE, SE_CLAMP_TO_BORDER};
 enum SE_TEX_WRAP_TYPE {SE_S, SE_T, SE_R};
@@ -39,6 +40,8 @@ extern void SE_Renderer_SetTexWrap(enum SE_TEX_TARGET target, enum SE_TEX_WRAP_T
 extern void SE_Renderer_SetTexEnv(enum SE_TEX_ENV env);
 extern void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TARGET target, const char* texName);
 extern void SE_Renderer_DrawWorld(SE_World* world);
+extern void SE_Renderer_EnableState(enum SE_GL_STATE s);
+extern void SE_Renderer_DisableState(enum SE_GL_STATE s);
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/

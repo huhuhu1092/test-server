@@ -16,14 +16,14 @@ typedef struct SE_Script_GlobalEntry_tag
 } SE_Script_GlobalEntry;
 typedef struct SE_Script_RunEnv_tag
 {
-    SE_Spatial_tag* spatial;
+    void* data;
 } SE_Script_RunEnv;
 typedef struct SE_Script_Tag
 {
     ACCscript* script;
     SE_Script_RunEnv runEnv;
 } SE_Script;
-extern SE_Result SE_Script_Init(SE_Script* script, const char* scriptSource);
+extern SE_Result SE_Script_Init(SE_Script* script, const char* scriptSource, int scriptLen);
 extern SE_Result SE_Script_Compile(SE_Script* script);
 extern SE_Result SE_Script_Run(SE_Script* script);
 /**

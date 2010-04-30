@@ -16,6 +16,7 @@
 
 #include "SE_HashMap.h"
 #include "SE_Memory.h"
+#include "SE_Log.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -140,6 +141,7 @@ static void releaseBucket(SE_HashMap_Entry** buckets, int bucketCount)
 static void expandIfNecessary(SE_HashMap* map) {
     // If the load factor exceeds 0.75...
     if (map->size > (map->bucketCount * 3 / 4)) {
+        LOGI("#### expand hashmap ####");
         // Start off with a 0.33 load factor.
         int newBucketCount = map->bucketCount << 1;
         SE_HashMap_Entry** newBuckets = (SE_HashMap_Entry**)SE_Calloc(newBucketCount, sizeof(SE_HashMap_Entry*));
@@ -162,7 +164,7 @@ static void expandIfNecessary(SE_HashMap* map) {
         }
 
         // Copy over internals.
-        releaseBucket(map->buckets, map->bucketCount);
+        //releaseBucket(map->buckets, map->bucketCount);
         SE_Free(map->buckets);
         map->buckets = newBuckets;
         map->bucketCount = newBucketCount;
@@ -218,7 +220,10 @@ SE_Result SE_HashMap_Put(SE_HashMap* map, SE_Element key, SE_Element value) {
         // Replace existing entry.
         if (equalKeys(current->key, key)) {
             SE_Element oldValue = current->value;
+            SE_Element oldKey = current->key;
             current->value = value;
+            current->key = key;
+            SE_Element_Release(&oldKey);
             SE_Element_Release(&oldValue);
             return SE_VALID;
         }

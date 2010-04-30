@@ -88,6 +88,8 @@ int SE_String_IsEmpty(const SE_String* str)
     SE_ASSERT(str);
     if(str->data == NULL)
         return 1;
+    else if(strcmp(str->data, "") == 0)
+        return 1;
     else
         return 0;
 }
