@@ -1,6 +1,7 @@
 #include "SE_Log.h"
 #include "SE_Common.h"
 #include <stdarg.h>
+#ifndef ANDROID
 void LOGE(const char* fmt, ...)
 {
     va_list ap;
@@ -32,3 +33,4 @@ void LOGVA(const char* fmt, va_list ap)
     buf[4096 - 1] = '\0';
     fprintf(stderr, "%s", buf);
 }
+#endif

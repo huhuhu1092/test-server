@@ -9,7 +9,7 @@ SE_Spatial* SE_Spatial_Create()
     SE_Object_Clear(s, sizeof(SE_Spatial));
     return s;
 }
-SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType, const char* name, SE_ResourceManager* resourceManager,SE_Mesh_tag* mesh)
+SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType, const char* name, SE_ResourceManager* resourceManager, struct SE_Mesh_tag* mesh)
 {
     SE_ASSERT(spatial);
     SE_Object_Clear(spatial, sizeof(SE_Spatial));

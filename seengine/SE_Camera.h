@@ -26,11 +26,18 @@ extern SE_Result SE_Camera_InitByDirectionUp(const SE_Vector3f* location, const 
 // 1: not cull
 // 0: intersect partly
 extern SE_Result SE_Camera_CullBouningVolume(const SE_Camera* camera, SE_BoundingVolume* bv);
-#ifdef __cplusplus
-}
 extern SE_Result SE_Camera_Update(SE_Camera* camera);
 extern SE_Result SE_Camera_SetViewport(SE_Camera* camera, int x, int y, int w, int h);
 extern SE_Result SE_Camera_GetMatrixWorldToView(SE_Camera* camera, SE_Matrix4f* out);
 extern SE_Result SE_Camera_GetMatrixViewToWorld(SE_Camera* camera, SE_Matrix4f* out);
+/**
+ * rotate about the local axis x, y, z.
+ * 0: x axis
+ * 1: y axis
+ * 2: z axis
+ * */
+extern SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAngle, int axis);
+#ifdef __cplusplus
+}
 #endif
 #endif

@@ -27,10 +27,10 @@ typedef SE_Result (*SE_SPATIAL_UPDATEWORLDBV)(void* spatial);
 typedef SE_Result (*SE_SPATIAL_UPDATEGEOMETRICSTATE)(void* spatial);
 typedef struct SE_Spatial_tag
 {
-    SE_SPATIAL_TYPE spatialType;
-    SE_SPATIAL_RENDER_TYPE renderType;
-    SE_SPATIAL_COLLISION_TYPE collisionType;
-    SE_SPATIAL_MOVE_TYPE moveType;
+    enum SE_SPATIAL_TYPE spatialType;
+    enum SE_SPATIAL_RENDER_TYPE renderType;
+    enum SE_SPATIAL_COLLISION_TYPE collisionType;
+    enum SE_SPATIAL_MOVE_TYPE moveType;
     struct SE_Spatial_tag* parent;
     SE_Quat localRotation;
     SE_Vector3f localTranslation;
@@ -41,7 +41,7 @@ typedef struct SE_Spatial_tag
     SE_RenderState renderState;
     SE_String name;
     SE_List* children;
-    SE_Mesh_tag* mesh;
+    struct SE_Mesh_tag* mesh;
     int subMeshIndex; //-1 : indicate this is not submesh
     SE_ResourceManager* resourceManager;
     SE_SPATIAL_UPDATEWORLDTRANSLATION fUpdateWorldTranslation;
@@ -55,7 +55,7 @@ typedef struct SE_Spatial_tag
  * this function create a new SE_Spatial, you has the responsibility to release it, or add it to its parent spatial.
  * */
 extern SE_Spatial* SE_Spatial_Create();
-extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, SE_SPATIAL_TYPE spatialType ,const char* name, SE_ResourceManager* resourceManager,SE_Mesh_tag* mesh);
+extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType ,const char* name, SE_ResourceManager* resourceManager, struct SE_Mesh_tag* mesh);
 extern void SE_Spatial_Release(void* spatial);
 extern SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst);
 extern SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial);

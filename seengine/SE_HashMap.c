@@ -28,7 +28,7 @@ SE_Result SE_HashMap_Init(int initialCapacity,
     SE_ASSERT(map != NULL);    
     SE_Object_Clear(map, sizeof(SE_HashMap));
     // 0.75 load factor.
-    size_t minimumBucketCount = initialCapacity * 4 / 3;
+    int minimumBucketCount = initialCapacity * 4 / 3;
     map->bucketCount = 1;
     while (map->bucketCount <= minimumBucketCount) {
         // Bucket count must be power of 2.
@@ -289,7 +289,7 @@ SE_Result SE_HashMap_Remove(SE_HashMap* map, SE_Element key) {
 void SE_HashMap_ForEach(SE_HashMap* map, 
         int (*callback)(SE_Element key, SE_Element value, void* context),
         void* context) {
-    size_t i;
+    int i;
     for (i = 0; i < map->bucketCount; i++) {
         SE_HashMap_Entry* entry = map->buckets[i];
         while (entry != NULL) {

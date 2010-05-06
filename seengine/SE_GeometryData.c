@@ -157,13 +157,14 @@ SE_Result SE_FaceList_Init(SE_FaceList* fl, SE_GeometryData* s, int faceNum, int
     fl->num = faceNum;
     return SE_VALID;
 }
-SE_Result SE_FaceList_Release(void* fl)
+void SE_FaceList_Release(void* fl)
 {
     SE_FaceList* facelist = (SE_FaceList*)fl;
     if(facelist->num > 0)
     {
         SE_Free(facelist->faces);
     }
+
 }
 SE_Result SE_GeometryData_SetVertexes(SE_GeometryData* gd, SE_Vector3f* vertexArray, int vertexNum, int isCopy)
 {

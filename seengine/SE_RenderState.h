@@ -22,7 +22,7 @@ typedef struct SE_RenderState_tag
 extern SE_Result SE_RenderState_Init(SE_RenderState* rs, SE_ResourceManager* resourceManager);
 extern void SE_RenderState_Release(void* rs);
 extern void SE_RenderState_Update(SE_RenderState* dstRs, SE_RenderState* srcRs);
-extern void SE_RenderState_Activate(SE_RenderState* rs, SE_Spatial_tag* spatial);
+extern void SE_RenderState_Activate(SE_RenderState* rs, struct SE_Spatial_tag* spatial);
 
 #ifdef __cplusplus
 }

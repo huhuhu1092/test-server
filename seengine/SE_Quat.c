@@ -88,6 +88,7 @@ SE_Result SE_Quat_Clear(SE_Quat* q)
 {
     SE_ASSERT(q);
     memset(q, 0, sizeof(SE_Quat));
+    return SE_VALID;
 }
 SE_Result SE_Quat_Inverse(const SE_Quat* q, SE_Quat* out)
 {

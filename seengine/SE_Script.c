@@ -39,7 +39,7 @@ static void SEC_SetTexEnv(void* runEnv, int env)
 static void SEC_BindTexture(void* runEnv, int target)
 {
     SE_Script_RunEnv* currEnv = (SE_Script_RunEnv*)runEnv;
-    LOGI("spatial = %p\n", currEnv->data); 
+    /* LOGI("spatial = %p\n", currEnv->data); */
     SE_ASSERT(currEnv->data != NULL);
     SE_Spatial* spatial = (SE_Spatial*)currEnv->data;
     SE_ResourceManager* resourceManager = spatial->resourceManager;
@@ -65,7 +65,7 @@ static void SEC_BindTexture(void* runEnv, int target)
 }
 static void SEC_EnableState(void* runEnv, int s)
 {
-    LOGI("### enable %d ###\n", s);
+    /*LOGI("### enable %d ###\n", s);*/
     SE_Renderer_EnableState((enum SE_GL_STATE)s);
 }
 static void SEC_DisableState(void* runEnv, int s)
@@ -87,7 +87,8 @@ static SE_Script_GlobalEntry entryMap[] = {
 static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) 
 {
     int count = sizeof(entryMap) / sizeof(SE_Script_GlobalEntry);
-    for(int i = 0 ; i < count ; i++)
+    int i;
+    for(i = 0 ; i < count ; i++)
     {
         SE_Script_GlobalEntry* e = &entryMap[i];
         if(strcmp(e->fName, name) == 0)
@@ -118,7 +119,6 @@ SE_Result SE_Script_Compile(SE_Script* script)
     accRegisterSymbolCallback(script->script, symbolLookup, NULL);
     accCompileScript(script->script);
     int result = accGetError(script->script);
-
     if(result != 0)
         return SE_INVALID;
     return SE_VALID;
@@ -126,7 +126,7 @@ SE_Result SE_Script_Compile(SE_Script* script)
 SE_Result SE_Script_Run(SE_Script* script)
 {
     MainPtr mainPointer;
-    accGetScriptLabel(script->script, "main", (ACCvoid**) &mainPointer);
+    accGetScriptLabel(script->script, "main", (ACCvoid**)&mainPointer);
     int result = accGetError(script->script);
     if (result != ACC_NO_ERROR) 
     {
@@ -134,10 +134,9 @@ SE_Result SE_Script_Run(SE_Script* script)
     } 
     else 
     {
-        LOGI("Executing compiled code:\n");
         result = run(mainPointer, &script->runEnv);
-        LOGI("result: %d\n", result);
     }
+    return SE_VALID;
 }
 
 void SE_Script_Release(void* script)

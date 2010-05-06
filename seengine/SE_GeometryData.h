@@ -47,7 +47,7 @@ typedef struct SE_FaceList_tag
     int num;
 } SE_FaceList;
 extern SE_Result SE_FaceList_Init(SE_FaceList* fl, SE_GeometryData* s, int faceNum, int* faces);
-extern SE_Result SE_FaceList_Release(void* fl);
+extern void SE_FaceList_Release(void* fl);
 
 /**
  * if own** is true, SE_GeometryData_Init will copy  the *Array to out

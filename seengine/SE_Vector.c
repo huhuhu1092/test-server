@@ -167,7 +167,7 @@ SE_Result SE_Vec3f_Clear(SE_Vector3f* v)
 {
     SE_ASSERT(v != NULL);
     v->x = v->y = v->z = 0;
-    return 1;
+    return SE_VALID;
 }
 SE_Result SE_Vec3f_Normalize(const SE_Vector3f* v, SE_Vector3f* out)
 {
@@ -182,6 +182,7 @@ SE_Result SE_Vec3f_Normalize(const SE_Vector3f* v, SE_Vector3f* out)
     out->x = v->x * iLen;
     out->y = v->y * iLen;
     out->z = v->z * iLen;
+    return SE_VALID;
 }
 float SE_Vec3f_Length(const SE_Vector3f* v)
 {
@@ -199,7 +200,7 @@ SE_Result SE_Vec3f_Cross(const SE_Vector3f* firstV, const SE_Vector3f* secondV, 
     out->x = firstV->y * secondV->z - firstV->z * secondV->y;
     out->y = firstV->z * secondV->x - firstV->x * secondV->z;
     out->z = firstV->x * secondV->y - firstV->y * secondV->x;
-    return 1;
+    return SE_VALID;
 
 }
 float SE_Vec3f_Distance(const SE_Vector3f* v1, const SE_Vector3f* v2)

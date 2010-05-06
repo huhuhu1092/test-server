@@ -21,7 +21,7 @@ enum SE_TEX_TARGET {SE_1D, SE_2D, SE_3D};
 enum SE_TEX_ENV {SE_REPLACE, SE_DECAL, SE_MODULATE};
 typedef struct SE_Renderer_tag
 {
-    SE_World_tag* currWorld;
+    struct SE_World_tag* currWorld;
     SE_List* rendererUnit;
 } SE_Renderer ;   
 extern SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld);
@@ -39,7 +39,7 @@ extern void SE_Renderer_SetTexFilter(enum SE_TEX_TARGET target, enum SE_TEX_FILT
 extern void SE_Renderer_SetTexWrap(enum SE_TEX_TARGET target, enum SE_TEX_WRAP_TYPE type, enum SE_TEX_WRAP_VALUE v);
 extern void SE_Renderer_SetTexEnv(enum SE_TEX_ENV env);
 extern void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TARGET target, const char* texName);
-extern void SE_Renderer_DrawWorld(SE_World* world);
+extern void SE_Renderer_DrawWorld(SE_World* world, int w, int h);
 extern void SE_Renderer_EnableState(enum SE_GL_STATE s);
 extern void SE_Renderer_DisableState(enum SE_GL_STATE s);
 #ifdef __cplusplus

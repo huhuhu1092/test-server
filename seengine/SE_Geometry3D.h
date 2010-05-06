@@ -70,7 +70,7 @@ extern SE_Result SE_Line_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f*
 extern SE_Result SE_Line_GetDirection(const SE_Line* line, SE_Vector3f* out, int normal);
 /****            function about plane **/
 extern SE_Result SE_Plane_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, const SE_Vector3f* p2, SE_Plane* out);
-extern SE_Result SE_Plane_InitFromNormal(const SE_Vector3f* p0, const SE_Vector3f* n, int normal);
+extern SE_Result SE_Plane_InitFromNormal(const SE_Vector3f* p0, const SE_Vector3f* n, int normal, SE_Plane* out);
 //extern SE_Result SE_Plane_GetNormal(const SE_Plane* plane, SE_Vector3f* out);
 #define SE_Plane_GetNormal(plane) (&plane->n)
 #define SE_Plane_GetNormalCopy(plane, out) (SE_Vec3f_Copy(&plane->n, out))

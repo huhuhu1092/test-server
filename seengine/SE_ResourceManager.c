@@ -301,6 +301,7 @@ SE_Result SE_MeshLoad(const char* fileName, SE_ResourceManager* resource)
     process(data, 0, fileSize, resource);
     SE_Free(data);
     fclose(fin);
+    return SE_VALID;
 }
 /**   image load function*/
 typedef SE_Result (*ImageFileLoader)(const char* fileName, struct SE_ImageData_tag* imageData);
@@ -325,15 +326,25 @@ static struct ImageLoaderImpl impl[] = {{"jpg", &JpgLoader},
                                  {"raw", &RawLoader}
 };
 SE_Result JpgLoader(const char* fileName, struct SE_ImageData_tag* imageData)
-{}
+{
+    return SE_VALID;
+}
 SE_Result JpegLoader(const char* fileName, struct SE_ImageData_tag* imageData)
-{}
+{
+    return SE_VALID;
+}
 SE_Result PngLoader(const char* fileName, struct SE_ImageData_tag* imageData)
-{}
+{
+    return SE_VALID;
+}
 SE_Result BitmapLoader(const char* fileName, struct SE_ImageData_tag* imageData)
-{}
+{
+    return SE_VALID;
+}
 SE_Result TgaLoader(const char* fileName, struct SE_ImageData_tag* imageData)
-{}
+{
+    return SE_VALID;
+}
 SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
 {
     char* data = NULL;
@@ -532,7 +543,7 @@ void SE_Texture_Release(void* tex)
     if(texture->mipMapNum > 0)
     {
         int i;
-        for(int i = 0 ; i < texture->mipMapNum; i++)
+        for(i = 0 ; i < texture->mipMapNum; i++)
         {
             SE_ImageData* imd = &texture->mipMapArray[i];
             SE_ImageData_Release(imd);
@@ -876,7 +887,7 @@ SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager
     SE_ASSERT(resourceManager);
     if(texName == NULL)
         return SE_INVALID;
-    SE_TextureID texID = SE_ResourceManager_GetTextureID(resourceManager, texName, false);
+    SE_TextureID texID = SE_ResourceManager_GetTextureID(resourceManager, texName, 0);
     if(SE_TextureID_IsValid(&texID))
     {
         SE_TextureID_Delete(&texID);

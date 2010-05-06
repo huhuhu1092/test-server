@@ -44,7 +44,7 @@
 
 
 
-// #define LOG_STACK(...) fprintf (stderr, __VA_ARGS__)
+#define LOG_STACK LOGI
 
 // #define PROVIDE_TRACE_CODEGEN
 

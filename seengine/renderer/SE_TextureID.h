@@ -2,7 +2,12 @@
 #define SE_TEXTUREID_H
 
 #include "SE_Common.h"
+
+#ifdef ANDROID
+#include <GLES/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

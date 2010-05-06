@@ -4,9 +4,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef ANDROID
+#include <cutils/log.h>
+#else
 extern void LOGE(const char* fmt, ...);
 extern void LOGI(const char* fmt, ...);
 extern void LOGVA(const char* fmt, va_list ap);
+#endif
 #ifdef __cplusplus
 }
 #endif

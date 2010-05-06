@@ -212,15 +212,28 @@ SE_Result SE_Frustum_GetFar(const SE_Frustum* ft, SE_Plane* out)
 {}
 */
 SE_Result SE_Intersect_Line_Plane(const SE_Line* line, const SE_Plane* plane, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
+
 SE_Result SE_Intersect_Line_Line(const SE_Line* line1, const SE_Line* line2, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_Intersect_Line_Triangle(const SE_Line* line, const SE_Triangle* tri, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_Intersect_Ray_Plane(const SE_Ray* ray, const SE_Plane* plane, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_Intersect_Ray_Ray(const SE_Ray* ray1, const SE_Ray* ray2, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_Intersect_Ray_Triangle(const SE_Ray* ray, const SE_Triangle* tri, SE_IntersectionResult* out)
-{}
+{
+    return SE_VALID;
+}
 

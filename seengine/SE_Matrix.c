@@ -52,6 +52,7 @@ SE_Result SE_Mat3f_Clear(SE_Matrix3f* m)
 {
     SE_ASSERT(m);
     memset(m, 0, sizeof(SE_Matrix3f));
+    return SE_VALID;
 }
 SE_Result SE_Mat3f_Init(float m00, float m01, float m02,
                                  float m10, float m11, float m12,
@@ -74,6 +75,7 @@ SE_Result SE_Mat3f_Copy(const SE_Matrix3f* m, SE_Matrix3f* out)
     SE_ASSERT(m);
     SE_ASSERT(out);
     memcpy(out, m, sizeof(SE_Matrix3f));
+    return SE_VALID;
 }
 SE_Result SE_Mat3f_GetRow(const SE_Matrix3f* m, int row, SE_Vector3f* out)
 {
@@ -475,12 +477,16 @@ SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out)
         SE_Mat3f_Map(&inverseRs, &t, &lastColumn0);
         SE_Vector3f lastColumn;
         SE_Vec3f_Neg(&lastColumn0, &lastColumn);
+        SE_Mat4f_InitFromMT(&inverseRs, &lastColumn, out);
+        /*
         SE_Vector4f c1, c2, c3, c4;
         SE_Vec4f_Init(inverseRs.m00, inverseRs.m10, inverseRs.m20, 0.0f, &c1);
         SE_Vec4f_Init(inverseRs.m01, inverseRs.m11, inverseRs.m21, 0.0f, &c2);
         SE_Vec4f_Init(inverseRs.m02, inverseRs.m12, inverseRs.m22, 0.0f, &c3);
+
         SE_Vec4f_Init(lastColumn.x, lastColumn.y, lastColumn.z, 1.0f, &c4);
         SE_Mat4f_InitFromColumn(&c1, &c2, &c3, &c4, out);
+        */
     }    
     else
     {

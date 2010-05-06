@@ -15,7 +15,7 @@ void SE_RenderState_Release(void* rs)
         SE_String_Release(&renderState->rsu[i].scriptName);
     }
 }
-void SE_RenderState_Activate(SE_RenderState* rs, SE_Spatial_tag* spatial)
+void SE_RenderState_Activate(SE_RenderState* rs, struct SE_Spatial_tag* spatial)
 {
     int i;
     for(i = 0  ; i < SE_RS_NUM ; i++)

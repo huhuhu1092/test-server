@@ -4,6 +4,7 @@ SE_Result SE_World_Init(SE_World* world, const char* initScriptName)
     SE_Object_Clear(world, sizeof(SE_World));
     SE_List_Init(&world->cameraList);
     SE_String_Init(&world->initScript, initScriptName);
+    SE_InputDevice_Init(&world->inputDevice);
     return SE_VALID;
 }
 void SE_World_Release(void* world)
@@ -31,8 +32,17 @@ SE_ResourceManager* SE_World_GetResourceManager(SE_World* world)
 {
     return &world->resourceManager;
 }
+SE_InputDevice* SE_World_GetInputDevice(SE_World* world)
+{
+    return &world->inputDevice;
+}
 SE_Result SE_World_Update(SE_World* world, float time)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_World_FixUpdate(SE_World* world, float fixTime)
-{}
+{
+    return SE_VALID;
+}
+
 

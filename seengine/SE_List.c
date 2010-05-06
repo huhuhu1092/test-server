@@ -247,6 +247,7 @@ SE_Result SE_ListIterator_Init(SE_ListIterator* li, SE_List* list)
 {
     li->list = list;
     li->curr = list->head;
+    return SE_VALID;
 }
 int SE_ListIterator_Next(SE_ListIterator* li, SE_Element* out)
 {

@@ -19,11 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "./renderer/SE_Renderer.h"
+#include "SE_Input.h"
+#include "SE_Memory.h"
 #include <SDL.h>
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 400
+#define SCREEN_HEIGHT 480
 #define SCREEN_BPP     16
 
 /* Set up some booleans */
@@ -88,6 +90,7 @@ int init(int argc, char** argv)
             {
                 SE_Spatial* subs = SE_Spatial_Create();
                 SE_String subName;
+                SE_Object_Clear(&subName, sizeof(SE_String));
                 SE_String_Concate(&subName, "%s_%d", SE_String_GetData(&strName), j);
                 SE_Spatial_Init(subs, SE_GEOMETRY, SE_String_GetData(&subName), resourceManager, mesh);
                 subs->subMeshIndex = j;
@@ -132,8 +135,13 @@ int resizeWindow( int w, int h )
     glViewport(0, 0, w, h);
     SE_Camera* mainCamera = SE_World_GetMainCamera(&seWorld);
     SE_Vector3f loc, target;
+    /*
     SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
     SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
+    */
+    SE_Vec3f_Init(54.9162,	-240.5901,	95.9493, &loc);
+    SE_Vec3f_Init(49.3477,	27.1996,	97.1154, &target);
+
     SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
     SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
     SE_Rectf nearrect;
@@ -189,7 +197,7 @@ int drawScene ()   // Create The Display Function
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SE_Renderer_DrawWorld(&seWorld);
+    SE_Renderer_DrawWorld(&seWorld, SCREEN_WIDTH, SCREEN_HEIGHT);
     /*
     //debug
     glBegin(GL_TRIANGLES);
@@ -296,7 +304,7 @@ int main( int argc, char **argv )
 
     /* resize the initial window */
     resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
-
+    SE_InputEvent* inputEvent = NULL;
     /* wait for events */
     while ( !done )
 	{
@@ -336,6 +344,89 @@ int main( int argc, char **argv )
 			    /* handle quit requests */
 			    done = TRUE;
 			    break;
+            case SDL_MOUSEMOTION:
+                if(event.button.button > 0)
+                {
+                LOGI("Mouse moved by %d,%d to (%d,%d)\n", 
+                       event.motion.xrel, event.motion.yrel,
+                       event.motion.x, event.motion.y);
+                LOGI("Mouse button %d \n", event.button.button);
+                    inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                    if(inputEvent)
+                    {
+                        SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                        inputEvent->inputType = SE_MOUSE;
+                        inputEvent->mouse.mt = SE_PRESSED;
+                        switch(event.button.button)
+                        {
+                        case 1:
+                            inputEvent->mouse.mc = SE_LEFTKEY;
+                            break;
+                        case 2:
+                            inputEvent->mouse.mc = SE_MIDKEY;
+                            break;
+                        case 3:
+                            inputEvent->mouse.mc = SE_RIGHTKEY;
+                            break;
+                        }
+                        inputEvent->mouse.x = event.motion.x;
+                        inputEvent->mouse.y = event.motion.y;
+                        SE_HandleInputEvent(&seWorld, inputEvent);
+                    }    
+                }
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                LOGI("Mouse button %d pressed at (%d,%d)\n",
+                       event.button.button, event.button.x, event.button.y);
+                inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_PRESSED;
+                    switch(event.button.button)
+                    {
+                    case 1:
+                        inputEvent->mouse.mc = SE_LEFTKEY;
+                        break;
+                    case 2:
+                        inputEvent->mouse.mc = SE_MIDKEY;
+                        break;
+                    case 3:
+                        inputEvent->mouse.mc = SE_RIGHTKEY;
+                        break;
+                    }
+                    inputEvent->mouse.x = event.button.x;
+                    inputEvent->mouse.y = event.button.y;
+                    SE_HandleInputEvent(&seWorld, inputEvent);
+                }    
+                break;
+            case SDL_MOUSEBUTTONUP:
+                LOGI("Mouse button %d released at (%d,%d)\n",
+                       event.button.button, event.button.x, event.button.y);
+                inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_RELEASED;
+                    switch(event.button.button)
+                    {
+                    case 1:
+                        inputEvent->mouse.mc = SE_LEFTKEY;
+                        break;
+                    case 2:
+                        inputEvent->mouse.mc = SE_MIDKEY;
+                        break;
+                    case 3:
+                        inputEvent->mouse.mc = SE_RIGHTKEY;
+                        break;
+                    }
+                    inputEvent->mouse.x = event.button.x;
+                    inputEvent->mouse.y = event.button.y;
+                    SE_HandleInputEvent(&seWorld, inputEvent);
+                }    
+                break;
 			default:
 			    break;
 			}

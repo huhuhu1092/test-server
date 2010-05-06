@@ -1,18 +1,33 @@
 #include "SE_Renderer.h"
+#ifdef ANDROID
+#include <GLES/gl.h>
+#else
 #include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 #include "SE_World.h"
 #include "SE_ResourceManager.h"
 #include "SE_Spatial.h"
 #include "SE_Memory.h"
 #include "SE_Log.h"
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld)
-{}
+{
+    return SE_VALID;
+}
+
 SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
-{}
+{
+
+    return SE_VALID;
+}
 SE_Result SE_Renderer_EndDraw(SE_Renderer* renderer)
-{}
+{
+    return SE_VALID;
+}
 SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
-{}
+{
+    return SE_VALID;
+}
 void SE_Renderer_Release(SE_Renderer* renderer)
 {}
 void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
@@ -23,16 +38,47 @@ void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vert
 {
 
 }
-void SE_Renderer_DrawWorld(SE_World* world)
+void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
 {
     SE_Camera* mainCamera = SE_World_GetMainCamera(world);
+    glViewport(0, 0, w, h);
+    /*
+    SE_Vector3f loc, target;
+    SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
+    SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
+    SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
+    SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
+    */
+    SE_Rectf nearrect;
+    SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+#ifdef ANDROID
+    glFrustumf(nearrect.left, nearrect.right, nearrect.bottom, nearrect.top, 1.0f, 1000.0f);
+#else
+    glFrustum(nearrect.left, nearrect.right, nearrect.bottom, nearrect.top, 1.0f, 1000.0f);
+    /*gluPerspective(90.0f, ((float)w / h), 1.0f, 1000.0f);*/
+#endif
     SE_ResourceManager_RunScript(SE_World_GetResourceManager(world), SE_String_GetData(&world->initScript));
+    glEnable( GL_DEPTH_TEST );
+    glDepthFunc( GL_LEQUAL );
+
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity( );
     SE_Matrix4f worldToView;
     SE_Camera_GetMatrixWorldToView(mainCamera, &worldToView);
     float m[16];
     SE_Mat4f_GetMatrixColumnSequence(&worldToView, m);
+    /*
+    int j;
+    for(j = 0 ; j < 16 ; j++)
+    {
+        LOGI("%f ", m[j]);
+        if(((j + 1) % 4) == 0)
+            LOGI("\n");
+    }
+    LOGI("\n\n\n");
+    */
     glLoadMatrixf(m);
     SE_Spatial* rootSpatial = SE_World_GetSceneRoot(world);
     SE_Renderer_DrawSpatial(rootSpatial);
@@ -42,9 +88,13 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
     SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, index);
     SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
     SE_FaceList* faceList = &subMesh->faceList;
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
     int vertexCount = faceList->num * 3;
     int i;
     int k = 0;
+    /*LOGI("## vertex Count = %d ###\n", vertexCount);*/
     SE_Vector3f* vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
     for(i = 0 ; i < faceList->num ; i++)
     {
@@ -54,10 +104,11 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
         vertexArray[k++] = gd->vertexArray[s->v[2]]; 
     }
     glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    SE_Free(vertexArray);
+    SE_Vector2f* texVertexArray = NULL;
     if(gd->texVertexArray)
     {
-        SE_Vector2f* texVertexArray= (SE_Vector2f *) SE_Malloc(faceList->num * 3 * sizeof(SE_Vector2f));
+        k = 0;
+        texVertexArray= (SE_Vector2f *) SE_Malloc(faceList->num * 3 * sizeof(SE_Vector2f));
         for(i = 0 ; i < faceList->num ; i++)
         {
             SE_Face* s = &gd->texFaceArray[faceList->faces[i]];
@@ -72,11 +123,14 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
             k++;
         }
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
-        SE_Free(texVertexArray);
     }
     glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
-    LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );
+    /*LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    SE_Free(vertexArray);
+    if(texVertexArray)
+        SE_Free(texVertexArray);
+
 
 }
 static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
@@ -116,7 +170,7 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
     glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
-    LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );
+    /*LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     /*
      * the Free must do after glDrawArrarys else it will make draw error
@@ -195,6 +249,7 @@ void SE_Renderer_SetTexWrap(enum SE_TEX_TARGET target, enum SE_TEX_WRAP_TYPE typ
     case SE_REPEAT:
         pvalue = GL_REPEAT;
         break;
+#ifndef ANDROID
     case SE_CLAMP:
         pvalue = GL_CLAMP;
         break;
@@ -203,6 +258,7 @@ void SE_Renderer_SetTexWrap(enum SE_TEX_TARGET target, enum SE_TEX_WRAP_TYPE typ
         break;
     case SE_CLAMP_TO_BORDER:
         pvalue = GL_CLAMP_TO_BORDER;
+#endif
     }
     switch(target)
     {
@@ -272,7 +328,7 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
         switch(t)
         {
         case SE_2D:
-            LOGI("### texuture id = %d ####\n", texID.textureid);
+            /*LOGI("### texture id = %d ####\n", texID.textureid);*/
             glBindTexture(GL_TEXTURE_2D, texID.textureid);
             break;
         }
@@ -295,7 +351,7 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
     switch(t)
     {
     case SE_2D:
-        LOGI("## texture %s : w = %d, h = %d, pixelFormat = %d, data = %p ##\n", texName, imd->width , imd->height, imd->pixelFormat, imd->data);
+        /*LOGI("## texture %s : w = %d, h = %d, pixelFormat = %d, data = %p ##\n", texName, imd->width , imd->height, imd->pixelFormat, imd->data);*/
         glTexImage2D(GL_TEXTURE_2D, 0, getGLInternalFormat(imd), imd->width, imd->height, 0, getGLFormat(imd), getGLType(imd), imd->data);
         break;
     default:

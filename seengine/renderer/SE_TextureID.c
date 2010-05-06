@@ -21,6 +21,6 @@ SE_Result SE_TextureID_Delete(SE_TextureID* texId)
 
 SE_Result SE_TextureID_CreateArray(SE_TextureID* texId, int texNum)
 {
-    
+    return SE_VALID;   
 }
 

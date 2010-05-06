@@ -2,12 +2,14 @@
 #define SE_SCRIPT_H
 #include "SE_Common.h"
 #include "SE_String.h"
-
+#include "./cscript/acc.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
+    /*
 struct ACCscript;
 typedef void ACCvoid;
+*/
 struct SE_Spatial_tag;
 typedef struct SE_Script_GlobalEntry_tag
 {
