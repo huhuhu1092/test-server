@@ -45,4 +45,15 @@ SE_Result SE_World_FixUpdate(SE_World* world, float fixTime)
     return SE_VALID;
 }
 
-
+SE_Result SE_World_SaveMainCamera(SE_World* world)
+{
+    SE_Camera* camera = &world->mainCamera;
+    SE_SaveState_SaveCamera(&world->saveState, &camera->location, &camera->xAxis, &camera->yAxis, &camera->zAxis);
+    return SE_VALID;
+}
+SE_Result SE_World_RestoreMainCamera(SE_World* world)
+{
+    SE_Camera* camera = &world->mainCamera;
+    SE_SaveState_GetCamera(&world->saveState, &camera->location, &camera->xAxis, &camera->yAxis, &camera->zAxis);
+    return SE_VALID;
+}

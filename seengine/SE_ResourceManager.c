@@ -366,6 +366,7 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
     }
     memcpy(imageData->data, data + startPos, pixelDataLen);
     SE_Free(data);
+    /*
     /// flip pixmap
     data = imageData->data;
     imageData->data = (char*)SE_Malloc(pixelDataLen);
@@ -386,6 +387,7 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
         imageData->data = data;
     }
     //end
+    */
     return SE_VALID;
     
 }
@@ -433,7 +435,7 @@ static SE_Result SE_ImageLoad(const char* fileName, SE_ImageData* imageData)
     }
     if(i >= count)
     {
-        LOGE("can not file the image loader for : %s\n", fileName);
+        LOGE("can not find the image loader for : %s\n", fileName);
     }
     SE_String_Release(&fileExt);
     return SE_VALID;

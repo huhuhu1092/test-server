@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "./renderer/SE_Renderer.h"
-
+#include "SE_SaveState.h"
 static SE_World seWorld;
 struct SE_World_tag* SE_GetWorld()
 {
@@ -58,6 +58,7 @@ SE_Result SE_InitWorld(int argc, char** argv)
             {
                 SE_Spatial* subs = SE_Spatial_Create();
                 SE_String subName;
+                SE_Object_Clear(&subName, sizeof(SE_String));
                 SE_String_Concate(&subName, "%s_%d", SE_String_GetData(&strName), j);
                 SE_Spatial_Init(subs, SE_GEOMETRY, SE_String_GetData(&subName), resourceManager, mesh);
                 subs->subMeshIndex = j;
@@ -112,6 +113,7 @@ SE_Result SE_ResizeWindow(int w, int h)
     SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
     SE_Camera_RotateLocalXYZAxis(mainCamera, 90.0f, 2);
     SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
+    SE_World_SaveMainCamera(&seWorld);
     /*
     SE_Rectf nearrect;
     SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);

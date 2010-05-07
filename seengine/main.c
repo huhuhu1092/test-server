@@ -68,6 +68,7 @@ int resizeWindow( int w, int h )
 }
 void handleKeyPress( SDL_keysym *keysym )
 {
+    SE_InputEvent* inputEvent = NULL;
     switch ( keysym->sym )
 	{
 	case SDLK_ESCAPE:
@@ -78,7 +79,15 @@ void handleKeyPress( SDL_keysym *keysym )
 	    /* F1 key was pressed
 	     * this toggles fullscreen mode
 	     */
-	    SDL_WM_ToggleFullScreen( surface );
+	    //SDL_WM_ToggleFullScreen( surface );
+        inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_F1;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
 	    break;
 	case SDLK_RIGHT:
 	    /* Right arrow key was pressed

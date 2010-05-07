@@ -27,6 +27,7 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
     enum SE_MOUSESTATE currMouseState;
     enum SE_MOUSECODE currMouseCode;
     SE_MouseRecord* mouseRecord;
+    enum SE_KEYCODE currKeyCode;
     /***/
     inputDevice = SE_World_GetInputDevice(world);
     if(inputEvent->inputType == SE_MOUSE)
@@ -73,6 +74,16 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
             }
         }
     } 
+    else if(inputEvent->inputType == SE_KEYBOARD)
+    {
+        currKeyCode = inputEvent->keyboard.key;
+        LOGI("## currKeyCode = %d ##\n", currKeyCode);
+        LOGI("## down = %d ##\n", inputEvent->keyboard.down);
+        if(currKeyCode == SE_KEY_F1 && inputEvent->keyboard.down)
+        {
+            SE_World_RestoreMainCamera(world);
+        }
+    }
     SE_Free(inputEvent);
     return SE_VALID;
 }

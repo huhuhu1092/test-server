@@ -22,6 +22,7 @@ SRCS = SE_Vector.c \
 		   SE_Script.c \
 		   SE_Input.c \
 		   SE_Init.c \
+		   SE_SaveState.c \
 		   ./renderer/SE_TextureID.c \
 		   ./renderer/SE_Renderer.c \
 		   ./cscript/hashmap.c \
@@ -341,7 +342,7 @@ SE_World.o: SE_RenderState.h SE_ResourceManager.h SE_GeometryData.h
 SE_World.o: SE_HashMap.h SE_Script.h ./cscript/acc.h /usr/include/stdint.h
 SE_World.o: /usr/include/bits/wchar.h ./renderer/SE_TextureID.h
 SE_World.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
-SE_World.o: /usr/include/inttypes.h SE_Input.h
+SE_World.o: /usr/include/inttypes.h SE_Input.h SE_SaveState.h
 SE_Camera.o: SE_Camera.h SE_Common.h /usr/include/assert.h
 SE_Camera.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Camera.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -380,7 +381,7 @@ SE_Script.o: SE_HashMap.h SE_Element.h ./renderer/SE_TextureID.h
 SE_Script.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
 SE_Script.o: /usr/include/inttypes.h SE_List.h SE_Log.h
 SE_Script.o: ./renderer/SE_Renderer.h SE_World.h SE_Camera.h SE_Input.h
-SE_Script.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
+SE_Script.o: SE_SaveState.h /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
 SE_Input.o: SE_Input.h SE_Common.h /usr/include/assert.h
 SE_Input.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Input.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -401,8 +402,8 @@ SE_Input.o: SE_String.h SE_Spatial.h SE_RenderState.h SE_ResourceManager.h
 SE_Input.o: SE_GeometryData.h SE_HashMap.h SE_Script.h ./cscript/acc.h
 SE_Input.o: /usr/include/stdint.h /usr/include/bits/wchar.h
 SE_Input.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
-SE_Input.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Log.h
-SE_Input.o: SE_Memory.h
+SE_Input.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_SaveState.h
+SE_Input.o: SE_Log.h SE_Memory.h
 SE_Init.o: SE_Init.h SE_Common.h /usr/include/assert.h
 SE_Init.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Init.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -426,8 +427,24 @@ SE_Init.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 SE_Init.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Spatial.h
 SE_Init.o: SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h SE_Matrix.h
 SE_Init.o: SE_RenderState.h SE_List.h SE_Log.h SE_World.h SE_Camera.h
-SE_Init.o: SE_Input.h cscript/acc.h /usr/include/ctype.h /usr/include/dlfcn.h
-SE_Init.o: /usr/include/bits/dlfcn.h ./renderer/SE_Renderer.h
+SE_Init.o: SE_Input.h SE_SaveState.h cscript/acc.h /usr/include/ctype.h
+SE_Init.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
+SE_Init.o: ./renderer/SE_Renderer.h
+SE_SaveState.o: SE_SaveState.h SE_Common.h /usr/include/assert.h
+SE_SaveState.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_SaveState.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_SaveState.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_SaveState.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_SaveState.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_SaveState.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_SaveState.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_SaveState.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_SaveState.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_SaveState.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_SaveState.o: /usr/include/string.h /usr/include/stdio.h
+SE_SaveState.o: /usr/include/libio.h /usr/include/_G_config.h
+SE_SaveState.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+SE_SaveState.o: /usr/include/bits/sys_errlist.h SE_Vector.h
 ./renderer/SE_TextureID.o: ./renderer/SE_TextureID.h SE_Common.h
 ./renderer/SE_TextureID.o: /usr/include/assert.h /usr/include/features.h
 ./renderer/SE_TextureID.o: /usr/include/sys/cdefs.h
@@ -480,8 +497,8 @@ SE_Init.o: /usr/include/bits/dlfcn.h ./renderer/SE_Renderer.h
 ./renderer/SE_Renderer.o: /usr/include/bits/wchar.h ./renderer/SE_TextureID.h
 ./renderer/SE_Renderer.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
 ./renderer/SE_Renderer.o: /usr/include/inttypes.h SE_World.h SE_Camera.h
-./renderer/SE_Renderer.o: SE_Input.h /usr/include/GL/glu.h SE_Memory.h
-./renderer/SE_Renderer.o: SE_Log.h
+./renderer/SE_Renderer.o: SE_Input.h SE_SaveState.h /usr/include/GL/glu.h
+./renderer/SE_Renderer.o: SE_Memory.h SE_Log.h
 ./cscript/hashmap.o: ./cscript/hashmap.h /usr/include/stdlib.h
 ./cscript/hashmap.o: /usr/include/features.h /usr/include/sys/cdefs.h
 ./cscript/hashmap.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -568,8 +585,8 @@ main.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 main.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Spatial.h
 main.o: SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h SE_Matrix.h
 main.o: SE_RenderState.h SE_List.h SE_Log.h SE_World.h SE_Camera.h SE_Input.h
-main.o: cscript/acc.h /usr/include/GL/glu.h /usr/include/ctype.h
-main.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
+main.o: SE_SaveState.h cscript/acc.h /usr/include/GL/glu.h
+main.o: /usr/include/ctype.h /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
 main.o: ./renderer/SE_Renderer.h SE_Memory.h SE_Init.h /usr/include/SDL/SDL.h
 main.o: /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_stdinc.h
 main.o: /usr/include/SDL/SDL_config.h /usr/include/SDL/SDL_platform.h
