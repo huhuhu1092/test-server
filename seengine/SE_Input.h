@@ -1,7 +1,7 @@
 #ifndef SE_INPUT_H
 #define SE_INPUT_H
 #include "SE_Common.h"
-
+#include "SE_Vector.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

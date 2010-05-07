@@ -7,6 +7,7 @@ extern "C" {
 struct SE_World_tag;
 extern struct SE_World_tag* SE_GetWorld();
 extern SE_Result SE_InitWorld(int argc, char** argv);
+extern SE_Result SE_ResizeWindow(int w, int h);
 #ifdef __cplusplus
 }
 #endif

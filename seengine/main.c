@@ -21,6 +21,7 @@
 #include "./renderer/SE_Renderer.h"
 #include "SE_Input.h"
 #include "SE_Memory.h"
+#include "SE_Init.h"
 #include <SDL.h>
 
 /* screen width, height, and bit depth */
@@ -34,15 +35,14 @@
 
 /* This is our SDL surface */
 SDL_Surface *surface;
-static SE_World seWorld;
 void Quit( int returnCode )
 {
+    SE_World_Release(SE_GetWorld());
     /* clean up the window */
     SDL_Quit( );
 
     exit( returnCode );
 }
-
 int init(int argc, char** argv)
 {
     if(argc < 3)
@@ -58,100 +58,13 @@ int init(int argc, char** argv)
     loader.Write(SE_String_GetData(&outPath));
     SE_String_Release(&outPath);
     SE_String_Release(&inPath);
-    SE_World_Init(&seWorld, "world_init.rs");
-    SE_ResourceManager* resourceManager = SE_World_GetResourceManager(&seWorld);
-    SE_ResourceManager_InitFromFile(resourceManager, "/home/luwei/model/jme/home/newhome3", argv[2]);
-    SE_Spatial* root = SE_World_GetSceneRoot(&seWorld);
-    SE_Spatial_Init(root, SE_NODE, "root", resourceManager,NULL);
-    SE_Spatial_SetRenderState(root, SE_TEXTURE, "texture.rs");
-    int meshCount = SE_ResourceManager_GetMeshCount(resourceManager);
-    LOGI("### meshCount = %d ####\n", meshCount);
-    int i;
-    SE_List nameList;
-    SE_List_Init(&nameList);
-    int geometryNum = 0;
-    for(i = 0 ; i < meshCount; i++)
-    {
-        SE_Mesh* mesh = SE_ResourceManager_GetMesh(resourceManager, i);
-        SE_Spatial* spatial = SE_Spatial_Create();
-        SE_String strName;
-        SE_Object_Clear(&strName, sizeof(SE_String));
-        SE_String_Concate(&strName, "%s_%d", SE_String_GetData(&mesh->name), i);
-        if(mesh->subMeshNum == 0)
-        {
-            SE_Spatial_Init(spatial, SE_GEOMETRY, SE_String_GetData(&strName), resourceManager, mesh);
-            geometryNum++;
-        }
-        else
-        {
-            SE_Spatial_Init(spatial, SE_NODE, SE_String_GetData(&strName), resourceManager, mesh);
-            int j;
-            for(j = 0 ; j < mesh->subMeshNum ; j++)
-            {
-                SE_Spatial* subs = SE_Spatial_Create();
-                SE_String subName;
-                SE_Object_Clear(&subName, sizeof(SE_String));
-                SE_String_Concate(&subName, "%s_%d", SE_String_GetData(&strName), j);
-                SE_Spatial_Init(subs, SE_GEOMETRY, SE_String_GetData(&subName), resourceManager, mesh);
-                subs->subMeshIndex = j;
-                SE_Spatial_AddChild(spatial, subs);
-                SE_String_Release(&subName);
-            }
-        }
-        SE_Element e;
-        e.type = SE_STRING;
-        SE_String_Init(&e.str, SE_String_GetData(&strName));
-        SE_String_Release(&strName);
-        SE_List_AddLast(&nameList, e);
-        SE_Spatial_AddChild(root, spatial);
-        SE_MaterialData* m = SE_ResourceManager_GetMaterialData(resourceManager, mesh->materialIndex);
-        if(m)
-        {
-            SE_String str = m->texturename;
-            if(!SE_String_IsEmpty(&str))
-                SE_Texture* tex = SE_ResourceManager_LoadTexture(resourceManager, SE_String_GetData(&m->texturename));
-        }
-    }
-    LOGI("... geometry with no sub mesh num = %d\n", geometryNum);
-    SE_Spatial_UpdateRenderState(root);
-    /*
-    int nameCount = SE_List_Size(&nameList);
-    SE_ASSERT(nameCount == meshCount);
-    for(i = 0 ; i < nameCount ; i++)
-    {
-        SE_Element e = SE_List_GetAt(&nameList, i);
-        SE_Spatial_RemoveChildByName(root, e.str);
-    }
-    */
-    SE_List_Release(&nameList);
-    return 0;
+    int argcn = 2;
+    char* argvn[] = {"/home/luwei/model/jme/home/newhome3", argv[2]};
+    SE_InitWorld(argcn, argvn);
 }
 int resizeWindow( int w, int h )
 {
-    if(w <= 0)
-        w = 1;
-    if(h <= 0)
-        h = 1;
-    glViewport(0, 0, w, h);
-    SE_Camera* mainCamera = SE_World_GetMainCamera(&seWorld);
-    SE_Vector3f loc, target;
-    /*
-    SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
-    SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
-    */
-    SE_Vec3f_Init(54.9162,	-240.5901,	95.9493, &loc);
-    SE_Vec3f_Init(49.3477,	27.1996,	97.1154, &target);
-
-    SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
-    SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
-    SE_Rectf nearrect;
-    SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(nearrect.left, nearrect.right, nearrect.top, nearrect.bottom, 1.0f, 1000.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity(); 
-
+    SE_ResizeWindow(w, h);
 }
 void handleKeyPress( SDL_keysym *keysym )
 {
@@ -197,7 +110,7 @@ int drawScene ()   // Create The Display Function
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SE_Renderer_DrawWorld(&seWorld, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SE_Renderer_DrawWorld(SE_GetWorld(), SCREEN_WIDTH, SCREEN_HEIGHT);
     /*
     //debug
     glBegin(GL_TRIANGLES);
@@ -371,7 +284,7 @@ int main( int argc, char **argv )
                         }
                         inputEvent->mouse.x = event.motion.x;
                         inputEvent->mouse.y = event.motion.y;
-                        SE_HandleInputEvent(&seWorld, inputEvent);
+                        SE_HandleInputEvent(SE_GetWorld(), inputEvent);
                     }    
                 }
                 break;
@@ -398,7 +311,7 @@ int main( int argc, char **argv )
                     }
                     inputEvent->mouse.x = event.button.x;
                     inputEvent->mouse.y = event.button.y;
-                    SE_HandleInputEvent(&seWorld, inputEvent);
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
                 }    
                 break;
             case SDL_MOUSEBUTTONUP:
@@ -424,7 +337,7 @@ int main( int argc, char **argv )
                     }
                     inputEvent->mouse.x = event.button.x;
                     inputEvent->mouse.y = event.button.y;
-                    SE_HandleInputEvent(&seWorld, inputEvent);
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
                 }    
                 break;
 			default:

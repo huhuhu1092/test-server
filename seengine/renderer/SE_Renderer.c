@@ -41,15 +41,8 @@ void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vert
 void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
 {
     SE_Camera* mainCamera = SE_World_GetMainCamera(world);
-    glViewport(0, 0, w, h);
-    /*
-    SE_Vector3f loc, target;
-    SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
-    SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
-    SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
-    SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
-    */
     SE_Rectf nearrect;
+    glViewport(0, 0, w, h);
     SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

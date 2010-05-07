@@ -95,4 +95,31 @@ SE_Result SE_InitWorld(int argc, char** argv)
     SE_List_Release(&nameList);
     return 0;
 }
-
+SE_Result SE_ResizeWindow(int w, int h)
+{
+    if(w <= 0)
+        w = 1;
+    if(h <= 0)
+        h = 1;
+    SE_Camera* mainCamera = SE_World_GetMainCamera(&seWorld);
+    SE_Vector3f loc, target, zDir,zAxis, yAxis;
+    /*
+    SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
+    SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
+    */
+    SE_Vec3f_Init(54.9162,	-240.5901,	95.9493, &loc);
+    SE_Vec3f_Init(49.3477,	27.1996,	97.1154, &target);
+    SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
+    SE_Camera_RotateLocalXYZAxis(mainCamera, 90.0f, 2);
+    SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
+    /*
+    SE_Rectf nearrect;
+    SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(nearrect.left, nearrect.right, nearrect.top, nearrect.bottom, 1.0f, 1000.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity(); 
+*/
+    return SE_VALID;
+}

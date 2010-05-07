@@ -51,18 +51,15 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 LOGI("## delta x = %f ##\n", deltaX );
                 mainCamera = SE_World_GetMainCamera(world);
                 viewportWidth  = mainCamera->viewport.right - mainCamera->viewport.left;
-                if(deltaX > 0)
-                {
-                    ratio = -180.0f / viewportWidth;
-                }
-                else
-                {
-                    ratio = 180.0f / viewportWidth;
-                }
-
+                ratio = -180.0f / viewportWidth;
                 angle = ratio * deltaX;/*this angle is the rotation angle about y axis*/
+                LOGI("## rotate angle = %f ###\n", angle);
                 SE_Camera_RotateLocalXYZAxis(mainCamera, angle, 1);/*rotate about y axis*/
-
+                SE_Vector3f v;
+                SE_Vec3f_Init(0, 0, deltaY, &v);
+                SE_Camera_LocationTranslateAlignXYZ(mainCamera, deltaY, 2);
+                mouseRecord->x = inputEvent->mouse.x;
+                mouseRecord->y = inputEvent->mouse.y;
             }
             else if(currMouseState == SE_RELEASED && mouseRecord->state == SE_PRESSED)
             {
@@ -77,5 +74,6 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
         }
     } 
     SE_Free(inputEvent);
+    return SE_VALID;
 }
 

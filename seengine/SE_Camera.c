@@ -137,4 +137,28 @@ SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAngle, int
     SE_Vec3f_Normalize(&xAxis, &camera->xAxis);
     SE_Vec3f_Normalize(&yAxis, &camera->yAxis);
     SE_Vec3f_Normalize(&zAxis, &camera->zAxis); 
+    return SE_VALID;
+}
+SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate, int axis)
+{
+    SE_Vector3f newLoc;
+    SE_Vector3f delta;
+    if(translate == 0.0)
+        return SE_VALID;
+    switch(axis)
+    {
+    case 0:
+        SE_Vec3f_Mul(&camera->xAxis, translate, &delta);
+        break;
+    case 1:
+        SE_Vec3f_Mul(&camera->yAxis, translate, &delta);
+        break;
+    case 2:
+        SE_Vec3f_Mul(&camera->zAxis, translate, &delta);
+        break;
+    }
+    
+    SE_Vec3f_Add(&camera->location, &delta, &newLoc);
+    SE_Vec3f_Copy(&newLoc, &camera->location);
+    return SE_VALID;
 }

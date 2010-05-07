@@ -37,6 +37,13 @@ extern SE_Result SE_Camera_GetMatrixViewToWorld(SE_Camera* camera, SE_Matrix4f* 
  * 2: z axis
  * */
 extern SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAngle, int axis);
+/**
+ * translate along x, y,z axis of camera
+ * 0: x axis
+ * 1: y axis
+ * 2: z axis
+ * */
+extern SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate, int axis);
 #ifdef __cplusplus
 }
 #endif
