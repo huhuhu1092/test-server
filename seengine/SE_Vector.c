@@ -219,6 +219,12 @@ SE_Result SE_Vec3f_Decompose(const SE_Vector3f* vDecomposed, const SE_Vector3f* 
     SE_Vec3f_Subtract(vDecomposed, vParallel, vPerpendicular);
     return SE_VALID;
 }
+float SE_Vec3f_ScalarTripleProduct(const SE_Vector3f* u, const SE_Vector3f* v, const SE_Vector3f* w)
+{
+    SE_Vector3f crossProduct;
+    SE_Vec3f_Cross(u, v, &crossProduct);
+    return SE_Vec3f_Dot(&crossProduct , w);
+}
 SE_Result SE_Vec4f_Init(float x, float y, float z, float w, SE_Vector4f* out)
 {
     out->x = x;

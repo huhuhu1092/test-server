@@ -108,10 +108,18 @@ SE_Result SE_ResizeWindow(int w, int h)
     SE_Vec3f_Init(111.3221f,-338.9771f, 119.7675f, &loc);
     SE_Vec3f_Init(46.4345f, -123.8831f, 57.3685f, &target);
     */
+    /*
     SE_Vec3f_Init(54.9162,	-240.5901,	95.9493, &loc);
     SE_Vec3f_Init(49.3477,	27.1996,	97.1154, &target);
+    */
+    SE_Vec3f_Init(45.4441,	-234.7624,	90.7012, &loc);
+    SE_Vec3f_Init(0, -1, 0, &zAxis);
+    SE_Vec3f_Init(0, 0, 1, &yAxis);
+    SE_Camera_InitByDirectionUp(&loc, &zAxis, &yAxis, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera); 
+    /*
     SE_Camera_InitByLocationTarget(&loc, &target, 90.0f, ((float)h) / w, 1.0f, 1000.0f, mainCamera);
     SE_Camera_RotateLocalXYZAxis(mainCamera, 90.0f, 2);
+    */
     SE_Camera_SetViewport(mainCamera, 0, 0, w, h);
     SE_World_SaveMainCamera(&seWorld);
     /*

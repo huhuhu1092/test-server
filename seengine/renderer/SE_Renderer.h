@@ -42,6 +42,9 @@ extern void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE
 extern void SE_Renderer_DrawWorld(SE_World* world, int w, int h);
 extern void SE_Renderer_EnableState(enum SE_GL_STATE s);
 extern void SE_Renderer_DisableState(enum SE_GL_STATE s);
+extern void SE_Renderer_SetColor(float r, float g, float b, float a);
+extern void SE_Renderer_SetAmbientMaterial(float rm, float gm, float bm, float am);
+
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/

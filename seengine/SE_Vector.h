@@ -68,6 +68,12 @@ extern float SE_Vec3f_LengthSquare(const SE_Vector3f* v);
 extern SE_Result  SE_Vec3f_Cross(const SE_Vector3f* firstV, const SE_Vector3f* secondV, SE_Vector3f* out);
 extern float SE_Vec3f_Distance(const SE_Vector3f* v1, const SE_Vector3f* v2);
 extern SE_Result SE_Vec3f_Decompose(const SE_Vector3f* vDecomposed, const SE_Vector3f* vAxis, SE_Vector3f* vPerpendicular, SE_Vector3f* vParallel);
+/**
+ * this function implement w.(u X v)
+ * if return value is 0 u v w is at the same plane
+ * else it is the volume formed by u v w
+ * */
+extern float SE_Vec3f_ScalarTripleProduct(const SE_Vector3f* u, const SE_Vector3f* v, const SE_Vector3f* w);
 
 extern SE_Result SE_Vec4f_Init(float x, float y, float z, float w, SE_Vector4f* out);
 extern SE_Result SE_Vec4f_Copy(const SE_Vector4f* src, SE_Vector4f* out);

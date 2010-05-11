@@ -57,10 +57,26 @@ static void SEC_BindTexture(void* runEnv, int target)
         {
             md = SE_ResourceManager_GetMaterialData(resourceManager, mesh->materialIndex);
         } 
-        if(md != NULL && !SE_String_IsEmpty(&md->texturename))
+        if(md != NULL)
         {
-            SE_Renderer_BindTexture(resourceManager, (enum SE_TEX_TARGET)target, SE_String_GetData(&md->texturename));
+            if(!SE_String_IsEmpty(&md->texturename))
+            {
+                SE_Renderer_EnableState(SE_TEX_2D);
+                SE_Renderer_BindTexture(resourceManager, (enum SE_TEX_TARGET)target, SE_String_GetData(&md->texturename));
+            }
+            else
+            {
+                SE_Renderer_DisableState(SE_TEX_2D);
+                SE_Renderer_SetAmbientMaterial(md->ambient.x, md->ambient.y, md->ambient.z, 1.0f);
+                //SE_Renderer_SetDiffuseMaterial(md->diffuse);
+            }
         } 
+        else
+        {
+            SE_Renderer_DisableState(SE_TEX_2D);
+            SE_Renderer_SetColor(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0);
+        }
+
     } 
 }
 static void SEC_EnableState(void* runEnv, int s)

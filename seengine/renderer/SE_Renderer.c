@@ -73,6 +73,11 @@ void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
     LOGI("\n\n\n");
     */
     glLoadMatrixf(m);
+    //enable light
+    GLfloat ambientLight[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    glEnable(GL_LIGHTING);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientLight);
+    //end
     SE_Spatial* rootSpatial = SE_World_GetSceneRoot(world);
     SE_Renderer_DrawSpatial(rootSpatial);
 }
@@ -117,7 +122,7 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
         }
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
-    glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
+    /*glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);*/
     /*LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     SE_Free(vertexArray);
@@ -162,7 +167,7 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
         }
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
-    glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);
+    /*glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);*/
     /*LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     /*
@@ -395,4 +400,14 @@ void SE_Renderer_DisableState(enum SE_GL_STATE s)
     }
 
 }
+void SE_Renderer_SetColor(float r, float g, float b, float a)
+{
+    glColor4f(r, g , b, a);
+}
+void SE_Renderer_SetAmbientMaterial(float rm , float gm , float bm, float am)
+{
+    GLfloat gray[] = {rm, gm, bm, am};
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, gray);
+}
+
 
