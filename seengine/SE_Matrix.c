@@ -190,6 +190,14 @@ SE_Result SE_Mat3f_Transpose(const SE_Matrix3f* m, SE_Matrix3f* out)
     SE_Mat3f_InitFromColumn(&row1, &row2, &row3, out);
     return SE_VALID;
 }
+SE_Result SE_Mat3f_Scale(float x, float y, float z, SE_Matrix3f* out)
+{
+    SE_Mat3f_Identity(out);
+    out->m00 = x;
+    out->m11 = y;
+    out->m22 = z;
+    return SE_VALID;
+}
 SE_Result SE_Mat3f_RotateX(float angle, SE_Matrix3f* out)
 {
     float radian = SE_AngleToRadian(angle);

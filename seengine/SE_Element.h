@@ -8,7 +8,7 @@ extern "C" {
 /*
  * this type is used in data structure. for example SE_List, SE_Hash, SE_Tree, etc.
  * **/
-enum SE_ELEMENT_TYPE {SE_NONE, SE_INT, SE_UINT, SE_SHORT, SE_USHORT, SE_LONG, SE_ULONG, SE_CHAR, SE_UCHAR, SE_FLOAT, SE_STRING, SE_DATA};
+enum SE_ELEMENT_TYPE {SE_NONE, SE_INT, SE_UINT, SE_SHORT, SE_USHORT, SE_LONG, SE_ULONG, SE_CHAR, SE_UCHAR, SE_FLOAT, SE_POINTER, SE_STRING, SE_DATA};
 /*
 #define SE_NONE   0
 #define SE_INT    1
@@ -53,6 +53,7 @@ typedef struct SE_Element_tag
         long l;
         unsigned long ul;
         float f;
+        void* ptr;
         SE_String str;
         SE_DataPointer dp;
     };

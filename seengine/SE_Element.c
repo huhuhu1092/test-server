@@ -153,6 +153,20 @@ int SE_Element_Compare(SE_Element v1, SE_Element v2)
         }
 
         break; 
+    case SE_POINTER:
+        if(v1.l == v2.l)
+        {
+            ret = 0;
+        } 
+        else if(v1.l > v2.l)
+        {
+            ret = 1;
+        }
+        else
+        {
+            ret = -1;
+        }
+        break;
     case SE_STRING: 
         ret = SE_String_Compare(v1.str, v2.str);
         break; 

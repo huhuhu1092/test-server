@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+typedef void (*SELISTAPPLYFUNCTION)(SE_Element* e, void* context);
 typedef struct SE_ListNode_tag
 {
     SE_Element data;
@@ -33,6 +33,7 @@ extern SE_Result SE_List_RemoveAt(SE_List* list, int index);
 extern SE_Result SE_List_RemoveFront(SE_List* list);
 extern SE_Result SE_List_RemoveLast(SE_List* list);
 extern SE_Result SE_List_RemoveElement(SE_List* list, SE_Element e);
+extern SE_Result SE_List_Apply(SE_List* list, SELISTAPPLYFUNCTION applyFunc, void* context);
 extern void SE_List_Release(void* l);
 extern int SE_List_Size(SE_List* list);
 extern SE_Element SE_List_GetAt(SE_List* list , int index);

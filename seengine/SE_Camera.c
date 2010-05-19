@@ -1,5 +1,6 @@
 #include "SE_Camera.h"
 #include "SE_Log.h"
+#include "SE_Math.h"
 SE_Result SE_Camera_InitByLocationTarget(const SE_Vector3f* location, const SE_Vector3f* target, float fov, float ratio, float near, float far, SE_Camera* out)
 {
     SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
@@ -162,3 +163,27 @@ SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate
     SE_Vec3f_Copy(&newLoc, &camera->location);
     return SE_VALID;
 }
+SE_Result SE_Camera_ScreenCoordinateToWorld(SE_Camera* camera, int x, int y, SE_Ray* out)
+{
+    SE_Recti viewport;
+    SE_Rectf nearRect;
+    SE_Frustum* frustum;
+    SE_Vector3f dir, dirx, diry, dirz, tmp;
+    float xp, yp, xv, yv, dirLen;
+    viewport = camera->viewport;
+    frustum = &camera->frustum;
+    xp = ((float)x) / (viewport.right - viewport.left);
+    yp = 1 - ((float)y) / (viewport.bottom - viewport.top);
+    SE_Frustum_GetNearPlaneRect(frustum, &nearRect);
+    xv = (1 - xp) * nearRect.left + xp * nearRect.right;
+    yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
+    dirLen = SE_Sqrtf(xv * xv + yv + yv + frustum->n * frustum->n);
+    SE_Vec3f_Mul(&camera->xAxis, xv / dirLen, &dirx);
+    SE_Vec3f_Mul(&camera->yAxis, yv / dirLen, &diry);
+    SE_Vec3f_Mul(&camera->zAxis, -frustum->n / dirLen, &dirz);
+    SE_Vec3f_Add(&dirx , &diry, &tmp);
+    SE_Vec3f_Add(&dirz, &tmp, &dir);
+    SE_Ray_InitFromDirection(&camera->location, &dir, false, out); 
+    return SE_VALID;
+}
+

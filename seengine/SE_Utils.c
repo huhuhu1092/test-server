@@ -82,3 +82,23 @@ void SE_ReadCScriptFile(const char* name, char** outData, int* outLen)
     fclose(fin);
 
 }
+void SE_ExtremePointAlongDirection(SE_Vector3f* dir, SE_Vector3f* points, int pointNum , int* indexMin, int* indexMax)
+{
+    float minproj = SE_FLT_MAX;
+    float maxproj = -SE_FLT_MAX;
+    int i;
+    for(i = 0 ; i < pointNum ; i++)
+    {
+        float proj = SE_Vec3f_Dot(dir, &points[i]);
+        if(proj < minproj)
+        {
+            minproj = proj;
+            *indexMin = i;
+        }
+        if(proj > maxproj)
+        {
+            maxproj = proj;
+            *indexMax = i;
+        }
+    }
+}

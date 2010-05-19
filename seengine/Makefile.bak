@@ -23,6 +23,9 @@ SRCS = SE_Vector.c \
 		   SE_Input.c \
 		   SE_Init.c \
 		   SE_SaveState.c \
+		   SE_AABB.c \
+		   SE_Sphere.c \
+		   SE_GeometryIntersect.c \
 		   ./renderer/SE_TextureID.c \
 		   ./renderer/SE_Renderer.c \
 		   ./cscript/hashmap.c \
@@ -243,12 +246,12 @@ SE_Spatial.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_Spatial.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_Spatial.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_Spatial.o: SE_Vector.h SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h
-SE_Spatial.o: SE_Matrix.h SE_RenderState.h SE_String.h SE_ResourceManager.h
-SE_Spatial.o: SE_GeometryData.h SE_HashMap.h SE_Element.h SE_Script.h
-SE_Spatial.o: ./cscript/acc.h /usr/include/stdint.h /usr/include/bits/wchar.h
-SE_Spatial.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
-SE_Spatial.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_List.h
-SE_Spatial.o: SE_Memory.h SE_Utils.h
+SE_Spatial.o: SE_Matrix.h SE_AABB.h SE_Sphere.h SE_RenderState.h SE_String.h
+SE_Spatial.o: SE_ResourceManager.h SE_GeometryData.h SE_HashMap.h
+SE_Spatial.o: SE_Element.h SE_Script.h ./cscript/acc.h /usr/include/stdint.h
+SE_Spatial.o: /usr/include/bits/wchar.h ./renderer/SE_TextureID.h
+SE_Spatial.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
+SE_Spatial.o: /usr/include/inttypes.h SE_List.h SE_Memory.h SE_Utils.h
 SE_BoundingVolume.o: SE_BoundingVolume.h SE_Common.h /usr/include/assert.h
 SE_BoundingVolume.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_BoundingVolume.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -264,7 +267,8 @@ SE_BoundingVolume.o: /usr/include/string.h /usr/include/stdio.h
 SE_BoundingVolume.o: /usr/include/libio.h /usr/include/_G_config.h
 SE_BoundingVolume.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
 SE_BoundingVolume.o: /usr/include/bits/sys_errlist.h SE_Geometry3D.h
-SE_BoundingVolume.o: SE_Vector.h SE_Quat.h SE_Matrix.h
+SE_BoundingVolume.o: SE_Vector.h SE_Quat.h SE_Matrix.h SE_AABB.h SE_Sphere.h
+SE_BoundingVolume.o: SE_GeometryIntersect.h
 SE_ResourceManager.o: SE_ResourceManager.h SE_Common.h /usr/include/assert.h
 SE_ResourceManager.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_ResourceManager.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -337,12 +341,13 @@ SE_World.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_World.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_World.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_World.o: SE_Geometry3D.h SE_Vector.h SE_BoundingVolume.h SE_Quat.h
-SE_World.o: SE_Matrix.h SE_List.h SE_Element.h SE_String.h SE_Spatial.h
-SE_World.o: SE_RenderState.h SE_ResourceManager.h SE_GeometryData.h
-SE_World.o: SE_HashMap.h SE_Script.h ./cscript/acc.h /usr/include/stdint.h
-SE_World.o: /usr/include/bits/wchar.h ./renderer/SE_TextureID.h
-SE_World.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
-SE_World.o: /usr/include/inttypes.h SE_Input.h SE_SaveState.h
+SE_World.o: SE_Matrix.h SE_AABB.h SE_Sphere.h SE_List.h SE_Element.h
+SE_World.o: SE_String.h SE_Spatial.h SE_RenderState.h SE_ResourceManager.h
+SE_World.o: SE_GeometryData.h SE_HashMap.h SE_Script.h ./cscript/acc.h
+SE_World.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+SE_World.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
+SE_World.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Input.h
+SE_World.o: SE_SaveState.h
 SE_Camera.o: SE_Camera.h SE_Common.h /usr/include/assert.h
 SE_Camera.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Camera.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -358,7 +363,7 @@ SE_Camera.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_Camera.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_Camera.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_Camera.o: SE_Geometry3D.h SE_Vector.h SE_BoundingVolume.h SE_Quat.h
-SE_Camera.o: SE_Matrix.h SE_Log.h
+SE_Camera.o: SE_Matrix.h SE_AABB.h SE_Sphere.h SE_Log.h
 SE_Script.o: SE_Script.h SE_Common.h /usr/include/assert.h
 SE_Script.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Script.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -376,12 +381,13 @@ SE_Script.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_Script.o: SE_String.h ./cscript/acc.h /usr/include/stdint.h
 SE_Script.o: /usr/include/bits/wchar.h SE_Utils.h SE_Vector.h SE_Matrix.h
 SE_Script.o: SE_Quat.h SE_Spatial.h SE_BoundingVolume.h SE_Geometry3D.h
-SE_Script.o: SE_RenderState.h SE_ResourceManager.h SE_GeometryData.h
-SE_Script.o: SE_HashMap.h SE_Element.h ./renderer/SE_TextureID.h
-SE_Script.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
-SE_Script.o: /usr/include/inttypes.h SE_List.h SE_Log.h
-SE_Script.o: ./renderer/SE_Renderer.h SE_World.h SE_Camera.h SE_Input.h
-SE_Script.o: SE_SaveState.h /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
+SE_Script.o: SE_AABB.h SE_Sphere.h SE_RenderState.h SE_ResourceManager.h
+SE_Script.o: SE_GeometryData.h SE_HashMap.h SE_Element.h
+SE_Script.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
+SE_Script.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_List.h
+SE_Script.o: SE_Log.h ./renderer/SE_Renderer.h SE_World.h SE_Camera.h
+SE_Script.o: SE_Input.h SE_SaveState.h /usr/include/dlfcn.h
+SE_Script.o: /usr/include/bits/dlfcn.h
 SE_Input.o: SE_Input.h SE_Common.h /usr/include/assert.h
 SE_Input.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_Input.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -397,10 +403,10 @@ SE_Input.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_Input.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_Input.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_Input.o: SE_Vector.h SE_World.h SE_Camera.h SE_Geometry3D.h
-SE_Input.o: SE_BoundingVolume.h SE_Quat.h SE_Matrix.h SE_List.h SE_Element.h
-SE_Input.o: SE_String.h SE_Spatial.h SE_RenderState.h SE_ResourceManager.h
-SE_Input.o: SE_GeometryData.h SE_HashMap.h SE_Script.h ./cscript/acc.h
-SE_Input.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+SE_Input.o: SE_BoundingVolume.h SE_Quat.h SE_Matrix.h SE_AABB.h SE_Sphere.h
+SE_Input.o: SE_List.h SE_Element.h SE_String.h SE_Spatial.h SE_RenderState.h
+SE_Input.o: SE_ResourceManager.h SE_GeometryData.h SE_HashMap.h SE_Script.h
+SE_Input.o: ./cscript/acc.h /usr/include/stdint.h /usr/include/bits/wchar.h
 SE_Input.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 SE_Input.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_SaveState.h
 SE_Input.o: SE_Log.h SE_Memory.h
@@ -426,10 +432,10 @@ SE_Init.o: /usr/include/stdint.h /usr/include/bits/wchar.h
 SE_Init.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 SE_Init.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Spatial.h
 SE_Init.o: SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h SE_Matrix.h
-SE_Init.o: SE_RenderState.h SE_List.h SE_Log.h SE_World.h SE_Camera.h
-SE_Init.o: SE_Input.h SE_SaveState.h cscript/acc.h /usr/include/ctype.h
-SE_Init.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
-SE_Init.o: ./renderer/SE_Renderer.h
+SE_Init.o: SE_AABB.h SE_Sphere.h SE_RenderState.h SE_List.h SE_Log.h
+SE_Init.o: SE_World.h SE_Camera.h SE_Input.h SE_SaveState.h cscript/acc.h
+SE_Init.o: /usr/include/ctype.h /usr/include/dlfcn.h
+SE_Init.o: /usr/include/bits/dlfcn.h ./renderer/SE_Renderer.h
 SE_SaveState.o: SE_SaveState.h SE_Common.h /usr/include/assert.h
 SE_SaveState.o: /usr/include/features.h /usr/include/sys/cdefs.h
 SE_SaveState.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
@@ -445,6 +451,56 @@ SE_SaveState.o: /usr/include/string.h /usr/include/stdio.h
 SE_SaveState.o: /usr/include/libio.h /usr/include/_G_config.h
 SE_SaveState.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
 SE_SaveState.o: /usr/include/bits/sys_errlist.h SE_Vector.h
+SE_AABB.o: SE_AABB.h SE_Common.h /usr/include/assert.h
+SE_AABB.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_AABB.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_AABB.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_AABB.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_AABB.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_AABB.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_AABB.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_AABB.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_AABB.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_AABB.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_AABB.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_AABB.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_AABB.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_AABB.o: SE_Vector.h SE_Matrix.h
+SE_Sphere.o: SE_Sphere.h SE_Common.h /usr/include/assert.h
+SE_Sphere.o: /usr/include/features.h /usr/include/sys/cdefs.h
+SE_Sphere.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+SE_Sphere.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+SE_Sphere.o: /usr/include/sys/types.h /usr/include/bits/types.h
+SE_Sphere.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_Sphere.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_Sphere.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+SE_Sphere.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+SE_Sphere.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+SE_Sphere.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+SE_Sphere.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
+SE_Sphere.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_Sphere.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+SE_Sphere.o: SE_Vector.h SE_Matrix.h SE_Math.h
+SE_GeometryIntersect.o: SE_GeometryIntersect.h SE_Vector.h SE_Common.h
+SE_GeometryIntersect.o: /usr/include/assert.h /usr/include/features.h
+SE_GeometryIntersect.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+SE_GeometryIntersect.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+SE_GeometryIntersect.o: /usr/include/stdlib.h /usr/include/sys/types.h
+SE_GeometryIntersect.o: /usr/include/bits/types.h
+SE_GeometryIntersect.o: /usr/include/bits/typesizes.h /usr/include/time.h
+SE_GeometryIntersect.o: /usr/include/endian.h /usr/include/bits/endian.h
+SE_GeometryIntersect.o: /usr/include/bits/byteswap.h
+SE_GeometryIntersect.o: /usr/include/sys/select.h /usr/include/bits/select.h
+SE_GeometryIntersect.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+SE_GeometryIntersect.o: /usr/include/sys/sysmacros.h
+SE_GeometryIntersect.o: /usr/include/bits/pthreadtypes.h
+SE_GeometryIntersect.o: /usr/include/alloca.h /usr/include/string.h
+SE_GeometryIntersect.o: /usr/include/stdio.h /usr/include/libio.h
+SE_GeometryIntersect.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_GeometryIntersect.o: /usr/include/bits/stdio_lim.h
+SE_GeometryIntersect.o: /usr/include/bits/sys_errlist.h SE_Geometry3D.h
+SE_GeometryIntersect.o: SE_Sphere.h SE_Matrix.h SE_AABB.h SE_Math.h
+SE_GeometryIntersect.o: SE_Memory.h
 ./renderer/SE_TextureID.o: ./renderer/SE_TextureID.h SE_Common.h
 ./renderer/SE_TextureID.o: /usr/include/assert.h /usr/include/features.h
 ./renderer/SE_TextureID.o: /usr/include/sys/cdefs.h
@@ -491,9 +547,9 @@ SE_SaveState.o: /usr/include/bits/sys_errlist.h SE_Vector.h
 ./renderer/SE_Renderer.o: /usr/include/bits/sys_errlist.h SE_Matrix.h
 ./renderer/SE_Renderer.o: SE_Quat.h SE_List.h SE_Element.h SE_String.h
 ./renderer/SE_Renderer.o: SE_GeometryData.h SE_Spatial.h SE_BoundingVolume.h
-./renderer/SE_Renderer.o: SE_Geometry3D.h SE_RenderState.h
-./renderer/SE_Renderer.o: SE_ResourceManager.h SE_HashMap.h SE_Script.h
-./renderer/SE_Renderer.o: ./cscript/acc.h /usr/include/stdint.h
+./renderer/SE_Renderer.o: SE_Geometry3D.h SE_AABB.h SE_Sphere.h
+./renderer/SE_Renderer.o: SE_RenderState.h SE_ResourceManager.h SE_HashMap.h
+./renderer/SE_Renderer.o: SE_Script.h ./cscript/acc.h /usr/include/stdint.h
 ./renderer/SE_Renderer.o: /usr/include/bits/wchar.h ./renderer/SE_TextureID.h
 ./renderer/SE_Renderer.o: /usr/include/GL/gl.h /usr/include/GL/glext.h
 ./renderer/SE_Renderer.o: /usr/include/inttypes.h SE_World.h SE_Camera.h
@@ -583,22 +639,22 @@ main.o: SE_Element.h SE_String.h SE_Script.h ./cscript/acc.h
 main.o: /usr/include/stdint.h /usr/include/bits/wchar.h
 main.o: ./renderer/SE_TextureID.h /usr/include/GL/gl.h
 main.o: /usr/include/GL/glext.h /usr/include/inttypes.h SE_Spatial.h
-main.o: SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h SE_Matrix.h
-main.o: SE_RenderState.h SE_List.h SE_Log.h SE_World.h SE_Camera.h SE_Input.h
-main.o: SE_SaveState.h cscript/acc.h /usr/include/GL/glu.h
-main.o: /usr/include/ctype.h /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
-main.o: ./renderer/SE_Renderer.h SE_Memory.h SE_Init.h /usr/include/SDL/SDL.h
-main.o: /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_stdinc.h
-main.o: /usr/include/SDL/SDL_config.h /usr/include/SDL/SDL_platform.h
-main.o: /usr/include/strings.h /usr/include/iconv.h
-main.o: /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h
-main.o: /usr/include/SDL/SDL_audio.h /usr/include/SDL/SDL_error.h
-main.o: /usr/include/SDL/SDL_endian.h /usr/include/SDL/SDL_mutex.h
-main.o: /usr/include/SDL/SDL_thread.h /usr/include/SDL/SDL_rwops.h
-main.o: /usr/include/SDL/SDL_cdrom.h /usr/include/SDL/SDL_cpuinfo.h
-main.o: /usr/include/SDL/SDL_events.h /usr/include/SDL/SDL_active.h
-main.o: /usr/include/SDL/SDL_keyboard.h /usr/include/SDL/SDL_keysym.h
-main.o: /usr/include/SDL/SDL_mouse.h /usr/include/SDL/SDL_video.h
-main.o: /usr/include/SDL/SDL_joystick.h /usr/include/SDL/SDL_quit.h
-main.o: /usr/include/SDL/SDL_loadso.h /usr/include/SDL/SDL_timer.h
-main.o: /usr/include/SDL/SDL_version.h
+main.o: SE_BoundingVolume.h SE_Geometry3D.h SE_Quat.h SE_Matrix.h SE_AABB.h
+main.o: SE_Sphere.h SE_RenderState.h SE_List.h SE_Log.h SE_World.h
+main.o: SE_Camera.h SE_Input.h SE_SaveState.h cscript/acc.h
+main.o: /usr/include/GL/glu.h /usr/include/ctype.h /usr/include/dlfcn.h
+main.o: /usr/include/bits/dlfcn.h ./renderer/SE_Renderer.h SE_Memory.h
+main.o: SE_Init.h /usr/include/SDL/SDL.h /usr/include/SDL/SDL_main.h
+main.o: /usr/include/SDL/SDL_stdinc.h /usr/include/SDL/SDL_config.h
+main.o: /usr/include/SDL/SDL_platform.h /usr/include/strings.h
+main.o: /usr/include/iconv.h /usr/include/SDL/begin_code.h
+main.o: /usr/include/SDL/close_code.h /usr/include/SDL/SDL_audio.h
+main.o: /usr/include/SDL/SDL_error.h /usr/include/SDL/SDL_endian.h
+main.o: /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_thread.h
+main.o: /usr/include/SDL/SDL_rwops.h /usr/include/SDL/SDL_cdrom.h
+main.o: /usr/include/SDL/SDL_cpuinfo.h /usr/include/SDL/SDL_events.h
+main.o: /usr/include/SDL/SDL_active.h /usr/include/SDL/SDL_keyboard.h
+main.o: /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h
+main.o: /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_joystick.h
+main.o: /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_loadso.h
+main.o: /usr/include/SDL/SDL_timer.h /usr/include/SDL/SDL_version.h

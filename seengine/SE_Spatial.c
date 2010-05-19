@@ -3,6 +3,7 @@
 #include "SE_Utils.h"
 #include "SE_ResourceManager.h"
 #include "SE_Script.h"
+#include "SE_Log.h"
 SE_Spatial* SE_Spatial_Create()
 {
     SE_Spatial* s = (SE_Spatial*)SE_Malloc(sizeof(SE_Spatial));
@@ -62,12 +63,12 @@ SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial)
     }
     if(spatial->children)
     {
-        int size = SE_List_Size(spatial->children);
-        int i;
-        for(i = 0 ; i < size; i++)
+        SE_Element* e = NULL;
+        SE_ListIterator li;
+        SE_ListIterator_Init(&li, spatial->children);
+        while(SE_ListIterator_Next(&li, e))
         {
-            SE_Element e = SE_List_GetAt(spatial->children, i);
-            SE_Spatial* child = (SE_Spatial*)e.dp.data;
+            SE_Spatial* child = (SE_Spatial*)e->dp.data;
             SE_ASSERT(child->parent == spatial);
             SE_Spatial_UpdateWorldTransform(child);
         }
@@ -219,5 +220,89 @@ SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType,
     SE_String* str = &spatial->renderState.rsu[rsType].scriptName;
     SE_String_CopyCharArray(str, scriptname);
     spatial->renderState.resourceManager = spatial->resourceManager;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, SE_BVType bvType)
+{
+    SE_Mesh* mesh = spatial->mesh;
+    SE_ResourceManager* resourceManager = spatial->resourceManager;
+    SE_GeometryData* geomData;
+    SE_SphereBV* sphereBV = NULL;
+    SE_AABBBV* aabbBV = NULL;
+    if(!mesh)
+        return SE_INVALID;
+    geomData = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
+    switch(bvType)
+    {
+    case SE_SPHERE_E:
+        sphereBV = (SE_SphereBV*)SE_Malloc(sizeof(SE_SphereBV));
+        if(!sphereBV)
+            LOGE("out of memory when alloc sphere\n");
+        SE_SphereBV_CreateFromPoints(sphereBV, geomData->vertexArray, geomData->vertexNum);
+        spatial->localBV = (SE_BoundingVolume*)sphereBV;
+        break;
+    case SE_AABB_E:
+        aabbBV = (SE_AABBBV*)SE_Malloc(sizeof(SE_AABBBV));
+        SE_AABBBV_CreateFromPoints(aabbBV, geomData->vertexArray, geomData->vertexNum);
+        spatial->localBV = (SE_BoundingVolume*)aabbBV;
+        break;
+    default:
+        LOGE("can not implement \n");
+        break;
+    }
+}
+struct ContextData
+{
+    SE_Ray* ray;
+    SE_List* spatialList;
+};
+static void travelSpatialChildren(SE_Element* e, void* context)
+{
+    SE_Spatial* s = (SE_Spatial*)e->ptr;
+    SE_ASSERT(e);
+    SE_ASSERT(context);
+    struct ContextData* contextData = (struct ContextData*)context;
+    spatialIntersectRay(s, contextData.ray, contextData.spatialList);
+}
+static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList)
+{
+    SE_BoundingVolume* bv = spatial->worldBV;
+    if(bv)
+    {
+        int ret;
+        ret = bv->fIntersectRay(bv, ray);
+        if(ret == 0)
+            return 0;
+        SE_List* children = spatial->children;
+        if(children)
+        {
+            struct ContextData contextData;
+            contextData.ray = ray;
+            contextData.spatialList = spatialList;
+            SE_List_Apply(children, &contextData);
+        }
+        else
+        {
+            SE_Element e;
+            e.type = SE_POINTER;
+            e.ptr = spatial;
+            SE_List_AddLast(spatialList, e);
+        }
+        return 0;
+    }
+    else
+    {
+        return 0;
+    }
+}
+SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList)
+{
+    if(!spatail)
+        return SE_INVALID;
+    if(!ray)
+        return SE_INVALID;
+    if(!spatialList)
+        return SE_INVALID;
+    spatialIntersectRay(spatial, ray, spatialList);
     return SE_VALID;
 }

@@ -66,6 +66,7 @@ SE_Result SE_InitWorld(int argc, char** argv)
                 SE_String_Release(&subName);
             }
         }
+        SE_Spatial_CreateLocalBV(spatial, SE_AABB_E);
         SE_Element e;
         e.type = SE_STRING;
         SE_String_Init(&e.str, SE_String_GetData(&strName));

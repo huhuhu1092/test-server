@@ -165,6 +165,19 @@ SE_Result SE_List_RemoveLast(SE_List* list)
     SE_ASSERT(list->size >= 0);
     return SE_VALID; 
 }
+SE_Result SE_List_Apply(SE_List* list, SELISTAPPLYFUNCTION applyFunc, void* context)
+{
+    SE_ASSERT(list);
+    SE_ASSERT(applyFunc);
+    SE_ListIterator li;
+    SE_Element* e = NULL;
+    SE_Object_Clear(&li, sizeof(SE_ListIterator));
+    SE_ListIterator_Init(&li, list);
+    while(SE_ListIterator_Next(&li, e))
+    {
+        applyFunc(e, context);
+    }
+}
 void SE_List_Release(void* l)
 {
     SE_ASSERT(l);

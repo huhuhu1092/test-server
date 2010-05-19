@@ -44,6 +44,10 @@ extern SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAng
  * 2: z axis
  * */
 extern SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate, int axis);
+/**
+ * x, y is the Operation Window System coordinate, for example windows or Xserver
+ * */
+extern SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ray* out);
 #ifdef __cplusplus
 }
 #endif

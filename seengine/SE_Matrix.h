@@ -62,6 +62,7 @@ extern SE_Result SE_Mat3f_RotateX(float angle, SE_Matrix3f* out);
 extern SE_Result SE_Mat3f_RotateY(float angle, SE_Matrix3f* out);
 extern SE_Result SE_Mat3f_RotateZ(float angle, SE_Matrix3f* out);
 extern SE_Result SE_Mat3f_RotateAngleFromAxis(float angle, const SE_Vector3f* v, SE_Matrix3f* out);
+extern SE_Result SE_Mat3f_Scale(float x, float y, float z, SE_Matrix3f* out);
 /**                      function about Matrix4f */
 extern SE_Result SE_Mat4f_InitFromArray(float data[16], SE_Matrix4f* out);
 extern SE_Result SE_Mat4f_InitFromColumn(const SE_Vector4f* column1, const SE_Vector4f* column2, const SE_Vector4f* column3, const SE_Vector4f* column4, SE_Matrix4f* out);

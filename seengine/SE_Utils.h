@@ -19,6 +19,7 @@ extern void SE_ReadFileAllByName(const char* name, char** outData, int* outLen);
  * this function is used to read csript file. cscript file has a special point, it need the last char of buffer must be '\0', so we alloc a buffer with file size plus 1.
  * */
 extern void SE_ReadCScriptFile(const char* name, char** outData, int* outLen);
+extern void SE_ExtremePointAlongDirection(SE_Vector3f* dir, SE_Vector3f* points, int pointNum , int* indexMin, int* indexMax);
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/

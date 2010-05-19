@@ -280,9 +280,9 @@ static GLint getGLInternalFormat(SE_ImageData* imageData)
     switch(imageData->pixelFormat)
     {
     case SE_RGB:
-        return GL_RGB;
+        return GL_COMPRESSED_RGB;
     case SE_RGBA:
-        return GL_RGBA;
+        return GL_COMPRESSED_RGBA;
     case SE_RGB565:
         return GL_RGB;
     default:
