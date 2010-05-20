@@ -28,10 +28,12 @@ SE_Result SE_Intersect_Ray_Triangle(const SE_Ray* ray, const SE_Triangle* tri, S
 }
 SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_IntersectionResult* out)
 {
-    float tmin = 0.0f;
+    /*
+    float tmin = 0.0;
     float tmax = SE_FLT_MAX;
     SE_Vector3f dir, origin, tmp;
-    int i, ood, t1, t2;
+    int i;
+    float ood, t1, t2;
     SE_Ray_GetDirection(ray, &dir);
     SE_Ray_GetOrigin(ray, &origin);
     SE_Object_Clear(out, sizeof(SE_IntersectionResult));
@@ -69,6 +71,7 @@ SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_Inter
 
         }
     }
+    out->intersected = 1;
     out->distanceNum = 1;
     out->distance = (float*)SE_Malloc(sizeof(float));
     if(out->distance)
@@ -79,6 +82,54 @@ SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_Inter
     {
         SE_Vec3f_Mul(&dir, tmin, &tmp);
         SE_Vec3f_Add(&origin, &tmp, &out->intersectPoint[0]);
+    }
+    */
+    SE_Vector3f dir, origin, tmp;
+    int i;
+    int intersect = 0;
+    SE_Ray_GetDirection(ray, &dir);
+    SE_Ray_GetOrigin(ray, &origin);
+    SE_Object_Clear(out, sizeof(SE_IntersectionResult));
+    int index[3][2];
+    index[0][0] = 1;
+    index[0][1] = 2;
+    index[1][0] = 0;
+    index[1][1] = 2;
+    index[2][0] = 0;
+    index[2][1] = 1;
+    for(i = 0 ; i < 3 ; i++)
+    {
+        float v = dir.d[i];
+        float t = 0, ood;
+        float p[2];
+        int j;
+        ood = 1.0f / v;
+        if(v > 0)
+        {
+            t = (aabb->min.d[i] - origin.d[i]) * ood;
+        }
+        else
+        {
+            t = (aabb->max.d[i] - origin.d[i]) * ood;
+        }
+        for(j = 0 ; j < 2 ; j++)
+        {
+            p[j] = origin.d[index[i][j]] + t * dir.d[index[i][j]];
+        }
+        for(j = 0 ;j < 2 ; j++)
+        {
+            if(p[j] > aabb->max.d[index[i][j]] || p[j] < aabb->min.d[index[i][j]])
+               break; 
+        }
+        if(j == 2)
+        {
+            intersect = 1;
+            break;
+        }
+    }
+    if(intersect)
+    {
+        out->intersected = 1;
     }
     return SE_VALID;
 }

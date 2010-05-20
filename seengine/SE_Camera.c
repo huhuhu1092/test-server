@@ -163,7 +163,7 @@ SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate
     SE_Vec3f_Copy(&newLoc, &camera->location);
     return SE_VALID;
 }
-SE_Result SE_Camera_ScreenCoordinateToWorld(SE_Camera* camera, int x, int y, SE_Ray* out)
+SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ray* out)
 {
     SE_Recti viewport;
     SE_Rectf nearRect;
@@ -177,12 +177,17 @@ SE_Result SE_Camera_ScreenCoordinateToWorld(SE_Camera* camera, int x, int y, SE_
     SE_Frustum_GetNearPlaneRect(frustum, &nearRect);
     xv = (1 - xp) * nearRect.left + xp * nearRect.right;
     yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
-    dirLen = SE_Sqrtf(xv * xv + yv + yv + frustum->n * frustum->n);
+    dirLen = SE_Sqrtf(xv * xv + yv * yv + frustum->n * frustum->n);
+    /*
     SE_Vec3f_Mul(&camera->xAxis, xv / dirLen, &dirx);
     SE_Vec3f_Mul(&camera->yAxis, yv / dirLen, &diry);
     SE_Vec3f_Mul(&camera->zAxis, -frustum->n / dirLen, &dirz);
     SE_Vec3f_Add(&dirx , &diry, &tmp);
     SE_Vec3f_Add(&dirz, &tmp, &dir);
+    */
+    dir.x = camera->xAxis.x * xv / dirLen + camera->yAxis.x * yv / dirLen + camera->zAxis.x * (-frustum->n) / dirLen;
+    dir.y = camera->xAxis.y * xv / dirLen + camera->yAxis.y * yv /dirLen + camera->zAxis.y * (-frustum->n) / dirLen;
+    dir.z = camera->xAxis.z * xv / dirLen + camera->yAxis.z * yv / dirLen + camera->zAxis.z * (-frustum->n) / dirLen;
     SE_Ray_InitFromDirection(&camera->location, &dir, false, out); 
     return SE_VALID;
 }

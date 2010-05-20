@@ -3,8 +3,11 @@
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
+#include "SE_Geometry3D.h"
+#include "SE_List.h"
 #include "SE_Log.h"
 #include "SE_Memory.h"
+#include "SE_Math.h"
 SE_Result SE_InputDevice_Init(SE_InputDevice* inputDevice)
 {
     SE_Object_Clear(inputDevice, sizeof(SE_InputDevice));
@@ -44,25 +47,72 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 mouseRecord->y = inputEvent->mouse.y;
                 LOGI("## down x = %f, y = %f ##\n", mouseRecord->x , mouseRecord->y );
             }
-            else if(currMouseState == SE_PRESSED && mouseRecord->state == SE_PRESSED)
+            else if(currMouseState == SE_PRESSED && (mouseRecord->state == SE_PRESSED || mouseRecord->state == SE_MOVE))
             {
                 /*mouse is moving*/
                 deltaX = inputEvent->mouse.x - mouseRecord->x;
                 deltaY = inputEvent->mouse.y - mouseRecord->y;
-                LOGI("## delta x = %f ##\n", deltaX );
-                mainCamera = SE_World_GetMainCamera(world);
-                viewportWidth  = mainCamera->viewport.right - mainCamera->viewport.left;
-                ratio = -180.0f / viewportWidth;
-                angle = ratio * deltaX;/*this angle is the rotation angle about y axis*/
-                LOGI("## rotate angle = %f ###\n", angle);
-                SE_Camera_RotateLocalXYZAxis(mainCamera, angle, 1);/*rotate about y axis*/
-                SE_Vector3f v;
-                SE_Vec3f_Init(0, 0, deltaY, &v);
-                SE_Camera_LocationTranslateAlignXYZ(mainCamera, deltaY, 2);
-                mouseRecord->x = inputEvent->mouse.x;
-                mouseRecord->y = inputEvent->mouse.y;
+                LOGI("## delta x = %f ##\n", deltaX);
+                LOGI("## delta y = %f ##\n", deltaY);
+                if(((SE_Fabs(deltaX) > SE_MOVE_SLOPE) || (SE_Fabs(deltaY) > SE_MOVE_SLOPE)) && mouseRecord->state == SE_PRESSED)
+                {
+                    mouseRecord->state = SE_MOVE;
+                }
+                if(mouseRecord->state == SE_MOVE)
+                {
+                    mainCamera = SE_World_GetMainCamera(world);
+                    viewportWidth  = mainCamera->viewport.right - mainCamera->viewport.left;
+                    ratio = -180.0f / viewportWidth;
+                    angle = ratio * deltaX;/*this angle is the rotation angle about y axis*/
+                    LOGI("## rotate angle = %f ###\n", angle);
+                    SE_Camera_RotateLocalXYZAxis(mainCamera, angle, 1);/*rotate about y axis*/
+                    SE_Vector3f v;
+                    SE_Vec3f_Init(0, 0, deltaY, &v);
+                    SE_Camera_LocationTranslateAlignXYZ(mainCamera, deltaY, 2);
+                    mouseRecord->x = inputEvent->mouse.x;
+                    mouseRecord->y = inputEvent->mouse.y;
+                }
             }
             else if(currMouseState == SE_RELEASED && mouseRecord->state == SE_PRESSED)
+            {
+                int x = (int)mouseRecord->x;
+                int y = (int)mouseRecord->y;
+                LOGI("## in release state ##\n");
+                SE_Ray ray;
+                SE_Spatial* rootScene;
+                SE_Object_Clear(&ray, sizeof(SE_Ray));
+                mainCamera = SE_World_GetMainCamera(world);
+                SE_Camera_ScreenCoordinateToRay(mainCamera, x, y, &ray);
+                rootScene = SE_World_GetSceneRoot(world);
+                /*
+                 * test code
+                 * */
+                SE_List* children = rootScene->children;
+                SE_ListIterator li;
+                SE_ListIterator_Init(&li, children);
+                SE_Element e;
+                SE_List pickList;
+                SE_List_Init(&pickList);
+                while(SE_ListIterator_Next(&li, &e))
+                {
+                    SE_Spatial* s = (SE_Spatial*)e.dp.data;
+                    SE_Spatial_IntersectRay(s, &ray, &pickList);
+                } 
+                SE_ListIterator liPickList;
+                SE_ListIterator_Init(&liPickList, &pickList);
+                SE_Element pe;
+                while(SE_ListIterator_Next(&liPickList, &pe))
+                {
+                    SE_Spatial* s = (SE_Spatial*)pe.dp.data;
+                    LOGI("## pick obj = %s ##\n", SE_String_GetData(&s->name));
+                }
+                SE_List_Release(&pickList);
+                /*end*/
+                mouseRecord->state = SE_RELEASED;
+                mouseRecord->x = 0;
+                mouseRecord->y = 0;
+            }
+            else if(currMouseState == SE_RELEASED && mouseRecord->state == SE_MOVE)
             {
                 mouseRecord->state = SE_RELEASED;
                 mouseRecord->x = 0;

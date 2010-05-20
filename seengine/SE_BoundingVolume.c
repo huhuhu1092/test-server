@@ -1,11 +1,39 @@
 #include "SE_BoundingVolume.h"
 #include "SE_GeometryIntersect.h"
+#include "SE_Memory.h"
 SE_Result SE_BoundingVolume_Init(SE_BoundingVolume* bv)
 {
     return SE_VALID;
 }
 void SE_BoundingVolume_Release(void* bv)
 {}
+SE_BoundingVolume* SE_BoundingVolume_Clone(const SE_BoundingVolume* src)
+{
+    const SE_SphereBV* sphereSrcBv = NULL;
+    SE_SphereBV* sphereDstBv = NULL;
+    const SE_AABBBV* aabbSrcBv = NULL;
+    SE_AABBBV* aabbDstBv = NULL;
+    SE_BoundingVolume* ret = NULL;
+    SE_ASSERT(src);
+    switch(src->type)
+    {
+    case SE_SPHERE_E:
+        sphereSrcBv = (const SE_SphereBV*)src;
+        sphereDstBv = (SE_SphereBV*)SE_Malloc(sizeof(SE_SphereBV));
+        *sphereDstBv = *sphereSrcBv;
+        ret = (SE_BoundingVolume*)sphereDstBv; 
+        break;
+    case SE_AABB_E:
+        aabbSrcBv = (const SE_AABBBV*)src;
+        aabbDstBv = (SE_AABBBV*)SE_Malloc(sizeof(SE_AABBBV));
+        *aabbDstBv = *aabbSrcBv;
+        ret = (SE_BoundingVolume*)aabbDstBv;
+        break;
+    default:
+        break;
+    }
+    return ret;
+}
 /***/
 static void initBoundingVolumeForSphere(SE_BoundingVolume* bv)
 {
@@ -16,6 +44,8 @@ static void initBoundingVolumeForSphere(SE_BoundingVolume* bv)
     bv->fContains = &SE_SphereBV_Contains;
     bv->fIntersectRay = &SE_SphereBV_IntersectRay;
     bv->fIntersectRayDetail = &SE_SphereBV_IntersectRayDetail;
+    bv->fClone = &SE_SphereBV_Clone;
+    bv->fRelease = &SE_SphereBV_Release;
 }
 SE_Result SE_SphereBV_CreateFromPoints(SE_SphereBV* sbv, SE_Vector3f* points, int pointNum)
 {
@@ -107,6 +137,15 @@ int SE_SphereBV_BVIntersectBV(const struct SE_BoundingVolume_tag* bv1, const str
 {
     return 0;
 }
+struct SE_BoundingVolume_tag* SE_SphereBV_Clone(const struct SE_BoundingVolume_tag* bvsrc)
+{
+    const SE_SphereBV* sbvsrc = (const SE_SphereBV*)bvsrc;
+    SE_SphereBV* sbvdst = (SE_SphereBV*)SE_Malloc(sizeof(SE_SphereBV));
+    *sbvdst = *sbvsrc;
+    return (SE_BoundingVolume*)sbvdst;
+}
+void SE_SphereBV_Release(void* bv)
+{}
 /***/
 static void initBoundingVolumeForAABB(SE_BoundingVolume* bv)
 {
@@ -117,7 +156,8 @@ static void initBoundingVolumeForAABB(SE_BoundingVolume* bv)
     bv->fContains = &SE_AABBBV_Contains;
     bv->fIntersectRay = &SE_AABBBV_IntersectRay;
     bv->fIntersectRayDetail = &SE_AABBBV_IntersectRayDetail;
-
+    bv->fClone = &SE_AABBBV_Clone;
+    bv->fRelease = &SE_AABBBV_Release;
 }
 SE_Result SE_AABBBV_CreateFromPoints(SE_AABBBV* aabbBv, SE_Vector3f* points, int pointNum)
 {
@@ -202,7 +242,9 @@ int SE_AABBBV_IntersectRay(const struct SE_BoundingVolume_tag* bv, const SE_Ray*
     SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
     SE_IntersectionResult result;
     SE_Intersect_Ray_AABB(ray, &aabbBv->aabb, &result);
-    return result.intersected; 
+    int ret = result.intersected; 
+    SE_IntersectionResult_Release(&result);
+    return ret;
 }
 SE_Result SE_AABBBV_IntersectRayDetail(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result)
 {
@@ -216,5 +258,12 @@ int SE_AABBBV_BVIntersectBV(const struct SE_BoundingVolume_tag* bv1, const struc
 {
     return 0;
 }
-
-
+struct SE_BoundingVolume_tag* SE_AABBBV_Clone(const struct SE_BoundingVolume_tag* bvsrc)
+{
+    const SE_AABBBV* aabbBvSrc = (const SE_AABBBV*)bvsrc;
+    SE_AABBBV* aabbBvDst = (SE_AABBBV*)SE_Malloc(sizeof(SE_AABBBV));
+    *aabbBvDst = *aabbBvSrc;
+    return (SE_BoundingVolume*)aabbBvDst;
+}
+void SE_AABBBV_Release(void* bv)
+{}

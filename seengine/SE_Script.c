@@ -67,6 +67,7 @@ static void SEC_BindTexture(void* runEnv, int target)
             else
             {
                 SE_Renderer_DisableState(SE_TEX_2D);
+                SE_Renderer_EnableState(SE_LIGHT);
                 SE_Renderer_SetAmbientMaterial(md->ambient.x, md->ambient.y, md->ambient.z, 1.0f);
                 //SE_Renderer_SetDiffuseMaterial(md->diffuse);
             }
@@ -74,6 +75,7 @@ static void SEC_BindTexture(void* runEnv, int target)
         else
         {
             SE_Renderer_DisableState(SE_TEX_2D);
+            SE_Renderer_DisableState(SE_LIGHT);
             SE_Renderer_SetColor(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0);
         }
 

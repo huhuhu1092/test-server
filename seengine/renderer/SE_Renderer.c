@@ -177,6 +177,127 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
     if(texVertexArray)
         SE_Free(texVertexArray);
 }
+static void drawBoundingVolume(SE_Spatial* spatial)
+{
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glColor3f(0.0, 1.0, 0.0);
+    SE_AABBBV* aabbBv = (SE_AABBBV*)spatial->worldBV;
+    SE_AABB* aabb = &aabbBv->aabb; 
+    SE_Vector3f points[24];
+    //edge 1
+    points[0].x = aabb->min.x;
+    points[0].y = aabb->min.y;
+    points[0].z = aabb->min.z;
+
+    points[1].x = aabb->max.x;
+    points[1].y = aabb->min.y;
+    points[1].z = aabb->min.z;
+    //edge 2
+    points[2].x = aabb->max.x;
+    points[2].y = aabb->min.y;
+    points[2].z = aabb->min.z;
+
+    points[3].x =  aabb->max.x;
+    points[3].y = aabb->min.y;
+    points[3].z = aabb->max.z;
+    //edge 3
+    points[4].x =  aabb->max.x;
+    points[4].y = aabb->min.y;
+    points[4].z = aabb->max.z;
+
+    points[5].x =  aabb->min.x;
+    points[5].y = aabb->min.y;
+    points[5].z = aabb->max.z;
+
+    //edge 4
+    points[6].x =  aabb->min.x;
+    points[6].y = aabb->min.y;
+    points[6].z = aabb->max.z;
+    
+    points[7].x = aabb->min.x;
+    points[7].y = aabb->min.y;
+    points[7].z = aabb->min.z;
+
+    //edge 5
+    points[8].x = aabb->min.x;
+    points[8].y = aabb->min.y;
+    points[8].z = aabb->min.z;
+
+    points[9].x = aabb->min.x;
+    points[9].y = aabb->max.y;
+    points[9].z = aabb->min.z;
+
+    //edge 6
+    points[10].x = aabb->min.x;
+    points[10].y = aabb->max.y;
+    points[10].z = aabb->min.z;
+    
+    points[11].x = aabb->max.x;
+    points[11].y = aabb->max.y;
+    points[11].z = aabb->min.z;
+
+
+    //edge 7
+    points[12].x = aabb->max.x;
+    points[12].y = aabb->max.y;
+    points[12].z = aabb->min.z;
+
+    points[13].x = aabb->max.x;
+    points[13].y = aabb->min.y;
+    points[13].z = aabb->min.z;
+
+    //edge 8
+    points[14].x = aabb->max.x;
+    points[14].y = aabb->max.y;
+    points[14].z = aabb->max.z;
+    
+    points[15].x = aabb->min.x;
+    points[15].y = aabb->max.y;
+    points[15].z = aabb->max.z;
+
+
+    //edge 9
+points[16].x = aabb->min.x;
+    points[16].y = aabb->max.y;
+    points[16].z = aabb->max.z;
+
+points[17].x = aabb->min.x;
+    points[17].y = aabb->max.y;
+    points[17].z = aabb->min.z;
+
+    //edge 10
+points[18].x = aabb->max.x;
+    points[18].y = aabb->max.y;
+    points[18].z = aabb->max.z;
+
+    points[19].x = aabb->max.x;
+    points[19].y = aabb->min.y;
+    points[19].z = aabb->max.z;
+
+    //edge 11
+points[20].x = aabb->max.x;
+    points[20].y = aabb->max.y;
+    points[20].z = aabb->max.z;
+
+    points[21].x = aabb->max.x;
+    points[21].y = aabb->max.y;
+    points[21].z = aabb->min.z;
+
+    //edge 12
+points[22].x = aabb->min.x;
+    points[22].y = aabb->max.y;
+    points[22].z = aabb->max.z;
+
+points[23].x = aabb->min.x;
+    points[23].y = aabb->min.y;
+    points[23].z = aabb->max.z;
+glVertexPointer(3, GL_FLOAT, 0, points);
+glDrawArrays(GL_LINES, 0, 24);
+
+
+
+}
 void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
 {
     SE_ResourceManager* resourceManager = spatial->resourceManager;
@@ -188,6 +309,12 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
         if(spatial->subMeshIndex == -1)
         {
             drawMesh(resourceManager, spatial->mesh);
+            /**
+             * test
+             *
+             */
+            drawBoundingVolume(spatial);
+            /*end*/
         }
         else
         {
@@ -383,6 +510,7 @@ void SE_Renderer_EnableState(enum SE_GL_STATE s)
     case SE_DEPTH:
         break;
     case SE_LIGHT:
+        glEnable(GL_LIGHTING);
         break;
     }
 }
@@ -396,6 +524,7 @@ void SE_Renderer_DisableState(enum SE_GL_STATE s)
     case SE_DEPTH:
         break;
     case SE_LIGHT:
+        glDisable(GL_LIGHTING);
         break;
     }
 

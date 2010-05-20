@@ -85,6 +85,7 @@ SE_Result SE_InitWorld(int argc, char** argv)
     }
     LOGI("... geometry with no sub mesh num = %d\n", geometryNum);
     SE_Spatial_UpdateRenderState(root);
+    SE_Spatial_UpdateWorldBV(root);
     /*
     int nameCount = SE_List_Size(&nameList);
     SE_ASSERT(nameCount == meshCount);

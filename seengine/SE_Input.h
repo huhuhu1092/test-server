@@ -5,6 +5,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define SE_MOVE_SLOPE 5
 struct SE_World_tag;
 enum SE_INPUT_TYPE {SE_KEYBOARD, SE_MOUSE};
 enum SE_MOUSESTATE {SE_PRESSED , SE_MOVE, SE_RELEASED};

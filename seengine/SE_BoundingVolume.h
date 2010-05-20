@@ -18,6 +18,8 @@ typedef int (*SE_BV_CONTAINS)(const struct SE_BoundingVolume_tag* bv, const SE_V
 typedef int (*SE_BV_INTERSECT_RAY)(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray);
 typedef SE_Result (*SE_BV_INTERSECT_RAY_DETAIL)(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result);
 typedef int (*SE_BV_INTERSECT_BV)(const struct SE_BoundingVolume_tag* bv1, const struct SE_BoundingVolume_tag* bv2);
+typedef struct SE_BoundingVolume_tag*  (*SE_BV_CLONE)(const struct SE_BoundingVolume_tag* bvsrc);
+typedef void (*SE_BV_RELEASE)(void* bv);
 typedef struct SE_BoundingVolume_tag
 {
     enum SE_BVType type;
@@ -28,9 +30,12 @@ typedef struct SE_BoundingVolume_tag
     SE_BV_INTERSECT_RAY fIntersectRay;
     SE_BV_INTERSECT_RAY_DETAIL fIntersectRayDetail;
     SE_BV_INTERSECT_BV fIntersectBV;
+    SE_BV_CLONE fClone;
+    SE_BV_RELEASE fRelease;
 } SE_BoundingVolume;
 extern SE_Result SE_BoundingVolume_Init(SE_BoundingVolume* bv);
 extern void SE_BoundingVolume_Release(void* bv);
+extern SE_BoundingVolume* SE_BoundingVolume_Clone(const SE_BoundingVolume* src);
 /**
  * sphere bounding volume
  * */
@@ -48,6 +53,8 @@ extern int SE_SphereBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE
 extern int SE_SphereBV_IntersectRay(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray);
 extern SE_Result SE_SphereBV_IntersectRayDetail(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result);
 extern int SE_SphereBV_BVIntersectBV(const struct SE_BoundingVolume_tag* bv1, const struct SE_BoundingVolume_tag* bv2);
+extern  struct SE_BoundingVolume_tag* SE_SphereBV_Clone(const struct SE_BoundingVolume_tag* bvsrc);
+extern void SE_SphereBV_Release(void* bv);
 /*
  * AABB bounding volume
  * */
@@ -65,7 +72,8 @@ extern int SE_AABBBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_V
 extern int SE_AABBBV_IntersectRay(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray);
 extern SE_Result SE_AABBBV_IntersectRayDetail(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result);
 extern int SE_AABBBV_BVIntersectBV(const struct SE_BoundingVolume_tag* bv1, const struct SE_BoundingVolume_tag* bv2);
-
+extern struct SE_BoundingVolume_tag* SE_AABBBV_Clone(const struct SE_BoundingVolume_tag* bvsrc);
+extern void SE_AABBBV_Release(void* bv);
 #ifdef __cplusplus
 }
 #endif

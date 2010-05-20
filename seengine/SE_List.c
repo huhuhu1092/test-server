@@ -170,12 +170,12 @@ SE_Result SE_List_Apply(SE_List* list, SELISTAPPLYFUNCTION applyFunc, void* cont
     SE_ASSERT(list);
     SE_ASSERT(applyFunc);
     SE_ListIterator li;
-    SE_Element* e = NULL;
+    SE_Element e;
     SE_Object_Clear(&li, sizeof(SE_ListIterator));
     SE_ListIterator_Init(&li, list);
-    while(SE_ListIterator_Next(&li, e))
+    while(SE_ListIterator_Next(&li, &e))
     {
-        applyFunc(e, context);
+        applyFunc(&e, context);
     }
 }
 void SE_List_Release(void* l)

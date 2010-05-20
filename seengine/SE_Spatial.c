@@ -30,8 +30,12 @@ void SE_Spatial_Release(void* s)
 {
     SE_Spatial* spatial = (SE_Spatial*)s;
     SE_ASSERT(spatial);
-    SE_BoundingVolume_Release(&spatial->worldBV);
-    SE_BoundingVolume_Release(&spatial->localBV);
+    SE_BoundingVolume_Release(spatial->worldBV);
+    if(spatial->worldBV)
+        SE_Free(spatial->worldBV);
+    SE_BoundingVolume_Release(spatial->localBV);
+    if(spatial->localBV)
+        SE_Free(spatial->localBV);
     SE_RenderState_Release(&spatial->renderState);
     SE_String_Release(&spatial->name);
     if(spatial->children)
@@ -63,20 +67,86 @@ SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial)
     }
     if(spatial->children)
     {
-        SE_Element* e = NULL;
+        SE_Element e;
         SE_ListIterator li;
         SE_ListIterator_Init(&li, spatial->children);
-        while(SE_ListIterator_Next(&li, e))
+        while(SE_ListIterator_Next(&li, &e))
         {
-            SE_Spatial* child = (SE_Spatial*)e->dp.data;
+            SE_Spatial* child = (SE_Spatial*)e.dp.data;
             SE_ASSERT(child->parent == spatial);
             SE_Spatial_UpdateWorldTransform(child);
         }
     }
     return SE_VALID;
 }
+static void createWorldBVFromLocalBV(SE_Spatial* spatial)
+{
+    if(spatial->worldBV)
+    {
+        if(spatial->worldBV->fRelease)
+        {
+            (*spatial->worldBV->fRelease)(spatial->worldBV);
+        }
+        SE_Free(spatial->worldBV);
+        spatial->worldBV = NULL;
+    }
+    SE_ASSERT(spatial->worldBV == NULL);
+    if(spatial->localBV)
+    {
+        spatial->worldBV =  SE_BoundingVolume_Clone(spatial->localBV);
+    }
+}
+struct ContextDataForWorldBV
+{
+    int subMeshNum;
+};
+static void travelListToUpdateWorldBV(SE_Element* e, void* context)
+{
+    SE_Spatial* spatial = (SE_Spatial*)e->dp.data;
+    ContextDataForWorldBV* d = (ContextDataForWorldBV*)context;
+    if(spatial->subMeshIndex != -1)
+    {
+        d->subMeshNum++;
+        return;
+    }
+    else
+    {
+        SE_Spatial_UpdateWorldBV(spatial);
+    }
+}
 SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial)
 {
+    /**
+     * this implementation is a special case. we need to change 
+     * it to a general version
+     * */
+    if(!spatial)
+        return SE_VALID;
+    SE_List* children = spatial->children;
+    if(spatial->spatialType == SE_NODE)
+    {
+        ContextDataForWorldBV d;
+        SE_Object_Clear(&d, sizeof(ContextDataForWorldBV));
+        if(spatial->children)
+        {
+            SE_List_Apply(spatial->children, &travelListToUpdateWorldBV, &d);
+            int childsize = SE_List_Size(spatial->children);
+            if(d.subMeshNum > 0)
+            {
+                SE_ASSERT(d.subMeshNum == childsize);
+                createWorldBVFromLocalBV(spatial);
+            }
+            
+        }
+        else
+        {
+            LOGI("node spatial has no children\n");
+        }
+    }
+    else if(spatial->spatialType == SE_GEOMETRY)
+    {
+        createWorldBVFromLocalBV(spatial); 
+    }
     return SE_VALID;
 }
 SE_Result SE_Spatial_UpdateGeometricState(SE_Spatial* spatial)
@@ -256,14 +326,7 @@ struct ContextData
     SE_Ray* ray;
     SE_List* spatialList;
 };
-static void travelSpatialChildren(SE_Element* e, void* context)
-{
-    SE_Spatial* s = (SE_Spatial*)e->ptr;
-    SE_ASSERT(e);
-    SE_ASSERT(context);
-    struct ContextData* contextData = (struct ContextData*)context;
-    spatialIntersectRay(s, contextData.ray, contextData.spatialList);
-}
+static void travelSpatialChildren(SE_Element* e, void* context);
 static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList)
 {
     SE_BoundingVolume* bv = spatial->worldBV;
@@ -279,7 +342,7 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
             struct ContextData contextData;
             contextData.ray = ray;
             contextData.spatialList = spatialList;
-            SE_List_Apply(children, &contextData);
+            SE_List_Apply(children, &travelSpatialChildren, &contextData);
         }
         else
         {
@@ -295,9 +358,17 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
         return 0;
     }
 }
+static void travelSpatialChildren(SE_Element* e, void* context)
+{
+    SE_Spatial* s = (SE_Spatial*)e->ptr;
+    SE_ASSERT(e);
+    SE_ASSERT(context);
+    struct ContextData* contextData = (struct ContextData*)context;
+    spatialIntersectRay(s, contextData->ray, contextData->spatialList);
+}
 SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList)
 {
-    if(!spatail)
+    if(!spatial)
         return SE_INVALID;
     if(!ray)
         return SE_INVALID;
