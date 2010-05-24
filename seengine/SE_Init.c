@@ -66,6 +66,16 @@ SE_Result SE_InitWorld(int argc, char** argv)
                 SE_String_Release(&subName);
             }
         }
+        /*test*/
+        SE_String ttt;
+        SE_String_Init(&ttt, "Box07_130");
+        if(SE_String_Compare(strName, ttt) == 0)
+        {
+            LOGI("###### box07_130 #########\n");
+            spatial->collisionType = SE_NO_COLLISION;
+        }
+        SE_String_Release(&ttt);
+        /*end*/
         SE_Spatial_CreateLocalBV(spatial, SE_AABB_E);
         SE_Element e;
         e.type = SE_STRING;

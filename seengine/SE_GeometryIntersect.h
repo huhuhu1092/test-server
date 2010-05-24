@@ -21,6 +21,20 @@ extern SE_Result SE_Intersect_Ray_Sphere(const SE_Ray* ray, const SE_Sphere* sph
  * return value: 0: not intersect , 1 : intersected
  * */
 extern int SE_Intersect_AABB_Plane(const SE_AABB* aabb, const SE_Plane* plane);
+/* square distance of point to AABB
+ * if point is in AABB  or at the bound surface of AABB, the distance is 0;
+ * */
+extern float SE_PointAABB_DistanceSquare(SE_Vector3f* point, SE_AABB* aabb);
+/*
+ * 0: not intersect
+ * 1: intersect
+ * */
+extern int SE_Intersect_Sphere_AABB(SE_Sphere* sphere, SE_AABB* aabb);
+/*
+ * intersection of a moving sphere and a static AABB
+ * ths out value t is in the interval [0, 1]
+ * */
+extern int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vector3f endPoint, SE_Vector3f* out);
 #ifdef __cplusplus
 }
 #endif

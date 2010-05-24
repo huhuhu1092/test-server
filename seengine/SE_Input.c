@@ -35,9 +35,11 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
     inputDevice = SE_World_GetInputDevice(world);
     if(inputEvent->inputType == SE_MOUSE)
     {
+        SE_Spatial* rootScene;
         currMouseState = inputEvent->mouse.mt;
         currMouseCode = inputEvent->mouse.mc;
         mouseRecord = &inputDevice->mouseState[currMouseCode];
+        rootScene = SE_World_GetSceneRoot(world);
         if(currMouseCode == SE_LEFTKEY)
         {
             if(currMouseState == SE_PRESSED && mouseRecord->state == SE_RELEASED)
@@ -68,7 +70,20 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                     SE_Camera_RotateLocalXYZAxis(mainCamera, angle, 1);/*rotate about y axis*/
                     SE_Vector3f v;
                     SE_Vec3f_Init(0, 0, deltaY, &v);
+                    SE_Vector3f startLocation, endLocation;
+                    startLocation = mainCamera->location;
                     SE_Camera_LocationTranslateAlignXYZ(mainCamera, deltaY, 2);
+                    endLocation = mainCamera->location;
+                    SE_Sphere s;
+                    SE_Vector3f out;
+                    SE_Object_Clear(&out, sizeof(SE_Vector3f));
+                    s.center = startLocation;
+                    s.radius = 6;
+                    if(SE_Spatial_MovingSphereIntersect(&s, endLocation,rootScene, &out))
+                    {
+                        LOGI("### intersection ###\n");
+                        mainCamera->location = out;
+                    } 
                     mouseRecord->x = inputEvent->mouse.x;
                     mouseRecord->y = inputEvent->mouse.y;
                 }
@@ -79,11 +94,9 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 int y = (int)mouseRecord->y;
                 LOGI("## in release state ##\n");
                 SE_Ray ray;
-                SE_Spatial* rootScene;
                 SE_Object_Clear(&ray, sizeof(SE_Ray));
                 mainCamera = SE_World_GetMainCamera(world);
                 SE_Camera_ScreenCoordinateToRay(mainCamera, x, y, &ray);
-                rootScene = SE_World_GetSceneRoot(world);
                 /*
                  * test code
                  * */
@@ -101,11 +114,19 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 SE_ListIterator liPickList;
                 SE_ListIterator_Init(&liPickList, &pickList);
                 SE_Element pe;
+                float distancemin = SE_FLT_MAX;
+                SE_Spatial* minspaital = NULL;
                 while(SE_ListIterator_Next(&liPickList, &pe))
                 {
-                    SE_Spatial* s = (SE_Spatial*)pe.dp.data;
-                    LOGI("## pick obj = %s ##\n", SE_String_GetData(&s->name));
+                    SE_IntersectionSpatialData* s = (SE_IntersectionSpatialData*)pe.dp.data;
+                    if(s->intersectionResult.distance[0] < distancemin)
+                    {
+                        distancemin = s->intersectionResult.distance[0];
+                        minspaital = s->spatial;
+                    }
+                    LOGI("## pick obj = %s ##\n", SE_String_GetData(&s->spatial->name));
                 }
+                LOGI("### most near obj = %s ##\n", SE_String_GetData(&minspaital->name));
                 SE_List_Release(&pickList);
                 /*end*/
                 mouseRecord->state = SE_RELEASED;

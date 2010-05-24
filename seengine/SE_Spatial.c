@@ -3,6 +3,7 @@
 #include "SE_Utils.h"
 #include "SE_ResourceManager.h"
 #include "SE_Script.h"
+#include "SE_GeometryIntersect.h"
 #include "SE_Log.h"
 SE_Spatial* SE_Spatial_Create()
 {
@@ -24,6 +25,7 @@ SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType,
     spatial->renderType = SE_RENDERABLE;
     spatial->resourceManager = resourceManager;
     SE_RenderState_Init(&spatial->renderState, resourceManager);
+    spatial->collisionType = SE_COLLISIONABLE;
     return SE_VALID;
 }
 void SE_Spatial_Release(void* s)
@@ -332,9 +334,10 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
     SE_BoundingVolume* bv = spatial->worldBV;
     if(bv)
     {
-        int ret;
-        ret = bv->fIntersectRay(bv, ray);
-        if(ret == 0)
+        SE_IntersectionResult result;
+        SE_Object_Clear(&result, sizeof(SE_IntersectionResult));
+        bv->fIntersectRayDetail(bv, ray, &result);
+        if(result.intersected == 0)
             return 0;
         SE_List* children = spatial->children;
         if(children)
@@ -347,9 +350,16 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
         else
         {
             SE_Element e;
-            e.type = SE_POINTER;
-            e.ptr = spatial;
-            SE_List_AddLast(spatialList, e);
+            e.type = SE_DATA;
+            SE_IntersectionSpatialData* element = (SE_IntersectionSpatialData*)SE_Malloc(sizeof(SE_IntersectionSpatialData));
+            if(element)
+            {
+                element->intersectionResult = result;
+                element->spatial = spatial;
+                e.dp.data = element;
+                e.dp.fRelease = &SE_IntersectionSpatialData_Release;
+                SE_List_AddLast(spatialList, e);
+            }
         }
         return 0;
     }
@@ -376,4 +386,45 @@ SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spa
         return SE_INVALID;
     spatialIntersectRay(spatial, ray, spatialList);
     return SE_VALID;
+}
+int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spatial* spatial, SE_Vector3f* out)
+{
+    int ret = 0;
+    SE_AABBBV* bv = NULL;
+    if(!spatial)
+        return 0;
+    if(spatial->spatialType == SE_GEOMETRY && spatial->collisionType == SE_COLLISIONABLE)
+    {
+        bv = (SE_AABBBV*)spatial->worldBV;
+        ret = SE_Intersect_MovingSphereStaticAABB(*s, &bv->aabb, endPoint, out);
+        return ret;
+    }
+    else if(spatial->spatialType == SE_NODE)
+    {
+        SE_List* children = spatial->children;
+        SE_ListIterator li;
+        SE_Element e;
+        SE_ListIterator_Init(&li, children);
+        while(SE_ListIterator_Next(&li, &e))
+        {
+            SE_Spatial* childs = (SE_Spatial*)e.dp.data;
+            bv = (SE_AABBBV*)childs->worldBV;
+            if(childs->collisionType == SE_COLLISIONABLE)
+                ret = SE_Intersect_MovingSphereStaticAABB(*s, &bv->aabb, endPoint, out);
+            else 
+                ret = 0;
+            if(ret)
+            {
+                LOGI("### move intersect obj = %s ####\n", SE_String_GetData(&childs->name));
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+/** */
+void SE_IntersectionSpatialData_Release(void* isd)
+{
+    SE_IntersectionSpatialData* spatialData = (SE_IntersectionSpatialData*)isd;
+    SE_IntersectionResult_Release(&spatialData->intersectionResult);
 }

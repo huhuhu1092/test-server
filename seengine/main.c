@@ -131,7 +131,7 @@ int drawScene ()   // Create The Display Function
     */
   // Swap The Buffers To Not Be Left With A Clear Screen
         /* Draw it to the screen */
-    SDL_GL_SwapBuffers( );
+    //SDL_GL_SwapBuffers( );
 
     /* Gather our frames per second */
     Frames++;

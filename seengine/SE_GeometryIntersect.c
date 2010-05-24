@@ -28,8 +28,7 @@ SE_Result SE_Intersect_Ray_Triangle(const SE_Ray* ray, const SE_Triangle* tri, S
 }
 SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_IntersectionResult* out)
 {
-    /*
-    float tmin = 0.0;
+    float tmin = -SE_FLT_MAX;
     float tmax = SE_FLT_MAX;
     SE_Vector3f dir, origin, tmp;
     int i;
@@ -61,14 +60,18 @@ SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_Inter
             }
             if(t1 > tmin)
                 tmin = t1;
-            if(t2 > tmax)
+            if(t2 < tmax)
                 tmax = t2;
             if(tmin > tmax)
             {
                 out->intersected = 0;
                 return SE_VALID;
             }
-
+            if(tmax < 0)
+            {
+                out->intersected = 0;
+                return SE_VALID;
+            }
         }
     }
     out->intersected = 1;
@@ -83,7 +86,7 @@ SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_Inter
         SE_Vec3f_Mul(&dir, tmin, &tmp);
         SE_Vec3f_Add(&origin, &tmp, &out->intersectPoint[0]);
     }
-    */
+    /*
     SE_Vector3f dir, origin, tmp;
     int i;
     int intersect = 0;
@@ -131,6 +134,7 @@ SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_Inter
     {
         out->intersected = 1;
     }
+    */
     return SE_VALID;
 }
 SE_Result SE_Intersect_Ray_Sphere(const SE_Ray* ray, const SE_Sphere* sphere, SE_IntersectionResult* out)
@@ -178,4 +182,43 @@ int SE_Intersect_AABB_Plane(const SE_AABB* aabb, const SE_Plane* plane)
     r = positiveExtent.x * SE_Fabs(normal.x) + positiveExtent.y * SE_Fabs(normal.y) + positiveExtent.z * SE_Fabs(normal.z);
     s = SE_Vec3f_Dot(&normal, &centerAABB) - plane->d;
     return SE_Fabs(s) <= r;
-} 
+}
+float SE_PointAABB_DistanceSquare(SE_Vector3f* point, SE_AABB* aabb)
+{
+    float sqDist = 0.0f;
+    int i;
+    for(i = 0 ; i < 3 ; i++)
+    {
+        float v = point->d[i];
+        if(v < aabb->min.d[i]) sqDist += (aabb->min.d[i] - v) * (aabb->min.d[i] - v);
+        if(v > aabb->max.d[i]) sqDist += (v - aabb->max.d[i]) * (v - aabb->max.d[i]);
+    }
+    return sqDist;
+}
+int SE_Intersect_Sphere_AABB(SE_Sphere* sphere, SE_AABB* aabb)
+{
+    float sqDist = SE_PointAABB_DistanceSquare(&sphere->center, aabb);
+    return sqDist <= sphere->radius * sphere->radius;
+}
+int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vector3f endPoint, SE_Vector3f* out)
+{
+    SE_Sphere s;
+    SE_Vector3f tmp1, tmp2;
+    float r, interval;
+    SE_Vec3f_Subtract(&endPoint, &sphere.center, &tmp1);
+    SE_Vec3f_Mul(&tmp1, 0.5, &tmp2);
+    SE_Vec3f_Add(&sphere.center, &tmp2, &s.center);
+    r = SE_Vec3f_Length(&tmp2) + sphere.radius;
+    s.radius = r;
+    if(!SE_Intersect_Sphere_AABB(&s, aabb))
+        return 0;
+    interval = SE_Vec3f_Length(&tmp1);
+    if(interval < 5.0f)
+    {
+        *out = sphere.center;
+        return 1;
+    }
+    if(SE_Intersect_MovingSphereStaticAABB(sphere, aabb, s.center, out))
+        return 1;
+    return SE_Intersect_MovingSphereStaticAABB(s, aabb, endPoint, out);
+}
