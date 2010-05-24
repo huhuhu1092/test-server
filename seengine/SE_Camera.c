@@ -188,7 +188,7 @@ SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ra
     dir.x = camera->xAxis.x * xv / dirLen + camera->yAxis.x * yv / dirLen + camera->zAxis.x * (-frustum->n) / dirLen;
     dir.y = camera->xAxis.y * xv / dirLen + camera->yAxis.y * yv /dirLen + camera->zAxis.y * (-frustum->n) / dirLen;
     dir.z = camera->xAxis.z * xv / dirLen + camera->yAxis.z * yv / dirLen + camera->zAxis.z * (-frustum->n) / dirLen;
-    SE_Ray_InitFromDirection(&camera->location, &dir, false, out); 
+    SE_Ray_InitFromDirection(&camera->location, &dir, 0, out); 
     return SE_VALID;
 }
 

@@ -115,18 +115,19 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 SE_ListIterator_Init(&liPickList, &pickList);
                 SE_Element pe;
                 float distancemin = SE_FLT_MAX;
-                SE_Spatial* minspaital = NULL;
+                SE_Spatial* minspatial = NULL;
                 while(SE_ListIterator_Next(&liPickList, &pe))
                 {
                     SE_IntersectionSpatialData* s = (SE_IntersectionSpatialData*)pe.dp.data;
                     if(s->intersectionResult.distance[0] < distancemin)
                     {
                         distancemin = s->intersectionResult.distance[0];
-                        minspaital = s->spatial;
+                        minspatial = s->spatial;
                     }
                     LOGI("## pick obj = %s ##\n", SE_String_GetData(&s->spatial->name));
                 }
-                LOGI("### most near obj = %s ##\n", SE_String_GetData(&minspaital->name));
+                LOGI("### most near obj = %s ##\n", SE_String_GetData(&minspatial->name));
+                world->pickedSpatial = minspatial;
                 SE_List_Release(&pickList);
                 /*end*/
                 mouseRecord->state = SE_RELEASED;

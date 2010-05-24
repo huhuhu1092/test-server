@@ -20,6 +20,7 @@ typedef struct SE_World_tag
     SE_String initScript;
     SE_InputDevice inputDevice;
     SE_SaveState saveState;
+    SE_Spatial* pickedSpatial;
 } SE_World;
 extern SE_Result SE_World_Init(SE_World* world, const char* initScriptName);
 extern void SE_World_Release(void* world);

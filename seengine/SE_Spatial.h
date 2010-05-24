@@ -75,7 +75,7 @@ extern SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child);
 extern SE_Result SE_Spatial_RemoveChild(SE_Spatial* parent, SE_Spatial* child);
 extern SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name);
 extern SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType, const char* scriptname);
-extern SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, SE_BVType bvType);
+extern SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, enum SE_BVType bvType);
 extern SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList);
 extern int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint,SE_Spatial* spatial, SE_Vector3f* out);
 #ifdef __cplusplus

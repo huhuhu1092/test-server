@@ -64,7 +64,7 @@ typedef struct SE_AABBBV_tag
     SE_AABB aabb;
 } SE_AABBBV;
 extern SE_Result SE_AABBBV_CreateFromPoints(SE_AABBBV* aabbBv, SE_Vector3f* points, int pointNum);
-extern SE_Result SE_AABBBV_CreateFromAABB(SE_SphereBV* sbv, SE_AABB* aabb);
+extern SE_Result SE_AABBBV_CreateFromAABB(SE_AABBBV* aabbBv, SE_AABB* aabb);
 extern SE_Result SE_AABBBV_Transform(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale);
 extern enum SE_Plane_Side SE_AABBBV_WhichSide(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane);
 extern SE_Result SE_AABBBV_Merge(struct SE_BoundingVolume_tag* bvMerged, const struct SE_BoundingVolume_tag* bv);

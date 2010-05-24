@@ -105,7 +105,7 @@ struct ContextDataForWorldBV
 static void travelListToUpdateWorldBV(SE_Element* e, void* context)
 {
     SE_Spatial* spatial = (SE_Spatial*)e->dp.data;
-    ContextDataForWorldBV* d = (ContextDataForWorldBV*)context;
+    struct ContextDataForWorldBV* d = (struct ContextDataForWorldBV*)context;
     if(spatial->subMeshIndex != -1)
     {
         d->subMeshNum++;
@@ -127,8 +127,8 @@ SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial)
     SE_List* children = spatial->children;
     if(spatial->spatialType == SE_NODE)
     {
-        ContextDataForWorldBV d;
-        SE_Object_Clear(&d, sizeof(ContextDataForWorldBV));
+        struct ContextDataForWorldBV d;
+        SE_Object_Clear(&d, sizeof(struct ContextDataForWorldBV));
         if(spatial->children)
         {
             SE_List_Apply(spatial->children, &travelListToUpdateWorldBV, &d);
@@ -294,7 +294,7 @@ SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType,
     spatial->renderState.resourceManager = spatial->resourceManager;
     return SE_VALID;
 }
-SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, SE_BVType bvType)
+SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, enum SE_BVType bvType)
 {
     SE_Mesh* mesh = spatial->mesh;
     SE_ResourceManager* resourceManager = spatial->resourceManager;
@@ -322,6 +322,7 @@ SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, SE_BVType bvType)
         LOGE("can not implement \n");
         break;
     }
+    return SE_VALID;
 }
 struct ContextData
 {

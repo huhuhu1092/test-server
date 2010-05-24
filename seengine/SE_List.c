@@ -177,6 +177,7 @@ SE_Result SE_List_Apply(SE_List* list, SELISTAPPLYFUNCTION applyFunc, void* cont
     {
         applyFunc(&e, context);
     }
+    return SE_VALID;
 }
 void SE_List_Release(void* l)
 {
