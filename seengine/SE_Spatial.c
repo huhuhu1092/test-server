@@ -4,6 +4,7 @@
 #include "SE_ResourceManager.h"
 #include "SE_Script.h"
 #include "SE_GeometryIntersect.h"
+#include "SE_Math.h"
 #include "SE_Log.h"
 SE_Spatial* SE_Spatial_Create()
 {
@@ -388,17 +389,53 @@ SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spa
     spatialIntersectRay(spatial, ray, spatialList);
     return SE_VALID;
 }
+struct _IntersectPointData
+{
+    SE_Spatial* spatial;
+    SE_Vector3f intersectPoint;
+};
+static void addIntersectPointToList(SE_Spatial* spatial, SE_Sphere* s, SE_AABB* aabb, SE_Vector3f endPoint, SE_List* intersectPointList)
+{
+    int ret = 0;
+    SE_Vector3f intersectPoint;
+    ret = SE_Intersect_MovingSphereStaticAABB(*s, aabb, endPoint, &intersectPoint);
+    if(ret)
+    {
+        SE_Element e;
+        _IntersectPointData* ipd = NULL;
+        SE_Object_Clear(&e, sizeof(SE_Element));
+        e.type = SE_DATA;
+        ipd = (struct _IntersectPointData*)SE_Malloc(sizeof(struct _IntersectPointData));
+        if(ipd == NULL)
+        {
+            LOGE("### out of memory when moveing sphere ###\n");
+            return;
+        }
+        SE_Vec3f_Copy(&intersectPoint, &ipd->intersectPoint);
+        ipd->spatial = spatial;
+        e.dp.data = ipd;
+        SE_List_AddLast(intersectPointList, e);
+    }
+
+}
 int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spatial* spatial, SE_Vector3f* out)
 {
     int ret = 0;
     SE_AABBBV* bv = NULL;
+    SE_List intersectPointList;
+    SE_ListIterator intersectPointListIt;
+    SE_Vector3f intersectPoint;
+    SE_Element intersectPointData;
+    int size = 0;
+    float minPoint = SE_FLT_MAX;
+    _IntersectPointData* minIntersectPoint = NULL;
     if(!spatial)
         return 0;
+    SE_List_Init(&intersectPointList);
     if(spatial->spatialType == SE_GEOMETRY && spatial->collisionType == SE_COLLISIONABLE)
     {
         bv = (SE_AABBBV*)spatial->worldBV;
-        ret = SE_Intersect_MovingSphereStaticAABB(*s, &bv->aabb, endPoint, out);
-        return ret;
+        addIntersectPointToList(spatial, s, &bv->aabb, endPoint, &intersectPointList);
     }
     else if(spatial->spatialType == SE_NODE)
     {
@@ -411,17 +448,47 @@ int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spat
             SE_Spatial* childs = (SE_Spatial*)e.dp.data;
             bv = (SE_AABBBV*)childs->worldBV;
             if(childs->collisionType == SE_COLLISIONABLE)
-                ret = SE_Intersect_MovingSphereStaticAABB(*s, &bv->aabb, endPoint, out);
-            else 
-                ret = 0;
-            if(ret)
             {
-                LOGI("### move intersect obj = %s ####\n", SE_String_GetData(&childs->name));
-                return 1;
+                addIntersectPointToList(childs, s, &bv->aabb, endPoint, &intersectPointList);
             }
         }
     }
-    return 0;
+    size = SE_List_Size(&intersectPointList);
+    if(size == 0)
+    {
+        ret = 0;
+    }
+    else
+    {
+        ret = 1;
+    }
+    LOGI("### intersect obj size = %d ###\n", size);
+    SE_ListIterator_Init(&intersectPointListIt, &intersectPointList);
+    while(SE_ListIterator_Next(&intersectPointListIt, &intersectPointData))
+    {
+        _IntersectPointData* ipd = (_IntersectPointData*)intersectPointData.dp.data;
+        SE_Vector3f distV;
+        float len;
+        SE_Vec3f_Subtract(&ipd->intersectPoint, &s->center, &distV);
+        len = SE_Vec3f_LengthSquare(&distV) ;
+        if(len < minPoint)
+        {
+            minPoint = len;
+            minIntersectPoint = ipd;
+        }
+        
+    }
+    if(minIntersectPoint)
+    {
+        LOGI("### move intersect obj = %s ####\n", SE_String_GetData(&minIntersectPoint->spatial->name));
+        SE_Vec3f_Copy(&minIntersectPoint->intersectPoint, out);
+    }
+    else
+    {
+        ret = 0;
+    }
+    SE_List_Release(&intersectPointList);
+    return ret;
 }
 /** */
 void SE_IntersectionSpatialData_Release(void* isd)

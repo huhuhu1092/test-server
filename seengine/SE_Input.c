@@ -78,7 +78,7 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                     SE_Vector3f out;
                     SE_Object_Clear(&out, sizeof(SE_Vector3f));
                     s.center = startLocation;
-                    s.radius = 6;
+                    s.radius = 2;
                     if(SE_Spatial_MovingSphereIntersect(&s, endLocation,rootScene, &out))
                     {
                         LOGI("### intersection ###\n");

@@ -213,7 +213,7 @@ int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vect
     if(!SE_Intersect_Sphere_AABB(&s, aabb))
         return 0;
     interval = SE_Vec3f_Length(&tmp1);
-    if(interval < 5.0f)
+    if(interval < 2.0f)
     {
         *out = sphere.center;
         return 1;
@@ -222,3 +222,4 @@ int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vect
         return 1;
     return SE_Intersect_MovingSphereStaticAABB(s, aabb, endPoint, out);
 }
+

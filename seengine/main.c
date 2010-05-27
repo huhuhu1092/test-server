@@ -269,10 +269,12 @@ int main( int argc, char **argv )
             case SDL_MOUSEMOTION:
                 if(event.button.button > 0)
                 {
+                    /*
                 LOGI("Mouse moved by %d,%d to (%d,%d)\n", 
                        event.motion.xrel, event.motion.yrel,
                        event.motion.x, event.motion.y);
                 LOGI("Mouse button %d \n", event.button.button);
+                */
                     inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
                     if(inputEvent)
                     {
@@ -298,8 +300,10 @@ int main( int argc, char **argv )
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
+                /*
                 LOGI("Mouse button %d pressed at (%d,%d)\n",
                        event.button.button, event.button.x, event.button.y);
+                       */
                 inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
                 if(inputEvent)
                 {
@@ -324,8 +328,10 @@ int main( int argc, char **argv )
                 }    
                 break;
             case SDL_MOUSEBUTTONUP:
+                /*
                 LOGI("Mouse button %d released at (%d,%d)\n",
                        event.button.button, event.button.x, event.button.y);
+                       */
                 inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
                 if(inputEvent)
                 {

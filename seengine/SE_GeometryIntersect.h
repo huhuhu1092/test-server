@@ -35,6 +35,11 @@ extern int SE_Intersect_Sphere_AABB(SE_Sphere* sphere, SE_AABB* aabb);
  * ths out value t is in the interval [0, 1]
  * */
 extern int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vector3f endPoint, SE_Vector3f* out);
+/**
+ * intersect moving sphere with plane, out is the intersection point of sphere center
+ * dirOfSphere is the endpoint minus startpoint of sphere, 
+ * */
+extern int SE_Intersect_MovingSphereStaticPlane(const SE_Sphere* sphere, const SE_Plane* plane, const SE_Vector3f* dirOfSphere, SE_Vector3f* out);
 #ifdef __cplusplus
 }
 #endif
