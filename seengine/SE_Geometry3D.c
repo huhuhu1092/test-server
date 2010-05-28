@@ -82,6 +82,10 @@ SE_Result SE_Plane_GetNormal(const SE_Plane* plane, SE_Vector3f* out)
     SE_Vec3f_Copy(&plane->n, out);
     return SE_VALID;
 }
+float SE_Plane_GetD(const SE_Plane* plane)
+{
+    return plane->d;
+}
 enum SE_Plane_Side SE_Plane_PointOnWhichSide(const SE_Plane* plane, const SE_Vector3f* point)
 {
     SE_ASSERT(plane);

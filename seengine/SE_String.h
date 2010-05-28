@@ -60,6 +60,11 @@ extern int SE_String_IsEmpty(const SE_String* str);
  * */
 extern int SE_String_Compare(SE_String s1, SE_String s2);
 /**
+ * return the index of the sub string in src string if found
+ * else return -1
+ * */
+extern int SE_String_FindString(const SE_String* src, const SE_String* sub);
+/**
  * concate the element to string
  * */
 extern SE_Result SE_String_Concate(SE_String* strDst, const char* fmt, ...);

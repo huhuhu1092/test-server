@@ -176,3 +176,14 @@ SE_Result SE_String_SetString(SE_String* dstStr, SE_String* srcStr)
     dstStr->own = srcStr->own;
     return SE_VALID;
 }
+int SE_String_FindString(const SE_String* src, const SE_String* sub)
+{
+    const char* p = NULL;
+    if(src == NULL || sub == NULL)
+        return -1;
+    p = strstr(src->data, sub->data);
+    if(p == NULL)
+        return -1;
+    else
+        return p - src->data;
+}

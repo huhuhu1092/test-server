@@ -222,4 +222,42 @@ int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vect
         return 1;
     return SE_Intersect_MovingSphereStaticAABB(s, aabb, endPoint, out);
 }
-
+int SE_Intersect_MovingSphereStaticPlane(const SE_Sphere* sphere, const SE_Plane* plane, const SE_Vector3f* dirOfSphere, SE_Vector3f* out)
+{
+    SE_Vector3f planeNormal;
+    SE_Plane_GetNormal(plane, &planeNormal);
+    float planeD = SE_Plane_GetD(plane);
+    float dist = SE_Vec3f_Dot(&planeNormal, &sphere->center) - planeD;
+    if(SE_Fabs(dist) <= sphere->radius)
+    {
+        SE_Vec3f_Copy(&sphere->center, out);
+        return 1;
+    }
+    else
+    {
+        float denom = SE_Vec3f_Dot(&planeNormal, dirOfSphere);
+        if(denom * dist >= 0.0f)
+        {
+            return 0;
+        }
+        else
+        {
+            float r = dist >0.0f ? sphere->radius : -sphere->radius;
+            float t = (r - dist) / denom;
+            if(t >= 0.0f && t <= 1.0f)
+            {
+                SE_Vector3f tmp1, tmp2, tmp3;
+                SE_Vec3f_Mul(dirOfSphere, t, &tmp1);
+                SE_Vec3f_Add(&sphere->center, &tmp1, &tmp2);
+                SE_Vec3f_Mul(&planeNormal, r, &tmp3);
+                SE_Vec3f_Subtract(&tmp2, &tmp3, out);
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+    
+}

@@ -74,6 +74,10 @@ extern SE_Result SE_Segment_GetDirection(const SE_Segment* seg, SE_Vector3f* out
 extern SE_Result SE_Plane_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, const SE_Vector3f* p2, SE_Plane* out);
 extern SE_Result SE_Plane_InitFromNormal(const SE_Vector3f* p0, const SE_Vector3f* n, int normal, SE_Plane* out);
 extern SE_Result SE_Plane_GetNormal(const SE_Plane* plane, SE_Vector3f* out);
+/**
+ * plane is represented by n * X - d = 0
+ * */
+extern float SE_Plane_GetD(const SE_Plane* plane);
 /*
 #define SE_Plane_GetNormal(plane) (&plane->n)
 #define SE_Plane_GetNormalCopy(plane, out) (SE_Vec3f_Copy(&plane->n, out))

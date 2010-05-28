@@ -78,6 +78,7 @@ extern SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE 
 extern SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, enum SE_BVType bvType);
 extern SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList);
 extern int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint,SE_Spatial* spatial, SE_Vector3f* out);
+extern int SE_Spatial_HasSubMesh(const SE_Spatial* spatial);
 #ifdef __cplusplus
 }
 #endif

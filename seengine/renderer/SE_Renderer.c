@@ -336,6 +336,16 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
             SE_Renderer_DrawSpatial(sc);
         }
     }
+    /*
+     * test
+     * */
+    /*
+            SE_String ttt;
+            SE_String_Init(&ttt, "tv self");
+            if(SE_String_FindString(&spatial->name, &ttt) != -1 && spatial->worldBV)
+                drawBoundingVolume(spatial);
+            SE_String_Release(&ttt);
+            */
 }
 void SE_Renderer_SetTexFilter(enum SE_TEX_TARGET target, enum SE_TEX_FILTER mag, enum SE_TEX_FILTER min)
 {

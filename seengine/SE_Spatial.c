@@ -286,6 +286,13 @@ SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name)
     e.dp.fCompare = &compareSpatialByName;
     return SE_List_RemoveElement(parent->children, e); 
 }
+int SE_Spatial_HasSubMesh(const SE_Spatial* spatial)
+{
+    if(!spatial)
+        return 0;
+    if(!spatial->mesh)
+    return spatial->mesh->subMeshNum > 0;
+}
 SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType, const char* scriptname)
 {
     if(scriptname == NULL)
@@ -342,7 +349,7 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
         if(result.intersected == 0)
             return 0;
         SE_List* children = spatial->children;
-        if(children)
+        if(children && !SE_Spatial_HasSubMesh(spatial))
         {
             struct ContextData contextData;
             contextData.ray = ray;
@@ -402,7 +409,7 @@ static void addIntersectPointToList(SE_Spatial* spatial, SE_Sphere* s, SE_AABB* 
     if(ret)
     {
         SE_Element e;
-        _IntersectPointData* ipd = NULL;
+        struct _IntersectPointData* ipd = NULL;
         SE_Object_Clear(&e, sizeof(SE_Element));
         e.type = SE_DATA;
         ipd = (struct _IntersectPointData*)SE_Malloc(sizeof(struct _IntersectPointData));
@@ -428,7 +435,7 @@ int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spat
     SE_Element intersectPointData;
     int size = 0;
     float minPoint = SE_FLT_MAX;
-    _IntersectPointData* minIntersectPoint = NULL;
+    struct _IntersectPointData* minIntersectPoint = NULL;
     if(!spatial)
         return 0;
     SE_List_Init(&intersectPointList);
@@ -466,7 +473,7 @@ int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spat
     SE_ListIterator_Init(&intersectPointListIt, &intersectPointList);
     while(SE_ListIterator_Next(&intersectPointListIt, &intersectPointData))
     {
-        _IntersectPointData* ipd = (_IntersectPointData*)intersectPointData.dp.data;
+        struct _IntersectPointData* ipd = (struct _IntersectPointData*)intersectPointData.dp.data;
         SE_Vector3f distV;
         float len;
         SE_Vec3f_Subtract(&ipd->intersectPoint, &s->center, &distV);
