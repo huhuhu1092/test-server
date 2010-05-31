@@ -27,6 +27,7 @@ SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType,
     spatial->resourceManager = resourceManager;
     SE_RenderState_Init(&spatial->renderState, resourceManager);
     spatial->collisionType = SE_COLLISIONABLE;
+    SE_Mat4f_Identity(&spatial->worldTransform);
     return SE_VALID;
 }
 void SE_Spatial_Release(void* s)
@@ -96,7 +97,11 @@ static void createWorldBVFromLocalBV(SE_Spatial* spatial)
     SE_ASSERT(spatial->worldBV == NULL);
     if(spatial->localBV)
     {
+        SE_Matrix3f rotateMatrix;
+        SE_Vector3f translate;
+        SE_Mat4f_GetMatrix3fAndTranslate(&spatial->worldTransform, &rotateMatrix, &translate);
         spatial->worldBV =  SE_BoundingVolume_Clone(spatial->localBV);
+        spatial->worldBV->fTransform(spatial->localBV, &rotateMatrix, &translate, NULL, spatial->worldBV); 
     }
 }
 struct ContextDataForWorldBV
@@ -238,6 +243,7 @@ SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child)
     e.type = SE_DATA;
     e.dp.data = child;
     e.dp.fRelease = &SE_Spatial_Release;
+    child->parent = parent;
     return SE_List_AddLast(parent->children, e); 
 }
 SE_Result SE_Spatial_RemoveChild(SE_Spatial* parent, SE_Spatial* child)
@@ -428,7 +434,7 @@ static void addIntersectPointToList(SE_Spatial* spatial, SE_Sphere* s, SE_AABB* 
 int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spatial* spatial, SE_Vector3f* out)
 {
     int ret = 0;
-    SE_AABBBV* bv = NULL;
+    SE_AABBBV* aabbBV = NULL;
     SE_List intersectPointList;
     SE_ListIterator intersectPointListIt;
     SE_Vector3f intersectPoint;
@@ -441,8 +447,13 @@ int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spat
     SE_List_Init(&intersectPointList);
     if(spatial->spatialType == SE_GEOMETRY && spatial->collisionType == SE_COLLISIONABLE)
     {
-        bv = (SE_AABBBV*)spatial->worldBV;
-        addIntersectPointToList(spatial, s, &bv->aabb, endPoint, &intersectPointList);
+        switch(spatial->worldBV->type)
+        {
+        case SE_AABB_E:
+            aabbBV = (SE_AABBBV*)spatial->worldBV;
+            addIntersectPointToList(spatial, s, &aabbBV->aabb, endPoint, &intersectPointList);
+            break;
+        }
     }
     else if(spatial->spatialType == SE_NODE)
     {
@@ -453,10 +464,15 @@ int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint, SE_Spat
         while(SE_ListIterator_Next(&li, &e))
         {
             SE_Spatial* childs = (SE_Spatial*)e.dp.data;
-            bv = (SE_AABBBV*)childs->worldBV;
             if(childs->collisionType == SE_COLLISIONABLE)
             {
-                addIntersectPointToList(childs, s, &bv->aabb, endPoint, &intersectPointList);
+                switch(childs->worldBV->type)
+                {
+                case SE_AABB_E:
+                    aabbBV = (SE_AABBBV*)childs->worldBV;
+                    addIntersectPointToList(childs, s, &aabbBV->aabb, endPoint, &intersectPointList);
+                    break;
+                }
             }
         }
     }
@@ -503,3 +519,104 @@ void SE_IntersectionSpatialData_Release(void* isd)
     SE_IntersectionSpatialData* spatialData = (SE_IntersectionSpatialData*)isd;
     SE_IntersectionResult_Release(&spatialData->intersectionResult);
 }
+SE_Result SE_Spatial_SetMoveType(SE_Spatial* spatial, enum SE_SPATIAL_MOVE_TYPE moveType)
+{
+    SE_ASSERT(spatial);
+    spatial->moveType = moveType;
+    return SE_VALID;
+}
+
+SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* spatial, SE_AXIS_TYPE axis, float dist)
+{
+    SE_AABBBV* aabbBV = NULL;
+    SE_ASSERT(spatial);
+    if(spatial->worldBV == NULL)
+    {
+        LOGI("spatial worldBV is null\n");
+        return SE_VALID; 
+    } 
+    switch(spatial->worldBV->type)
+    {
+    case SE_AABB_E:
+        {
+            aabbBV = (SE_AABBBV*)spatial->worldBV;
+            
+        }
+        break;
+    case SE_SPHERE_E:
+        break;
+    case SE_OBB_E:
+        break;
+    }
+    return SE_VALID;
+}
+SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, SE_AXIS_TYPE axis, float angle)
+{
+    return SE_VALID;
+}
+SE_Spatial* SE_Spatial_Find(SE_Spatial* parent, SE_String name)
+{
+    SE_ASSERT(parent);
+    SE_ListIterator li;
+    SE_List* children = parent->children;
+    SE_Element e;
+    SE_Spatial* spatial = NULL;
+    if(SE_String_Compare(parent->name, name) == 0)
+    {
+        return parent;
+    }
+    if(children == NULL)
+        return NULL;
+    SE_ListIterator_Init(&li, children);
+    while(SE_ListIterator_Next(&li, &e))
+    {
+        SE_Spatial* schild = (SE_Spatial*)e.dp.data;
+        spatial = SE_Spatial_Find(schild, name);
+        if(spatial)
+            break;
+    }
+    return spatial;  
+}
+SE_Result SE_Spatial_GetLocalRotateQuat(const SE_Spatial* spatial, SE_Quat* out)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(out);
+    *out = spatial->localRotation;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_GetLocalTranslate(const SE_Spatial* spatial, SE_Vector3f* out)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(out);
+    *out = spatial->localTranslation;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_GetLocalScale(const SE_Spatial* spatial, SE_Vector3f* out)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(out);
+    *out = spatial->localScale;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_SetLocalRotateQuat(SE_Spatial* spatial, const SE_Quat* quat)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(quat);
+    spatial->localRotation = *quat;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_SetLocalTranslate(SE_Spatial* spatial, const SE_Vector3f* translate)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(translate);
+    spatial->localTranslation = *translate;
+    return SE_VALID;
+}
+SE_Result SE_Spatial_SetLocalScale(SE_Spatial* spatial, const SE_Vector3f* scale)
+{
+    SE_ASSERT(spatial);
+    SE_ASSERT(scale);
+    spatial->localScale = *scale;
+    return SE_VALID;
+}
+

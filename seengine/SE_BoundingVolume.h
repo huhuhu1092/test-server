@@ -11,7 +11,7 @@ extern "C" {
 #endif
 enum SE_BVType {SE_SPHERE_E, SE_AABB_E, SE_OBB_E, SE_CAPSULE_E};
 struct SE_BoundingVolume_tag;
-typedef SE_Result (*SE_BV_TRANSFORM)(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale);
+typedef SE_Result (*SE_BV_TRANSFORM)(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out);
 typedef enum SE_Plane_Side (*SE_BV_WHICH_SIDE)(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane);
 typedef SE_Result (*SE_BV_MERGE)(struct SE_BoundingVolume_tag* bvMerged, const struct SE_BoundingVolume_tag* bv);
 typedef int (*SE_BV_CONTAINS)(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f* point);
@@ -46,7 +46,7 @@ typedef struct SE_SphereBV_tag
 } SE_SphereBV;
 extern SE_Result SE_SphereBV_CreateFromPoints(SE_SphereBV* sbv, SE_Vector3f* points, int pointNum);
 extern SE_Result SE_SphereBV_CreateFromSphere(SE_SphereBV* sbv, SE_Sphere* s);
-extern SE_Result SE_SphereBV_Transform(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale);
+extern SE_Result SE_SphereBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out);
 extern enum SE_Plane_Side SE_SphereBV_WhichSide(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane);
 extern SE_Result SE_SphereBV_Merge(struct SE_BoundingVolume_tag* bvMerged, const struct SE_BoundingVolume_tag* bv);
 extern int SE_SphereBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f* point);
@@ -65,7 +65,7 @@ typedef struct SE_AABBBV_tag
 } SE_AABBBV;
 extern SE_Result SE_AABBBV_CreateFromPoints(SE_AABBBV* aabbBv, SE_Vector3f* points, int pointNum);
 extern SE_Result SE_AABBBV_CreateFromAABB(SE_AABBBV* aabbBv, SE_AABB* aabb);
-extern SE_Result SE_AABBBV_Transform(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale);
+extern SE_Result SE_AABBBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* traslate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out);
 extern enum SE_Plane_Side SE_AABBBV_WhichSide(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane);
 extern SE_Result SE_AABBBV_Merge(struct SE_BoundingVolume_tag* bvMerged, const struct SE_BoundingVolume_tag* bv);
 extern int SE_AABBBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f* point);

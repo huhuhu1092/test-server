@@ -96,6 +96,7 @@ void handleKeyPress( SDL_keysym *keysym )
 	     */
 	    break;
 	case SDLK_LEFT:
+
 	    /* Left arrow key was pressed
 	     * this effectively turns the camera left, but does it by
 	     * rotating the scene right

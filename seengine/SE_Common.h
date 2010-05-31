@@ -19,6 +19,7 @@ typedef int SE_Result;
  * */
 #define SE_Result_IsValid(r) ((r) != 0)
 #define SE_Object_Clear(optr, size) (memset((optr), 0, size))
+enum SE_AXIS_TYPE {SE_AXIS_X, SE_AXIS_Y, SE_AXIS_Z};
 /*
 extern int SE_Result_Valid(SE_Result r);
 */

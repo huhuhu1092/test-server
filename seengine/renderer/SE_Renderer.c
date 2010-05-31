@@ -295,7 +295,6 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
         }
         glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
-    /*glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);*/
     /*LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     /*
@@ -304,6 +303,13 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
     SE_Free(vertexArray);
     if(texVertexArray)
         SE_Free(texVertexArray);
+}
+static void setSpatialMatrix(SE_Spatial* spatial)
+{
+    SE_Matrix4f* m = &spatial->worldTransform;
+    float mData[16];
+    SE_Mat4f_GetMatrixColumnSequence(m, mData); 
+    glMultMatrixf(mData);
 }
 void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
 {
@@ -315,11 +321,17 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
         SE_RenderState_Activate(&spatial->renderState, spatial);
         if(spatial->subMeshIndex == -1)
         {
+            glPushMatrix();
+            setSpatialMatrix(spatial);
             drawMesh(resourceManager, spatial->mesh);
+            glPopMatrix();
         }
         else
         {
+            glPushMatrix();
+            setSpatialMatrix(spatial);
             drawSubMesh(resourceManager, spatial->mesh, spatial->subMeshIndex);
+            glPopMatrix();
         }
     }
     else if(spatial->spatialType == SE_NODE)

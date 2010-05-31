@@ -65,6 +65,12 @@ extern SE_Spatial* SE_Spatial_Create();
 extern SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType ,const char* name, SE_ResourceManager* resourceManager, struct SE_Mesh_tag* mesh);
 extern void SE_Spatial_Release(void* spatial);
 extern SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst);
+extern SE_Result SE_Spatial_GetLocalRotateQuat(const SE_Spatial* spatial, SE_Quat* out);
+extern SE_Result SE_Spatial_GetLocalTranslate(const SE_Spatial* spatial, SE_Vector3f* out);
+extern SE_Result SE_Spatial_GetLocalScale(const SE_Spatial* spatial, SE_Vector3f* out);
+extern SE_Result SE_Spatial_SetLocalRotateQuat(SE_Spatial* spatail, const SE_Quat* quat);
+extern SE_Result SE_Spatial_SetLocalTranslate(SE_Spatial* spatial, const SE_Vector3f* translate);
+extern SE_Result SE_Spatial_SetLocalScale(SE_Spatial* spatial, const SE_Vector3f* scale);
 extern SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial);
 extern SE_Result SE_Spatial_UpdateGeometricState(SE_Spatial* spatial);
@@ -79,6 +85,13 @@ extern SE_Result SE_Spatial_CreateLocalBV(SE_Spatial* spatial, enum SE_BVType bv
 extern SE_Result SE_Spatial_IntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList);
 extern int SE_Spatial_MovingSphereIntersect(SE_Sphere* s, SE_Vector3f endPoint,SE_Spatial* spatial, SE_Vector3f* out);
 extern int SE_Spatial_HasSubMesh(const SE_Spatial* spatial);
+extern SE_Result SE_Spatial_SetMoveType(SE_Spatial* spatial, enum SE_SPATIAL_MOVE_TYPE moveType);
+/**
+ *
+ * */
+extern SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float dist);
+extern SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float angle); 
+extern SE_Spatial* SE_Spatial_Find(SE_Spatial* parent, SE_String name);
 #ifdef __cplusplus
 }
 #endif

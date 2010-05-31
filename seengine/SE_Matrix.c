@@ -599,3 +599,24 @@ void SE_Mat4f_GetMatrixColumnSequence(const SE_Matrix4f*m, float out[16])
         }
     }
 }
+void SE_Mat4f_GetMatrix3fAndTranslate(const SE_Matrix4f* m, SE_Matrix3f* rs, SE_Vector3f* translate)
+{
+    SE_ASSERT(m);
+    SE_ASSERT(rs);
+    SE_ASSERT(translate);
+    rs->m00 = m->m00;
+    rs->m01 = m->m01;
+    rs->m02 = m->m02;
+    
+    rs->m10 = m->m10;
+    rs->m11 = m->m11;
+    rs->m12 = m->m12;
+
+    rs->m20 = m->m20;
+    rs->m21 = m->m21;
+    rs->m22 = m->m22;
+
+    translate->x = m->m03;
+    translate->y = m->m13;
+    translate->z = m->m23;
+}

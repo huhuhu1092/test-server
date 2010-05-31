@@ -261,3 +261,50 @@ int SE_Intersect_MovingSphereStaticPlane(const SE_Sphere* sphere, const SE_Plane
     }
     
 }
+int SE_Intersect_MovingOBBStaticAABB(const SE_OBB obb, const SE_AABB* aabb, const SE_Vector3f endCenter, int axis, SE_OBB* out)
+{
+    SE_OBB aabbObb;
+    SE_OBB obbWithEnd;
+    SE_Vector3f aabbCenter;
+    SE_Vector3f aabbExtent;
+    SE_Vector3f distV, mid;
+    float moveAxisExtent; /*this is the extent of the moving direction */
+    float interval;
+    SE_AABB_GetCenter(aabb, &aabbCenter);
+    SE_AABB_GetExtent(aabb, &aabbExtent);
+    SE_Vec3f_Copy(&aabbCenter, &aabbObb.center);
+    SE_Vec3f_Init(0, 0, 1, &aabbObb.axis[0]);
+    SE_Vec3f_Init(0, 1, 0, &aabbObb.axis[1]);
+    SE_Vec3f_Init(0, 0, 1, &aabbObb.axis[2]);
+    aabbObb.e[0] = aabbExtent.x / 2;
+    aabbObb.e[1] = aabbExtent.y / 2;
+    aabbObb.e[2] = aabbExtent.z / 2;
+    SE_Vec3f_Subtract(&endCenter, &obb.center, &distV);
+    SE_Vec3f_Mul(&distV, 0.5, &mid);
+    SE_Vec3f_Add(&obb.center, &mid, &obbWithEnd.center);
+    SE_Vec3f_Copy(&obb.axis[0], &obbWithEnd.axis[0]);
+    SE_Vec3f_Copy(&obb.axis[1], &obbWithEnd.axis[1]);
+    SE_Vec3f_Copy(&obb.axis[2], &obbWithEnd.axis[2]);
+    obbWithEnd.e[0] = obb.e[0];
+    obbWithEnd.e[1] = obb.e[1];
+    obbWithEnd.e[2] = obb.e[2];
+    moveAxisExtent = SE_Vec3f_Length(&distV) + 2 * obb.e[axis];
+    obbWithEnd.e[axis] = moveAxisExtent / 2;
+    if(!SE_OBB_IntersectOBB(&aabbObb, &obbWithEnd))
+       return 0;
+    interval = SE_Vec3f_Length(&distV);
+    if(interval < 2.0f)
+    {
+        *out = obb;
+        return 1;
+    }
+    if(SE_Intersect_MovingOBBStaticAABB(obb, aabb, obbWithEnd.center, axis, out))
+        return 1;
+    SE_Vec3f_Copy(&obb.axis[0], &obbWithEnd.axis[0]);
+    SE_Vec3f_Copy(&obb.axis[1], &obbWithEnd.axis[1]);
+    SE_Vec3f_Copy(&obb.axis[2], &obbWithEnd.axis[2]);
+    obbWithEnd.e[0] = obb.e[0];
+    obbWithEnd.e[1] = obb.e[1];
+    obbWithEnd.e[2] = obb.e[2];
+    return SE_Intersect_MovingOBBStaticAABB(obbWithEnd, aabb, endCenter, axis, out);
+}

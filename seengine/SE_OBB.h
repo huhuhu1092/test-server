@@ -20,13 +20,37 @@ extern SE_Result SE_OBB_CreateFromPoints(SE_OBB* obb, SE_Vector3f* points, int n
  * axis : -1 : no axis and no rotation, 0: x axis, 1 : y axis, 2: z axis
  * angle: the rotate angle around axis
  * */
-extern SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, int axis, float angle, const SE_Vector3f* translate);
+extern SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, int axis, float angle);
 /**
  * a is the main OBB, we will translate b to the coordinate of a.
  * 0: not intersect
  * 1: intersect
  * */
 extern int SE_OBB_IntersectOBB(const SE_OBB* a, const SE_OBB* b);
+/**
+ * the vertex is ranged from bottom face to top face
+ * bottom face: 0, 1, 2, 3 four vertex counterclockwise
+ * top face : 4 ,5 ,6 ,7 four vertex counterclockwise
+ *           bottom face:
+ *         
+ *         |-----------> x
+ *         |  0----3
+ *         |  |    |
+ *         |  |    |
+ *         |  1----2
+ *       z\|/
+ *         
+ *
+ *
+ *           top face:
+ *           4----7
+ *           |    |
+ *           |    |
+ *           5----6
+
+ *
+ * */
+extern SE_Result SE_OBB_GetVertex(const SE_OBB* obb, SE_Vector3f points[]);
 #ifdef __cplusplus
 }
 #endif

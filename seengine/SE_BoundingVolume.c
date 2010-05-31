@@ -65,7 +65,7 @@ SE_Result SE_SphereBV_CreateFromSphere(SE_SphereBV* sbv, SE_Sphere* s)
     sbv->sphere = *s;
     return SE_VALID;
 }
-SE_Result SE_SphereBV_Transform(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* translate, const SE_Vector3f* scale)
+SE_Result SE_SphereBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* translate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out)
 {
     SE_ASSERT(bv);
     SE_SphereBV* sbv = (SE_SphereBV*)bv;
@@ -177,7 +177,7 @@ SE_Result SE_AABBBV_CreateFromAABB(SE_AABBBV* aabbBv, SE_AABB* aabb)
     aabbBv->aabb = *aabb;
     return SE_VALID;
 }
-SE_Result SE_AABBBV_Transform(struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* rotation, const SE_Vector3f* translate, const SE_Vector3f* scale)
+SE_Result SE_AABBBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* rotation, const SE_Vector3f* translate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out)
 {
     SE_AABB dst;
     SE_Matrix3f s, rs;

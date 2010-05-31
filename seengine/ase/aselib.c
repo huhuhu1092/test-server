@@ -3,6 +3,10 @@
 #include "../SE_GeometryData.h"
 #include "../SE_ResourceManager.h"
 #include "../SE_Memory.h"
+#include "SE_Vector.h"
+#include "SE_Matrix.h"
+#include "SE_Quat.h"
+#include "SE_Utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -196,12 +200,41 @@ void ASE_Loader::Write(const char* filename)
         dstgd->type = SE_TRIANGLES;
         dstgd->vertexNum = mesh->numVertexes;
         dstgd->vertexArray = (SE_Vector3f*)SE_Malloc(dstgd->vertexNum * sizeof(SE_Vector3f));
+        SE_Matrix3f rotate, rs;
+        SE_Matrix4f transformMatrix, invertTransformMatrix;
+        SE_Vector3f rotateAxis, translate, scale;
+        SE_Quat rotateQuat;
+        rotateAxis.x = go->rotateAxis[0];
+        rotateAxis.y = go->rotateAxis[1];
+        rotateAxis.z = go->rotateAxis[2];
+        translate.x = go->translate[0];
+        translate.y = go->translate[1];
+        translate.z = go->translate[2];
+        scale.x = go->scale[0];
+        scale.y = go->scale[1];
+        scale.z = go->scale[2];
+        SE_Quat_InitFromAngleAxis(go->rotateAngle, &rotateAxis, &rotateQuat);
+        SE_CreateTransformByRST(&rotateQuat, &scale, &translate, &transformMatrix);
+        SE_Mat4f_Inverse(&transformMatrix, &invertTransformMatrix);
         int j;
         for(j = 0 ; j < dstgd->vertexNum ; j++ )
         {
+            SE_Vector4f v1, v2;
+            v1.x = mesh->vertexes[j].x;
+            v1.y =  mesh->vertexes[j].y;
+            v1.z = mesh->vertexes[j].z;
+            v1.w = 1.0f;
+            SE_Mat4f_Map(&invertTransformMatrix, &v1, &v2);
+            SE_ASSERT(v2.w == 1.0f);
+            dstgd->vertexArray[j].x = v2.x;
+            dstgd->vertexArray[j].y = v2.y;
+            dstgd->vertexArray[j].z = v2.z;
+
+            /*
             dstgd->vertexArray[j].x = mesh->vertexes[j].x;
             dstgd->vertexArray[j].y = mesh->vertexes[j].y;
             dstgd->vertexArray[j].z = mesh->vertexes[j].z;
+            */
         }
         dstgd->ownVertexArray = 1;
         dstgd->texVertexNum = mesh->numTVertexes;
@@ -903,7 +936,7 @@ void ASE_Loader::ASE_KeyNODETM(const char* token)
     {
         ASE_GetToken(false);
         float x = atof(s_token);
-        mCurrGeomObject->rotateAngle = x;
+        mCurrGeomObject->rotateAngle = x * 180.0 / 3.1415926;
     }
     else if(!strcmp( token, "*TM_SCALE"))
     {

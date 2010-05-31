@@ -43,7 +43,12 @@ SE_Result SE_InitWorld(int argc, char** argv)
         SE_Mesh* mesh = SE_ResourceManager_GetMesh(resourceManager, i);
         SE_Spatial* spatial = SE_Spatial_Create();
         SE_String strName;
+        SE_Quat rotation;
+        SE_Vector3f scale, translation;
         SE_Object_Clear(&strName, sizeof(SE_String));
+        SE_Vec3f_Copy(&mesh->scale, &scale);
+        SE_Vec3f_Copy(&mesh->translate, &translation);
+        SE_Quat_InitFromAngleAxis(mesh->rotateAngle, &mesh->rotateAxis, &rotation);
         SE_String_Concate(&strName, "%s_%d", SE_String_GetData(&mesh->name), i);
         if(mesh->subMeshNum == 0)
         {
@@ -66,6 +71,9 @@ SE_Result SE_InitWorld(int argc, char** argv)
                 SE_String_Release(&subName);
             }
         }
+        SE_Spatial_SetLocalScale(spatial, &scale);
+        SE_Spatial_SetLocalTranslate(spatial, &translation);
+        SE_Spatial_SetLocalRotateQuat(spatial, &rotation); 
         /*test*/
         SE_String ttt;
         SE_String_Init(&ttt, "Box07_130");
@@ -95,7 +103,7 @@ SE_Result SE_InitWorld(int argc, char** argv)
     }
     LOGI("... geometry with no sub mesh num = %d\n", geometryNum);
     SE_Spatial_UpdateRenderState(root);
-    SE_Spatial_UpdateWorldBV(root);
+    SE_Spatial_UpdateGeometricState(root);
     /*
     int nameCount = SE_List_Size(&nameList);
     SE_ASSERT(nameCount == meshCount);
