@@ -83,6 +83,24 @@ SE_Result SE_InitWorld(int argc, char** argv)
             spatial->collisionType = SE_NO_COLLISION;
         }
         SE_String_Release(&ttt);
+
+        SE_String_Init(&ttt, "Box48_29");
+        if(SE_String_Compare(strName, ttt) == 0)
+        {
+            LOGI("###### box48 #########\n");
+            spatial->collisionType = SE_NO_COLLISION;
+        }
+        SE_String_Release(&ttt);
+
+        SE_String_Init(&ttt, "DB_0");
+        if(SE_String_Compare(strName, ttt) == 0)
+        {
+            LOGI("###### DB #########\n");
+            spatial->collisionType = SE_NO_COLLISION;
+        }
+        SE_String_Release(&ttt);
+
+
         /*end*/
         SE_Spatial_CreateLocalBV(spatial, SE_AABB_E);
         SE_Element e;

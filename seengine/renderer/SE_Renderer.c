@@ -345,6 +345,11 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
         while(SE_ListIterator_Next(&li, &e))
         {
             SE_Spatial* sc = (SE_Spatial*)e.dp.data;
+#if 0 
+            SE_String ttt;
+            SE_String_Init(&ttt, "Box48_29");
+            if(SE_String_Compare(sc->name, ttt) == 0)
+#endif
             SE_Renderer_DrawSpatial(sc);
         }
     }

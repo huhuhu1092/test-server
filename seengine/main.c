@@ -103,8 +103,26 @@ void handleKeyPress( SDL_keysym *keysym )
 	     */
 	    break;
 	case SDLK_UP:
+        inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_FORWARD;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
+
 	    break;
 	case SDLK_DOWN:
+        inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_BACK;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
+
 	    break;
 	default:
 	    break;

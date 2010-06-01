@@ -38,7 +38,7 @@ OBJ_FILE = $(SRCS:.c=.o)
 OUTPUT_NAME = seapp
 INCLUDE_PATH = -I./ -I../ -I/usr/include -I/usr/include/SDL
 INPUT_LIB = -L/usr/lib -lm -lGL -lGLU `sdl-config --libs`
-CFLAGS = -g $(INCLUDE_PATH)
+CFLAGS = -g -DDEBUG $(INCLUDE_PATH)
 all: $(OBJ_FILE) depend
 	$(CC) $(INPUT_LIB) $(OBJ_FILE) -o $(OUTPUT_NAME)
 depend: 
@@ -483,21 +483,20 @@ SE_Sphere.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
 SE_Sphere.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_Sphere.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_Sphere.o: SE_Vector.h SE_Matrix.h SE_Math.h
-SE_OBB.o: SE_OBB.h SE_Vector.h SE_Common.h /usr/include/assert.h
-SE_OBB.o: /usr/include/features.h /usr/include/sys/cdefs.h
-SE_OBB.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-SE_OBB.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
-SE_OBB.o: /usr/include/sys/types.h /usr/include/bits/types.h
-SE_OBB.o: /usr/include/bits/typesizes.h /usr/include/time.h
-SE_OBB.o: /usr/include/endian.h /usr/include/bits/endian.h
-SE_OBB.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
-SE_OBB.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-SE_OBB.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
-SE_OBB.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
-SE_OBB.o: /usr/include/string.h /usr/include/stdio.h /usr/include/libio.h
-SE_OBB.o: /usr/include/_G_config.h /usr/include/wchar.h
+SE_OBB.o: SE_OBB.h SE_Common.h /usr/include/assert.h /usr/include/features.h
+SE_OBB.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+SE_OBB.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+SE_OBB.o: /usr/include/stdlib.h /usr/include/sys/types.h
+SE_OBB.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+SE_OBB.o: /usr/include/time.h /usr/include/endian.h
+SE_OBB.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+SE_OBB.o: /usr/include/sys/select.h /usr/include/bits/select.h
+SE_OBB.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+SE_OBB.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+SE_OBB.o: /usr/include/alloca.h /usr/include/string.h /usr/include/stdio.h
+SE_OBB.o: /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h
 SE_OBB.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-SE_OBB.o: SE_Matrix.h SE_AABB.h SE_Math.h
+SE_OBB.o: SE_Vector.h SE_Matrix.h SE_AABB.h SE_Math.h
 SE_GeometryIntersect.o: SE_GeometryIntersect.h SE_Vector.h SE_Common.h
 SE_GeometryIntersect.o: /usr/include/assert.h /usr/include/features.h
 SE_GeometryIntersect.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h

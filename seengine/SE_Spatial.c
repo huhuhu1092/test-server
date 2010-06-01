@@ -97,11 +97,62 @@ static void createWorldBVFromLocalBV(SE_Spatial* spatial)
     SE_ASSERT(spatial->worldBV == NULL);
     if(spatial->localBV)
     {
+        /*
         SE_Matrix3f rotateMatrix;
         SE_Vector3f translate;
-        SE_Mat4f_GetMatrix3fAndTranslate(&spatial->worldTransform, &rotateMatrix, &translate);
+        //SE_Mat4f_GetMatrix3fAndTranslate(&spatial->worldTransform, &rotateMatrix, &translate);
+        SE_Quat_ToMatrix3f(&spatial->localRotation, &rotateMatrix);
         spatial->worldBV =  SE_BoundingVolume_Clone(spatial->localBV);
-        spatial->worldBV->fTransform(spatial->localBV, &rotateMatrix, &translate, NULL, spatial->worldBV); 
+        spatial->worldBV->fTransform(spatial->localBV, &rotateMatrix, &spatial->localTranslation, &spatial->localScale, spatial->worldBV); 
+        */
+        SE_Mesh* mesh = spatial->mesh;
+        SE_ResourceManager* resourceManager = spatial->resourceManager;
+        SE_GeometryData* geomData;
+        SE_SphereBV* sphereBV = NULL;
+        SE_AABBBV* aabbBV = NULL;
+        if(!mesh)
+            return ;
+        geomData = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
+        switch(spatial->localBV->type)
+        {
+        case SE_SPHERE_E:
+            break;
+        case SE_AABB_E:
+            {
+                int i;
+                aabbBV = (SE_AABBBV*)SE_Malloc(sizeof(SE_AABBBV));
+                SE_Vector3f* worldVertexData = (SE_Vector3f*)SE_Malloc(sizeof(SE_Vector3f) * geomData->vertexNum);
+                for(i = 0 ; i < geomData->vertexNum ; i++)
+                {
+                    SE_Vector4f v1, v2;
+                    v1.x = geomData->vertexArray[i].x;
+                    v1.y = geomData->vertexArray[i].y;
+                    v1.z = geomData->vertexArray[i].z;
+                    v1.w = 1.0f;
+                    SE_Mat4f_Map(&spatial->worldTransform, &v1, &v2);
+                    worldVertexData[i].x = v2.x;
+                    worldVertexData[i].y = v2.y;
+                    worldVertexData[i].z = v2.z;
+                }
+                SE_AABBBV_CreateFromPoints(aabbBV, worldVertexData, geomData->vertexNum);
+                SE_Free(worldVertexData);
+                spatial->worldBV = (SE_BoundingVolume*)aabbBV;
+#ifdef DEBUG
+                SE_String ttt;
+                SE_String_Init(&ttt, "Box04_2");
+                if(SE_String_Compare(ttt, spatial->name) == 0)
+                {
+                    LOGI("## min.x = %f, y = %f, z = %f", aabbBV->aabb.min.x, aabbBV->aabb.min.y, aabbBV->aabb.min.z);
+                    LOGI("## max.x = %f, y = %f, z = %f", aabbBV->aabb.max.x, aabbBV->aabb.max.y, aabbBV->aabb.max.z);
+
+                }
+#endif
+            }
+            break;
+        default:
+            LOGE("can not implement \n");
+            break;
+        }
     }
 }
 struct ContextDataForWorldBV
@@ -297,6 +348,7 @@ int SE_Spatial_HasSubMesh(const SE_Spatial* spatial)
     if(!spatial)
         return 0;
     if(!spatial->mesh)
+        return 0;
     return spatial->mesh->subMeshNum > 0;
 }
 SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType, const char* scriptname)
@@ -525,8 +577,94 @@ SE_Result SE_Spatial_SetMoveType(SE_Spatial* spatial, enum SE_SPATIAL_MOVE_TYPE 
     spatial->moveType = moveType;
     return SE_VALID;
 }
-
-SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* spatial, SE_AXIS_TYPE axis, float dist)
+static void getMoveDir(SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
+{
+    SE_Vector3f xv, yv, zv;
+    SE_Vec3f_Init(1,0,0, &xv);
+    SE_Vec3f_Init(0,1,0, &yv);
+    SE_Vec3f_Init(0,0,1, &zv);
+    switch(axis)
+    {
+    case SE_AXIS_X:
+        SE_Vec3f_Mul(&xv, dist, out);
+        break;
+    case SE_AXIS_Y:
+        SE_Vec3f_Mul(&yv, dist, out);
+        break;
+    case SE_AXIS_Z:
+        SE_Vec3f_Mul(&zv, dist, out);
+        break;
+    }
+}
+struct _IntersectMoveOBBData
+{
+    SE_Spatial* spatial;
+    SE_OBB obb;
+};
+static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* moveSpatial, SE_OBB obb, SE_Vector3f endPoint, SE_AXIS_TYPE axis, SE_List* obbList)
+{
+    SE_AABBBV* aabbBV = NULL;
+    int ret = 0;
+    /*
+    if(root->worldBV == NULL)
+        return ;
+        */
+    if(root == moveSpatial)
+        return ;
+    if(root->collisionType == SE_NO_COLLISION)
+        return;
+    if(root->spatialType == SE_GEOMETRY || (root->spatialType == SE_NODE && SE_Spatial_HasSubMesh(root)))
+    {
+        switch(root->worldBV->type)
+        {
+        case SE_AABB_E:
+            {
+                SE_OBB obbIntersect;
+                aabbBV = (SE_AABBBV*)root->worldBV;
+                ret = SE_Intersect_MovingOBBStaticAABB(obb, &aabbBV->aabb, endPoint, axis, &obbIntersect);
+                if(ret)
+                {
+                    SE_Element e;
+                    struct _IntersectMoveOBBData* oe;
+                    e.type = SE_DATA;
+                    oe = (struct _IntersectMoveOBBData*)SE_Malloc(sizeof(struct _IntersectMoveOBBData));
+                    if(oe)
+                    {
+                        oe->obb = obbIntersect;
+                        oe->spatial = root;
+                        e.dp.data = oe;
+                        SE_List_AddLast(obbList, e);
+                    }
+                }
+            }
+            break;
+        case SE_SPHERE_E:
+            break;
+        case SE_OBB_E:
+            break;
+        }
+    }
+    else if(root->spatialType == SE_NODE)
+    {
+        SE_List* children = root->children;
+        if(SE_Spatial_HasSubMesh(root))
+        {
+            calculateIntersectSpatialByMovingOBB(root, moveSpatial, obb, endPoint, axis, obbList);
+        }
+        else
+        {
+            SE_Element e;
+            SE_ListIterator it;
+            SE_ListIterator_Init(&it, children);
+            while(SE_ListIterator_Next(&it, &e))
+            {
+                SE_Spatial* schild = (SE_Spatial*)e.dp.data;
+                calculateIntersectSpatialByMovingOBB(schild, moveSpatial, obb, endPoint, axis, obbList);
+            }
+        }
+    }
+}
+SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, SE_AXIS_TYPE axis, float dist)
 {
     SE_AABBBV* aabbBV = NULL;
     SE_ASSERT(spatial);
@@ -539,8 +677,51 @@ SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* spatial, SE_AXIS_TYPE axis, flo
     {
     case SE_AABB_E:
         {
+            SE_Vector3f endPoint, localTranslate, moveDir;
+            SE_OBB aabbOBB, endOBB;
+            int size = 0;
+            SE_List obbList;
             aabbBV = (SE_AABBBV*)spatial->worldBV;
-            
+            SE_OBB_CreateFromAABB(&aabbOBB, &aabbBV->aabb, SE_AXIS_NOAXIS, 0.0f);
+            getMoveDir(axis, dist, &moveDir);
+            SE_Vec3f_Add(&aabbOBB.center, &moveDir, &endPoint);
+            SE_List_Init(&obbList);
+            calculateIntersectSpatialByMovingOBB(root, spatial, aabbOBB, endPoint, axis, &obbList);
+            size = SE_List_Size(&obbList);
+#ifdef DEBUG
+            LOGI("### move obb size = %d ###\n", size);
+#endif
+            if(size > 0)
+            {
+                SE_ListIterator it;
+                SE_Element e;
+                struct _IntersectMoveOBBData* minOBB = NULL;
+                float minDist = SE_FLT_MAX;
+                SE_ListIterator_Init(&it, &obbList);
+                while(SE_ListIterator_Next(&it, &e))
+                {
+                    struct _IntersectMoveOBBData* s = (struct _IntersectMoveOBBData*)e.dp.data;
+                    SE_Vector3f distV;
+                    float dist;
+                    SE_Vec3f_Subtract(&s->obb.center, &aabbOBB.center, &distV);
+                    dist = SE_Vec3f_LengthSquare(&distV);
+                    if(dist < minDist)
+                    {
+                        minDist = dist;
+                        minOBB = s;
+                    }
+                }
+                endOBB = minOBB->obb;
+#ifdef DEBUG
+                LOGI("### move obb intersect object = %s ###\n", SE_String_GetData(&minOBB->spatial->name));
+#endif
+                SE_Vec3f_Subtract(&endOBB.center, &aabbOBB.center, &moveDir);
+            }
+            SE_Spatial_GetLocalTranslate(spatial, &localTranslate);
+            SE_Vec3f_Add(&localTranslate, &moveDir, &localTranslate);
+            SE_Spatial_SetLocalTranslate(spatial, &localTranslate);
+            SE_Spatial_UpdateGeometricState(spatial);
+            SE_List_Release(&obbList);
         }
         break;
     case SE_SPHERE_E:

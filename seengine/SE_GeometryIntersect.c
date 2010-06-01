@@ -273,7 +273,7 @@ int SE_Intersect_MovingOBBStaticAABB(const SE_OBB obb, const SE_AABB* aabb, cons
     SE_AABB_GetCenter(aabb, &aabbCenter);
     SE_AABB_GetExtent(aabb, &aabbExtent);
     SE_Vec3f_Copy(&aabbCenter, &aabbObb.center);
-    SE_Vec3f_Init(0, 0, 1, &aabbObb.axis[0]);
+    SE_Vec3f_Init(1, 0, 0, &aabbObb.axis[0]);
     SE_Vec3f_Init(0, 1, 0, &aabbObb.axis[1]);
     SE_Vec3f_Init(0, 0, 1, &aabbObb.axis[2]);
     aabbObb.e[0] = aabbExtent.x / 2;

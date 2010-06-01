@@ -89,7 +89,7 @@ extern SE_Result SE_Spatial_SetMoveType(SE_Spatial* spatial, enum SE_SPATIAL_MOV
 /**
  *
  * */
-extern SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float dist);
+extern SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float dist);
 extern SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float angle); 
 extern SE_Spatial* SE_Spatial_Find(SE_Spatial* parent, SE_String name);
 #ifdef __cplusplus

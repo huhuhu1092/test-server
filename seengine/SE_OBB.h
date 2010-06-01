@@ -1,5 +1,6 @@
 #ifndef SE_OBB_H
 #define SE_OBB_H
+#include "SE_Common.h"
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #ifdef __cplusplus
@@ -20,7 +21,7 @@ extern SE_Result SE_OBB_CreateFromPoints(SE_OBB* obb, SE_Vector3f* points, int n
  * axis : -1 : no axis and no rotation, 0: x axis, 1 : y axis, 2: z axis
  * angle: the rotate angle around axis
  * */
-extern SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, int axis, float angle);
+extern SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, enum SE_AXIS_TYPE axis, float angle);
 /**
  * a is the main OBB, we will translate b to the coordinate of a.
  * 0: not intersect

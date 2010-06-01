@@ -102,7 +102,7 @@ SE_Result SE_OBB_CreateFromPoints(SE_OBB* obb, SE_Vector3f* points, int numPoint
 {
     return SE_VALID;
 }
-SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, int axis, float angle)
+SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, enum SE_AXIS_TYPE axis, float angle)
 {
     SE_Vector3f aabbCenter, aabbExtent;
     SE_Vector3f targetV;
@@ -116,17 +116,22 @@ SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, int
     obb->e[2] = aabbExtent.z / 2;
     switch(axis)
     {
-    case 0:
+    case SE_AXIS_NOAXIS:
+        SE_Vec3f_Init(1, 0, 0, &obb->axis[0]);
+        SE_Vec3f_Init(0, 1, 0, &obb->axis[1]);
+        SE_Vec3f_Init(0, 0, 1, &obb->axis[2]);
+        break;
+    case SE_AXIS_X:
         SE_Vec3f_Init(1, 0, 0, &obb->axis[0]);
         SE_Vec3f_Init(0, SE_Cosf(radian), SE_Sinf(radian), &obb->axis[1]);
         SE_Vec3f_Init(0, -SE_Sinf(radian), SE_Cosf(radian), &obb->axis[2]);
         break;
-    case 1:
+    case SE_AXIS_Y:
         SE_Vec3f_Init(SE_Cosf(radian), 0, -SE_Sinf(radian), &obb->axis[0]);
         SE_Vec3f_Init(0, 1, 0, &obb->axis[1]);
         SE_Vec3f_Init(SE_Sinf(radian), 0, SE_Cosf(radian), &obb->axis[2]);
         break;    
-    case 2:
+    case SE_AXIS_Z:
         SE_Vec3f_Init(SE_Cosf(radian), SE_Sinf(radian), 0, &obb->axis[0]);
         SE_Vec3f_Init(-SE_Sinf(radian), SE_Cosf(radian), 0, &obb->axis[1]);
         SE_Vec3f_Init(0 ,0, 1, &obb->axis[2]);

@@ -31,15 +31,15 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
     enum SE_MOUSECODE currMouseCode;
     SE_MouseRecord* mouseRecord;
     enum SE_KEYCODE currKeyCode;
+    SE_Spatial* rootScene;
     /***/
     inputDevice = SE_World_GetInputDevice(world);
+    rootScene = SE_World_GetSceneRoot(world);
     if(inputEvent->inputType == SE_MOUSE)
     {
-        SE_Spatial* rootScene;
         currMouseState = inputEvent->mouse.mt;
         currMouseCode = inputEvent->mouse.mc;
         mouseRecord = &inputDevice->mouseState[currMouseCode];
-        rootScene = SE_World_GetSceneRoot(world);
         if(currMouseCode == SE_LEFTKEY)
         {
             if(currMouseState == SE_PRESSED && mouseRecord->state == SE_RELEASED)
@@ -155,6 +155,33 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
         {
             SE_World_RestoreMainCamera(world);
         }
+        else if(currKeyCode == SE_KEY_FORWARD && inputEvent->keyboard.down)
+        {
+            SE_String ttt;
+            SE_Spatial* moveSpatial;
+            SE_String_Init(&ttt, "Box07_130");
+            moveSpatial = SE_Spatial_Find(rootScene, ttt);
+            if(moveSpatial)
+            {
+                LOGI("### move object ####");
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, 2);
+            }
+            SE_String_Release(&ttt);
+        }
+        else if(currKeyCode == SE_KEY_BACK && inputEvent->keyboard.down)
+        {
+            SE_String ttt;
+            SE_Spatial* moveSpatial;
+            SE_String_Init(&ttt, "Box07_130");
+            moveSpatial = SE_Spatial_Find(rootScene, ttt);
+            if(moveSpatial)
+            {
+                LOGI("### move object ####");
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, -2);
+            }
+            SE_String_Release(&ttt);
+        }
+
     }
     SE_Free(inputEvent);
     return SE_VALID;
