@@ -146,6 +146,7 @@ static void createWorldBVFromLocalBV(SE_Spatial* spatial)
                     LOGI("## max.x = %f, y = %f, z = %f", aabbBV->aabb.max.x, aabbBV->aabb.max.y, aabbBV->aabb.max.z);
 
                 }
+                SE_String_Release(&ttt);
 #endif
             }
             break;
@@ -577,7 +578,7 @@ SE_Result SE_Spatial_SetMoveType(SE_Spatial* spatial, enum SE_SPATIAL_MOVE_TYPE 
     spatial->moveType = moveType;
     return SE_VALID;
 }
-static void getMoveDir(SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
+static void getMoveDir(enum SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
 {
     SE_Vector3f xv, yv, zv;
     SE_Vec3f_Init(1,0,0, &xv);
@@ -601,7 +602,7 @@ struct _IntersectMoveOBBData
     SE_Spatial* spatial;
     SE_OBB obb;
 };
-static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* moveSpatial, SE_OBB obb, SE_Vector3f endPoint, SE_AXIS_TYPE axis, SE_List* obbList)
+static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* moveSpatial, SE_OBB obb, float dist, enum SE_AXIS_TYPE axis, SE_List* obbList)
 {
     SE_AABBBV* aabbBV = NULL;
     int ret = 0;
@@ -620,11 +621,21 @@ static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* m
         case SE_AABB_E:
             {
                 SE_OBB obbIntersect;
+#ifdef DEBUG
+                SE_String ttt;
+                SE_String_Init(&ttt, "table1_23");
+                if(SE_String_Compare(ttt, root->name) == 0)
+                {
+                    LOGI("table1_23 \n");
+                }
+                SE_String_Release(&ttt);
+#endif
                 aabbBV = (SE_AABBBV*)root->worldBV;
-                ret = SE_Intersect_MovingOBBStaticAABB(obb, &aabbBV->aabb, endPoint, axis, &obbIntersect);
+                ret = SE_Intersect_MovingOBBStaticAABB(obb, &aabbBV->aabb, axis, dist, &obbIntersect);
                 if(ret)
                 {
                     SE_Element e;
+                    SE_Object_Clear(&e, sizeof(SE_Element));
                     struct _IntersectMoveOBBData* oe;
                     e.type = SE_DATA;
                     oe = (struct _IntersectMoveOBBData*)SE_Malloc(sizeof(struct _IntersectMoveOBBData));
@@ -649,7 +660,7 @@ static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* m
         SE_List* children = root->children;
         if(SE_Spatial_HasSubMesh(root))
         {
-            calculateIntersectSpatialByMovingOBB(root, moveSpatial, obb, endPoint, axis, obbList);
+            calculateIntersectSpatialByMovingOBB(root, moveSpatial, obb, dist, axis, obbList);
         }
         else
         {
@@ -659,12 +670,12 @@ static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* m
             while(SE_ListIterator_Next(&it, &e))
             {
                 SE_Spatial* schild = (SE_Spatial*)e.dp.data;
-                calculateIntersectSpatialByMovingOBB(schild, moveSpatial, obb, endPoint, axis, obbList);
+                calculateIntersectSpatialByMovingOBB(schild, moveSpatial, obb, dist, axis, obbList);
             }
         }
     }
 }
-SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, SE_AXIS_TYPE axis, float dist)
+SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float dist)
 {
     SE_AABBBV* aabbBV = NULL;
     SE_ASSERT(spatial);
@@ -679,14 +690,18 @@ SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, SE_A
         {
             SE_Vector3f endPoint, localTranslate, moveDir;
             SE_OBB aabbOBB, endOBB;
+            /*
+            SE_Matrix4f inverseOfWorldM;
+            SE_Vector4f moveDirInLocalSpace, tmp;
+            */
             int size = 0;
             SE_List obbList;
             aabbBV = (SE_AABBBV*)spatial->worldBV;
             SE_OBB_CreateFromAABB(&aabbOBB, &aabbBV->aabb, SE_AXIS_NOAXIS, 0.0f);
-            getMoveDir(axis, dist, &moveDir);
-            SE_Vec3f_Add(&aabbOBB.center, &moveDir, &endPoint);
+            SE_Vec3f_PointMove(&aabbOBB.center, &aabbOBB.axis[axis], dist, &endPoint);
+            SE_Vec3f_Mul(&aabbOBB.axis[axis], dist, &moveDir);
             SE_List_Init(&obbList);
-            calculateIntersectSpatialByMovingOBB(root, spatial, aabbOBB, endPoint, axis, &obbList);
+            calculateIntersectSpatialByMovingOBB(root, spatial, aabbOBB, dist, axis, &obbList);
             size = SE_List_Size(&obbList);
 #ifdef DEBUG
             LOGI("### move obb size = %d ###\n", size);
@@ -717,6 +732,14 @@ SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, SE_A
 #endif
                 SE_Vec3f_Subtract(&endOBB.center, &aabbOBB.center, &moveDir);
             }
+            /*
+            SE_Mat4f_Inverse(&spatial->worldTransform, &inverseOfWorldM);
+            SE_Vec4f_Init(moveDir.x, moveDir.y, moveDir.z, 0.0f, &moveDirInLocalSpace);
+            SE_Mat4f_Map(&inverseOfWorldM, &moveDirInLocalSpace, &tmp);
+            moveDir.x = tmp.x;
+            moveDir.y = tmp.y;
+            moveDir.z = tmp.z;
+            */
             SE_Spatial_GetLocalTranslate(spatial, &localTranslate);
             SE_Vec3f_Add(&localTranslate, &moveDir, &localTranslate);
             SE_Spatial_SetLocalTranslate(spatial, &localTranslate);
@@ -731,7 +754,7 @@ SE_Result SE_Spatial_MoveByLocalAxis(SE_Spatial* root, SE_Spatial* spatial, SE_A
     }
     return SE_VALID;
 }
-SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, SE_AXIS_TYPE axis, float angle)
+SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE axis, float angle)
 {
     return SE_VALID;
 }

@@ -33,8 +33,8 @@ int SE_OBB_IntersectOBB(const SE_OBB* a, const SE_OBB* b)
     for(i = 0 ; i < 3 ; i++)
     {
         ra = a->e[i];
-        rb = b->e[0] *AbsR.d[i * 3] + b->e[1] * AbsR.d[i + 3 + 1] + b->e[2] * AbsR.d[i * 3 + 2];
-        if(SE_Fabs(t.d[i]) > ra + rb)
+        rb = b->e[0] *AbsR.d[i * 3] + b->e[1] * AbsR.d[i * 3 + 1] + b->e[2] * AbsR.d[i * 3 + 2];
+        if(SE_Fabs(t.d[i]) > (ra + rb))
             return 0;
     }
     /*test axes L = B0, L = B1, L = B2*/
@@ -48,51 +48,51 @@ int SE_OBB_IntersectOBB(const SE_OBB* a, const SE_OBB* b)
     /*test axis L = A0 * B0 */
     ra = a->e[1] * AbsR.d[2 * 3] + a->e[2] * AbsR.d[3];
     rb = b->e[1] * AbsR.d[2] + b->e[2] * AbsR.d[1];
-    if(SE_Fabs(t.d[2] * R.d[3] - t.d[1] * R.d[6]) > ra + rb)
+    if(SE_Fabs(t.d[2] * R.d[3] - t.d[1] * R.d[6]) > (ra + rb))
         return 0;
     /*test axis L = A0 * B1 */
     ra = a->e[1] * AbsR.d[2 * 3 + 1] + a->e[2] * AbsR.d[1 * 3 + 1];
     rb = b->e[0] * AbsR.d[2] + b->e[2] * AbsR.d[0];
-    if(SE_Fabs(t.d[2] * R.d[1 * 3 + 1] - t.d[1] * R.d[2 * 3 + 1]) > ra + rb)
+    if(SE_Fabs(t.d[2] * R.d[1 * 3 + 1] - t.d[1] * R.d[2 * 3 + 1]) > (ra + rb))
         return 0;
     /*test axis L = A0 * A2 */
     ra = a->e[1] * AbsR.d[2 * 3 + 2] + a->e[2] * AbsR.d[1 * 3 + 2];
     rb = b->e[0] * AbsR.d[1] + b->e[1] * AbsR.d[0];
-    if(SE_Fabs(t.d[2] * R.d[1 * 3 + 2] - t.d[1] * R.d[2 * 3 + 2]) > ra + rb)
+    if(SE_Fabs(t.d[2] * R.d[1 * 3 + 2] - t.d[1] * R.d[2 * 3 + 2]) > (ra + rb))
         return 0;
     /*tes axis L = A1 * B0*/
     ra = a->e[0] * AbsR.d[2 * 3] + a->e[2] * AbsR.d[0];
     rb = b->e[1] * AbsR.d[1 * 3 + 2] + b->e[2] * AbsR.d[1 * 3 + 1];
-    if(SE_Fabs(t.d[0] * R.d[2 * 3] - t.d[2] * R.d[0]) > ra + rb)
+    if(SE_Fabs(t.d[0] * R.d[2 * 3] - t.d[2] * R.d[0]) > (ra + rb))
         return 0;
     /* test axis L = A1 * B1 */
     ra = a->e[0] * AbsR.d[2 * 3 + 1] + a->e[2] * AbsR.d[1];
     rb = b->e[0] * AbsR.d[1 * 3 + 2] + b->e[2] * AbsR.d[1 * 3];
-    if(SE_Fabs(t.d[0] * R.d[2 * 3 + 1] - t.d[2] * R.d[1]) > ra + rb)
+    if(SE_Fabs(t.d[0] * R.d[2 * 3 + 1] - t.d[2] * R.d[1]) > (ra + rb))
         return 0;
     
     /* test axis A1 * B2 */
     ra = a->e[0] * AbsR.d[2 * 3 + 2] + a->e[2] * AbsR.d[2];
     rb = b->e[0] * AbsR.d[1 * 3 + 1] + b->e[1] * AbsR.d[1 * 3];
-    if(SE_Fabs(t.d[0] * R.d[2 * 3 + 2] - t.d[2] * R.d[2]) > ra + rb)
+    if(SE_Fabs(t.d[0] * R.d[2 * 3 + 2] - t.d[2] * R.d[2]) > (ra + rb))
         return 0;
 
     /* test A2 * B0 */
     ra = a->e[0] * AbsR.d[1 * 3] + a->e[1] * AbsR.d[0];
     rb = b->e[1] * AbsR.d[2 * 3 + 2] + b->e[2] * AbsR.d[2 * 3 + 1];
-    if(SE_Fabs(t.d[1] * R.d[0] - t.d[0] * R.d[1 * 3]) > ra + rb)
+    if(SE_Fabs(t.d[1] * R.d[0] - t.d[0] * R.d[1 * 3]) > (ra + rb))
         return 0;
 
     /*test A2 * B1 */
     ra = a->e[0] * AbsR.d[1 * 3 + 1] + a->e[1] * AbsR.d[1];
     rb = b->e[0] * AbsR.d[2 * 3 + 2] + b->e[2] * AbsR.d[2 * 3];
-    if(SE_Fabs(t.d[1] * R.d[1] - t.d[0] * R.d[1 * 3 + 1]) > ra + rb)
+    if(SE_Fabs(t.d[1] * R.d[1] - t.d[0] * R.d[1 * 3 + 1]) > (ra + rb))
         return 0;
     
     /*test A2 * B2 */
     ra = a->e[0] * AbsR.d[1 * 3 + 2] + a->e[1] * AbsR.d[2];
     rb = b->e[0] * AbsR.d[2 * 3 + 1] + b->e[1] * AbsR.d[2 * 3];
-    if(SE_Fabs(t.d[1] * R.d[2] - t.d[0] * R.d[1 * 3 + 2]) > ra + rb)
+    if(SE_Fabs(t.d[1] * R.d[2] - t.d[0] * R.d[1 * 3 + 2]) > (ra + rb))
         return 0;
 
     return 1;
@@ -111,9 +111,9 @@ SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, enu
     SE_AABB_GetExtent(aabb, &aabbExtent);
     radian = SE_AngleToRadian(angle);
     SE_Vec3f_Copy(&aabbCenter, &obb->center);
-    obb->e[0] = aabbExtent.x / 2;
-    obb->e[1] = aabbExtent.y / 2;
-    obb->e[2] = aabbExtent.z / 2;
+    obb->e[0] = SE_Fabs(aabbExtent.x / 2);
+    obb->e[1] = SE_Fabs(aabbExtent.y / 2);
+    obb->e[2] = SE_Fabs(aabbExtent.z / 2);
     switch(axis)
     {
     case SE_AXIS_NOAXIS:

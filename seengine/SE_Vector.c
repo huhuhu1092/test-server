@@ -219,6 +219,13 @@ SE_Result SE_Vec3f_Decompose(const SE_Vector3f* vDecomposed, const SE_Vector3f* 
     SE_Vec3f_Subtract(vDecomposed, vParallel, vPerpendicular);
     return SE_VALID;
 }
+SE_Result SE_Vec3f_PointMove(const SE_Vector3f* point, const SE_Vector3f* dir, float dist, SE_Vector3f* out)
+{
+    SE_Vector3f tmp;
+    SE_Vec3f_Mul(dir, dist, &tmp);
+    SE_Vec3f_Add(point, &tmp, out);
+    return SE_VALID;
+}
 float SE_Vec3f_ScalarTripleProduct(const SE_Vector3f* u, const SE_Vector3f* v, const SE_Vector3f* w)
 {
     SE_Vector3f crossProduct;

@@ -68,6 +68,7 @@ extern float SE_Vec3f_LengthSquare(const SE_Vector3f* v);
 extern SE_Result  SE_Vec3f_Cross(const SE_Vector3f* firstV, const SE_Vector3f* secondV, SE_Vector3f* out);
 extern float SE_Vec3f_Distance(const SE_Vector3f* v1, const SE_Vector3f* v2);
 extern SE_Result SE_Vec3f_Decompose(const SE_Vector3f* vDecomposed, const SE_Vector3f* vAxis, SE_Vector3f* vPerpendicular, SE_Vector3f* vParallel);
+extern SE_Result SE_Vec3f_PointMove(const SE_Vector3f* point, const SE_Vector3f* dir, float dist, SE_Vector3f* out);
 /**
  * this function implement w.(u X v)
  * if return value is 0 u v w is at the same plane

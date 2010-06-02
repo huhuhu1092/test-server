@@ -1,5 +1,6 @@
 #ifndef SE_GEOMETRYINTERSECT_H
 #define SE_GEOMETRYINTERSECT_H
+#include "SE_Common.h"
 #include "SE_Vector.h"
 #include "SE_Geometry3D.h"
 #include "SE_Sphere.h"
@@ -41,7 +42,7 @@ extern int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, 
  * dirOfSphere is the endpoint minus startpoint of sphere, 
  * */
 extern int SE_Intersect_MovingSphereStaticPlane(const SE_Sphere* sphere, const SE_Plane* plane, const SE_Vector3f* dirOfSphere, SE_Vector3f* out);
-extern int SE_Intersect_MovingOBBStaticAABB(const SE_OBB obb, const SE_AABB* aabb, const SE_Vector3f endCenter, int axis, SE_OBB* out);
+extern int SE_Intersect_MovingOBBStaticAABB(const SE_OBB obb, const SE_AABB* aabb, enum SE_AXIS_TYPE axis, float dist, SE_OBB* out);
 #ifdef __cplusplus
 }
 #endif

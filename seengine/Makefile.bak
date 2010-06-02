@@ -497,7 +497,7 @@ SE_OBB.o: /usr/include/alloca.h /usr/include/string.h /usr/include/stdio.h
 SE_OBB.o: /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h
 SE_OBB.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 SE_OBB.o: SE_Vector.h SE_Matrix.h SE_AABB.h SE_Math.h
-SE_GeometryIntersect.o: SE_GeometryIntersect.h SE_Vector.h SE_Common.h
+SE_GeometryIntersect.o: SE_GeometryIntersect.h SE_Common.h
 SE_GeometryIntersect.o: /usr/include/assert.h /usr/include/features.h
 SE_GeometryIntersect.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 SE_GeometryIntersect.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -514,9 +514,9 @@ SE_GeometryIntersect.o: /usr/include/alloca.h /usr/include/string.h
 SE_GeometryIntersect.o: /usr/include/stdio.h /usr/include/libio.h
 SE_GeometryIntersect.o: /usr/include/_G_config.h /usr/include/wchar.h
 SE_GeometryIntersect.o: /usr/include/bits/stdio_lim.h
-SE_GeometryIntersect.o: /usr/include/bits/sys_errlist.h SE_Geometry3D.h
-SE_GeometryIntersect.o: SE_Sphere.h SE_Matrix.h SE_AABB.h SE_OBB.h SE_Math.h
-SE_GeometryIntersect.o: SE_Memory.h
+SE_GeometryIntersect.o: /usr/include/bits/sys_errlist.h SE_Vector.h
+SE_GeometryIntersect.o: SE_Geometry3D.h SE_Sphere.h SE_Matrix.h SE_AABB.h
+SE_GeometryIntersect.o: SE_OBB.h SE_Math.h SE_Memory.h SE_Log.h
 ./renderer/SE_TextureID.o: ./renderer/SE_TextureID.h SE_Common.h
 ./renderer/SE_TextureID.o: /usr/include/assert.h /usr/include/features.h
 ./renderer/SE_TextureID.o: /usr/include/sys/cdefs.h

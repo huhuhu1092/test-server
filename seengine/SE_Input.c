@@ -163,8 +163,7 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
             moveSpatial = SE_Spatial_Find(rootScene, ttt);
             if(moveSpatial)
             {
-                LOGI("### move object ####");
-                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, 2);
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_Y, 2);
             }
             SE_String_Release(&ttt);
         }
@@ -176,8 +175,7 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
             moveSpatial = SE_Spatial_Find(rootScene, ttt);
             if(moveSpatial)
             {
-                LOGI("### move object ####");
-                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, -2);
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_Y, -2);
             }
             SE_String_Release(&ttt);
         }
