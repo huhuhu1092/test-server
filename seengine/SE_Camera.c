@@ -44,9 +44,11 @@ SE_Result SE_Camera_InitByFrame(const SE_Vector3f* location, const SE_Vector3f* 
 }
 SE_Result SE_Camera_InitByDirectionUp(const SE_Vector3f* location, const SE_Vector3f* zAxis, const SE_Vector3f* yAxis, float fov, float ratio, float near, float far, SE_Camera* out)
 {
+    SE_Vector3f xAxis;
     SE_Vec3f_Normalize(zAxis, &out->zAxis);
     SE_Vec3f_Normalize(yAxis, &out->yAxis);
-    SE_Vec3f_Cross(&out->yAxis, &out->zAxis, &out->xAxis);
+    SE_Vec3f_Cross(&out->yAxis, &out->zAxis, &xAxis);
+    SE_Vec3f_Normalize(&xAxis, &out->xAxis);
     SE_Vec3f_Copy(location, &out->location);
     SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
     return SE_VALID;
