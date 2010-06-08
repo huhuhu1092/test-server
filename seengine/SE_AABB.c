@@ -1,12 +1,12 @@
 #include "SE_AABB.h"
 SE_Result SE_AABB_CreateFromPoints(SE_AABB* aabb, SE_Vector3f* points, int pointNum)
 {
-    SE_ASSERT(points);
-    SE_ASSERT(aabb);
-    SE_ASSERT(pointNum > 0);
-    int i;
+	int i;
     SE_Vector3f min, max;
     SE_Vector3f* v = &points[0];
+	SE_ASSERT(points);
+    SE_ASSERT(aabb);
+    SE_ASSERT(pointNum > 0);
     SE_Vec3f_Copy(v, &min);
     SE_Vec3f_Copy(v, &max);
     for(i = 1 ; i < pointNum ; i++)
@@ -54,11 +54,11 @@ SE_Result SE_AABB_GetCenter(const SE_AABB* aabb, SE_Vector3f* out)
 }
 SE_Result SE_AABB_Transform(const SE_AABB* aabbsrc, const SE_Matrix3f* rs, const SE_Vector3f* translate, SE_AABB* aabbdst)
 {
+	int i, j;
     SE_ASSERT(aabbsrc);
     SE_ASSERT(rs);
     SE_ASSERT(translate);
     SE_ASSERT(aabbdst);
-    int i, j;
     for(i = 0 ; i < 3 ; i++)
     {
         aabbdst->min.d[i] = aabbdst->max.d[i] = translate->d[i];

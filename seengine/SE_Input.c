@@ -10,8 +10,8 @@
 #include "SE_Math.h"
 SE_Result SE_InputDevice_Init(SE_InputDevice* inputDevice)
 {
+	int i;
     SE_Object_Clear(inputDevice, sizeof(SE_InputDevice));
-    int i;
     for(i = 0 ; i < SE_MOUSEKEY_NUM; i++)
     {
         inputDevice->mouseState[i].x = 0;
@@ -62,20 +62,21 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                 }
                 if(mouseRecord->state == SE_MOVE)
                 {
+                    SE_Vector3f v;
+                    SE_Sphere s;
+                    SE_Vector3f out;
+                    SE_Vector3f startLocation, endLocation;
+
                     mainCamera = SE_World_GetMainCamera(world);
                     viewportWidth  = mainCamera->viewport.right - mainCamera->viewport.left;
                     ratio = -180.0f / viewportWidth;
                     angle = ratio * deltaX;/*this angle is the rotation angle about y axis*/
                     LOGI("## rotate angle = %f ###\n", angle);
                     SE_Camera_RotateLocalXYZAxis(mainCamera, angle, 1);/*rotate about y axis*/
-                    SE_Vector3f v;
                     SE_Vec3f_Init(0, 0, deltaY, &v);
-                    SE_Vector3f startLocation, endLocation;
                     startLocation = mainCamera->location;
                     SE_Camera_LocationTranslateAlignXYZ(mainCamera, deltaY, 2);
                     endLocation = mainCamera->location;
-                    SE_Sphere s;
-                    SE_Vector3f out;
                     SE_Object_Clear(&out, sizeof(SE_Vector3f));
                     s.center = startLocation;
                     s.radius = 2;
@@ -92,30 +93,32 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
             {
                 int x = (int)mouseRecord->x;
                 int y = (int)mouseRecord->y;
-                LOGI("## in release state ##\n");
                 SE_Ray ray;
+				SE_List* children;
+				SE_Element e;
+                SE_ListIterator li;
+                SE_List pickList;
+                SE_ListIterator liPickList;
+                SE_Element pe;
+                float distancemin = SE_FLT_MAX;
+                SE_Spatial* minspatial = NULL;
+				
+                LOGI("## in release state ##\n");
                 SE_Object_Clear(&ray, sizeof(SE_Ray));
                 mainCamera = SE_World_GetMainCamera(world);
                 SE_Camera_ScreenCoordinateToRay(mainCamera, x, y, &ray);
                 /*
                  * test code
                  * */
-                SE_List* children = rootScene->children;
-                SE_ListIterator li;
+                children = rootScene->children;
                 SE_ListIterator_Init(&li, children);
-                SE_Element e;
-                SE_List pickList;
                 SE_List_Init(&pickList);
                 while(SE_ListIterator_Next(&li, &e))
                 {
                     SE_Spatial* s = (SE_Spatial*)e.dp.data;
                     SE_Spatial_IntersectRay(s, &ray, &pickList);
                 } 
-                SE_ListIterator liPickList;
                 SE_ListIterator_Init(&liPickList, &pickList);
-                SE_Element pe;
-                float distancemin = SE_FLT_MAX;
-                SE_Spatial* minspatial = NULL;
                 while(SE_ListIterator_Next(&liPickList, &pe))
                 {
                     SE_IntersectionSpatialData* s = (SE_IntersectionSpatialData*)pe.dp.data;

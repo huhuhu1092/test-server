@@ -3,7 +3,9 @@
 static void mostSeparatedPointsOnAABB(int* min , int* max, SE_Vector3f* points, int numPoint)
 {
     int minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
+    SE_Vector3f xAxisDir, yAxisDir, zAxisDir;
     int i;
+	float dist2x, dist2y, dist2z;
     for(i = 1 ; i < numPoint ; i++)
     {
         if(points[i].x < points[minx].x)
@@ -19,13 +21,12 @@ static void mostSeparatedPointsOnAABB(int* min , int* max, SE_Vector3f* points, 
         if(points[i].z > points[maxz].z)
             maxz = i;
     }
-    SE_Vector3f xAxisDir, yAxisDir, zAxisDir;
     SE_Vec3f_Subtract(&points[maxx], &points[minx], &xAxisDir); 
     SE_Vec3f_Subtract(&points[maxy], &points[miny], &yAxisDir);
     SE_Vec3f_Subtract(&points[maxz], &points[minz], &zAxisDir);
-    float dist2x = SE_Vec3f_LengthSquare(&xAxisDir);
-    float dist2y = SE_Vec3f_LengthSquare(&yAxisDir);
-    float dist2z = SE_Vec3f_LengthSquare(&zAxisDir);
+    dist2x = SE_Vec3f_LengthSquare(&xAxisDir);
+    dist2y = SE_Vec3f_LengthSquare(&yAxisDir);
+    dist2z = SE_Vec3f_LengthSquare(&zAxisDir);
     *min = minx;
     *max = maxx;
     if(dist2y > dist2x && dist2y > dist2z)
@@ -57,8 +58,9 @@ static void sphereFromDistantPoints(SE_Sphere* s, SE_Vector3f* points, int point
 static void sphereOfSphereAndPoint(SE_Sphere* s, SE_Vector3f* point)
 {
     SE_Vector3f d, tmp1, tmp2;
+	float dist2;
     SE_Vec3f_Subtract(point, &s->center, &d);
-    float dist2 = SE_Vec3f_LengthSquare(&d);
+    dist2 = SE_Vec3f_LengthSquare(&d);
     if(dist2 > s->radius * s->radius)
     {
         float dist = SE_Sqrtf(dist2);
@@ -83,9 +85,10 @@ static void ritterSphere(SE_Sphere*s, SE_Vector3f* points, int pointNum)
 int SE_Sphere_IntersectSphere(const SE_Sphere* a, const SE_Sphere* b)
 {
     SE_Vector3f d;
+	float d2, radiusSum;
     SE_Vec3f_Subtract(&a->center, &b->center, &d);
-    float d2 = SE_Vec3f_Dot(&d, &d);
-    float radiusSum = a->radius + b->radius;
+    d2 = SE_Vec3f_Dot(&d, &d);
+    radiusSum = a->radius + b->radius;
     return d2 <= radiusSum;
 }
 SE_Result SE_Sphere_CreateFromPoints(SE_Sphere* s, SE_Vector3f* points, int pointNum)

@@ -7,18 +7,18 @@
     (dstArray) = (type)SE_Malloc((srcArrayNum) * (elementSize)); \
     if((dstArray)) \
     { \
+	    int i; \
         (dstArrayNum) = (srcArrayNum); \
-        int i; \
         for(i = 0 ; i < (srcArrayNum) ; i++) \
         { \
             (dstArray)[i] = (srcArray)[i]; \
         } \
     } \
 }while(0)
-#define SE_ARRAY_FREE(own, array) do{ \
-    if((own) && (array)) \
+#define SE_ARRAY_FREE(own, Array) do{ \
+    if((own) && (Array)) \
     { \
-        SE_Free((array)); \
+        SE_Free((Array)); \
     } \
 }while(0)
 SE_Result SE_GeometryData_Init(int type, SE_Vector3f* vertexArray, int vertexNum, int ownVertexArray,
@@ -114,8 +114,9 @@ SE_Result SE_GeometryData_Init(int type, SE_Vector3f* vertexArray, int vertexNum
 }
 void SE_GeometryData_Release(void* gd)
 {
+    SE_GeometryData* data;
     SE_ASSERT(gd);
-    SE_GeometryData* data = (SE_GeometryData*)gd;
+    data = (SE_GeometryData*)gd;
     if(data->ownVertexArray && data->vertexArray != NULL)
     {
         SE_Free(data->vertexArray);

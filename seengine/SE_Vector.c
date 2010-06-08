@@ -79,6 +79,12 @@ SE_Result SE_Vec2f_Clear(SE_Vector2f* v)
     v->x = v->y = 0;
     return 1;
 }
+SE_Result SE_Vec2f_Copy(const SE_Vector2f* src, SE_Vector2f* dst)
+{
+	dst->x = src->x;
+	dst->y = src->y;
+	return SE_VALID;
+}
 /*
 SE_Result SE_Vec2f_Cross(const SE_Vector2f* firstV, const SE_Vector2f* secondV, SE_Vector2f* out)
 {
@@ -211,10 +217,11 @@ float SE_Vec3f_Distance(const SE_Vector3f* v1, const SE_Vector3f* v2)
 }
 SE_Result SE_Vec3f_Decompose(const SE_Vector3f* vDecomposed, const SE_Vector3f* vAxis, SE_Vector3f* vPerpendicular, SE_Vector3f* vParallel)
 {
+	float dotProduct, lenSquare;
     SE_ASSERT(!SE_Vec3f_IsZero(vDecomposed)) ;
     SE_ASSERT(!SE_Vec3f_IsZero(vAxis));
-    float dotProduct = SE_Vec3f_Dot(vDecomposed, vAxis);
-    float lenSquare = SE_Vec3f_LengthSquare(vAxis);
+    dotProduct = SE_Vec3f_Dot(vDecomposed, vAxis);
+    lenSquare = SE_Vec3f_LengthSquare(vAxis);
     SE_Vec3f_Mul(vAxis, dotProduct / lenSquare, vParallel);
     SE_Vec3f_Subtract(vDecomposed, vParallel, vPerpendicular);
     return SE_VALID;

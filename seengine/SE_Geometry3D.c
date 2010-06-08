@@ -28,9 +28,9 @@ SE_Result SE_Segment_GetEnd(const SE_Segment* seg, SE_Vector3f* out)
 }
 SE_Result SE_Segment_GetDirection(const SE_Segment* seg, SE_Vector3f* out, int normal)
 {
+    SE_Vector3f r;
     SE_ASSERT(seg);
     SE_ASSERT(out);
-    SE_Vector3f r;
     if(normal)
     {
         SE_Vec3f_Subtract(&seg->end, &seg->start, &r);
@@ -44,12 +44,12 @@ SE_Result SE_Segment_GetDirection(const SE_Segment* seg, SE_Vector3f* out, int n
 }
 SE_Result SE_Plane_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, const SE_Vector3f* p2, SE_Plane* out)
 {
+    SE_Vector3f v1, v2, n;
     SE_ASSERT(p0);
     SE_ASSERT(p1);
     SE_ASSERT(p2);
     SE_ASSERT(out);
 
-    SE_Vector3f v1, v2, n;
     SE_Vec3f_Subtract(p1, p0, &v1);
     SE_Vec3f_Subtract(p2, p0, &v2);
     SE_Vec3f_Cross(&v1, &v2, &n);
@@ -88,9 +88,10 @@ float SE_Plane_GetD(const SE_Plane* plane)
 }
 enum SE_Plane_Side SE_Plane_PointOnWhichSide(const SE_Plane* plane, const SE_Vector3f* point)
 {
+	float ret;
     SE_ASSERT(plane);
     SE_ASSERT(point);
-    float ret = SE_Vec3f_Dot(&plane->n, point) - plane->d;
+    ret = SE_Vec3f_Dot(&plane->n, point) - plane->d;
     if(ret == 0.0)
         return SE_ONSIDE;
     else if(ret > 0.0)
@@ -104,10 +105,10 @@ float SE_Plane_PointDistance(const SE_Plane* plane, const SE_Vector3f* point)
 }
 SE_Result SE_Ray_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, SE_Ray* out)
 {
+    SE_Vector3f v;
     SE_ASSERT(p0);
     SE_ASSERT(p1);
     SE_ASSERT(out);
-    SE_Vector3f v;
     SE_Vec3f_Subtract(p1, p0, &v);
     SE_Vec3f_Normalize(&v, &out->dir);
     SE_Vec3f_Copy(p0, &out->origin);
@@ -182,14 +183,15 @@ SE_Result SE_Triangle_GetPoint2(const SE_Triangle* tri, SE_Vector3f* out)
 }
 SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far, SE_Frustum* out)
 {
+	float fovRadian, e, param1, param2;
     SE_ASSERT(fov != 0.0);
     SE_ASSERT(ratio != 0.0);
     SE_ASSERT(fov >= 0.0 && fov <= 360.0);
     SE_ASSERT(near > 0 && far > 0);
-    float fovRadian = SE_AngleToRadian(fov);
-    float e = 1.0 / SE_Tanf(fovRadian / 2);
-    float param1 = 1.0 / SE_Sqrtf(e * e + 1);
-    float param2 = 1.0 / SE_Sqrtf(e * e + ratio * ratio);
+    fovRadian = SE_AngleToRadian(fov);
+    e = 1.0 / SE_Tanf(fovRadian / 2);
+    param1 = 1.0 / SE_Sqrtf(e * e + 1);
+    param2 = 1.0 / SE_Sqrtf(e * e + ratio * ratio);
     SE_Vec3f_Init(e / param1, 0, -1 / param1, &out->left.n);
     SE_Vec3f_Init(-e / param1, 0, -1 / param1, &out->right.n);
     SE_Vec3f_Init(0, -e / param2, -ratio / param2, &out->top.n);
@@ -210,10 +212,11 @@ SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far, 
 }
 SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out)
 {
+	float fovRadian, e;
     SE_ASSERT(ft);
     SE_ASSERT(out);
-    float fovRaidan = SE_AngleToRadian(ft->fovAngle);
-    float e = 1.0 / SE_Tanf(fovRaidan / 2);
+    fovRadian = SE_AngleToRadian(ft->fovAngle);
+    e = 1.0 / SE_Tanf(fovRadian / 2);
     out->left = - ft->n / e;
     out->right = ft->n / e;
     out->top = ft->n * ft->ratio / e;

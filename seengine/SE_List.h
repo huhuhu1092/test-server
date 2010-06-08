@@ -37,6 +37,10 @@ extern SE_Result SE_List_Apply(SE_List* list, SELISTAPPLYFUNCTION applyFunc, voi
 extern void SE_List_Release(void* l);
 extern int SE_List_Size(SE_List* list);
 extern SE_Element SE_List_GetAt(SE_List* list , int index);
+/**
+ * this copy is a shallow copy we just copy the SE_Element.
+ * */
+extern SE_Result SE_List_Copy(SE_List* src, SE_List* dst);
 /**/
 extern SE_Result SE_ListIterator_Init(SE_ListIterator* li, SE_List* list);
 extern int SE_ListIterator_Next(SE_ListIterator* li, SE_Element* out);

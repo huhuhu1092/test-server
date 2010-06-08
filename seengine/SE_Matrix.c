@@ -154,12 +154,14 @@ SE_Result SE_Mat3f_Sub(const SE_Matrix3f* m1, const SE_Matrix3f* m2, SE_Matrix3f
 SE_Result SE_Mat3f_Inverse(const SE_Matrix3f* m, SE_Matrix3f* out)
 {
     float det = SE_Mat3f_Det(m);
+    SE_Matrix3f adjM;
+    SE_Matrix3f adjMT;
+	int i;
     if(det == 0)
     {
         SE_Mat3f_Clear(out);
         return 0;
     }
-    SE_Matrix3f adjM;
     adjM.m00 = m->m11 * m->m22 - m->m12 * m->m21;
     adjM.m01 = -(m->m10 * m->m22 - m->m12 * m->m20);
     adjM.m02 = m->m10 * m->m21 - m->m11 * m->m20;
@@ -171,9 +173,7 @@ SE_Result SE_Mat3f_Inverse(const SE_Matrix3f* m, SE_Matrix3f* out)
     adjM.m20 = m->m01 * m->m12 - m->m02 * m->m11;
     adjM.m21 = -(m->m00 * m->m12 - m->m02 * m->m10);
     adjM.m22 = m->m00 * m->m11 - m->m01 * m->m10;
-    SE_Matrix3f adjMT;
     SE_Mat3f_Transpose(&adjM, &adjMT);
-    int i;
     for(i = 0 ; i < 9 ; i++)
     {
         out->d[i] = adjMT.d[i] / det;
@@ -233,15 +233,16 @@ SE_Result SE_Mat3f_RotateZ(float angle, SE_Matrix3f* out)
 }
 SE_Result SE_Mat3f_RotateAngleFromAxis(float angle, const SE_Vector3f* v, SE_Matrix3f* out)
 {
+	float radian, param1;
+    SE_Vector3f n;
     if(SE_Vec3f_IsZero(v))
     {
         SE_Mat3f_Clear(out);
         return SE_INVALID;
     }
-    float radian = SE_AngleToRadian(angle);
-    SE_Vector3f n;
+    radian = SE_AngleToRadian(angle);
     SE_Vec3f_Normalize(v, &n);
-    float param1 = 1 - SE_Cosf(radian);
+    param1 = 1 - SE_Cosf(radian);
     out->m00 = n.x * n.x * param1 + SE_Cosf(radian);
     out->m01 = n.x * n.y * param1 - n.z * SE_Sinf(radian);
     out->m02 = n.x * n.z * param1 + n.y * SE_Sinf(radian);
@@ -323,8 +324,8 @@ SE_Result SE_Mat4f_Identity(SE_Matrix4f* m)
 }
 int SE_Mat4f_IsZero(SE_Matrix4f* m)
 {
+	int i;
     SE_ASSERT(m);
-    int i ;
     for(i = 0 ; i < 16 ; i++)
     {
         if(m->d[i] != 0.0f)
@@ -372,21 +373,22 @@ SE_Result SE_Mat4f_GetColumn(const SE_Matrix4f* m, int column, SE_Vector4f* out)
 float SE_Mat4f_Det(const SE_Matrix4f* m)
 {
     SE_Matrix3f m1, m2, m3, m4;
+	float det;
     SE_Mat3f_Init(m->m11, m->m12, m->m13, m->m21, m->m22,m->m23, m->m31, m->m32, m->m33, &m1);
     SE_Mat3f_Init(m->m10, m->m12, m->m13, m->m20, m->m22, m->m23, m->m30 ,m->m32, m->m33, &m2);
     SE_Mat3f_Init(m->m10, m->m11, m->m13, m->m20, m->m21, m->m23, m->m30, m->m31, m->m33, &m3);
     SE_Mat3f_Init(m->m10, m->m11, m->m12, m->m20, m->m21, m->m22, m->m30, m->m31, m->m32, &m4);
-    float det = m->m00 * SE_Mat3f_Det(&m1) - m->m01 * SE_Mat3f_Det(&m2) + m->m02 * SE_Mat3f_Det(&m3) - m->m03 * SE_Mat3f_Det(&m4);
+    det = m->m00 * SE_Mat3f_Det(&m1) - m->m01 * SE_Mat3f_Det(&m2) + m->m02 * SE_Mat3f_Det(&m3) - m->m03 * SE_Mat3f_Det(&m4);
     return det;
 }
 SE_Result SE_Mat4f_Map(const SE_Matrix4f* m,const SE_Vector4f* v, SE_Vector4f* out)
 {
     SE_Vector4f r1, r2, r3, r4;
+    float x , y, z , w;
     SE_Mat4f_GetRow(m, 0, &r1);
     SE_Mat4f_GetRow(m, 1, &r2);
     SE_Mat4f_GetRow(m, 2, &r3);
     SE_Mat4f_GetRow(m, 3, &r4);
-    float x , y, z , w;
     x = SE_Vec4f_Dot(&r1, v);
     y = SE_Vec4f_Dot(&r2, v);
     z = SE_Vec4f_Dot(&r3, v);
@@ -396,11 +398,12 @@ SE_Result SE_Mat4f_Map(const SE_Matrix4f* m,const SE_Vector4f* v, SE_Vector4f* o
 }
 SE_Result SE_Mat4f_Mul(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f* out)
 {
-    SE_ASSERT(m1);
-    SE_ASSERT(m2);
-    SE_ASSERT(out);
     SE_Vector4f r[4];
     SE_Vector4f c[4];
+	int i, j;
+	SE_ASSERT(m1);
+    SE_ASSERT(m2);
+    SE_ASSERT(out);
     SE_Mat4f_GetRow(m1, 0, &r[0]);
     SE_Mat4f_GetRow(m1, 1, &r[1]);
     SE_Mat4f_GetRow(m1, 2, &r[2]);
@@ -409,7 +412,6 @@ SE_Result SE_Mat4f_Mul(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f
     SE_Mat4f_GetColumn(m2, 1, &c[1]);
     SE_Mat4f_GetColumn(m2, 2, &c[2]);
     SE_Mat4f_GetColumn(m2, 3, &c[3]);
-    int i, j;
     for(i = 0 ; i < 4 ; i++)
     {
         for(j = 0 ; j < 4 ; j++)
@@ -421,9 +423,9 @@ SE_Result SE_Mat4f_Mul(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f
 }
 SE_Result SE_Mat4f_MulScalar(const SE_Matrix4f* m, float scalar, SE_Matrix4f* out)
 {
+	int i;
     SE_ASSERT(m);
     SE_ASSERT(out);
-    int i;
     for(i = 0 ; i < 16  ; i++)
     {
         out->d[i] = m->d[i] * scalar;
@@ -432,10 +434,10 @@ SE_Result SE_Mat4f_MulScalar(const SE_Matrix4f* m, float scalar, SE_Matrix4f* ou
 }
 SE_Result SE_Mat4f_Add(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f* out)
 {
+	int i;
     SE_ASSERT(m1);
     SE_ASSERT(m2);
     SE_ASSERT(out);
-    int i;
     for(i = 0 ; i < 16  ; i++)
     {
         out->d[i] = m1->d[i] +  m2->d[i];
@@ -445,10 +447,10 @@ SE_Result SE_Mat4f_Add(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f
 }
 SE_Result SE_Mat4f_Sub(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f* out)
 {
+	int i;
     SE_ASSERT(m1);
     SE_ASSERT(m2);
     SE_ASSERT(out);
-    int i;
     for(i = 0 ; i < 16  ; i++)
     {
         out->d[i] = m1->d[i] -  m2->d[i];
@@ -458,15 +460,16 @@ SE_Result SE_Mat4f_Sub(const SE_Matrix4f* m1, const SE_Matrix4f* m2, SE_Matrix4f
 }
 SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out)
 {
+	float det;
+    SE_Vector4f lastRow;
     SE_ASSERT(m);
     SE_ASSERT(out);
-    float det = SE_Mat4f_Det(m);
+    det = SE_Mat4f_Det(m);
     if(det == 0.0f)
     {
         SE_Mat4f_Clear(out);
         return SE_INVALID;
     }    
-    SE_Vector4f lastRow;
     SE_Mat4f_GetRow(m, 3, &lastRow);
     if(lastRow.x == 0.0f && lastRow.y == 0.0f && lastRow.z == 0.0f && lastRow.w == 1.0f)
     {
@@ -474,16 +477,16 @@ SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out)
          * this matrix is affine transform
          * */
         SE_Matrix3f rs;
+        SE_Matrix3f inverseRs;
         SE_Vector3f t;
+        SE_Vector3f lastColumn0;
+        SE_Vector3f lastColumn;
         SE_Mat3f_Init(m->m00, m->m01, m->m02, 
                       m->m10, m->m11, m->m12,
                       m->m20, m->m21, m->m22, &rs);
         SE_Vec3f_Init(m->m03, m->m13, m->m23, &t);
-        SE_Matrix3f inverseRs;
         SE_Mat3f_Inverse(&rs, &inverseRs);
-        SE_Vector3f lastColumn0;
         SE_Mat3f_Map(&inverseRs, &t, &lastColumn0);
-        SE_Vector3f lastColumn;
         SE_Vec3f_Neg(&lastColumn0, &lastColumn);
         SE_Mat4f_InitFromMT(&inverseRs, &lastColumn, out);
         /*
@@ -505,8 +508,9 @@ SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out)
             for(j = 0 ; j < 4 ; j++)
             {
                 SE_Matrix3f coffM;
+				float coffDet;
                 SE_Mat4f_CofactorM(m, i, j, &coffM);
-                float coffDet = SE_Mat3f_Det(&coffM);
+                coffDet = SE_Mat3f_Det(&coffM);
                 if(((i + j ) % 2) == 0)
                     adjM.d[i * 4 + j] = coffDet / det;
                 else
@@ -520,12 +524,12 @@ SE_Result SE_Mat4f_Inverse(const SE_Matrix4f* m, SE_Matrix4f* out)
 }
 SE_Result SE_Mat4f_CofactorM(const SE_Matrix4f* m, int row, int column, SE_Matrix3f* out)
 {
-    SE_ASSERT(m);
+    int outIndex = 0;
+    int i  , j;
+	SE_ASSERT(m);
     SE_ASSERT(out);
     SE_ASSERT(row >= 0 && row < 4);
     SE_ASSERT(column >= 0 && column < 4);
-    int outIndex = 0;
-    int i  , j;
     for(i = 0 ; i < 4 ; i++)
     {
         if(i != row)
@@ -585,11 +589,11 @@ SE_Result SE_Mat4f_InitFromMT(const SE_Matrix3f* m, const SE_Vector3f* t, SE_Mat
 void SE_Mat4f_GetMatrixColumnSequence(const SE_Matrix4f*m, float out[16])
 {
     SE_Vector4f col[4];
+	int i, j;
     SE_Mat4f_GetColumn(m, 0, &col[0]);
     SE_Mat4f_GetColumn(m, 1, &col[1]);
     SE_Mat4f_GetColumn(m, 2, &col[2]);
     SE_Mat4f_GetColumn(m, 3, &col[3]);
-    int i, j;
     for(i = 0 ; i < 4 ; i++)
     {
         SE_Vector4f* c = &col[i];

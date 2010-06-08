@@ -226,9 +226,10 @@ int SE_Intersect_MovingSphereStaticAABB(SE_Sphere sphere, SE_AABB* aabb, SE_Vect
 int SE_Intersect_MovingSphereStaticPlane(const SE_Sphere* sphere, const SE_Plane* plane, const SE_Vector3f* dirOfSphere, SE_Vector3f* out)
 {
     SE_Vector3f planeNormal;
+	float planeD, dist;
     SE_Plane_GetNormal(plane, &planeNormal);
-    float planeD = SE_Plane_GetD(plane);
-    float dist = SE_Vec3f_Dot(&planeNormal, &sphere->center) - planeD;
+    planeD = SE_Plane_GetD(plane);
+    dist = SE_Vec3f_Dot(&planeNormal, &sphere->center) - planeD;
     if(SE_Fabs(dist) <= sphere->radius)
     {
         SE_Vec3f_Copy(&sphere->center, out);

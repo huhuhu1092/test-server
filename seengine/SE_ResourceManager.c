@@ -40,11 +40,12 @@ static short readShort(char* data, int* currPos)
 }
 static SE_String readString(char* data, int* currPos)
 {
+    SE_String str;
     int len;
+	char* buf;
     memcpy(&len, data + (*currPos), sizeof(int));
     (*currPos) += sizeof(int);
-    SE_String str;
-    char* buf = (char*)SE_Malloc(len + 1);
+    buf = (char*)SE_Malloc(len + 1);
     memset(buf, 0 , len + 1);
     if(len > 0)
         strncpy(buf, data + (*currPos), len);
@@ -56,6 +57,10 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
 {
     int magic, version, coordinate, endian;
     int startPos = currPos;
+	int materialNum, geomObjNum, meshNum;
+	int currMat, currMesh, currGeomObj;
+	short currChunckId;
+	SE_MeshManager* meshManager;
     magic = readInt(data, &startPos);
     version = readInt(data, &startPos);
     coordinate = readInt(data, &startPos);
@@ -64,30 +69,31 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
         return;
     if(version != VERSION)
         return;
-    int materialNum = readInt(data, &startPos);
-    int geomObjNum = readInt(data, &startPos);
-    int meshNum = readInt(data, &startPos);
+    materialNum = readInt(data, &startPos);
+    geomObjNum = readInt(data, &startPos);
+    meshNum = readInt(data, &startPos);
     LOGI("...material num = %d\n", materialNum);
     LOGI("...geom obj num = %d\n", geomObjNum);
     LOGI("... mesh num = %d\n", meshNum);
     SE_MaterialManager_Init(SE_ResourceManager_GetMaterialManager(resource), materialNum);
     SE_GeometryDataManager_Init(SE_ResourceManager_GetGeometryDataManager(resource), geomObjNum);
-    SE_MeshManager* meshManager = SE_ResourceManager_GetMeshManager(resource);
+    meshManager = SE_ResourceManager_GetMeshManager(resource);
     SE_MeshManager_Init(meshManager, meshNum);
-    int currMat = 0;
-    int currGeomObj = 0;
-    int currMesh = 0;
-    short currChunckId;
+    currMat = 0;
+    currGeomObj = 0;
+    currMesh = 0;
     while(startPos < dataLen)
     {
         currChunckId = readShort(data, &startPos);
         LOGI("...currChunckId = %x\n", currChunckId);
         if(currChunckId == MATERIAL_ID)
         {
-            LOGI("...handle material\n");
-            SE_Material* m = SE_MaterialManager_GetMaterial(SE_ResourceManager_GetMaterialManager(resource), currMat++);
-            m->materialData.texturename = readString(data, &startPos);
             float x, y, z;
+			int subMtlNum;
+			SE_Material* m;
+            LOGI("...handle material\n");
+            m = SE_MaterialManager_GetMaterial(SE_ResourceManager_GetMaterialManager(resource), currMat++);
+            m->materialData.texturename = readString(data, &startPos);
             x = readFloat(data, &startPos);
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
@@ -100,12 +106,12 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
             SE_Vec3f_Init(x, y, z, &m->materialData.specular);
-            int subMtlNum = readInt(data, &startPos);
+            subMtlNum = readInt(data, &startPos);
             m->subMaterialNum = subMtlNum;
             if(subMtlNum > 0)
             {
-                m->subMaterialArray = (SE_MaterialData*)SE_Malloc(subMtlNum * sizeof(SE_MaterialData));
                 int i;
+                m->subMaterialArray = (SE_MaterialData*)SE_Malloc(subMtlNum * sizeof(SE_MaterialData));
                 for(i = 0 ; i < subMtlNum ; i++)
                 {
                     m->subMaterialArray[i].texturename = readString(data, &startPos);
@@ -127,28 +133,35 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
         }
         else if(currChunckId == GEOMOBJECT_ID)
         {
-            LOGI("... read the geom obj : %d\n", currGeomObj);
-            SE_GeometryData* gd = SE_GeometryDataManager_GetGeomData(&resource->geomDataManager, currGeomObj++);
             int type = readInt(data, &startPos);
             int vertexNum = readInt(data, &startPos);
             int faceNum = readInt(data, &startPos);
             int texVertexNum = readInt(data, &startPos);
             int colorNum = readInt(data, &startPos);
+            SE_GeometryData* gd = SE_GeometryDataManager_GetGeomData(&resource->geomDataManager, currGeomObj++);
+			SE_Face* faceArray = NULL;
+			SE_Vector3f* vertexArray = NULL;
+            SE_Vector3f* texVertexArray = NULL;
+            SE_Face* texFaceArray = NULL;
+            SE_Vector3f* colorArray = NULL;
+            int i;
+
+			LOGI("... read the geom obj : %d\n", currGeomObj);
             LOGI("... face num = %d\n", faceNum);
             LOGI("... vertex num = %d\n", vertexNum);
             LOGI("... tex vertex num = %d\n", texVertexNum);
             LOGI("... color num = %d\n", colorNum);
-            SE_Face* faceArray = (SE_Face*)SE_Malloc(faceNum * sizeof(SE_Face));
+            faceArray = (SE_Face*)SE_Malloc(faceNum * sizeof(SE_Face));
             if(!faceArray)
             {
                 LOGE("out of memory when alloc face\n");
             } 
-            SE_Vector3f* vertexArray = (SE_Vector3f*)SE_Malloc(vertexNum * sizeof(SE_Vector3f));
+            vertexArray = (SE_Vector3f*)SE_Malloc(vertexNum * sizeof(SE_Vector3f));
             if(!vertexArray)
             {
                 LOGE("out of memory when alloc vertex\n");
             }
-            SE_Vector3f* texVertexArray = NULL;
+            
             if(texVertexNum > 0)
             {
                 texVertexArray = (SE_Vector3f*)SE_Malloc(texVertexNum * sizeof(SE_Vector3f));
@@ -157,7 +170,6 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                     LOGE("out of memory when alloc tex vertex ");
                 }
             }
-            int i;
             for(i = 0 ; i < vertexNum ; i++)
             {
                 vertexArray[i].x = readFloat(data, &startPos);
@@ -170,7 +182,6 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
                 faceArray[i].v[1] = readInt(data, &startPos);
                 faceArray[i].v[2] = readInt(data, &startPos);
             }
-            SE_Face* texFaceArray = NULL;
             if(texVertexNum > 0)
             {
                 for(i = 0 ; i < texVertexNum ; i++)
@@ -192,7 +203,6 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
 
                 }
             }
-            SE_Vector3f* colorArray = NULL;
             if(colorNum > 0)
             {
                 colorArray = (SE_Vector3f*)SE_Malloc(colorNum * sizeof(SE_Vector3f));
@@ -215,12 +225,14 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
         }
         else if(currChunckId == MESH_ID)
         {
+            float x, y,z;
+			int subMeshNum;
+			SE_String meshName;
+            SE_Mesh* mesh = SE_MeshManager_GetMesh(meshManager, currMesh++);
             LOGI("... handle mesh\n");
             LOGI("... current mesh = %d\n", currMesh);
-            SE_Mesh* mesh = SE_MeshManager_GetMesh(meshManager, currMesh++);
-            mesh->geomDataIndex = readInt(data, &startPos);
+			mesh->geomDataIndex = readInt(data, &startPos);
             mesh->materialIndex = readInt(data, &startPos);
-            float x, y,z;
             x = readFloat(data, &startPos);
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
@@ -243,27 +255,30 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
             y = readFloat(data, &startPos);
             z = readFloat(data, &startPos);
             SE_Vec3f_Init(x, y, z, &mesh->translate);
-            SE_String meshName = readString(data, &startPos);
+            meshName = readString(data, &startPos);
             SE_String_SetString(&mesh->name, &meshName);
-            int subMeshNum = readInt(data, &startPos);
+            subMeshNum = readInt(data, &startPos);
             mesh->subMeshNum = subMeshNum;
             LOGI("...subMeshNum = %d\n", subMeshNum);
             if(subMeshNum > 0)
             {
-                SE_Mesh_CreateSubMeshArray(mesh, subMeshNum);
                 int i;
+                SE_Mesh_CreateSubMeshArray(mesh, subMeshNum);
                 for(i = 0 ; i < subMeshNum ; i++)
                 {
+					int j;
+					int fn;
+					int* faces;
+					SE_FaceList* faceList;
                     SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, i);
                     subMesh->subMaterialIndex = readInt(data, &startPos);
-                    int fn = readInt(data, &startPos);
-                    SE_FaceList* faceList = &subMesh->faceList;
-                    int* faces = (int*)SE_Malloc(fn * sizeof(int));
+                    fn = readInt(data, &startPos);
+                    faceList = &subMesh->faceList;
+                    faces = (int*)SE_Malloc(fn * sizeof(int));
                     if(!faces)
                     {
                         LOGE("out of memory when alloc face list\n");
                     }
-                    int j;
                     for(j = 0 ; j < fn ; j++)
                     {
                         faces[j] = readInt(data, &startPos);
@@ -278,20 +293,26 @@ static void process(char* data, int currPos, int dataLen, SE_ResourceManager* re
 }
 SE_Result SE_MeshLoad(const char* fileName, SE_ResourceManager* resource)
 {
-    SE_ASSERT(resource);
-    SE_String* dataPath = SE_ResourceManager_GetDataPath(resource);
+	SE_String* dataPath;
     SE_String filePath;
+    FILE* fin;
+	int fileSize;
+	char* data;
+	char* p;
+	size_t lenLeft;
+    SE_ASSERT(resource);
+    dataPath = SE_ResourceManager_GetDataPath(resource);
     SE_Object_Clear(&filePath, sizeof(SE_String));
     SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(dataPath), fileName);
-    FILE* fin = fopen(SE_String_GetData(&filePath), "rb");
+    fin = fopen(SE_String_GetData(&filePath), "rb");
     SE_String_Release(&filePath);
     if(!fin)
         return SE_INVALID;
-    int fileSize = SE_GetFileSize(fin);
+    fileSize = SE_GetFileSize(fin);
     LOGI("## filesize = %d ####\n" , fileSize);
-    char* data = (char*)SE_Malloc(fileSize);
-    size_t lenLeft = fileSize;
-    char* p = data;
+    data = (char*)SE_Malloc(fileSize);
+    lenLeft = fileSize;
+    p = data;
     while(lenLeft > 0)
     {
         size_t readNum = fread(p, 1, lenLeft, fin);
@@ -349,15 +370,16 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
 {
     char* data = NULL;
     int len = 0;
+    int startPos = 0;
+	int pixelDataLen;
     SE_ReadFileAllByName(fileName, &data, &len);
     if(!data)
         return SE_INVALID;
-    int startPos = 0;
     imageData->width = readInt(data, &startPos);
     imageData->height = readInt(data, &startPos);
     imageData->pixelFormat = readInt(data, &startPos);
     imageData->bytesPerRow = readInt(data, &startPos);
-    int pixelDataLen = len - sizeof(int) * 4;
+    pixelDataLen = len - sizeof(int) * 4;
     imageData->data = (char*)SE_Malloc(pixelDataLen);
     if(!imageData->data)
     {
@@ -393,10 +415,9 @@ SE_Result RawLoader(const char* fileName, struct SE_ImageData_tag* imageData)
 }
 static void getFileExt(const char* fileName, SE_String* ext)
 {
-    SE_ASSERT(fileName);
-    SE_ASSERT(ext);
-    int index;
+    int index, copyLen;
     int len = strlen(fileName);
+	char buf[10];
     for(index  = (len - 1) ; index >= 0  ; index--)
     {
         if(fileName[index] == '.')
@@ -407,8 +428,7 @@ static void getFileExt(const char* fileName, SE_String* ext)
     if(index >= (len - 1))
         return;
     index += 1;
-    int copyLen = len - index;
-    char buf[10];
+    copyLen = len - index;
     memset(buf, 0, 10);
     if(copyLen > 10)
     {
@@ -421,10 +441,10 @@ static void getFileExt(const char* fileName, SE_String* ext)
 static SE_Result SE_ImageLoad(const char* fileName, SE_ImageData* imageData)
 {
     SE_String fileExt;
+    int i, count;
     SE_Object_Clear(&fileExt, sizeof(SE_String));
     getFileExt(fileName, &fileExt);
-    int i;
-    int count = sizeof(impl) / sizeof(struct ImageLoaderImpl);
+    count = sizeof(impl) / sizeof(struct ImageLoaderImpl);
     for(i = 0 ; i < count ; i++)
     {
         if(strcmp(impl[i].fileExt, SE_String_GetData(&fileExt)) == 0)
@@ -599,9 +619,10 @@ SE_Result SE_TextureManager_Init(SE_TextureManager* tm, int texInitCount)
 SE_Texture* SE_TextureManager_GetTexture(SE_TextureManager* tm, const char* texturename)
 {
     SE_Element key;
+	SE_Element* element;
     key.type = SE_STRING;
     SE_String_Init(&key.str, texturename);
-    SE_Element* element = SE_HashMap_Get(&tm->textureMap, key);
+    element = SE_HashMap_Get(&tm->textureMap, key);
     SE_Element_Release(&key);
     if(element)
     {
@@ -696,13 +717,14 @@ void SE_ScriptManager_Release(void* script)
 /**              function about SE_ResourceManager    */
 SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, const char* dataPath, const char* fileName)
 {
+	SE_TextureManager* textureManager;
     SE_ASSERT(dataPath);
     SE_ASSERT(fileName);
     SE_ASSERT(resourceManager);
     SE_Object_Clear(resourceManager, sizeof(SE_ResourceManager));
     SE_String_Init(&resourceManager->dataPath, dataPath);
     SE_MeshLoad(fileName, resourceManager);
-    SE_TextureManager* textureManager = &resourceManager->textureManager;
+    textureManager = &resourceManager->textureManager;
     SE_HashMap_Init(256, NULL, &textureManager->textureMap);
     SE_HashMap_Init(256, NULL, &resourceManager->textureIDMap);
     SE_HashMap_Init(128, NULL, &resourceManager->scriptMap);
@@ -727,9 +749,10 @@ SE_Texture* SE_ResourceManager_GetTexture(SE_ResourceManager* resourceManager, c
 int SE_ResourceManager_Contains(SE_ResourceManager* resourceManager, const char* textureName)
 {
     SE_Element key;
+	int ret;
     key.type = SE_STRING;
     SE_String_Init(&key.str, textureName);
-    int ret = SE_HashMap_ContainsKey(&resourceManager->textureManager.textureMap, key);
+    ret = SE_HashMap_ContainsKey(&resourceManager->textureManager.textureMap, key);
     SE_Element_Release(&key);
     return ret;
 }
@@ -758,9 +781,16 @@ SE_Mesh* SE_ResourceManager_FindMeshByIndex(SE_ResourceManager* resourceManager,
 SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, const char* textureName)
 {
     SE_Texture* tex = SE_ResourceManager_GetTexture(resourceManager, textureName);
+	SE_Texture* currTex;
+	SE_Result ret;
+    SE_String strTexPath;
+	SE_Element value;
+    SE_DataPointer dp;
+    SE_Element key;
+
     if(tex)
         return tex;
-    SE_Texture* currTex = (SE_Texture*)SE_Malloc(sizeof(SE_Texture));
+    currTex = (SE_Texture*)SE_Malloc(sizeof(SE_Texture));
     if(!currTex)
     {
         LOGE("out of memory when alloc texture \n");
@@ -768,10 +798,9 @@ SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, 
 
     }
     SE_Object_Clear(currTex, sizeof(SE_Texture));
-    SE_String strTexPath;
     SE_Object_Clear(&strTexPath, sizeof(SE_String));
     SE_String_Concate(&strTexPath, "%s/%s", (SE_String_GetData(&resourceManager->dataPath)), textureName);
-    SE_Result ret = SE_ImageLoad(SE_String_GetData(&strTexPath), &currTex->imageData);
+    ret = SE_ImageLoad(SE_String_GetData(&strTexPath), &currTex->imageData);
     SE_String_Release(&strTexPath);
     if(ret != SE_VALID)
     {
@@ -780,14 +809,12 @@ SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, 
         return SE_INVALID;
     }
     SE_String_Init(&currTex->texturename, textureName);
-    SE_Element value;
-    SE_DataPointer dp;
+
     dp.data = currTex;
     dp.fRelease = &SE_Texture_Release;
     dp.fCompare = NULL; 
     value.type = SE_DATA;
     value.dp = dp;
-    SE_Element key;
     key.type = SE_STRING;
     SE_String_Init(&key.str, textureName);
     SE_HashMap_Put(&(resourceManager->textureManager.textureMap), key, value);
@@ -824,6 +851,10 @@ int SE_ResourceManager_GetMeshCount(SE_ResourceManager* resourceManager)
 }
 SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager, const char* texName, int isCreate)
 {
+    SE_TextureID nullTexID;
+    SE_HashMap* texIDMap;
+    SE_Element key;
+    SE_Element* id;
     SE_ASSERT(resourceManager);
     if(texName == NULL)
     {
@@ -831,13 +862,11 @@ SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager
         SE_Object_Clear(&id, sizeof(SE_TextureID));
         return id;
     }
-    SE_TextureID nullTexID;
     SE_Object_Clear(&nullTexID, sizeof(SE_TextureID));
-    SE_HashMap* texIDMap = &resourceManager->textureIDMap;
-    SE_Element key;
+    texIDMap = &resourceManager->textureIDMap;
     key.type = SE_STRING;
     SE_String_Init(&key.str, texName);
-    SE_Element* id = SE_HashMap_Get(texIDMap, key);
+    id = SE_HashMap_Get(texIDMap, key);
     if(id != NULL)
     {
         SE_Element_Release(&key);
@@ -845,19 +874,20 @@ SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager
     }
     else
     {
+        SE_TextureID* texID;
+        SE_Element value;
         if(!isCreate)
         {
             SE_Element_Release(&key);
             return nullTexID;
         }
-        SE_TextureID* texID = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
+        texID = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
         if(texID == NULL)
         {
             SE_Element_Release(&key);
             return nullTexID;
         }
         SE_TextureID_Create(texID);
-        SE_Element value;
         SE_Object_Clear(&value, sizeof(SE_Element));
         value.type = SE_DATA;
         value.dp.data = texID;
@@ -867,17 +897,18 @@ SE_TextureID SE_ResourceManager_GetTextureID(SE_ResourceManager* resourceManager
 }
 SE_Result SE_ResourceManager_PutTextureID(SE_ResourceManager* resourceManager, const char* texName, SE_TextureID texID)
 {
+    SE_Element value;
+    SE_Element key;
+
     SE_ASSERT(resourceManager);
     if(texName == NULL)
         return SE_INVALID;
-    SE_Element value;
     SE_Object_Clear(&value, sizeof(SE_Element));
     value.type = SE_DATA;
     value.dp.data = (SE_TextureID*)SE_Malloc(sizeof(SE_TextureID));
     if(value.dp.data == NULL)
         return SE_INVALID;
     *(SE_TextureID*)value.dp.data = texID;
-    SE_Element key;
     SE_Object_Clear(&key, sizeof(SE_Element));
     key.type = SE_STRING;
     SE_String_Init(&key.str, texName);
@@ -886,10 +917,11 @@ SE_Result SE_ResourceManager_PutTextureID(SE_ResourceManager* resourceManager, c
 }
 SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resourceManager, const char* texName)
 {
+	SE_TextureID texID;
     SE_ASSERT(resourceManager);
     if(texName == NULL)
         return SE_INVALID;
-    SE_TextureID texID = SE_ResourceManager_GetTextureID(resourceManager, texName, 0);
+    texID = SE_ResourceManager_GetTextureID(resourceManager, texName, 0);
     if(SE_TextureID_IsValid(&texID))
     {
         SE_TextureID_Delete(&texID);
@@ -915,22 +947,25 @@ SE_GeometryData* SE_ResourceManager_GetGeometryData(SE_ResourceManager* resource
 
 SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, const char* name)
 {
+    SE_Element key;
+	SE_Element* value;
+    SE_Element v;
+	char* data = NULL;
+    int len;
+    SE_String filePath;
+    SE_Script* script;
     if(name == NULL)
         return NULL;
-    SE_Element key;
     key.type = SE_STRING;
     SE_String_Init(&key.str, name);
-    SE_Element* value = SE_HashMap_Get(&resourceManager->scriptMap, key);
+    value = SE_HashMap_Get(&resourceManager->scriptMap, key);
     if(value)
     {
         SE_Element_Release(&key);
         return (SE_Script*)value->dp.data;
     } 
-    SE_String filePath;
     SE_Object_Clear(&filePath, sizeof(SE_String));
     SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(&resourceManager->dataPath), SE_String_GetData(&key.str));
-    char* data = NULL;
-    int len;
     //SE_ReadCScriptFile(SE_String_GetData(&filePath), &data, &len);
     SE_ReadFileAllByName(SE_String_GetData(&filePath), &data, &len);
     LOGI("## script len = %d ####\n", len);
@@ -941,7 +976,7 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
         LOGI("can not find script %s\n", name);
         return NULL;
     }
-    SE_Script* script = (SE_Script*)SE_Malloc(sizeof(SE_Script));
+    script = (SE_Script*)SE_Malloc(sizeof(SE_Script));
     if(script == NULL)
     {
         SE_Element_Release(&key);
@@ -953,7 +988,6 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
     SE_Script_Init(script, data, len);
     SE_Free(data);
     SE_Script_Compile(script);
-    SE_Element v;
     v.type =SE_DATA;
     v.dp.data = script;
     v.dp.fRelease = &SE_Script_Release;

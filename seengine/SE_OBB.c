@@ -141,9 +141,9 @@ SE_Result SE_OBB_CreateFromAABB(SE_OBB* obb, const struct SE_AABB_tag* aabb, enu
 }
 SE_Result SE_OBB_GetVertex(const SE_OBB* obb, SE_Vector3f points[])
 {
+    SE_Vector3f min, xV, yV, zV, tmp1, tmp2;
     SE_ASSERT(obb);
     SE_ASSERT(points);
-    SE_Vector3f min, xV, yV, zV, tmp1, tmp2;
     SE_Vec3f_Mul(&obb->axis[0], -obb->e[0], &xV);
     SE_Vec3f_Mul(&obb->axis[1], -obb->e[1], &yV);
     SE_Vec3f_Mul(&obb->axis[2], -obb->e[2], &zV);

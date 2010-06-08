@@ -3,25 +3,25 @@
 #include "SE_Math.h"
 SE_Result SE_Camera_InitByLocationTarget(const SE_Vector3f* location, const SE_Vector3f* target, float fov, float ratio, float near, float far, SE_Camera* out)
 {
-    SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
     SE_Vector3f zDir;
+    SE_Vector3f zDirNormal;
+    SE_Vector3f upDir;
+    SE_Vector3f xAxis, yAxis, zAxis;
+    SE_Vector3f x, y;
+    SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
     SE_Vec3f_Subtract(target, location, &zDir);
     if(SE_Vec3f_IsZero(&zDir))
     {
         LOGI("camera z direction is zero\n");
         SE_Vec3f_Init(0, 0, -1, &zDir);
     }
-    SE_Vector3f zDirNormal;
     SE_Vec3f_Normalize(&zDir, &zDirNormal);
-    SE_Vector3f upDir;
     SE_Vec3f_Init(0, 1, 0, &upDir);
     if(SE_Vec3f_Compare(&upDir, &zDirNormal))
     {
         SE_Vec3f_Init(0, 0, 1, &upDir);
     }
-    SE_Vector3f xAxis, yAxis, zAxis;
     SE_Vec3f_Neg(&zDirNormal, &zAxis);
-    SE_Vector3f x, y;
     SE_Vec3f_Cross(&upDir, &zDirNormal, &x);
     SE_Vec3f_Cross(&zDirNormal, &x, &y);
     SE_Vec3f_Normalize(&y, &yAxis);

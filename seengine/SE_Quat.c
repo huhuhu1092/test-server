@@ -93,11 +93,12 @@ SE_Result SE_Quat_Clear(SE_Quat* q)
 }
 SE_Result SE_Quat_Inverse(const SE_Quat* q, SE_Quat* out)
 {
+    SE_Quat conj;
+    float len;
     SE_ASSERT(q);
     SE_ASSERT(out);
-    SE_Quat conj;
     SE_Quat_Conjugate(q, &conj);
-    float len = SE_Quat_Length(q);
+    len = SE_Quat_Length(q);
     if(len == 0)
     {
         SE_Quat_Clear(out);
@@ -111,8 +112,9 @@ SE_Result SE_Quat_Inverse(const SE_Quat* q, SE_Quat* out)
 }
 float SE_Quat_Length(const SE_Quat* q)
 {
+	float len;
     SE_ASSERT(q);
-    float len = SE_Sqrtf(q->w * q->w + q->v.x * q->v.x + q->v.y * q->v.y + q->v.z * q->v.z);
+    len = SE_Sqrtf(q->w * q->w + q->v.x * q->v.x + q->v.y * q->v.y + q->v.z * q->v.z);
     return len;
 }
 float SE_Quat_LengthSquare(const SE_Quat* q)
@@ -121,6 +123,8 @@ float SE_Quat_LengthSquare(const SE_Quat* q)
 }
 SE_Result SE_Quat_InitFromAngleAxis(float angle, const SE_Vector3f* axis, SE_Quat* out)
 {
+    SE_Vector3f axNorm;
+	float radian, sinAngle;
     SE_ASSERT(axis);
     SE_ASSERT(out);
     if(SE_Vec3f_IsZero(axis))
@@ -128,10 +132,9 @@ SE_Result SE_Quat_InitFromAngleAxis(float angle, const SE_Vector3f* axis, SE_Qua
         SE_Quat_Clear(out);
         return 0;
     }
-    SE_Vector3f axNorm;
     SE_Vec3f_Normalize(axis, &axNorm);
-    float radian = SE_AngleToRadian(angle) / 2;
-    float sinAngle = SE_Sinf(radian);
+    radian = SE_AngleToRadian(angle) / 2;
+    sinAngle = SE_Sinf(radian);
     out->w = SE_Cosf(radian);
     out->v.x = axNorm.x * sinAngle;
     out->v.y = axNorm.y * sinAngle;
@@ -147,21 +150,22 @@ SE_Result SE_Quat_IsZero(const SE_Quat* q)
 }
 SE_Result SE_Quat_MapVec3f(const SE_Quat* q, const SE_Vector3f* v, SE_Vector3f* out)
 {
+    SE_Quat vq;
+    SE_Quat qinverse;
+    SE_Quat result1;
+    SE_Quat result;
+	SE_Result ret;
     SE_ASSERT(q);
     SE_ASSERT(v);
     SE_ASSERT(out);
-    SE_Quat vq;
     SE_Quat_InitFromVector(v, 0.0f, &vq);
-    SE_Quat qinverse;
-    SE_Result ret = SE_Quat_Inverse(q, &qinverse);
+    ret = SE_Quat_Inverse(q, &qinverse);
     if(ret == 0)
     {
         SE_Vec3f_Clear(out);
         return 0;
     }
-    SE_Quat result1;
     SE_Quat_Mul(q, &vq, &result1);
-    SE_Quat result;
     SE_Quat_Mul(&result1, &qinverse, &result);
     out->x = result.v.x;
     out->y = result.v.y;
@@ -170,8 +174,6 @@ SE_Result SE_Quat_MapVec3f(const SE_Quat* q, const SE_Vector3f* v, SE_Vector3f* 
 }
 SE_Result SE_Quat_ToMatrix3f(const SE_Quat* q, SE_Matrix3f* out)
 {
-    SE_ASSERT(q);
-    SE_ASSERT(out);
     float m00 = 1 - 2 * q->v.y * q->v.y - 2 * q->v.z * q->v.z;
     float m01 = 2 * q->v.x * q->v.y - 2 * q->w * q->v.z;
     float m02 = 2 * q->v.x * q->v.z + 2 * q->w * q->v.y;

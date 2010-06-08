@@ -19,6 +19,7 @@ enum SE_TEX_WRAP_VALUE {SE_REPEAT, SE_CLAMP, SE_CLAMP_TO_EDGE, SE_CLAMP_TO_BORDE
 enum SE_TEX_WRAP_TYPE {SE_S, SE_T, SE_R};
 enum SE_TEX_TARGET {SE_1D, SE_2D, SE_3D};
 enum SE_TEX_ENV {SE_REPLACE, SE_DECAL, SE_MODULATE};
+enum SE_SHADER {SE_VERTEX_SHADER, SE_FRAGMENT_SHADER};
 typedef struct SE_Renderer_tag
 {
     struct SE_World_tag* currWorld;
@@ -44,7 +45,6 @@ extern void SE_Renderer_EnableState(enum SE_GL_STATE s);
 extern void SE_Renderer_DisableState(enum SE_GL_STATE s);
 extern void SE_Renderer_SetColor(float r, float g, float b, float a);
 extern void SE_Renderer_SetAmbientMaterial(float rm, float gm, float bm, float am);
-
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/

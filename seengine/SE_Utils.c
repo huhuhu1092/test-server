@@ -5,12 +5,12 @@
 SE_Result SE_CreateTransformByRST(const SE_Quat* rotation, const SE_Vector3f* scale, const SE_Vector3f* translate, SE_Matrix4f* transform)
 {
     SE_Matrix3f rotatem;
-    SE_Quat_ToMatrix3f(rotation, &rotatem);
     SE_Matrix3f scalem;
+    SE_Matrix3f rsm;
+    SE_Quat_ToMatrix3f(rotation, &rotatem);
     SE_Mat3f_Init(scale->x, 0.0f, 0.0f,
                      0.0f, scale->y, 0.0f,
                      0.0f, 0.0f, scale->z, &scalem);
-    SE_Matrix3f rsm;
     SE_Mat3f_Mul(&rotatem, &scalem, &rsm);
     SE_Mat4f_InitFromMT(&rsm, translate, transform);
     return SE_VALID;
@@ -42,9 +42,9 @@ static void readFile(char* out, int fileSize, FILE* fp)
 }
 void SE_ReadFileAll(FILE* fp, char** outData, int* outLen)
 {
+    int fileSize = SE_GetFileSize(fp);
     *outData = NULL;
     *outLen = 0;
-    int fileSize = SE_GetFileSize(fp);
     *outData = (char*)SE_Malloc(fileSize);
     if(!(*outData))
     {
@@ -55,9 +55,9 @@ void SE_ReadFileAll(FILE* fp, char** outData, int* outLen)
 }
 void SE_ReadFileAllByName(const char* name, char** outData, int* outLen)
 {
+    FILE* fin = fopen(name, "rb");
     *outData = NULL;
     *outLen = 0;
-    FILE* fin = fopen(name, "rb");
     if(!fin)
         return;
     SE_ReadFileAll(fin, outData, outLen);
@@ -65,12 +65,13 @@ void SE_ReadFileAllByName(const char* name, char** outData, int* outLen)
 }
 void SE_ReadCScriptFile(const char* name, char** outData, int* outLen)
 {
+	int fileSize = 0;
+    FILE* fin = fopen(name, "rb");
     *outData = NULL;
     *outLen = 0;
-    FILE* fin = fopen(name, "rb");
     if(!fin)
         return;
-    int fileSize = SE_GetFileSize(fin);
+    fileSize = SE_GetFileSize(fin);
     *outData = (char*)SE_Malloc(fileSize + 1) ;
     if(!(*outData))
     {

@@ -14,9 +14,10 @@ SE_Spatial* SE_Spatial_Create()
 }
 SE_Result SE_Spatial_Init(SE_Spatial* spatial, enum SE_SPATIAL_TYPE spatialType, const char* name, SE_ResourceManager* resourceManager, struct SE_Mesh_tag* mesh)
 {
+	SE_String* strName;
     SE_ASSERT(spatial);
     SE_Object_Clear(spatial, sizeof(SE_Spatial));
-    SE_String* strName = &spatial->name;
+    strName = &spatial->name;
     spatial->spatialType = spatialType;
     SE_String_Init(strName, name);
     SE_Quat_Identity(&spatial->localRotation);
@@ -56,8 +57,9 @@ SE_Result SE_Spatial_Copy(const SE_Spatial* spatialSrc, SE_Spatial* spatialDst)
 }
 SE_Result SE_Spatial_UpdateWorldTransform(SE_Spatial* spatial)
 {
+	SE_Spatial* parent;
     SE_ASSERT(spatial);
-    SE_Spatial* parent = spatial->parent;
+    parent = spatial->parent;
     if(parent)
     {
         SE_Matrix4f* parentWorldTransform = &parent->worldTransform;
@@ -97,14 +99,6 @@ static void createWorldBVFromLocalBV(SE_Spatial* spatial)
     SE_ASSERT(spatial->worldBV == NULL);
     if(spatial->localBV)
     {
-        /*
-        SE_Matrix3f rotateMatrix;
-        SE_Vector3f translate;
-        //SE_Mat4f_GetMatrix3fAndTranslate(&spatial->worldTransform, &rotateMatrix, &translate);
-        SE_Quat_ToMatrix3f(&spatial->localRotation, &rotateMatrix);
-        spatial->worldBV =  SE_BoundingVolume_Clone(spatial->localBV);
-        spatial->worldBV->fTransform(spatial->localBV, &rotateMatrix, &spatial->localTranslation, &spatial->localScale, spatial->worldBV); 
-        */
         SE_Mesh* mesh = spatial->mesh;
         SE_ResourceManager* resourceManager = spatial->resourceManager;
         SE_GeometryData* geomData;
@@ -120,8 +114,9 @@ static void createWorldBVFromLocalBV(SE_Spatial* spatial)
         case SE_AABB_E:
             {
                 int i;
+                SE_Vector3f* worldVertexData;
                 aabbBV = (SE_AABBBV*)SE_Malloc(sizeof(SE_AABBBV));
-                SE_Vector3f* worldVertexData = (SE_Vector3f*)SE_Malloc(sizeof(SE_Vector3f) * geomData->vertexNum);
+                worldVertexData = (SE_Vector3f*)SE_Malloc(sizeof(SE_Vector3f) * geomData->vertexNum);
                 for(i = 0 ; i < geomData->vertexNum ; i++)
                 {
                     SE_Vector4f v1, v2;
@@ -180,17 +175,19 @@ SE_Result SE_Spatial_UpdateWorldBV(SE_Spatial* spatial)
      * this implementation is a special case. we need to change 
      * it to a general version
      * */
+	SE_List* children;
     if(!spatial)
         return SE_VALID;
-    SE_List* children = spatial->children;
+    children = spatial->children;
     if(spatial->spatialType == SE_NODE)
     {
         struct ContextDataForWorldBV d;
         SE_Object_Clear(&d, sizeof(struct ContextDataForWorldBV));
         if(spatial->children)
         {
+			int childsize;
             SE_List_Apply(spatial->children, &travelListToUpdateWorldBV, &d);
-            int childsize = SE_List_Size(spatial->children);
+            childsize = SE_List_Size(spatial->children);
             if(d.subMeshNum > 0)
             {
                 SE_ASSERT(d.subMeshNum == childsize);
@@ -217,11 +214,12 @@ SE_Result SE_Spatial_UpdateGeometricState(SE_Spatial* spatial)
 }
 static void updateRenderStateFromRoot(SE_Spatial* spatial)
 {
+	SE_Spatial* parent;
     if(spatial == NULL)
     {
         return ;
     }
-    SE_Spatial* parent = spatial->parent;
+    parent = spatial->parent;
     updateRenderStateFromRoot(parent);
     if(parent != NULL)
     {
@@ -235,8 +233,8 @@ static void updateRenderStateToChild(SE_Spatial* child, SE_RenderState* parentSt
     if(child->children != NULL)
     {
         SE_ListIterator li;
-        SE_ListIterator_Init(&li, child->children);
         SE_Element n;
+        SE_ListIterator_Init(&li, child->children);
         while(SE_ListIterator_Next(&li, &n))
         {
             SE_Spatial* c = (SE_Spatial*)n.dp.data;
@@ -250,8 +248,8 @@ SE_Result SE_Spatial_UpdateRenderState(SE_Spatial* spatial)
     if(spatial->children != NULL)
     {
         SE_ListIterator li;
-        SE_ListIterator_Init(&li, spatial->children);
         SE_Element n;
+        SE_ListIterator_Init(&li, spatial->children);
         while(SE_ListIterator_Next(&li, &n))
         {
             SE_Spatial* child = (SE_Spatial*)n.dp.data;
@@ -277,6 +275,8 @@ int SE_Spatial_GetChildrenNum(SE_Spatial* spatial)
 }
 SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child)
 {
+    SE_Element e;
+
     if(parent == NULL)
         return SE_INVALID;
     if(parent->spatialType != SE_NODE)
@@ -290,7 +290,6 @@ SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child)
     }
     if(parent->children == NULL)
         return SE_INVALID;
-    SE_Element e;
     SE_Object_Clear(&e, sizeof(SE_Element));
     e.type = SE_DATA;
     e.dp.data = child;
@@ -300,6 +299,8 @@ SE_Result SE_Spatial_AddChild(SE_Spatial* parent, SE_Spatial* child)
 }
 SE_Result SE_Spatial_RemoveChild(SE_Spatial* parent, SE_Spatial* child)
 {
+    SE_Element e;
+
     if(parent == NULL)
         return SE_INVALID;
     if(parent->spatialType != SE_NODE)
@@ -310,7 +311,6 @@ SE_Result SE_Spatial_RemoveChild(SE_Spatial* parent, SE_Spatial* child)
     {
         return SE_INVALID;
     }
-    SE_Element e;
     SE_Object_Clear(&e, sizeof(SE_Element));
     e.type = SE_DATA;
     e.dp.data = child;
@@ -326,6 +326,8 @@ static int compareSpatialByName(void* v1, void* v2)
 
 SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name)
 {
+    SE_Spatial tmpSpatial;
+    SE_Element e;
     if(parent == NULL)
         return SE_INVALID;
     if(parent->spatialType != SE_NODE)
@@ -336,9 +338,7 @@ SE_Result SE_Spatial_RemoveChildByName(SE_Spatial* parent, SE_String name)
     {
         return SE_INVALID;
     }
-    SE_Spatial tmpSpatial;
     tmpSpatial.name = name;
-    SE_Element e;
     e.type = SE_DATA;
     e.dp.data = &tmpSpatial;
     e.dp.fCompare = &compareSpatialByName;
@@ -354,9 +354,10 @@ int SE_Spatial_HasSubMesh(const SE_Spatial* spatial)
 }
 SE_Result SE_Spatial_SetRenderState(SE_Spatial* spatial, enum SE_RS_TYPE rsType, const char* scriptname)
 {
+	SE_String* str;
     if(scriptname == NULL)
         return SE_INVALID;
-    SE_String* str = &spatial->renderState.rsu[rsType].scriptName;
+    str = &spatial->renderState.rsu[rsType].scriptName;
     SE_String_CopyCharArray(str, scriptname);
     spatial->renderState.resourceManager = spatial->resourceManager;
     return SE_VALID;
@@ -403,11 +404,12 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
     if(bv)
     {
         SE_IntersectionResult result;
+		SE_List* children;
         SE_Object_Clear(&result, sizeof(SE_IntersectionResult));
         bv->fIntersectRayDetail(bv, ray, &result);
         if(result.intersected == 0)
             return 0;
-        SE_List* children = spatial->children;
+        children = spatial->children;
         if(children && !SE_Spatial_HasSubMesh(spatial))
         {
             struct ContextData contextData;
@@ -418,8 +420,8 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
         else
         {
             SE_Element e;
-            e.type = SE_DATA;
             SE_IntersectionSpatialData* element = (SE_IntersectionSpatialData*)SE_Malloc(sizeof(SE_IntersectionSpatialData));
+            e.type = SE_DATA;
             if(element)
             {
                 element->intersectionResult = result;
@@ -439,8 +441,6 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
 static void travelSpatialChildren(SE_Element* e, void* context)
 {
     SE_Spatial* s = (SE_Spatial*)e->ptr;
-    SE_ASSERT(e);
-    SE_ASSERT(context);
     struct ContextData* contextData = (struct ContextData*)context;
     spatialIntersectRay(s, contextData->ray, contextData->spatialList);
 }
@@ -635,8 +635,8 @@ static void calculateIntersectSpatialByMovingOBB(SE_Spatial* root, SE_Spatial* m
                 if(ret)
                 {
                     SE_Element e;
-                    SE_Object_Clear(&e, sizeof(SE_Element));
                     struct _IntersectMoveOBBData* oe;
+                    SE_Object_Clear(&e, sizeof(SE_Element));
                     e.type = SE_DATA;
                     oe = (struct _IntersectMoveOBBData*)SE_Malloc(sizeof(struct _IntersectMoveOBBData));
                     if(oe)
@@ -760,7 +760,6 @@ SE_Result SE_Spatial_RotateByLocalAxis(SE_Spatial* spatial, enum SE_AXIS_TYPE ax
 }
 SE_Spatial* SE_Spatial_Find(SE_Spatial* parent, SE_String name)
 {
-    SE_ASSERT(parent);
     SE_ListIterator li;
     SE_List* children = parent->children;
     SE_Element e;

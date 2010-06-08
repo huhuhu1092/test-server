@@ -2,8 +2,8 @@
 #ifdef ANDROID
 #include <GLES/gl.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #endif
 #include "SE_World.h"
 #include "SE_ResourceManager.h"
@@ -13,12 +13,16 @@
 /*** static function*/
 static void drawBoundingVolume(SE_Spatial* spatial)
 {
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-    glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-    SE_AABBBV* aabbBv = (SE_AABBBV*)spatial->worldBV;
-    SE_AABB* aabb = &aabbBv->aabb; 
+    SE_AABBBV* aabbBv;
+    SE_AABB* aabb;
     SE_Vector3f points[24];
+
+    glDisable(GL_TEXTURE_2D);
+    /*
+	should set color in shader
+	*/
+    aabbBv = (SE_AABBBV*)spatial->worldBV;
+    aabb = &aabbBv->aabb; 
     //edge 1
     points[0].x = aabb->min.x;
     points[0].y = aabb->min.y;
@@ -126,9 +130,10 @@ points[22].x = aabb->min.x;
 points[23].x = aabb->min.x;
     points[23].y = aabb->min.y;
     points[23].z = aabb->max.z;
+	/* should do in shader
 glVertexPointer(3, GL_FLOAT, 0, points);
 glDrawArrays(GL_LINES, 0, 24);
-
+*/
 }
 /***/
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld)
@@ -163,25 +168,17 @@ void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
 {
     SE_Camera* mainCamera = SE_World_GetMainCamera(world);
     SE_Rectf nearrect;
+    SE_Matrix4f worldToView;
+    float m[16];
+    GLfloat ambientLight[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    SE_Spatial* rootSpatial;
     glViewport(0, 0, w, h);
     SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-#ifdef ANDROID
-    glFrustumf(nearrect.left, nearrect.right, nearrect.bottom, nearrect.top, 1.0f, 1000.0f);
-#else
-    glFrustum(nearrect.left, nearrect.right, nearrect.bottom, nearrect.top, 1.0f, 1000.0f);
-    /*gluPerspective(90.0f, ((float)w / h), 1.0f, 1000.0f);*/
-#endif
-    SE_ResourceManager_RunScript(SE_World_GetResourceManager(world), SE_String_GetData(&world->initScript));
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LEQUAL );
 
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity( );
-    SE_Matrix4f worldToView;
+    SE_ResourceManager_RunScript(SE_World_GetResourceManager(world), SE_String_GetData(&world->initScript));
+
+
     SE_Camera_GetMatrixWorldToView(mainCamera, &worldToView);
-    float m[16];
     SE_Mat4f_GetMatrixColumnSequence(&worldToView, m);
     /*
     int j;
@@ -193,13 +190,7 @@ void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
     }
     LOGI("\n\n\n");
     */
-    glLoadMatrixf(m);
-    //enable light
-    GLfloat ambientLight[] = {0.7f, 0.7f, 0.7f, 1.0f};
-    glEnable(GL_LIGHTING);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ambientLight);
-    //end
-    SE_Spatial* rootSpatial = SE_World_GetSceneRoot(world);
+    rootSpatial = SE_World_GetSceneRoot(world);
     SE_Renderer_DrawSpatial(rootSpatial);
     /**
      * test
@@ -214,13 +205,10 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
     SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, index);
     SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
     SE_FaceList* faceList = &subMesh->faceList;
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     int vertexCount = faceList->num * 3;
     int i;
     int k = 0;
-    /*LOGI("## vertex Count = %d ###\n", vertexCount);*/
+    SE_Vector2f* texVertexArray = NULL;
     SE_Vector3f* vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
     for(i = 0 ; i < faceList->num ; i++)
     {
@@ -229,8 +217,6 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
         vertexArray[k++] = gd->vertexArray[s->v[1]];
         vertexArray[k++] = gd->vertexArray[s->v[2]]; 
     }
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    SE_Vector2f* texVertexArray = NULL;
     if(gd->texVertexArray)
     {
         k = 0;
@@ -248,11 +234,7 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
             texVertexArray[k].y = gd->texVertexArray[s->v[2]].y;
             k++;
         }
-        glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
-    /*glColor4f(mesh->wireframeColor.x, mesh->wireframeColor.y, mesh->wireframeColor.z, 1.0f);*/
-    /*LOGI("### isenable texture: %d ###\n", glIsEnabled(GL_TEXTURE_2D) );*/
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     SE_Free(vertexArray);
     if(texVertexArray)
         SE_Free(texVertexArray);
@@ -262,25 +244,21 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
 static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
 {
     SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     int vertexCount = gd->faceNum * 3;
     SE_Vector3f* vertexArray = (SE_Vector3f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector3f));
     int i;
     int k = 0;
+    SE_Vector2f* texVertexArray = NULL;
     for(i = 0 ; i < gd->faceNum ; i++)
     {
         vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[0]];
         vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[1]];
         vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[2]];
     }
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    SE_Vector2f* texVertexArray = NULL;
     if(gd->texVertexArray)
     {
         texVertexArray = (SE_Vector2f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector2f));
-        int i;
-        int k = 0 ; 
+        k = 0 ; 
         for(i = 0 ; i < gd->faceNum ; i++)
         {
             texVertexArray[k].x = gd->texVertexArray[gd->texFaceArray[i].v[0]].x;
@@ -293,9 +271,7 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
             texVertexArray[k].y = gd->texVertexArray[gd->texFaceArray[i].v[2]].y;
             k++;
         }
-        glTexCoordPointer(2, GL_FLOAT, 0, texVertexArray); 
     }
-    /*LOGI("### isenable texture: %d ####\n", glIsEnabled(GL_TEXTURE_2D) );*/
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     /*
      * the Free must do after glDrawArrarys else it will make draw error
@@ -309,7 +285,6 @@ static void setSpatialMatrix(SE_Spatial* spatial)
     SE_Matrix4f* m = &spatial->worldTransform;
     float mData[16];
     SE_Mat4f_GetMatrixColumnSequence(m, mData); 
-    glMultMatrixf(mData);
 }
 void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
 {
@@ -321,27 +296,23 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
         SE_RenderState_Activate(&spatial->renderState, spatial);
         if(spatial->subMeshIndex == -1)
         {
-            glPushMatrix();
             setSpatialMatrix(spatial);
             drawMesh(resourceManager, spatial->mesh);
-            glPopMatrix();
         }
         else
         {
-            glPushMatrix();
             setSpatialMatrix(spatial);
             drawSubMesh(resourceManager, spatial->mesh, spatial->subMeshIndex);
-            glPopMatrix();
         }
     }
     else if(spatial->spatialType == SE_NODE)
     {
+		SE_List* children = spatial->children;
+        SE_ListIterator li;
+        SE_Element e;
         if(spatial->renderType != SE_RENDERABLE)
             return;
-        SE_List* children = spatial->children;
-        SE_ListIterator li;
         SE_ListIterator_Init(&li, children);
-        SE_Element e;
         while(SE_ListIterator_Next(&li, &e))
         {
             SE_Spatial* sc = (SE_Spatial*)e.dp.data;
@@ -403,14 +374,9 @@ void SE_Renderer_SetTexWrap(enum SE_TEX_TARGET target, enum SE_TEX_WRAP_TYPE typ
         pvalue = GL_REPEAT;
         break;
 #ifndef ANDROID
-    case SE_CLAMP:
-        pvalue = GL_CLAMP;
-        break;
     case SE_CLAMP_TO_EDGE:
         pvalue = GL_CLAMP_TO_EDGE;
         break;
-    case SE_CLAMP_TO_BORDER:
-        pvalue = GL_CLAMP_TO_BORDER;
 #endif
     }
     switch(target)
@@ -476,6 +442,8 @@ static GLenum getGLType(SE_ImageData* imageData)
 void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TARGET t, const char* texName)
 {
     SE_TextureID texID = SE_ResourceManager_GetTextureID(resourceManager, texName, 0);
+	SE_Texture* tex;
+	SE_ImageData* imd;
     if(SE_TextureID_IsValid(&texID))
     {
         switch(t)
@@ -499,8 +467,8 @@ void SE_Renderer_BindTexture(SE_ResourceManager* resourceManager, enum SE_TEX_TA
             break;
         }
     }
-    SE_Texture* tex = SE_ResourceManager_LoadTexture(resourceManager, texName);
-    SE_ImageData* imd = &tex->imageData;
+    tex = SE_ResourceManager_LoadTexture(resourceManager, texName);
+    imd = &tex->imageData;
     switch(t)
     {
     case SE_2D:
@@ -519,14 +487,14 @@ void SE_Renderer_SetTexEnv(enum SE_TEX_ENV env)
     case SE_REPLACE:
         param = GL_REPLACE;
         break;
-    case SE_DECAL:
-        param = GL_DECAL;
+	case SE_DECAL:
         break;
     case SE_MODULATE:
-        param = GL_MODULATE;
         break;
     }
+	/*
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, param);
+	*/
 }
 void SE_Renderer_EnableState(enum SE_GL_STATE s)
 {
@@ -538,7 +506,9 @@ void SE_Renderer_EnableState(enum SE_GL_STATE s)
     case SE_DEPTH:
         break;
     case SE_LIGHT:
+		/*
         glEnable(GL_LIGHTING);
+		*/
         break;
     }
 }
@@ -552,19 +522,22 @@ void SE_Renderer_DisableState(enum SE_GL_STATE s)
     case SE_DEPTH:
         break;
     case SE_LIGHT:
-        glDisable(GL_LIGHTING);
         break;
     }
 
 }
 void SE_Renderer_SetColor(float r, float g, float b, float a)
 {
+	/*
     glColor4f(r, g , b, a);
+	*/
 }
 void SE_Renderer_SetAmbientMaterial(float rm , float gm , float bm, float am)
 {
     GLfloat gray[] = {rm, gm, bm, am};
+	/*
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, gray);
+	*/
 }
 
 

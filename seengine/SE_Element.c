@@ -26,12 +26,11 @@ void SE_DataPointer_Release(void* dp)
  * */
 int SE_Element_Compare(SE_Element v1, SE_Element v2)
 {
-    //SE_ASSERT(v1.type == v2.type);
+    int ret = 0;
     if(v1.type != v2.type)
         return -1;
     if(v1.type == SE_NONE)
         return 0;
-    int ret = 0;
     switch(v1.type)
     {
     case SE_INT: 

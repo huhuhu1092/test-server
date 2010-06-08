@@ -6,7 +6,8 @@
 #ifdef ANDROID
 #include <GLES/gl.h>
 #else
-#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #endif
 
 #ifdef __cplusplus

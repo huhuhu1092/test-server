@@ -5,11 +5,12 @@
 #include <stdarg.h>
 SE_Result SE_String_Init(SE_String* str, const char* strInput)
 {
+	int len = 0;
     SE_ASSERT(str);
     SE_Object_Clear(str, sizeof(SE_String));
     if(strInput == NULL)
         return SE_INVALID;
-    int len = strlen(strInput) + 1;
+    len = strlen(strInput) + 1;
     if(len > SE_MAX_STR_LEN)
         len = SE_MAX_STR_LEN;
     SE_ASSERT(len <= SE_MAX_STR_LEN);
@@ -24,8 +25,9 @@ SE_Result SE_String_Init(SE_String* str, const char* strInput)
 }
 void SE_String_Release(void* strData)
 {
+	SE_String* str;
     SE_ASSERT(strData);
-    SE_String* str = (SE_String*)strData;
+    str = (SE_String*)strData;
     if(str->own)
         SE_Free(str->data);
     str->data = NULL;
@@ -34,6 +36,8 @@ void SE_String_Release(void* strData)
 }
 SE_Result SE_String_CopyCharArray(SE_String* str, const char* strInput)
 {
+	int len;
+	char* tmpBuffer;
     SE_ASSERT(str);
     if(strInput == NULL)
     {
@@ -46,11 +50,11 @@ SE_Result SE_String_CopyCharArray(SE_String* str, const char* strInput)
         str->own = 0;
         return SE_VALID;
     }
-    int len = strlen(strInput) + 1;
+    len = strlen(strInput) + 1;
     if(len > SE_MAX_STR_LEN)
         len = SE_MAX_STR_LEN;
     SE_ASSERT(len >= 1);
-    char* tmpBuffer = (char*)SE_Malloc(len);
+    tmpBuffer = (char*)SE_Malloc(len);
     if(tmpBuffer == NULL)
         return SE_INVALID;
     strncpy(tmpBuffer, strInput, len - 1);
@@ -95,11 +99,15 @@ int SE_String_IsEmpty(const SE_String* str)
 }
 SE_Result SE_String_CopyFromSubStr(SE_String* str, const SE_String* input, int start, int len)
 {
+	int srcLen = 0;
+	const char* src = NULL;
+	int end, copyLen;
+	char* tmpBuffer;
     SE_ASSERT(str);
     if(input == NULL)
         return SE_INVALID;
-    int srcLen = SE_String_Length(input);
-    const char* src = input->data;
+    srcLen = SE_String_Length(input);
+    src = input->data;
     SE_ASSERT(srcLen >= 0 && srcLen < SE_MAX_STR_LEN);
     if(src == NULL)
     {
@@ -117,11 +125,11 @@ SE_Result SE_String_CopyFromSubStr(SE_String* str, const SE_String* input, int s
         return SE_INVALID;
     if(len == 0)
         return SE_INVALID;
-    int end = start + len - 1;
+    end = start + len - 1;
     if(end >= srcLen)
         end = srcLen - 1;
-    int copyLen = end - start + 1;
-    char* tmpBuffer = (char*)SE_Malloc(copyLen + 1);
+    copyLen = end - start + 1;
+    tmpBuffer = (char*)SE_Malloc(copyLen + 1);
     if(tmpBuffer == NULL)
         return SE_INVALID;
     strncpy(tmpBuffer, src + start, copyLen);
@@ -142,8 +150,8 @@ char* SE_String_GetData(SE_String* str)
 SE_Result SE_String_Concate(SE_String* strDst, const char* fmt,...)
 {
     va_list ap;
-    va_start(ap, fmt);
     char tmpStr[SE_MAX_STR_LEN];
+    va_start(ap, fmt);
     memset(tmpStr, 0, SE_MAX_STR_LEN);
     vsnprintf(tmpStr, SE_MAX_STR_LEN, fmt, ap);
     tmpStr[SE_MAX_STR_LEN - 1] = '\0';

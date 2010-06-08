@@ -25,10 +25,11 @@
 SE_Result SE_HashMap_Init(int initialCapacity,
         int (*hash)(SE_Element key), SE_HashMap* map) 
 {
+	int minimumBucketCount;
     SE_ASSERT(map != NULL);    
     SE_Object_Clear(map, sizeof(SE_HashMap));
     // 0.75 load factor.
-    int minimumBucketCount = initialCapacity * 4 / 3;
+    minimumBucketCount = initialCapacity * 4 / 3;
     map->bucketCount = 1;
     while (map->bucketCount <= minimumBucketCount) {
         // Bucket count must be power of 2.
@@ -48,6 +49,7 @@ SE_Result SE_HashMap_Init(int initialCapacity,
 int SE_HashMap_Hash(SE_Element key) {
     char* data = NULL;
     int keysize = 0;
+	int h, i;
     switch(key.type)
     {
     case SE_INT:
@@ -83,8 +85,7 @@ int SE_HashMap_Hash(SE_Element key) {
         data = (char*)key.dp.data;
         break;
     }
-    int h = keysize;
-    int i;
+    h = keysize;
     for (i = 0; i < keysize; i++) {
         h = h * 31 + *data;
         data++;
@@ -141,17 +142,17 @@ static void releaseBucket(SE_HashMap_Entry** buckets, int bucketCount)
 static void expandIfNecessary(SE_HashMap* map) {
     // If the load factor exceeds 0.75...
     if (map->size > (map->bucketCount * 3 / 4)) {
-        LOGI("#### expand hashmap ####");
         // Start off with a 0.33 load factor.
+		int i;
         int newBucketCount = map->bucketCount << 1;
         SE_HashMap_Entry** newBuckets = (SE_HashMap_Entry**)SE_Calloc(newBucketCount, sizeof(SE_HashMap_Entry*));
+        LOGI("#### expand hashmap ####");
         if (newBuckets == NULL) {
             // Abort expansion.
             return;
         }
         memset(newBuckets, 0, newBucketCount * sizeof(SE_HashMap_Entry*)); 
         // Move over existing entries.
-        int i;
         for (i = 0; i < map->bucketCount; i++) {
             SE_HashMap_Entry* entry = map->buckets[i];
             while (entry != NULL) {
@@ -171,7 +172,6 @@ static void expandIfNecessary(SE_HashMap* map) {
     }
 }
 void SE_HashMap_Release(void* mapData) {
-    int i;
     SE_HashMap* map = (SE_HashMap*)mapData;
     releaseBucket(map->buckets, map->bucketCount);
     SE_Free(map->buckets);

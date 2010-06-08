@@ -48,7 +48,7 @@ extern SE_Result SE_Vec2f_Mul(const SE_Vector2f* v, float scalar, SE_Vector2f* o
 extern SE_Result SE_Vec2f_Normalize(const SE_Vector2f* v, SE_Vector2f* out);
 extern float SE_Vec2f_Length(const SE_Vector2f* v);
 extern float SE_Vec2f_LengthSquare(const SE_Vector2f* v);
-
+extern SE_Result SE_Vec2f_Copy(const SE_Vector2f* src, SE_Vector2f* dst);
 extern SE_Result SE_Vec3f_Init(float x, float y, float z, SE_Vector3f* out);
 extern int SE_Vec3f_IsZero(const SE_Vector3f* v);
 /**

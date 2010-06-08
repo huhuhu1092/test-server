@@ -67,10 +67,11 @@ SE_Result SE_SphereBV_CreateFromSphere(SE_SphereBV* sbv, SE_Sphere* s)
 }
 SE_Result SE_SphereBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_Matrix3f* ratation, const SE_Vector3f* translate, const SE_Vector3f* scale, struct SE_BoundingVolume_tag* out)
 {
-    SE_ASSERT(bv);
-    SE_SphereBV* sbv = (SE_SphereBV*)bv;
     SE_Vector3f center;
+	SE_SphereBV* sbv = NULL;
     float scaleX;
+    SE_ASSERT(bv);
+    sbv = (SE_SphereBV*)bv;
     if(translate)
     {
         SE_Vec3f_Add(&sbv->sphere.center, translate, &center);
@@ -86,9 +87,10 @@ SE_Result SE_SphereBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE
 enum SE_Plane_Side SE_SphereBV_WhichSide(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane)
 {
     float dist;
+	SE_SphereBV* sbv = NULL;
     SE_ASSERT(bv);
     SE_ASSERT(plane);
-    SE_SphereBV* sbv = (SE_SphereBV*)bv;
+    sbv = (SE_SphereBV*)bv;
     dist = SE_Plane_PointDistance(plane, &sbv->sphere.center);
     if(dist > 0)
     {
@@ -112,24 +114,27 @@ SE_Result SE_SphereBV_Merge(struct SE_BoundingVolume_tag* bvMerged, const struct
 }
 int SE_SphereBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f* point)
 {
+	SE_SphereBV* sbv = NULL;
     SE_ASSERT(bv);
-    SE_SphereBV* sbv = (SE_SphereBV*)bv;
+    sbv = (SE_SphereBV*)bv;
     return SE_Sphere_ContainPoint(&sbv->sphere, point);
 }
 int SE_SphereBV_IntersectRay(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray)
 {
+	SE_SphereBV* sbv = NULL;
+    SE_IntersectionResult intersectResult;
     SE_ASSERT(bv);
     SE_ASSERT(ray);
-    SE_SphereBV* sbv = (SE_SphereBV*)bv;
-    SE_IntersectionResult intersectResult;
+    sbv = (SE_SphereBV*)bv;
     SE_Intersect_Ray_Sphere(ray, &sbv->sphere, &intersectResult);
     return intersectResult.intersected;
 }
 SE_Result SE_SphereBV_IntersectRayDetail(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result)
 {
+	SE_SphereBV* sbv = NULL;
     SE_ASSERT(bv);
     SE_ASSERT(ray);
-    SE_SphereBV* sbv = (SE_SphereBV*)bv;
+    sbv = (SE_SphereBV*)bv;
     SE_Intersect_Ray_Sphere(ray, &sbv->sphere, result);
     return SE_VALID;
 }
@@ -207,11 +212,12 @@ SE_Result SE_AABBBV_Transform(const struct SE_BoundingVolume_tag* bv, const SE_M
 
 enum SE_Plane_Side SE_AABBBV_WhichSide(struct SE_BoundingVolume_tag* bv, const SE_Plane* plane)
 {
-    SE_ASSERT(bv);
-    SE_ASSERT(plane);
-    SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
+	SE_AABBBV* aabbBv = NULL;
     int bIntersect = 0;
     SE_Vector3f center;
+    SE_ASSERT(bv);
+    SE_ASSERT(plane);
+    aabbBv = (SE_AABBBV*)bv;
     bIntersect = SE_Intersect_AABB_Plane(&aabbBv->aabb, plane);
     if(bIntersect)
     {
@@ -226,10 +232,12 @@ SE_Result SE_AABBBV_Merge(struct SE_BoundingVolume_tag* bvMerged, const struct S
 }
 int SE_AABBBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f* point)
 {
+	SE_AABBBV* aabbBv = NULL;
+	SE_AABB* aabb = NULL;
     SE_ASSERT(bv);
     SE_ASSERT(point);
-    SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
-    SE_AABB* aabb = &aabbBv->aabb;
+    aabbBv = (SE_AABBBV*)bv;
+    aabb = &aabbBv->aabb;
     if(point->x >= aabb->min.x && point->y >= aabb->min.y && point->z >= aabb->min.z &&
        point->x <= aabb->max.x && point->y <= aabb->max.y && point->z <= aabb->max.z)
         return 1;
@@ -237,20 +245,23 @@ int SE_AABBBV_Contains(const struct SE_BoundingVolume_tag* bv, const SE_Vector3f
 }
 int SE_AABBBV_IntersectRay(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray)
 {
+    SE_IntersectionResult result;
+	SE_AABBBV* aabbBv = NULL;
+	int ret = 0;
     SE_ASSERT(bv);
     SE_ASSERT(ray);
-    SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
-    SE_IntersectionResult result;
+    aabbBv = (SE_AABBBV*)bv;
     SE_Intersect_Ray_AABB(ray, &aabbBv->aabb, &result);
-    int ret = result.intersected; 
+    ret = result.intersected; 
     SE_IntersectionResult_Release(&result);
     return ret;
 }
 SE_Result SE_AABBBV_IntersectRayDetail(const struct SE_BoundingVolume_tag* bv, const SE_Ray* ray, SE_IntersectionResult* result)
 {
+	SE_AABBBV* aabbBv = NULL;
     SE_ASSERT(bv);
     SE_ASSERT(ray);
-    SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
+    aabbBv = (SE_AABBBV*)bv;
     SE_Intersect_Ray_AABB(ray, &aabbBv->aabb, result);
     return SE_VALID;
 }

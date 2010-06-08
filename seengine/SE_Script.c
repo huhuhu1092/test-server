@@ -2,12 +2,15 @@
 #include "SE_Utils.h"
 #include "SE_Spatial.h"
 #include "SE_Log.h"
-#include "./cscript/acc.h"
 #include "./renderer/SE_Renderer.h"
+#ifndef LUA_SCRIPT
+#include "./cscript/acc.h"
 #include <dlfcn.h>
+#else
+#endif
+
+#ifndef LUA_SCRIPT
 typedef int (*MainPtr)(void*);
-/**
- * */
 int run(MainPtr mainFunc, SE_Script_RunEnv* runEnv) {
     return mainFunc(runEnv);
 }
@@ -39,7 +42,6 @@ static void SEC_SetTexEnv(void* runEnv, int env)
 static void SEC_BindTexture(void* runEnv, int target)
 {
     SE_Script_RunEnv* currEnv = (SE_Script_RunEnv*)runEnv;
-    /* LOGI("spatial = %p\n", currEnv->data); */
     SE_ASSERT(currEnv->data != NULL);
     SE_Spatial* spatial = (SE_Spatial*)currEnv->data;
     SE_ResourceManager* resourceManager = spatial->resourceManager;
@@ -165,4 +167,26 @@ void SE_Script_Release(void* script)
         accDeleteScript(s->script);
     }
 }
+#else
+SE_Result SE_Script_Init(SE_Script* script, const char* scriptSource, int scriptLen)
+{
+    SE_Object_Clear(script, sizeof(SE_Script));
+    return SE_VALID;
+ 
+}
+SE_Result SE_Script_Compile(SE_Script* script)
+{
 
+    return SE_VALID;
+}
+SE_Result SE_Script_Run(SE_Script* script)
+{
+
+    return SE_VALID;
+}
+
+void SE_Script_Release(void* script)
+{
+
+}
+#endif
