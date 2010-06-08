@@ -1,6 +1,7 @@
 #include "SE_PropertyManager.h"
 #include "SE_Element.h"
 #include "SE_List.h"
+#include "SE_Memory.h"
 enum _DataType_E {INT, FLOAT, STRING, VECTOR2f, VECTOR3f, LIST};
 SE_Result SE_PropertyManager_Init(SE_PropertyManager* propManager, int bucketCount)
 {
@@ -10,14 +11,14 @@ SE_Result SE_PropertyManager_Init(SE_PropertyManager* propManager, int bucketCou
 }
 void SE_PropertyManager_Release(void* pro)
 {}
-static void getProperty(SE_PropertyManager* propManager, const char* name, enum _DataType_E type, const void* defValue, void* out)
+static void getProperty(SE_PropertyManager* propManager, const char* name, enum _DataType_E type, void* defValue, void* out)
 {
     SE_Element key;
     SE_Element* value = NULL;
     SE_Object_Clear(&key, sizeof(SE_Element));
     key.type = SE_STRING;
     SE_String_Init(&key.str, name);
-    value = SE_HashMap_Get(&propManager, key);
+	value = SE_HashMap_Get(&propManager->propertyMap, key);
     if(value == NULL)
     {
         switch(type)
@@ -30,20 +31,23 @@ static void getProperty(SE_PropertyManager* propManager, const char* name, enum 
 	    break;
 	case STRING:
 	    {
-		SE_String* outStr = (SE_String*)out;
-	        SE_String_Init(&outStr, (const char*)defValue);
+		    SE_String* outStr = (SE_String*)out;
+			SE_String* defString = (SE_String*)defValue;
+	        SE_String_Init(outStr, SE_String_GetData(defString));
 	    }
 	    break;
 	case VECTOR2f:
 	    {
-		SE_Vector2f* outVec = (SE_Vector2f*)out;
-	        SE_Vec2f_Copy((const SE_Vector2f*)defValue, &outVec);
+		    SE_Vector2f* outVec = (SE_Vector2f*)out;
+			SE_Vector2f* defString = (SE_Vector2f*)defValue;
+	        SE_Vec2f_Copy(defString, &outVec);
 	    }
 	    break;
 	case VECTOR3f:
 	    {
 		    SE_Vector3f* outVec = (SE_Vector3f*)out;
-	        SE_Vec3f_Copy((const SE_Vector3f*)defValue, &outVec);
+			SE_Vector3f* defString = (SE_Vector3f*)defValue;
+	        SE_Vec3f_Copy(defString, &outVec);
 	    }
 	    break;
 	case LIST:
@@ -62,9 +66,9 @@ static void getProperty(SE_PropertyManager* propManager, const char* name, enum 
 	    break;
 	case STRING:
 	    {
-                SE_String str = value->str;
-		SE_String* outStr = (SE_String*)out;
-		SE_String_Copy(&str, outStr);
+            SE_String str = value->str;
+		    SE_String* outStr = (SE_String*)out;
+		    SE_String_Copy(&str, outStr);
 	    }
 	    break;
 	case VECTOR2f:
@@ -106,7 +110,10 @@ int SE_PropertyManager_GetInt(SE_PropertyManager* propManager, const char* name,
 }
 SE_Result SE_PropertyManager_GetString(SE_PropertyManager* propManager, const char* name, const char* defValue, SE_String* out)
 {
-    getProperty(propManager, name, STRING, defValue, out);
+	SE_String defString;
+	SE_String_Init(&defString, defValue);
+    getProperty(propManager, name, STRING, &defString, out);
+	SE_String_Release(&defString);
     return SE_VALID;
 }
 SE_Result SE_PropertyManager_GetVector3f(SE_PropertyManager* propManager, const char* name, SE_Vector3f* defValue, SE_Vector3f* out)
@@ -135,7 +142,7 @@ SE_Result SE_PropertyManager_SetFloat(SE_PropertyManager* propManager, const cha
     SE_String_Init(&key.str, name);
     value.type = SE_FLOAT;
     value.f = v;
-    SE_HashMap_Put(&propManager, key, value);
+	SE_HashMap_Put(&propManager->propertyMap, key, value);
     return SE_VALID; 
 }
 SE_Result SE_PropertyManager_SetInt(SE_PropertyManager* propManager, const char* name, int v)
@@ -147,7 +154,7 @@ SE_Result SE_PropertyManager_SetInt(SE_PropertyManager* propManager, const char*
     SE_String_Init(&key.str, name);
     value.type = SE_INT;
     value.i = v;
-    SE_HashMap_Put(&propManager, key, value);
+	SE_HashMap_Put(&propManager->propertyMap, key, value);
     return SE_VALID;
 }
 SE_Result SE_PropertyManager_SetString(SE_PropertyManager* propManager, const char* name, SE_String* v)
@@ -159,7 +166,7 @@ SE_Result SE_PropertyManager_SetString(SE_PropertyManager* propManager, const ch
     SE_String_Init(&key.str, name);
     value.type = SE_STRING;
     SE_String_Init(&value.str, SE_String_GetData(v));
-    SE_HashMap_Put(&propManager, key, value);
+	SE_HashMap_Put(&propManager->propertyMap, key, value);
     return SE_VALID;
 }
 SE_Result SE_PropertyManager_SetVector3f(SE_PropertyManager* propManager, const char* name, SE_Vector3f* v)
@@ -176,7 +183,7 @@ SE_Result SE_PropertyManager_SetVector3f(SE_PropertyManager* propManager, const 
     {
 	SE_Vec3f_Copy(v, vec);
 	value.dp.data = vec;
-        SE_HashMap_Put(&propManager, key, value);
+	SE_HashMap_Put(&propManager->propertyMap, key, value);
     }
     else
     {
@@ -196,9 +203,9 @@ SE_Result SE_PropertyManager_SetVector2f(SE_PropertyManager* propManager, const 
     vec = (SE_Vector2f*)SE_Malloc(sizeof(SE_Vector2f));
     if(vec)
     {
-	SE_Vec2f_Copy(v, vec);
-	value.dp.data = vec;
-        SE_HashMap_Put(&propManager, key, value);
+	    SE_Vec2f_Copy(v, vec);
+	    value.dp.data = vec;
+		SE_HashMap_Put(&propManager->propertyMap, key, value);
     }
     else
     {

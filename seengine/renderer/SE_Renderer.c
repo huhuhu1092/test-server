@@ -11,6 +11,10 @@
 #include "SE_Memory.h"
 #include "SE_Log.h"
 /*** static function*/
+static void loadVertexShader(SE_Spatial* spatial, const char* filename)
+{
+
+}
 static void drawBoundingVolume(SE_Spatial* spatial)
 {
     SE_AABBBV* aabbBv;
