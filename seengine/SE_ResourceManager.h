@@ -8,6 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+struct SE_ShaderProgram_tag;
 enum SE_PIXELFORMAT {SE_RGB, SE_RGBA, SE_RGB565};
 /*
  * SE_MaterialData don't release by yourself
@@ -168,6 +169,7 @@ typedef struct SE_ResourceManager_tag
     SE_String dataPath;
     SE_HashMap textureIDMap;
     SE_HashMap scriptMap;
+    SE_HashMap shaderProgramMap;
 } SE_ResourceManager;
 extern SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, const char* dataPath, const char* fileName);
 extern void SE_ResourceManager_Release(void* resourceManager);
@@ -191,8 +193,9 @@ extern SE_Result SE_ResourceManager_DeleteTextureID(SE_ResourceManager* resource
 extern SE_MaterialData* SE_ResourceManager_GetMaterialData(SE_ResourceManager* resourceManager, int index);
 extern SE_MaterialData* SE_ResourceManager_GetSubMaterialData(SE_ResourceManager* resourceManager, int materialIndex, int subMaterialIndex);
 extern SE_GeometryData* SE_ResourceManager_GetGeometryData(SE_ResourceManager* resourceManager, int index);
-extern SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* scriptManager, const char* name);
+extern SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, const char* name);
 extern SE_Script* SE_ResourceManager_RunScript(SE_ResourceManager* resourceManager, const char* name);
+extern struct SE_ShaderProgram_tag* SE_ResourceManager_GetShaderProgram(SE_ResourceManager* resourceManager, const char* vertexShaderFileName, const char* fragmentShaderFileName);
 #ifdef __cplusplus
 }
 #endif

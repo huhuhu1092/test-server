@@ -2,8 +2,31 @@
 #include "SE_Memory.h"
 #include "SE_Log.h"
 #include "SE_Utils.h"
+#include "./renderer/SE_ShaderProgram.h"
 #include <string.h>
 #include <stdlib.h>
+static const char* getPathSep()
+{
+#ifdef _WINDOWS
+    return "\\";
+#else
+    return "/";
+#endif
+}
+unsigned char defaultVertexShaderSrc[] =  
+      "uniform mat4 u_world_to_view_matrix;                   \n"
+      "attribute vec4 v_position;                  \n"
+      "void main()                                 \n"
+      "{                                           \n"
+      "   gl_Position = u_world_to_view_matrix * v_position;  \n"
+      "}                                           \n";
+   
+unsigned char defaultFragmentShaderSrc[] =  
+      "precision mediump float;                            \n"
+      "void main()                                         \n"
+      "{                                                   \n"
+      "  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );        \n"
+      "}                                                   \n";
 
 /** function about load image and mesh */
 static const short MATERIAL_ID = 0x0002;
@@ -303,7 +326,7 @@ SE_Result SE_MeshLoad(const char* fileName, SE_ResourceManager* resource)
     SE_ASSERT(resource);
     dataPath = SE_ResourceManager_GetDataPath(resource);
     SE_Object_Clear(&filePath, sizeof(SE_String));
-    SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(dataPath), fileName);
+    SE_String_Concate(&filePath, "%s%s%s", SE_String_GetData(dataPath), getPathSep(),fileName);
     fin = fopen(SE_String_GetData(&filePath), "rb");
     SE_String_Release(&filePath);
     if(!fin)
@@ -717,7 +740,7 @@ void SE_ScriptManager_Release(void* script)
 /**              function about SE_ResourceManager    */
 SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, const char* dataPath, const char* fileName)
 {
-	SE_TextureManager* textureManager;
+    SE_TextureManager* textureManager;
     SE_ASSERT(dataPath);
     SE_ASSERT(fileName);
     SE_ASSERT(resourceManager);
@@ -728,6 +751,7 @@ SE_Result SE_ResourceManager_InitFromFile(SE_ResourceManager* resourceManager, c
     SE_HashMap_Init(256, NULL, &textureManager->textureMap);
     SE_HashMap_Init(256, NULL, &resourceManager->textureIDMap);
     SE_HashMap_Init(128, NULL, &resourceManager->scriptMap);
+    SE_HashMap_Init(128, NULL, &resourceManager->shaderProgramMap);
     return SE_VALID;
 }
 void SE_ResourceManager_Release(void* resourceManager)
@@ -799,7 +823,7 @@ SE_Texture* SE_ResourceManager_LoadTexture(SE_ResourceManager* resourceManager, 
     }
     SE_Object_Clear(currTex, sizeof(SE_Texture));
     SE_Object_Clear(&strTexPath, sizeof(SE_String));
-    SE_String_Concate(&strTexPath, "%s/%s", (SE_String_GetData(&resourceManager->dataPath)), textureName);
+    SE_String_Concate(&strTexPath, "%s%s%s", (SE_String_GetData(&resourceManager->dataPath)), getPathSep(),textureName);
     ret = SE_ImageLoad(SE_String_GetData(&strTexPath), &currTex->imageData);
     SE_String_Release(&strTexPath);
     if(ret != SE_VALID)
@@ -965,7 +989,7 @@ SE_Script* SE_ResourceManager_GetScript(SE_ResourceManager* resourceManager, con
         return (SE_Script*)value->dp.data;
     } 
     SE_Object_Clear(&filePath, sizeof(SE_String));
-    SE_String_Concate(&filePath, "%s/%s", SE_String_GetData(&resourceManager->dataPath), SE_String_GetData(&key.str));
+    SE_String_Concate(&filePath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath), getPathSep(),SE_String_GetData(&key.str));
     //SE_ReadCScriptFile(SE_String_GetData(&filePath), &data, &len);
     SE_ReadFileAllByName(SE_String_GetData(&filePath), &data, &len);
     LOGI("## script len = %d ####\n", len);
@@ -1015,4 +1039,66 @@ SE_MaterialData* SE_ResourceManager_GetSubMaterialData(SE_ResourceManager* resou
     }
     return NULL;
 }
-
+struct SE_ShaderProgram_tag* SE_ResourceManager_GetShaderProgram(SE_ResourceManager* resourceManager, const char* vertexShaderFileName, const char* fragmentShaderFileName)
+{
+    SE_Element key, value;
+    SE_Element* retValue = NULL;
+    SE_String vertexShaderPath, fragmentShaderPath;
+    SE_HashMap* shaderProgramMap = &resourceManager->shaderProgramMap;
+    char* vertexShaderSrc = NULL, fragmentShaderSrc = NULL;
+    int vertexShaderSrcLen = 0, fragmentShaderSrcLen = 0;
+    SE_ShaderProgram* shaderProgram = NULL;
+    SE_Result ret;
+    /***/
+    SE_Object_Clear(&key, sizeof(SE_Element));
+    SE_Object_Clear(&value, sizeof(SE_Element));
+    SE_Object_Clear(&vertexShaderPath, sizeof(SE_String));
+    SE_Object_Clear(&fragmentShaderPath, sizeof(SE_String));
+    key.type = SE_STRING;
+    SE_String_Concate(&key.str, "%s+%s", vertexShaderFileName, fragmentShaderFileName);
+    retValue = SE_HashMap_Get(shaderProgramMap, key);
+    if(retValue != NULL)
+    {
+        SE_Element_Release(&key);
+	return (SE_ShaderProgram*)retValue->dp.data;
+    }
+    shaderProgram = (SE_ShaderProgram*)SE_Malloc(sizeof(SE_ShaderProgram));
+    if(!shaderProgram)
+    {
+        SE_Element_Release(&key);
+	return NULL;
+    }
+    SE_String_Concate(&vertexShaderPath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath), getPathSep(), vertexShaderFileName);
+    SE_String_Concate(&fragmentShaderPath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath, getPathSep(), fragmentShaderFileName));
+    SE_ReadFileAllByName(SE_String_GetData(&vertexShaderPath), &vertexShaderSrc, &vertexShaderSrcLen);
+    SE_ReadFileAllByName(SE_String_GetData(&fragmentShaderPath), &fragmentShaderSrc, &fragmentShaderSrcLen); 
+    if(!vertexShaderSrc)
+    {
+        vertexShaderSrc = defaultVertexShaderSrc; 
+    }
+    if(!fragmentShaderSrc)
+    {
+        fragmentShaderSrc = defaultFragmentShaderSrc;
+    }
+    ret = SE_ShaderProgram_Init(shaderProgram, vertexShaderSrc, fragmentShaderSrc);
+    if(ret != SE_VALID)
+    {
+        SE_String_Release(&key);
+        goto end;
+    }
+    value.type = SE_DATA;
+    value.dp.data = shaderProgram;
+    value.dp.fRelease = &SE_ShaderProgram_Release;
+    SE_HashMap_Put(shaderProgramMap, key, value);
+end: 
+    SE_String_Release(&vertexShaderPath);
+    SE_String_Release(&fragmentShaderPath);
+    if(vertexShaderSrc != defaultVertexShaderSrc)
+        SE_Free(vertexShaderSrc);
+    if(fragmentShaderSrc != defaultFragmentShaderSrc)
+	SE_Free(fragmentShaderSrc);
+    if(ret == SE_VALID)
+        return shaderProgram;
+    else
+	return NULL;
+}

@@ -22,77 +22,77 @@ static void getProperty(SE_PropertyManager* propManager, const char* name, enum 
     if(value == NULL)
     {
         switch(type)
-	{
-	case INT:
-	    *(int*)out = *(int*)defValue;
-	    break;
-	case FLOAT:
-	    *(float*)out = *(float*)defValue;
-	    break;
-	case STRING:
-	    {
-		    SE_String* outStr = (SE_String*)out;
-			SE_String* defString = (SE_String*)defValue;
-	        SE_String_Init(outStr, SE_String_GetData(defString));
-	    }
-	    break;
-	case VECTOR2f:
-	    {
-		    SE_Vector2f* outVec = (SE_Vector2f*)out;
-			SE_Vector2f* defString = (SE_Vector2f*)defValue;
-	        SE_Vec2f_Copy(defString, &outVec);
-	    }
-	    break;
-	case VECTOR3f:
-	    {
-		    SE_Vector3f* outVec = (SE_Vector3f*)out;
-			SE_Vector3f* defString = (SE_Vector3f*)defValue;
-	        SE_Vec3f_Copy(defString, &outVec);
-	    }
-	    break;
-	case LIST:
-	    break;
-	}
+		{
+		case INT:
+			*(int*)out = *(int*)defValue;
+			break;
+		case FLOAT:
+			*(float*)out = *(float*)defValue;
+			break;
+		case STRING:
+			{
+				SE_String* outStr = (SE_String*)out;
+				SE_String* defString = (SE_String*)defValue;
+				SE_String_Init(outStr, SE_String_GetData(defString));
+			}
+			break;
+		case VECTOR2f:
+			{
+				SE_Vector2f* outVec = (SE_Vector2f*)out;
+				SE_Vector2f* defString = (SE_Vector2f*)defValue;
+				SE_Vec2f_Copy(defString, &outVec);
+			}
+			break;
+		case VECTOR3f:
+			{
+				SE_Vector3f* outVec = (SE_Vector3f*)out;
+				SE_Vector3f* defString = (SE_Vector3f*)defValue;
+				SE_Vec3f_Copy(defString, &outVec);
+			}
+			break;
+		case LIST:
+			break;
+		}
     }
     else
     { 
         switch(type)
-	{
-	case INT:
-	    *(int*)out = value->i;
-	    break;
-	case FLOAT:
-	    *(float*)out = value->f;
-	    break;
-	case STRING:
-	    {
-            SE_String str = value->str;
-		    SE_String* outStr = (SE_String*)out;
-		    SE_String_Copy(&str, outStr);
-	    }
-	    break;
-	case VECTOR2f:
-	    {
-	        SE_Vector2f* vec = (SE_Vector2f*)value->dp.data;
-		SE_Vector2f* outVec = (SE_Vector2f*)out;
-		SE_Vec2f_Copy(vec, outVec);
-	    }
-	    break;
-	case VECTOR3f:
-	    {
-		SE_Vector3f* vec = (SE_Vector3f*)value->dp.data;
-		SE_Vector3f* outVec = (SE_Vector3f*)out;
-		SE_Vec3f_Copy(vec, outVec);
-	    }
-	    break;
-	case LIST:
-	    {
-	        SE_List* l = (SE_List*)value->dp.data;
-		SE_List* outList = (SE_List*)out;
-                SE_List_Copy(l, outList);
-	    }
-	    break;
-	}        
+		{
+		case INT:
+			*(int*)out = value->i;
+			break;
+		case FLOAT:
+			*(float*)out = value->f;
+			break;
+		case STRING:
+			{
+				SE_String str = value->str;
+				SE_String* outStr = (SE_String*)out;
+				SE_String_Copy(&str, outStr);
+			}
+			break;
+		case VECTOR2f:
+			{
+				SE_Vector2f* vec = (SE_Vector2f*)value->dp.data;
+			SE_Vector2f* outVec = (SE_Vector2f*)out;
+			SE_Vec2f_Copy(vec, outVec);
+			}
+			break;
+		case VECTOR3f:
+			{
+			SE_Vector3f* vec = (SE_Vector3f*)value->dp.data;
+			SE_Vector3f* outVec = (SE_Vector3f*)out;
+			SE_Vec3f_Copy(vec, outVec);
+			}
+			break;
+		case LIST:
+			{
+				SE_List* l = (SE_List*)value->dp.data;
+			SE_List* outList = (SE_List*)out;
+					SE_List_Copy(l, outList);
+			}
+			break;
+		}        
     }
     SE_Element_Release(&key);
 }
