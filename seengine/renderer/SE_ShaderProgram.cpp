@@ -15,6 +15,7 @@ static GLuint loadShader(GLenum type, const char* shaderSrc)
 {
     GLuint shader;
     GLint compiled;
+	/*const char* shaderString[] = {shaderSrc, 0};*/
     shader = glCreateShader(type);
     if(shader == 0)
         return 0;
@@ -99,4 +100,8 @@ SE_Result SE_ShaderProgram_Use(SE_ShaderProgram* shaderProgram)
     if(shaderProgram && shaderProgram->programID && shaderProgram->programID->programObject != 0)
         glUseProgram(shaderProgram->programID->programObject);
     return SE_VALID;
+}
+int SE_ShaderProgram_GetProgramHandler(SE_ShaderProgram* shaderProgram)
+{
+	return shaderProgram->programID->programObject;
 }

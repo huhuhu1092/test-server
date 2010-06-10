@@ -66,6 +66,7 @@ void SE_ReadFileAllByName(const char* name, char** outData, int* outLen)
 void SE_ReadCScriptFile(const char* name, char** outData, int* outLen)
 {
 	int fileSize = 0;
+	char* p = NULL;
     FILE* fin = fopen(name, "rb");
     *outData = NULL;
     *outLen = 0;
@@ -79,7 +80,8 @@ void SE_ReadCScriptFile(const char* name, char** outData, int* outLen)
     }
     *outLen = fileSize + 1;
     readFile(*outData, fileSize, fin); 
-    outData[fileSize] = '\0';
+	p = *outData;
+    p[fileSize] = '\0';
     fclose(fin);
 
 }
@@ -102,4 +104,8 @@ void SE_ExtremePointAlongDirection(SE_Vector3f* dir, SE_Vector3f* points, int po
             *indexMax = i;
         }
     }
+}
+void SE_ReadTextFromFile(const char* name, char** outText, int* outLen)
+{
+    
 }

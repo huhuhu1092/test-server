@@ -1,9 +1,13 @@
 #ifndef SE_GEOMETRY3D_H
 #define SE_GEOMETRY3D_H
+#include "SE_Common.h"
 #include "SE_Vector.h"
+#include "SE_Matrix.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+enum SE_Plane_Side {SE_POSITIVE, SE_ONSIDE, SE_NEGATIVE};
 typedef struct SE_Rectf_tag
 {
     float left, right, top, bottom;
@@ -17,7 +21,7 @@ typedef struct SE_Segment_tag
    SE_Vector3f start;
    SE_Vector3f end; 
 } SE_Segment;
-enum SE_Plane_Side {SE_POSITIVE, SE_ONSIDE, SE_NEGATIVE};
+
 typedef struct SE_Plane_tag
 {
     SE_Vector3f n;
@@ -40,8 +44,8 @@ typedef struct SE_Frustum_tag
     SE_Plane right;
     SE_Plane top;
     SE_Plane bottom;
-    SE_Plane near;
-    SE_Plane far;
+    SE_Plane nearp;
+    SE_Plane farp;
     float fovAngle; 
     float ratio;
     float n;
@@ -159,6 +163,7 @@ extern SE_Result SE_Triangle_GetPoint2(const SE_Triangle* tri, SE_Vector3f* out)
  * */
 extern SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far,SE_Frustum* out);
 extern SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out);
+extern SE_Result SE_Frustum_GetPerspectiveMatrix(const SE_Frustum* ft, SE_Matrix4f* out);
 /*
 #define SE_Frustum_GetLeftPlane(ft) (&ft->left)
 #define SE_Frustum_GetRightPlane(ft) (&ft->right)
@@ -175,6 +180,7 @@ extern SE_Result SE_Frustum_GetNear(const SE_Frustum* ft, SE_Plane* out);
 extern SE_Result SE_Frustum_GetFar(const SE_Frustum* ft, SE_Plane* out);
 /***/
 extern void SE_IntersectionResult_Release(void* intersectResult);
+
 #ifdef __cplusplus
 }
 #endif

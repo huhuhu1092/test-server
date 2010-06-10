@@ -10,21 +10,35 @@
 #include "SE_Spatial.h"
 #include "SE_Memory.h"
 #include "SE_Log.h"
-/*** static function*/
-static void loadVertexShader(SE_Spatial* spatial, const char* filename)
+#include "SE_ShaderProgram.h"
+/*** static function and data structure*/
+struct _ShaderData
 {
-
-}
-static void drawBoundingVolume(SE_Spatial* spatial)
+    SE_ShaderProgram* shaderProgram;
+    GLint a_position_loc;
+    GLint a_tex_coord_loc;
+    GLint u_obj_to_world_matrix_loc;
+    GLint u_world_to_view_matrix_loc;
+    GLint u_view_to_projective_matrix_loc;
+    GLint u_texture_loc;
+    GLint u_shading_mode_loc;
+    GLint u_color_loc;
+};
+static void drawBoundingVolume(SE_Renderer* renderer, SE_Spatial* spatial)
 {
     SE_AABBBV* aabbBv;
     SE_AABB* aabb;
     SE_Vector3f points[24];
-
-    glDisable(GL_TEXTURE_2D);
+	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
+	float color[3];
+	color[0] = 1.0;
+	color[1] = 0.0;
+	color[2] = 0.0;
     /*
 	should set color in shader
 	*/
+	glUniform3fv(shaderData->u_color_loc, 1, color);
+	glUniform1i(shaderData->u_shading_mode_loc, 0);
     aabbBv = (SE_AABBBV*)spatial->worldBV;
     aabb = &aabbBv->aabb; 
     //edge 1
@@ -100,16 +114,16 @@ static void drawBoundingVolume(SE_Spatial* spatial)
 
 
     //edge 9
-points[16].x = aabb->min.x;
+    points[16].x = aabb->min.x;
     points[16].y = aabb->max.y;
     points[16].z = aabb->max.z;
 
-points[17].x = aabb->min.x;
+    points[17].x = aabb->min.x;
     points[17].y = aabb->max.y;
     points[17].z = aabb->min.z;
 
     //edge 10
-points[18].x = aabb->max.x;
+    points[18].x = aabb->max.x;
     points[18].y = aabb->max.y;
     points[18].z = aabb->max.z;
 
@@ -118,7 +132,7 @@ points[18].x = aabb->max.x;
     points[19].z = aabb->max.z;
 
     //edge 11
-points[20].x = aabb->max.x;
+    points[20].x = aabb->max.x;
     points[20].y = aabb->max.y;
     points[20].z = aabb->max.z;
 
@@ -127,64 +141,77 @@ points[20].x = aabb->max.x;
     points[21].z = aabb->min.z;
 
     //edge 12
-points[22].x = aabb->min.x;
+    points[22].x = aabb->min.x;
     points[22].y = aabb->max.y;
     points[22].z = aabb->max.z;
 
-points[23].x = aabb->min.x;
+    points[23].x = aabb->min.x;
     points[23].y = aabb->min.y;
     points[23].z = aabb->max.z;
+	glVertexAttribPointer(shaderData->a_position_loc, 3, GL_FLOAT,
+		                  GL_FALSE, 0, points);
+	glEnableVertexAttribArray(shaderData->a_position_loc);
 	/* should do in shader
 glVertexPointer(3, GL_FLOAT, 0, points);
 glDrawArrays(GL_LINES, 0, 24);
 */
 }
+static void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
+                                     SE_Face* faceArray, int faceNum, 
+                                     SE_Vector3f* texVertexArray, int texVertexNum,
+                                     SE_Face* texFaceArray, 
+                                     SE_Vector3f* colorArray, int colorNum);
+static void SE_Renderer_DrawSpatial(SE_Renderer* renderer, SE_Spatial* spatial);
+static void SE_Renderer_DrawWorld(SE_Renderer* renderer);
+static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial);
 /***/
-SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld)
+SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h)
 {
+	SE_Object_Clear(renderer, sizeof(SE_Renderer));
+    renderer->currWorld = currWorld;
+    renderer->rendererUnit = NULL;
+    SE_Mat4f_Identity(&renderer->objToWorld);
+    SE_Mat4f_Identity(&renderer->worldToView);
+    SE_Mat4f_Identity(&renderer->viewToProjective);
+    renderer->wWidth = w;
+    renderer->wHeight = h;
     return SE_VALID;
 }
 
 SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
 {
-
-    return SE_VALID;
-}
-SE_Result SE_Renderer_EndDraw(SE_Renderer* renderer)
-{
-    return SE_VALID;
-}
-SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
-{
-    return SE_VALID;
-}
-void SE_Renderer_Release(SE_Renderer* renderer)
-{}
-void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
-                                     SE_Face* faceArray, int faceNum, 
-                                     SE_Vector3f* texVertexArray, int texVertexNum,
-                                     SE_Face* texFaceArray, 
-                                     SE_Vector3f* colorArray, int colorNum)
-{
-
-}
-void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
-{
-    SE_Camera* mainCamera = SE_World_GetMainCamera(world);
+    SE_Camera* mainCamera = SE_World_GetMainCamera(renderer->currWorld);
     SE_Rectf nearrect;
-    SE_Matrix4f worldToView;
     float m[16];
-    GLfloat ambientLight[] = {0.7f, 0.7f, 0.7f, 1.0f};
-    SE_Spatial* rootSpatial;
-    glViewport(0, 0, w, h);
+    SE_ShaderProgram* shaderProgram = NULL;
+    SE_ResourceManager* resourceManager = SE_World_GetResourceManager(renderer->currWorld);
+    struct _ShaderData* shaderData = NULL;
+    /***/
+    glViewport(0, 0, renderer->wWidth, renderer->wHeight);
     SE_Frustum_GetNearPlaneRect(&mainCamera->frustum, &nearrect);
+    SE_Camera_GetMatrixWorldToView(mainCamera, &renderer->worldToView);
+    SE_Frustum_GetPerspectiveMatrix(&mainCamera->frustum, &renderer->viewToProjective);
+    shaderData = (struct _ShaderData*)SE_Malloc(sizeof(struct _ShaderData));
+    if(!shaderData)
+        return SE_INVALID;
+	shaderData->shaderProgram = SE_ResourceManager_GetShaderProgram(resourceManager, "main_vertex_shader.glsl", "main_fragment_shader.glsl");
+    if(!shaderData->shaderProgram)
+        return SE_INVALID;
+	shaderData->a_position_loc = glGetAttribLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "a_position");
+	shaderData->a_tex_coord_loc = glGetAttribLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "a_tex_coord");
+	shaderData->u_obj_to_world_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_obj_to_world_matrix");
+	shaderData->u_world_to_view_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_world_to_view_matrix");
+	shaderData->u_view_to_projective_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_view_to_projective_matrix");
+	shaderData->u_texture_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_texture");
+	shaderData->u_shading_mode_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_shading_mode");
+	shaderData->u_color_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_color");
+    SE_Mat4f_GetMatrixColumnSequence(&renderer->worldToView, m);
+    glUniformMatrix4fv(shaderData->u_world_to_view_matrix_loc, 1, 0, m);
+	SE_Mat4f_GetMatrixColumnSequence(&renderer->viewToProjective, m);
+    glUniformMatrix4fv(shaderData->u_view_to_projective_matrix_loc, 1, 0, m); 
+    SE_ShaderProgram_Use(shaderData->shaderProgram);
 
-    SE_ResourceManager_RunScript(SE_World_GetResourceManager(world), SE_String_GetData(&world->initScript));
-
-
-    SE_Camera_GetMatrixWorldToView(mainCamera, &worldToView);
-    SE_Mat4f_GetMatrixColumnSequence(&worldToView, m);
-    /*
+        /*
     int j;
     for(j = 0 ; j < 16 ; j++)
     {
@@ -194,17 +221,48 @@ void SE_Renderer_DrawWorld(SE_World* world, int w, int h)
     }
     LOGI("\n\n\n");
     */
-    rootSpatial = SE_World_GetSceneRoot(world);
-    SE_Renderer_DrawSpatial(rootSpatial);
+
+    renderer->userData = shaderData;
+    return SE_VALID;
+}
+SE_Result SE_Renderer_EndDraw(SE_Renderer* renderer)
+{
+    return SE_VALID;
+}
+SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
+{
+    SE_Renderer_DrawWorld(renderer);
+    return SE_VALID;
+}
+void SE_Renderer_Release(void* renderer)
+{
+    SE_Renderer* r = (SE_Renderer*)renderer;
+	if(r && r->userData)
+	{
+	    SE_Free(r->userData);
+	}
+}
+void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
+                                     SE_Face* faceArray, int faceNum, 
+                                     SE_Vector3f* texVertexArray, int texVertexNum,
+                                     SE_Face* texFaceArray, 
+                                     SE_Vector3f* colorArray, int colorNum)
+{
+
+}
+void SE_Renderer_DrawWorld(SE_Renderer* renderer)
+{
+    SE_Spatial* rootSpatial = SE_World_GetSceneRoot(renderer->currWorld);
+    SE_Renderer_DrawSpatial(renderer, rootSpatial);
     /**
      * test
      *
      */
-    if(world->pickedSpatial)
-        drawBoundingVolume(world->pickedSpatial);
+	if(renderer->currWorld->pickedSpatial)
+		drawBoundingVolume(renderer, renderer->currWorld->pickedSpatial);
     /*end*/
 }
-static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int index)
+static void drawSubMesh(SE_Renderer* renderer, SE_ResourceManager* resourceManager, SE_Mesh* mesh, int index)
 {
     SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, index);
     SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
@@ -212,6 +270,7 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
     int vertexCount = faceList->num * 3;
     int i;
     int k = 0;
+	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
     SE_Vector2f* texVertexArray = NULL;
     SE_Vector3f* vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
     for(i = 0 ; i < faceList->num ; i++)
@@ -239,13 +298,21 @@ static void drawSubMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh, int 
             k++;
         }
     }
+	glVertexAttribPointer(shaderData->a_position_loc, 3, GL_FLOAT,
+		                  GL_FALSE, 0, vertexArray);
+	if(texVertexArray)
+	{
+		glVertexAttribPointer(shaderData->a_tex_coord_loc, 2, GL_FLOAT, 0, 0, texVertexArray);
+	}
+	glEnableVertexAttribArray(shaderData->a_position_loc);
+	glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
     SE_Free(vertexArray);
     if(texVertexArray)
         SE_Free(texVertexArray);
 
 
 }
-static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
+static void drawMesh(SE_Renderer* renderer, SE_ResourceManager* resourceManager, SE_Mesh* mesh)
 {
     SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
     int vertexCount = gd->faceNum * 3;
@@ -253,6 +320,7 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
     int i;
     int k = 0;
     SE_Vector2f* texVertexArray = NULL;
+	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
     for(i = 0 ; i < gd->faceNum ; i++)
     {
         vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[0]];
@@ -276,6 +344,14 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
             k++;
         }
     }
+	glVertexAttribPointer(shaderData->a_position_loc, 3, GL_FLOAT,
+		                  GL_FALSE, 0, vertexArray);
+	if(texVertexArray)
+	{
+		glVertexAttribPointer(shaderData->a_tex_coord_loc, 2, GL_FLOAT, 0, 0, texVertexArray);
+	}
+	glEnableVertexAttribArray(shaderData->a_position_loc);
+	glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     /*
      * the Free must do after glDrawArrarys else it will make draw error
@@ -284,29 +360,82 @@ static void drawMesh(SE_ResourceManager* resourceManager, SE_Mesh* mesh)
     if(texVertexArray)
         SE_Free(texVertexArray);
 }
-static void setSpatialMatrix(SE_Spatial* spatial)
+static void setSpatialMatrix(SE_Renderer* renderer, SE_Matrix4f* m)
 {
-    SE_Matrix4f* m = &spatial->worldTransform;
     float mData[16];
-    SE_Mat4f_GetMatrixColumnSequence(m, mData); 
+	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
+    SE_Mat4f_GetMatrixColumnSequence(m, mData);
+    glUniformMatrix4fv(shaderData->u_obj_to_world_matrix_loc, 1, 0, mData); 
 }
-void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
+static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial)
+{
+    SE_ResourceManager* resourceManager = spatial->resourceManager;
+    SE_Mesh* mesh = spatial->mesh;
+	struct _ShaderData* shaderData= (struct _ShaderData*)renderer->userData;
+    SE_ASSERT(resourceManager != NULL);
+	SE_ASSERT(spatial->spatialType == SE_GEOMETRY);
+    if(spatial->spatialType == SE_GEOMETRY)
+    {
+        SE_MaterialData* md = NULL;
+        if(spatial->subMeshIndex != -1)
+        {
+            SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, spatial->subMeshIndex);
+            md = SE_ResourceManager_GetSubMaterialData(resourceManager, mesh->materialIndex, subMesh->subMaterialIndex);
+        }
+        else
+        {
+            md = SE_ResourceManager_GetMaterialData(resourceManager, mesh->materialIndex);
+        } 
+        if(md != NULL)
+        {
+            if(!SE_String_IsEmpty(&md->texturename))
+            {
+                glEnable(GL_TEXTURE_2D);
+				glActiveTexture(GL_TEXTURE0);
+                SE_Renderer_BindTexture(resourceManager, SE_TEX_2D, SE_String_GetData(&md->texturename));
+				glUniform1i(shaderData->u_texture_loc, 0);
+				glUniform1i(shaderData->u_shading_mode_loc, 1);
+            }
+            else
+            {
+                float color[3];
+				color[0] = md->ambient.x;
+				color[1] = md->ambient.y;
+				color[2] = md->ambient.z;
+				glUniform3fv(shaderData->u_color_loc, 1, color);
+				glUniform1i(shaderData->u_shading_mode_loc, 1);
+            }
+        } 
+        else
+        {
+			float color[3];
+			color[0] = mesh->wireframeColor.x;
+			color[1] = mesh->wireframeColor.y;
+			color[2] = mesh->wireframeColor.z;
+			glUniform3fv(shaderData->u_color_loc, 1, color);
+			glUniform1i(shaderData->u_shading_mode_loc, 1);
+        }
+
+    }     
+}
+void SE_Renderer_DrawSpatial(SE_Renderer* renderer, SE_Spatial* spatial)
 {
     SE_ResourceManager* resourceManager = spatial->resourceManager;
     if(spatial->spatialType == SE_GEOMETRY)
     {
         if(spatial->renderType != SE_RENDERABLE)
             return;
-        SE_RenderState_Activate(&spatial->renderState, spatial);
+        /*SE_RenderState_Activate(&spatial->renderState, spatial);*/
+	setRenderState(renderer, spatial);
         if(spatial->subMeshIndex == -1)
         {
-            setSpatialMatrix(spatial);
-            drawMesh(resourceManager, spatial->mesh);
+            setSpatialMatrix(renderer, &spatial->worldTransform);
+            drawMesh(renderer, resourceManager, spatial->mesh);
         }
         else
         {
-            setSpatialMatrix(spatial);
-            drawSubMesh(resourceManager, spatial->mesh, spatial->subMeshIndex);
+            setSpatialMatrix(renderer,  &spatial->worldTransform);
+            drawSubMesh(renderer, resourceManager, spatial->mesh, spatial->subMeshIndex);
         }
     }
     else if(spatial->spatialType == SE_NODE)
@@ -325,7 +454,7 @@ void SE_Renderer_DrawSpatial(SE_Spatial* spatial)
             SE_String_Init(&ttt, "Box48_29");
             if(SE_String_Compare(sc->name, ttt) == 0)
 #endif
-            SE_Renderer_DrawSpatial(sc);
+            SE_Renderer_DrawSpatial(renderer, sc);
         }
     }
     /*

@@ -1045,7 +1045,8 @@ struct SE_ShaderProgram_tag* SE_ResourceManager_GetShaderProgram(SE_ResourceMana
     SE_Element* retValue = NULL;
     SE_String vertexShaderPath, fragmentShaderPath;
     SE_HashMap* shaderProgramMap = &resourceManager->shaderProgramMap;
-    char* vertexShaderSrc = NULL, fragmentShaderSrc = NULL;
+    char* vertexShaderSrc = NULL;
+	char* fragmentShaderSrc = NULL;
     int vertexShaderSrcLen = 0, fragmentShaderSrcLen = 0;
     SE_ShaderProgram* shaderProgram = NULL;
     SE_Result ret;
@@ -1069,9 +1070,14 @@ struct SE_ShaderProgram_tag* SE_ResourceManager_GetShaderProgram(SE_ResourceMana
 	return NULL;
     }
     SE_String_Concate(&vertexShaderPath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath), getPathSep(), vertexShaderFileName);
-    SE_String_Concate(&fragmentShaderPath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath, getPathSep(), fragmentShaderFileName));
-    SE_ReadFileAllByName(SE_String_GetData(&vertexShaderPath), &vertexShaderSrc, &vertexShaderSrcLen);
+    SE_String_Concate(&fragmentShaderPath, "%s%s%s", SE_String_GetData(&resourceManager->dataPath), getPathSep(), fragmentShaderFileName);
+    /*
+	SE_ReadFileAllByName(SE_String_GetData(&vertexShaderPath), &vertexShaderSrc, &vertexShaderSrcLen);
     SE_ReadFileAllByName(SE_String_GetData(&fragmentShaderPath), &fragmentShaderSrc, &fragmentShaderSrcLen); 
+	*/
+	SE_ReadCScriptFile(SE_String_GetData(&vertexShaderPath), &vertexShaderSrc, &vertexShaderSrcLen);
+    SE_ReadCScriptFile(SE_String_GetData(&fragmentShaderPath), &fragmentShaderSrc, &fragmentShaderSrcLen); 
+	
     if(!vertexShaderSrc)
     {
         vertexShaderSrc = defaultVertexShaderSrc; 

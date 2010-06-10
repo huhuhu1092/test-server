@@ -196,14 +196,14 @@ SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far, 
     SE_Vec3f_Init(-e / param1, 0, -1 / param1, &out->right.n);
     SE_Vec3f_Init(0, -e / param2, -ratio / param2, &out->top.n);
     SE_Vec3f_Init(0, e / param2, -ratio / param2, &out->bottom.n);
-    SE_Vec3f_Init(0,0, -1, &out->near.n );
-    SE_Vec3f_Init(0, 0, 1, &out->far.n);
+    SE_Vec3f_Init(0,0, -1, &out->nearp.n );
+    SE_Vec3f_Init(0, 0, 1, &out->farp.n);
     out->left.d = 0;
     out->right.d = 0;
     out->top.d = 0;
     out->bottom.d = 0; 
-    out->near.d = -near;
-    out->far.d = far;
+    out->nearp.d = -near;
+    out->farp.d = far;
     out->fovAngle = fov;
     out->ratio = ratio;
     out->n = near;
@@ -223,7 +223,37 @@ SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out)
     out->bottom = - ft->n * ft->ratio / e;
     return SE_VALID;
 }
-
+SE_Result SE_Frustum_GetPerspectiveMatrix(const SE_Frustum* ft, SE_Matrix4f* out)
+{
+    SE_Rectf nearrect;
+    float n, f;
+    float l, r, b , t;
+    SE_Object_Clear(&nearrect, sizeof(SE_Rectf));
+    SE_Frustum_GetNearPlaneRect(ft, &nearrect);
+    n = ft->n;
+    f = ft->f;
+    l = nearrect.left;
+    r = nearrect.right;
+    b = nearrect.bottom;
+    t = nearrect.top;
+    out->m00 = (2 * n) / (r - l);
+    out->m01 = 0;
+    out->m02 = (r + l) / (r - l);
+    out->m03 = 0;
+    out->m10 = 0;
+    out->m11 = (2 * n) / (t - b);
+    out->m12 = (t + b) / (t - b);
+    out->m13 = 0;
+    out->m20 = 0;
+    out->m21 = 0;
+    out->m22 = -(f + n) / (f - n);
+    out->m23 = -(2 * n * f) / (f - n);
+    out->m30 = 0;
+    out->m31 = 0;
+    out->m32 = -1;
+    out->m33 = 0;
+    return SE_VALID;
+} 
 SE_Result SE_Frustum_GetLeft(const SE_Frustum* ft, SE_Plane* out)
 {
     SE_ASSERT(ft);
@@ -256,14 +286,14 @@ SE_Result SE_Frustum_GetNear(const SE_Frustum* ft, SE_Plane* out)
 {
     SE_ASSERT(ft);
     SE_ASSERT(out);
-    *out = ft->near;
+    *out = ft->nearp;
     return SE_VALID;
 }
 SE_Result SE_Frustum_GetFar(const SE_Frustum* ft, SE_Plane* out)
 {
     SE_ASSERT(ft);
     SE_ASSERT(out);
-    *out = ft->far;
+    *out = ft->farp;
     return SE_VALID;
 }
 void SE_IntersectionResult_Release(void* intersectResult)

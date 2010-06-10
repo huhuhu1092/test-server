@@ -87,7 +87,7 @@ SE_Result SE_Camera_GetMatrixViewToWorld(SE_Camera* camera, SE_Matrix4f* out)
 }
 SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAngle, int axis)
 {
-    SE_Matrix3f initm , resultm;
+    SE_Matrix3f initm;
     SE_Matrix3f rotatem;/*this is the rotate matrix*/
     SE_Vector3f initAxis, resultAxis;
     SE_Matrix4f viewToWorld;
@@ -170,7 +170,7 @@ SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ra
     SE_Recti viewport;
     SE_Rectf nearRect;
     SE_Frustum* frustum;
-    SE_Vector3f dir, dirx, diry, dirz, tmp;
+    SE_Vector3f dir;
     float xp, yp, xv, yv, dirLen;
     viewport = camera->viewport;
     frustum = &camera->frustum;

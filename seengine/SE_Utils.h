@@ -20,6 +20,7 @@ extern void SE_ReadFileAllByName(const char* name, char** outData, int* outLen);
  * */
 extern void SE_ReadCScriptFile(const char* name, char** outData, int* outLen);
 extern void SE_ExtremePointAlongDirection(SE_Vector3f* dir, SE_Vector3f* points, int pointNum , int* indexMin, int* indexMax);
+extern void SE_ReadTextFromFile(const char* name, char** outText, int* outLen);
 #ifdef __cplusplus
 }
 #endif /** end __cplusplus*/
