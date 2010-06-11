@@ -23,6 +23,7 @@ struct _ShaderData
     GLint u_texture_loc;
     GLint u_shading_mode_loc;
     GLint u_color_loc;
+	GLint u_mvp_matrix_loc;
 };
 static void drawBoundingVolume(SE_Renderer* renderer, SE_Spatial* spatial)
 {
@@ -205,6 +206,7 @@ SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
 	shaderData->u_texture_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_texture");
 	shaderData->u_shading_mode_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_shading_mode");
 	shaderData->u_color_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_color");
+	shaderData->u_mvp_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_mvp_matrix");
     SE_Mat4f_GetMatrixColumnSequence(&renderer->worldToView, m);
     glUniformMatrix4fv(shaderData->u_world_to_view_matrix_loc, 1, 0, m);
 	SE_Mat4f_GetMatrixColumnSequence(&renderer->viewToProjective, m);
@@ -221,7 +223,7 @@ SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
     }
     LOGI("\n\n\n");
     */
-
+    glEnable(GL_DEPTH_TEST);
     renderer->userData = shaderData;
     return SE_VALID;
 }
@@ -306,10 +308,10 @@ static void drawSubMesh(SE_Renderer* renderer, SE_ResourceManager* resourceManag
 	}
 	glEnableVertexAttribArray(shaderData->a_position_loc);
 	glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
+	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     SE_Free(vertexArray);
     if(texVertexArray)
         SE_Free(texVertexArray);
-
 
 }
 static void drawMesh(SE_Renderer* renderer, SE_ResourceManager* resourceManager, SE_Mesh* mesh)
@@ -363,9 +365,14 @@ static void drawMesh(SE_Renderer* renderer, SE_ResourceManager* resourceManager,
 static void setSpatialMatrix(SE_Renderer* renderer, SE_Matrix4f* m)
 {
     float mData[16];
+	SE_Matrix4f tmp, mvp;
 	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
-    SE_Mat4f_GetMatrixColumnSequence(m, mData);
-    glUniformMatrix4fv(shaderData->u_obj_to_world_matrix_loc, 1, 0, mData); 
+    SE_Mat4f_Mul(&renderer->worldToView , m, &tmp);
+	SE_Mat4f_Mul(&renderer->viewToProjective, &tmp, &mvp);
+    SE_Mat4f_GetMatrixColumnSequence(&mvp, mData);
+    glUniformMatrix4fv(shaderData->u_mvp_matrix_loc, 1, 0, mData); 
+	SE_Mat4f_GetMatrixColumnSequence(m, mData);
+	glUniformMatrix4fv(shaderData->u_obj_to_world_matrix_loc, 1, 0, mData);
 }
 static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial)
 {
@@ -391,8 +398,13 @@ static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial)
             if(!SE_String_IsEmpty(&md->texturename))
             {
                 glEnable(GL_TEXTURE_2D);
+				glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 				glActiveTexture(GL_TEXTURE0);
-                SE_Renderer_BindTexture(resourceManager, SE_TEX_2D, SE_String_GetData(&md->texturename));
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                SE_Renderer_BindTexture(resourceManager, SE_2D, SE_String_GetData(&md->texturename));
 				glUniform1i(shaderData->u_texture_loc, 0);
 				glUniform1i(shaderData->u_shading_mode_loc, 1);
             }
@@ -403,7 +415,7 @@ static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial)
 				color[1] = md->ambient.y;
 				color[2] = md->ambient.z;
 				glUniform3fv(shaderData->u_color_loc, 1, color);
-				glUniform1i(shaderData->u_shading_mode_loc, 1);
+				glUniform1i(shaderData->u_shading_mode_loc, 0);
             }
         } 
         else
@@ -413,7 +425,7 @@ static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial)
 			color[1] = mesh->wireframeColor.y;
 			color[2] = mesh->wireframeColor.z;
 			glUniform3fv(shaderData->u_color_loc, 1, color);
-			glUniform1i(shaderData->u_shading_mode_loc, 1);
+			glUniform1i(shaderData->u_shading_mode_loc, 0);
         }
 
     }     

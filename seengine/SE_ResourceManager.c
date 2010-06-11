@@ -1089,7 +1089,7 @@ struct SE_ShaderProgram_tag* SE_ResourceManager_GetShaderProgram(SE_ResourceMana
     ret = SE_ShaderProgram_Init(shaderProgram, vertexShaderSrc, fragmentShaderSrc);
     if(ret != SE_VALID)
     {
-        SE_String_Release(&key);
+        SE_Element_Release(&key);
         goto end;
     }
     value.type = SE_DATA;
