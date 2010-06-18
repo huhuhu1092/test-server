@@ -49,6 +49,7 @@ extern SE_Result SE_Vec2f_Normalize(const SE_Vector2f* v, SE_Vector2f* out);
 extern float SE_Vec2f_Length(const SE_Vector2f* v);
 extern float SE_Vec2f_LengthSquare(const SE_Vector2f* v);
 extern SE_Result SE_Vec2f_Copy(const SE_Vector2f* src, SE_Vector2f* dst);
+/*    **/
 extern SE_Result SE_Vec3f_Init(float x, float y, float z, SE_Vector3f* out);
 extern int SE_Vec3f_IsZero(const SE_Vector3f* v);
 /**
@@ -58,6 +59,7 @@ extern int SE_Vec3f_Compare(const SE_Vector3f* v1, const SE_Vector3f* v2);
 extern SE_Result SE_Vec3f_Clear(SE_Vector3f* v);
 extern SE_Result SE_Vec3f_Copy(const SE_Vector3f* v, SE_Vector3f* out);
 extern SE_Result SE_Vec3f_Add(const SE_Vector3f* leftV, const SE_Vector3f* rightV, SE_Vector3f* out);
+extern SE_Result SE_Vec3f_AddSequence(SE_Vector3f* vecSeq, int num, SE_Vector3f* out);
 extern SE_Result  SE_Vec3f_Subtract(const SE_Vector3f* leftV, const SE_Vector3f* rightV, SE_Vector3f* out);
 extern float SE_Vec3f_Dot(const SE_Vector3f* leftV, const SE_Vector3f* rightV);
 extern SE_Result SE_Vec3f_Neg(const SE_Vector3f* v, SE_Vector3f* out);

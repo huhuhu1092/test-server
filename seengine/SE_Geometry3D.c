@@ -202,13 +202,18 @@ SE_Result SE_Frustum_InitFromFOV(float fov, float ratio, float near, float far, 
     out->right.d = 0;
     out->top.d = 0;
     out->bottom.d = 0; 
-    out->nearp.d = -near;
-    out->farp.d = far;
+    out->nearp.d = near;
+    out->farp.d = -far;
     out->fovAngle = fov;
     out->ratio = ratio;
     out->n = near;
     out->f = far;
     return SE_VALID; 
+}
+SE_Result SE_Frustum_Copy(const SE_Frustum* src, SE_Frustum* dst)
+{
+	*dst = *src;
+	return SE_VALID;
 }
 SE_Result SE_Frustum_GetNearPlaneRect(const SE_Frustum* ft, SE_Rectf* out)
 {

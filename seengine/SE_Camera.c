@@ -31,6 +31,7 @@ SE_Result SE_Camera_InitByLocationTarget(const SE_Vector3f* location, const SE_V
     SE_Vec3f_Copy(&yAxis, &out->yAxis);
     SE_Vec3f_Copy(&zAxis, &out->zAxis);
     SE_Vec3f_Copy(location, &out->location);
+	out->changed = 1;
     return SE_VALID;
 }
 SE_Result SE_Camera_InitByFrame(const SE_Vector3f* location, const SE_Vector3f* xAxis, const SE_Vector3f* yAxis, const SE_Vector3f* zAxis, float fov, float ratio, float near, float far, SE_Camera* out)
@@ -40,6 +41,7 @@ SE_Result SE_Camera_InitByFrame(const SE_Vector3f* location, const SE_Vector3f* 
     SE_Vec3f_Normalize(zAxis, &out->zAxis);
     SE_Vec3f_Copy(location, &out->location);
     SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
+    out->changed = 1;
     return SE_VALID;
 }
 SE_Result SE_Camera_InitByDirectionUp(const SE_Vector3f* location, const SE_Vector3f* zAxis, const SE_Vector3f* yAxis, float fov, float ratio, float near, float far, SE_Camera* out)
@@ -51,11 +53,28 @@ SE_Result SE_Camera_InitByDirectionUp(const SE_Vector3f* location, const SE_Vect
     SE_Vec3f_Normalize(&xAxis, &out->xAxis);
     SE_Vec3f_Copy(location, &out->location);
     SE_Frustum_InitFromFOV(fov, ratio, near, far, &out->frustum);
+	out->changed = 1;
     return SE_VALID;
 }
 
-SE_Result SE_Camera_CullBouningVolume(const SE_Camera* camera, SE_BoundingVolume* bv)
+int SE_Camera_CullBoundingVolume(const SE_Camera* camera, SE_BoundingVolume* bv)
 {
+	SE_Plane cullPlanes[6];
+	enum SE_Plane_Side planeSide = SE_NEGATIVE;
+	int i, ret;
+	SE_Camera_GetPlanes(camera, cullPlanes);
+	for(i = 0 ; i < 6 ; i++)
+	{
+		enum SE_Plane_Side p = (*bv->fWhichSide)(bv, &cullPlanes[i]);
+        if(p == SE_POSITIVE)
+			return -1;
+		if(p != SE_NEGATIVE)
+		    planeSide = p;
+	}
+	if(planeSide == SE_NEGATIVE)
+		return 1;
+	else
+		return 0;
     return SE_VALID;
 }
 SE_Result SE_Camera_Update(SE_Camera* camera)
@@ -140,6 +159,7 @@ SE_Result SE_Camera_RotateLocalXYZAxis(SE_Camera* camera, float rotateAngle, int
     SE_Vec3f_Normalize(&xAxis, &camera->xAxis);
     SE_Vec3f_Normalize(&yAxis, &camera->yAxis);
     SE_Vec3f_Normalize(&zAxis, &camera->zAxis); 
+	camera->changed = 1;
     return SE_VALID;
 }
 SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate, int axis)
@@ -163,6 +183,7 @@ SE_Result SE_Camera_LocationTranslateAlignXYZ(SE_Camera* camera, float translate
     
     SE_Vec3f_Add(&camera->location, &delta, &newLoc);
     SE_Vec3f_Copy(&newLoc, &camera->location);
+	camera->changed = 1;
     return SE_VALID;
 }
 SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ray* out)
@@ -193,4 +214,73 @@ SE_Result SE_Camera_ScreenCoordinateToRay(SE_Camera* camera, int x, int y, SE_Ra
     SE_Ray_InitFromDirection(&camera->location, &dir, 0, out); 
     return SE_VALID;
 }
+SE_Result SE_Camera_SetFrustum(SE_Camera* camera , float fov, float ratio, float nearp, float farp)
+{
+    SE_Frustum frustum;
+	SE_Result ret;
+	SE_Object_Clear(&frustum, sizeof(SE_Frustum));
+    ret = SE_Frustum_InitFromFOV(fov, ratio, nearp, farp, &frustum);
+	if(ret == SE_VALID)
+	{
+		SE_Frustum_Copy(&frustum, &camera->frustum);
+		camera->changed = 1;
+		return SE_VALID;
+	}
+	return SE_INVALID;
+}
 
+SE_Result SE_Camera_GetPlanes(const SE_Camera* camera, SE_Plane* planes)
+{
+	SE_Vector3f NearLeftBottom, NearLeftTop, NearRightBottom, NearRightTop,
+		        FarLeftBottom, FarLeftTop, FarRightBottom, FarRightTop;
+	SE_Vector3f tmp1;
+	SE_Vector3f tmp[4];
+	SE_Frustum* frustum = &camera->frustum;
+	SE_Rectf nearplane;
+    SE_ASSERT(camera);
+	SE_ASSERT(planes);
+	SE_Frustum_GetNearPlaneRect(frustum, &nearplane);
+	SE_Vec3f_Mul(&camera->zAxis, -frustum->n, &tmp[0]);
+	SE_Vec3f_Mul(&camera->xAxis, nearplane.left, &tmp[1]);
+	SE_Vec3f_Mul(&camera->yAxis, nearplane.bottom, &tmp[2]);
+	SE_Vec3f_Copy(&camera->location, &tmp[3]);
+	SE_Vec3f_AddSequence(tmp, 4, &NearLeftBottom);
+    SE_Vec3f_AddSequence(tmp, 3, &tmp1);
+    SE_Vec3f_Mul(&tmp1, frustum->f / frustum->n, &tmp1);
+	SE_Vec3f_Add(&camera->location, &tmp1, &FarLeftBottom);
+
+	SE_Vec3f_Mul(&camera->xAxis, nearplane.left, &tmp[1]);
+	SE_Vec3f_Mul(&camera->yAxis, nearplane.top, &tmp[2]);
+	SE_Vec3f_AddSequence(tmp, 4, &NearLeftTop);
+	SE_Vec3f_AddSequence(tmp, 3, &tmp1);
+    SE_Vec3f_Mul(&tmp1, frustum->f / frustum->n, &tmp1);
+	SE_Vec3f_Add(&camera->location, &tmp1, &FarLeftTop);
+
+	SE_Vec3f_Mul(&camera->xAxis, nearplane.right, &tmp[1]);
+	SE_Vec3f_Mul(&camera->yAxis, nearplane.bottom, &tmp[2]);
+	SE_Vec3f_AddSequence(tmp, 4, &NearRightBottom);
+    SE_Vec3f_AddSequence(tmp, 3, &tmp1);
+    SE_Vec3f_Mul(&tmp1, frustum->f / frustum->n, &tmp1);
+	SE_Vec3f_Add(&camera->location, &tmp1, &FarRightBottom);
+
+ 	SE_Vec3f_Mul(&camera->xAxis, nearplane.right, &tmp[1]);
+	SE_Vec3f_Mul(&camera->yAxis, nearplane.top, &tmp[2]);
+	SE_Vec3f_AddSequence(tmp, 4, &NearRightTop);
+
+	SE_Vec3f_AddSequence(tmp, 3, &tmp1);
+    SE_Vec3f_Mul(&tmp1, frustum->f / frustum->n, &tmp1);
+	SE_Vec3f_Add(&camera->location, &tmp1, &FarRightTop);
+    
+	SE_Plane_InitFromPoint(&NearLeftBottom, &camera->location, &NearLeftTop, &planes[0]);
+	SE_Plane_InitFromPoint(&NearLeftBottom, &NearLeftTop, &camera->location, &planes[1]);
+
+	SE_Plane_InitFromPoint(&camera->location, &NearRightBottom, &NearLeftBottom, &planes[2]);
+	SE_Plane_InitFromPoint(&camera->location, &NearRightTop, &NearLeftTop, &planes[3]);
+
+	SE_Plane_InitFromPoint(&NearLeftBottom, &NearRightBottom, &NearRightTop, &planes[4]);
+
+	SE_Plane_InitFromPoint(&FarLeftBottom, &FarLeftTop, &FarRightTop, &planes[5]);
+	return SE_VALID;
+
+
+}

@@ -20,10 +20,26 @@ enum SE_TEX_WRAP_TYPE {SE_S, SE_T, SE_R};
 enum SE_TEX_TARGET {SE_1D, SE_2D, SE_3D};
 enum SE_TEX_ENV {SE_REPLACE, SE_DECAL, SE_MODULATE};
 enum SE_SHADER {SE_VERTEX_SHADER, SE_FRAGMENT_SHADER};
+typedef struct SE_RenderGeometry_tag
+{
+	SE_Vector3f* vertexArray;
+	int vertexCount;
+	SE_Vector2f* texVertexArray;
+	int texVertexCount;
+	SE_Matrix4f matrix;
+} SE_RenderGeometry;
+typedef struct SE_RenderUnit_tag
+{
+	SE_List renderGeometryList;
+	int materialIndex;
+	int subMaterialIndex;
+	SE_Vector3f color;
+} SE_RenderUnit;
+
 typedef struct SE_Renderer_tag
 {
     struct SE_World_tag* currWorld;
-    SE_List* rendererUnit;
+    SE_List rendererUnitList;
     SE_Matrix4f objToWorld;
     SE_Matrix4f worldToView;
     SE_Matrix4f viewToProjective;
@@ -31,6 +47,10 @@ typedef struct SE_Renderer_tag
     int wHeight;
     void* userData;
 } SE_Renderer ;   
+/**function about SE_RenderUnit*/
+extern void SE_RenderGeometry_Release(void* rg);
+extern void SE_RenderUnit_Release(void* ru);
+/* function about SE_Renderer****/
 extern SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h);
 extern SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer);
 extern SE_Result SE_Renderer_EndDraw(SE_Renderer* renderer);

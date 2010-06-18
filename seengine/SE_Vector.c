@@ -118,6 +118,22 @@ int SE_Vec3f_Compare(const SE_Vector3f* v1, const SE_Vector3f* v2)
     }
     return 1;
 }
+SE_Result SE_Vec3f_AddSequence(SE_Vector3f* vecSeq, int num, SE_Vector3f* out)
+{
+	int i ;
+	SE_Vector3f v;
+	SE_ASSERT(vecSeq);
+	SE_ASSERT(out);
+	SE_Object_Clear(&v, sizeof(SE_Vector3f));
+	for(i = 0 ; i < num ; i++)
+	{
+		v.x += vecSeq[i].x;
+		v.y += vecSeq[i].y;
+		v.z += vecSeq[i].z;
+	}
+	*out = v;
+	return SE_VALID;
+}
 SE_Result SE_Vec3f_Copy(const SE_Vector3f* v, SE_Vector3f* out)
 {
     SE_ASSERT(v);

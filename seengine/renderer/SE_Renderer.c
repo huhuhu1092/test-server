@@ -165,17 +165,228 @@ static void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3
 static void SE_Renderer_DrawSpatial(SE_Renderer* renderer, SE_Spatial* spatial);
 static void SE_Renderer_DrawWorld(SE_Renderer* renderer);
 static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial);
+static void setSpatialMatrix(SE_Renderer* renderer, SE_Matrix4f* m);
+static SE_RenderUnit* findMaterialIndex(SE_List* renderUnitList, int materialIndex, 
+										int subMaterialIndex, SE_Vector3f* color)
+{
+	SE_ListIterator li;
+	SE_Element e;
+	SE_RenderUnit* renderUnit = NULL;
+	SE_ListIterator_Init(&li, renderUnitList);
+    while(SE_ListIterator_Next(&li, &e))
+	{
+		SE_RenderUnit* r = (SE_RenderUnit*)e.dp.data;
+		if(r->materialIndex == materialIndex && r->subMaterialIndex == subMaterialIndex)
+		{	
+			if(r->materialIndex != -1)
+			{
+				renderUnit =r;
+				break;
+			}
+			else
+			{
+				if(SE_Vec3f_Compare(&r->color, color))
+				{
+					renderUnit = r;
+					break;
+				}
+			}
+
+		}
+	}
+	return renderUnit;
+}
+static void createRenderUnitByMesh(SE_Renderer* renderer, SE_Mesh* mesh, int subIndex, SE_Matrix4f* objToWorld)
+{
+	SE_ResourceManager* resourceManager = SE_World_GetResourceManager(renderer->currWorld);
+	SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
+	int materialIndex = -1;
+	int subMaterialIndex = -1;
+	SE_RenderUnit* renderUnit = NULL;
+	SE_RenderGeometry* renderGeometry  = NULL;
+	SE_Element renderGeometryElement;
+	SE_Element renderUnitElement;
+	int vertexCount = 0;
+	int texVertexCount = 0;
+	SE_Vector2f* texVertexArray = NULL;
+    SE_Vector3f* vertexArray = NULL;
+	materialIndex = mesh->materialIndex;
+    if(subIndex != -1)
+	{
+        SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, subIndex);
+		subMaterialIndex = subMesh->subMaterialIndex;
+	}
+	renderUnit = findMaterialIndex(&renderer->rendererUnitList, materialIndex, subMaterialIndex, &mesh->wireframeColor);
+	if(!renderUnit)
+	{
+	    renderUnit = (SE_RenderUnit*)SE_Malloc(sizeof(SE_RenderUnit));
+		if(!renderUnit)
+		{
+			LOGI("## can not create render unit : out of memory\n");
+			return;
+		}
+		SE_Object_Clear(renderUnit, sizeof(SE_RenderUnit));
+		SE_Object_Clear(&renderUnitElement, sizeof(SE_Element));
+		renderUnitElement.type = SE_DATA;
+		renderUnitElement.dp.data = renderUnit;
+		renderUnitElement.dp.fRelease = &SE_RenderUnit_Release;
+		SE_List_AddLast(&renderer->rendererUnitList, renderUnitElement);
+		SE_List_Init(&renderUnit->renderGeometryList);
+	}
+	renderUnit->materialIndex = materialIndex;
+	renderUnit->subMaterialIndex = subMaterialIndex;
+	renderUnit->color = mesh->wireframeColor;
+    renderGeometry = (SE_RenderGeometry*)SE_Malloc(sizeof(SE_RenderGeometry));
+    if(!renderGeometry)
+	{
+		LOGI("can not createn render geometry : out of memory\n");
+		return;
+	}
+	SE_Object_Clear(renderGeometry, sizeof(SE_RenderGeometry));
+	SE_Object_Clear(&renderGeometryElement, sizeof(SE_Element));
+    renderGeometryElement.type = SE_DATA;
+	renderGeometryElement.dp.data = renderGeometry;
+	renderGeometryElement.dp.fRelease = &SE_RenderGeometry_Release;
+	SE_List_AddLast(&renderUnit->renderGeometryList, renderGeometryElement);
+    if(subIndex == -1)
+	{
+		int i;
+        int k = 0;
+        vertexArray = (SE_Vector3f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector3f));
+		if(!vertexArray)
+		{
+			LOGI("can not create vertex array : out of memory\n");
+			return;
+		}
+        for(i = 0 ; i < gd->faceNum ; i++)
+		{
+			vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[0]];
+			vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[1]];
+			vertexArray[k++] = gd->vertexArray[gd->faceArray[i].v[2]];
+		}
+	    if(gd->texVertexArray)
+		{
+			texVertexArray = (SE_Vector2f*)SE_Malloc(gd->faceNum * 3 * sizeof(SE_Vector2f));
+			if(!texVertexArray)
+			{
+				LOGI("can not create tex vertex array : out of memory \n");
+				return;
+			}
+			k = 0 ; 
+			for(i = 0 ; i < gd->faceNum ; i++)
+			{
+				texVertexArray[k].x = gd->texVertexArray[gd->texFaceArray[i].v[0]].x;
+				texVertexArray[k].y = gd->texVertexArray[gd->texFaceArray[i].v[0]].y;
+				k++;
+				texVertexArray[k].x = gd->texVertexArray[gd->texFaceArray[i].v[1]].x;
+				texVertexArray[k].y = gd->texVertexArray[gd->texFaceArray[i].v[1]].y;
+				k++;
+				texVertexArray[k].x = gd->texVertexArray[gd->texFaceArray[i].v[2]].x;
+				texVertexArray[k].y = gd->texVertexArray[gd->texFaceArray[i].v[2]].y;
+				k++;
+			}
+		}
+		vertexCount = gd->faceNum * 3;
+		texVertexCount = gd->faceNum * 3;
+	}
+	else
+	{
+        SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, subIndex);
+		SE_FaceList* faceList = &subMesh->faceList;
+		int vertexCount = faceList->num * 3;
+		int i;
+		int k = 0;
+        vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
+		if(!vertexArray)
+		{
+			LOGI("can not create sub vertex array : out of memory \n");
+			return;
+		}
+        for(i = 0 ; i < faceList->num ; i++)
+		{
+			SE_Face* s = &gd->faceArray[faceList->faces[i]];
+			vertexArray[k++] = gd->vertexArray[s->v[0]];
+			vertexArray[k++] = gd->vertexArray[s->v[1]];
+			vertexArray[k++] = gd->vertexArray[s->v[2]]; 
+		}
+        if(gd->texVertexArray)
+		{
+			k = 0;
+			texVertexArray= (SE_Vector2f *) SE_Malloc(faceList->num * 3 * sizeof(SE_Vector2f));
+			if(!texVertexArray)
+			{
+				LOGI("can not create sub tex vertex array : out of memory \n");
+				return;
+			}
+			for(i = 0 ; i < faceList->num ; i++)
+			{
+				SE_Face* s = &gd->texFaceArray[faceList->faces[i]];
+				texVertexArray[k].x = gd->texVertexArray[s->v[0]].x;
+				texVertexArray[k].y = gd->texVertexArray[s->v[0]].y;
+				k++;
+				texVertexArray[k].x = gd->texVertexArray[s->v[1]].x;
+				texVertexArray[k].y = gd->texVertexArray[s->v[1]].y;
+				k++;
+				texVertexArray[k].x = gd->texVertexArray[s->v[2]].x;
+				texVertexArray[k].y = gd->texVertexArray[s->v[2]].y;
+				k++;
+			}
+		}
+		texVertexCount = vertexCount;
+	}
+    renderGeometry->vertexCount = vertexCount;
+	renderGeometry->vertexArray = vertexArray;
+	renderGeometry->texVertexArray = texVertexArray;
+	renderGeometry->matrix = *objToWorld;
+	if(renderGeometry->texVertexArray)
+		renderGeometry->texVertexCount = texVertexCount;
+}
+static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
+{
+    SE_Camera* mainCamera = SE_World_GetMainCamera(renderer->currWorld);
+    SE_BoundingVolume* spatialBv = spatial->worldBV;
+	SE_Element e;
+	SE_ListIterator li;
+	SE_List* children = spatial->children;
+    if(spatialBv)
+    {
+		
+        int cullret = SE_Camera_CullBoundingVolume(mainCamera, spatialBv);
+		if(cullret == -1)
+			return;
+			
+    }    
+    if(children)
+	{
+        SE_ListIterator_Init(&li, children);
+		while(SE_ListIterator_Next(&li, &e))
+		{
+			SE_Spatial* childs = (SE_Spatial*)e.dp.data;
+            createRenderUnit(renderer, childs);
+		}
+	}
+	else
+	{
+		SE_ASSERT(spatial->spatialType == SE_GEOMETRY);
+		createRenderUnitByMesh(renderer, spatial->mesh, spatial->subMeshIndex, &spatial->worldTransform);
+	}
+}
+/*****/
+void SE_RenderGeometry_Release(void* rg)
+{}
+void SE_RenderUnit_Release(void* ru)
+{}
 /***/
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h)
 {
 	SE_Object_Clear(renderer, sizeof(SE_Renderer));
     renderer->currWorld = currWorld;
-    renderer->rendererUnit = NULL;
     SE_Mat4f_Identity(&renderer->objToWorld);
     SE_Mat4f_Identity(&renderer->worldToView);
     SE_Mat4f_Identity(&renderer->viewToProjective);
     renderer->wWidth = w;
     renderer->wHeight = h;
+	SE_List_Init(&renderer->rendererUnitList);
     return SE_VALID;
 }
 
@@ -186,6 +397,7 @@ SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
     float m[16];
     SE_ShaderProgram* shaderProgram = NULL;
     SE_ResourceManager* resourceManager = SE_World_GetResourceManager(renderer->currWorld);
+	SE_Spatial* rootScene = SE_World_GetSceneRoot(renderer->currWorld);
     struct _ShaderData* shaderData = NULL;
     /***/
     glViewport(0, 0, renderer->wWidth, renderer->wHeight);
@@ -213,27 +425,94 @@ SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
     glUniformMatrix4fv(shaderData->u_view_to_projective_matrix_loc, 1, 0, m); 
     SE_ShaderProgram_Use(shaderData->shaderProgram);
 
-        /*
-    int j;
-    for(j = 0 ; j < 16 ; j++)
-    {
-        LOGI("%f ", m[j]);
-        if(((j + 1) % 4) == 0)
-            LOGI("\n");
-    }
-    LOGI("\n\n\n");
-    */
     glEnable(GL_DEPTH_TEST);
     renderer->userData = shaderData;
+	createRenderUnit(renderer, rootScene);
     return SE_VALID;
 }
 SE_Result SE_Renderer_EndDraw(SE_Renderer* renderer)
 {
+	SE_List_Release(&renderer->rendererUnitList);
     return SE_VALID;
 }
 SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
 {
+	/*
     SE_Renderer_DrawWorld(renderer);
+	*/
+	SE_Element e;
+	SE_ListIterator li;
+	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
+	SE_ResourceManager* resourceManager = SE_World_GetResourceManager(renderer->currWorld);
+	SE_ListIterator_Init(&li, &renderer->rendererUnitList);
+	while(SE_ListIterator_Next(&li, &e))
+	{
+		SE_RenderUnit* renderUnit = (SE_RenderUnit*)e.dp.data;
+		int materialIndex = renderUnit->materialIndex;
+		int subMaterialIndex = renderUnit->subMaterialIndex;
+        SE_MaterialData* md = NULL;
+		SE_Element renderGeometryElement;
+		SE_ListIterator renderGeometryLi;
+        if(materialIndex != -1)
+		{
+            if(subMaterialIndex != -1)
+			{
+				md = SE_ResourceManager_GetSubMaterialData(resourceManager, materialIndex, subMaterialIndex);
+			}
+			else
+			{
+				md = SE_ResourceManager_GetMaterialData(resourceManager, materialIndex);
+			}
+            
+		}
+		if(md != NULL) 
+		{
+            if(!SE_String_IsEmpty(&md->texturename))
+            {
+                glEnable(GL_TEXTURE_2D);
+				glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+				glActiveTexture(GL_TEXTURE0);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+                SE_Renderer_BindTexture(resourceManager, SE_2D, SE_String_GetData(&md->texturename));
+				glUniform1i(shaderData->u_texture_loc, 0);
+				glUniform1i(shaderData->u_shading_mode_loc, 1);
+            }
+            else
+            {
+                float color[3];
+				color[0] = md->ambient.x;
+				color[1] = md->ambient.y;
+				color[2] = md->ambient.z;
+				glUniform3fv(shaderData->u_color_loc, 1, color);
+				glUniform1i(shaderData->u_shading_mode_loc, 0);
+            }
+		}
+		else
+		{
+            float color[3];
+			color[0] = renderUnit->color.x;
+			color[1] = renderUnit->color.y;
+			color[2] = renderUnit->color.z;
+			glUniform3fv(shaderData->u_color_loc, 1, color);
+			glUniform1i(shaderData->u_shading_mode_loc, 0);
+		}
+		SE_ListIterator_Init(&renderGeometryLi,&renderUnit->renderGeometryList);
+		while(SE_ListIterator_Next(&renderGeometryLi, &renderGeometryElement))
+		{
+			SE_RenderGeometry* renderGeometry = (SE_RenderGeometry*)renderGeometryElement.dp.data;
+			setSpatialMatrix(renderer, &renderGeometry->matrix);
+            glVertexAttribPointer(shaderData->a_position_loc, 3, GL_FLOAT,
+				GL_FALSE, 0, renderGeometry->vertexArray);
+			if(renderGeometry->texVertexArray)
+                glVertexAttribPointer(shaderData->a_tex_coord_loc, 2, GL_FLOAT, 0, 0, renderGeometry->texVertexArray);
+            glEnableVertexAttribArray(shaderData->a_position_loc);
+	        glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
+            glDrawArrays(GL_TRIANGLES, 0, renderGeometry->vertexCount);
+		}
+	}
     return SE_VALID;
 }
 void SE_Renderer_Release(void* renderer)

@@ -21,7 +21,9 @@ typedef struct SE_Segment_tag
    SE_Vector3f start;
    SE_Vector3f end; 
 } SE_Segment;
-
+/**
+ * plane is represented by n * X - d = 0
+ * */
 typedef struct SE_Plane_tag
 {
     SE_Vector3f n;
@@ -78,9 +80,7 @@ extern SE_Result SE_Segment_GetDirection(const SE_Segment* seg, SE_Vector3f* out
 extern SE_Result SE_Plane_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, const SE_Vector3f* p2, SE_Plane* out);
 extern SE_Result SE_Plane_InitFromNormal(const SE_Vector3f* p0, const SE_Vector3f* n, int normal, SE_Plane* out);
 extern SE_Result SE_Plane_GetNormal(const SE_Plane* plane, SE_Vector3f* out);
-/**
- * plane is represented by n * X - d = 0
- * */
+
 extern float SE_Plane_GetD(const SE_Plane* plane);
 /*
 #define SE_Plane_GetNormal(plane) (&plane->n)
@@ -178,6 +178,7 @@ extern SE_Result SE_Frustum_GetTop(const SE_Frustum* ft, SE_Plane* out);
 extern SE_Result SE_Frustum_GetBottom(const SE_Frustum* ft, SE_Plane* out);
 extern SE_Result SE_Frustum_GetNear(const SE_Frustum* ft, SE_Plane* out);
 extern SE_Result SE_Frustum_GetFar(const SE_Frustum* ft, SE_Plane* out);
+extern SE_Result SE_Frustum_Copy(const SE_Frustum* src, SE_Frustum* dst);
 /***/
 extern void SE_IntersectionResult_Release(void* intersectResult);
 
