@@ -1,7 +1,5 @@
 #include "SE_Renderer.h"
-#ifdef ANDROID
-#include <GLES/gl.h>
-#else
+#ifdef USING_GLES2
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #endif
@@ -25,15 +23,27 @@ struct _ShaderData
     GLint u_color_loc;
 	GLint u_mvp_matrix_loc;
 };
+static void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
+                                     SE_Face* faceArray, int faceNum, 
+                                     SE_Vector3f* texVertexArray, int texVertexNum,
+                                     SE_Face* texFaceArray, 
+                                     SE_Vector3f* colorArray, int colorNum);
+static void SE_Renderer_DrawSpatial(SE_Renderer* renderer, SE_Spatial* spatial);
+static void SE_Renderer_DrawWorld(SE_Renderer* renderer);
+static void setRenderState(SE_Renderer* renderer, SE_Spatial* spatial);
+static void setSpatialMatrix(SE_Renderer* renderer, SE_Matrix4f* m);
+
 static void drawBoundingVolume(SE_Renderer* renderer, SE_Spatial* spatial)
 {
     SE_AABBBV* aabbBv;
     SE_AABB* aabb;
     SE_Vector3f points[24];
 	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
+    SE_Matrix4f worldM;
 	float color[3];
-	color[0] = 1.0;
-	color[1] = 0.0;
+    SE_Mat4f_Identity(&worldM);
+	color[0] = 0.0;
+	color[1] = 1.0;
 	color[2] = 0.0;
     /*
 	should set color in shader
@@ -152,11 +162,14 @@ static void drawBoundingVolume(SE_Renderer* renderer, SE_Spatial* spatial)
 	glVertexAttribPointer(shaderData->a_position_loc, 3, GL_FLOAT,
 		                  GL_FALSE, 0, points);
 	glEnableVertexAttribArray(shaderData->a_position_loc);
+    setSpatialMatrix(renderer, &worldM);
+    glDrawArrays(GL_LINES, 0, 24);
 	/* should do in shader
 glVertexPointer(3, GL_FLOAT, 0, points);
 glDrawArrays(GL_LINES, 0, 24);
 */
 }
+<<<<<<< HEAD
 static void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
                                      SE_Face* faceArray, int faceNum, 
                                      SE_Vector3f* texVertexArray, int texVertexNum,
@@ -376,6 +389,8 @@ void SE_RenderGeometry_Release(void* rg)
 {}
 void SE_RenderUnit_Release(void* ru)
 {}
+=======
+>>>>>>> 9a7119050c88b5cf58ba6539711939c360a11bbb
 /***/
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h)
 {

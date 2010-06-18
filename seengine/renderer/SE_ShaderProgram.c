@@ -45,7 +45,7 @@ SE_Result SE_ShaderProgram_Init(SE_ShaderProgram* shaderProgram, const char* ver
     GLuint fragmentShader;
     GLuint programObject;
     GLint linked;
-    SE_ShaderProgramID_tag* p = (SE_ShaderProgramID_tag*)SE_Malloc(sizeof(SE_ShaderProgramID_tag));
+    struct SE_ShaderProgramID_tag* p = (struct SE_ShaderProgramID_tag*)SE_Malloc(sizeof(struct SE_ShaderProgramID_tag));
     if(!p)
         return SE_INVALID;
     vertexShader = loadShader(GL_VERTEX_SHADER, vertexShaderSrc);
