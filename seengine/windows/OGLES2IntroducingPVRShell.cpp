@@ -32,6 +32,7 @@
 #include "./renderer/SE_Renderer.h"
 #include "SE_Memory.h"
 #include "SE_Init.h"
+#include "SE_Input.h"
 /******************************************************************************
  Defines
 ******************************************************************************/
@@ -68,8 +69,15 @@ bool	g_bDemoDone = false;
  @Description	Processes messages for the main window
 ******************************************************************************/
 #ifndef NO_GDI
+void doButtonDown(HWND hWnd, LPARAM lParam)
+{
+    
+
+}
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    SE_InputEvent* inputEvent = NULL;
+	static int bPressed = 0;
 	switch (message)
 	{
 		/*
@@ -93,6 +101,71 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			g_bDemoDone = true;
 			PostQuitMessage(0);
 			return 1;
+		case WM_LBUTTONDOWN:
+			{
+                int x, y;
+	            x = LOWORD(lParam);
+	            y = HIWORD(lParam);
+	            SetCapture(hWnd);
+				bPressed = 1;
+                inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_PRESSED;
+                    inputEvent->mouse.mc = SE_LEFTKEY;
+                    inputEvent->mouse.x = (float)x;
+                    inputEvent->mouse.y = (float)y;
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+                }    
+			}
+			break;
+		case WM_LBUTTONUP:
+			{
+				int x, y;
+                x = LOWORD(lParam);
+				y = HIWORD(lParam);
+			    inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_RELEASED;
+                    inputEvent->mouse.mc = SE_LEFTKEY;
+                    inputEvent->mouse.x = (float)x;
+                    inputEvent->mouse.y = (float)y;
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+                }    
+			    bPressed = 0;
+			    ReleaseCapture();
+			}
+			break;
+		case WM_RBUTTONDOWN:
+			break;
+		case WM_RBUTTONUP:
+			break;
+		case WM_MOUSEMOVE:
+			{
+                int x, y;
+				if(bPressed)
+				{
+					x = LOWORD(lParam);
+					y = HIWORD(lParam);
+					inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+					if(inputEvent)
+					{
+						SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+						inputEvent->inputType = SE_MOUSE;
+						inputEvent->mouse.mt = SE_PRESSED;
+						inputEvent->mouse.mc = SE_LEFTKEY;
+						inputEvent->mouse.x = (float)x;
+						inputEvent->mouse.y = (float)y;
+						SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+					}
+				}
+			}
+			break;
 
 		default:
 			break;

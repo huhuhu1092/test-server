@@ -272,9 +272,9 @@ SE_Result SE_Camera_GetPlanes(const SE_Camera* camera, SE_Plane* planes)
 	SE_Vec3f_Add(&camera->location, &tmp1, &FarRightTop);
     
 	SE_Plane_InitFromPoint(&NearLeftBottom, &camera->location, &NearLeftTop, &planes[0]);
-	SE_Plane_InitFromPoint(&NearLeftBottom, &NearLeftTop, &camera->location, &planes[1]);
+	SE_Plane_InitFromPoint(&NearRightTop, &camera->location, &NearRightBottom, &planes[1]);
 
-	SE_Plane_InitFromPoint(&camera->location, &NearRightBottom, &NearLeftBottom, &planes[2]);
+	SE_Plane_InitFromPoint(&camera->location,  &NearLeftBottom, &NearRightBottom,&planes[2]);
 	SE_Plane_InitFromPoint(&camera->location, &NearRightTop, &NearLeftTop, &planes[3]);
 
 	SE_Plane_InitFromPoint(&NearLeftBottom, &NearRightBottom, &NearRightTop, &planes[4]);
