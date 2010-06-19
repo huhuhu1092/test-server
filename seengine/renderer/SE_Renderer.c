@@ -169,7 +169,6 @@ glVertexPointer(3, GL_FLOAT, 0, points);
 glDrawArrays(GL_LINES, 0, 24);
 */
 }
-<<<<<<< HEAD
 static void SE_Renderer_DrawGeometry(SE_Renderer* renderer, int type, SE_Vector3f* vertexArray, int vertexNum,
                                      SE_Face* faceArray, int faceNum, 
                                      SE_Vector3f* texVertexArray, int texVertexNum,
@@ -389,8 +388,6 @@ void SE_RenderGeometry_Release(void* rg)
 {}
 void SE_RenderUnit_Release(void* ru)
 {}
-=======
->>>>>>> 9a7119050c88b5cf58ba6539711939c360a11bbb
 /***/
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h)
 {
