@@ -364,8 +364,11 @@ static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
     {
 		
         int cullret = SE_Camera_CullBoundingVolume(mainCamera, spatialBv);
-		if(cullret == -1)
-			return;
+        if(cullret == -1)
+	{
+            LOGI("## cull object : %s ###\n", SE_String_GetData(&spatial->name));
+	    return;
+	}
 			
     }    
     if(children)
@@ -469,6 +472,9 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
 	SE_ListIterator li;
 	struct _ShaderData* shaderData = (struct _ShaderData*)renderer->userData;
 	SE_ResourceManager* resourceManager = SE_World_GetResourceManager(renderer->currWorld);
+#ifdef DEBUG
+	int drawCount = 0;
+#endif
 	SE_ListIterator_Init(&li, &renderer->rendererUnitList);
 	while(SE_ListIterator_Next(&li, &e))
 	{
@@ -525,6 +531,9 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
 			glUniform1i(shaderData->u_shading_mode_loc, 0);
 		}
 		SE_ListIterator_Init(&renderGeometryLi,&renderUnit->renderGeometryList);
+#ifdef DEBUG
+		drawCount += SE_List_Size(&renderUnit->renderGeometryList);
+#endif
 		while(SE_ListIterator_Next(&renderGeometryLi, &renderGeometryElement))
 		{
 			SE_RenderGeometry* renderGeometry = (SE_RenderGeometry*)renderGeometryElement.dp.data;
@@ -538,6 +547,9 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
             glDrawArrays(GL_TRIANGLES, 0, renderGeometry->vertexCount);
 		}
 	}
+#ifdef DEBUG
+	LOGI("### draw object count = %d ###\n", drawCount);
+#endif
     return SE_VALID;
 }
 void SE_Renderer_Release(void* renderer)
