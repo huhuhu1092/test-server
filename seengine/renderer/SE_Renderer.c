@@ -385,9 +385,22 @@ static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
 }
 /*****/
 void SE_RenderGeometry_Release(void* rg)
-{}
+{
+    SE_RenderGeometry* renderGeometry = (SE_RenderGeometry*)rg;
+    if(renderGeometry)
+    {
+        if(renderGeometry->vertexArray)
+            SE_Free(renderGeometry->vertexArray);
+	if(renderGeometry->texVertexArray)
+            SE_Free(renderGeometry->texVertexArray);
+    }
+}
 void SE_RenderUnit_Release(void* ru)
-{}
+{
+    SE_RenderUnit* renderUnit = (SE_RenderUnit*)ru;
+    if(renderUnit)
+        SE_List_Release(&renderUnit->renderGeometryList);
+}
 /***/
 SE_Result SE_Renderer_Init(SE_Renderer* renderer, struct SE_World_tag* currWorld, int w, int h)
 {

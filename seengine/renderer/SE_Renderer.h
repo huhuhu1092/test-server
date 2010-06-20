@@ -36,6 +36,7 @@ typedef struct SE_RenderUnit_tag
 	SE_Vector3f color;
 } SE_RenderUnit;
 
+
 typedef struct SE_Renderer_tag
 {
     struct SE_World_tag* currWorld;

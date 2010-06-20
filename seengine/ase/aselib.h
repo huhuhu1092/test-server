@@ -2,6 +2,7 @@
 #define ASE_LIB_H
 #include <list>
 #include <vector>
+#include <string.h>
 #define ASE_OK 1
 #define ASE_ERROR 0
 
