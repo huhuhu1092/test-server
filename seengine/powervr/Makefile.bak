@@ -1,0 +1,113 @@
+PLAT_CC  = gcc
+PLAT_CPP = g++
+PLAT_AR  = ar
+RM = rm -f
+SDKDIR = /home/luwei/program/powervr_emulator/SDKPackage
+PLATFORM = LinuxPC
+SEENG_DIR = /home/luwei/program/streamserver_git/test-server/seengine
+OUTNAME = SEDemo
+## X11 lib define
+X11_LIBS = -lX11 -lXau
+WS = X11
+X11_INC = /usr/include/X11
+LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
+               -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DUSING_GLES2 -DLUA_SCRIPT -g
+
+PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
+	   $(X11_INC) \
+	   /usr/include \
+	   /usr/include/linux
+
+PLAT_OBJPATH = $(PLATFORM)/$(WS)
+PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 $(X11_LIBS)
+INCLUDES += -I$(SDKDIR)/Shell  \
+			-I$(SDKDIR)/Shell/API/KEGL \
+			-I$(SDKDIR)/Shell/OS/LinuxX11 \
+			-I$(SEENG_DIR) \
+			-I$(SEENG_DIR)/renderer \
+			-I$(SEENG_DIR)/cscript \
+			-I$(SEENG_DIR)/ase \
+			-I$(SEENG_DIR)/lua/src \
+			$(addprefix -I, $(PLAT_INC))
+
+VPATH +=  ../ : \
+	  ../renderer : \
+	  ../ase : \
+	  ../cscript : \
+	  ../lua/src : \
+	  $(SDKDIR)/Shell            : \
+	  $(SDKDIR)/Shell/API/KEGL   : \
+	  $(SDKDIR)/Shell/OS/LinuxX11
+DEPEND_FLAG = $(PLAT_CFLAGS) $(INCLUDES)
+SRC_LUA = lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c  ldump.c lfunc.c  lgc.c linit.c liolib.c llex.c \
+	  lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c lstring.c lstrlib.c ltable.c ltablib.c ltm.c \
+	  lundump.c lvm.c lzio.c print.c
+SRCS_C = SE_Vector.c \
+		   SE_Math.c \
+		   SE_Matrix.c \
+		   SE_Quat.c \
+		   SE_Memory.c \
+		   SE_Element.c \
+		   SE_String.c \
+		   SE_List.c \
+		   SE_HashMap.c \
+		   SE_Log.c \
+		   SE_Utils.c \
+		   SE_GeometryData.c \
+		   SE_Spatial.c \
+		   SE_BoundingVolume.c \
+		   SE_ResourceManager.c \
+		   SE_Geometry3D.c \
+		   SE_RenderState.c \
+		   SE_World.c \
+		   SE_Camera.c \
+		   SE_Script.c \
+		   SE_Input.c \
+		   SE_Init.c \
+		   SE_SaveState.c \
+		   SE_AABB.c \
+		   SE_Sphere.c \
+		   SE_OBB.c \
+		   SE_GeometryIntersect.c \
+		   SE_TextureID.c \
+		   SE_Renderer.c \
+		   SE_ShaderProgram.c \
+		   hashmap.c \
+		   aselib.c \
+		   $(notdir $(SRC_LUA))
+
+SRCS_CPP =         acc.cpp \
+                   SEDemo.cpp \
+		   PVRShell.cpp \
+		   PVRShellAPI.cpp \
+		   PVRShellOS.cpp
+SRCS := $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
+SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
+OBJ_C = $(SRCS_C:.c=.o)
+OBJ_CPP = $(SRCS_CPP:.cpp=.o)
+OBJECTS += $(OBJ_C)
+OBJECTS += $(OBJ_CPP)
+$(OUTNAME): $(OBJECTS) depend
+	@mkdir -p $(PLAT_OBJPATH)
+	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
+
+depend: 
+	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
+%.o: %.c
+	@mkdir -p $(PLAT_OBJPATH)
+	$(PLAT_CC) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+%.o: %.cpp
+	@mkdir -p $(PLAT_OBJPATH)
+	$(PLAT_CPP) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+print_info:
+#	@echo $(OBJECTS)
+#	@echo $(PLAT_OBJPATH)/$(OUTNAME)
+#	@echo $(INCLUDES)
+#	@echo $(PLAT_CFLAGS)
+#	@echo $(VPATH)
+	@echo $(SRCS)
+clean:
+	$(RM) $(OBJECTS) $(OUTNAME)
