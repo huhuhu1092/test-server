@@ -9,6 +9,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/*function about closest point 
+ * these function find the closest point on geometry to the given point
+*/
+extern SE_Result SE_ClosestPoint_PointPlane(const SE_Vector3f* point, const SE_Plane* plane, SE_Vector3f* out);
+extern SE_Result SE_ClosestPoint_PointSegment(const SE_Vector3f* point, const SE_Segment* seg, SE_Vector3f* outPoint, float* outt);
+extern SE_Result SE_ClosestPoint_PointRay(const SE_Vector3f* point, const SE_Ray* ray, SE_Vector3f* outPoint, float* outt);
+extern SE_Result SE_ClosestPoint_PointAABB(const SE_Vector3f* point, const SE_AABB* aabb, SE_Vector3f* outPoint);
+extern SE_Result SE_ClosestPoint_PointOBB(const SE_Vector3f* point, const SE_OBB* obb, SE_Vector3f* outPoint);
+extern SE_Result SE_ClosestPoint_PointRect3D(const SE_Vector3f* point, const SE_Rect3D* rect3D, SE_Vector3f* outPoint);
 
 /****                   function about intersection      **/
 extern SE_Result SE_Intersect_Segment_Plane(const SE_Segment* line, const SE_Plane* plane, SE_IntersectionResult* out);

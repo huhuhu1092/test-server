@@ -2,6 +2,106 @@
 #include "SE_Math.h"
 #include "SE_Memory.h"
 #include "SE_Log.h"
+/**function closest*/
+SE_Result SE_ClosestPoint_PointPlane(const SE_Vector3f* point, const SE_Plane* plane, SE_Vector3f* out)
+{
+	SE_Vector3f n, tmp;
+	float t, d;
+	SE_Plane_GetNormal(plane, &n);
+	d = SE_Plane_GetD(plane);
+    t = (SE_Vec3f_Dot(point, &n) - d) / SE_Vec3f_Dot(&n, &n);
+	SE_Vec3f_Mul(&n, t, &tmp);
+	SE_Vec3f_Subtract(point, &tmp, out);
+	return SE_VALID;
+}
+SE_Result SE_ClosestPoint_PointSegment(const SE_Vector3f* point, const SE_Segment* seg, SE_Vector3f* outPoint, float* outt)
+{
+	SE_Vector3f start, end, segDir, startToPoint;
+	float t;
+	SE_Segment_GetStart(seg, &start);
+	SE_Segment_GetEnd(seg, &end);
+    SE_Vec3f_Subtract(&end, &start, &segDir);
+	SE_Vec3f_Subtract(point, &start, &startToPoint);
+    t = SE_Vec3f_Dot(&startToPoint, &segDir) / SE_Vec3f_Dot(&segDir, &segDir);
+	if(t < 0.0f)
+		t = 0.0f;
+	if(t > 1.0f)
+		t = 1.0f;
+    SE_Vec3f_PointMove(&start, &segDir, t, outPoint);
+	*outt = t;
+	return SE_VALID;
+}
+SE_ClosestPoint_PointRay(const SE_Vector3f* point, const SE_Ray* ray, SE_Vector3f* outPoint, float* outt)
+{
+	SE_Vector3f origin, dir, originToPoint;
+	float t;
+	SE_Ray_GetOrigin(ray, &origin);
+	SE_Ray_GetDirection(ray, &dir);
+    SE_Vec3f_Subtract(point, &origin, &originToPoint);
+	t = SE_Vec3f_Dot(&originToPoint, &dir);
+	if(t < 0.0f)
+		t = 0.0f;
+	SE_Vec3f_PointMove(&origin, &dir, t, outPoint);
+	*outt = t;
+	return SE_VALID;
+}
+SE_Result SE_ClosestPoint_PointAABB(const SE_Vector3f* point, const SE_AABB* aabb, SE_Vector3f* outPoint)
+{
+	int i;
+	SE_Vector3f q;
+	for(i = 0 ; i < 3 ; i++)
+	{
+		float v = point->d[i];
+		if(v < aabb->min.d[i])
+			v = aabb->min.d[i];
+		if(v > aabb->max.d[i])
+			v = aabb->max.d[i];
+		q.d[i] = v;
+	}
+	SE_Vec3f_Copy(&q, outPoint);
+	return SE_VALID;
+}
+SE_Result SE_ClosestPoint_PointOBB(const SE_Vector3f* point, const SE_OBB* obb, SE_Vector3f* outPoint)
+{
+	SE_Vector3f dir, q;
+	int i;
+	SE_Vec3f_Subtract(point, &obb->center, &dir);
+	SE_Vec3f_Copy(&obb->center, &q);
+    for(i = 0 ; i < 3 ; i++)
+	{
+		float dist = SE_Vec3f_Dot(&dir, &obb->axis[i]);
+		SE_Vector3f tmp;
+		if(dist > obb->e[i])
+			dist = obb->e[i];
+		if(dist < -obb->e[i])
+			dist = -obb->e[i];
+		SE_Vec3f_PointMove(&q, &obb->axis[i], dist, &tmp);
+		SE_Vec3f_Copy(&tmp, &q);
+	}
+	SE_Vec3f_Copy(&q, outPoint);
+	return SE_VALID;
+}
+SE_Result SE_ClosestPoint_PointRect3D(const SE_Vector3f* point, const SE_Rect3D* rect3D, SE_Vector3f* outPoint)
+{
+	SE_Vector3f dir, q;
+	int i;
+	SE_Vec3f_Copy(&rect3D->center, &q);
+	SE_Vec3f_Subtract(point, &rect3D->center, &dir);
+	for(i = 0 ; i < 2 ; i++)
+	{
+		float dist = SE_Vec3f_Dot(&dir, &rect3D->u[i]);
+		SE_Vector3f tmp;
+		if(dist > rect3D->e[i])
+			dist = rect3D->e[i];
+		if(dist < -rect3D->e[i])
+			dist = -rect3D->e[i];
+		SE_Vec3f_PointMove(&q, &rect3D->u[i], dist, &tmp);
+		SE_Vec3f_Copy(&tmp, &q);
+	}
+	SE_Vec3f_Copy(&q, outPoint);
+	return SE_VALID;
+}
+/**function intersection */
 SE_Result SE_Intersect_Segment_Plane(const SE_Segment* seg, const SE_Plane* plane, SE_IntersectionResult* out)
 {
     return SE_VALID;

@@ -16,6 +16,12 @@ typedef struct SE_Recti_tag
 {
     int left, right, top, bottom;
 } SE_Recti;
+typedef struct SE_Rect3D_tag
+{
+	SE_Vector3f center; /* center point if rect */
+	SE_Vector3f u[2]; /*unit vectors determine local x and y axis*/
+	float e[2]; /*the halfwidth extents of the rect along the axis */
+} SE_Rect3D;
 typedef struct SE_Segment_tag
 {
    SE_Vector3f start;
