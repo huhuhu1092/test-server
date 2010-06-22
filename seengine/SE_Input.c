@@ -182,6 +182,32 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
             }
             SE_String_Release(&ttt);
         }
+	else if(currKeyCode == SE_KEY_LEFT && inputEvent->keyboard.down)
+	{
+	    SE_String ttt;
+            SE_Spatial* moveSpatial;
+            SE_String_Init(&ttt, "Box07_130");
+            moveSpatial = SE_Spatial_Find(rootScene, ttt);
+            if(moveSpatial)
+            {
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, -2);
+            }
+            SE_String_Release(&ttt);
+
+	}
+	else if(currKeyCode == SE_KEY_RIGHT && inputEvent->keyboard.down)
+	{
+	    SE_String ttt;
+            SE_Spatial* moveSpatial;
+            SE_String_Init(&ttt, "Box07_130");
+            moveSpatial = SE_Spatial_Find(rootScene, ttt);
+            if(moveSpatial)
+            {
+                SE_Spatial_MoveByLocalAxis(rootScene, moveSpatial, SE_AXIS_X, 2);
+            }
+            SE_String_Release(&ttt);
+
+	}
 
     }
     SE_Free(inputEvent);

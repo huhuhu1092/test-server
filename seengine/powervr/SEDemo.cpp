@@ -68,7 +68,8 @@ public:
 	virtual bool ReleaseView();
 	virtual bool QuitApplication();
 	virtual bool RenderScene();
-
+private:
+	void handleInput(int width, int height);
     
 };
 bool SEDemo::InitApplication()
@@ -93,10 +94,107 @@ bool SEDemo::QuitApplication()
 {
 	return true;
 }
+void SEDemo::handleInput(int width, int height)
+{
+    static float prevPointer[2];
+    static bool bPressed = false;
+    int buttonState = PVRShellGet(prefButtonState);
+    float* pointerLocation = (float*)PVRShellGet(prefPointerLocation);
+    SE_InputEvent* inputEvent = NULL;
+    /*LOGI("## buttonstate = %d ##\n", buttonState);*/
+    if(pointerLocation)
+    {
+        LOGI("### pointer location = %f, %f", pointerLocation[0], pointerLocation[1]);
+        prevPointer[0] = pointerLocation[0];
+        prevPointer[1] = pointerLocation[1];
+    }
+    if((buttonState & ePVRShellButtonLeft))
+    {
+                inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_PRESSED;
+                    inputEvent->mouse.mc = SE_LEFTKEY;
+                    inputEvent->mouse.x = prevPointer[0] * width;
+                    inputEvent->mouse.y = prevPointer[1] * height;
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+		}    
+	bPressed = 1;
+    }
+    else if(bPressed)
+    {
+                inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+                if(inputEvent)
+                {
+                    SE_Object_Clear(inputEvent, sizeof(SE_InputEvent));
+                    inputEvent->inputType = SE_MOUSE;
+                    inputEvent->mouse.mt = SE_RELEASED;
+                    inputEvent->mouse.mc = SE_LEFTKEY;
+                    inputEvent->mouse.x = prevPointer[0] * width;
+                    inputEvent->mouse.y = prevPointer[1] * height;
+                    SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+                }    
+        bPressed = 0;
+    }
+    if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
+    {
+        LOGI("## left ##\n");
+	inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_LEFT;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
+
+    }
+    else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
+    {
+        inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_RIGHT;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
+
+        LOGI("## right ##\n");
+    }
+    else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
+    {
+	LOGI("## up ##\n");
+	inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_FORWARD;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }
+
+    }
+    else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
+    {
+	inputEvent = (SE_InputEvent*)SE_Malloc(sizeof(SE_InputEvent));
+        if(inputEvent)
+        {
+            inputEvent->inputType = SE_KEYBOARD;
+            inputEvent->keyboard.down = 1;
+            inputEvent->keyboard.key = SE_KEY_BACK;
+            SE_HandleInputEvent(SE_GetWorld(), inputEvent);
+        }    
+	LOGI("## down ##\n");
+    }
+}
 bool SEDemo::RenderScene()
 {
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
+	handleInput(dwCurrentWidth, dwCurrentHeight);
 	drawScene(dwCurrentWidth, dwCurrentHeight);
 	return true;
 }
