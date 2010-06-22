@@ -161,6 +161,7 @@ void ASE_Loader::Write(const char* filename)
 {
     int materialNum = mSceneObject->mMats.size();
     SE_Material* materials = (SE_Material*)SE_Malloc(materialNum * sizeof(SE_Material));
+    SE_Object_Clear(materials, sizeof(materialNum * sizeof(SE_Material)));
     int i;
     for(i = 0 ; i < materialNum ; i++)
     {
@@ -419,7 +420,45 @@ void ASE_Loader::Write(const char* filename)
             }
         }
 
+    }
+    for(i = 0 ; i < materialNum ; i++)
+    {
+	 if(materials[i].subMaterialNum > 0)
+	 {
+             for(int j = 0 ; j < materials[i].subMaterialNum ; j++)
+	     {
+		 SE_String_Release(&materials[i].subMaterialArray[j].texturename);
+	     }
+             SE_Free(materials[i].subMaterialArray);
+	 }
+	 SE_String_Release(&materials[i].materialData.texturename);
     } 
+    SE_Free(materials);
+    for(i = 0 ; i < geomDataNum ; i++)
+    {
+	SE_Free(geomDataArray[i].vertexArray);
+	SE_Free(geomDataArray[i].texVertexArray);
+	SE_Free(geomDataArray[i].faceArray);
+	SE_Free(geomDataArray[i].texFaceArray);
+	SE_Free(geomDataArray[i].colorArray);
+    }
+    SE_Free(geomDataArray);
+    for(itMesh = seMeshs.begin() ; itMesh != seMeshs.end() ; itMesh++)
+    {
+	SE_Mesh* mesh = *itMesh;
+	if(mesh->subMeshArray)
+	{
+	    for(int j = 0 ; j < mesh->subMeshNum; j++)
+	    { 
+	        SE_SubMesh* subMesh = &mesh->subMeshArray[j];
+		SE_Free(subMesh->faceList.faces);
+	    }
+	    SE_Free(mesh->subMeshArray);
+	}
+	SE_String_Release(&mesh->name);
+	SE_Free(*itMesh);
+    }
+
     LOGI("write end\n");
     fclose(fout); 
 }

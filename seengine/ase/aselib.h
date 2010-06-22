@@ -56,6 +56,13 @@ struct ASE_Mesh
 		faces = tfaces = NULL;
         numFaceGroup = 0;
 	}
+	~ASE_Mesh()
+	{
+	    delete[] vertexes;
+	    delete[] tvertexes;
+	    delete[] faces;
+	    delete[] tfaces;
+	}
 } ;
 struct ASE_GeometryObject
 {
@@ -80,6 +87,11 @@ struct ASE_GeometryObject
         translate[0] = translate[1] = translate[2] = 0;
         materialref = -1;
         wireframeColor[0] = wireframeColor[1] = wireframeColor[2] = 0;
+    }
+    ~ASE_GeometryObject()
+    {
+        if(mesh)
+	    delete mesh;
     }
 };
 struct ASE_MaterialData
@@ -117,6 +129,15 @@ struct ASE_SceneObject
 {
     std::list<ASE_GeometryObject*> mGeomObjects;
     std::vector<ASE_Material> mMats;
+    ~ASE_SceneObject()
+    {
+        std::list<ASE_GeometryObject*>::iterator it;
+	for(it = mGeomObjects.begin() ; it != mGeomObjects.end() ; it++)
+	{
+	    ASE_GeometryObject* go = *it;
+	    delete go;
+	}
+    }
 };
 class ASE_Loader
 {
