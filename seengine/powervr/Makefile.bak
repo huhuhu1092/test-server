@@ -2,7 +2,7 @@ PLAT_CC  = gcc
 PLAT_CPP = g++
 PLAT_AR  = ar
 RM = rm -f
-SDKDIR = /home/luwei/program/powervr_emulator/SDKPackage
+SDKDIR = /home/luwei/program/powervr/SDKPackage
 PLATFORM = LinuxPC
 SEENG_DIR = /home/luwei/program/streamserver_git/test-server/seengine
 OUTNAME = SEDemo
@@ -16,8 +16,6 @@ PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DUSING_GLES2 -DLUA_SCRIPT -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
 	   $(X11_INC) \
-	   /usr/include \
-	   /usr/include/linux
 
 PLAT_OBJPATH = $(PLATFORM)/$(WS)
 PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 $(X11_LIBS)
@@ -89,17 +87,14 @@ OBJ_CPP = $(SRCS_CPP:.cpp=.o)
 OBJECTS += $(OBJ_C)
 OBJECTS += $(OBJ_CPP)
 $(OUTNAME): $(OBJECTS) depend
-	@mkdir -p $(PLAT_OBJPATH)
 	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
 
 depend: 
 	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
 %.o: %.c
-	@mkdir -p $(PLAT_OBJPATH)
 	$(PLAT_CC) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
 
 %.o: %.cpp
-	@mkdir -p $(PLAT_OBJPATH)
 	$(PLAT_CPP) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
 
 print_info:

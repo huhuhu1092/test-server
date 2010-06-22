@@ -305,7 +305,8 @@ static void createRenderUnitByMesh(SE_Renderer* renderer, SE_Mesh* mesh, int sub
 	{
         SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, subIndex);
 		SE_FaceList* faceList = &subMesh->faceList;
-		int vertexCount = faceList->num * 3;
+        LOGI("### sub face num = %d ###", faceList->num);
+		vertexCount = faceList->num * 3;
 		int i;
 		int k = 0;
         vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
@@ -363,10 +364,19 @@ static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
     if(spatialBv)
     {
 		
-        int cullret = SE_Camera_CullBoundingVolume(mainCamera, spatialBv);
+        int cullret =  SE_Camera_CullBoundingVolume(mainCamera, spatialBv);
         if(cullret == -1)
 	{
-            LOGI("## cull object : %s ###\n", SE_String_GetData(&spatial->name));
+            /*LOGI("## cull object : %s ###\n", SE_String_GetData(&spatial->name));*/
+#ifdef DEBUG
+        SE_String ttt;
+        SE_String_Init(&ttt, "tv self_8");
+        if(SE_String_Compare(ttt, spatial->name) == 0)
+        {
+            LOGI("### has tv self ####\n");
+        }
+#endif
+
 	    return;
 	}
 			
@@ -382,9 +392,23 @@ static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
 	}
 	else
 	{
+#ifdef DEBUG
+        SE_String ttt;
+        SE_String_Init(&ttt, "tv self_8");
+        if(SE_String_Compare(ttt, spatial->name) == 0)
+        {
+            LOGI("### has tv self ####\n");
+        }
+#endif
 		SE_ASSERT(spatial->spatialType == SE_GEOMETRY);
 		createRenderUnitByMesh(renderer, spatial->mesh, spatial->subMeshIndex, &spatial->worldTransform);
 	}
+}
+void setPolygonOffset(float factor, float units)
+{
+    //glDepthFunc(GL_LEQUAL);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(factor, units);
 }
 /*****/
 void SE_RenderGeometry_Release(void* rg)
@@ -475,6 +499,8 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
 #ifdef DEBUG
 	int drawCount = 0;
 #endif
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	SE_ListIterator_Init(&li, &renderer->rendererUnitList);
 	while(SE_ListIterator_Next(&li, &e))
 	{
@@ -545,10 +571,15 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
             glEnableVertexAttribArray(shaderData->a_position_loc);
 	        glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
             glDrawArrays(GL_TRIANGLES, 0, renderGeometry->vertexCount);
+
+            /*setPolygonOffset(-1.0f, -2.0f);*/
 		}
 	}
+    if(renderer->currWorld->pickedSpatial)
+		drawBoundingVolume(renderer, renderer->currWorld->pickedSpatial);
+
 #ifdef DEBUG
-	LOGI("### draw object count = %d ###\n", drawCount);
+	/*LOGI("### draw object count = %d ###\n", drawCount);*/
 #endif
     return SE_VALID;
 }
