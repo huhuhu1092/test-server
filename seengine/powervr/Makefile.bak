@@ -15,9 +15,7 @@ LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
 PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DUSING_GLES2 -DLUA_SCRIPT -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
-	   $(X11_INC) \
-	   /usr/include \
-	   /usr/include/linux
+	   $(X11_INC) 
 
 PLAT_OBJPATH = $(PLATFORM)/$(WS)
 PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 $(X11_LIBS)
