@@ -129,7 +129,8 @@ SE_Result SE_HandleInputEvent(struct SE_World_tag* world, SE_InputEvent* inputEv
                     }
                     LOGI("## pick obj = %s ##\n", SE_String_GetData(&s->spatial->name));
                 }
-                LOGI("### most near obj = %s ##\n", SE_String_GetData(&minspatial->name));
+				if(minspatial)
+                    LOGI("### most near obj = %s ##\n", SE_String_GetData(&minspatial->name));
                 world->pickedSpatial = minspatial;
                 SE_List_Release(&pickList);
                 /*end*/

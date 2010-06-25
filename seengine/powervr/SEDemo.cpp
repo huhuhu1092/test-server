@@ -10,9 +10,11 @@
 #include "SE_World.h"
 #include "SE_Camera.h"
 #include <ctype.h>
-#include <dlfcn.h>
 #include <stdarg.h>
+#ifdef WIN32
+#else
 #include <stdint.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,15 +33,24 @@ static int init(int argc, char** argv)
     SE_String inPath;
     SE_Object_Clear(&inPath, sizeof(SE_String));
     SE_Object_Clear(&outPath, sizeof(SE_String));
+#ifdef WIN32
+	SE_String_Concate(&outPath, "%s\\%s", "D:\\model\\jme\\home\\newhome3", argv[2]);
+	SE_String_Concate(&inPath, "%s\\%s", "D:\\model\\jme\\home\\newhome3", argv[1]);
+#else
     SE_String_Concate(&outPath, "%s/%s", "/home/luwei/model/jme/home/newhome3", argv[2]);
     SE_String_Concate(&inPath, "%s/%s", "/home/luwei/model/jme/home/newhome3", argv[1]);
+#endif
     ASE_Loader loader(SE_String_GetData(&inPath), 0, 0);
     loader.Load();
     loader.Write(SE_String_GetData(&outPath));
     SE_String_Release(&outPath);
     SE_String_Release(&inPath);
     int argcn = 2;
+#ifdef WIN32
+    char* argvn[] = {"D:\\model\\jme\\home\\newhome3", argv[2]};
+#else
     char* argvn[] = {"/home/luwei/model/jme/home/newhome3", argv[2]};
+#endif
     SE_InitWorld(argcn, argvn);
 }
 static void drawScene(int width, int height)

@@ -7,9 +7,22 @@
 extern "C" {
 #endif
 /**
- * matrix is column mainly sequence. it is used in right hand
+ * matrix is row mainly sequence. In opengl it is column mainly sequence, so please 
+ * use the API to convert it. it is used in right hand
  * coordinate. if used in left hand , it need transpose of M
  * */
+typedef struct SE_Matrix2f_tag
+{
+	union
+	{
+		float d[4];
+		struct
+		{
+			float m00, m01;
+			float m10, m11;
+		};
+	};
+} SE_Matrix2f;
 typedef struct SE_Matrix3f_tag
 {
     union
@@ -39,6 +52,15 @@ typedef struct SE_Matrix4f_tag
     };
 
 } SE_Matrix4f;
+extern SE_Result SE_Mat2f_InitFromArray(float data[4], SE_Matrix2f* out);
+extern SE_Result SE_Mat2f_InitFromColumn(const SE_Vector2f* c1, const SE_Vector2f* c2, SE_Matrix2f* out);
+extern SE_Result SE_Mat2f_InitFromRow(const SE_Vector2f* r1, const SE_Vector2f* r2, SE_Matrix2f* out);
+extern SE_Result SE_Mat2f_Identity(SE_Matrix2f* m);
+extern SE_Result SE_Mat2f_Map(const SE_Matrix2f* m, const SE_Vector2f* v, SE_Vector2f* out);
+extern float SE_Mat2f_Det(const SE_Matrix2f* m);
+extern SE_Result SE_Mat2f_Inverse(const SE_Matrix2f* m, SE_Matrix2f* out);
+extern SE_Result SE_Mat2f_MulScalar(const SE_Matrix2f* m, float f, SE_Matrix2f* out);
+
 extern SE_Result SE_Mat3f_InitFromArray(float data[9], SE_Matrix3f* out);
 extern SE_Result SE_Mat3f_InitFromColumn(const SE_Vector3f* column1, const SE_Vector3f* column2, const SE_Vector3f* column3, SE_Matrix3f* out);
 extern SE_Result SE_Mat3f_InitFromRow(const SE_Vector3f* row1, const SE_Vector3f* row2, const SE_Vector3f* row3, SE_Matrix3f* out);

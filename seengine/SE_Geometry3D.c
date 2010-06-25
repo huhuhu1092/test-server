@@ -53,7 +53,12 @@ SE_Result SE_Plane_InitFromPoint(const SE_Vector3f* p0, const SE_Vector3f* p1, c
     SE_Vec3f_Subtract(p1, p0, &v1);
     SE_Vec3f_Subtract(p2, p0, &v2);
     SE_Vec3f_Cross(&v1, &v2, &n);
-    SE_ASSERT(!SE_Vec3f_IsZero(&n));
+    if(SE_Vec3f_IsZero(&n))
+	{
+        SE_Object_Clear(&out->n, sizeof(SE_Vector3f));
+		out->d = 0.0f;
+		return SE_INVALID;
+	}
     SE_Vec3f_Normalize(&n, &out->n);
     out->d = SE_Vec3f_Dot(&out->n, p0);
     return SE_VALID;
@@ -313,4 +318,26 @@ void SE_IntersectionResult_Release(void* intersectResult)
         SE_Free(r->intersectPoint);
     }
     return;
+}
+SE_Result SE_IntersectionResult_Copy(const SE_IntersectionResult* src, SE_IntersectionResult* dst)
+{
+	if(!src)
+		return SE_INVALID;
+	SE_Object_Clear(dst, sizeof(SE_IntersectionResult));
+	dst->intersected = src->intersected;
+	dst->distanceNum = src->distanceNum;
+	if(dst->distanceNum > 0)
+	{
+		int size = dst->distanceNum * sizeof(float);
+		dst->distance = (float*)SE_Malloc(size);
+		SE_Mem_Copy(src->distance, dst->distance, size);
+	}
+	dst->intersectPointNum = src->intersectPointNum;
+	if(dst->intersectPointNum > 0)
+	{
+		int size = dst->intersectPointNum * sizeof(SE_Vector3f);
+		dst->intersectPoint = (SE_Vector3f*)SE_Malloc(size);
+		SE_Mem_Copy(src->intersectPoint, dst->intersectPoint, size);
+	}
+	return SE_VALID;
 }

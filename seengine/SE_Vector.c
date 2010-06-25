@@ -249,6 +249,13 @@ SE_Result SE_Vec3f_PointMove(const SE_Vector3f* point, const SE_Vector3f* dir, f
     SE_Vec3f_Add(point, &tmp, out);
     return SE_VALID;
 }
+SE_Result SE_Vec3f_InitFromVector4f(const SE_Vector4f* v, SE_Vector3f* out)
+{
+	out->x = v->x;
+	out->y = v->y;
+	out->z = v->z;
+	return SE_VALID;
+}
 float SE_Vec3f_ScalarTripleProduct(const SE_Vector3f* u, const SE_Vector3f* v, const SE_Vector3f* w)
 {
     SE_Vector3f crossProduct;
@@ -344,3 +351,11 @@ float SE_Vec4f_Dot(const SE_Vector4f* v1, const SE_Vector4f* v2)
     return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z + v1->w * v2->w;
 }
 
+SE_Result SE_Vec4f_InitFromVector3f(const SE_Vector3f* v, float w, SE_Vector4f* out)
+{
+	out->x = v->x;
+	out->y = v->y;
+	out->z = v->z;
+	out->w = w;
+	return SE_VALID;
+}

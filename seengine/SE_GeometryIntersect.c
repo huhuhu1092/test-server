@@ -2,6 +2,7 @@
 #include "SE_Math.h"
 #include "SE_Memory.h"
 #include "SE_Log.h"
+#include "SE_Matrix.h"
 /**function closest*/
 SE_Result SE_ClosestPoint_PointPlane(const SE_Vector3f* point, const SE_Plane* plane, SE_Vector3f* out)
 {
@@ -125,6 +126,87 @@ SE_Result SE_Intersect_Ray_Ray(const SE_Ray* ray1, const SE_Ray* ray2, SE_Inters
 }
 SE_Result SE_Intersect_Ray_Triangle(const SE_Ray* ray, const SE_Triangle* tri, SE_IntersectionResult* out)
 {
+	SE_Vector3f origin, dir;
+	SE_Vector3f normal;
+	float d;
+	SE_Vector3f p0, p1, p2;
+	SE_Plane plane;
+	SE_Vector3f p; /*the intersection of ray and plane*/
+	float t;
+	float nvDot; /*normal and dir dot*/
+	SE_Vector3f r, q1, q2;
+	SE_Matrix2f m, inverseM; /*matrix computed by q1, q2*/
+	SE_Vector2f v; /*vector computed by r and q1, q2*/
+	SE_Vector2f bc; /*barycentric coordinate w1, w2*/
+	float w0; /*barycentric coordiate w0 */
+	float data[4];
+	SE_Result ret;
+	SE_Object_Clear(out, sizeof(SE_IntersectionResult));
+	SE_Triangle_GetPoint0(tri, &p0);
+	SE_Triangle_GetPoint1(tri, &p1);
+	SE_Triangle_GetPoint2(tri, &p2);
+	ret = SE_Plane_InitFromPoint(&p0, &p1, &p2, &plane);
+	if(ret != SE_VALID)
+	{
+		out->intersected = 0;
+		return SE_VALID;
+	}
+	SE_Ray_GetOrigin(ray, &origin);
+	SE_Ray_GetDirection(ray, &dir);
+	SE_Plane_GetNormal(&plane, &normal);
+	d = SE_Plane_GetD(&plane);
+    nvDot = SE_Vec3f_Dot(&normal, &dir);
+	if(nvDot == 0.0f)
+	{
+		out->intersected = 0;
+		return SE_VALID;
+	}
+	t = (d - SE_Vec3f_Dot(&normal, &origin)) / nvDot;
+	if(t < 0)
+	{
+		out->intersected = 0;
+		return SE_VALID;
+	}
+    SE_Vec3f_PointMove(&origin, &dir, t, &p);
+	SE_Vec3f_Subtract(&p, &p0, &r);
+	SE_Vec3f_Subtract(&p1, &p0, &q1);
+	SE_Vec3f_Subtract(&p2, &p0, &q2);
+    v.x = SE_Vec3f_Dot(&r, &q1);
+	v.y = SE_Vec3f_Dot(&r, &q2);
+	data[0] = SE_Vec3f_Dot(&q1, &q1);
+	data[1] = SE_Vec3f_Dot(&q1, &q2);
+	data[2] = SE_Vec3f_Dot(&q1, &q2);
+	data[3] = SE_Vec3f_Dot(&q2, &q2);
+	SE_Mat2f_InitFromArray(data, &m);
+	ret = SE_Mat2f_Inverse(&m, &inverseM);
+	if(ret != SE_VALID)
+	{
+		out->intersected = 0;
+		return SE_VALID;
+	}
+    SE_Mat2f_Map(&inverseM, &v, &bc);
+	if((bc.x + bc.y) <= 1.0f && bc.x >= 0.0f && bc.y >= 0.0f)
+	{
+        w0 = 1 - bc.x - bc.y;
+		out->intersected = 1;
+		out->intersectPointNum = 2;
+		out->intersectPoint = (SE_Vector3f*)SE_Malloc(2 * sizeof(SE_Vector3f));
+		out->intersectPoint[0].x = w0;
+		out->intersectPoint[0].y = bc.x;
+		out->intersectPoint[0].z = bc.y;
+		out->intersectPoint[1].x = p.x;
+		out->intersectPoint[1].y = p.y;
+		out->intersectPoint[1].z = p.z;
+		out->distanceNum = 1;
+		out->distance = (float*)SE_Malloc(sizeof(float));
+		*out->distance = SE_Vec3f_Distance(&p, &origin);
+		return SE_VALID;
+	}
+	else
+	{
+		out->intersected = 0;
+		return SE_VALID;
+	}
     return SE_VALID;
 }
 SE_Result SE_Intersect_Ray_AABB(const SE_Ray* ray, const SE_AABB* aabb, SE_IntersectionResult* out)

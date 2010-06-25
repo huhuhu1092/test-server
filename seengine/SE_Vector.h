@@ -51,6 +51,7 @@ extern float SE_Vec2f_LengthSquare(const SE_Vector2f* v);
 extern SE_Result SE_Vec2f_Copy(const SE_Vector2f* src, SE_Vector2f* dst);
 /*    **/
 extern SE_Result SE_Vec3f_Init(float x, float y, float z, SE_Vector3f* out);
+extern SE_Result SE_Vec3f_InitFromVector4f(const SE_Vector4f* v, SE_Vector3f* out);
 extern int SE_Vec3f_IsZero(const SE_Vector3f* v);
 /**
  * euqal return 1 else return 0
@@ -79,6 +80,7 @@ extern SE_Result SE_Vec3f_PointMove(const SE_Vector3f* point, const SE_Vector3f*
 extern float SE_Vec3f_ScalarTripleProduct(const SE_Vector3f* u, const SE_Vector3f* v, const SE_Vector3f* w);
 
 extern SE_Result SE_Vec4f_Init(float x, float y, float z, float w, SE_Vector4f* out);
+extern SE_Result SE_Vec4f_InitFromVector3f(const SE_Vector3f* v, float w, SE_Vector4f* out);
 extern SE_Result SE_Vec4f_Copy(const SE_Vector4f* src, SE_Vector4f* out);
 extern int SE_Vec4f_IsZero(const SE_Vector4f* v);
 extern int SE_Vec4f_Compare(const SE_Vector4f* v1, const SE_Vector3f* v2);

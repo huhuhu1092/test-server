@@ -187,7 +187,7 @@ extern SE_Result SE_Frustum_GetFar(const SE_Frustum* ft, SE_Plane* out);
 extern SE_Result SE_Frustum_Copy(const SE_Frustum* src, SE_Frustum* dst);
 /***/
 extern void SE_IntersectionResult_Release(void* intersectResult);
-
+extern SE_Result SE_IntersectionResult_Copy(const SE_IntersectionResult* src, SE_IntersectionResult* dst);
 #ifdef __cplusplus
 }
 #endif

@@ -303,11 +303,12 @@ static void createRenderUnitByMesh(SE_Renderer* renderer, SE_Mesh* mesh, int sub
 	}
 	else
 	{
+		int i;
+		int k = 0;
         SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, subIndex);
 		SE_FaceList* faceList = &subMesh->faceList;
 		vertexCount = faceList->num * 3;
-		int i;
-		int k = 0;
+
         vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
 		if(!vertexArray)
 		{

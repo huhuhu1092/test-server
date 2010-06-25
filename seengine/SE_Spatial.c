@@ -398,6 +398,50 @@ struct ContextData
     SE_List* spatialList;
 };
 static void travelSpatialChildren(SE_Element* e, void* context);
+static SE_Result intersectRayMesh(const SE_Ray* ray, const SE_Mesh* mesh, SE_Spatial* spatial, SE_IntersectionResult* out)
+{
+	SE_ResourceManager* resourceManager = spatial->resourceManager;
+    SE_GeometryData* gd = SE_ResourceManager_GetGeometryData(resourceManager, mesh->geomDataIndex);
+	SE_Triangle tri;
+	int i;
+	float distance = -SE_FLT_MAX;
+	int intersected = 0;
+	SE_Object_Clear(out, sizeof(SE_IntersectionResult));
+	for(i = 0 ; i < gd->faceNum ; i++)
+	{
+		SE_IntersectionResult result;
+		SE_Vector4f p1, p2, p3;
+		SE_Vector4f wp1, wp2, wp3;
+		SE_Vector3f np1, np2, np3;
+		SE_Face* f = &gd->faceArray[i];
+		SE_Vec4f_InitFromVector3f(&gd->vertexArray[f->v0], 1.0f, &p1);
+        SE_Vec4f_InitFromVector3f(&gd->vertexArray[f->v1], 1.0f, &p2);
+		SE_Vec4f_InitFromVector3f(&gd->vertexArray[f->v2], 1.0f, &p3);
+		SE_Mat4f_Map(&spatial->worldTransform, &p1, &wp1);
+        SE_Mat4f_Map(&spatial->worldTransform, &p2, &wp2);
+		SE_Mat4f_Map(&spatial->worldTransform, &p3, &wp3);
+		SE_Vec3f_InitFromVector4f(&wp1, &np1);
+        SE_Vec3f_InitFromVector4f(&wp2, &np2);
+		SE_Vec3f_InitFromVector4f(&wp3, &np3);
+		SE_Triangle_InitFromPoint(&np1, &np2, &np3, &tri);
+        SE_Intersect_Ray_Triangle(ray, &tri, &result);
+		if(result.intersected && (result.distance[0] > distance))
+		{
+			distance = result.distance[0];
+			intersected = 1;
+		}
+		SE_IntersectionResult_Release(&result);
+	}
+	if(intersected)
+	{
+		out->intersected = 1;
+		out->distanceNum = 1;
+		out->distance = (float*)SE_Malloc(sizeof(float));
+	    *out->distance = distance;
+	}
+	return SE_VALID;
+}
+
 static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatialList)
 {
     SE_BoundingVolume* bv = spatial->worldBV;
@@ -420,16 +464,26 @@ static int spatialIntersectRay(SE_Spatial* spatial, SE_Ray* ray, SE_List* spatia
         else
         {
             SE_Element e;
-            SE_IntersectionSpatialData* element = (SE_IntersectionSpatialData*)SE_Malloc(sizeof(SE_IntersectionSpatialData));
+			SE_IntersectionResult meshResult;
+			SE_IntersectionSpatialData* element;
+			SE_IntersectionResult_Release(&result);
+			intersectRayMesh(ray, spatial->mesh, spatial, &meshResult);
+			if(meshResult.intersected == 0)
+			{
+				SE_IntersectionResult_Release(&meshResult);
+				return 0;
+			}
+            element = (SE_IntersectionSpatialData*)SE_Malloc(sizeof(SE_IntersectionSpatialData));
             e.type = SE_DATA;
             if(element)
             {
-                element->intersectionResult = result;
+                SE_IntersectionResult_Copy(&meshResult, &element->intersectionResult);
                 element->spatial = spatial;
                 e.dp.data = element;
                 e.dp.fRelease = &SE_IntersectionSpatialData_Release;
                 SE_List_AddLast(spatialList, e);
             }
+			SE_IntersectionResult_Release(&meshResult);
         }
         return 0;
     }

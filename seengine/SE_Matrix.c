@@ -2,6 +2,71 @@
 #include "SE_Common.h"
 #include "SE_Math.h"
 #include <string.h>
+SE_Result SE_Mat2f_InitFromArray(float data[4], SE_Matrix2f* out)
+{
+	out->d[0] = data[0];
+	out->d[1] = data[1];
+	out->d[2] = data[2];
+	out->d[3] = data[3];
+	return SE_VALID;
+}
+SE_Result SE_Mat2f_InitFromColumn(const SE_Vector2f* c1, const SE_Vector2f* c2, SE_Matrix2f* out)
+{
+	out->m00 = c1->x;
+	out->m10 = c1->y;
+	out->m01 = c2->x;
+	out->m11 = c2->y;
+	return SE_VALID;
+}
+SE_Result SE_Mat2f_InitFromRow(const SE_Vector2f* r1, const SE_Vector2f* r2, SE_Matrix2f* out)
+{
+	out->m00 = r1->x;
+	out->m01 = r1->y;
+	out->m10 = r2->x;
+	out->m11 = r2->y;
+	return SE_VALID;
+}
+SE_Result SE_Mat2f_Identity(SE_Matrix2f* m)
+{
+    m->m00 = 1;
+	m->m01 = 0;
+	m->m10 = 0;
+	m->m11 = 1;
+	return SE_VALID;
+}
+SE_Result SE_Mat2f_Map(const SE_Matrix2f* m, const SE_Vector2f* v, SE_Vector2f* out)
+{
+	out->x = m->m00 * v->x + m->m01 * v->y;
+	out->y = m->m10 * v->x + m->m11 * v->y;
+	return SE_VALID;
+}
+float SE_Mat2f_Det(const SE_Matrix2f* m)
+{
+	return m->m00 * m->m11 - m->m01 * m->m10;
+}
+SE_Result SE_Mat2f_MulScalar(const SE_Matrix2f* m, float f, SE_Matrix2f* out)
+{
+	out->m00 = m->m00 * f;
+	out->m01 = m->m01 * f;
+	out->m10 = m->m10 * f;
+	out->m11 = m->m11 * f;
+	return SE_VALID;
+}
+SE_Result SE_Mat2f_Inverse(const SE_Matrix2f* m, SE_Matrix2f* out)
+{
+	float det = SE_Mat2f_Det(m);
+	if(det == 0.0f)
+	{
+		SE_Mat2f_Identity(out);
+		return SE_INVALID;
+	}
+	out->m00 = m->m11 / det;
+	out->m01 = -m->m01 / det;
+	out->m10 = -m->m10 / det;
+	out->m11 = m->m00 / det;
+	return SE_VALID;
+}
+
 SE_Result SE_Mat3f_InitFromArray(float data[9], SE_Matrix3f* out)
 {
     SE_ASSERT(out != NULL);
