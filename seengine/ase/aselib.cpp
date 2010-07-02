@@ -1016,6 +1016,10 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 		strcpy( mCurrGeomObject->name, s_token + 1 );
 		if ( strchr( mCurrGeomObject->name, '"' ) )
 			*strchr( mCurrGeomObject->name, '"' ) = 0;
+		if(!strcmp(mCurrGeomObject->name , "Camera01"))
+		{
+		    LOGI("... has camera setting\n");
+		}
 	}
 	else if ( !strcmp( token, "*NODE_PARENT" ) )
 	{
@@ -1074,6 +1078,9 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 */
 void ASE_Loader::ASE_Process(  )
 {
+#ifdef DEBUG
+    int geomCount = 0;
+#endif
 	while ( ASE_GetToken( false ) )
 	{
 		if ( !strcmp( s_token, "*3DSMAX_ASCIIEXPORT" ) ||
@@ -1094,13 +1101,18 @@ void ASE_Loader::ASE_Process(  )
 		else if ( !strcmp( s_token, "*GEOMOBJECT" ) )
 		{
 			LOGI( "GEOMOBJECT\n"  );
-            ASE_GeometryObject *obj = new ASE_GeometryObject;
+                    ASE_GeometryObject *obj = new ASE_GeometryObject;
 			mSceneObject->mGeomObjects.push_back(obj);
 			mCurrGeomObject = obj;
 			ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyGEOMOBJECT );
-
+#ifdef DEBUG
+			geomCount++;
+#endif
 	    }	
 	}
+#ifdef DEBUG
+	LOGI(".. geomCount = %d \n", geomCount);
+#endif
     ASE_AdjustSubMtl();
 }
 void ASE_Loader::ASE_AdjustSubMtl()
