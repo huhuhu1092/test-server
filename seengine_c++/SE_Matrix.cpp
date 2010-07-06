@@ -640,4 +640,12 @@ void SE_Matrix4f::setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const 
 	setColumn(i, cr[i]);
     }
 }
-
+void  SE_Matrix4f::set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, const SE_Vector3f& translate)
+{
+    SE_Matrix3f sm;
+    sm.set(0 , 0, scale.x);
+    sm.set(1, 1, scale.y);
+    sm.set(2, 2, scale.z);
+    SE_Matrix3f rs = rotate.mul(sm);
+    set(rs, translate);
+}

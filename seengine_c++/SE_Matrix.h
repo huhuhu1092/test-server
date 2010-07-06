@@ -51,6 +51,10 @@ public:
     SE_Matrix3f mul(const SE_Matrix3f& rm) const;
     SE_Matrix3f add(const SE_Matrix3f& rm) const;
     float get(int row, int column) const;
+    void set(int row, int column, float f)
+    {
+        d[row * 3 + column] = f;
+    }
     SE_Vector3f getRow(int i) const;
     SE_Vector3f getColumn(int i) const;
     void setColumn(const SE_Vector3f& c0, const SE_Vector3f& c1, const SE_Vector3f& c2);
@@ -99,6 +103,14 @@ public:
     SE_Matrix4f(const SE_Matrix4f& rm);
     SE_Matrix4f& operator=(const SE_Matrix4f& rm);
     float det() const;
+    void identity()
+    {
+        memset(d, 0, sizeof(float) * 16);
+        set(0 , 0 , 1.0f);
+        set(1 , 1 , 1.0f);
+        set(2 , 2 , 1.0f);
+        set(3 , 3 , 1.0f);
+    }
     SE_Matrix3f toMatrix3f() const;
     SE_Vector4f map(const SE_Vector4f& v) const;
     SE_Matrix4f inverse() const;
@@ -115,10 +127,19 @@ public:
     void setColumn(int column, const SE_Vector4f& v);
     void setRow(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3);
     void setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const SE_Vector4f& c2, const SE_Vector4f& c3);
+    void set(int row, int column, float f)
+    {
+        d[row * 4 + column] = f;
+    }
+    void set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, const SE_Vector3f& translate);
     SE_Vector3f getTranslate() const;
     bool hasInverse() const
     {
-	return det() != 0;
+	    return det() != 0;
+    }
+    float get(int row, int column)
+    {
+        return d[row * 4 + column];
     }
 
 private:

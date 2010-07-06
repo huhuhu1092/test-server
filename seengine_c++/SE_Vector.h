@@ -110,58 +110,69 @@ class SE_Vector3f
 public:
     SE_Vector3f()
     {
-	x = y = z = 0.0f;
+	    x = y = z = 0.0f;
     }
     SE_Vector3f(float x, float y, float z)
     {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+	    this->x = x;
+	    this->y = y;
+	    this->z = z;
+    }
+    SE_Vector3f(const SE_Vector2f& v, float z)
+    {
+        x = v.x;
+        y = v.y;
+        this->z = z;
     }
     SE_Vector3f(float d[3])
     {
-	x = d[0];
-	y = d[1];
-	z = d[2];
+	    x = d[0];
+	    y = d[1];
+	    z = d[2];
     }
     SE_Vector3f(const SE_Vector3f& rv)
     {
-	x = rv.x;
-	y = rv.y;
-	z = rv.z;
+	    x = rv.x;
+	    y = rv.y;
+	    z = rv.z;
     }
     SE_Vector3f& operator=(const SE_Vector3f& rv)
     {
-	if(this == &rv)
-	    return *this;
+	    if(this == &rv)
+	        return *this;
         x = rv.x;
-	y = rv.y;
-	z = rv.z;
-	return *this;
+	    y = rv.y;
+	    z = rv.z;
+	    return *this;
     }
     inline float operator[](int i)
     {
-	return d[i];
+	    return d[i];
     }
+
     inline float dot(const SE_Vector3f& rv) const
     {
-	return x * rv.x + y * rv.y + z * rv.z;
+	    return x * rv.x + y * rv.y + z * rv.z;
     }
     inline SE_Vector3f cross(const SE_Vector3f& rv) const
     {
-	return SE_Vector3f(y * rv.z - z * rv.y, z * rv.x - x * rv.z, x * rv.y - y * rv.x);
+	    return SE_Vector3f(y * rv.z - z * rv.y, z * rv.x - x * rv.z, x * rv.y - y * rv.x);
     }
     inline SE_Vector3f mul(float f) const
     {
-	return SE_Vector3f(x * f, y * f, z * f);
+	    return SE_Vector3f(x * f, y * f, z * f);
+    }
+    inline SE_Vector3f mul(const SE_Vector3f& v) const
+    {
+        return SE_Vector3f(x * v.x, y * v.y, z * v.z);
     }
     inline SE_Vector3f subtract(const SE_Vector3f& rv) const
     {
-	return SE_Vector3f(x - rv.x, y - rv.y, z - rv.z);
+	    return SE_Vector3f(x - rv.x, y - rv.y, z - rv.z);
     }
     inline SE_Vector3f add(const SE_Vector3f& rv) const
     {
-	return SE_Vector3f(x + rv.x, y + rv.y , z + rv.z);
+	    return SE_Vector3f(x + rv.x, y + rv.y , z + rv.z);
     }
     inline SE_Vector3f neg() const
     {
@@ -298,6 +309,22 @@ public:
 	z = rv.z;
 	w = rv.w;
 	return *this;
+    }
+    SE_Vector3f xyz() const
+    {
+        return SE_Vector3f(x, y, z);
+    }
+    SE_Vector3f yzw() const
+    {
+        return SE_Vector3f(y, z, w);
+    }
+    SE_Vector3f zwx() const
+    {
+        return SE_Vector3f(z, w, x);
+    }
+    SE_Vector3f get(int indexX, int indexY, int indexZ) const
+    {
+        return SE_Vector3f(d[indexX], d[indexY], d[indexZ]);
     }
     bool isZero() const
     {
