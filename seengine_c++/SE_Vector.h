@@ -96,6 +96,16 @@ public:
     {
 	return v.mul(d);
     }
+    friend bool operator==(const SE_Vector2f& v1, const SE_Vector2f& v2)
+    {
+        for(int i = 0 ; i < 2 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return false;
+        }
+        return true;
+
+    }
     union
     {
 	float d[2];
@@ -145,6 +155,17 @@ public:
 	    z = rv.z;
 	    return *this;
     }
+    friend bool operator==(const SE_Vector3f& v1, const SE_Vector3f& v2)
+    {
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return false;
+        }
+        return true;
+
+    }
+
     inline float operator[](int i)
     {
 	    return d[i];
@@ -310,6 +331,17 @@ public:
 	w = rv.w;
 	return *this;
     }
+    friend bool operator==(const SE_Vector4f& v1, const SE_Vector4f& v2)
+    {
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return false;
+        }
+        return true;
+
+    }
+
     SE_Vector3f xyz() const
     {
         return SE_Vector3f(x, y, z);
@@ -407,5 +439,45 @@ public:
 	};
     };
 
+};
+class SE_Vector3i
+{
+public:
+    SE_Vector3i()
+    {
+        x = y = z = 0;
+    }
+    SE_Vector3i(int x, int y, int z)
+    {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+    }
+    SE_Vector3i(int d[3])
+    {
+        this->d[0] = d[0];
+        this->d[1] = d[1];
+        this->d[2] = d[2];
+    }    
+    friend bool operator==(const SE_Vector3i& v1, const SE_Vector3i& v2)
+    {
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] != v2.d[i])
+                return false;
+        }
+        return true;
+
+    }
+
+public:
+    union
+    {
+        int d[3];
+        struct
+        {
+            int x, y, z;
+        };
+    };
 };
 #endif
