@@ -162,7 +162,7 @@ static void processMaterialData(char* data, int& startPos, SE_ResourceManager* r
         int d[4];
         for(int i = 0 ; i < 4 ; i++)
         {
-            d[i] =readInt(data, &startPos);
+            d[i] = readInt(data, &startPos);
         }
         SE_MaterialData* materialData = new SE_MaterialData;
         readVector3f(materialData->ambient, data, &startPos);
@@ -176,7 +176,20 @@ static void processMaterialData(char* data, int& startPos, SE_ResourceManager* r
 }
 static void processImageData(char* data, int& startPos, SE_ResourceManager* resourceManager)
 {
-
+    int imageDataNum = readInt(data, &startPos);
+    for(int i = 0 ; i < imageDataNum ; i++)
+    {
+        int d[4];
+        for(int j = 0 ; j < 4 ; j++)
+            d[j] = readInt(data, &startPos);
+        int imageType = readInt(data, &startPos);
+        std::string str = readString(data, &startPos);
+        std::string dataPath = resourceManager->getDataPath();
+        std::string imageDataPath = dataPath + "/" + str;
+        SE_ImageData* imageData = SE_IO::loadImage(imageDataPath.c_str(), imageType);
+        SE_ImageDataID id(d[0], d[1], d[2], d[3]);
+        resourceManager->setImageData(id, imageData); 
+    }
 }
 static void process(char* data, int currPos, int dataLen, SE_ResourceManager* resourceManager)
 {

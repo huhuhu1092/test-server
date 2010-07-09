@@ -36,6 +36,8 @@ public:
     SE_Mesh* getMesh(const SE_MeshID& meshID);
     void setMeshTransfer(const SE_SceneID& sceneID, const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);
     int getMeshNum(const SE_SceneID& sceneID);
+    const char* getDataPath();
+    void setDataPath(const char* datapath);
 private:
     SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
 private:
