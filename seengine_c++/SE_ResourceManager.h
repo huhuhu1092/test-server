@@ -5,7 +5,7 @@ class SE_TextureUnitData;
 class SE_ImageData;
 class SE_MaterialData;
 class SE_GeometryDataID;
-class SE_TextureUnitDataID;
+class SE_TextureCoordDataID;
 class SE_ImageDataID;
 class SE_MaterialDataID;
 class SE_MeshID;
@@ -20,8 +20,8 @@ public:
     SE_GeometryData* getGeometryData(const SE_GeometryDataID& geomID);
     SE_GeometryData* setGeometryData(const SE_GeometryDataID& geomID, SE_GeometryData* data);
     
-    SE_TextureUnitData* getTextureUnitData(const SE_TextureUnitDataID& texID);
-    SE_TextureUnitData* setTextureUnitData(const SE_TextureUnitDataID& texID, SE_TextureUnitData* data);
+    SE_TextureCoordData* getTextureCoordData(const SE_TextureCoordDataID& texID);
+    SE_TextureCoordData* setTextureCoordData(const SE_TextureCoordDataID& texID, SE_TextureCoordData* data);
     
     SE_ImageData* getImageData(const SE_ImageDataID& imageID);
     SE_ImageData* setImageData(const SE_ImageDataID& imageID, SE_ImageData* data);
@@ -29,9 +29,16 @@ public:
     SE_MaterialData* getMaterialData(const SE_MaterialDataID& materialID);
     SE_MaterialData* setMaterialData(const SE_MaterialDataID& materialID, SE_MaterialData* data);
 
+/*
     void loadGeometryData(const char* resourceName);
-    void loadTextureUnitData(const char* resourceName);
+    void loadTextureCoordData(const char* resourceName);
     void loadMaterialData(const char* resourceName);
+*/
+    /*
+     * base data contains: geometry data, texture coord data, material data, image data.
+     * */
+    void loadBaseData(const char* baseResourceName);
+    void loadScene(const char* sceneName);
 
     SE_Mesh* getMesh(const SE_MeshID& meshID);
     void setMeshTransfer(const SE_SceneID& sceneID, const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);

@@ -32,20 +32,20 @@ private:
 private:
     unsigned int id[4];
 };
-class SE_TextureUnitDataID
+class SE_TextureCoordDataID
 {
 public:
-    static SE_TextureUnitDataID create(SE_APPID id);
-    SE_TextureUnitDataID(int i0, int i1, int i2, int i3);
+    static SE_TextureCoordDataID create(SE_APPID id);
+    SE_TextureCoordDataID(int i0, int i1, int i2, int i3);
 
-    SE_TextureUnitDataID(const SE_GeometryDataID& rid);
-    SE_TextureUnitDataID& operator=(const SE_TextureUnitDataID& rid);
-    friend bool operator==(const SE_TextureUnitDataID& lid, const SE_TextureUnitDataID& rid);
-    friend bool operator<(const SE_TextureUnitDataID& lid, const SE_TextureUnitDataID& rid);
-    friend bool operator>(const SE_TextureUnitDataID& lid, const SE_TextureUnitDataID& rid);
-    friend bool operator!=(const SE_TextureUnitDataID& lid, const SE_TextureUnitDataID& rid);
+    SE_TextureCoordDataID(const SE_GeometryDataID& rid);
+    SE_TextureCoordDataID& operator=(const SE_TextureCoordDataID& rid);
+    friend bool operator==(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
+    friend bool operator<(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
+    friend bool operator>(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
+    friend bool operator!=(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
 private:
-    SE_TextureUnitDataID();
+    SE_TextureCoordDataID();
 private:
     unsigned int id[4];
 };
@@ -106,7 +106,7 @@ class SE_IDManager
 public:
     SE_IDManager(SE_APPID appid);
     SE_GeometryDataID createGeomDataID();
-    SE_TextureUnitDataID createTextureUnitDataID();
+    SE_TextureCoordDataID createTextureCoordDataID();
     SE_MaterialDataID createMaterialDataID();
     SE_ImageDataID createImageDataID();
     SE_SceneID createSceneID();

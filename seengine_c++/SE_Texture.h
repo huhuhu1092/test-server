@@ -7,13 +7,13 @@ public:
     enum {BASEMAP, NORMALMAP, ENVMAP};
     SE_TextureUnit(int type);
     ~SE_TextureUnit();
-    void setTextureUnitData(SE_TextureUnitData* texUnitData);
+    void setTextureCoordData(SE_TextureCoordData* texCoordData);
     bool addImageData(SE_ImageData* imageData);
-    SE_TextureUnitData* getTextureUnitData();
+    SE_TextureCoordData* getTextureCoordData();
     int getImageNum();
     SE_ImageData* getImage(int index);
 private:
-    SE_TextureUnitData* texUnit;
+    SE_TextureCoordData* texCoord;
     SE_ImageData* imageArray[MAX_IMAGE_NUM];
     int imageNum;
     int type;
