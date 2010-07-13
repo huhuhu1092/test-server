@@ -1,108 +1,216 @@
 #ifndef SE_DATATRANSFER_H
 #define SE_DATATRANSFER_H
+#include "SE_ID.h"
 class SE_TextureUnitTransfer
 {
 public:
-    SE_TextureUnitTransfer();
+    SE_TextureUnitTransfer()
+    {
+        mImageDataNum = 0;
+        mType = 0;
+        mImageDataArray = NULL;
+    }
     ~SE_TextureUnitTransfer()
     {
-        if(imageDataArray)
-            delete[] imageDataArray;
+        if(mImageDataArray)
+            delete[] mImageDataArray;
     }
-    SE_TextureCoordDataID getTexCoordDataID();
-    int getImageDataNum();
-    SE_ImageDataID* getImageDataID(int index);
-    int getType(); // this is the texture unit type: base color, bumpmap, reflection map, etc.
+    SE_TextureCoordDataID getTexCoordDataID()
+    {
+        return mTexCoordID;
+    }
+    int getImageDataNum()
+    {
+        return mImageDataNum;
+    }
+    SE_ImageDataID* getImageDataID(int index)
+    {
+        if(index < 0 || index >= mImageDataNum)
+            return NULL;
+        return &mImageDataArray[index];
+    }
+    // this is the texture unit type: base color, bumpmap, reflection map, etc.
+    int getType()
+    {
+        return mType;
+    } 
 
-    void setTextureCoordDataID(const SE_TextureCoordDataID& texCoordDataID);
-    void setImageDataNum(int num);
-    void setImageDataID(SE_ImageDataID* imageDataIDArray);
-    void setType(int type);
+    void setTextureCoordDataID(const SE_TextureCoordDataID& texCoordDataID)
+    {
+        mTexCoordDataID = texCoordDataID;
+    }
+    void setImageDataID(SE_ImageDataID* imageDataIDArray, int num)
+    {
+        mImageDataArray = imageDataArray;
+        mImageDataNum = num;
+    }
+    void setType(int type)
+    {
+        mType = type;
+    }
 private:
-    SE_TextureCoordDataID texCoordID;
-    int imageDataNum;
-    int type;
-    SE_ImageDataID* imageDataArray;
+    SE_TextureCoordDataID mTexCoordID;
+    int mImageDataNum;
+    int mType;
+    SE_ImageDataID* mImageDataArray;
 };
+///////////////////////////////////////////////
 class SE_TextureTransfer
 {
 public:
-    SE_TextureTransfer();
+    SE_TextureTransfer()
+    {
+        mTexUnitNum = 0;
+        mTexUnitTransfer = NULL;
+    }
     ~SE_TextureTransfer()
     {
-        if(texUnitDataTransfer)
-            delete[] texUnitDataTransfer;
+        if(mTexUnitDataTransfer)
+            delete[] mTexUnitDataTransfer;
     }
 
-    int getTextureUnitNum();
-    SE_TextureUnitTransfer* getTextureUnit(int index);
+    int getTextureUnitNum()
+    {
+        return mTexUnitNum;
+    }
+    SE_TextureUnitTransfer* getTextureUnit(int index)
+    {
+        if(index < 0 || index >= mTexUnitNum)
+            return NULL;
+        return mTexUnitTransfer;
+    }
 
-    void setTextureUnitNum(int num);
-    void setTextureUnitTransfer(SE_TextureUnitTransfer* texUnitTransfer);
+    void setTextureUnitTransfer(SE_TextureUnitTransfer* texUnitTransfer, int num)
+    {
+        mTexUnitTransfer = texUnitTransfer;
+        mTexUnitNum = num;
+    }
 private:
-    int texUnitNum;
-    SE_TextureUnitTransfer* texUnitTransfer;
+    int mTexUnitNum;
+    SE_TextureUnitTransfer* mTexUnitTransfer;
 };
+/////////////////////////////////////////
 class SE_SurfaceTransfer
 {
 public:
-    SE_SurfaceTransfer();
+    SE_SurfaceTransfer()
+    {
+        mTexIndex = -1;
+        mFacetNum = 0;
+        mFacetArray = NULL;
+    }
     ~SE_SurfaceTransfer()
     {
-        if(faceList)
-            delete[] faceList;
+        if(mFacetArray)
+            delete[] mFacetArray;
     }
-    int getTextureIndex();
-    SE_MaterialDataID getMaterialDataID();
-    int getFacetNum();
-    int* getFacetList();
+    int getTextureIndex()
+    {
+        return mTexIndex;
+    }
+    SE_MaterialDataID getMaterialDataID()
+    {
+        return mMaterialDataID;
+    }
+    int getFacetNum()
+    {
+        return mFacetNum;
+    }
+    int* getFacetArray()
+    {
+        return mFacetArray;
+    }
 
-    void setTextureIndex(int index);
-    void setMaterialDataID(const SE_MaterialDataID& materialDataID);
-    void setFacetNum(int num);
-    void setFacets(int* facets);
+    void setTextureIndex(int index)
+    {
+        mTexIndex = index;
+    }
+    void setMaterialDataID(const SE_MaterialDataID& materialDataID)
+    {
+        mMaterialDataID = materialDataID;
+    }
+    void setFacets(int* facets, int num)
+    {
+        mFacetArray = facets;
+        mFacetNum = num;
+    }
 private:
-    int texIndex;
-    SE_MaterialDataID materialDataID;
-    int facetNum;
-    int* facetList;
+    int mTexIndex;
+    SE_MaterialDataID mMaterialDataID;
+    int mFacetNum;
+    int* mFacetArray;
 };
+//////////////////////////////////////////////////
 class SE_MeshTransfer
 {
 public:
-    SE_MeshTransfer();
-    ~SE_MeshTransfer()
+    SE_MeshTransfer()
     {
-        if(surfaceData)
-            delete[] sufaceData;
-        if(texTransfer)
-            delete[] texTransfer;
+        mSurfaceNum = 0;
+        mSurfaceTransferArray = NULL;
+        mTexNum = 0;
+        mTexTransferArray = NULL;
     }
-    SE_GeometryDataID getGeomDataID();
-    int getSurfaceNum();
-    SE_SurfaceDataTransfer* getSurface(int index);
-    int getTextureNum();
-    SE_TextureTransfer* getTexture(int index);
-    SE_Vector3f getColor();
+    ~SE_MeshTransfer();
+    SE_GeometryDataID getGeomDataID()
+    {
+        return mGeomDataID;
+    }
+    int getSurfaceNum()
+    {
+        return mSurfaceNum;
+    }
+    SE_SurfaceDataTransfer* getSurface(int index)
+    {
+        if(index < 0 || index >= mSurfaceNum)
+            return NULL;
+        return &mSurfaceTransferArray[index];
+    }
+    int getTextureNum()
+    {
+        return mTexNum;
+    }
+    SE_TextureTransfer* getTexture(int index)
+    {
+        if(index < 0 || index >= mTexNum)
+            return NULL;
+        return &mTexTransferArray[index];
+    }
+    SE_Vector3f getColor()
+    {
+        return mColor;
+    }
 
-    void setGeometryDataID(const SE_GeometryDataID& geomDataID);
-    void setSurfaceNum(int n);
-    void setSurface(SE_SurfaceDataTransfer* surfaceData);
-    void setTextureNum(int num);
-    void setTextureTransfer(SE_TextureTransfer* texTranfer);
-    void setColor(const SE_Vector3f& color);
+    void setGeometryDataID(const SE_GeometryDataID& geomDataID)
+    {
+        mGeomDataID = geomDataID;
+    }
+    void setSurfaceTransfer(SE_SurfaceDataTransfer* surfaceData, int num)
+    {
+        mSurfaceTransferArray = surfaceData;
+        mSurfaceNum = num;
+    }
+    void setTextureTransfer(SE_TextureTransfer* texTransfer, int num)
+    {
+        mTexTransferArray = texTransfer;
+        mTexNum = num;
+    }
+    void setColor(const SE_Vector3f& color)
+    {
+        mColor = color;
+    }
     /////////////////////////////////////////////////////
     SE_Mesh* createMesh();
     void createFromMesh(SE_Mesh* mesh);
     void createFromBytes(char* data, int len);
     void writeToBytes(char*& data, int& len);
 private:
-    SE_GeometryDataID geomDataID;
-    int surfaceNum;
-    SE_SurfaceDataTransfer* surfaceData;
-    int texNum;
-    SE_TextureTransfer* texTransfer;
-    SE_Vector3f color;
+    SE_GeometryDataID mGeomDataID;
+    int mSurfaceNum;
+    SE_SurfaceTransfer* mSurfaceTransferArray;
+    int mTexNum;
+    SE_TextureTransfer* mTexTransferArray;
+    SE_Vector3f mColor;
 };
 
 #endif

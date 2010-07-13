@@ -1,5 +1,6 @@
 #ifndef SE_ID_H
 #define SE_ID_H
+class SE_BufferOutput;
 class SE_CommonID
 {
 public:
@@ -10,6 +11,7 @@ public:
     friend bool operator==(const SE_CommonID& id1, const SE_CommonID& id2);
     friend bool operator<(const SE_CommonID& id1, const SE_CommonID& id2);
     friend bool operator>(const SE_CommonID& id1, const SE_CommonID& id2);
+    void write(const SE_BufferOutput& output);
 private:
     struct _Impl;
     _Impl* mImpl;
@@ -23,6 +25,7 @@ public:
     SE_GeometryDataID(int i0, int i1, int i2, int i3);
     SE_GeometryDataID(const SE_GeometryDataID& rid);
     SE_GeometryDataID& operator=(const SE_GeometryDataID& rid);
+    void write(const SE_BufferOutput& output);
     friend bool operator==(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid);
     friend bool operator<(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid);
     friend bool operator>(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid);
@@ -40,6 +43,7 @@ public:
 
     SE_TextureCoordDataID(const SE_GeometryDataID& rid);
     SE_TextureCoordDataID& operator=(const SE_TextureCoordDataID& rid);
+    void write(const SE_BufferOutput& output);
     friend bool operator==(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
     friend bool operator<(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
     friend bool operator>(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid);
@@ -57,6 +61,7 @@ public:
 
     SE_MaterialDataID(const SE_GeometryDataID& rid);
     SE_MaterialDataID& operator=(const SE_MaterialDataID& rid);
+    void write(const SE_BufferOutput& output);
     friend bool operator==(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid);
     friend bool operator<(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid);
     friend bool operator>(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid);
@@ -78,6 +83,7 @@ public:
     friend bool operator>(const SE_SceneID& lid, const SE_SceneID& rid);
     friend bool operator!=(const SE_SceneID& lid, const SE_SceneID& rid);
     bool isValid();
+    void write(const SE_BufferOutput& output);
 private:
     SE_SceneID();
 private:
@@ -86,7 +92,7 @@ private:
 class SE_ImageDataID
 {
 public:
-    static SE_ImageDataID create(SE_APPID appid);
+    static SE_ImageDataID create(SE_APPID appid, const char* str = NULL);
     SE_ImageDataID(const char* id);
     SE_ImageDataID(const char* id, int size);
     SE_ImageDataID(const SE_GeometryDataID& rid);
@@ -95,6 +101,7 @@ public:
     friend bool operator<(const SE_ImageDataID& lid, const SE_ImageDataID& rid);
     friend bool operator>(const SE_ImageDataID& lid, const SE_ImageDataID& rid);
     friend bool operator!=(const SE_ImageDataID& lid, const SE_ImageDataID& rid);
+    void write(const SE_BufferOutput& output);
 private:
     SE_ImageDataID();
 private:

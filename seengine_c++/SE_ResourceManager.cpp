@@ -1,4 +1,5 @@
 #include "SE_ResourceManager.h"
+#include "SE_Utils.h"
 #include <map>
 #include <vector>
 static const int SE_MAX_MESH_NUM = 1024; //the max mesh in per scene
@@ -13,53 +14,27 @@ static const int SE_VERSION = 0x01;
 
 static int readInt(char* data, int* currPos)
 {
-    int v;
-    memcpy(&v, data + (*currPos), sizeof(int));
-    (*currPos) += sizeof(int);
-    return v;
+    return SE_Util::readInt(data, currPos);
 }
 static float readFloat(char* data, int* currPos)
 {
-    float v;
-    memcpy(&v, data + (*currPos), sizeof(float));
-    (*currPos) += sizeof(float);
-    return v;
+    return SE_Util::readFloat(data, currPos);
 }
 static short readShort(char* data, int* currPos)
 {
-    short v;
-    memcpy(&v, data + (*currPos), sizeof(short));
-    (*currPos) += sizeof(short);
-    return v;
+    return SE_Util::readShort(data, currPos);
 }
 static std::string readString(char* data, int* currPos)
 {
-    std::string str;
-    int len;
-	char* buf = NULL;
-    memcpy(&len, data + (*currPos), sizeof(int));
-    (*currPos) += sizeof(int);
-    if(len > 0)
-    {
-        buf = (char*)SE_Malloc(len + 1);
-        memset(buf, 0 , len + 1);
-        strncpy(buf, data + (*currPos), len);
-        str = buf;
-        delete buf;
-    }
-    return str;
+    return SE_Util::readString(data, currPos);
 }
 static void readVector3f(SE_Vector3f& out, char* data, int* currPos)
 {
-    out.x = readFloat(data, currPos);
-    out.y = readFloat(data, currPos);
-    out.z = readFloat(data, currPos);
+    SE_Util::readVector3f(out, data, currPos);
 }
 static void readVector3i(SE_Vector3i& out, char* data, int* currPos)
 {
-    out.x = readInt(data, currPos);
-    out.y = readInt(data, currPos);
-    out.z = readInt(data, currPos);
+    SE_Util::readVector3i(out, data, currPos);
 }
 //////////////////////////////////////////////
 struct _MeshData
