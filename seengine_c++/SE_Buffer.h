@@ -33,4 +33,40 @@ private:
     int mOffset;
     bool mNetOrder;
 };
+class SE_BufferInput
+{
+public:
+    SE_BufferInput(char* data, int len, bool netOrder = false, bool own = true);
+    ~SE_BufferInput();
+    bool hasMore();
+    char readByte();
+    short readShort();
+    int readInt();
+    float readFloat();
+    SE_Vector2f readVector2f();
+    SE_Vector3f readVector3f();
+    SE_Vector3i readVector3i();
+    SE_Vector4f readVector4f();
+    SE_Matrix2f readMatrix2f();
+    SE_Matrix3f readMatrix3f();
+    SE_Matrix4f readMatrix4f();
+    SE_Quat readQuat();
+    //this is the string ended by '\0'
+    char* readString();
+    char* readBytes(int len);
+    int getDataLen()
+    {
+        return mLen;
+    }
+    void reset()
+    {
+        mOffset = 0;
+    }
+private:
+    char* mData;
+    int mLen;
+    int mOffset;
+    bool mNetOrder;
+    bool mOwn;
+};
 #endif

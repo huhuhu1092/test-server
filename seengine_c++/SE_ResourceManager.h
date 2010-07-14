@@ -38,7 +38,7 @@ public:
      * base data contains: geometry data, texture coord data, material data, image data.
      * */
     void loadBaseData(const char* baseResourceName);
-    void loadScene(const char* sceneName);
+    SE_Spatial* loadScene(const char* sceneName);
 
     SE_Mesh* getMesh(const SE_MeshID& meshID);
     void setMeshTransfer(const SE_SceneID& sceneID, const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);
@@ -47,6 +47,8 @@ public:
     void setDataPath(const char* datapath);
 private:
     SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
+    static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);
+    SE_Spatial* createSpatial(int spatialType);
 private:
     struct _Impl;
     _Impl* mImpl;

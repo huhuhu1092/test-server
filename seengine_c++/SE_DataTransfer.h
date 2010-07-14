@@ -1,6 +1,8 @@
 #ifndef SE_DATATRANSFER_H
 #define SE_DATATRANSFER_H
 #include "SE_ID.h"
+class SE_BufferInput;
+class SE_BufferOutput;
 class SE_TextureUnitTransfer
 {
 public:
@@ -23,13 +25,13 @@ public:
     {
         return mImageDataNum;
     }
-    SE_ImageDataID* getImageDataID(int index)
+    SE_ImageDataID getImageDataID(int index)
     {
         if(index < 0 || index >= mImageDataNum)
             return NULL;
-        return &mImageDataArray[index];
+        return mImageDataArray[index];
     }
-    // this is the texture unit type: base color, bumpmap, reflection map, etc.
+    // this is the texture unit type: TEXTURE0, TEXTURE1, ... TEXTURE8,etc.
     int getType()
     {
         return mType;
@@ -202,8 +204,8 @@ public:
     /////////////////////////////////////////////////////
     SE_Mesh* createMesh();
     void createFromMesh(SE_Mesh* mesh);
-    void createFromBytes(char* data, int len);
-    void writeToBytes(char*& data, int& len);
+    void read(SE_BufferInput& inputBuffer);
+    void write(SE_BufferOutput& outputBuffer);
 private:
     SE_GeometryDataID mGeomDataID;
     int mSurfaceNum;

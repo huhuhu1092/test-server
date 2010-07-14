@@ -1,5 +1,6 @@
 #include "SE_ResourceManager.h"
 #include "SE_Utils.h"
+#include "SE_Buffer.h"
 #include <map>
 #include <vector>
 static const int SE_MAX_MESH_NUM = 1024; //the max mesh in per scene
@@ -8,34 +9,11 @@ static const int SE_TEXUNITDATA_ID = 0x4002;
 static const int SE_MATERIALDATA_ID = 0x4003;
 static const int SE_IMAGEDATA_ID = 0x4004;
 static const int SE_SCENEDATA_ID = 0x4005;
+static const int SE_MESHDATA_ID = 0x4006;
 
 static const int SE_MAGIC = 0xCFCFCFCF;
 static const int SE_VERSION = 0x01;
 
-static int readInt(char* data, int* currPos)
-{
-    return SE_Util::readInt(data, currPos);
-}
-static float readFloat(char* data, int* currPos)
-{
-    return SE_Util::readFloat(data, currPos);
-}
-static short readShort(char* data, int* currPos)
-{
-    return SE_Util::readShort(data, currPos);
-}
-static std::string readString(char* data, int* currPos)
-{
-    return SE_Util::readString(data, currPos);
-}
-static void readVector3f(SE_Vector3f& out, char* data, int* currPos)
-{
-    SE_Util::readVector3f(out, data, currPos);
-}
-static void readVector3i(SE_Vector3i& out, char* data, int* currPos)
-{
-    SE_Util::readVector3i(out, data, currPos);
-}
 //////////////////////////////////////////////
 struct _MeshData
 {
@@ -59,28 +37,29 @@ static SE_ImageData* loadRawImage(const char* imageName)
     SE_IO::readFileAll(imageName, data, len);
     if(len == 0)
         return NULL;
+    SE_ImageData* imageData = new SE_ImageData;
+    if(!imageData)
+        return NULL;
     int height, width, pixelFormat, bytesPerRow;
-    int startPos = 0;
-    width = readInt(data, &startPos);
-    height = readInt(data, &startPos);
-    pixelFormat = readInt(data, &startPos);
-    bytesPerRow = readInt(data, &startPos);
+    SE_BufferInput inputBuffer(data, len);
+    width = inputBuffer.readInt();
+    height = inputBuffer.readInt();
+    pixelFormat = inputBuffer.readInt();
+    bytesPerRow = inputBuffer.readInt();
     int pixelDataLen = len - sizeof(int) * 4;
     char* pixelData = new char[pixelDataLen];
-    if(pixelData)
+    if(!pixelData)
     {
-        delete[] data;
+        delete imageData;
         return NULL;
     }
-    memcpy(pixelData, data + startPos, pixelDataLen);
-    SE_ImageData* imageData = new SE_ImageData;
+    inputBuffer.readBytes(pixelData, pixelDataLen);
     imageData->setWidth(width);
     imageData->setHeight(height);
     imageData->setPixelFormat(pixelFormat);
     imageData->setBytesPerRow(bytesPerRow);
     imageData->setData(pixelData);
     imageData->setCompressType(SE_ImageData::RAW);
-    delete[] data;
     return imageData;
 }
 static SE_ImageData* loadImage(const char* imageName, int type)
@@ -104,32 +83,29 @@ static SE_ImageData* loadImage(const char* imageName, int type)
         break;
     } 
 }
-static void processGeometryData(char* data, int& startPos, SE_ResourceManager* resourceManager)
+static void processGeometryData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int geomDataNum = readInt(data, &startPos);
+    int geomDataNum = inputBuffer.readInt();
     for(int n = 0 ; n < geomDataNum ; n++)
     {
-        int d[4];
-        for(int i = 0 ; i < 4 ; i++)
-        {
-            d[i] = reandInt(data, &startPos);
-        }
-        int vertexNum = readInt(data, &startPos);
-        int faceNum = readInt(data, &startPos);
-        int normalNum = readInt(data, &startPos);
+        SE_GeometryDataID geomDataID;
+        geomDataID.read(inputBuffer);
+        int vertexNum = inputBuffer.readInt();
+        int faceNum = inputBuffer.readInt();
+        int normalNum = inputBuffer.readInt();
         SE_Vector3f* vertexArray = new SE_Vector3f[vertexNum];
         SE_Vector3i* faceArray = new SE_Vector3i[faceNum];
         for(int i = 0 ; i < vertexNum ; i++)
         {
-            vertexArray[i].x = readFloat(data, &startPos);
-            vertexArray[i].y = readFloat(data, &startPos);
-            vertexArray[i].z = readFloat(data, &startPos);
+            vertexArray[i].x = inputBuffer.readFloat();
+            vertexArray[i].y = inputBuffer.readFloat();
+            vertexArray[i].z = inputBuffer.readFloat();
         }
         for(int i = 0 ; i < faceNum ; i++)
         {
-            faceArray[i].d[0] = readInt(data, &startPos);
-            faceArray[i].d[1] = readInt(data, &startPos);
-            faceArray[i].d[2] = readInt(data, &startPos);
+            faceArray[i].d[0] = inputBuffer.readInt();
+            faceArray[i].d[1] = inputBuffer.readInt();
+            faceArray[i].d[2] = inputBuffer.readInt();
         }
         SE_Vector3f* normalArray = NULL;
         if(normalNum > 0)
@@ -137,12 +113,11 @@ static void processGeometryData(char* data, int& startPos, SE_ResourceManager* r
             normalArray = new SE_Vector3f[normalNum];
             for(int i = 0 ; i < normalNum ; i++)
             {
-                normalArray[i].x = readFloat(data, &startPos);
-                normalArray[i].y = readFloat(data, &startPos);
-                normalArray[i].z = readFloat(data, &startPos);
+                normalArray[i].x = inputBuffer.readFloat();
+                normalArray[i].y = inputBuffer.readFloat();
+                normalArray[i].z = inputBuffer.readFloat();
             }
         }
-        SE_GeometryDataID id(d[0], d[1], d[2], d[3]);
         SE_GeometryData* geomData = new SE_GeometryData;
         geomData->setVertexArray(vertexArry, vertexNum);
         geomData->setFaceArray(faceArray, faceNum);
@@ -150,108 +125,89 @@ static void processGeometryData(char* data, int& startPos, SE_ResourceManager* r
         resourceManager->setGeometryData(id, geomData);
     }
 }
-static void processTextureUnitData(char* data, int& startPos, SE_ResourceManager* resourceManager)
+static void processTextureUnitData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int texNum = readInt(data, &startPos);
+    int texNum = inputBuffer.readInt();
     for(int n = 0 ; n < texNum ; n++)
     {
-        int d[4];
-        for(int i = 0 ; i < 4 ; i++)
-        {
-            d[i] = readInt(data, &startPos);
-        }
-        int texVertexNum = readInt(data, &startPos);
-        int texFaceNum = readInt(data, &startPos);
+        SE_TextureUnitDataiD texUnitID;
+        texUnitID.read(inputBuffer);
+        int texVertexNum = inputBuffer.readInt();
+        int texFaceNum = inputBuffer.readInt();
         SE_Vector2f* texVertexArray = new SE_Vector2f[texVertexNum];
         SE_Vector3i* texFace = new SE_Vector3i[texFaceNum];
         for(int i = 0 ; i < texVertexArray ; i++)
         {
-            texVertexArray[i].x = readFloat(data, &startPos);
-            texVertexArray[i].y = readFloat(data, &startPos);
+            texVertexArray[i].x = inputBuffer.readFloat();
+            texVertexArray[i].y = inputBuffer.readFloat();
         }
         for(int i = 0 ; i  < texFaceNum ; i++)
         {
-            texFace[i].d[0] = readInt(data, &startPos);
-            texFace[i].d[1] = readInt(data, &startPos);
-            texFace[i].d[2] = readInt(data, &startPos);
+            texFace[i].d[0] = inputBuffer.readInt();
+            texFace[i].d[1] = inputBuffer.readInt();
+            texFace[i].d[2] = inputBuffer.readInt();
         }
-        SE_TextureUnitDataiD texUnitID(d[0], d[1], d[2], d[3]);
+        
         SE_TextureUnitData* texUnitData = new SE_TextureUnitData;
         texUnitData->setTexVertexArray(texVertexArray, texVertexNum);
         texUnitData->setTexFaceArray(texFaceArray, texFaceNum);
         resourceManager->setTextureUnitData(texUnitID, texUnitData);
     }
 }
-static void processMaterialData(char* data, int& startPos, SE_ResourceManager* resourceManager)
+static void processMaterialData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int materialDataNum = readInt(data, &startPos);
+    int materialDataNum = inputBuffer.readInt();
     for(int n = 0 ; n < materialDataNum ; n++)
     {
-        int d[4];
-        for(int i = 0 ; i < 4 ; i++)
-        {
-            d[i] = readInt(data, &startPos);
-        }
+        SE_MaterialDataID materialDataID;
+        materialDataID.read(inputBuffer);
         SE_MaterialData* materialData = new SE_MaterialData;
-        readVector3f(materialData->ambient, data, &startPos);
-        readVector3f(materialData->diffuse, data, &startPos);
-        readVector3f(materialData->specular, data, &startPos);
-        readVector3f(materialData->shiny, data, &startPos);
-        SE_MaterialDataID materialDataID(d[0], d[1], d[2], d[3]);
+        materialData->ambient = inputBuffer.readVector3f();
+        materialData->diffuse = inputBuffer.readVector3f();
+        materialData->specular = inputBuffer.readVector3f();
+        materialData->shiny = inputBuffer.readVector3f();
         resourceManager->setMaterialData(materialDataID, materialData);
     }
 
 }
-static void processImageData(char* data, int& startPos, SE_ResourceManager* resourceManager)
+static void processImageData(SE_BufferInput inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int imageDataNum = readInt(data, &startPos);
+    int imageDataNum = inputBuffer.readInt();
     for(int i = 0 ; i < imageDataNum ; i++)
     {
-        int d[4];
-        for(int j = 0 ; j < 4 ; j++)
-            d[j] = readInt(data, &startPos);
-        int imageType = readInt(data, &startPos);
-        std::string str = readString(data, &startPos);
+        SE_ImageDataID imageDataid;
+        imageDataid.read(inputBuffer);
+        int imageType = inputBuffer.readInt();
+        std::string str = inputBuffer.readString();
         std::string dataPath = resourceManager->getDataPath();
         std::string imageDataPath = dataPath + "/" + str;
         SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType);
-        SE_ImageDataID id(d[0], d[1], d[2], d[3]);
-        resourceManager->setImageData(id, imageData); 
+        resourceManager->setImageData(imageDataid, imageData); 
     }
 }
-static void processSceneData(char* data, int& startPos, SE_ResourceManager* resourceManager)
-{
 
-}
-static void process(char* data, int currPos, int dataLen, SE_ResourceManager* resourceManager)
+
+static void process(const SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int startPos = currPos;
-    int magic = readInt(data, &startPos);
-    if(magic != SE_MAGIC)
+    if(!resourceManager->checkHeader(inputBuffer))
         return;
-    int version = readInt(data, &startPos);
-    if(version != SE_VERSION)
-        return;
-    while(startPos < dataLen)
+    while(inputBuffer.hasMore())
     {
-        short id = readShort(data, &startPos);
+        short id = inputBuffer.readShort();
         switch(id)
         {
             case SE_GEOMETRYDATA_ID:
-                processGeometryData(data, startPos, resourceManager);
+                processGeometryData(inputBuffer, resourceManager);
                 break;
             case SE_TEXUNITDATA_ID:
-                processTextureUnitData(data, startPos, resourceManager);
+                processTextureUnitData(inputBuffer, resourceManager);
                 break;
             case SE_MATERIALDATA_ID:
-                processMaterialData(data, startPos, resourceManager);
+                processMaterialData(inputBuffer, resourceManager);
                 break;
             case SE_IMAGEDATA_ID:
-                processImageData(data, startPos, resourceManager);
-            case SE_SCENEDATA_ID:
-                processSceneData(data, startPos, resourceManager);
+                processImageData(inputBuffer, resourceManager);
                 break;
-
         }
     }
 }
@@ -273,11 +229,11 @@ struct SE_ResourceManager::_Impl
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
-    void process(char* data, int dataLen);
+    void process(SE_BufferInput& inputBuffer);
 };
-void SE_ResourceManager::_Impl::process(char* data, int currPos, int dataLen)
+void SE_ResourceManager::_Impl::process(SE_BufferInput& inputBuffer)
 {
-    process(data, currPos, dataLen, resourceManager);
+    process(inputBuffer, resourceManager);
 }
 //////////////////////
 SE_ResourceManager::SE_ResourceManager(const char* dataPath)
@@ -400,11 +356,46 @@ void SE_ResourceManager::loadBaseData(const char* baseResourceName)
     SE_IO::readFileAll(resourcePath.c_str(), data, len);
     if(data)
     {
-        mImpl->process(data, 0, len);
-        delete[] data;
+        SE_BufferInput inputBuffer(data, len)
+        mImpl->process(inputBuffer);
     }
 }
-void SE_ResourceManager::loadScene(const char* sceneName)
+bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
+{
+    int magic = inputBuffer.readInt();
+    if(magic != SE_MAGIC)
+        return false;
+    int version = inputBuffer.readInt();
+    if(version != SE_VERSION)
+        return false;
+    int dataLen = inputBuffer.readInt();
+    if(dataLen != inputBuffer.getDataLen())
+        return false;
+    return true;
+}
+SE_Spatial* SE_ResourceManager::createSpatial(int spatialType, SE_SpatialID spatialID, SE_Spatial* parent)
+{
+    if(spatialType == 0)
+        return new SE_CommonNode(spatialID, parent);
+    else if(spatialType == 1)
+        return new SE_Geometry(spatialID, parent);
+}
+SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
+{
+    int spatialType = inputBuffer.readInt();
+    SE_SpatialID spatialID;
+    spatialID.read(inputBuffer);
+    int childNum = inputBuffer.readInt();
+    SE_Node* node = NULL;
+    SE_Geometry* geometry = NULL;
+    SE_Spatial* spatial = createSpatial(spatialType);
+    spatial->read(inputBuffer);
+    for(int i = 0 ; i < childNum ; i++)
+    {
+        createSceneNode(inputBuffer, spatial);
+    }
+}
+SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName;
     char* data = NULL;
@@ -412,8 +403,54 @@ void SE_ResourceManager::loadScene(const char* sceneName)
     SE_IO::readFileAll(scenePath, data, len);
     if(data)
     {
-        mImpl->process(data, 0, len);
-        delete[] data;
+        SE_BufferInput inputBuffer(data , len);
+        if(!checkHeader(inputBuffer))
+            return;
+        SE_SceneID sceneID;
+        sceneID.read(inputBuffer);
+        std::string meshFileName = inputBuffer.readString();
+        loadMesh(sceneID, meshFileName); 
+        SE_Spatial* spatial = createScene(inputBuffer, NULL);    
+        return spatial;
+    }
+    else
+        return NULL;
+}
+void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, const char* meshFileName)
+{
+    std::string meshPath = mImpl->dataPath + "/" + meshFileName;
+    char* data = NULL;
+    int len = 0;
+    SE_IO::readFileAll(meshPath, data, len);
+    if(data)
+    {
+        SE_BufferInput inputBuffer(data, len);
+        int magic = inputBuffer.readInt();
+        if(magic != SE_MAGIC)
+        {
+            return;
+        }
+        int version = inputBuffer.readInt();
+        if(version != SE_VERSION)
+        {
+            return;
+        }
+        int meshNum = inputBuffer.readInt();
+        for(int i = 0 ; i < meshNum ; i++)
+        {
+            SE_MeshID meshID;
+            meshID.read(inputBuffer);
+            SE_MeshTranfer* meshTransfer = new SE_MeshTransfer;
+            if(meshTransfer)
+            {
+                meshTransfer->read(inputBuffer);
+                resourceManager->setMeshTransfer(sceneID, meshID, meshTransfer);
+            }
+        }
+    }
+    else
+    {
+        LOGI("can not find meshfile when load mesh!!\n");
     }
 }
 SE_Mesh* SE_ResourceManager::getMesh(const SE_SceneID& sceneID, const SE_MeshID& meshID)

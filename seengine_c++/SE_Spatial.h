@@ -3,10 +3,12 @@
 #include "SE_Matrix.h"
 #include "SE_Vector.h"
 #include "SE_Quat.h"
-class SE_SpatialID;
+#include "SE_ID.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_GeometryObject;
+class SE_BufferInput;
+class SE_BufferOutput;
 class SE_SpatialTravel
 {
 public:
@@ -17,7 +19,7 @@ class SE_Spatial
 public:
     enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04};
     enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4};
-    SE_Spatial(SE_SpatialID* spatialID, SE_Spatial* parent = NULL);
+    SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
     virtual ~SE_Spatial();
     const SE_Matrix4f& getWorldTransform();
     SE_Spatial* getParent();
@@ -30,7 +32,7 @@ public:
     SE_Matrix3f getLocalRotateMatrix();
     SE_Quat getLocalRotate();
     SE_Vector3f getLocalScale();
-    const SE_SpatialID* getSpatialID()
+    SE_SpatialID getSpatialID()
     {
         return mSpatialID;
     }
@@ -92,6 +94,8 @@ public:
     virtual void travel(SE_SpatialTravel* spatialTravel);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
+    virtual void write(SE_BufferOutput& output);
+    virtual void read(SE_BufferInput& input);
 protected:
     void updateWorldTranslate();
     void updateWorldRotate();
@@ -109,7 +113,7 @@ private:
 
     SE_BoundingVolume* mWorldBoundingVolume;
     SE_Spatial* mParent;
-    SE_SpatialID* mSpatialID;
+    SE_SpatialID mSpatialID;
     int mState;
 };
 #endif

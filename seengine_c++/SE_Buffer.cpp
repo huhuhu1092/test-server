@@ -1,4 +1,5 @@
 #include "SE_Buffer.h"
+#include <string.h>
 SE_BufferOutput::SE_BufferOutput(bool netOrder)
 {
     mLen = DEFAULT_LEN;
@@ -165,4 +166,167 @@ const char* SE_BufferOutput::getData()
 int SE_BufferOutput::getDataLen()
 {
     return mOffset;
+}
+////////////////////////////////////////////////////////////////////////////
+SE_BufferInput::SE_BufferInput(char* data, int len, bool netOrder = false, bool own = true)
+{
+    mData = data;
+    mLen = len;
+    mOffset = 0;
+    mNetOrder = netOrder;
+    mOwn = own;
+}
+SE_BufferInput::~SE_BufferInput()
+{
+    if(mOwn && mData)
+    {
+        delete[] mData;
+    }
+}
+bool SE_BufferInput::hasMore()
+{
+    return mOffset < mLen;
+}
+char SE_BufferInput::readByte()
+{
+    return mData[mOffsest++];
+}
+short SE_BufferInput::readShort()
+{
+    short out = 0xFFFF;
+    readBytes((char*)&out, sizeof(short));
+    if(mNetOrder)
+    {
+        out = SE_Util::net2HostInt16(out);
+    }    
+    return out;
+}
+int SE_BufferInput::readInt()
+{
+    int out = 0xFFFFFFFF;
+    readBytes((char*)&out, sizeof(int));
+    if(mNetOrder)
+    {
+        out = SE_Util::net2HostInt32(out);
+    }
+    return out;
+}
+float SE_BufferInput::readFloat()
+{
+    float out = 0xFFFFFFFF;
+    readBytes((char*)&out, sizeof(float));
+    if(mNetOrder)
+    {
+        int i = *(int*)out;
+        i = SE_Util::net2HostInt32(i);
+        out = (float)i;
+    }
+    return out;
+}
+SE_Vector2f SE_BufferInput::readVector2f()
+{
+    SE_Vector2f out;
+    for(int i = 0 ; i < 2 ; i++)
+    {
+        out.d[i] = readFloat();
+    }
+    return out;
+}
+SE_Vector3f SE_BufferInput::readVector3f()
+{
+    SE_Vector3f out;
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        out.d[i] = readFloat();
+    }
+    return out;
+}
+SE_Vector3i SE_BufferInput::readVector3i()
+{
+    SE_Vector3i out;
+    for(int i = 0 ; i < 3 ; i++)
+        out.d[i] = readInt();
+    return out;
+}
+SE_Vector4f SE_BufferInput::readVector4f()
+{
+    SE_Vector4f out;
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        out.d[i] = readFloat();
+    }
+    return out;
+}
+SE_Matrix2f SE_BufferInput::readMatrix2f()
+{
+    SE_Matrix2f m;
+    for(int i = 0 ; i < 2 ; i++)
+    {
+        for(int j = 0 ; j < 2 ; j++)
+        {
+            m.set(i, j, readFloat());
+        }
+
+    }
+    return m;
+}
+SE_Matrix3f SE_BufferInput::readMatrix3f()
+{
+    SE_Matrix3f m;
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        for(int j = 0 ; j < 3 ; j++)
+        {
+            m.set(i, j, readFloat());
+        }
+
+    }
+    return m;
+}
+SE_Matrix4f SE_BufferInput::readMatrix4f()
+{
+    SE_Matrix4f m;
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        for(int j = 0 ; j < 4 ; j++)
+        {
+            m.set(i, j, readFloat());
+        }
+
+    }
+    return m;
+}
+SE_Quat SE_BufferInput::readQuat()
+{
+    SE_Vector4f v = readVector4f();
+    return SE_Quat(v.x, v.y, v.z, v.w);
+}
+char* SE_BufferInput::readString()
+{
+    int len = readInt();
+    char* data = new char[len + 1];
+    if(data)
+    {
+        memset(data, 0, len + 1);
+        readBytes(data, len);
+        return data;
+    }
+    else
+        return NULL;
+}
+bool SE_BufferInput::readBytes(char* out, int len)
+{
+    bool exceed = (mOffset + len) > mLen;
+    int copyLen = len;
+    if(exceed)
+    {
+        copyLen = mLen - mOffset;
+    }
+    if(copyLen)
+        memcpy(out, mData + mOffset, copyLen);
+    mOffset += copyLen;
+    if(copyLen < len)
+        return false;
+    else
+        return true;
 }
