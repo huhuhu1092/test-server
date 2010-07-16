@@ -4,14 +4,16 @@
 class SE_CommonNode : public SE_Spatial
 {
 public:
-    SE_CommonNode(SE_SpatialID* id, SE_Spatial* parent = NULL);
+    SE_CommonNode(SE_Spatial* parent = NULL);
+    SE_CommonNode(SE_SpatialID id, SE_Spatial* parent = NULL);
     ~SE_CommonNode();
     void addChild(SE_Spatial* child);
     void removeChild(SE_Spatial* child);
-    virtual void updateWorldTransform();
-    virtual void updateBoundingVolume();
-    virtual void travel(SE_SpatialTravel* spatialTravel);
-
+    void updateWorldTransform();
+    void updateBoundingVolume();
+    void travel(SE_SpatialTravel* spatialTravel);
+    void write(SE_BufferOutput& output);
+    void read(SE_BufferInput& input);
 private:
     struct _Impl;
     _Impl* mImpl;

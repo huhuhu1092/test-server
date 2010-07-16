@@ -12,6 +12,10 @@ struct SE_CommonNode::_Impl
         }
     }
 };
+SE_CommonNode::SE_CommonNode(SE_Spatial* parent) : SE_Spatial(parent)
+{
+    mImpl = new SE_CommonNode::_Impl;
+}
 SE_CommonNode::SE_CommonNode(SE_SpatialID* id, SE_Spatial* parent) : SE_Spatial(id, parent)
 {
     mImpl = new SE_CommonNode::_Impl;
@@ -45,4 +49,13 @@ void SE_CommonNode::travel(SE_SpatialTravel* spatialTravel)
 
 void SE_CommonNode::updateBoundingVolume()
 {}
-
+void SE_CommonNode::write(SE_BufferOutput& output)
+{
+    output.writeInt(0);
+    output.writeInt(mImpl->children.size());
+    SE_Spatial::write(output);
+}
+void SE_CommonNode::read(SE_BufferInput& input)
+{
+    SE_Spatial::read(input);
+}

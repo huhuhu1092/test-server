@@ -1,20 +1,10 @@
 #include "SE_ResourceManager.h"
 #include "SE_Utils.h"
 #include "SE_Buffer.h"
+#include "SE_ResFileHeader.h"
 #include <map>
 #include <vector>
-static const int SE_MAX_MESH_NUM = 1024; //the max mesh in per scene
-static const int SE_GEOMETRYDATA_ID = 0x4001;
-static const int SE_TEXUNITDATA_ID = 0x4002;
-static const int SE_MATERIALDATA_ID = 0x4003;
-static const int SE_IMAGEDATA_ID = 0x4004;
-static const int SE_SCENEDATA_ID = 0x4005;
-static const int SE_MESHDATA_ID = 0x4006;
 
-static const int SE_MAGIC = 0xCFCFCFCF;
-static const int SE_VERSION = 0x01;
-
-//////////////////////////////////////////////
 struct _MeshData
 {
     SE_Mesh* mesh;
@@ -373,22 +363,20 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
         return false;
     return true;
 }
-SE_Spatial* SE_ResourceManager::createSpatial(int spatialType, SE_SpatialID spatialID, SE_Spatial* parent)
+SE_Spatial* SE_ResourceManager::createSpatial(int spatialType, SE_Spatial* parent)
 {
     if(spatialType == 0)
-        return new SE_CommonNode(spatialID, parent);
+        return new SE_CommonNode(parent);
     else if(spatialType == 1)
-        return new SE_Geometry(spatialID, parent);
+        return new SE_Geometry(parent);
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
 {
     int spatialType = inputBuffer.readInt();
-    SE_SpatialID spatialID;
-    spatialID.read(inputBuffer);
     int childNum = inputBuffer.readInt();
     SE_Node* node = NULL;
     SE_Geometry* geometry = NULL;
-    SE_Spatial* spatial = createSpatial(spatialType);
+    SE_Spatial* spatial = createSpatial(spatialType, parent);
     spatial->read(inputBuffer);
     for(int i = 0 ; i < childNum ; i++)
     {
@@ -410,7 +398,7 @@ SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
         sceneID.read(inputBuffer);
         std::string meshFileName = inputBuffer.readString();
         loadMesh(sceneID, meshFileName); 
-        SE_Spatial* spatial = createScene(inputBuffer, NULL);    
+        SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
         return spatial;
     }
     else

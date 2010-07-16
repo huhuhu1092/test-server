@@ -1,7 +1,20 @@
 #include "SE_Spatial.h"
 #include "SE_SpatialID.h"
 #include "SE_BoundingVolume.h"
-SE_Spatial::SE_Spatial(SE_SpatialID* spatialID, SE_Spatial* parent)
+SE_Spatial::SE_Spatial(SE_Spatial* parent)
+{
+    mWorldTransform.identity();
+    mLocalTranslate.setZero();
+    mLocalScale.set(1.0f, 1.0f, 1.0f);
+    mLocalRotate.identity();
+    mWorldBoundingVolume = NULL;
+    mParent = parent;
+    mState = 0;
+    setMovable(true);
+    setVisible(true);
+    setCollisionable(true);
+}
+SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {
     mWorldTransform.identity();
     mLocalTranslate.setZero();
@@ -148,10 +161,25 @@ void SE_Spatial::addChild(SE_Spatial* child)
 {}
 void SE_Spatial::removeChild(SE_Spatial* child)
 {}
-void SE_Spatial::attachGeometryObject(SE_GeometryObject* go)
+void SE_Spatial::attachGeometryObject(SE_SimObject* go)
 {}
-void SE_Spatial::detachGeometryObject(SE_GeometryObject* go)
+void SE_Spatial::detachGeometryObject(SE_SimObject* go)
 {}
 void SE_Spatial::travel(SE_SpatialTravel* spatialTravel)
 {}
-
+void SE_Spatial::read(SE_BufferInput& input)
+{
+    mSpatialID.read(input);
+    mState = input.readInt();
+    mLocalTranslate = input.readVector3f();
+    mLocalScale = input.readVector3f();
+    mWorldRotate = input.readQuat();
+}
+void SE_Spatial::write(SE_BufferInput& output)
+{
+    mSpatialID.write(output);
+    output.writeInt(mState);
+    output.writeVector3f(mLocalTranslate);
+    output.writeVector3f(mLocalScale);
+    output.writeQuat(mLocalRotate);
+}

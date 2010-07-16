@@ -6,7 +6,7 @@
 #include "SE_ID.h"
 class SE_BoundingVolume;
 class SE_Spatial;
-class SE_GeometryObject;
+class SE_SimObject;
 class SE_BufferInput;
 class SE_BufferOutput;
 class SE_SpatialTravel
@@ -19,6 +19,7 @@ class SE_Spatial
 public:
     enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04};
     enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4};
+    SE_Spatial(SE_Spatial* parent = NULL);
     SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
     virtual ~SE_Spatial();
     const SE_Matrix4f& getWorldTransform();
@@ -89,8 +90,8 @@ public:
     }
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
-    virtual void attachGeometryObject(SE_GeometryObject* go);
-    virtual void detachGeometryObject(SE_GeometryObject* go);
+    virtual void attachGeometryObject(SE_SimObject* go);
+    virtual void detachGeometryObject(SE_SimObject* go);
     virtual void travel(SE_SpatialTravel* spatialTravel);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
