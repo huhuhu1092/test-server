@@ -1,9 +1,17 @@
 #ifndef SE_BUFFER_H
 #define SE_BUFFER_H
+class SE_Vector2f;
+class SE_Vector3f;
+class SE_Vector4f;
+class SE_Vector3i;
+class SE_Matrix2f;
+class SE_Matrix3f;
+class SE_Matrix4f;
+class SE_Quat;
 class SE_BufferOutput
 {
 public:
-    enum {DEFAUL_LEN = 1024};
+    enum {DEFAULT_LEN = 1024};
     SE_BufferOutput(bool netOrder = false);
     SE_BufferOutput(int size, bool netOrder = false);
     ~SE_BufferOutput();
@@ -51,9 +59,11 @@ public:
     SE_Matrix3f readMatrix3f();
     SE_Matrix4f readMatrix4f();
     SE_Quat readQuat();
-    //this is the string ended by '\0'
+    //this is the string ended by '\0', user need to release the memory returned
     char* readString();
     char* readBytes(int len);
+    bool readBytes(char* out, int len);
+
     int getDataLen()
     {
         return mLen;

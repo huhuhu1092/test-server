@@ -19,6 +19,10 @@ public:
     SE_Matrix2f inverse() const;
     SE_Vector2f getRow(int i) const;
     SE_Vector2f getColumn(int i) const;
+    void set(int row, int column, float f)
+    {
+        d[row * 2 + column] = f;
+    }
     bool isZero();
     void setZero();
     float det() const;
@@ -137,7 +141,7 @@ public:
     {
 	    return det() != 0;
     }
-    float get(int row, int column)
+    float get(int row, int column) const
     {
         return d[row * 4 + column];
     }

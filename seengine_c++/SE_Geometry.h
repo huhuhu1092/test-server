@@ -6,6 +6,7 @@ class SE_BufferOutput;
 class SE_BufferInput;
 class SE_Geometry : public SE_Spatial
 {
+    DECLARE_OBJECT(SE_Geometry)
 public:
     SE_Geometry(SE_Spatial* parent = NULL);
     SE_Geometry(SE_SpatialID id, SE_Spatial* parent = NULL);

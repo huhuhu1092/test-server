@@ -363,19 +363,16 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
         return false;
     return true;
 }
-SE_Spatial* SE_ResourceManager::createSpatial(int spatialType, SE_Spatial* parent)
+SE_Spatial* SE_ResourceManager::createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
-    if(spatialType == 0)
-        return new SE_CommonNode(parent);
-    else if(spatialType == 1)
-        return new SE_Geometry(parent);
+    SE_Spatial* spatial = SE_Object::create(spatialType.c_str());
+    spatial->setParent(parent);
+    return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
 {
-    int spatialType = inputBuffer.readInt();
+    std::string spatialType = inputBuffer.readString();
     int childNum = inputBuffer.readInt();
-    SE_Node* node = NULL;
-    SE_Geometry* geometry = NULL;
     SE_Spatial* spatial = createSpatial(spatialType, parent);
     spatial->read(inputBuffer);
     for(int i = 0 ; i < childNum ; i++)
@@ -396,49 +393,26 @@ SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
             return;
         SE_SceneID sceneID;
         sceneID.read(inputBuffer);
-        std::string meshFileName = inputBuffer.readString();
-        loadMesh(sceneID, meshFileName); 
+        loadMesh(sceneID, inputBuffer); 
         SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
         return spatial;
     }
     else
         return NULL;
 }
-void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, const char* meshFileName)
+void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, SE_BufferInput& inputBuffer)
 {
-    std::string meshPath = mImpl->dataPath + "/" + meshFileName;
-    char* data = NULL;
-    int len = 0;
-    SE_IO::readFileAll(meshPath, data, len);
-    if(data)
+    int meshNum = inputBuffer.readInt();
+    for(int i = 0 ; i < meshNum ; i++)
     {
-        SE_BufferInput inputBuffer(data, len);
-        int magic = inputBuffer.readInt();
-        if(magic != SE_MAGIC)
+        SE_MeshID meshID;
+        meshID.read(inputBuffer);
+        SE_MeshTranfer* meshTransfer = new SE_MeshTransfer;
+        if(meshTransfer)
         {
-            return;
+            meshTransfer->read(inputBuffer);
+            resourceManager->setMeshTransfer(sceneID, meshID, meshTransfer);
         }
-        int version = inputBuffer.readInt();
-        if(version != SE_VERSION)
-        {
-            return;
-        }
-        int meshNum = inputBuffer.readInt();
-        for(int i = 0 ; i < meshNum ; i++)
-        {
-            SE_MeshID meshID;
-            meshID.read(inputBuffer);
-            SE_MeshTranfer* meshTransfer = new SE_MeshTransfer;
-            if(meshTransfer)
-            {
-                meshTransfer->read(inputBuffer);
-                resourceManager->setMeshTransfer(sceneID, meshID, meshTransfer);
-            }
-        }
-    }
-    else
-    {
-        LOGI("can not find meshfile when load mesh!!\n");
     }
 }
 SE_Mesh* SE_ResourceManager::getMesh(const SE_SceneID& sceneID, const SE_MeshID& meshID)

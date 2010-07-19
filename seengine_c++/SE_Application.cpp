@@ -58,6 +58,12 @@ void SE_Application::sendCommand(SE_Command* command)
         delete command;
     }
 }
+SE_CommonID SE_Application::createCommonID()
+{
+    SE_TimeMS currTime = SE_Time::getCurrentTimeMS();
+    return SE_CommonID(mAppID, (unsigned int)currTime, 0, 0);
+}
+
 class isPriorityLessThan
 {
 public:

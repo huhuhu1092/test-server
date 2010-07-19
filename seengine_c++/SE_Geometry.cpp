@@ -2,6 +2,7 @@
 #include "SE_SimObject.h"
 #include "SE_Buffer.h"
 #include <list>
+IMPLEMENT_OBJECT(SE_Geometry)
 struct SE_Geometry::_Impl
 {
     std::list<SE_GeometryObject*> attachObject;
@@ -29,7 +30,7 @@ void SE_Geometry::detachGeometryObject(SE_SimObject* go)
 }
 void SE_Geometry::write(SE_BufferOutput& output)
 {
-    output.writeInt(1);
+    output.writeString("SE_Geometry");
     output.writeInt(0);
     SE_Spatial::write(output);
 }

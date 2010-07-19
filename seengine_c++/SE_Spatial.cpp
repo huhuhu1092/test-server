@@ -1,6 +1,8 @@
 #include "SE_Spatial.h"
-#include "SE_SpatialID.h"
+#include "SE_Buffer.h"
 #include "SE_BoundingVolume.h"
+#include "SE_Log.h"
+IMPLEMENT_OBJECT(SE_Spatial)
 SE_Spatial::SE_Spatial(SE_Spatial* parent)
 {
     mWorldTransform.identity();
@@ -32,8 +34,6 @@ SE_Spatial::~SE_Spatial()
 {
     if(mWorldBoundingVolume)
         delete mWorldBoundingVolume;
-    if(mSpatialID)
-        delete mSpatialID;
 }
 void SE_Spatial::updateWorldTransform()
 {
@@ -175,7 +175,7 @@ void SE_Spatial::read(SE_BufferInput& input)
     mLocalScale = input.readVector3f();
     mWorldRotate = input.readQuat();
 }
-void SE_Spatial::write(SE_BufferInput& output)
+void SE_Spatial::write(SE_BufferOutput& output)
 {
     mSpatialID.write(output);
     output.writeInt(mState);

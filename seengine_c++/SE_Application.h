@@ -1,6 +1,7 @@
 #ifndef SE_APPLICATION_H
 #define SE_APPLICATION_H
 #include "SE_Time.h"
+#include "SE_ID.h"
 #include <list>
 class SE_Application
 {
@@ -23,6 +24,7 @@ public:
     {
         return mAppID;
     }
+    SE_CommonID createCommonID();
 protected:
     virtual void setUpEnv();
     virtual void processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta);

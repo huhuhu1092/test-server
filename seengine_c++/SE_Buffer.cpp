@@ -1,4 +1,8 @@
 #include "SE_Buffer.h"
+#include "SE_Vector.h"
+#include "SE_Matrix.h"
+#include "SE_Quat.h"
+#include "SE_Utils.h"
 #include <string.h>
 SE_BufferOutput::SE_BufferOutput(bool netOrder)
 {
@@ -24,21 +28,21 @@ void SE_BufferOutput::writeByte(char c)
 }
 void SE_BufferOutput::writeInt(int i)
 {
-    int outI = i
+    int outI = i;
     if(mNetOrder)
     {
         outI = SE_Util::host2NetInt32(i);
     }
-    writeBytes(&outI, 4);
+    writeBytes((char*)&outI, 4);
 }
 void SE_BufferOutput::writeShort(short s)
 {
     short outS = s;
     if(mNetOrder)
     {
-        outs = SE_Util::host2NetInt16(s);
+        outS = SE_Util::host2NetInt16(s);
     }
-    writeBytes(&outS, 2);
+    writeBytes((char*)&outS, 2);
 }
 void SE_BufferOutput::writeFloat(float f)
 {
@@ -49,7 +53,7 @@ void SE_BufferOutput::writeFloat(float f)
         tmp = SE_Util::host2NetInt32(*outF);
         outF = (int*)&tmp;
     }
-    writeBytes(outF, 4);
+    writeBytes((char*)outF, 4);
 }
 void SE_BufferOutput::writeVector2f(const SE_Vector2f& v)
 {
@@ -168,7 +172,7 @@ int SE_BufferOutput::getDataLen()
     return mOffset;
 }
 ////////////////////////////////////////////////////////////////////////////
-SE_BufferInput::SE_BufferInput(char* data, int len, bool netOrder = false, bool own = true)
+SE_BufferInput::SE_BufferInput(char* data, int len, bool netOrder, bool own)
 {
     mData = data;
     mLen = len;
@@ -189,7 +193,7 @@ bool SE_BufferInput::hasMore()
 }
 char SE_BufferInput::readByte()
 {
-    return mData[mOffsest++];
+    return mData[mOffset++];
 }
 short SE_BufferInput::readShort()
 {
@@ -217,7 +221,7 @@ float SE_BufferInput::readFloat()
     readBytes((char*)&out, sizeof(float));
     if(mNetOrder)
     {
-        int i = *(int*)out;
+        int i = *(int*)&out;
         i = SE_Util::net2HostInt32(i);
         out = (float)i;
     }

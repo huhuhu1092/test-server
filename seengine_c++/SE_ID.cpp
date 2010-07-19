@@ -1,39 +1,41 @@
 #include "SE_ID.h"
+#include "SE_Common.h"
+#include "SE_Buffer.h"
 #include <string>
 
 ///////////////////////
-struct SE_CommonID::_Impl
+struct SE_StringID::_Impl
 {
     std::string id;
 };
-SE_CommonID::SE_CommonID()
+SE_StringID::SE_StringID()
 {
-    mImpl = new SE_CommonID::_Impl;
+    mImpl = new SE_StringID::_Impl;
 }
-SE_CommonID::SE_CommonID(const char* id)
+SE_StringID::SE_StringID(const char* id)
 {
     SE_ASSERT(id);
-    mImpl = new SE_CommonID::_Impl;
+    mImpl = new SE_StringID::_Impl;
     mImpl->id = id;
 }
-SE_CommonID::SE_CommonID(const char* id, int size)
+SE_StringID::SE_StringID(const char* id, int size)
 {
     SE_ASSERT(id);
-    mImpl = new SE_CommonID::_Impl;
+    mImpl = new SE_StringID::_Impl;
     mImpl->id.assign(id, size);
 }
-SE_CommonID::SE_CommonID(const SE_CommonID& id)
+SE_StringID::SE_StringID(const SE_StringID& id)
 {
-    SE_CommonID::_Impl* mImpl = new SE_CommonID::_Impl;
+    SE_StringID::_Impl* mImpl = new SE_StringID::_Impl;
     if(!mImpl)
         return ;
     mImpl->id = id.mImpl->id;
 }
-SE_CommonID& SE_CommonID::operator=(const SE_CommonID& id)
+SE_StringID& SE_StringID::operator=(const SE_StringID& id)
 {
     if(this == &id)
         return *this;
-    SE_CommonID::_Impl* tmp = new SE_CommonID::_Impl;
+    SE_StringID::_Impl* tmp = new SE_StringID::_Impl;
     if(!tmp)
         return *this;
     tmp->id = id.mImpl->id;
@@ -42,29 +44,29 @@ SE_CommonID& SE_CommonID::operator=(const SE_CommonID& id)
     mImpl = tmp;
     return *this;
 }
-bool SE_CommonID::isValid()
+bool SE_StringID::isValid()
 {
-    SE_CommomID invalid("");
+    SE_StringID invalid("");
     return *this == invalid;
 }
-SE_CommonID& SE_CommonID::read(SE_BufferInput& input)
+SE_StringID& SE_StringID::read(SE_BufferInput& input)
 {
     std::string str = input.readString();
     mImpl->id = str;
     return *this;
 }
-void SE_CommonID::write(SE_BufferOutput& output)
+void SE_StringID::write(SE_BufferOutput& output)
 {
     output.writeString(mImpl->id.c_str());
 }
-bool operator==(const SE_CommonID& id1, const SE_CommonID& id2)
+bool operator==(const SE_StringID& id1, const SE_StringID& id2)
 {
     if(id1.mImpl->id == id2.mImpl->id)
         return true;
     else
         return false;
 }
-bool operator<(const SE_CommonID& id1, const SE_CommonID& id2)
+bool operator<(const SE_StringID& id1, const SE_StringID& id2)
 {
     if(id1.mImpl->id < id2.mImpl->id)
         return true;
@@ -72,7 +74,7 @@ bool operator<(const SE_CommonID& id1, const SE_CommonID& id2)
         return false;
 
 }
-bool operator>(const SE_CommonID& id1, const SE_CommonID& id2)
+bool operator>(const SE_StringID& id1, const SE_StringID& id2)
 {
     if(id1.mImpl->id > id2.mImpl->id)
         return true;
@@ -80,7 +82,71 @@ bool operator>(const SE_CommonID& id1, const SE_CommonID& id2)
         return false;
 
 }
+//////////////////////////////////////////////
+SE_CommonID::SE_CommonID()
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        id[i] = 0xFFFFFFFF;
+    }
+}
+SE_CommonID::SE_CommonID(int i0, int i1, int i2, int i3)
+{
+    id[0] = i0;
+    id[1] = i1;
+    id[2] = i2;
+    id[3] = i3;
+}
+SE_CommonID::SE_CommonID(const SE_CommonID& rid)
+{
+    memcpy(id, rid.id, sizeof(unsigned int) * 4);
+}
+SE_CommonID& SE_CommonID::operator=(const SE_CommonID& rid)
+{
+    if(this == &rid)
+        return *this;
+    memcpy(id, rid.id, sizeof(unsigned int) * 4);
+    return *this;
+}
+void SE_CommonID::write(SE_BufferOutput& output)
+{
+    output.writeIntArray((int*)id, 4);
+
+}
+SE_CommonID& SE_CommonID::read(SE_BufferInput& input)
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        id[i] = input.readInt();
+    }
+    return *this;
+}
+bool SE_CommonID::isValid()
+{
+    SE_CommonID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+    return *this == invalid;
+
+}
+bool operator==(const SE_CommonID& lid, const SE_CommonID& rid)
+{
+    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
+}
+bool operator<(const SE_CommonID& lid, const SE_CommonID& rid)
+{
+    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) < 0;
+}
+bool operator>(const SE_CommonID& lid, const SE_CommonID& rid)
+{
+    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) > 0;
+}
+bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
+{
+    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
+
+}
+
 ////////////////////////////////////////////
+/*
 SE_GeometryDataID::SE_GeometryDataID()
 {
     for(int i = 0 ; i < 4 ; i++)
@@ -113,7 +179,7 @@ bool SE_GeometryDataID::isValid()
 }
 void SE_GeometryDataID::write(SE_BufferOutput& output)
 {
-    output.writeIntArray(id, 4);
+    output.writeIntArray((int*)id, 4);
 }
 SE_GeometryDataID& SE_GeometryDataID::read(SE_BufferInput& input)
 {
@@ -156,7 +222,7 @@ SE_TextureCoordDataID::SE_TextureCoordDataID(int i0, int i1, int i2, int i3)
     id[3] = i3;
 }
 
-SE_TextureCoordDataID::SE_TextureCoordDataID(const SE_TextureDataID& rid)
+SE_TextureCoordDataID::SE_TextureCoordDataID(const SE_TextureCoordDataID& rid)
 {
     memcpy(id, rid.id, sizeof(unsigned int) * 4);
 }
@@ -169,11 +235,11 @@ SE_TextureCoordDataID& SE_TextureCoordDataID::operator=(const SE_TextureCoordDat
 }
 void SE_TextureCoordDataID::write(SE_BufferOutput& output)
 {
-    output.writeIntArray(id, 4);
+    output.writeIntArray((int*)id, 4);
 }
 bool SE_TextureCoordDataID::isValid()
 {
-    SE_TextureCoordDataID invlid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+    SE_TextureCoordDataID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
     return *this == invalid;
 }
 SE_TextureCoordDataID& SE_TextureCoordDataID::read(SE_BufferInput& input)
@@ -211,7 +277,7 @@ SE_MaterialDataID::SE_MaterialDataID()
 }
 bool SE_MaterialDataID::isValid()
 {
-    SE_MaterialDataID invlid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+    SE_MaterialDataID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
     return *this == invalid;
 }
 SE_MaterialDataID::SE_MaterialDataID(int i0, int i1, int i2, int i3)
@@ -222,7 +288,7 @@ SE_MaterialDataID::SE_MaterialDataID(int i0, int i1, int i2, int i3)
     id[3] = i3;
 }
 
-SE_MaterialDataID::SE_MaterialDataID(const SE_GeometryDataID& rid)
+SE_MaterialDataID::SE_MaterialDataID(const SE_MaterialDataID& rid)
 {
     memcpy(id, rid.id, sizeof(unsigned int) * 4);
 }
@@ -235,9 +301,9 @@ SE_MaterialDataID& SE_MaterialDataID::operator=(const SE_MaterialDataID& rid)
 }
 void SE_MaterialDataID::write(SE_BufferOutput& output)
 {
-    output.writeIntArray(id, 4);
+    output.writeIntArray((int*)id, 4);
 }
-SE_MaterialDataiD& SE_MaterialDataID::read(SE_BufferInput& input)
+SE_MaterialDataID& SE_MaterialDataID::read(SE_BufferInput& input)
 {
     for(int i = 0 ; i < 4 ; i++)
     {
@@ -269,7 +335,7 @@ SE_SceneID::SE_SceneID(int i0, int i1, int i2, int i3)
     id[2] = i2;
     id[3] = i3;
 }
-SE_SceneID::SE_SceneID(const SE_GeometryDataID& rid)
+SE_SceneID::SE_SceneID(const SE_SceneID& rid)
 {
     memcpy(id, rid.id, sizeof(unsigned int) * 4);
 }
@@ -298,12 +364,12 @@ bool operator!=(const SE_SceneID& lid, const SE_SceneID& rid)
 }
 bool SE_SceneID::isValid()
 {
-    SE_SceneID invlid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+    SE_SceneID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
     return *this == invalid;
 }
 void SE_SceneID::write(SE_BufferOutput& output)
 {
-    output.writeIntArray(id, 4);
+    output.writeIntArray((int*)id, 4);
 }
 SE_SceneID& SE_SceneID::read(SE_BufferInput& input)
 {
@@ -313,5 +379,6 @@ SE_SceneID& SE_SceneID::read(SE_BufferInput& input)
     }
     return *this;
 }
+*/
 /////////////////////////
 

@@ -3,6 +3,7 @@
 #include "SE_Spatial.h"
 class SE_CommonNode : public SE_Spatial
 {
+    DECLARE_OBJECT(SE_CommonNode)
 public:
     SE_CommonNode(SE_Spatial* parent = NULL);
     SE_CommonNode(SE_SpatialID id, SE_Spatial* parent = NULL);

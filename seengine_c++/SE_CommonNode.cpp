@@ -1,5 +1,7 @@
 #include "SE_CommonNode.h"
+#include "SE_Buffer.h"
 #include <list>
+IMPLEMENT_OBJECT(SE_CommonNode)
 struct SE_CommonNode::_Impl
 {
     std::list<SE_Spatial*> children;
@@ -16,7 +18,7 @@ SE_CommonNode::SE_CommonNode(SE_Spatial* parent) : SE_Spatial(parent)
 {
     mImpl = new SE_CommonNode::_Impl;
 }
-SE_CommonNode::SE_CommonNode(SE_SpatialID* id, SE_Spatial* parent) : SE_Spatial(id, parent)
+SE_CommonNode::SE_CommonNode(SE_SpatialID id, SE_Spatial* parent) : SE_Spatial(id, parent)
 {
     mImpl = new SE_CommonNode::_Impl;
 }
@@ -51,7 +53,7 @@ void SE_CommonNode::updateBoundingVolume()
 {}
 void SE_CommonNode::write(SE_BufferOutput& output)
 {
-    output.writeInt(0);
+    output.writeString("SE_CommonNode");
     output.writeInt(mImpl->children.size());
     SE_Spatial::write(output);
 }

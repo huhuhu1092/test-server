@@ -11,4 +11,4 @@ public:
     static unsigned int net2HostInt32(unsigned int i);
     static unsigned short net2HostInt16(unsigned short s);
 };
-#endif /** end SE_UTILS_H
+#endif /** end SE_UTILS_H*/

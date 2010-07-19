@@ -3,7 +3,7 @@
 #if defined(WIN32)
 
 #else
-typedef uint32_t SE_TimeMS;
+typedef unsigned int SE_TimeMS;
 class SE_Time
 {
 public:

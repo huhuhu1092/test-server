@@ -4,6 +4,7 @@
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_ID.h"
+#include "SE_Object.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_SimObject;
@@ -14,8 +15,9 @@ class SE_SpatialTravel
 public:
     virtual void travel(SE_Spatial* spatial) = 0;
 };
-class SE_Spatial
+class SE_Spatial : public SE_Object
 {
+    DECLARE_OBJECT(SE_Spatial);
 public:
     enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04};
     enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4};

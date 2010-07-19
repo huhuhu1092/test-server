@@ -10,7 +10,8 @@ SE_TimeMS SE_Time::getCurrentTimeMS()
 #else
     timeval tp;
     gettimeofday(&tp, 0);
-    uint32_t timeMS = tp.tv_sec * 1000 + tp.tv_usec / 1000;    return timeMS; 
+    unsigned int timeMS = tp.tv_sec * 1000 + tp.tv_usec / 1000;   
+    return timeMS; 
 #endif    
 }
 /*

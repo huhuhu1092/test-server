@@ -91,7 +91,7 @@ public:
         x = y = z = w = 0;
     }
     void set(float angle, const SE_Vector3f& axis);
-    SE_Vector4f toVector4f()
+    SE_Vector4f toVector4f() const
     {
         return SE_Vector4f(x, y, z, w);
     }
