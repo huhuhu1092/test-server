@@ -12,6 +12,7 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
     mWorldBoundingVolume = NULL;
     mParent = parent;
     mState = 0;
+    mBVType = 0;
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
@@ -26,6 +27,7 @@ SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
     mParent = parent;
     mSpatialID = spatialID;
     mState = 0;
+    mBVType = 0;
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
@@ -171,6 +173,7 @@ void SE_Spatial::read(SE_BufferInput& input)
 {
     mSpatialID.read(input);
     mState = input.readInt();
+    mBVType = input.readInt();
     mLocalTranslate = input.readVector3f();
     mLocalScale = input.readVector3f();
     mWorldRotate = input.readQuat();
@@ -179,6 +182,7 @@ void SE_Spatial::write(SE_BufferOutput& output)
 {
     mSpatialID.write(output);
     output.writeInt(mState);
+    output.writeInt(mBVType);
     output.writeVector3f(mLocalTranslate);
     output.writeVector3f(mLocalScale);
     output.writeQuat(mLocalRotate);

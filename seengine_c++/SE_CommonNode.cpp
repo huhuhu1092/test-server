@@ -50,7 +50,14 @@ void SE_CommonNode::travel(SE_SpatialTravel* spatialTravel)
 }
 
 void SE_CommonNode::updateBoundingVolume()
-{}
+{
+    std::list<SE_Spatial*>::iterator it;
+    for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+        s->updateBoundingVolume();
+    }
+}
 void SE_CommonNode::write(SE_BufferOutput& output)
 {
     output.writeString("SE_CommonNode");

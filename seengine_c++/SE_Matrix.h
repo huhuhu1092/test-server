@@ -11,6 +11,7 @@ public:
     SE_Matrix2f(const SE_Vector2f& r0, const SE_Vector2f& r1);
     SE_Matrix2f(const SE_Matrix2f& rm);
     SE_Matrix2f& operator=(const SE_Matrix2f& rm);
+    float operator()(int row, int column);
     void identity();
     float get(int row, int column) const;
     SE_Vector2f map(const SE_Vector2f& v) const;
@@ -59,6 +60,7 @@ public:
     {
         d[row * 3 + column] = f;
     }
+    float operator()(int row, int column);
     SE_Vector3f getRow(int i) const;
     SE_Vector3f getColumn(int i) const;
     void setColumn(const SE_Vector3f& c0, const SE_Vector3f& c1, const SE_Vector3f& c2);
@@ -115,6 +117,7 @@ public:
         set(2 , 2 , 1.0f);
         set(3 , 3 , 1.0f);
     }
+    float operator()(int row, int column);
     SE_Matrix3f toMatrix3f() const;
     SE_Vector4f map(const SE_Vector4f& v) const;
     SE_Matrix4f inverse() const;

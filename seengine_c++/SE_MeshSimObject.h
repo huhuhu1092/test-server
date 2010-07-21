@@ -7,9 +7,12 @@ class SE_MeshSimObject : public SE_SimObject
 {
     DECLARE_OBJECT(SE_MeshSimObject)
 public:
-    SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh = false);
+    SE_MeshSimObject();
+    SE_MeshSimObject(const SE_MeshID& meshID);
+    SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh);
     ~SE_MeshSimObject();
-    void doTransform(const SE_Matrix4f& mworld);
+    void doTransform(const SE_Matrix4f& m);
+    void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
     void read(SE_BufferInput& input);
     void write(SE_BufferOutput& output);
     int getSurface();
@@ -23,6 +26,7 @@ public:
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;
+    SE_MeshID mMeshID
     bool mOwnMesh;
 };
 #endif

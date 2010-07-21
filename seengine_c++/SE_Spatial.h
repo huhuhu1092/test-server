@@ -45,6 +45,14 @@ public:
     void setLocalScale(const SE_Vector3f& scale);
     SE_Vector3f localToWorld(const SE_Vector3f& v);
     SE_Vector3f worldToLocal(const SE_Vector3f& v);
+    int getBVType()
+    {
+        return mBVType;
+    }
+    void setBVType(int bvType)
+    {
+        mBVType = bvType;
+    }
     bool canVisible()
     {
         return (mState & VISIBILITY_MASK) == VISIBLE;
@@ -103,6 +111,8 @@ protected:
     void updateWorldTranslate();
     void updateWorldRotate();
     void updateWorldScale();
+protected:
+    SE_BoundingVolume* mWorldBoundingVolume;
 private:
     SE_Matrix4f mWorldTransform;
 
@@ -114,9 +124,9 @@ private:
     SE_Vector3f mWorldScale;
     SE_Quat mWorldRotate;
 
-    SE_BoundingVolume* mWorldBoundingVolume;
     SE_Spatial* mParent;
     SE_SpatialID mSpatialID;
     int mState;
+    int mBVType;
 };
 #endif

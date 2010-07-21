@@ -31,6 +31,9 @@ public:
     void setVertexArray(SE_Vector3f* va, int num);
     void setFaceArray(SE_Vector3i* fa, int num);
     void setNormalArray(SE_Vector3f* na, int num);
+
+    static void transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_GeometryData* dst);
+    static void transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
 private:
     SE_GeometryData(const SE_GeometryData&);
     SE_GeometryData& operator=(const SE_GeometryData&);

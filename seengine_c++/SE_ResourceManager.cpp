@@ -10,16 +10,6 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
-struct _MeshDataVector
-{
-    _MeshData* meshDataArray[SE_MAX_MESH_NUM];
-    int num;
-    _MeshDataVector()
-    {
-        num = 0;
-        memset(meshDataArray, 0, sizeof(_MeshData*) * SE_MAX_MESH_NUM);
-    }
-};
 static SE_ImageData* loadRawImage(const char* imageName)
 {
     char* data = NULL;
@@ -117,11 +107,11 @@ static void processGeometryData(SE_BufferInput& inputBuffer, SE_ResourceManager*
 }
 static void processTextureUnitData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    int texNum = inputBuffer.readInt();
-    for(int n = 0 ; n < texNum ; n++)
+    int texCoordNum = inputBuffer.readInt();
+    for(int n = 0 ; n < texCoordNum ; n++)
     {
-        SE_TextureUnitDataiD texUnitID;
-        texUnitID.read(inputBuffer);
+        SE_TextureCoordDataiD texCoordID;
+        texCoordID.read(inputBuffer);
         int texVertexNum = inputBuffer.readInt();
         int texFaceNum = inputBuffer.readInt();
         SE_Vector2f* texVertexArray = new SE_Vector2f[texVertexNum];
@@ -138,10 +128,10 @@ static void processTextureUnitData(SE_BufferInput& inputBuffer, SE_ResourceManag
             texFace[i].d[2] = inputBuffer.readInt();
         }
         
-        SE_TextureUnitData* texUnitData = new SE_TextureUnitData;
-        texUnitData->setTexVertexArray(texVertexArray, texVertexNum);
-        texUnitData->setTexFaceArray(texFaceArray, texFaceNum);
-        resourceManager->setTextureUnitData(texUnitID, texUnitData);
+        SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
+        texCoordData->setTexVertexArray(texVertexArray, texVertexNum);
+        texCoordData->setTexFaceArray(texFaceArray, texFaceNum);
+        resourceManager->setTextureCoordData(texCoordID, texCoordData);
     }
 }
 static void processMaterialData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
@@ -175,7 +165,22 @@ static void processImageData(SE_BufferInput inputBuffer, SE_ResourceManager* res
         resourceManager->setImageData(imageDataid, imageData); 
     }
 }
+static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+    int meshNum = inputBuffer.readInt();
+    for(int i = 0 ; i < meshNum ; i++)
+    {
+        SE_MeshID meshID;
+        meshID.read(inputBuffer);
+        SE_MeshTranfer* meshTransfer = new SE_MeshTransfer;
+        if(meshTransfer)
+        {
+            meshTransfer->read(inputBuffer);
+            resourceManager->setMeshTransfer(meshID, meshTransfer);
+        }
+    }
 
+}
 
 static void process(const SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
@@ -198,24 +203,80 @@ static void process(const SE_BufferInput& inputBuffer, SE_ResourceManager* resou
             case SE_IMAGEDATA_ID:
                 processImageData(inputBuffer, resourceManager);
                 break;
+            case SE_MESHDATA_ID:
+                processMeshData(inputBuffer, resourceManager);
+                break;
         }
     }
 }
+///////////////////////////////////////
+template <class TID, class T>
+class ResourceMap
+{
+public:
+    T* get(const TID& id)
+    void set(const TID& id, T* data);
+    void remove(const TID& id);
+    ~ResourceMap();
+private:
+    typedef std::map<TID, T*> RMap;
+    RMap m;
+};
+template <class TID, class T>
+void ResourceMap<TID, T>::remove(const TID& id)
+{
+    m.erase(id);
+}
+template <class TID, class T>
+T* ResourceMap<TID, T>::get(const TID& id)
+{
+    RMap::iterator it = m.find(id);
+    if(it == m.end())
+        return NULL;
+    else
+        return it->second;
+}
+template <class TID, class T>
+void ResourceMap<TID, t>::set(const TID& id, T* data)
+{
+    RMap::iterator it = m.find(id);
+    if(it == m.end())
+    {
+        m.insert(std::pair<TID, T*>(id, data));
+    }
+    else
+    {
+        T* oldData = it->second;
+        it->second = data;
+        delete oldData;
+    }
+}
+template <class TID, class T>
+ResourceMap<TID, T>::~ResourceMap()
+{
+    RMap::iterator it;
+    for(it = m.begin() ; it != m.end() ; it++)
+    {
+        T* data = it->second;
+        delete data;
+    }
+}
+/////////////////////////////////////////
 struct SE_ResourceManager::_Impl
 {
+    /*
     typedef std::map<SE_GeometryDataID, SE_GeometryData*> _GeometryDataMap;
     typedef std::map<SE_ImageDataID, SE_ImageData*> _ImageDataMap;
-    typedef std::map<SE_TextureUnitDataID, SE_TextureUnitData> _TextureUnitDataMap;
+    typedef std::map<SE_TextureUnitDataID, SE_TextureUnitData*> _TextureUnitDataMap;
     typedef std::map<SE_MaterialDataID, SE_MaterialData*> _MaterialDataMap;
 
     typedef std::map<SE_MeshID, _MeshData> _MeshDataMap;
-    typedef std::map<SE_SceneID, _MeshDataMap*> _MeshMap; 
-
-    _GeometryDataMap geomDataMap;
-    _ImageDataMap imageDataMap;
-    _TextureUnitDataMap texUnitDataMap;
-    _MaterialDataMap materialDataMap;
-    _MeshMap meshMap;
+*/
+    ResourceMap<SE_GeometryDataID, SE_GeometryData> geomDataMap;
+    ResourceMap<SE_ImageDataID, SE_ImageData> imageDataMap;
+    ResourceMap<SE_TextureCoordDataID, SE_TextureCoordData> texCoordDataMap;
+    ResourceMap<SE_MaterialDataID, SE_MaterialData> materialDataMap;
+    ResourceMap<SE_MeshID, SE_MeshTransfer> meshMap;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
@@ -240,14 +301,19 @@ SE_ResourceManager::~SE_ResourceManager()
 
 SE_GeometryData* SE_ResourceManager::getGeometryData(const SE_GeometryDataID& geomID)
 {
+    return mImpl->geomDataMap.get(geomID);
+    /*
     SE_ResourceManager::_Impl::_GeometryDataMap::iterator it = mImpl->geomDataMap.find(geomID);
     if(it == mImpl->geomDataMap.end())
         return NULL;
     else
         return it->second;
+        */
 }
-SE_GeometryData* SE_ResourceManager::setGeometryData(const SE_GeometryDataID& geomID, SE_GeometryData* data)
+void SE_ResourceManager::setGeometryData(const SE_GeometryDataID& geomID, SE_GeometryData* data)
 {
+    mImpl->geomDataMap.set(geomID, data);
+    /*
     SE_ResourceManager::_Impl::_GeometryDataMap::iterator it = mImpl->geomDataMap.find(geomID);
     if(it == mImpl->geomDataMap.end())
     {
@@ -260,18 +326,27 @@ SE_GeometryData* SE_ResourceManager::setGeometryData(const SE_GeometryDataID& ge
         it->second = data;
         return prev;
     }
+    */
 }
-    
-SE_TextureCoordData* SE_ResourceManager::getTextureCoordData(const SE_TextureCoordDataID& texID)
+void SE_ResourceManager::removeGeometryData(const SE_GeometryDataID& geomID)
 {
+    mImpl->geomDataMap.remove(geomID);
+} 
+SE_TextureCoordData* SE_ResourceManager::getTextureCoordData(const SE_TextureCoordDataID& texCoordID)
+{
+    return mImpl->texCoordDataMap.get(texCoordID);
+    /*
      SE_ResourceManager::_Impl::_TextureCoordDataMap::iterator it = mImpl->texUnitDataMap.find(texID);
     if(it == mImpl->texUnitDataMap.end())
         return NULL;
     else
         return it->second;
+        */
 }
-SE_TextureCoordData* SE_ResourceManager::setTextureCoordData(const SE_TextureCoordDataID& texID, SE_TextureCoordData* data)
+void SE_ResourceManager::setTextureCoordData(const SE_TextureCoordDataID& texCoordID, SE_TextureCoordData* data)
 {
+    mImpl->texCoordDataMap.set(texCoordID, data);
+    /*
     SE_ResourceManager::_Impl::_TexureUnitDataMap::iterator it = mImpl->texUnitDataMap.find(texID);
     if(it == mImpl->texUnitDataMap.end())
     {
@@ -284,20 +359,28 @@ SE_TextureCoordData* SE_ResourceManager::setTextureCoordData(const SE_TextureCoo
         it->second = data;
         return prev;
     }
-
+*/
+}
+void SE_ResourceManager::removeTextureCoordData(const SE_TextureCoordDataID& texCoordID)
+{
+    mImpl->texCoordDataMap.remove(texCoordID);
 }
     
 SE_ImageData* SE_ResourceManager::getImageData(const SE_ImageDataID& imageID)
 {
+    return mImpl->imageDataMap.get(imageID);
+    /*
      SE_ResourceManager::_Impl::_ImageDataMap::iterator it = mImpl->imageDataMap.find(imageID);
     if(it == mImpl->imageDataMap.end())
         return NULL;
     else
         return it->second;
-
+*/
 }
-SE_ImageData* SE_ResourceManager::setImageData(const SE_ImageDataID& imageID, SE_ImageData* data)
+void SE_ResourceManager::setImageData(const SE_ImageDataID& imageID, SE_ImageData* data)
 {
+    mImpl->imageDataMap.set(imageID, data);
+    /*
     SE_ResourceManager::_Impl::ImageDataMap::iterator it = mImpl->imageDataMap.find(imageID);
     if(it == mImpl->imageDataMap.end())
     {
@@ -310,20 +393,27 @@ SE_ImageData* SE_ResourceManager::setImageData(const SE_ImageDataID& imageID, SE
         it->second = data;
         return prev;
     }
-
+*/
 }
-
+void SE_ResourceManager::removeImageData(const SE_ImageDataID& imageID)
+{
+    mImpl->imageDataMap.remove(imageID);
+}
 SE_MaterialData* SE_ResourceManager::getMaterialData(const SE_MaterialDataID& materialID)
 {
+    return mImpl->materialDataMap.get(materialID);
+    /*
      SE_ResourceManager::_Impl::_MaterialDataMap::iterator it = mImpl->materialDataMap.find(materialID);
     if(it == mImpl->materialDataMap.end())
         return NULL;
     else
         return it->second;
-
+*/
 }
-SE_MaterialData* SE_ResourceManager::setMaterialData(const SE_MaterialDataID& materialID, SE_MaterialData* data)
+void SE_ResourceManager::setMaterialData(const SE_MaterialDataID& materialID, SE_MaterialData* data)
 {
+    mImpl->materialDataMap.set(materialID, data);
+    /*
     SE_ResourceManager::_Impl::MaterialDataMap::iterator it = mImpl->materialDataMap.find(materialID);
     if(it == mImpl->imageDataMap.end())
     {
@@ -336,7 +426,11 @@ SE_MaterialData* SE_ResourceManager::setMaterialData(const SE_MaterialDataID& ma
         it->second = data;
         return prev;
     }
-
+*/
+}
+void SE_ResourceManager::removeMaterialData(const SE_MaterialDataID& materialID)
+{
+    mImpl->materialDataMap.remove(materialID);
 }
 void SE_ResourceManager::loadBaseData(const char* baseResourceName)
 {
@@ -363,7 +457,7 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
         return false;
     return true;
 }
-SE_Spatial* SE_ResourceManager::createSpatial(std::string& spatialType, SE_Spatial* parent)
+static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
     SE_Spatial* spatial = SE_Object::create(spatialType.c_str());
     spatial->setParent(parent);
@@ -393,13 +487,13 @@ SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
             return;
         SE_SceneID sceneID;
         sceneID.read(inputBuffer);
-        loadMesh(sceneID, inputBuffer); 
         SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
         return spatial;
     }
     else
         return NULL;
 }
+/*
 void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, SE_BufferInput& inputBuffer)
 {
     int meshNum = inputBuffer.readInt();
@@ -415,8 +509,11 @@ void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, SE_BufferInput& inp
         }
     }
 }
-SE_Mesh* SE_ResourceManager::getMesh(const SE_SceneID& sceneID, const SE_MeshID& meshID)
+*/
+SE_MeshTransfer* SE_ResourceManager::getMeshTransfer(const SE_MeshID& meshID)
 {
+    return mImpl->meshDataMap.get(meshID);
+    /*
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);
     if(it == mImpl->meshMap.end())
         return NULL;
@@ -425,10 +522,12 @@ SE_Mesh* SE_ResourceManager::getMesh(const SE_SceneID& sceneID, const SE_MeshID&
     if(itMeshData == pMeshDataMap->end())
         return NULL;
     return itMeshData->second.mesh;
-
+*/
 }
-void SE_ResourceManager::setMeshTransfer(const SE_SceneID& sceneID, const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer)
+void SE_ResourceManager::setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer)
 {
+    mImpl->meshDataMap.set(meshID, meshTransfer);
+    /*
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);
     SE_ResourceManager::_Impl::_MeshDataMap* pMeshDataMap = NULL;
     if(it == mImpl->meshMap.end())
@@ -448,7 +547,9 @@ void SE_ResourceManager::setMeshTransfer(const SE_SceneID& sceneID, const SE_Mes
     {
         ret->first->second = _md;
     }
+    */
 }
+/*
 int SE_ResourceManager::getMeshNum(const SE_SceneID& sceneID)
 {
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);
@@ -457,6 +558,8 @@ int SE_ResourceManager::getMeshNum(const SE_SceneID& sceneID)
     SE_ResourceManager::_Impl::_MeshDataMap* pMeshDataMap = it->second;
     return pMeshDataMap->size();
 }
+*/
+/*
 SE_Mesh* SE_ResourceManager::createMesh(SE_MeshTransfer* meshTransfer)
 {
     SE_Mesh* mesh = new SE_Mesh;
@@ -504,3 +607,4 @@ SE_Mesh* SE_ResourceManager::createMesh(SE_MeshTransfer* meshTransfer)
         mesh->surfaceNum++;
     }
 }
+*/

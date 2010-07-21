@@ -36,7 +36,6 @@ public:
     SE_MeshTransfer* getMeshTransfer(const SE_MeshID& meshID);
     void setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);
     void removeMeshTransfer(const SE_MeshID& meshID); 
-    SE_Mesh* getMesh(const SE_MeshID& meshID);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
@@ -46,7 +45,7 @@ public:
     const char* getDataPath();
     void setDataPath(const char* datapath);
 private:
-    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
+//    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
     static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);
 private:
     struct _Impl;

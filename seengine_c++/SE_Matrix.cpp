@@ -28,6 +28,10 @@ SE_Matrix2f::SE_Matrix2f(const SE_Vector2f& r0, const SE_Vector2f& r1)
     this->m10 = r1.x;
     this->m11 = r1.y;
 }
+float SE_Matrix2f::operator()(int row, int column)
+{
+    return d[row * 2 + column];
+}
 SE_Matrix2f::SE_Matrix2f(const SE_Matrix2f& rm)
 {
     for(int i = 0 ; i < 4 ; i++)
@@ -158,6 +162,10 @@ SE_Matrix3f& SE_Matrix3f::operator=(const SE_Matrix3f& rm)
 	d[i] = rm.d[i];
     }
     return *this;
+}
+float SE_Matrix3f::operator()(int row, int column)
+{
+    return d[row * 3 + j];
 }
 SE_Matrix3f SE_Matrix3f::mulScalar(float f) const
 {
@@ -450,6 +458,10 @@ SE_Matrix4f& SE_Matrix4f::operator=(const SE_Matrix4f& rm)
 	d[i] = rm.d[i];
     }
     return *this;
+}
+float SE_Matrix4f::operator()(int row, int column)
+{
+    return d[row * 4 + column];
 }
 float SE_Matrix4f::det() const
 {

@@ -13,6 +13,10 @@ public:
     ~SE_Geometry();
     void attachGeometryObject(SE_SimObject* go);
     void detachGeometryObject(SE_SimObject* go);
+    void updateWorldTransform();
+    void updateBoundingVolume();
+    void travel(SE_SpatialTravel* spatialTravel);
+
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
 private:
