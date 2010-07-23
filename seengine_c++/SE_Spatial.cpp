@@ -187,3 +187,5 @@ void SE_Spatial::write(SE_BufferOutput& output)
     output.writeVector3f(mLocalScale);
     output.writeQuat(mLocalRotate);
 }
+void SE_Spatial::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+{}

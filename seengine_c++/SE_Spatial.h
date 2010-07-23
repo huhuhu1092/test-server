@@ -13,7 +13,8 @@ class SE_BufferOutput;
 class SE_SpatialTravel
 {
 public:
-    virtual void travel(SE_Spatial* spatial) = 0;
+    virtual void visit(SE_Spatial* spatial) = 0;
+    virtual void visit(SE_SimObject* simObject) = 0;
 };
 class SE_Spatial : public SE_Object
 {
@@ -102,11 +103,12 @@ public:
     virtual void removeChild(SE_Spatial* child);
     virtual void attachGeometryObject(SE_SimObject* go);
     virtual void detachGeometryObject(SE_SimObject* go);
-    virtual void travel(SE_SpatialTravel* spatialTravel);
+    virtual int travel(SE_SpatialTravel* spatialTravel);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
+    virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
 protected:
     void updateWorldTranslate();
     void updateWorldRotate();

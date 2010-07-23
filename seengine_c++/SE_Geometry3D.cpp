@@ -80,6 +80,12 @@ void SE_Plane::set(const SE_Vector3f& normal, float d)
     mNormal = normal;
     mDistance = d;
 }
+SE_Plane SE_Plane::transform(const SE_Matrix4f& m)
+{
+    SE_Vector4f v(mNormal, -mDistance);
+    SE_Vector4f out = m.map(v);
+    return SE_Plane(out.xyz(), out.w);
+}
 void SE_Plane::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2)
 {
     SE_Vector3f v0 = p1 - p0;

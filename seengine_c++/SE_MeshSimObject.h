@@ -23,6 +23,7 @@ public:
     int getFaceNum();
     int* getSurfaceFace(int surfaceIndex);
     int getSurfaceFaceNum(int surfaceIndex);
+    SE_RenderUnit* createRenderUnit();
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;

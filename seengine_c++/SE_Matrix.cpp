@@ -449,6 +449,10 @@ SE_Matrix4f::SE_Matrix4f(const SE_Matrix4f& rm)
 	d[i] = rm.d[i];
     }
 }
+SE_Matrix4f::SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t)
+{
+    set(m, t);
+}
 SE_Matrix4f& SE_Matrix4f::operator=(const SE_Matrix4f& rm)
 {
     if(this == &rm)

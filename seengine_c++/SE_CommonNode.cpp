@@ -44,11 +44,38 @@ void SE_CommonNode::updateWorldTransform()
         s->updateWorldTransform();
     }
 }
-void SE_CommonNode::travel(SE_SpatialTravel* spatialTravel)
+int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
 {
+    int ret = spatialTravel->visit(this);
+    if(ret)
+        return ret;
+    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
+    for(; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+        ret = s->visit(spatialTravel);
+        if(ret && !travelAways)
+            break;
+    }
+    return ret;
+}
+void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+{
+    SE_BoundingVolume* bv = getBoundingVolume();
+    if(bv)
+    {
+        int culled = camera->cullBV(*bv);
+        if(culled == SE_FULL_CULLED)
+            return;
+    }
+    std::list<SE_Spatial*>::iterator it;
+    for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+        s->renderScene(camera, renderManager);
+    }
 
 }
-
 void SE_CommonNode::updateBoundingVolume()
 {
     std::list<SE_Spatial*>::iterator it;

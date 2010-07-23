@@ -63,6 +63,24 @@ void SE_Geometry::updateBoundingVolume()
 {
     
 }
-void SE_Geometry::travel(SE_SpatialTravel* spatialTravel)
-{}
-
+int SE_Geometry::travel(SE_SpatialTravel* spatialTravel)
+{
+    return spatialTravel->visit(this);
+}
+void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+{
+    SE_BoundingVolume* bv = getBoundingVolume();
+    if(bv)
+    {
+        int culled = camera->cullBV(*bv);
+        if(culled == SE_FULL_CULLED)
+            return;
+    }
+    SE_Geometry::_Impl::SimObjectList::iterator it;
+    for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+    {
+        SE_SimObject* so = *it;
+        SE_RenderUnit* renderUnit = so->createRenderUnit();
+        renderManager->addRenderUnit(renderUnit);
+    }
+}

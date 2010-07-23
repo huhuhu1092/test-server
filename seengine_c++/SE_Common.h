@@ -15,4 +15,5 @@ typedef int SE_Result;
  * */
 #define SE_Result_IsValid(r) ((r) != 0)
 enum SE_AXIS_TYPE {SE_AXIS_NOAXIS = -1, SE_AXIS_X, SE_AXIS_Y, SE_AXIS_Z};
+enum SE_CULL_TYPE {SE_CULL_FULL, SE_CULL_PART, SE_NOT_CULL};
 #endif

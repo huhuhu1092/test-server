@@ -107,6 +107,7 @@ public:
     SE_Matrix4f(float d[16]);
     SE_Matrix4f(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3);
     SE_Matrix4f(const SE_Matrix4f& rm);
+    SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t);
     SE_Matrix4f& operator=(const SE_Matrix4f& rm);
     float det() const;
     void identity()

@@ -68,6 +68,7 @@ public:
     float getDistance();
     SE_Plane_Side whichSide(const SE_Vector3f& point);
     float distance(const SE_Vector3f& point);
+    SE_Plane transform(const SE_Matrix4f& m);
 private:
     SE_Vector3f mNormal;
     float mDistance; 
