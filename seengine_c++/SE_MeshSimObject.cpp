@@ -60,17 +60,61 @@ void SE_MeshSimObject::write(SE_BufferOutput& output)
     mMeshID.write(output);
 }
 int SE_MeshSimObject::getSurface()
-{}
+{
+    if(!mMesh)
+        return 0;
+    return mMesh->getSurfaceNum();
+}
 SE_Vector3f* SE_MeshSimObject::getVertexArray()
-{}
+{
+    if(!mWorldGeomData)
+        return NULL;
+    return mWorldGeomData->getVertexArray();
+}
 int SE_MeshSimObject::getVertexNum()
-{}
+{
+    if(!mWorldGeomData)
+        return 0;
+    return mWorldGeomData->getVertexNum();
+}
 SE_Vector3i* SE_MeshSimObject::getFaceArray()
-{}
+{
+    if(!mWorldGeomData)
+        return 0;
+    return mWorldGeomData->getFaceArray();
+}
 int SE_MeshSimObject::getFaceNum()
-{}
-int* SE_MeshSimObject::getSurfaceFace(int surfaceIndex)
-{}
-int SE_MeshSimObject::getSurfaceFaceNum(int surfaceIndex)
-{}
+{
+    if(!mWorldGeomData)
+        return 0;
+    return mWOrldGeomData->getFaceNum();
+}
+void SE_MeshSimObject::getSurfaceFace(int surfaceIndex, int*& facets, int& faceNum)
+{
+    if(!mMesh)
+    {
+        facets = NULL;
+        faceNum = 0;
+        return;
+    }
+    SE_Surface* surface = mMesh->getSurface(surfaceIndex);
+    facets = surface->getFacetArray();
+    faceNum = surface->getFacetNum();
+    return facets;
+}
+RenderUnitVector SE_MeshSimObject::createRenderUnit()
+{
+    if(!mMesh)
+        return RenderUnitVector();
+    int surfaceNum = getSurfaceNum();
+    RenderUnitVector ruv;
+    ruv.resize(surfaceNum, NULL);
+    for(int i = 0 ; i < surfaceNum ; i++)
+    {
+        SE_Surface* surface = getSurface(i);
+        SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
+        ruv[i] = tsru;
+    }
+    return ruv;
+}
 

@@ -80,7 +80,12 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
     for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
     {
         SE_SimObject* so = *it;
-        SE_RenderUnit* renderUnit = so->createRenderUnit();
-        renderManager->addRenderUnit(renderUnit);
+        SE_SimObject::RenderUnitVector renderUnitVector = so->createRenderUnit();
+        SE_SimObject::RenderUnitVector::iterator itRU;
+        for(itRU = renderUnitVector.begin() ; itRU!= renderUnitVector.end(); itRU++)
+        {
+            itRU->setWorldTransform(getWorldTransform());
+            renderManager->addRenderUnit(*itRU);
+        }
     }
 }

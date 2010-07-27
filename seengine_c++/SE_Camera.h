@@ -28,6 +28,7 @@ public:
     void create(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float far, float near, float far);
+    SE_Matrix4f getPerspectiveMatrix();
 private:
     SE_Frustum mFrustum;
     SE_Rect<int> mViewport;

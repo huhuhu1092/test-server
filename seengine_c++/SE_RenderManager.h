@@ -14,5 +14,8 @@ public:
 private:
     typedef std::list<SE_RenderUnit*> RenderUnitList
     RenderUnitList* mRenderQueue[RQ_NUM];
+    SE_Matrix4f mWorldToViewMatrix;
+    SE_Matrix4f mPerspectiveMatrix;
+    SE_Renderer mRenderer;
 };
 #endif

@@ -62,6 +62,22 @@ void SE_Surface::setFacets(int* facets, int num)
     mFacetArray = facets;
     mFacetNum = num;
 }
+void SE_Surface::setColor(const SE_Vector3f& color)
+{
+    mColor = color;
+}
+SE_Vector3f SE_Surface::getColor()
+{
+    return mColor;
+}
+SE_ProgramDataID getProgramDataID()
+{
+    return mProgramDataID;
+}
+void setProgramDataID(const SE_ProgramDataID& programID);
+{
+    mProgramDataID = programID;
+}
 ///////
 SE_Texture::SE_Texture()
 {
@@ -115,4 +131,12 @@ SE_Mesh::~SE_Mesh()
 SE_GeometryData* SE_Mesh::getGeometryData()
 {
     return mGeometryData; 
+}
+int SE_Mesh::getSurfaceNum()
+{
+    return mSurfaceNum;
+}
+SE_Surface* SE_Mesh::getSurface(int index)
+{
+    return mSurfaceArray[index];
 }

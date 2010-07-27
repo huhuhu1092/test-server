@@ -46,6 +46,7 @@ typedef SE_CommonID SE_GeometryDataID;
 typedef SE_CommonID SE_TextureCoordDataID;
 typedef SE_CommonID SE_MaterialDataID;
 typedef SE_CommonID SE_SceneID;
+typedef SE_StringID SE_ProgramDataID;
 ///////////////////////////
 /*
 class SE_GeometryDataID

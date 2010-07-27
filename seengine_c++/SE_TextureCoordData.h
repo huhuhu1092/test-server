@@ -26,7 +26,7 @@ public:
     {
         return texVertexNum;
     }
-    SE_Vector3i getTexFaceArray()
+    SE_Vector3i* getTexFaceArray()
     {
         return texFaceArray;
     }
@@ -54,7 +54,7 @@ private:
 private:
     SE_Vector2f* texVertexArray;
     int texVertexNum;
-    SE_Vector3i texFaceArray;
+    SE_Vector3i* texFaceArray;
     int texFaceNum;
 };
 #endif

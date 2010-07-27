@@ -17,10 +17,10 @@ SE_SceneManager::~SE_SceneManager()
 }
 void SE_SceneManager::renderScene(SE_Camera* camera, SE_RenderManager& renderManager)
 {
-    SE_SpatialTravelForRender str;
-    str.setCamera(camera);
-    str.setRenderManager(&renderManager);
-    mSceneRoot.travel(&str);
+    SE_Matrix4f perspectiveMatrix = camera->getPerspectiveMatrix();
+    renderManager.setPerspectiveMatrix(perspectiveMatrix);
+    renderManager.setWorldToViweMatrix(camera->getWorldToViewMatrix());
+    mSceneRoot->renderScene(camera, renderManager);
 }
 SE_CommonNode* SE_SceneManager::getRoot()
 {

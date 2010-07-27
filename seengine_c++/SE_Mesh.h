@@ -25,11 +25,19 @@ public:
     {
         return mImageNum;
     }
-    SE_ImageDataID* getImage(int index)
+    SE_ImageDataID getImage(int index)
     {
         if(index < 0 || index >= mImageNum)
             return NULL;
         return mImageArray[index];
+    }
+    SE_ImageDataID getImage()
+    {
+        return mImageArray;
+    }
+    bool hasMultiImage()
+    {
+        return mImageNum > 1;
     }
 private:
     SE_TextureCoordData* mTexCoord;
@@ -58,18 +66,23 @@ public:
     SE_Texture* getTexture();
     SE_MaterialData* getMaterialData();
     int getFacetNum();
-    int getFacetArray();
-
+    int* getFacetArray();
+    SE_Vector3f getColor();
+    SE_ProgramDataID getProgramDataID();
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
     void setTexture(SE_Texture* texture);
     void setFacets(int* facets, int num);
+    void setColor(const SE_Vector3f& color);
+    void setProgramDataID(const SE_ProgramDataID& programID);
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
     int* mFacetArray;
     int mFacetNum;
     SE_GeometryData* mGeometryData;
+    SE_Vector3f mColor;
+    SE_ProgramDataID mProgramDataID;
 };
 class SE_Mesh
 {
@@ -105,6 +118,8 @@ public:
     {
         mGeometryData = geomData;
     }
+    int getSurfaceNum();
+    SE_Surface* getSurface(int index);
 private:
     SE_GeometryData* mGeometryData;
     SE_Surface** mSurfaceArray;
