@@ -12,6 +12,10 @@ SE_StringID::SE_StringID()
 {
     mImpl = new SE_StringID::_Impl;
 }
+const char* SE_StringID::getStr()
+{
+    return mImpl->id.c_str();
+}
 SE_StringID::SE_StringID(const char* id)
 {
     SE_ASSERT(id);

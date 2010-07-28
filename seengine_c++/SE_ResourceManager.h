@@ -36,6 +36,11 @@ public:
     SE_MeshTransfer* getMeshTransfer(const SE_MeshID& meshID);
     void setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);
     void removeMeshTransfer(const SE_MeshID& meshID); 
+
+    SE_ShaderProgram* getShaderProgram(const SE_ProgramDataID& programDataID);
+    void setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader);
+    void removeShaderProgram(const SE_ProgramDataID& programDataID);
+    
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
@@ -44,6 +49,8 @@ public:
 
     const char* getDataPath();
     void setDataPath(const char* datapath);
+
+
 private:
 //    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
     static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);

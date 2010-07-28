@@ -1,5 +1,10 @@
 #ifndef SE_IMAGEDATA_H
 #define SE_IMAGEDATA_H
+#ifdef GLES_20
+#include <GLES2/gl2.h>
+#else
+#include <GLES/gl.h>
+#endif
 class SE_ImageData
 {
 public:
@@ -12,6 +17,7 @@ public:
         pixelFormat = INVALID;
         bytesPerRow = 0;
         data = NULL;
+        texid = 0;
     }
     ~SE_ImageData()
     {
@@ -28,7 +34,15 @@ public:
     {return bytesPerRow;}
     char* getData()
     {return data;}
+    GLuint getTexID()
+    {
+        return texid;
+    }
 
+    void setTexID(GLuint texID)
+    {
+        texid = texID;
+    }
     void setHeight(int h)
     {height = h;}
     void setWidth(int w)
@@ -62,5 +76,6 @@ private:
     int bytesPerRow;
     int compressType;
     char* data;
+    GLuint texid;
 };
 #endif

@@ -1,5 +1,6 @@
 #include "SE_RenderUnit.h"
 #include "SE_Mesh.h"
+
 SE_RenderUnit::~SE_RenderUnit()
 {}
 void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
@@ -38,6 +39,97 @@ SE_MaterialData SE_RenderUnit::getMaterialData()
 SE_Vector3f SE_RenderUnit::getColor()
 {
     return SE_Vector3f(0, 0, 0);
+}
+void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, WRAP_TYPE wrapS, WRAP_TYPE wrapT, SAMPLE_TYPE min, SAMPLE_TYPE mag)
+{
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
+    if(imageData == NULL)
+    {
+        LOGI("### can not load texture: %s ###\n", imageDataID.getStr());
+        return 0;
+    }
+    glEnable(GL_TEXTURE_2D);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glActiveTexture(GL_TEXTURE0);
+    GLuint texid = imageData->getTexID();
+    if(!glIsTexture(texid))
+    {
+        glGenTexture(1, &texid);
+        imageData->setTexID(texid);
+    }
+    glBindTexture(GL_TEXTURE_2D, texid);
+    if(!imageData->isCompressTypeByHardware)
+    {
+        GLint internalFormat = GL_RGB;
+        GLenum format = GL_RGB;
+        GLenum type = GL_UNSIGNED_BYTE;
+        if(imageData->getPixelFormat() == SE_ImageData::RGBA)
+        {
+            internalFormat = GL_RGBA;
+            format = GL_RGBA;
+        }
+        if(imageData->getPixelFormat() == SE_ImageData::RGB_565)
+        {
+            type = GL_UNSIGNED_SHORT_5_6_5;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
+    }
+    else
+    {
+    }
+    GLint wraps, wrapt;
+    switch(wrapS)
+    {
+    case REPEAT:
+        wraps = GL_REPEAT;
+        break;
+    case CLAMP:
+        wraps = GL_CLAMP_TO_EDGE;
+    default:
+        wraps = GL_REPEAT;
+    }
+    switch(wrapT)
+    {
+    case REPEAT:
+        wrapt = GL_REPEAT;
+    case CLAMP:
+        wrapt = GL_CLAMP_TO_EDGE;
+        break;
+    default:
+        wrapt = GL_REPEAT;
+        break;
+    }
+    GLint sampleMin, sampleMag;
+    switch(min)
+    {
+    case NEAREST:
+        sampleMin = GL_NEAREAT;
+        break;
+    case LINEAR:
+        sampleMin = GL_LINEAR;
+        break;
+    default:
+        sampleMin = GL_LINEAR;
+    }
+    switch(mag)
+    {
+    case NEAREST:
+        sampleMag = GL_NEAREAT;
+        break;
+    case LINEAR:
+        sampleMag = GL_LINEAR;
+        break;
+    default:
+        sampleMag = GL_LINEAR;
+    }
+            
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampleMin );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampleMag ); 
+    return texid;
 }
 
 ////////////////////////////////
@@ -161,17 +253,10 @@ bool SE_TriSurfaceRenderUnit::cubeMapCoordSameAsBaseColor()
     return true;
 }
 
-SE_MaterialData SE_TriSurfaceRenderUnit::getMaterialData()
+SE_MaterialData* SE_TriSurfaceRenderUnit::getMaterialData()
 {
     SE_MaterialData* md = mSurface->getMaterialData();
-    if(md)
-    {
-        return md;
-    }
-    else
-    {
-        return SE_MaterialData();
-    }
+    return md;
 }
 SE_Vector3f SE_TriSurfaceRenderUnit::getColor()
 {
@@ -182,19 +267,56 @@ SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
     delete mVertex;
     delete mTexVertex;
 }
-void SE_TriSurfaceRenderUnit::draw(SE_Renderer& renderer)
+void SE_TriSurfaceRenderUnit::draw()
 {
     SE_Matrix4f m = mViewToPerspectiveMatrix.mul(mWorldTransform);
-    renderer.useProgram(mSurface->getProgramID());
-    renderer.setMatrix(m);
+    SE_ShaderProgram* shaderProgram = mSurface->getShaderProgram();
+    shaderProgram->use();
     SE_ImageDataID* imageDataArray;
     int imageDataNum;
     getBaseColorImageID(imageDataArray, imageDataNum);
-    renderer.loadTexture(imageDataArray, imageDataNum);
-    renderer.setSampler(mMinSample, mMagSample);
+    if(imageDataArray)
+    {
+        loadBaseColorTexture2D(imageDataArray[0], mSurface->getWraps(), mSurface->getWrapT(), mSurface->getMinSample(), mSurface->getMagSample());
+        glUniform1i(shaderProgram->getBaseColorTextureUnifyLoc, 0);
+		glUniform1i(shaderProgram->getShadingModeUnifyLoc, 1);
+    }
+    else
+    {
+        SE_MaterialData* md = mSurface->getMaterialData();
+        float color[3];
+        if(md)
+        {
+			color[0] = md->ambient.x;
+			color[1] = md->ambient.y;
+			color[2] = md->ambient.z;
+
+        }
+        else
+        {
+            SE_Vector3f c = mSurface->getColor();
+            color[0] = c.x;
+            color[1] = c.y;
+            color[2] = c.z;
+        }
+		glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+		glUniform1i(shaderProgram->getShaderModeUnifyLoc(), 0);
+    }
+    float matrixData[16];
+    m.getColumnSequence(matrixData);
+    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, matrixData); 
     SE_Vector3f* vertex;
     int vertexNum;
     SE_Vector2f* texVertex;
     int texVertexNum;
-    renderer.drawTriangles(vertex, vertexNum, texVertex, texVertexNum);
+    getVertex(vertex, vertexNum);
+    getBaseColorTexVertex(texVertex, texVertexNum);
+    SE_ASSERT(vertexNum == texVertexNum);
+    glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
+	if(texVertex)
+        glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);
+    glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
+	glEnableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
+    glDrawArrays(GL_TRIANGLES, 0, vertexNum);
+
 }

@@ -1,9 +1,15 @@
 #ifndef SE_RENDERUNIT_H
 #define SE_RENDERUNIT_H
+#ifdef GLES_20
+#include <GLES2/gl2.h>
+#endif
 enum SE_PRIMITIVE_TYPE {LINES, LINE_STRIP, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP};
 class SE_RenderUnit
 {
 public:
+    enum SAMPLE_TYPE {NEAREST, LINEAR};
+    enum WRAP_TYPE {REPEAT, CLAMP};
+
     virtual ~SE_RenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
     virtual SE_ImageDataID getBumpMapImageID();
@@ -17,7 +23,7 @@ public:
     virtual void getCubeMapTexVertex(SE_Vector2f* texVertex, int& texVertexNum);
     virtual bool cubeMapCoordSameAsBaseColor();
 
-    virtual SE_MaterialData getMaterialData();
+    virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw(SE_Renderer& renderer);
 public:
@@ -26,12 +32,12 @@ public:
     SE_Matrix4f getWorldTransform();
     void setViewToPerspectiveMatrix(const SE_Matrix4f& m);
     SE_Matrix4f getViewToPerspectiveMatrix();
+    void loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, WRAP_TYPE wrapS, WRAP_TYPE wrapT, SAMPLE_TYPE min, SAMPLE_TYPE mag);
+
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
     SE_Matrix4f mWorldTransform;
     SE_Matrix4f mViewToPerspective;
-    SE_Renderer::SAMPLE_TYPE mMinSample;
-    SE_Renderer::SAMPLE_TYPE mMagSample;
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 {

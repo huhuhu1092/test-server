@@ -15,6 +15,7 @@ public:
     friend bool operator>(const SE_StringID& id1, const SE_StringID& id2);
     void write(SE_BufferOutput& output);
     SE_StringID& read(SE_BufferInput& input);
+    const char* getStr();
     bool isValid();
 private:
     struct _Impl;

@@ -225,7 +225,12 @@ private:
 template <class TID, class T>
 void ResourceMap<TID, T>::remove(const TID& id)
 {
-    m.erase(id);
+    RMap::iterator it = m.find(id);
+    if(it != m.end())
+    {
+        delete it->second;
+        m.erase(it);
+    }
 }
 template <class TID, class T>
 T* ResourceMap<TID, T>::get(const TID& id)
@@ -261,6 +266,7 @@ ResourceMap<TID, T>::~ResourceMap()
         delete data;
     }
 }
+
 /////////////////////////////////////////
 struct SE_ResourceManager::_Impl
 {
@@ -277,6 +283,7 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_TextureCoordDataID, SE_TextureCoordData> texCoordDataMap;
     ResourceMap<SE_MaterialDataID, SE_MaterialData> materialDataMap;
     ResourceMap<SE_MeshID, SE_MeshTransfer> meshMap;
+    ResourceMap<SE_ProgramDataID, SE_ShaderProgram> shaderMap;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
@@ -474,6 +481,24 @@ SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_
         createSceneNode(inputBuffer, spatial);
     }
 }
+SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& programDataID)
+{
+    return mImpl->shaderMap.get(programDataID);
+}
+void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader)
+{
+    if(verteShader == NULL || fragmentShader == NULL)
+        return;
+    SE_ShaderProgram* shaderProgram = new SE_ShaderProgram(vertexShader, fragmentShader);
+    mImpl->shaderMap.set(programDataID, shaderProgram);
+
+}
+void SE_ResourceManager::removeShaderProgram(const SE_ProgramDataID& programDataID)
+{
+    mImpl->shaderMap.remove(programDataID);
+}
+    
+
 SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName;
@@ -527,6 +552,7 @@ SE_MeshTransfer* SE_ResourceManager::getMeshTransfer(const SE_MeshID& meshID)
 void SE_ResourceManager::setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer)
 {
     mImpl->meshDataMap.set(meshID, meshTransfer);
+
     /*
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);
     SE_ResourceManager::_Impl::_MeshDataMap* pMeshDataMap = NULL;
