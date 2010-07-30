@@ -6,6 +6,7 @@ const int SE_MATERIALDATA_ID = 0x4003;
 const int SE_IMAGEDATA_ID = 0x4004;
 const int SE_SCENEDATA_ID = 0x4005;
 const int SE_MESHDATA_ID = 0x4006;
+const int SE_SHADERPROGRAMDATA_ID = 0x4007;
 const int SE_MAGIC = 0xCFCFCFCF;
 const int SE_VERSION = 0x01;
 

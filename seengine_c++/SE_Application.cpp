@@ -1,5 +1,14 @@
 #include "SE_Application.h"
 #include <string.h>
+SE_Application* SE_Application::mInstance = NULL;
+SE_Application* SE_Application::getInstance()
+{
+    if(mInstance == NULL)
+    {
+        mInstance = new SE_Application();
+    }
+    return mInstance;
+}
 SE_Application::SE_Application()
 {
     memset(mCameraArray, 0, sizeof(SE_Camera*) * MAX_CAMERA_NUM);
@@ -34,7 +43,11 @@ SE_Application::~SE_Application()
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
-    mSceneManager->renderScene(mCurrentCamera);
+    SE_RenderManager renderManger;
+    mSceneManager->renderScene(mCurrentCamera, &renderManager);
+    renderManger.beginDraw();
+    renderManager.draw();
+    renderManager.endDraw();
 }
 void SE_Application::run()
 {

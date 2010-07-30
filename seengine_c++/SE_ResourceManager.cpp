@@ -181,8 +181,23 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
     }
 
 }
-
-static void process(const SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+    SE_ProgramDataID programDataID;
+    programDataID.read(inputBuffer);
+    int vertexShaderLen = inputBuffer.readInt();
+    int fragmentShaderLen = inputBuffer.readInt();
+    char* vertexShaderBytes = new char[vertexShaderLen + 1];
+    char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
+    inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
+    inpubBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
+    vertexShaderBytes[vertexShaderLen] = '\0';
+    framgentShaderBytes[fragmentShaderLen] = '\0';
+    resourceManager->setShaderProgram(programDataID, vertexShaderBytes, fragmentShaderBytes);
+    delete[] vertexShaderBytes;
+    delete[] fragmentShaderBytes;
+}
+static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     if(!resourceManager->checkHeader(inputBuffer))
         return;
@@ -205,6 +220,9 @@ static void process(const SE_BufferInput& inputBuffer, SE_ResourceManager* resou
                 break;
             case SE_MESHDATA_ID:
                 processMeshData(inputBuffer, resourceManager);
+                break;
+            case SE_SHADERPROGRAMDATA_ID:
+                processShaderProgram(inputBuffer, resourceManager);
                 break;
         }
     }

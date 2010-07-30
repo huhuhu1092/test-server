@@ -8,7 +8,6 @@ class SE_Application
 public:
     enum {MAX_CAMERA_NUM = 16};
     typedef int SE_APPID;
-    SE_Application();
     virtual ~SE_Application();
     void run();
     void sendCommand(SE_Command* command);
@@ -25,10 +24,14 @@ public:
         return mAppID;
     }
     SE_CommonID createCommonID();
+    SE_ResourceManager* getResourceManager();
+    SE_SceneManager* getSceneManager();
+    static SE_Application* getInstance();
 protected:
     virtual void setUpEnv();
     virtual void processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+    SE_Application();
 protected:
     class _CommandWrapper
     {
@@ -67,5 +70,6 @@ protected:
     SE_CommandFactoryList mCommandFactoryList;
     bool mStarted;
     SE_APPID mAppID;
+    static SE_Application* mInstance;
 };
 #endif

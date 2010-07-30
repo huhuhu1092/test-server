@@ -100,6 +100,10 @@ public:
         mTexIndex = -1;
         mFacetNum = 0;
         mFacetArray = NULL;
+        mSampleMin = 0;
+        mSampleMag = 0;
+        mWrapS = 0;
+        mWrapT = 0;
     }
     ~SE_SurfaceTransfer()
     {
@@ -122,7 +126,39 @@ public:
     {
         return mFacetArray;
     }
-
+    int getSampleMin()
+    {
+        return mSameleMin;
+    }
+    int getSampleMag()
+    {
+        return mSampleMag;
+    }
+    int getWrapS()
+    {
+        return mWrapS;
+    }
+    int getWrapT()
+    {
+        return mWrapT;
+    }
+    
+    void setSampleMin(int min)
+    {
+        mSampleMin = min;
+    }
+    void setSampleMag(int mag)
+    {
+        mSampleMag = mag;
+    }
+    void setWrapS(int wraps)
+    {
+        mWrapS = wraps;
+    }
+    void setWrapT(int wrapt)
+    {
+        mWrapT = wrapt;
+    }
     void setTextureIndex(int index)
     {
         mTexIndex = index;
@@ -141,6 +177,10 @@ private:
     SE_MaterialDataID mMaterialDataID;
     int mFacetNum;
     int* mFacetArray;
+    int mSampleMin;
+    int mSampleMag;
+    int mWrapS;
+    int mWrapT;
 };
 //////////////////////////////////////////////////
 class SE_MeshTransfer

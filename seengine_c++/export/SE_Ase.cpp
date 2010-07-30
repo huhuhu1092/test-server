@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 static int getFileLen(FILE* fp)
 {
 	int		pos;
@@ -105,76 +106,22 @@ static void writeString(const char* str, FILE* fout)
         fwrite(&len, sizeof(int), 1, fout);
     }
 }
-static void getMeshes(ASE_SceneObject* mSceneObject, std::list<SE_Mesh*>& meshList)
+void ASE_Loader::Write(SE_BufferOutput& output)
 {
-    int geomDataNum = mSceneObject->mGeomObjects.size();
-    std::list<ASE_GeometryObject*>::iterator it;
-    int i = 0;
-    for(it = mSceneObject->mGeomObjects.begin();
-        it != mSceneObject->mGeomObjects.end();
-        it++, i++)
-    {
-        ASE_GeometryObject* go = *it;
-        ASE_Mesh* mesh = go->mesh;
-        SE_Mesh* semesh = (SE_Mesh*)SE_Malloc(sizeof(SE_Mesh));
-        meshList.push_back(semesh);
-        SE_Object_Clear(semesh, sizeof(SE_Mesh));
-        semesh->geomDataIndex = i;
-        semesh->materialIndex = go->materialref;
-        semesh->wireframeColor.x = go->wireframeColor[0];
-        semesh->wireframeColor.y = go->wireframeColor[1];
-        semesh->wireframeColor.z = go->wireframeColor[2];
-        COPY_MESHP(rotateAxis);
-        COPY_MESHP(scale);
-        COPY_MESHP(scaleAxis);
-        COPY_MESHP(translate);
-        semesh->rotateAngle = go->rotateAngle;
-        SE_String_Init(&semesh->name, go->name);
-        LOGI("... numFaceGroup = %d\n", mesh->numFaceGroup);
-        if(mesh->numFaceGroup > 0)
-        {
-            semesh->subMeshArray = (SE_SubMesh*)SE_Malloc(sizeof(SE_SubMesh) * mesh->numFaceGroup);
-            semesh->subMeshNum = mesh->numFaceGroup;
-            for(int j = 0 ; j < mesh->faceGroup.size() ; j++)
-            {
-                std::list<int>* l = &mesh->faceGroup[j];
-                if(l->size() > 0)
-                {
-                    SE_SubMesh* submesh = &semesh->subMeshArray[j];
-                    submesh->subMaterialIndex = j;
-                    submesh->faceList.source = NULL;
-                    submesh->faceList.num = l->size();
-                    submesh->faceList.faces = (int*)SE_Malloc(submesh->faceList.num * sizeof(int));
-                    std::list<int>::iterator it;
-                    int k = 0;
-                    for(it = l->begin() ; it != l->end() ; it++, k++)
-                    {
-                        submesh->faceList.faces[k] = *it;
-                    }
-                }
-            }    
-        }
-    }
-}
-void ASE_Loader::Write(const char* filename)
-{
+    typedef std::pair<int, ASE_MaterialData> _MaterialData; // the first field is the num of submaterials
     int materialNum = mSceneObject->mMats.size();
-    SE_Material* materials = (SE_Material*)SE_Malloc(materialNum * sizeof(SE_Material));
-    SE_Object_Clear(materials, sizeof(materialNum * sizeof(SE_Material)));
+    std::vector<_MaterialData> materialVector(materialNum);
+    std::vector<int> indexWhichHasSubmaterial;
     int i;
     for(i = 0 ; i < materialNum ; i++)
     {
         ASE_Material* srcm = &mSceneObject->mMats[i];
-        SE_Material* dstm = &materials[i];
-        COPY_MATERIAL(ambient);
-        COPY_MATERIAL(diffuse);
-        COPY_MATERIAL(specular);
-        SE_String_Init(&dstm->materialData.texturename, srcm->materialData.texName);
-        dstm->subMaterialNum = srcm->numsubmaterials;
+        materialVector.push_back(_MaterialData(srcm->numsubmaterials, srcm->materialData));
         if(srcm->numsubmaterials > 0)
         {
-            dstm->subMaterialArray = (SE_MaterialData*)SE_Malloc(sizeof(SE_MaterialData) * dstm->subMaterialNum);
-            for(int j = 0 ; j < dstm->subMaterialNum ; j++)
+            indexWhichHasSubmaterial.push_back(i);
+            /*
+            for(int j = 0 ; j < srcm->subMaterialNum ; j++)
             {
                 SE_MaterialData* subdstm = &dstm->subMaterialArray[j];
                 ASE_MaterialData* subsrcm = &srcm->submaterials[j];
@@ -183,8 +130,31 @@ void ASE_Loader::Write(const char* filename)
                 COPY_SUBMATERIAL(specular);
                 SE_String_Init(&subdstm->texturename, subsrcm->texName);
             } 
+            */
         }
     }
+    std::vector<int>::iterator it;
+    for(it = indexWhichHasSubmaterial.begin() ; it != indexWhichHasSubmateria.end() ; it++)
+    {
+        int index = *it;
+        ASE_Material* m = &mSceneObject->mMats[index];
+        for(int j = 0 ; j < m->numsubmaterials ; j++)
+        {
+            materialVector.push_back(_MaterialData(0, m->submaterials[j]));
+        }
+    }
+    std::vector<_MaterialData>::iterator itMaterial;
+    for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
+    {
+        SE_MaterialDataID mid = SE_Application::getInstance()->createCommonID();
+        sleep(1);
+        mid.write(output);
+        output.write(itMaterial->second.ambient);
+        output.write(itMaterial->second.diffuse);
+        output.write(itMaterial->second.specular);
+        output.write(SE_Vector3f(0, 0, 0));
+    }
+    //////////////////////////////////////////////////////////////////////////
     int geomDataNum = mSceneObject->mGeomObjects.size();
     SE_GeometryData* geomDataArray = (SE_GeometryData*)SE_Malloc(geomDataNum * sizeof(SE_GeometryData));
     std::list<ASE_GeometryObject*>::iterator it;
