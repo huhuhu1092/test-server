@@ -65,19 +65,50 @@ void ASE_Loader::Load()
     ASE_Load(meshFileName, _verbose);
 
 }
-struct _MaterialData
+#define COPY_MATERIAL(type) do{ \
+    dstm->materialData.type.x = srcm->materialData.type[0]; \
+    dstm->materialData.type.y = srcm->materialData.type[1]; \
+    dstm->materialData.type.z = srcm->materialData.type[2]; \
+}while(0)
+#define COPY_SUBMATERIAL(type) do{ \
+    subdstm->type.x = subsrcm->type[0]; \
+    subdstm->type.y = subsrcm->type[1]; \
+    subdstm->type.z = subsrcm->type[2]; \
+}while(0)
+#define COPY_MESHP(type) do{\
+    semesh->type.x = go->type[0]; \
+    semesh->type.y = go->type[1]; \
+    semesh->type.z = go->type[2]; \
+}while(0)
+static void writeString(const char* str, FILE* fout)
 {
-    int subMaterialNum;
-    ASE_MaterialData md;
-    SE_MaterialDataID mid;
-    SE_TextureDataID tid;
-    _MaterialData()
+    int len = strlen(str);
+    if(len > 0)
     {
-        subMaterialNum = 0;
+        char buf[256];
+        char* p = buf;
+        memset(buf, 0, 256);
+        while(*str != '\0')
+        {
+            *p++ = *str++;
+            if(*(p - 1) == '.')
+                break;
+        }
+        if(*(p - 1) == '.')
+            strcpy(p, "raw");
+        LOGI("### string = %s ####\n", buf);
+        len = strlen(buf);
+        fwrite(&len, sizeof(int), 1, fout);
+        fwrite(buf, 1, len, fout);
     }
-};
+    else
+    {
+        fwrite(&len, sizeof(int), 1, fout);
+    }
+}
 void ASE_Loader::Write(SE_BufferOutput& output)
 {
+    typedef std::pair<int, ASE_MaterialData> _MaterialData; // the first field is the num of submaterials
     int materialNum = mSceneObject->mMats.size();
     std::vector<_MaterialData> materialVector(materialNum);
     std::vector<int> indexWhichHasSubmaterial;
@@ -85,10 +116,7 @@ void ASE_Loader::Write(SE_BufferOutput& output)
     for(i = 0 ; i < materialNum ; i++)
     {
         ASE_Material* srcm = &mSceneObject->mMats[i];
-        _MaterialData md;
-        md.subMaterialNum = srcm->numsubmaterials;
-        md.md = srcm->materialData;
-        materialVector.push_back(md);
+        materialVector.push_back(_MaterialData(srcm->numsubmaterials, srcm->materialData));
         if(srcm->numsubmaterials > 0)
         {
             indexWhichHasSubmaterial.push_back(i);
@@ -101,10 +129,7 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         ASE_Material* m = &mSceneObject->mMats[index];
         for(int j = 0 ; j < m->numsubmaterials ; j++)
         {
-            _MaterialData md;
-            md.subMaterialNum = 0;
-            md.md = m->submaterials[j];
-            materialVector.push_back(md);
+            materialVector.push_back(_MaterialData(0, m->submaterials[j]));
         }
     }
     std::vector<_MaterialData>::iterator itMaterial;
@@ -112,29 +137,14 @@ void ASE_Loader::Write(SE_BufferOutput& output)
     for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
     {
         SE_MaterialDataID mid = SE_Application::getInstance()->createCommonID();
-        itMaterial->mid = mid;
         sleep(1);
         mid.write(output);
-        output.write(itMaterial->md.ambient);
-        output.write(itMaterial->md.diffuse);
-        output.write(itMaterial->md.specular);
+        output.write(itMaterial->second.ambient);
+        output.write(itMaterial->second.diffuse);
+        output.write(itMaterial->second.specular);
         output.write(SE_Vector3f(0, 0, 0));
     }
-    /////////////////////////////write texture data ///////////////
-    output.writeShort(SE_IMAGEDATA_ID);
-    for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
-    {
-        std::string texStr(itMaterial->md.texName);
-        if(texStr != "")
-        {
-            SE_ImageDataID tid = SE_Application::getInstance()->createCommonID();
-            itMaterial->tid = tid;
-            sleep(1);
-            tid.write(output);
-            output.writeInt(0); // image data type
-        }
-    }
-    /////////////////////////////write geom data /////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
     output.writeShort(SE_GEOMETRYDATA_ID);
     int geomDataNum = mSceneObject->mGeomObjects.size();
     output.writeInt(geomDataNum);
@@ -163,9 +173,8 @@ void ASE_Loader::Write(SE_BufferOutput& output)
             output.writeInt(mesh->faces[i].vi[1]);
             output.writeInt(mesh->faces[i].vi[2]);
         }
-    }
-    ///////////////////////////////////////////////////////////////////////
 
+    }
     std::list<SE_Mesh*> seMeshs;
     getMeshes(mSceneObject, seMeshs);
     int meshNum = seMeshs.size();
