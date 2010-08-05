@@ -215,13 +215,17 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
         sleep(1);
         meshID.write(output);
-        geomTexCoordData[n++].geomID.write(output);
+        SE_GemoetryDataID geomID = geomTexCoordData[n].geomID;
+        SE_TextureCoordDataID texCoordID = geomTexCoordData[n].texCoordID;
+        n++;
+        geomID.write(output);
         output.writeFloat(wireframeColor[0]);
         output.writeFloat(wireframeColor[1]);
         output.writeFloat(wireframeColor[2]);
         int texNum = 0;
         int materiaref = go->materialref;
         _MaterialData mdData = materialVector[materialref];
+
         if(mdData.subMaterialNum > 1)
         {
             int startpos = 0;
@@ -250,11 +254,88 @@ void ASE_Loader::Write(SE_BufferOutput& output)
             }
         }
         output.writeInt(texNum);
+        int subMaterialStartPos = 0;
         for(i = 0 ; i < texNum ; i++)
         {
+            if(mdData.subMaterialNum > 1)
+            {
+                int j;
+                for(j = 0 ; j < (materialref - 1) ; j++)
+                {
+                    _MaterialData d = materialVector[j];
+                    subMaterialStartPos += d.subMaterialNum;
+                }
+                for(int j = 0 ; j < mdData.subMaterialNum ; j++)
+                {
+                    _MaterialData subMaterialData = materialVector[startpos++];
+                    std::string texStr(subMaterialData.md.texName);
+                    if(texStr != "")
+                    {
+                        output.writeInt(1);//current we just has one texture unit;
+                        output.writeInt(0);//texture unit type is TEXTURE0
+                        texCoordID.write(output);
+                        output.writeInt(1);//image num use in the texture unit. current it is not mipmap. so the num is 1
+                        subMaterialData.tid.write(output);
 
+                    }
+                }
+            }
+            else
+            {
+                std::string texStr(mdData.md.texName);
+                if(texStr != "")
+                {
+                    output.writeInt(1);//current we just has one texture unit;
+                    output.writeInt(0);//texture unit type is TEXTURE0
+                    texCoordID.write(output);
+                    output.writeInt(1);//image num use in the texture unit. current it is not mipmap. so the num is 1
+                    mdData.tid.write(output);
+                }
+            }
+            
+        }
+        ///write surface
+        if(mesh->numFaceGroup > 0)
+        {
+            SE_ASSERT(mesh->numFaceGroup == mesh->faceGroup.size());
+            output.writeInt(mesh->numFaceGroup);
+            std::vector<std::list<int> >::iterator it;
+            int indexM = subMaterialStartPos;
+            int texIndex = 0;
+            for(it = mesh->faceGroup.begin() ; it != mesh->faceGroup.end(); it++)
+            {
+                _MaterialData md = materialVector[indexM];
+                std::string texStr(md.md.texName);
+                if(texStr != "")
+                {
+                    output.writeInt(texIndex);
+                }
+                md.mid.write(output);
+                output.writeInt(it->size());
+                std::list<int>::iterator itFace;
+                for(itFace = it->begin() ; itFace != it->end() ; itFace++)
+                {
+                    output.writeInt(*itFace);
+                }
+                indexM++;
+                texInex++;
+            }
+        } 
+        else
+        {
+            output.writeInt(1); //just has one surface
+            std::string texStr(mdData.md.texName);
+            if(texStr != "")
+            {
+                output.writeInt(0); // the texture index is 0;
+            }
+            mdData.mid.write(output);
+            output.writeInt(mesh->numFaces); // facets num;
+            for(int f = 0 ; f < mesh->numFaces ; f++)
+                output.writeInt(f);
         }
     }
+    /////// create scene //////////
 
     LOGI("write end\n");
 }
