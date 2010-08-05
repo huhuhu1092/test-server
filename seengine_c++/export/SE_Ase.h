@@ -31,6 +31,7 @@ struct ASE_Face
     int materialID;
 	ASE_Face()
 	{
+        for(int i = 0 ; i < mesh)
 		memset(vi, 0, sizeof(int) * 3);
 		materialID = -1;
 	}

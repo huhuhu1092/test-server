@@ -105,7 +105,7 @@ static void processGeometryData(SE_BufferInput& inputBuffer, SE_ResourceManager*
         resourceManager->setGeometryData(id, geomData);
     }
 }
-static void processTextureUnitData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+static void processTextureCoordData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     int texCoordNum = inputBuffer.readInt();
     for(int n = 0 ; n < texCoordNum ; n++)

@@ -70,11 +70,16 @@ struct _MaterialData
     int subMaterialNum;
     ASE_MaterialData md;
     SE_MaterialDataID mid;
-    SE_TextureDataID tid;
+    SE_ImageDataID tid;
     _MaterialData()
     {
         subMaterialNum = 0;
     }
+};
+struct _GeomTexCoordData
+{
+    SE_GeometryDataID geomID;
+    SE_TextureCoordDataiD texCoordID;
 };
 void ASE_Loader::Write(SE_BufferOutput& output)
 {
@@ -132,13 +137,16 @@ void ASE_Loader::Write(SE_BufferOutput& output)
             sleep(1);
             tid.write(output);
             output.writeInt(0); // image data type
+            output.writeString(texStr.c_str());
         }
     }
     /////////////////////////////write geom data /////////////////////////////////////////////
     output.writeShort(SE_GEOMETRYDATA_ID);
     int geomDataNum = mSceneObject->mGeomObjects.size();
     output.writeInt(geomDataNum);
+    std::vector<_GeomTexCoordData> geomTexCoordData(geomDataNum);
     std::list<ASE_GeometryObject*>::iterator it;
+    int n = 0;
     for(it = mSceneObject->mGeomObjects.begin();
         it != mSceneObject->mGeomObjects.end();
         it++)
@@ -146,6 +154,7 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         ASE_GeometryObject* go = *it;
         ASE_Mesh* mesh = go->mesh;
         SE_GeometryDataID gid = SE_Application::getInstance()->createCommonID();
+        geomTexCoorData[n++].geomID = gid;
         gid.write(output);
         output.writeInt(mesh->numVertexes);
         output.writeInt(mesh->numFaces);
@@ -164,200 +173,90 @@ void ASE_Loader::Write(SE_BufferOutput& output)
             output.writeInt(mesh->faces[i].vi[2]);
         }
     }
-    ///////////////////////////////////////////////////////////////////////
 
-    std::list<SE_Mesh*> seMeshs;
-    getMeshes(mSceneObject, seMeshs);
-    int meshNum = seMeshs.size();
-    FILE* fout = fopen(filename, "wb");
-    if(!fout)
-       return;
-    fwrite(&MAGIC, sizeof(int), 1, fout);
-    fwrite(&VERSION, sizeof(int), 1, fout);
-    fwrite(&COORDINATE, sizeof(int), 1, fout);
-    fwrite(&ENDIAN, sizeof(int), 1, fout);
-    fwrite(&materialNum, sizeof(int), 1, fout);
-    fwrite(&geomDataNum, sizeof(int), 1, fout);
-    fwrite(&meshNum, sizeof(int), 1, fout);
-    for(i = 0 ; i < materialNum ; i++)
+    ////////////////////////write texture coordinate///////////////////////////////////////////////
+    output.writeShort(SE_TEXCOORDDATA_ID);
+    n = 0;
+    for(it = mSceneObject->mGeomObjects.begin();
+    it != mSceneObject->mGeomObjects.end();
+    it++)
     {
-        LOGI("...write material\n");
-        fwrite(&MATERIAL_ID, sizeof(short), 1, fout);
-        SE_Material* m = &materials[i];
-        writeString(SE_String_GetData(&m->materialData.texturename), fout);
-        fwrite(&m->materialData.ambient.x, sizeof(float), 1, fout);
-        fwrite(&m->materialData.ambient.y, sizeof(float), 1, fout);
-        fwrite(&m->materialData.ambient.z, sizeof(float), 1, fout);
-        
-        fwrite(&m->materialData.diffuse.x, sizeof(float), 1, fout);
-        fwrite(&m->materialData.diffuse.y, sizeof(float), 1, fout);
-        fwrite(&m->materialData.diffuse.z, sizeof(float), 1, fout);
-        
-        fwrite(&m->materialData.specular.x, sizeof(float), 1, fout);
-        fwrite(&m->materialData.specular.y, sizeof(float), 1, fout);
-        fwrite(&m->materialData.specular.z, sizeof(float), 1, fout);
-        fwrite(&m->subMaterialNum , sizeof(int), 1, fout);
-        if(m->subMaterialNum > 0)
+        ASE_GeometryObject* go = *it;
+        ASE_Mesh* mesh = go->mesh;
+        SE_TextureCoordDataID tcid = SE_Application::getInstance()->createCommonID();
+        tcid.write(tcid);
+        geomTexCoordData[n++].texCoordID = tcid;
+        sleep(1);
+        output.write(mesh->numTVertexes);
+        output.write(mesh->numFaces);
+        int i;
+        for(i = 0 ; i < mesh->numTVertexes ; i++)
         {
-            for(int j = 0 ; j < m->subMaterialNum ; j++)
-            {
-                SE_MaterialData* md = &m->subMaterialArray[j];
-                writeString(SE_String_GetData(&md->texturename), fout);
-                fwrite(&md->ambient.x, sizeof(float), 1, fout);
-                fwrite(&md->ambient.y, sizeof(float), 1, fout);
-                fwrite(&md->ambient.z, sizeof(float), 1, fout);
-                
-                fwrite(&md->diffuse.x, sizeof(float), 1, fout);
-                fwrite(&md->diffuse.y, sizeof(float), 1, fout);
-                fwrite(&md->diffuse.z, sizeof(float), 1, fout);
-                
-                fwrite(&md->specular.x, sizeof(float), 1, fout);
-                fwrite(&md->specular.y, sizeof(float), 1, fout);
-                fwrite(&md->specular.z, sizeof(float), 1, fout);
-     
-            }
+            output.writeFloat(mesh->tvertexes[i].s);
+            output.writeFloat(mesh->tvertexes[i].t);
         }
-
-    }
-    for(i = 0 ; i < geomDataNum ; i++)
-    {
-        LOGI("... write goem data\n");
-        fwrite(&GEOMOBJECT_ID, sizeof(short), 1, fout);
-        SE_GeometryData* gd = &geomDataArray[i];
-        fwrite(&gd->type, sizeof(int), 1, fout);
-        fwrite(&gd->vertexNum, sizeof(int), 1, fout);
-        fwrite(&gd->faceNum, sizeof(int), 1, fout);
-        fwrite(&gd->texVertexNum, sizeof(int), 1, fout);
-        fwrite(&gd->colorNum, sizeof(int), 1, fout);
-        int j;
-        for(j = 0 ; j < gd->vertexNum ; j++)
+        for(i = 0 ; i < mesh->numFaces ; i++)
         {
-            fwrite(&gd->vertexArray[j].x, sizeof(float), 1, fout);
-            fwrite(&gd->vertexArray[j].y, sizeof(float), 1, fout);
-            fwrite(&gd->vertexArray[j].z, sizeof(float), 1, fout);
-        }
-        for(j = 0 ; j < gd->faceNum ; j++)
-        {
-            fwrite(&gd->faceArray[j].v[0], sizeof(int), 1, fout);
-            fwrite(&gd->faceArray[j].v[1], sizeof(int), 1, fout);
-            fwrite(&gd->faceArray[j].v[2], sizeof(int), 1, fout);
-
-        }
-        if(gd->texVertexNum > 0)
-        {
-            for(j = 0 ; j < gd->texVertexNum ; j++)
-            {
-                fwrite(&gd->texVertexArray[j].x, sizeof(float), 1, fout);
-                fwrite(&gd->texVertexArray[j].y, sizeof(float), 1, fout);
-                fwrite(&gd->texVertexArray[j].z, sizeof(float), 1, fout);
-            }
-            for(j = 0 ; j < gd->faceNum ; j++)
-            {
-                fwrite(&gd->texFaceArray[j].v[0], sizeof(int), 1, fout);
-                fwrite(&gd->texFaceArray[j].v[1], sizeof(int), 1, fout);
-                fwrite(&gd->texFaceArray[j].v[2], sizeof(int), 1, fout);
-            }
-        }
-        if(gd->colorNum > 0)
-        {
-            for(j = 0 ; j < gd->colorNum ; j++)
-            {
-                fwrite(&gd->colorArray[j].x, sizeof(float), 1, fout);
-                fwrite(&gd->colorArray[j].y, sizeof(float), 1, fout);
-                fwrite(&gd->colorArray[j].z, sizeof(float), 1, fout);
-            }
+            output.writeInt(mesh->tfaces[i].vi[0]);
+            output.writeInt(mesh->tfaces[i].vi[1]);
+            output.writeInt(mesh->tfaces[i].vi[2]);
         }
     }
-    i = 0;
-    std::list<SE_Mesh*>::iterator itMesh;
-    for(itMesh = seMeshs.begin() ; itMesh != seMeshs.end() ; itMesh++)
+///////////////////// write mesh //////////////// 
+    output.writeShort(SE_MESHDATA_ID);
+    output.writeInt(geomDataNum);
+    n = 0;
+    for(it = mSceneObject->mGeomObjects.begin();
+    it != mSceneObject->mGeomObjects.end();
+    it++)
     {
-        SE_Mesh* smesh = *itMesh;
-        LOGI("... write mesh id\n");
-        fwrite(&MESH_ID, sizeof(short), 1, fout);
-        fwrite(&smesh->geomDataIndex, sizeof(int), 1, fout);
-        fwrite(&smesh->materialIndex, sizeof(int), 1, fout);
-        fwrite(&smesh->wireframeColor.x, sizeof(float), 1, fout);
-        fwrite(&smesh->wireframeColor.y, sizeof(float), 1, fout);
-        fwrite(&smesh->wireframeColor.z, sizeof(float), 1, fout);
-
-        fwrite(&smesh->rotateAxis.x, sizeof(float), 1, fout);
-        fwrite(&smesh->rotateAxis.y, sizeof(float), 1, fout);
-        fwrite(&smesh->rotateAxis.z, sizeof(float), 1, fout);
-
-        fwrite(&smesh->rotateAngle, sizeof(float), 1, fout);
-
-        fwrite(&smesh->scaleAxis.x, sizeof(float), 1, fout);
-        fwrite(&smesh->scaleAxis.y, sizeof(float), 1, fout);
-        fwrite(&smesh->scaleAxis.z, sizeof(float), 1, fout);
-
-        fwrite(&smesh->scale.x, sizeof(float), 1, fout);
-        fwrite(&smesh->scale.y, sizeof(float), 1, fout);
-        fwrite(&smesh->scale.z, sizeof(float), 1, fout);
-
-        fwrite(&smesh->translate.x, sizeof(float), 1, fout);
-        fwrite(&smesh->translate.y, sizeof(float), 1, fout);
-        fwrite(&smesh->translate.z, sizeof(float), 1, fout);
-        writeString(SE_String_GetData(&smesh->name), fout);
-        fwrite(&smesh->subMeshNum, sizeof(int), 1, fout);
-        if(smesh->subMeshNum > 0)
+        ASE_GeometryObject* go = *it;
+        ASE_Mesh* mesh = go->mesh;
+        SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
+        sleep(1);
+        meshID.write(output);
+        geomTexCoordData[n++].geomID.write(output);
+        output.writeFloat(wireframeColor[0]);
+        output.writeFloat(wireframeColor[1]);
+        output.writeFloat(wireframeColor[2]);
+        int texNum = 0;
+        int materiaref = go->materialref;
+        _MaterialData mdData = materialVector[materialref];
+        if(mdData.subMaterialNum > 1)
         {
-            LOGI("...submesh num = %d\n", smesh->subMeshNum);
-            int i;
-            for(i = 0 ; i < smesh->subMeshNum ; i++)
+            int startpos = 0;
+            int j;
+            for(j = 0 ; j < (materialref - 1) ; j++)
             {
-                SE_SubMesh* submesh = &smesh->subMeshArray[i];
-                fwrite(&submesh->subMaterialIndex, sizeof(int), 1, fout);
-                fwrite(&submesh->faceList.num, sizeof(int), 1, fout);
-                int j;
-                for(j = 0 ; j < submesh->faceList.num ; j++)
+                _MaterialData d = materialVector[j];
+                startpos += d.subMaterialNum;
+            }
+            for(int j = 0 ; j < mdData.subMaterialNum ; j++)
+            {
+                _MaterialData subMaterialData = materialVector[startpos++];
+                std::string texStr(subMaterialData.md.texName);
+                if(texStr != "")
                 {
-                    fwrite(&submesh->faceList.faces[j], sizeof(int), 1, fout);
+                    texNum++;
                 }
             }
         }
+        else
+        {
+            std::string texStr(mdData.md.texName);
+            if(texStr != "")
+            {
+                texNum = 1;
+            }
+        }
+        output.writeInt(texNum);
+        for(i = 0 ; i < texNum ; i++)
+        {
 
-    }
-    for(i = 0 ; i < materialNum ; i++)
-    {
-	 if(materials[i].subMaterialNum > 0)
-	 {
-             for(int j = 0 ; j < materials[i].subMaterialNum ; j++)
-	     {
-		 SE_String_Release(&materials[i].subMaterialArray[j].texturename);
-	     }
-             SE_Free(materials[i].subMaterialArray);
-	 }
-	 SE_String_Release(&materials[i].materialData.texturename);
-    } 
-    SE_Free(materials);
-    for(i = 0 ; i < geomDataNum ; i++)
-    {
-	SE_Free(geomDataArray[i].vertexArray);
-	SE_Free(geomDataArray[i].texVertexArray);
-	SE_Free(geomDataArray[i].faceArray);
-	SE_Free(geomDataArray[i].texFaceArray);
-	SE_Free(geomDataArray[i].colorArray);
-    }
-    SE_Free(geomDataArray);
-    for(itMesh = seMeshs.begin() ; itMesh != seMeshs.end() ; itMesh++)
-    {
-	SE_Mesh* mesh = *itMesh;
-	if(mesh->subMeshArray)
-	{
-	    for(int j = 0 ; j < mesh->subMeshNum; j++)
-	    { 
-	        SE_SubMesh* subMesh = &mesh->subMeshArray[j];
-		SE_Free(subMesh->faceList.faces);
-	    }
-	    SE_Free(mesh->subMeshArray);
-	}
-	SE_String_Release(&mesh->name);
-	SE_Free(*itMesh);
+        }
     }
 
     LOGI("write end\n");
-    fclose(fout); 
 }
 /*
 ** ASE_Load

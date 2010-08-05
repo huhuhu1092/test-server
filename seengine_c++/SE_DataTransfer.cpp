@@ -64,7 +64,7 @@ void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
             mTexTransferArray  = new SE_TextureTransfer[mTexNum];
         }
         int i;
-        for(i = 0 ; i < textureNum ; i++)
+        for(i = 0 ; i < mTexNum ; i++)
         {
             SE_TextureTransfer* textureTransfer = &mTexTransferArray[i];
             int texUnitNum = inputBuffer.readInt();
@@ -85,6 +85,7 @@ void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
                     imageDataIDArray[n] = imageID;
                 }
                 texUnitTransfer->setImageDataID(imageDataIDArray, imageNum);
+                texUnitTransfer->setType(type);
             }
         } 
         mSurfaceNum = inputBuffer.readInt();
