@@ -21,12 +21,12 @@ SE_Geometry::~SE_Geometry()
 {
     delete mImpl;
 }
-void SE_Geometry::attachGeometryObject(SE_SimObject* go)
+void SE_Geometry::attachSimObject(SE_SimObject* go)
 {
     mImpl->attachObject.push_back(go);
     go->doTransform(getWorldTransform());
 }
-void SE_Geometry::detachGeometryObject(SE_SimObject* go)
+void SE_Geometry::detachSimObject(SE_SimObject* go)
 {
     mImpl->attachObject.remove(go);
 }

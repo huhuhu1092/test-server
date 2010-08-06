@@ -81,7 +81,14 @@ struct _GeomTexCoordData
     SE_GeometryDataID geomID;
     SE_TextureCoordDataiD texCoordID;
 };
-void ASE_Loader::Write(SE_BufferOutput& output)
+static void writeHeader(SE_BufferOutput& output, int dataLen)
+{
+    output.writeInt(SE_MAGIC);
+    output.writeInt(SE_VERSION);
+    output.writeInt(SE_ENDIAN);
+    output.writeInt(dataLen);
+}
+void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
 {
     int materialNum = mSceneObject->mMats.size();
     std::vector<_MaterialData> materialVector(materialNum);
@@ -147,6 +154,9 @@ void ASE_Loader::Write(SE_BufferOutput& output)
     std::vector<_GeomTexCoordData> geomTexCoordData(geomDataNum);
     std::list<ASE_GeometryObject*>::iterator it;
     int n = 0;
+    SE_Matrix4f modelToWorldM, worldToModelM;
+    SE_Matrix3f rotateM;
+    SE_Vector3f rotateAxis, scale, translate;
     for(it = mSceneObject->mGeomObjects.begin();
         it != mSceneObject->mGeomObjects.end();
         it++)
@@ -154,6 +164,18 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         ASE_GeometryObject* go = *it;
         ASE_Mesh* mesh = go->mesh;
         SE_GeometryDataID gid = SE_Application::getInstance()->createCommonID();
+        rotateAxis.x = go->rotateAxis[0];
+        rotateAxis.y = go->rotateAxis[1];
+        rotateAxis.z = go->rotateAxis[2];
+        scale.x = go->scale[0];
+        scale.y = go->scale[1];
+        scale.z = go->scale[2];
+        translate.x = go->translate[0];
+        translate.y = go->translate[1];
+        translate.z = go->translate[2];
+        rotateM.setRotateFromAxis(go->rotateAngle, rotateAxis);
+        modelToWorldView.set(rotateM, scale, translate);
+        worldToModelM = modelToWorldM.inverse();
         geomTexCoorData[n++].geomID = gid;
         gid.write(output);
         output.writeInt(mesh->numVertexes);
@@ -162,9 +184,16 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         int i;
         for(i = 0 ; i < mesh->numVertexes ; i++)
         {
+            SE_Vector4f p(mesh->vertexes[i].x, mesh->vertexes[i].y, mesh->vertexes[i].z, 1.0f);
+            p = worldToModelM.map(p);
+            output.writeFloat(p.x);
+            output.writeFloat(p.y);
+            output.writeFloat(p.z);
+            /*
             output.writeFloat(mesh->vertexes[i].x);
             output.writeFloat(mesh->vertexes[i].y);
             output.writeFloat(mesh->vertexes[i].z);
+            */
         }
         for(i = 0 ; i < mesh->numFaces ; i++)
         {
@@ -203,6 +232,7 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         }
     }
 ///////////////////// write mesh //////////////// 
+    std::vector<SE_MeshID> meshIDVector(geomDataNum);
     output.writeShort(SE_MESHDATA_ID);
     output.writeInt(geomDataNum);
     n = 0;
@@ -215,6 +245,7 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
         sleep(1);
         meshID.write(output);
+        meshIDVector.push_back(meshID);
         SE_GemoetryDataID geomID = geomTexCoordData[n].geomID;
         SE_TextureCoordDataID texCoordID = geomTexCoordData[n].texCoordID;
         n++;
@@ -336,8 +367,60 @@ void ASE_Loader::Write(SE_BufferOutput& output)
         }
     }
     /////// create scene //////////
-
+    SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
+    SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
+    rootNode->setBVType(SE_BoundingVolume::AABB);
+    outScene.write(spatialID);
+    rootNode->write(outScene);
+    n = 0;
+    for(it = mSceneObject->mGeomObjects.begin();
+    it != mSceneObject->mGeomObjects.end();
+    it++)
+    {
+        ASE_GeometryObject* go = *it;
+        ASE_Mesh* mesh = go->mesh;
+        SE_MeshID meshID = meshIDVector[n++];
+        SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
+        SE_Geometry* child = new SE_Geometry(childID, rootNode);
+        rootNode->addChild(child);
+        SE_Vector3f translate, scale, rotateAxis;
+        translate.x = go->translate[0];
+        translate.y = go->translate[1];
+        translate.z = go->translate[2];
+        scale.x = go->scale[0];
+        scale.y = go->scale[1];
+        scale.z = go->scale[2];
+        rotateAxis.x = go->rotateAxis[0];
+        rotateAxis.y = go->rotateAxis[1];
+        rotateAxis.z = go->rotateAxis[2];
+        child->setLocalTranslate(translate);
+        child->setLocalScale(scale);
+        SE_Quat q;
+        q.set(go->rotateAngle, rotateAxis);
+        child->setBVType(SE_BoundingVolume::AABB);
+        SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
+        child->attachSimObject(meshObj);
+        child->write(outScene);
+    }
     LOGI("write end\n");
+}
+void ASE_Loader::Write(const char* outFileName)
+{
+    SE_BufferOutput outBase, outScene;
+    SE_BufferOutput outBaseHeader, outSceneHeader;
+    Write(outBase, outScene);
+    writeHeader(outBaseHeader, outBase.getDataLen());
+    writeHeader(outSceneHeader, outScene.getDataLen());
+    std::string outBaseFileName(outFileName);
+    outBaseFileName = outBaseFileName + "_basedata.cbf";
+    SE_File fbase(outBaseFileName, SE_File::WRITE);
+    f.write(outBaseHeader);
+    f.write(outBase);
+    std::string outSceneFileName(outFileName);
+    outSceneFileName = outSceneFileName + "_scene.cbf"
+    SE_File fscene(outSceneFileName, SE_FILE::WRITE);
+    fscene.write(outSceneHeader);
+    fscene.write(outScene);
 }
 /*
 ** ASE_Load

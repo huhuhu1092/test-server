@@ -101,8 +101,8 @@ public:
     }
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
-    virtual void attachGeometryObject(SE_SimObject* go);
-    virtual void detachGeometryObject(SE_SimObject* go);
+    virtual void attachSimObject(SE_SimObject* go);
+    virtual void detachSimObject(SE_SimObject* go);
     virtual int travel(SE_SpatialTravel* spatialTravel);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();

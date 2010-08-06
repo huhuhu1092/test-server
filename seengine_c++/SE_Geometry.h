@@ -11,8 +11,8 @@ public:
     SE_Geometry(SE_Spatial* parent = NULL);
     SE_Geometry(SE_SpatialID id, SE_Spatial* parent = NULL);
     ~SE_Geometry();
-    void attachGeometryObject(SE_SimObject* go);
-    void detachGeometryObject(SE_SimObject* go);
+    void attachSimObject(SE_SimObject* go);
+    void detachSimObject(SE_SimObject* go);
     void updateWorldTransform();
     void updateBoundingVolume();
     void travel(SE_SpatialTravel* spatialTravel);

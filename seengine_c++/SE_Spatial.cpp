@@ -163,9 +163,9 @@ void SE_Spatial::addChild(SE_Spatial* child)
 {}
 void SE_Spatial::removeChild(SE_Spatial* child)
 {}
-void SE_Spatial::attachGeometryObject(SE_SimObject* go)
+void SE_Spatial::attachSimObject(SE_SimObject* go)
 {}
-void SE_Spatial::detachGeometryObject(SE_SimObject* go)
+void SE_Spatial::detachSimObject(SE_SimObject* go)
 {}
 void SE_Spatial::travel(SE_SpatialTravel* spatialTravel)
 {}
