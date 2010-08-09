@@ -17,6 +17,7 @@ public:
     SE_StringID& read(SE_BufferInput& input);
     const char* getStr();
     bool isValid();
+	static SE_StringID INVALID;
 private:
     struct _Impl;
     _Impl* mImpl;
@@ -35,6 +36,7 @@ public:
     friend bool operator<(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator>(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid);
+	static SE_CommonID INVALID;
 private:
     unsigned int id[4];
 
@@ -48,6 +50,8 @@ typedef SE_CommonID SE_TextureCoordDataID;
 typedef SE_CommonID SE_MaterialDataID;
 typedef SE_CommonID SE_SceneID;
 typedef SE_StringID SE_ProgramDataID;
+typedef SE_StringID SE_CommandID;
+typedef SE_StringID SE_CommandFactoryID;
 ///////////////////////////
 /*
 class SE_GeometryDataID

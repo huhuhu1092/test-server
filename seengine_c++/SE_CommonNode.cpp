@@ -53,7 +53,7 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
     for(; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-        ret = s->visit(spatialTravel);
+        ret = spatialTravel->visit(s);
         if(ret && !travelAways)
             break;
     }

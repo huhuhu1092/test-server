@@ -1,6 +1,6 @@
 #include "SE_CommandFactory.h"
 #include <stdlib.h>
-static int _Compare(void* left, void* right)
+static int _Compare(const void* left, const void* right)
 {
     SE_CommandEntry* leftEntry = (SE_CommandEntry*)left;
     SE_CommandEntry* rightEntry = (SE_CommandEntry*)right;
@@ -34,7 +34,7 @@ SE_Command* SE_CommandFactory::create(SE_Application* app, const SE_CommandID& i
     SE_CommandEntry ce;
     ce.id = id;
     ce.cf = NULL;
-    SE_CommandEntry* entry = bsearch(&ce, mEntryAray, mEntrySize, sizeof(SE_CommandEntry*), &_Compare);
+    SE_CommandEntry* entry = (SE_CommandEntry*)bsearch(&ce, mEntryArray, mEntrySize, sizeof(SE_CommandEntry*), &_Compare);
     if(entry)
     {
         return entry->cf->create(app, id);

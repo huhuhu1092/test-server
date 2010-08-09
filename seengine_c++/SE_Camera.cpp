@@ -1,4 +1,6 @@
 #include "SE_Camera.h"
+#include "SE_Log.h"
+#include "SE_BoundingVolume.h"
 SE_Camera::SE_Camera()
 {
     mChanged = true;
@@ -7,7 +9,7 @@ SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, flo
 {
     mFrustum.set(fov, ratio, near, far);
     SE_Vector3f zDir = location - target;
-    if(zDir.isZero)
+    if(zDir.isZero())
     {
         LOGI("### camera direction is zero ####\n");
         zDir.set(0, 0, 1);
@@ -50,7 +52,7 @@ SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, cons
     mAxisX = xAxis.normalize();
     mAxisY = zAxis.cross(xAxis).normalize();
     mAxisZ = zAxis.normalize();
-    mLoacation = location;
+    mLocation = location;
     mChanged = true;
 }
 int SE_Camera::cullBV(const SE_BoundingVolume& bv)
@@ -66,7 +68,7 @@ int SE_Camera::cullBV(const SE_BoundingVolume& bv)
         if(p != SE_NEGATIVE)
             planeSide = p;
     }
-    if(planeSize == SE_NAGETIVE)
+    if(planeSide == SE_NEGATIVE)
         return 1;
     else
         return 0;
@@ -80,15 +82,15 @@ void SE_Camera::setViewport(int x, int y, int w, int h)
 }
 SE_Matrix4f SE_Camera::getWorldToViewMatrix()
 {
-    SE_Matrix4f vtow = getViewToWorld();
-    return vtow.inserse(); 
+    SE_Matrix4f vtow = getViewToWorldMatrix();
+    return vtow.inverse(); 
 }
 SE_Matrix4f SE_Camera::getViewToWorldMatrix()
 {
     SE_Matrix3f rm;
-    rm.setColumn(0, xAxis);
-    rm.setColumn(1, yAxis);
-    rm.setColumn(2, zAxis);
+    rm.setColumn(0, mAxisX);
+    rm.setColumn(1, mAxisY);
+    rm.setColumn(2, mAxisZ);
     return SE_Matrix4f(rm, mLocation);
 }
 void SE_Camera::setFrustum(float fov, float ratio, float near, float far)
@@ -110,10 +112,10 @@ SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
     float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
     float dirLen = SE_Sqrtf(xv * xv + yv * yv + mFrustum.getNear() * mFrustum.getNear());
     SE_Vector3f dir;
-    dir.x = mAxis.x * xv / dirLen + mAxisY.x * yv / dirLen + mAxisZ.x * (-mFrustum.getNear()) / dirLen;
+    dir.x = mAxisX.x * xv / dirLen + mAxisY.x * yv / dirLen + mAxisZ.x * (-mFrustum.getNear()) / dirLen;
     dir.y = mAxisX.y * xv / dirLen + mAxisY.y * yv /dirLen + mAxisZ.y * (-mFrustum.getNear()) / dirLen;
     dir.z = mAxisX.z * xv / dirLen + mAxisY.z * yv / dirLen + mAxisZ.z * (-mFrustum.getNear()) / dirLen;
-    return SE_Ray(mLocation, dir);
+    return SE_Ray(mLocation, dir, false);
 }
 void SE_Camera::getFrustumPlanes(SE_Plane planes[6])
 {
@@ -159,22 +161,22 @@ void SE_Camera::rotateLocal(const SE_Quat& rotate)
     SE_Vector3f localxAxis(1, 0, 0);
     SE_Vector3f localyAxis(0, 1, 0);
     SE_Vector3f localzAxis(0, 0, 1);
-    localxAxis = rotate.map(xAxis);
-    localyAxis = rotate.map(yAxis);
+    localxAxis = rotate.map(mAxisX);
+    localyAxis = rotate.map(mAxisY);
     //localzAxis = rotate.map(zAxis);
     SE_Matrix4f vtom = getViewToWorldMatrix();
     SE_Vector4f worldxAxis = vtom.map(SE_Vector4f(localxAxis, 0));
     SE_Vector4f worldyAxis = vtom.map(SE_Vector4f(localyAxis, 0));
     //SE_Vector4f worldzAxis = vtom.map(SE_Vector4f(localzAxis, 0));
-    SE_Vector4f worldzAxis = worldxAxis.cross(worldyAxis);
-    mAxisX = worldxAxis.normalize();
-    mAxisY = worldyAxis.normalize();
-    mAxisZ = worldzAxis.normalize();
+	SE_Vector4f worldzAxis(worldxAxis.xyz().cross(worldyAxis.xyz()), 0);
+    mAxisX = worldxAxis.normalize().xyz();
+    mAxisY = worldyAxis.normalize().xyz();
+    mAxisZ = worldzAxis.normalize().xyz();
     mChanged = true;
 }
 void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
 {}
 void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {}
-void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float far, float near, float far)
+void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float ratio, float near, float far)
 {}

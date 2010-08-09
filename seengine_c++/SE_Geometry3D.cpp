@@ -44,10 +44,10 @@ SE_Segment::SE_Segment()
 SE_Segment::SE_Segment(const SE_Vector3f& start, const SE_Vector3f& end) : mStart(start), mEnd(end)
 {
 }
-SE_Segment::SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir)
+SE_Segment::SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir, float len)
 {
     mStart = start;
-    mEnd = start + dir;
+    mEnd = start + dir * len;
 }
 SE_Vector3f SE_Segment::getStart()
 {
@@ -62,7 +62,11 @@ SE_Vector3f SE_Segment::getDirection()
     return mEnd - mStart;
 }
 ///////////////
-
+SE_Plane::SE_Plane()
+{
+	mNormal.set(0, 0, 0);
+	mDistance = 0;
+}
 SE_Plane::SE_Plane(const SE_Vector3f& normal, float d) : mNormal(normal), mDistance(d)
 {
 
@@ -136,10 +140,13 @@ SE_Ray::SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end)
     else
         mDir = dit.normalize();
 }
-SE_Ray::SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir)
+SE_Ray::SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized)
 {
     mOrigin = org;
-    mDir = dir.normalize();
+	if(!normalized)
+        mDir = dir.normalize();
+	else 
+		mDir = dir;
 }
 SE_Vector3f SE_Ray::getOrigin()
 {

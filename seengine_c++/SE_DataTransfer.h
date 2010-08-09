@@ -10,7 +10,7 @@ public:
     {
         mImageDataNum = 0;
         mType = 0;
-        mImageDataArray = NULL;
+        mImageDataArray = 0;
     }
     ~SE_TextureUnitTransfer()
     {
@@ -28,7 +28,7 @@ public:
     SE_ImageDataID getImageDataID(int index)
     {
         if(index < 0 || index >= mImageDataNum)
-            return NULL;
+			return SE_ImageDataID::INVALID;
         return mImageDataArray[index];
     }
     // this is the texture unit type: TEXTURE0, TEXTURE1, ... TEXTURE8,etc.

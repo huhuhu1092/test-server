@@ -4,6 +4,7 @@
 #include <string>
 
 ///////////////////////
+SE_StringID SE_StringID::INVALID("")
 struct SE_StringID::_Impl
 {
     std::string id;
@@ -87,6 +88,8 @@ bool operator>(const SE_StringID& id1, const SE_StringID& id2)
 
 }
 //////////////////////////////////////////////
+SE_CommonID SE_CommonID::INVLAID(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+
 SE_CommonID::SE_CommonID()
 {
     for(int i = 0 ; i < 4 ; i++)

@@ -2,7 +2,12 @@
 #define SE_APPLICATION_H
 #include "SE_Time.h"
 #include "SE_ID.h"
+#include "SE_Command.h"
 #include <list>
+class SE_CommandFactory;
+class SE_Camera;
+class SE_ResourceManager;
+class SE_SceneManager;
 class SE_Application
 {
 public:
@@ -27,13 +32,9 @@ public:
     SE_ResourceManager* getResourceManager();
     SE_SceneManager* getSceneManager();
     static SE_Application* getInstance();
+
 protected:
-    virtual void setUpEnv();
-    virtual void processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
-    void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
-    SE_Application();
-protected:
-    class _CommandWrapper
+	class _CommandWrapper
     {
     public:
         _CommandWrapper(SE_Command* c) : command(c)
@@ -50,11 +51,33 @@ protected:
         bool canDelete;
         bool canDestroy;
     };
+
+    virtual void setUpEnv();
+    virtual void processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+    void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+    SE_Application(const char* dataPath);
+	bool isRemoved(const _CommandWrapper& c);
+protected:
     struct _CommandFactoryEntry
     {
         SE_CommandFactoryID id;
         SE_CommandFactory* factory;
     };
+	class isCommandFactoryIDEqual
+	{
+	public:
+		isCommandFactoryIDEqual(const SE_CommandFactoryID& id): mID(id)
+		{}
+		bool operator()(const _CommandFactoryEntry& e)
+		{
+			if(mID == e.id)
+				return true;
+			else 
+				return false;
+		}
+	private:
+		SE_CommandFactoryID mID;
+	};
     //typedef std::list<_CommanDWrapper> SE_CommandList;
     typedef std::list<SE_Command*> SE_CommandList;
     typedef std::list<_CommandFactoryEntry> SE_CommandFactoryList;

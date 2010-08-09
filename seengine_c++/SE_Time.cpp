@@ -7,6 +7,7 @@
 SE_TimeMS SE_Time::getCurrentTimeMS()
 {
 #if defined(WIN32)
+	return GetTickCount();
 #else
     timeval tp;
     gettimeofday(&tp, 0);

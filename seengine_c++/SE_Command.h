@@ -1,12 +1,12 @@
 #ifndef SE_COMMAND_H
 #define SE_COMMAND_H
-#include "SE_Common.h"
+#include "SE_ID.h"
 #include "SE_Time.h"
-typedef SE_CommonID SE_CommandID;
+class SE_Application;
 class SE_Command
 {
 public:
-    SE_Command(SE_Application* app, SE_TimeMS waittime = 0, bool realTime = true) : mApp(app), mWaitTime(waitTime), mbRealTime(realTime)
+    SE_Command(SE_Application* app, SE_TimeMS waitTime = 0, bool realTime = true) : mApp(app), mWaitTime(waitTime), mbRealTime(realTime)
     {
     }
     virtual ~SE_Command();

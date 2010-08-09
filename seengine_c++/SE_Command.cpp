@@ -1,4 +1,6 @@
 #include "SE_Command.h"
+SE_Command::~SE_Command()
+{}
 bool SE_Command::expire(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_TimeMS compareTime;

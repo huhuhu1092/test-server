@@ -1,6 +1,8 @@
 #ifndef SE_RENDERMANAGER_H
 #define SE_RENDERMANAGER_H
+#include "SE_Matrix.h"
 #include <list>
+class SE_RenderUnit;
 class SE_RenderManager
 {
 public:
@@ -12,10 +14,9 @@ public:
     void draw();
     void addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq = RQ0 );
 private:
-    typedef std::list<SE_RenderUnit*> RenderUnitList
+    typedef std::list<SE_RenderUnit*> RenderUnitList;
     RenderUnitList* mRenderQueue[RQ_NUM];
     SE_Matrix4f mWorldToViewMatrix;
     SE_Matrix4f mPerspectiveMatrix;
-    SE_Renderer mRenderer;
 };
 #endif

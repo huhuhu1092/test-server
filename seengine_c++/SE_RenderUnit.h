@@ -25,7 +25,7 @@ public:
 
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
-    virtual void draw(SE_Renderer& renderer);
+    virtual void draw();
 public:
     SE_PRIMITIVE_TYPE getPrimitiveType();
     void setWorldTransform(const SE_Matrix4f& m);

@@ -1,10 +1,11 @@
 #ifndef SE_SCENEMANAGER_H
 #define SE_SCENEMANAGER_H
+#include "SE_ID.h"
 class SE_Spatial;
-class SE_Node;
 class SE_Camera;
+class SE_CommonNode;
 class SE_RenderManager;
-classs SE_SceneManager
+class SE_SceneManager
 {
 public:
     SE_SceneManager();

@@ -1,23 +1,30 @@
 #include "SE_Application.h"
+#include "SE_SceneManager.h"
+#include "SE_ResourceManager.h"
+#include "SE_RenderManager.h"
+#include "SE_Camera.h"
+#include "SE_Command.h"
+#include "SE_CommandFactory.h"
 #include <string.h>
+#include <algorithm>
 SE_Application* SE_Application::mInstance = NULL;
 SE_Application* SE_Application::getInstance()
 {
     if(mInstance == NULL)
     {
-        mInstance = new SE_Application();
+        mInstance = new SE_Application("/home/luwei/");
     }
     return mInstance;
 }
-SE_Application::SE_Application()
+SE_Application::SE_Application(const char* dataPath)
 {
     memset(mCameraArray, 0, sizeof(SE_Camera*) * MAX_CAMERA_NUM);
     mCurrentCamera = NULL;
     mSceneManager = new SE_SceneManager;
-    mResourceManager = new SE_ResourceManager;
+    mResourceManager = new SE_ResourceManager(dataPath);
     mFrameNum = 0;
     mStartTime = 0;
-    mCurrTime = 0;
+    mPrevTime = 0;
     mFrameRate = 30;
     mStarted = false;
 }
@@ -43,9 +50,9 @@ SE_Application::~SE_Application()
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
-    SE_RenderManager renderManger;
-    mSceneManager->renderScene(mCurrentCamera, &renderManager);
-    renderManger.beginDraw();
+    SE_RenderManager renderManager;
+    mSceneManager->renderScene(mCurrentCamera, renderManager);
+    renderManager.beginDraw();
     renderManager.draw();
     renderManager.endDraw();
 }
@@ -76,14 +83,14 @@ SE_CommonID SE_Application::createCommonID()
     SE_TimeMS currTime = SE_Time::getCurrentTimeMS();
     return SE_CommonID(mAppID, (unsigned int)currTime, 0, 0);
 }
-
+/*
 class isPriorityLessThan
 {
 public:
     isPriorityLessThan(int priority) : mPriority(priority)
     {
     }
-    bool operator()(const _CommandWrapper& cw)
+	bool operator()(const SE_Application::_CommandWrapper& cw)
     {
         if(cw.command->priority() < mPriority)
             return true;
@@ -93,6 +100,7 @@ public:
 private:
     int mPriority;
 };
+*/
 void SE_Application::postCommand(SE_Command* command)
 {
     mCommandList.push_back(command);
@@ -117,7 +125,7 @@ void SE_Application::postCommand(SE_Command* command)
 }
 void SE_Application::setUpEnv()
 {}
-bool isRemoved(const _CommandWrapper& c)
+bool SE_Application::isRemoved(const _CommandWrapper& c)
 {
     if(c.canDelete)
         return true;
@@ -129,14 +137,14 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     SE_CommandList::iterator it;
     SE_CommandList tmpList = mCommandList;
     mCommandList.clear();
-    for(it = tmpList.being(); it != tmpList.end(); it++)
+    for(it = tmpList.begin(); it != tmpList.end(); it++)
     {
         SE_Command* c = *it;
         if(c->expire(realDelta, simulateDelta))
         {
             c->handle(realDelta, simulateDelta);
             delete c;
-            it = tmpList.remove(it);
+            it = tmpList.erase(it);
             if(it == tmpList.end())
                 break;
             else
@@ -183,30 +191,16 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     }
     */
 }
-class isCommandFactoryIDEqual
-{
-public:
-    isCommandFactoryIDEqual(const SE_CommandFactoryID& id): mID(id)
-    {}
-    bool operator()(const _CommandFactoryEntry& e)
-    {
-        if(mID == e.id)
-            return true;
-        else 
-            return false;
-    }
-private:
-    SE_CommandFactoryID mID;
-};
+
 bool SE_Application::registerCommandFactory(const SE_CommandFactoryID& cfID, SE_CommandFactory* commandFactory)
 {
     _CommandFactoryEntry fe;
     fe.id = cfID;
     fe.factory = commandFactory;
-    SE_CommandFactoryList::iterator it = find_if(mCommandfactoryList.begin(), mCommandFactoryList.end(), isCommandFactoryIDEqual(cfID));
+    SE_CommandFactoryList::iterator it = find_if(mCommandFactoryList.begin(), mCommandFactoryList.end(), isCommandFactoryIDEqual(cfID));
     if(it != mCommandFactoryList.end())
         return false;
-    mCommondFactoryList.push_back(fe);
+    mCommandFactoryList.push_back(fe);
     return true;
 }
 bool SE_Application::unreginsterCommandFactory(const SE_CommandFactoryID& cfID)
@@ -217,7 +211,7 @@ bool SE_Application::unreginsterCommandFactory(const SE_CommandFactoryID& cfID)
 SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
 {
     SE_CommandFactoryList::iterator it;
-    for(it = mCommandFactoryList.being(); it != mCommandFactoryList.end(); it++)
+    for(it = mCommandFactoryList.begin(); it != mCommandFactoryList.end(); it++)
     {
         _CommandFactoryEntry e = *it;
         SE_Command* command = e.factory->create(this, commandID);

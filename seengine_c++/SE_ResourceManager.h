@@ -1,17 +1,13 @@
 #ifndef SE_RESOURCEMANAGER_H
 #define SE_RESOURCEMANAGER_H
+#include "SE_ID.h"
 class SE_GeometryData;
-class SE_TextureUnitData;
+class SE_TextureCoordData;
 class SE_ImageData;
 class SE_MaterialData;
-class SE_GeometryDataID;
-class SE_TextureCoordDataID;
-class SE_ImageDataID;
-class SE_MaterialDataID;
-class SE_MeshID;
-class SE_SceneID;
 class SE_Mesh;
 class SE_MeshTransfer;
+class SE_ShaderProgram;
 class SE_ResourceManager
 {
 public:
@@ -34,7 +30,7 @@ public:
     void removeMaterialData(const SE_MaterialDataID& materialID);
 
     SE_MeshTransfer* getMeshTransfer(const SE_MeshID& meshID);
-    void setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer);
+    void setMeshTransfer(const SE_MeshID& meshID, SE_MeshTransfer* meshTransfer);
     void removeMeshTransfer(const SE_MeshID& meshID); 
 
     SE_ShaderProgram* getShaderProgram(const SE_ProgramDataID& programDataID);

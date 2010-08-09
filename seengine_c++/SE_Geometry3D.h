@@ -3,17 +3,17 @@
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
+#include "SE_Common.h"
 #include <vector>
 class SE_AABB;
 class SE_Sphere;
 class SE_OBB;
-enum SE_Plane_Side {SE_POSITIVE, SE_NEGATIVE, SE_OTHER};
-class SE_IntersectRayResult
+
+class SE_IntersectResult
 {
 public:
-    SE_IntersectRayResult()
+    SE_IntersectResult()
     {
-        distance = 0;
         intersected = false;
     }
     std::vector<SE_Vector3f> intersectPoint;
@@ -46,7 +46,8 @@ class SE_Segment
 public:
     SE_Segment();
     SE_Segment(const SE_Vector3f& start, const SE_Vector3f& end);
-    SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir);
+	//if dir is normalized , the len is the length of dir. otherwise len == 1.0
+    SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir, float len);
     SE_Vector3f getStart();
     SE_Vector3f getEnd();
     SE_Vector3f getDirection();
@@ -60,6 +61,7 @@ class SE_Plane
      * n * x - d = 0;
      * */
 public:
+	SE_Plane();
     SE_Plane(const SE_Vector3f& normal, float d);
     SE_Plane(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
     void set(const SE_Vector3f& normal, float d);
@@ -78,7 +80,8 @@ class SE_Ray
 public:
     SE_Ray();
     SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end);
-    SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir);
+	// normalized indicate that whether dir is normalized.
+    SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized);
     SE_Vector3f getOrigin();
     SE_Vector3f getDirection();
 private:
@@ -115,7 +118,7 @@ public:
     float getNear();
     float getFar();
     void set(float fovAngle, float ratio, float n, float f);
-private;
+private:
     SE_Plane mLeftp;
     SE_Plane mRightp;
     SE_Plane mTopp;

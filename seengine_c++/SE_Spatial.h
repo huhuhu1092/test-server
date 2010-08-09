@@ -10,11 +10,13 @@ class SE_Spatial;
 class SE_SimObject;
 class SE_BufferInput;
 class SE_BufferOutput;
+class SE_Camera;
+class SE_RenderManager;
 class SE_SpatialTravel
 {
 public:
-    virtual void visit(SE_Spatial* spatial) = 0;
-    virtual void visit(SE_SimObject* simObject) = 0;
+    virtual int visit(SE_Spatial* spatial) = 0;
+    virtual int visit(SE_SimObject* simObject) = 0;
 };
 class SE_Spatial : public SE_Object
 {
@@ -46,6 +48,14 @@ public:
     void setLocalScale(const SE_Vector3f& scale);
     SE_Vector3f localToWorld(const SE_Vector3f& v);
     SE_Vector3f worldToLocal(const SE_Vector3f& v);
+	SE_BoundingVolume* getWorldBoundingVolume()
+	{
+		return mWorldBoundingVolume;
+	}
+	void setWorldBoundingVolume(SE_BoundingVolume* bv)
+	{
+		mWorldBoundingVolume = bv;
+	}
     int getBVType()
     {
         return mBVType;
@@ -103,7 +113,7 @@ public:
     virtual void removeChild(SE_Spatial* child);
     virtual void attachSimObject(SE_SimObject* go);
     virtual void detachSimObject(SE_SimObject* go);
-    virtual int travel(SE_SpatialTravel* spatialTravel);
+    virtual int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
     virtual void write(SE_BufferOutput& output);
