@@ -29,8 +29,14 @@ public:
         return mAppID;
     }
     SE_CommonID createCommonID();
-    SE_ResourceManager* getResourceManager();
-    SE_SceneManager* getSceneManager();
+    SE_ResourceManager* getResourceManager()
+	{
+		return mResourceManager;
+	}
+    SE_SceneManager* getSceneManager()
+	{
+		return mSceneManager;
+	}
     static SE_Application* getInstance();
 
 protected:

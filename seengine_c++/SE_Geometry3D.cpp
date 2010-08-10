@@ -2,7 +2,7 @@
 #include "SE_Math.h"
 SE_Rect3D::SE_Rect3D()
 {
-    e[0] = e[1] = 0;
+    mExtent[0] = mExtent[1] = 0;
 }
 SE_Rect3D::SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, float e[2]) : mCenter(center)
 {
@@ -133,12 +133,12 @@ SE_Ray::SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end)
 {
     mOrigin = start;
     SE_Vector3f dir = end - start;
-    if(dir.isZero)
+    if(dir.isZero())
     {
         mDir.setZero();
     }
     else
-        mDir = dit.normalize();
+        mDir = dir.normalize();
 }
 SE_Ray::SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized)
 {
@@ -154,7 +154,7 @@ SE_Vector3f SE_Ray::getOrigin()
 }
 SE_Vector3f SE_Ray::getDirection()
 {
-    mDir;
+   return mDir;
 }
 
 ///////////////////////
@@ -182,7 +182,7 @@ void SE_Frustum::set(float fovAngle, float ratio, float n, float f)
     v.set(0, e / param2, -ratio / param2);
     mBottomp.set(v, 0);
     v.set(0,0, -1);
-    mNearp.set(v, near);
+    mNearp.set(v, n);
     v.set(0, 0, 1);
     mFarp.set(v, -f);
     mNear = n;
@@ -194,7 +194,7 @@ SE_Rect<float> SE_Frustum::getNearPlaneRect()
     SE_Rect<float> out;
 	float fovRadian, e;
     fovRadian = SE_AngleToRadian(mFovAngle);
-    e = 1.0 / SE_Tanf(mFovRadian / 2);
+    e = 1.0 / SE_Tanf(fovRadian / 2);
     out.left = - mNear / e;
     out.right = mNear / e;
     out.top = mNear * mRatio / e;
@@ -214,27 +214,27 @@ SE_Matrix4f SE_Frustum::getPerspectiveMatrix()
     r = nearrect.right;
     b = nearrect.bottom;
     t = nearrect.top;
-    out->m00 = (2 * n) / (r - l);
-    out->m01 = 0;
-    out->m02 = (r + l) / (r - l);
-    out->m03 = 0;
-    out->m10 = 0;
-    out->m11 = (2 * n) / (t - b);
-    out->m12 = (t + b) / (t - b);
-    out->m13 = 0;
-    out->m20 = 0;
-    out->m21 = 0;
-    out->m22 = -(f + n) / (f - n);
-    out->m23 = -(2 * n * f) / (f - n);
-    out->m30 = 0;
-    out->m31 = 0;
-    out->m32 = -1;
-    out->m33 = 0;
+    out.set(0, 0, (2 * n) / (r - l));
+    out.set(0, 1,  0);
+    out.set(0, 2,  (r + l) / (r - l));
+    out.set(0, 3, 0);
+    out.set(1, 0, 0);
+    out.set(1, 1, (2 * n) / (t - b));
+    out.set(1, 2, (t + b) / (t - b));
+    out.set(1, 3, 0);
+    out.set(2, 0, 0);
+    out.set(2, 1, 0);
+    out.set(2, 2, -(f + n) / (f - n));
+    out.set(2, 3, -(2 * n * f) / (f - n));
+    out.set(3, 0, 0);
+    out.set(3, 1, 0);
+    out.set(3, 2, -1);
+    out.set(3, 3, 0);
     return out;
 }
 SE_Plane SE_Frustum::getLeftPlane()
 {
-    return mLeftp
+    return mLeftp;
 }
 SE_Plane SE_Frustum::getRightPlane()
 {
@@ -328,7 +328,7 @@ void SE_Sphere::sphereFromDistantPoints(SE_Vector3f* points, int pointNum)
     mCenter = (minP + maxP) * 0.5;
     mRadius = (points[max] - mCenter).length();
 }
-void SE_Sphere::sphereOfSphereAndPoint(SE_Vector3f* point)
+void SE_Sphere::sphereOfSphereAndPoint(const SE_Vector3f& point)
 {
     SE_Vector3f d, tmp1, tmp2;
 	float dist2;
@@ -347,10 +347,10 @@ void SE_Sphere::sphereOfSphereAndPoint(SE_Vector3f* point)
 void SE_Sphere::ritterSphere(SE_Vector3f* points, int num)
 {
     int i;
-    sphereFromDistantPoints(points, pointNum);
-    for(i = 0 ; i < pointNum ; i++)
+    sphereFromDistantPoints(points, num);
+    for(i = 0 ; i < num ; i++)
     {
-        sphereOfSphereAndPoint(&points[i]);
+        sphereOfSphereAndPoint(points[i]);
     }
     
 }
@@ -358,29 +358,35 @@ void SE_Sphere::createFromPoints(SE_Vector3f* points, int num)
 {
     ritterSphere(points, num);
 }
-SE_Vector3f SE_Sphere::getCenter()
+SE_Vector3f SE_Sphere::getCenter() const
 {
     return mCenter;
 }
-float SE_Sphere::getRadius()
+float SE_Sphere::getRadius() const
 {
     return mRadius;
 }
-SE_IntersectResult SE_Sphere::intersect(const SE_AABB& aabb)
-{}
-SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray)
-{}
-SE_IntersectResult SE_Sphere::intersect(const SE_OBB& obb)
+SE_IntersectResult SE_Sphere::intersect(const SE_AABB& aabb) const
 {
-
+    return SE_IntersectResult();
 }
-SE_Plane_Side SE_Sphere::whichSide(const SE_Plane& plane)
-{}
-SE_IntersectResult SE_Sphere::intersect(const SE_Sphere& sphere)
+SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray) const
 {
-
+    return SE_IntersectResult();
 }
-bool SE_Sphere::containPoint(const SE_Vector3f& point)
+SE_IntersectResult SE_Sphere::intersect(const SE_OBB& obb) const
+{
+    return SE_IntersectResult();
+}
+SE_Plane_Side SE_Sphere::whichSide(const SE_Plane& plane) const
+{
+	return SE_NEGATIVE;
+}
+SE_IntersectResult SE_Sphere::intersect(const SE_Sphere& sphere) const
+{
+    return SE_IntersectResult();
+}
+bool SE_Sphere::containPoint(const SE_Vector3f& point) const
 {
     SE_Vector3f d = mCenter - point;
     float dist2 = d.lengthSquare();
@@ -402,7 +408,7 @@ void SE_AABB::createFromPoints(SE_Vector3f* points, int num)
 	int i;
     SE_Vector3f& min = points[0];
     SE_Vector3f& max = points[0];
-    for(i = 1 ; i < pointNum ; i++)
+    for(i = 1 ; i < num ; i++)
     {
         SE_Vector3f& v = points[i];
         if(v.x < min.x)
@@ -421,26 +427,26 @@ void SE_AABB::createFromPoints(SE_Vector3f* points, int num)
     mMin = min;
     mMax = max;
 }
-SE_Vector3f SE_AABB::getMin()
+SE_Vector3f SE_AABB::getMin() const
 {
     return mMin;
 }
-SE_Vector3f SE_AABB::getMax()
+SE_Vector3f SE_AABB::getMax() const
 {
     return mMax;
 }
-SE_Vector3f SE_AABB::getExtent()
+SE_Vector3f SE_AABB::getExtent() const
 {
     return mMax - mMin;
 }
-SE_Vector3f SE_AABB::getCenter()
+SE_Vector3f SE_AABB::getCenter() const
 {
     return mMin + (mMax - mMin) * 0.5;
 }
-SE_IntersectResult SE_AABB::intersect(const SE_AABB& aabb)
+SE_IntersectResult SE_AABB::intersect(const SE_AABB& aabb) const
 {
     SE_IntersectResult ret;
-    if(mMax.x < aabb.min.x || mMin.x > aabb.mMax.x)
+    if(mMax.x < aabb.mMin.x || mMin.x > aabb.mMax.x)
         return ret;
     if(mMax.y < aabb.mMin.y || mMin.y > aabb.mMax.y)
         return ret;
@@ -450,14 +456,22 @@ SE_IntersectResult SE_AABB::intersect(const SE_AABB& aabb)
     return ret;
     
 }
-SE_IntersectResult SE_AABB::intersect(const SE_OBB& obb)
-{}
-SE_IntersectResult SE_AABB::intersect(const SE_Sphere& sphere)
-{}
-SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray)
-{}
-SE_Plane_Side SE_AABB::whichSide(const SE_Plane& plane)
-{}
+SE_IntersectResult SE_AABB::intersect(const SE_OBB& obb) const
+{
+	return SE_IntersectResult();
+}
+SE_IntersectResult SE_AABB::intersect(const SE_Sphere& sphere) const
+{
+	return SE_IntersectResult();
+}
+SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray) const
+{
+	return SE_IntersectResult();
+}
+SE_Plane_Side SE_AABB::whichSide(const SE_Plane& plane) const
+{
+	return SE_NEGATIVE;
+}
 
 /////////////////////////////////////////////////
 SE_OBB::SE_OBB()
@@ -477,19 +491,19 @@ void SE_OBB::createFromAABB(const SE_AABB& aabb)
     mExtent[1] = extent.y / 2;
     mExtent[2] = extent.z / 2;
 }
-void SE_OBB::getBoxVertex(SE_Vector3f out[8])
+void SE_OBB::getBoxVertex(SE_Vector3f out[8]) const
 {}
-SE_Vector3f SE_OBB::getCenter()
+SE_Vector3f SE_OBB::getCenter() const
 {
     return mCenter;
 }
-void SE_OBB::getAxis(SE_Vector3f axis[3])
+void SE_OBB::getAxis(SE_Vector3f axis[3]) const
 {
     axis[0] = mAxis[0];
     axis[1] = mAxis[1];
     axis[2] = mAxis[2];
 }
-void SE_OBB::getExtent(float e[3])
+void SE_OBB::getExtent(float e[3]) const
 {
     e[0] = mExtent[0];
     e[1] = mExtent[1];
@@ -520,9 +534,11 @@ void SE_OBB::transfrom(const SE_Vector3f& scale, const SE_Quat& rotate, const SE
     mAxis[1] = yAxis;
     mAxis[2] = zAxis;
 }
-SE_IntersectResult SE_OBB::intersect(const SE_AABB& aabb)
-{}
-SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb)
+SE_IntersectResult SE_OBB::intersect(const SE_AABB& aabb) const
+{
+	return SE_IntersectResult();
+}
+SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
 {
     float ra, rb;
     float x, y, z;
@@ -531,10 +547,9 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb)
     SE_Vector3f centerDistV, t;
     SE_Vector3f obbAxis[3];
     float obbExtent[3];
+	SE_IntersectResult ret;
     obb.getAxis(obbAxis);
     obb.getExtent(obbExtent);
-    if(a == NULL || b == NULL)
-        return 0;
     for(i = 0 ; i < 3 ; i++)
     {
         for(j = 0 ; j < 3 ; j++)
@@ -560,7 +575,7 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb)
         ra = mExtent[i];
         rb = obbExtent[0] * AbsR(i, 0) + obbExtent[1] * AbsR(i , 1) + obbExtent[2] * AbsR(i , 2);
         if(SE_Fabs(t.d[i]) > (ra + rb))
-            return 0;
+            return ret;
     }
     /*test axes L = B0, L = B1, L = B2*/
     for(i = 0 ; i < 3 ; i++)
@@ -568,68 +583,74 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb)
         ra = mExtent[0] * AbsR(0, i) + mExtent[1] * AbsR(1 , i) + mExtent[2] * AbsR(2 , i);
         rb = obbExtent[i];
         if(SE_Fabs(t.d[0] * R(0, i) + t.d[1] * R(1 , i) + t.d[2] * R(2 ,i)) > ra + rb)
-            return 0;
+            return ret;
     }
     /*test axis L = A0 * B0 */
     ra = mExtent[1] * AbsR(2, 0) + mExtent[2] * AbsR(1, 0);
     rb = obbExtent[1] * AbsR(0, 2) + obbExtent[2] * AbsR(0, 1);
     if(SE_Fabs(t.d[2] * R(1, 0) - t.d[1] * R(2, 0)) > (ra + rb))
-        return 0;
+        return ret;
     /*test axis L = A0 * B1 */
     ra = mExtent[1] * AbsR(2, 1) + mExtent[2] * AbsR(1 ,  1);
     rb = obbExtent[0] * AbsR(0, 2) + obbExtent[2] * AbsR(0, 0);
     if(SE_Fabs(t.d[2] * R(1 , 1) - t.d[1] * R(2 ,  1)) > (ra + rb))
-        return 0;
+        return ret;
     /*test axis L = A0 * A2 */
     ra = mExtent[1] * AbsR(2 ,  2) + mExtent[2] * AbsR(1 ,  2);
     rb = obbExtent[0] * AbsR(0, 1) + obbExtent[1] * AbsR(0, 0);
     if(SE_Fabs(t.d[2] * R(1 ,  2) - t.d[1] * R(2 ,  2)) > (ra + rb))
-        return 0;
+        return ret;
     /*tes axis L = A1 * B0*/
     ra = mExtent[0] * AbsR(2 , 0) + mExtent[2] * AbsR(0 , 0);
     rb = obbExtent[1] * AbsR(1 ,  2) + obbExtent[2] * AbsR(1 , 1);
     if(SE_Fabs(t.d[0] * R(2, 0) - t.d[2] * R(0, 0)) > (ra + rb))
-        return 0;
+        return ret;
     /* test axis L = A1 * B1 */
     ra = mExtent[0] * AbsR(2 ,  1) + mExtent[2] * AbsR(0, 1);
     rb = obbExtent[0] * AbsR(1 ,  2) + obbExtent[2] * AbsR(1, 0);
     if(SE_Fabs(t.d[0] * R(2 , 1) - t.d[2] * R(0, 1)) > (ra + rb))
-        return 0;
+        return ret;
     
     /* test axis A1 * B2 */
     ra = mExtent[0] * AbsR(2 , 2) + mExtent[2] * AbsR(0, 2);
     rb = obbExtent[0] * AbsR(1 ,  1) + obbExtent[1] * AbsR(1 , 0);
     if(SE_Fabs(t.d[0] * R(2 , 2) - t.d[2] * R(0, 2)) > (ra + rb))
-        return 0;
+        return ret;
 
     /* test A2 * B0 */
     ra = mExtent[0] * AbsR(1 , 0) + mExtent[1] * AbsR(0, 0);
     rb = obbExtent[1] * AbsR(2 ,  2) + obbExtent[2] * AbsR(2 , 1);
     if(SE_Fabs(t.d[1] * R(0, 0) - t.d[0] * R(1 , 0)) > (ra + rb))
-        return 0;
+        return ret;
 
     /*test A2 * B1 */
     ra = mExtent[0] * AbsR(1 ,  1) + mExtent[1] * AbsR(0, 1);
     rb = obbExtent[0] * AbsR(2 ,  2) + obbExtent[2] * AbsR(2 , 0);
     if(SE_Fabs(t.d[1] * R(0, 1) - t.d[0] * R(1 ,  1)) > (ra + rb))
-        return 0;
+        return ret;
     
     /*test A2 * B2 */
     ra = mExtent[0] * AbsR(1 , 2) + mExtent[1] * AbsR(0, 2);
     rb = obbExtent[0] * AbsR(2 ,  1) + obbExtent[1] * AbsR(2 , 0);
     if(SE_Fabs(t.d[1] * R(0, 2) - t.d[0] * R(1 ,  2)) > (ra + rb))
-        return 0;
-
-    return 1;
+        return ret;
+	ret.intersected = true;
+    return ret;
 
 
 }
-SE_IntersectResult SE_OBB::intersect(const SE_Sphere& sphere)
-{}
-SE_IntersectResult SE_OBB::intersect(const SE_Ray& ray)
-{}
-SE_Plane_Side SE_OBB::whichSide(const SE_Plane& plane)
-{}
+SE_IntersectResult SE_OBB::intersect(const SE_Sphere& sphere) const
+{
+	return SE_IntersectResult();
+}
+SE_IntersectResult SE_OBB::intersect(const SE_Ray& ray) const
+{
+	return SE_IntersectResult();
+}
+SE_Plane_Side SE_OBB::whichSide(const SE_Plane& plane) const
+{
+	return SE_NEGATIVE;
+}
 
 
 

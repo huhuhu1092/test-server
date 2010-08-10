@@ -1,8 +1,12 @@
 #ifndef SE_DATATRANSFER_H
 #define SE_DATATRANSFER_H
 #include "SE_ID.h"
+#include "SE_Vector.h"
+#include "SE_Matrix.h"
+class SE_Mesh;
 class SE_BufferInput;
 class SE_BufferOutput;
+class SE_ResourceManager;
 class SE_TextureUnitTransfer
 {
 public:
@@ -10,16 +14,16 @@ public:
     {
         mImageDataNum = 0;
         mType = 0;
-        mImageDataArray = 0;
+        mImageDataIDArray = 0;
     }
     ~SE_TextureUnitTransfer()
     {
-        if(mImageDataArray)
-            delete[] mImageDataArray;
+        if(mImageDataIDArray)
+            delete[] mImageDataIDArray;
     }
     SE_TextureCoordDataID getTexCoordDataID()
     {
-        return mTexCoordID;
+        return mTexCoordDataID;
     }
     int getImageDataNum()
     {
@@ -29,7 +33,7 @@ public:
     {
         if(index < 0 || index >= mImageDataNum)
 			return SE_ImageDataID::INVALID;
-        return mImageDataArray[index];
+        return mImageDataIDArray[index];
     }
     // this is the texture unit type: TEXTURE0, TEXTURE1, ... TEXTURE8,etc.
     int getType()
@@ -43,7 +47,7 @@ public:
     }
     void setImageDataID(SE_ImageDataID* imageDataIDArray, int num)
     {
-        mImageDataArray = imageDataArray;
+        mImageDataIDArray = imageDataIDArray;
         mImageDataNum = num;
     }
     void setType(int type)
@@ -51,10 +55,10 @@ public:
         mType = type;
     }
 private:
-    SE_TextureCoordDataID mTexCoordID;
+    SE_TextureCoordDataID mTexCoordDataID;
     int mImageDataNum;
     int mType;
-    SE_ImageDataID* mImageDataArray;
+    SE_ImageDataID* mImageDataIDArray;
 };
 ///////////////////////////////////////////////
 class SE_TextureTransfer
@@ -63,12 +67,12 @@ public:
     SE_TextureTransfer()
     {
         mTexUnitNum = 0;
-        mTexUnitTransfer = NULL;
+        mTexUnitTransfer = 0;
     }
     ~SE_TextureTransfer()
     {
-        if(mTexUnitDataTransfer)
-            delete[] mTexUnitDataTransfer;
+        if(mTexUnitTransfer)
+            delete[] mTexUnitTransfer;
     }
 
     int getTextureUnitNum()
@@ -78,7 +82,7 @@ public:
     SE_TextureUnitTransfer* getTextureUnit(int index)
     {
         if(index < 0 || index >= mTexUnitNum)
-            return NULL;
+            return 0;
         return mTexUnitTransfer;
     }
 
@@ -99,7 +103,7 @@ public:
     {
         mTexIndex = -1;
         mFacetNum = 0;
-        mFacetArray = NULL;
+        mFacetArray = 0;
         mSampleMin = 0;
         mSampleMag = 0;
         mWrapS = 0;
@@ -128,7 +132,7 @@ public:
     }
     int getSampleMin()
     {
-        return mSameleMin;
+        return mSampleMin;
     }
     int getSampleMag()
     {
@@ -189,9 +193,9 @@ public:
     SE_MeshTransfer()
     {
         mSurfaceNum = 0;
-        mSurfaceTransferArray = NULL;
+        mSurfaceTransferArray = 0;
         mTexNum = 0;
-        mTexTransferArray = NULL;
+        mTexTransferArray = 0;
     }
     ~SE_MeshTransfer();
     SE_GeometryDataID getGeomDataID()
@@ -202,10 +206,10 @@ public:
     {
         return mSurfaceNum;
     }
-    SE_SurfaceDataTransfer* getSurface(int index)
+    SE_SurfaceTransfer* getSurface(int index)
     {
         if(index < 0 || index >= mSurfaceNum)
-            return NULL;
+            return 0;
         return &mSurfaceTransferArray[index];
     }
     int getTextureNum()
@@ -215,7 +219,7 @@ public:
     SE_TextureTransfer* getTexture(int index)
     {
         if(index < 0 || index >= mTexNum)
-            return NULL;
+            return 0;
         return &mTexTransferArray[index];
     }
     SE_Vector3f getColor()
@@ -227,7 +231,7 @@ public:
     {
         mGeomDataID = geomDataID;
     }
-    void setSurfaceTransfer(SE_SurfaceDataTransfer* surfaceData, int num)
+    void setSurfaceTransfer(SE_SurfaceTransfer* surfaceData, int num)
     {
         mSurfaceTransferArray = surfaceData;
         mSurfaceNum = num;
@@ -242,7 +246,7 @@ public:
         mColor = color;
     }
     /////////////////////////////////////////////////////
-    SE_Mesh* createMesh();
+    SE_Mesh* createMesh(SE_ResourceManager* resourceManager);
     void createFromMesh(SE_Mesh* mesh);
     void read(SE_BufferInput& inputBuffer);
     void write(SE_BufferOutput& outputBuffer);

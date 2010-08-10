@@ -16,7 +16,7 @@ SE_Surface::SE_Surface()
 {
     mTexture = NULL;
     mMaterialData = NULL;
-    mFacetArrat = NULL;
+    mFacetArray = NULL;
     mFacetNum = NULL;
 }
 SE_Surface::~SE_Surface()
@@ -51,7 +51,7 @@ void SE_Surface::setGeometryData(SE_GeometryData* geomData)
 }
 void SE_Surface::setMaterialData(SE_MaterialData* materialData)
 {
-    mMaterilData = materialData;
+    mMaterialData = materialData;
 }
 void SE_Surface::setTexture(SE_Texture* texture)
 {
@@ -70,11 +70,11 @@ SE_Vector3f SE_Surface::getColor()
 {
     return mColor;
 }
-SE_ProgramDataID getProgramDataID()
+SE_ProgramDataID SE_Surface::getProgramDataID()
 {
     return mProgramDataID;
 }
-void setProgramDataID(const SE_ProgramDataID& programID);
+void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {
     mProgramDataID = programID;
 }
@@ -91,7 +91,7 @@ SE_Texture::~SE_Texture()
         for(int i = 0 ; i < TEXUNIT_NUM ; i++)
         {
             if(mTexUnitArray[i])
-                delete mTexUnitArray[i]
+                delete mTexUnitArray[i];
         }
         delete[] mTexUnitArray;
     }
@@ -101,6 +101,12 @@ void SE_Texture::setTextureUnit(int texType, SE_TextureUnit* texUnit)
     if(texType < 0 || texType >= TEXUNIT_NUM)
         return ;
     mTexUnitArray[texType] = texUnit;
+}
+SE_TextureUnit* SE_Texture::getTextureUnit(int texType)
+{
+    if(texType < 0 || texType >= TEXUNIT_NUM)
+        return 0;
+	return mTexUnitArray[texType];
 }
 ////////
 SE_Mesh::SE_Mesh(int surfaceNum, int texNum)
@@ -127,16 +133,4 @@ SE_Mesh::~SE_Mesh()
     }
     delete[] mSurfaceArray;
     delete[] mTextureArray;
-}
-SE_GeometryData* SE_Mesh::getGeometryData()
-{
-    return mGeometryData; 
-}
-int SE_Mesh::getSurfaceNum()
-{
-    return mSurfaceNum;
-}
-SE_Surface* SE_Mesh::getSurface(int index)
-{
-    return mSurfaceArray[index];
 }

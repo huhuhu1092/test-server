@@ -98,7 +98,7 @@ public:
     {
         return (mState & COLLISION_MASK) == COLLISIONABLE;
     }
-    bool setCollisionable(bool c)
+    void setCollisionable(bool c)
     {
         if(c)
         {

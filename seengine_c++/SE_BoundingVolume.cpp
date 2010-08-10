@@ -91,7 +91,9 @@ SE_IntersectResult SE_OBBBV::intersect(const SE_Ray& ray) const
 	return SE_IntersectResult();
 }
 bool SE_OBBBV::intersect(const SE_BoundingVolume& bv) const
-{}
+{
+	return false;
+}
 SE_BoundingVolume::BV_TYPE SE_OBBBV::getType() const
 {
 	return OBB;

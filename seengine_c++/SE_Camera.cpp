@@ -180,3 +180,7 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& xAxis, co
 {}
 void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float ratio, float near, float far)
 {}
+SE_Matrix4f SE_Camera::getPerspectiveMatrix()
+{
+	return mFrustum.getPerspectiveMatrix();
+}

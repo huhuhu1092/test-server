@@ -1,4 +1,5 @@
 #include "SE_RenderManager.h"
+#include "SE_RenderUnit.h"
 #include <string.h>
 SE_RenderManager::SE_RenderManager()
 {
@@ -12,9 +13,9 @@ SE_RenderManager::~SE_RenderManager()
 {
     for(int i = 0 ; i  < RQ_NUM ; i++)
     {
-        RnderUnitList* ruList = mRenderQueue[i];
+        RenderUnitList* ruList = mRenderQueue[i];
         RenderUnitList::iterator it;
-        for(it = ruList.begin() ; it != ruList.end() ;it++)
+        for(it = ruList->begin() ; it != ruList->end() ;it++)
         {
             SE_RenderUnit* ru = *it;
             delete ru;
@@ -35,11 +36,11 @@ void SE_RenderManager::draw()
     {
         RenderUnitList* ruList = mRenderQueue[i];
         RenderUnitList::iterator it;
-        for(it = ruList.begin() ; it != ruList.end() ;it++)
+        for(it = ruList->begin() ; it != ruList->end() ;it++)
         {
             SE_RenderUnit* ru = *it;
-            ru->setMatrix(m);
-            ru->draw(mRenderer);
+            ru->setWorldTransform(m);
+            ru->draw();
         }
 
     }

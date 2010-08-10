@@ -55,25 +55,25 @@ public:
     void identity()
     {
         x = 0;
-	y = 0;
-	z = 0;
-	w = 1;
+	    y = 0;
+	    z = 0;
+	    w = 1;
     }
     SE_Quat neg() const
     {
-	return SE_Quat(-x, -y, -z, -w);
+	    return SE_Quat(-x, -y, -z, -w);
     }
     SE_Quat add(const SE_Quat& rq) const
     {
-	return SE_Quat(x + rq.x , y + rq.y , z + rq.z, w + rq.w);
+	    return SE_Quat(x + rq.x , y + rq.y , z + rq.z, w + rq.w);
     }
     bool hasInverse()
     {
-	return lengthSquare() != 0.0f;
+	    return lengthSquare() != 0.0f;
     }
     SE_Quat subtract(const SE_Quat& rq) const
     {
-	return SE_Quat(x - rq.x, y - rq.y, z - rq.z, w - rq.w);
+	    return SE_Quat(x - rq.x, y - rq.y, z - rq.z, w - rq.w);
     }
     SE_Quat mul(const SE_Quat& rq) const;
     SE_Quat conjugate() const;
@@ -81,10 +81,10 @@ public:
     float length() const;
     float lengthSquare() const;
     SE_Vector3f map(const SE_Vector3f& v) const;
-    SE_Matrix3f toMatrix() const;
+    SE_Matrix3f toMatrix3f() const;
     bool isZero() const
     {
-	return x == 0 && y ==0 && z == 0  && w == 0;
+	    return x == 0 && y ==0 && z == 0  && w == 0;
     }
     void setZero()
     {

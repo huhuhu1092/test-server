@@ -4,7 +4,7 @@
 #include <string>
 
 ///////////////////////
-SE_StringID SE_StringID::INVALID("")
+SE_StringID SE_StringID::INVALID("");
 struct SE_StringID::_Impl
 {
     std::string id;
@@ -13,7 +13,7 @@ SE_StringID::SE_StringID()
 {
     mImpl = new SE_StringID::_Impl;
 }
-const char* SE_StringID::getStr()
+const char* SE_StringID::getStr() const
 {
     return mImpl->id.c_str();
 }
@@ -49,7 +49,7 @@ SE_StringID& SE_StringID::operator=(const SE_StringID& id)
     mImpl = tmp;
     return *this;
 }
-bool SE_StringID::isValid()
+bool SE_StringID::isValid() const
 {
     SE_StringID invalid("");
     return *this == invalid;
@@ -88,7 +88,7 @@ bool operator>(const SE_StringID& id1, const SE_StringID& id2)
 
 }
 //////////////////////////////////////////////
-SE_CommonID SE_CommonID::INVLAID(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+SE_CommonID SE_CommonID::INVALID(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
 
 SE_CommonID::SE_CommonID()
 {

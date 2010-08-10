@@ -42,7 +42,7 @@ void SE_Spatial::updateWorldTransform()
     updateWorldScale();
     updateWorldRotate();
     updateWorldTranslate();
-    mWorldTransform.set(mWorldRotate.toMatrix(), mWorldScale, mWorldTranslate);
+    mWorldTransform.set(mWorldRotate.toMatrix3f(), mWorldScale, mWorldTranslate);
 }
 void SE_Spatial::updateBoundingVolume()
 {}
@@ -72,7 +72,7 @@ SE_Quat SE_Spatial::getWorldRotate()
 }
 SE_Matrix3f SE_Spatial::getWorldRotateMatrix()
 {
-    return mWorldRotate.toMatrix();
+    return mWorldRotate.toMatrix3f();
 }
 SE_Vector3f SE_Spatial::getWorldScale()
 {
@@ -133,7 +133,7 @@ SE_Vector3f SE_Spatial::getLocalTranslate()
 }
 SE_Matrix3f SE_Spatial::getLocalRotateMatrix()
 {
-    return mLocalRotate.toMatrix();
+    return mLocalRotate.toMatrix3f();
 }
 SE_Quat SE_Spatial::getLocalRotate()
 {
@@ -167,8 +167,10 @@ void SE_Spatial::attachSimObject(SE_SimObject* go)
 {}
 void SE_Spatial::detachSimObject(SE_SimObject* go)
 {}
-void SE_Spatial::travel(SE_SpatialTravel* spatialTravel)
-{}
+int SE_Spatial::travel(SE_SpatialTravel* spatialTravel, bool tranvelAlways)
+{
+	return 0;
+}
 void SE_Spatial::read(SE_BufferInput& input)
 {
     mSpatialID.read(input);

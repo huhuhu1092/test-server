@@ -13,6 +13,14 @@ public:
     void endDraw();
     void draw();
     void addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq = RQ0 );
+	void setWorldToViewMatrix(const SE_Matrix4f& m)
+	{
+		mWorldToViewMatrix = m;
+	}
+	void setPerspectiveMatrix(const SE_Matrix4f& m)
+	{
+		mPerspectiveMatrix = m;
+	}
 private:
     typedef std::list<SE_RenderUnit*> RenderUnitList;
     RenderUnitList* mRenderQueue[RQ_NUM];

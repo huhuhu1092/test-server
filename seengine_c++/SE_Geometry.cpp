@@ -1,6 +1,10 @@
 #include "SE_Geometry.h"
 #include "SE_SimObject.h"
 #include "SE_Buffer.h"
+#include "SE_Camera.h"
+#include "SE_Common.h"
+#include "SE_RenderUnit.h"
+#include "SE_RenderManager.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_Geometry)
 struct SE_Geometry::_Impl
@@ -15,7 +19,7 @@ SE_Geometry::SE_Geometry(SE_Spatial* parent) : SE_Spatial(parent)
 }
 SE_Geometry::SE_Geometry(SE_SpatialID id, SE_Spatial* parent) : SE_Spatial(id, parent)
 {
-    mImpl = new SE_Gemetry::_Impl;
+    mImpl = new SE_Geometry::_Impl;
 }
 SE_Geometry::~SE_Geometry()
 {
@@ -49,7 +53,7 @@ void SE_Geometry::read(SE_BufferInput& input)
     for(int i = 0 ; i < attachObjNum ; i++)
     {
         std::string str = input.readString();
-        SE_SimObject* obj = SE_Object::create(str.c_str());
+        SE_SimObject* obj = (SE_SimObject*)SE_Object::create(str.c_str());
         obj->read(input);
         mImpl->attachObject.push_back(obj);
     }
@@ -63,17 +67,17 @@ void SE_Geometry::updateBoundingVolume()
 {
     
 }
-int SE_Geometry::travel(SE_SpatialTravel* spatialTravel)
+int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
 {
     return spatialTravel->visit(this);
 }
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
-    SE_BoundingVolume* bv = getBoundingVolume();
+    SE_BoundingVolume* bv = getWorldBoundingVolume();
     if(bv)
     {
         int culled = camera->cullBV(*bv);
-        if(culled == SE_FULL_CULLED)
+        if(culled == SE_FULL_CULL)
             return;
     }
     SE_Geometry::_Impl::SimObjectList::iterator it;
@@ -84,7 +88,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         SE_SimObject::RenderUnitVector::iterator itRU;
         for(itRU = renderUnitVector.begin() ; itRU!= renderUnitVector.end(); itRU++)
         {
-            itRU->setWorldTransform(getWorldTransform());
+            (*itRU)->setWorldTransform(getWorldTransform());
             renderManager->addRenderUnit(*itRU);
         }
     }

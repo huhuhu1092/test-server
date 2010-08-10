@@ -8,6 +8,7 @@ class SE_MaterialData;
 class SE_Mesh;
 class SE_MeshTransfer;
 class SE_ShaderProgram;
+class SE_Spatial;
 class SE_ResourceManager
 {
 public:
@@ -46,7 +47,7 @@ public:
     const char* getDataPath();
     void setDataPath(const char* datapath);
 
-
+    bool checkHeader(SE_BufferInput& input);
 private:
 //    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
     static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);

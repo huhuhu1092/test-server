@@ -3,13 +3,18 @@
 #ifdef GLES_20
 #include <GLES2/gl2.h>
 #endif
-enum SE_PRIMITIVE_TYPE {LINES, LINE_STRIP, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP};
+#include "SE_Vector.h"
+#include "SE_Quat.h"
+#include "SE_Matrix.h"
+#include "SE_MaterialData.h"
+#include "SE_ID.h"
+#include "SE_Common.h"
+class SE_Surface;
+class SE_Segment;
+
 class SE_RenderUnit
 {
 public:
-    enum SAMPLE_TYPE {NEAREST, LINEAR};
-    enum WRAP_TYPE {REPEAT, CLAMP};
-
     virtual ~SE_RenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
     virtual SE_ImageDataID getBumpMapImageID();
@@ -17,10 +22,10 @@ public:
     virtual void getVertex(SE_Vector3f*& vertex, int & vertexNum);
     virtual void getBaseColorTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
 
-    virtual void getBumpMapTexVertex(SE_Vector2f* texVertex, int& texVertexNum);
+    virtual void getBumpMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
     virtual bool bumpMapCoordSameAsBaseColor();
 
-    virtual void getCubeMapTexVertex(SE_Vector2f* texVertex, int& texVertexNum);
+    virtual void getCubeMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
     virtual bool cubeMapCoordSameAsBaseColor();
 
     virtual SE_MaterialData* getMaterialData();
@@ -28,11 +33,23 @@ public:
     virtual void draw();
 public:
     SE_PRIMITIVE_TYPE getPrimitiveType();
-    void setWorldTransform(const SE_Matrix4f& m);
-    SE_Matrix4f getWorldTransform();
-    void setViewToPerspectiveMatrix(const SE_Matrix4f& m);
-    SE_Matrix4f getViewToPerspectiveMatrix();
-    void loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, WRAP_TYPE wrapS, WRAP_TYPE wrapT, SAMPLE_TYPE min, SAMPLE_TYPE mag);
+    void setWorldTransform(const SE_Matrix4f& m)
+	{
+		mWorldTransform = m;
+	}
+    SE_Matrix4f getWorldTransform()
+	{
+		return mWorldTransform;
+	}
+    void setViewToPerspectiveMatrix(const SE_Matrix4f& m)
+	{
+		mViewToPerspective = m;
+	}
+    SE_Matrix4f getViewToPerspectiveMatrix()
+	{
+		return mViewToPerspective;
+	}
+    void loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
@@ -48,23 +65,19 @@ public:
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(SE_Vector3f*& vertex, int & vertexNum);
-    virtual void getBaseColorTexVertex(SE_Vector2f* texVertex, int& texVertexNum);
+    virtual void getBaseColorTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
 
-    virtual SE_Vector2f* getBumpMapTexVertex();
-    virtual int getBumpMapTexVertexNum();
-    virtual bool bumpMapCoordSameAsBaseColor();
-
-    virtual SE_Vector2f* getCubeMapTexVertex();
-    virtual int getCubeMapTexVertexNum();
-    virtual bool cubeMapCoordSameAsBaseColor();
-
-    virtual SE_MaterialData getMaterialData();
+    virtual void getBumpMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
+    bool bumpMapCoordSameAsBaseColor();
+    virtual void getCubeMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum);
+    bool cubeMapCoordSameAsBaseColor();
+    virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
 private:
     SE_Surface* mSurface;
     SE_Vector3f* mVertex;
-    int mVertexNum
+    int mVertexNum;
     SE_Vector2f* mTexVertex;
     int mTexVertexNum;
 };

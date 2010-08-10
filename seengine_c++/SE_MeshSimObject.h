@@ -1,9 +1,16 @@
 #ifndef SE_MESHSIMOBJECT_H
 #define SE_MESHSIMOBJECT_H
 #include "SE_SimObject.h"
+#include "SE_ID.h"
 #include <vector>
 class SE_BufferInput;
 class SE_BufferOutput;
+class SE_Mesh;
+class SE_GeometryData;
+class SE_Matrix4f;
+class SE_Quat;
+class SE_Vector3f;
+class SE_Vector3i;
 class SE_MeshSimObject : public SE_SimObject
 {
     DECLARE_OBJECT(SE_MeshSimObject)
@@ -27,7 +34,7 @@ public:
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;
-    SE_MeshID mMeshID
+    SE_MeshID mMeshID;
     bool mOwnMesh;
 };
 #endif

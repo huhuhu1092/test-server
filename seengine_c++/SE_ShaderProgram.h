@@ -8,7 +8,7 @@ class SE_ShaderProgram
 public:
     SE_ShaderProgram(char* vertexShader, char* fragmentShader);
     ~SE_ShaderProgram();
-    GLunit getHandler();
+    GLuint getHandler();
     bool initOK();
     void use();
     GLint getPositionAttributeLoc()
@@ -31,7 +31,7 @@ public:
     {
         return m_u_basecolor_texture_loc;
     }
-    GLint getShaderModeUnifyLoc()
+    GLint getShadingModeUnifyLoc()
     {
         return m_u_shading_mode_loc;
     }
@@ -46,6 +46,6 @@ private:
     GLint m_u_shading_mode_loc;
     GLint m_u_color_loc;
 	GLint m_u_wvp_matrix_loc;
-    
+    GLint m_u_texture_loc;
 };
 #endif

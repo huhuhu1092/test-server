@@ -1,6 +1,7 @@
 #include "SE_IO.h"
 #include "SE_Log.h"
-static int getFileSize(FILE* fin)
+#include <stdio.h>
+static int getFileSize(FILE* fp)
 {
 	int		pos;
 	int		end;
@@ -14,13 +15,13 @@ static int getFileSize(FILE* fin)
 }
 void SE_IO::readFileAll(const char* fileName, char*& outData, int& outLen)
 {
-    FILE* fin = fopen(name, "rb");
+    FILE* fin = fopen(fileName, "rb");
     outData = NULL;
     outLen = 0;
     if(!fin)
         return;
     int fileSize = getFileSize(fin);
-    outData = (char*)SE_Malloc(fileSize);
+    outData = new char[fileSize];
     if(!outData)
     {
         LOGE("out of memory when read file\n");
@@ -31,7 +32,7 @@ void SE_IO::readFileAll(const char* fileName, char*& outData, int& outLen)
     char* p = outData;
     while(lenLeft > 0)
     {
-        size_t readNum = fread(p, 1, lenLeft, fp);
+        size_t readNum = fread(p, 1, lenLeft, fin);
         lenLeft -= readNum;
         p += readNum;
     }

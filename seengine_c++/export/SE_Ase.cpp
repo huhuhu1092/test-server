@@ -1,18 +1,24 @@
 #include "SE_Ase.h"
 #include "SE_Log.h"
 #include "SE_GeometryData.h"
-#include "../SE_ResourceManager.h"
-#include "../SE_Memory.h"
+#include "SE_ResourceManager.h"
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
 #include "SE_Utils.h"
+#include "SE_Buffer.h"
+#include "SE_ResFileHeader.h"
+#include "SE_File.h"
+#include "SE_Application.h"
+#include "SE_CommonNode.h"
+#include "SE_Geometry.h"
+#include "SE_BoundingVolume.h"
+#include "SE_MeshSimObject.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h>
 static int getFileLen(FILE* fp)
 {
 	int		pos;
@@ -79,7 +85,7 @@ struct _MaterialData
 struct _GeomTexCoordData
 {
     SE_GeometryDataID geomID;
-    SE_TextureCoordDataiD texCoordID;
+    SE_TextureCoordDataID texCoordID;
 };
 static void writeHeader(SE_BufferOutput& output, int dataLen)
 {
@@ -107,7 +113,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         }
     }
     std::vector<int>::iterator it;
-    for(it = indexWhichHasSubmaterial.begin() ; it != indexWhichHasSubmateria.end() ; it++)
+    for(it = indexWhichHasSubmaterial.begin() ; it != indexWhichHasSubmaterial.end() ; it++)
     {
         int index = *it;
         ASE_Material* m = &mSceneObject->mMats[index];
@@ -125,12 +131,11 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
     {
         SE_MaterialDataID mid = SE_Application::getInstance()->createCommonID();
         itMaterial->mid = mid;
-        sleep(1);
         mid.write(output);
-        output.write(itMaterial->md.ambient);
-        output.write(itMaterial->md.diffuse);
-        output.write(itMaterial->md.specular);
-        output.write(SE_Vector3f(0, 0, 0));
+        output.writeVector3f(itMaterial->md.ambient);
+        output.writeVector3f(itMaterial->md.diffuse);
+        output.writeVector3f(itMaterial->md.specular);
+        output.writeVector3f(SE_Vector3f(0, 0, 0));
     }
     /////////////////////////////write texture data ///////////////
     output.writeShort(SE_IMAGEDATA_ID);
@@ -139,9 +144,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         std::string texStr(itMaterial->md.texName);
         if(texStr != "")
         {
-            SE_ImageDataID tid = SE_Application::getInstance()->createCommonID();
+			SE_ImageDataID tid = texStr.c_str();
             itMaterial->tid = tid;
-            sleep(1);
             tid.write(output);
             output.writeInt(0); // image data type
             output.writeString(texStr.c_str());
@@ -152,16 +156,16 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
     int geomDataNum = mSceneObject->mGeomObjects.size();
     output.writeInt(geomDataNum);
     std::vector<_GeomTexCoordData> geomTexCoordData(geomDataNum);
-    std::list<ASE_GeometryObject*>::iterator it;
+    std::list<ASE_GeometryObject*>::iterator itGeomObj;
     int n = 0;
     SE_Matrix4f modelToWorldM, worldToModelM;
     SE_Matrix3f rotateM;
     SE_Vector3f rotateAxis, scale, translate;
-    for(it = mSceneObject->mGeomObjects.begin();
-        it != mSceneObject->mGeomObjects.end();
-        it++)
+    for(itGeomObj = mSceneObject->mGeomObjects.begin();
+        itGeomObj != mSceneObject->mGeomObjects.end();
+        itGeomObj++)
     {
-        ASE_GeometryObject* go = *it;
+        ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_GeometryDataID gid = SE_Application::getInstance()->createCommonID();
         rotateAxis.x = go->rotateAxis[0];
@@ -174,9 +178,9 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         translate.y = go->translate[1];
         translate.z = go->translate[2];
         rotateM.setRotateFromAxis(go->rotateAngle, rotateAxis);
-        modelToWorldView.set(rotateM, scale, translate);
+        modelToWorldM.set(rotateM, scale, translate);
         worldToModelM = modelToWorldM.inverse();
-        geomTexCoorData[n++].geomID = gid;
+        geomTexCoordData[n++].geomID = gid;
         gid.write(output);
         output.writeInt(mesh->numVertexes);
         output.writeInt(mesh->numFaces);
@@ -206,18 +210,17 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
     ////////////////////////write texture coordinate///////////////////////////////////////////////
     output.writeShort(SE_TEXCOORDDATA_ID);
     n = 0;
-    for(it = mSceneObject->mGeomObjects.begin();
-    it != mSceneObject->mGeomObjects.end();
-    it++)
+    for(itGeomObj = mSceneObject->mGeomObjects.begin();
+    itGeomObj != mSceneObject->mGeomObjects.end();
+    itGeomObj++)
     {
-        ASE_GeometryObject* go = *it;
+        ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_TextureCoordDataID tcid = SE_Application::getInstance()->createCommonID();
-        tcid.write(tcid);
+        tcid.write(output);
         geomTexCoordData[n++].texCoordID = tcid;
-        sleep(1);
-        output.write(mesh->numTVertexes);
-        output.write(mesh->numFaces);
+        output.writeInt(mesh->numTVertexes);
+        output.writeInt(mesh->numFaces);
         int i;
         for(i = 0 ; i < mesh->numTVertexes ; i++)
         {
@@ -236,30 +239,28 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
     output.writeShort(SE_MESHDATA_ID);
     output.writeInt(geomDataNum);
     n = 0;
-    for(it = mSceneObject->mGeomObjects.begin();
-    it != mSceneObject->mGeomObjects.end();
-    it++)
+    for(itGeomObj = mSceneObject->mGeomObjects.begin();
+    itGeomObj != mSceneObject->mGeomObjects.end();
+    itGeomObj++)
     {
-        ASE_GeometryObject* go = *it;
+        ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
-        sleep(1);
         meshID.write(output);
         meshIDVector.push_back(meshID);
-        SE_GemoetryDataID geomID = geomTexCoordData[n].geomID;
+        SE_GeometryDataID geomID = geomTexCoordData[n].geomID;
         SE_TextureCoordDataID texCoordID = geomTexCoordData[n].texCoordID;
         n++;
         geomID.write(output);
-        output.writeFloat(wireframeColor[0]);
-        output.writeFloat(wireframeColor[1]);
-        output.writeFloat(wireframeColor[2]);
+        output.writeFloat(go->wireframeColor[0]);
+        output.writeFloat(go->wireframeColor[1]);
+        output.writeFloat(go->wireframeColor[2]);
         int texNum = 0;
-        int materiaref = go->materialref;
+        int materialref = go->materialref;
         _MaterialData mdData = materialVector[materialref];
-
+        int startpos = 0;
         if(mdData.subMaterialNum > 1)
         {
-            int startpos = 0;
             int j;
             for(j = 0 ; j < (materialref - 1) ; j++)
             {
@@ -330,10 +331,10 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         {
             SE_ASSERT(mesh->numFaceGroup == mesh->faceGroup.size());
             output.writeInt(mesh->numFaceGroup);
-            std::vector<std::list<int> >::iterator it;
+            std::vector<std::list<int> >::iterator itFaceGroup;
             int indexM = subMaterialStartPos;
             int texIndex = 0;
-            for(it = mesh->faceGroup.begin() ; it != mesh->faceGroup.end(); it++)
+            for(itFaceGroup = mesh->faceGroup.begin() ; itFaceGroup != mesh->faceGroup.end(); itFaceGroup++)
             {
                 _MaterialData md = materialVector[indexM];
                 std::string texStr(md.md.texName);
@@ -342,14 +343,15 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
                     output.writeInt(texIndex);
                 }
                 md.mid.write(output);
-                output.writeInt(it->size());
+                output.writeInt(itFaceGroup->size());
                 std::list<int>::iterator itFace;
-                for(itFace = it->begin() ; itFace != it->end() ; itFace++)
+                for(itFace = itFaceGroup->begin() ; itFace != itFaceGroup->end() ; 
+					itFaceGroup++)
                 {
                     output.writeInt(*itFace);
                 }
                 indexM++;
-                texInex++;
+                texIndex++;
             }
         } 
         else
@@ -370,14 +372,14 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
     rootNode->setBVType(SE_BoundingVolume::AABB);
-    outScene.write(spatialID);
+    spatialID.write(outScene);
     rootNode->write(outScene);
     n = 0;
-    for(it = mSceneObject->mGeomObjects.begin();
-    it != mSceneObject->mGeomObjects.end();
-    it++)
+    for(itGeomObj = mSceneObject->mGeomObjects.begin();
+    itGeomObj != mSceneObject->mGeomObjects.end();
+    itGeomObj++)
     {
-        ASE_GeometryObject* go = *it;
+        ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = meshIDVector[n++];
         SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
@@ -413,12 +415,12 @@ void ASE_Loader::Write(const char* outFileName)
     writeHeader(outSceneHeader, outScene.getDataLen());
     std::string outBaseFileName(outFileName);
     outBaseFileName = outBaseFileName + "_basedata.cbf";
-    SE_File fbase(outBaseFileName, SE_File::WRITE);
-    f.write(outBaseHeader);
-    f.write(outBase);
+	SE_File fbase(outBaseFileName.c_str(), SE_File::WRITE);
+    fbase.write(outBaseHeader);
+    fbase.write(outBase);
     std::string outSceneFileName(outFileName);
-    outSceneFileName = outSceneFileName + "_scene.cbf"
-    SE_File fscene(outSceneFileName, SE_FILE::WRITE);
+    outSceneFileName = outSceneFileName + "_scene.cbf";
+	SE_File fscene(outSceneFileName.c_str(), SE_File::WRITE);
     fscene.write(outSceneHeader);
     fscene.write(outScene);
 }

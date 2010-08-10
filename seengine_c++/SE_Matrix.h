@@ -149,7 +149,7 @@ public:
     {
         return d[row * 4 + column];
     }
-
+    void getColumnSequence(float out[16]) const;
 private:
     union
     {

@@ -1,4 +1,5 @@
 #include "SE_ShaderProgram.h"
+#include "SE_Log.h"
 static GLuint loadShader(GLenum type, const char* shaderSrc)
 {
     GLuint shader;
@@ -7,7 +8,7 @@ static GLuint loadShader(GLenum type, const char* shaderSrc)
     shader = glCreateShader(type);
     if(shader == 0)
         return 0;
-    glShaderSource(shader, 1, &shaderSrc, NULL);
+    glShaderSource(shader, 1, &shaderSrc, 0);
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if(!compiled)
@@ -17,7 +18,7 @@ static GLuint loadShader(GLenum type, const char* shaderSrc)
 		if(infoLen > 1)
 		{
 			char* infoLog = new char[sizeof(char) * infoLen];
-			glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
+			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
 			LOGI("Error compiling shader: \n%s\n", infoLog);
 			delete infoLog;
 		}
@@ -63,7 +64,7 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
 	    if(infoLen > 1)
 	    {
             char* infoLog = new char[sizeof(char) * infoLen];
-	        glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+	        glGetProgramInfoLog(programObject, infoLen, 0, infoLog);
 	        LOGI("Error linking program: \n%s\n", infoLog);
 	        delete infoLog;
 	    }
@@ -77,7 +78,7 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
     mHasInit = true;
 #endif
 }
-GLunit SE_ShaderProgram::getHandler()
+GLuint SE_ShaderProgram::getHandler()
 {
     return mShaderProgramObject;
 }
@@ -109,7 +110,7 @@ void SE_ShaderProgram::link()
 	m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_basecolor_texture");
 	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
 	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
-	m_u_mvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
+	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 #endif
 }
 

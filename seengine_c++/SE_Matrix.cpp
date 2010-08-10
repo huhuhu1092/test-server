@@ -165,7 +165,7 @@ SE_Matrix3f& SE_Matrix3f::operator=(const SE_Matrix3f& rm)
 }
 float SE_Matrix3f::operator()(int row, int column)
 {
-    return d[row * 3 + j];
+    return d[row * 3 + column];
 }
 SE_Matrix3f SE_Matrix3f::mulScalar(float f) const
 {
@@ -583,15 +583,16 @@ SE_Matrix4f SE_Matrix4f::add(const SE_Matrix4f& rm) const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	ret.d[i] = d[i] + rm.d[i];
+	    ret.d[i] = d[i] + rm.d[i];
     }
+	return ret;
 }
 SE_Matrix4f SE_Matrix4f::subtract(const SE_Matrix4f& rm) const
 {
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	ret.d[i] = d[i] - rm.d[i];
+	    ret.d[i] = d[i] - rm.d[i];
     }
     return ret;
 }
@@ -664,4 +665,26 @@ void  SE_Matrix4f::set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, cons
     sm.set(2, 2, scale.z);
     SE_Matrix3f rs = rotate.mul(sm);
     set(rs, translate);
+}
+void SE_Matrix4f::getColumnSequence(float out[16]) const
+{
+    out[0] = m00;
+    out[1] = m10;
+    out[2] = m20;
+    out[3] = m30;
+
+    out[4] = m01;
+    out[5] = m11;
+    out[6] = m21;
+    out[7] = m31;
+
+    out[8] = m02;
+    out[9] = m12;
+    out[10] = m22;
+	out[11] = m32;
+
+	out[12] = m03;
+	out[13] = m13;
+	out[14] = m23;
+	out[15] = m33;
 }

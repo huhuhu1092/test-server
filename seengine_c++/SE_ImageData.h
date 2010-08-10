@@ -16,7 +16,7 @@ public:
         height = 0;
         pixelFormat = INVALID;
         bytesPerRow = 0;
-        data = NULL;
+        data = 0;
         texid = 0;
     }
     ~SE_ImageData()
@@ -43,6 +43,10 @@ public:
     {
         texid = texID;
     }
+	void setData(char* data)
+	{
+		this->data = data;
+	}
     void setHeight(int h)
     {height = h;}
     void setWidth(int w)

@@ -1,8 +1,6 @@
 #ifndef SE_UTILS_H
 #define SE_UTILS_H
 
-#include <string> 
-
 class SE_Util
 {
 public:

@@ -10,17 +10,17 @@
 #endif
 unsigned int SE_Util::host2NetInt32(unsigned int i)
 {
-    return htonl(i);
+	return htonl(i);
 }
 unsigned short SE_Util::host2NetInt16(unsigned short s)
 {
-    return htons(s);
+	return htons(s);
 }
 unsigned int SE_Util::net2HostInt32(unsigned int i)
 {
-    return ntohl(i);
+	return ntohl(i);
 }
 unsigned short SE_Util::net2HostInt16(unsigned short s)
 {
-    return ntohs(s);
+	return ntohs(s);
 }

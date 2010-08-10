@@ -1,4 +1,16 @@
 #include "SE_MeshSimObject.h"
+#include "SE_Vector.h"
+#include "SE_Matrix.h"
+#include "SE_Quat.h"
+#include "SE_Mesh.h"
+#include "SE_GeometryData.h"
+#include "SE_DataTransfer.h"
+#include "SE_Application.h"
+#include "SE_Common.h"
+#include "SE_ResourceManager.h"
+#include "SE_Buffer.h"
+#include "SE_Mesh.h"
+#include "SE_RenderUnit.h"
 IMPLEMENT_OBJECT(SE_MeshSimObject)
 SE_MeshSimObject::SE_MeshSimObject() : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
@@ -14,7 +26,7 @@ SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NU
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(meshID);
     if(meshTransfer)
     {
-        mMesh = meshTransfer->createMesh();
+		mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
         mOwnMesh = true;
         mWorldGeomData = new SE_GeometryData;
     } 
@@ -39,7 +51,7 @@ void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rota
         return;
     SE_ASSERT(mWorldGeomData);
     SE_GeometryData* localMeshGeomData = mMesh->getGeometryData();
-    SE_GeometryData::transform(localMeshGeomData, scale, rotate, translate, mWorldGeomdata);
+    SE_GeometryData::transform(localMeshGeomData, scale, rotate, translate, mWorldGeomData);
 }
 void SE_MeshSimObject::read(SE_BufferInput& input)
 {
@@ -47,7 +59,7 @@ void SE_MeshSimObject::read(SE_BufferInput& input)
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(mMeshID);
     if(!meshTransfer)
         return;
-    mMesh = meshTransfer->createMesh();
+	mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
     if(mMesh)
     {
         mOwnMesh = true;
@@ -59,7 +71,7 @@ void SE_MeshSimObject::write(SE_BufferOutput& output)
     output.writeString("SE_MeshSimObject");
     mMeshID.write(output);
 }
-int SE_MeshSimObject::getSurface()
+int SE_MeshSimObject::getSurfaceNum()
 {
     if(!mMesh)
         return 0;
@@ -87,9 +99,9 @@ int SE_MeshSimObject::getFaceNum()
 {
     if(!mWorldGeomData)
         return 0;
-    return mWOrldGeomData->getFaceNum();
+    return mWorldGeomData->getFaceNum();
 }
-void SE_MeshSimObject::getSurfaceFace(int surfaceIndex, int*& facets, int& faceNum)
+void SE_MeshSimObject::getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum)
 {
     if(!mMesh)
     {
@@ -100,9 +112,8 @@ void SE_MeshSimObject::getSurfaceFace(int surfaceIndex, int*& facets, int& faceN
     SE_Surface* surface = mMesh->getSurface(surfaceIndex);
     facets = surface->getFacetArray();
     faceNum = surface->getFacetNum();
-    return facets;
 }
-RenderUnitVector SE_MeshSimObject::createRenderUnit()
+SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
 {
     if(!mMesh)
         return RenderUnitVector();
@@ -111,7 +122,7 @@ RenderUnitVector SE_MeshSimObject::createRenderUnit()
     ruv.resize(surfaceNum, NULL);
     for(int i = 0 ; i < surfaceNum ; i++)
     {
-        SE_Surface* surface = getSurface(i);
+        SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
         ruv[i] = tsru;
     }

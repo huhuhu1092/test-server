@@ -3,6 +3,12 @@
 #include "SE_Object.h"
 #include <vector>
 class SE_RenderUnit;
+class SE_Matrix4f;
+class SE_Quat;
+class SE_Vector3f;
+class SE_BufferInput;
+class SE_BufferOutput;
+class SE_Vector3i;
 class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)

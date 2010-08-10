@@ -1,5 +1,7 @@
 #include "SE_GeometryData.h"
-#include <SE_Vector.h>
+#include "SE_Vector.h"
+#include "SE_Matrix.h"
+#include "SE_Quat.h"
 SE_GeometryData::SE_GeometryData()
 {
     vertexArray = NULL;
@@ -21,10 +23,12 @@ SE_GeometryData::~SE_GeometryData()
 
 SE_Vector3f* SE_GeometryData::getNormals()
 {
-
+    return 0;
 }
 int SE_GeometryData::getNormalsNum()
-{}
+{
+	return 0;
+}
 
 void SE_GeometryData::setVertexArray(SE_Vector3f* va, int num)
 {
@@ -50,7 +54,7 @@ void SE_GeometryData::setNormalArray(SE_Vector3f* na, int num)
 void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_GeometryData* dst)
 {
     SE_Vector3f* vertex = NULL;
-    SE_Vector3f* face = NULL;
+    SE_Vector3i* faces = NULL;
     SE_Vector3f* normal = NULL;
     int vertexNum = 0;
     int faceNum = 0;
@@ -68,8 +72,8 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
     }
     if(src->faceArray)
     {
-        SE_Vector3i* faces = new SE_Vector3i[src->faceNum];
-        for(int i = 0 ; i < src->faceNum)
+        faces = new SE_Vector3i[src->faceNum];
+        for(int i = 0 ; i < src->faceNum; i++)
         {
             faces[i] = src->faceArray[i];
         }
@@ -82,7 +86,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
         {
             SE_Matrix3f inverse = t.inverse();
             inverse = inverse.transpose();
-            normal = new SE_Vector3f[src->normalNum]
+            normal = new SE_Vector3f[src->normalNum];
             for(int i = 0 ; i < src->normalNum ; i++)
             {
                 normal[i] = inverse.map(src->normalArray[i]);
@@ -91,13 +95,13 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
         }
     }
     dst->setVertexArray(vertex, vertexNum);
-    dst->setFaceArray(face, faceNum);
+    dst->setFaceArray(faces, faceNum);
     dst->setNormalArray(normal, normalNum);
 }
-void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
+void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate, SE_GeometryData* dst)
 {
     SE_Vector3f* vertex = NULL;
-    SE_Vector3f* face = NULL;
+    SE_Vector3i* faces = NULL;
     SE_Vector3f* normal = NULL;
     int vertexNum = 0;
     int faceNum = 0;
@@ -107,7 +111,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         vertex = new SE_Vector3f[src->vertexNum];
         for(int i = 0 ; i < src->vertexNum ; i++)
         {
-            SE_Vector3f v = scale.dot(src->vertexArray[i]);
+            SE_Vector3f v = scale.mul(src->vertexArray[i]);
             v = rotate.map(v);
             v = v + translate;
             vertex[i] = v;
@@ -116,8 +120,8 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
     }
     if(src->faceArray)
     {
-        SE_Vector3i* faces = new SE_Vector3i[src->faceNum];
-        for(int i = 0 ; i < src->faceNum)
+        faces = new SE_Vector3i[src->faceNum];
+        for(int i = 0 ; i < src->faceNum; i++)
         {
             faces[i] = src->faceArray[i];
         }
@@ -134,7 +138,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         {
             SE_Matrix3f inverse = m.inverse();
             m = m.transpose();
-            normal = new SE_Vector3f[src->normalNum]
+            normal = new SE_Vector3f[src->normalNum];
             for(int i = 0 ; i < src->normalNum ; i++)
             {
                 normal[i] = m.map(src->normalArray[i]);
@@ -143,7 +147,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         }
     }
     dst->setVertexArray(vertex, vertexNum);
-    dst->setFaceArray(face, faceNum);
+    dst->setFaceArray(faces, faceNum);
     dst->setNormalArray(normal, normalNum);
 }
 

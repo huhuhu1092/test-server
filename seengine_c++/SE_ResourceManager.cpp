@@ -2,6 +2,14 @@
 #include "SE_Utils.h"
 #include "SE_Buffer.h"
 #include "SE_ResFileHeader.h"
+#include "SE_IO.h"
+#include "SE_ImageData.h"
+#include "SE_MaterialData.h"
+#include "SE_GeometryData.h"
+#include "SE_TextureCoordData.h"
+#include "SE_DataTransfer.h"
+#include "SE_Spatial.h"
+#include "SE_ShaderProgram.h"
 #include <map>
 #include <vector>
 
@@ -99,10 +107,10 @@ static void processGeometryData(SE_BufferInput& inputBuffer, SE_ResourceManager*
             }
         }
         SE_GeometryData* geomData = new SE_GeometryData;
-        geomData->setVertexArray(vertexArry, vertexNum);
+        geomData->setVertexArray(vertexArray, vertexNum);
         geomData->setFaceArray(faceArray, faceNum);
         geomData->setNormalArray(normalArray, normalNum);
-        resourceManager->setGeometryData(id, geomData);
+        resourceManager->setGeometryData(geomDataID, geomData);
     }
 }
 static void processTextureCoordData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
@@ -110,22 +118,22 @@ static void processTextureCoordData(SE_BufferInput& inputBuffer, SE_ResourceMana
     int texCoordNum = inputBuffer.readInt();
     for(int n = 0 ; n < texCoordNum ; n++)
     {
-        SE_TextureCoordDataiD texCoordID;
+        SE_TextureCoordDataID texCoordID;
         texCoordID.read(inputBuffer);
         int texVertexNum = inputBuffer.readInt();
         int texFaceNum = inputBuffer.readInt();
         SE_Vector2f* texVertexArray = new SE_Vector2f[texVertexNum];
-        SE_Vector3i* texFace = new SE_Vector3i[texFaceNum];
-        for(int i = 0 ; i < texVertexArray ; i++)
+        SE_Vector3i* texFaceArray = new SE_Vector3i[texFaceNum];
+        for(int i = 0 ; i < texVertexNum ; i++)
         {
             texVertexArray[i].x = inputBuffer.readFloat();
             texVertexArray[i].y = inputBuffer.readFloat();
         }
         for(int i = 0 ; i  < texFaceNum ; i++)
         {
-            texFace[i].d[0] = inputBuffer.readInt();
-            texFace[i].d[1] = inputBuffer.readInt();
-            texFace[i].d[2] = inputBuffer.readInt();
+            texFaceArray[i].d[0] = inputBuffer.readInt();
+            texFaceArray[i].d[1] = inputBuffer.readInt();
+            texFaceArray[i].d[2] = inputBuffer.readInt();
         }
         
         SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
@@ -172,7 +180,7 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
     {
         SE_MeshID meshID;
         meshID.read(inputBuffer);
-        SE_MeshTranfer* meshTransfer = new SE_MeshTransfer;
+        SE_MeshTransfer* meshTransfer = new SE_MeshTransfer;
         if(meshTransfer)
         {
             meshTransfer->read(inputBuffer);
@@ -190,9 +198,9 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
     char* vertexShaderBytes = new char[vertexShaderLen + 1];
     char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
     inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
-    inpubBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
+    inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
     vertexShaderBytes[vertexShaderLen] = '\0';
-    framgentShaderBytes[fragmentShaderLen] = '\0';
+    fragmentShaderBytes[fragmentShaderLen] = '\0';
     resourceManager->setShaderProgram(programDataID, vertexShaderBytes, fragmentShaderBytes);
     delete[] vertexShaderBytes;
     delete[] fragmentShaderBytes;
@@ -209,8 +217,8 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
             case SE_GEOMETRYDATA_ID:
                 processGeometryData(inputBuffer, resourceManager);
                 break;
-            case SE_TEXUNITDATA_ID:
-                processTextureUnitData(inputBuffer, resourceManager);
+            case SE_TEXCOORDDATA_ID:
+                processTextureCoordData(inputBuffer, resourceManager);
                 break;
             case SE_MATERIALDATA_ID:
                 processMaterialData(inputBuffer, resourceManager);
@@ -232,7 +240,7 @@ template <class TID, class T>
 class ResourceMap
 {
 public:
-    T* get(const TID& id)
+    T* get(const TID& id);
     void set(const TID& id, T* data);
     void remove(const TID& id);
     ~ResourceMap();
@@ -260,7 +268,7 @@ T* ResourceMap<TID, T>::get(const TID& id)
         return it->second;
 }
 template <class TID, class T>
-void ResourceMap<TID, t>::set(const TID& id, T* data)
+void ResourceMap<TID, T>::set(const TID& id, T* data)
 {
     RMap::iterator it = m.find(id);
     if(it == m.end())
@@ -306,10 +314,11 @@ struct SE_ResourceManager::_Impl
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
     void process(SE_BufferInput& inputBuffer);
+
 };
 void SE_ResourceManager::_Impl::process(SE_BufferInput& inputBuffer)
 {
-    process(inputBuffer, resourceManager);
+	::process(inputBuffer, resourceManager);
 }
 //////////////////////
 SE_ResourceManager::SE_ResourceManager(const char* dataPath)
@@ -465,7 +474,7 @@ void SE_ResourceManager::loadBaseData(const char* baseResourceName)
     SE_IO::readFileAll(resourcePath.c_str(), data, len);
     if(data)
     {
-        SE_BufferInput inputBuffer(data, len)
+        SE_BufferInput inputBuffer(data, len);
         mImpl->process(inputBuffer);
     }
 }
@@ -484,7 +493,7 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
 }
 static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
-    SE_Spatial* spatial = SE_Object::create(spatialType.c_str());
+    SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
     spatial->setParent(parent);
     return spatial;
 }
@@ -498,6 +507,7 @@ SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_
     {
         createSceneNode(inputBuffer, spatial);
     }
+	return spatial;
 }
 SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& programDataID)
 {
@@ -505,7 +515,7 @@ SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& p
 }
 void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader)
 {
-    if(verteShader == NULL || fragmentShader == NULL)
+    if(vertexShader == NULL || fragmentShader == NULL)
         return;
     SE_ShaderProgram* shaderProgram = new SE_ShaderProgram(vertexShader, fragmentShader);
     mImpl->shaderMap.set(programDataID, shaderProgram);
@@ -516,18 +526,21 @@ void SE_ResourceManager::removeShaderProgram(const SE_ProgramDataID& programData
     mImpl->shaderMap.remove(programDataID);
 }
     
-
+const char* SE_ResourceManager::getDataPath()
+{
+	return mImpl->dataPath.c_str();
+}
 SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName;
     char* data = NULL;
     int len = 0;
-    SE_IO::readFileAll(scenePath, data, len);
+	SE_IO::readFileAll(scenePath.c_str(), data, len);
     if(data)
     {
         SE_BufferInput inputBuffer(data , len);
         if(!checkHeader(inputBuffer))
-            return;
+            return NULL;
         SE_SceneID sceneID;
         sceneID.read(inputBuffer);
         SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
@@ -555,7 +568,7 @@ void SE_ResourceManager::loadMesh(const SE_SceneID& sceneID, SE_BufferInput& inp
 */
 SE_MeshTransfer* SE_ResourceManager::getMeshTransfer(const SE_MeshID& meshID)
 {
-    return mImpl->meshDataMap.get(meshID);
+    return mImpl->meshMap.get(meshID);
     /*
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);
     if(it == mImpl->meshMap.end())
@@ -567,9 +580,9 @@ SE_MeshTransfer* SE_ResourceManager::getMeshTransfer(const SE_MeshID& meshID)
     return itMeshData->second.mesh;
 */
 }
-void SE_ResourceManager::setMeshTransfer(const SE_MeshID& meshID, SE_MeshTranfer* meshTransfer)
+void SE_ResourceManager::setMeshTransfer(const SE_MeshID& meshID, SE_MeshTransfer* meshTransfer)
 {
-    mImpl->meshDataMap.set(meshID, meshTransfer);
+    mImpl->meshMap.set(meshID, meshTransfer);
 
     /*
     SE_ResourceManager::_Impl::_MeshMap::iterator it = mImpl->meshMap.find(sceneID);

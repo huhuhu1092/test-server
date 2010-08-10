@@ -1,5 +1,6 @@
 #include "SE_CommonNode.h"
 #include "SE_Buffer.h"
+#include "SE_Camera.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_CommonNode)
 struct SE_CommonNode::_Impl
@@ -61,11 +62,11 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
 }
 void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
-    SE_BoundingVolume* bv = getBoundingVolume();
+    SE_BoundingVolume* bv = getWorldBoundingVolume();
     if(bv)
     {
         int culled = camera->cullBV(*bv);
-        if(culled == SE_FULL_CULLED)
+        if(culled == SE_FULL_CULL)
             return;
     }
     std::list<SE_Spatial*>::iterator it;

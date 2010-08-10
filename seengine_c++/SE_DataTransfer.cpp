@@ -3,10 +3,12 @@
 #include "SE_Utils.h"
 #include "SE_Buffer.h"
 #include "SE_Common.h"
+#include "SE_ResourceManager.h"
+#include <string>
 SE_MeshTransfer::~SE_MeshTransfer()
 {
     if(mSurfaceTransferArray)
-        delete[] mSufaceTransferArray;
+        delete[] mSurfaceTransferArray;
     if(mTexTransferArray)
         delete[] mTexTransferArray;
 }
@@ -17,16 +19,16 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
     for(int i = 0 ; i < mTexNum ; i++)
     {
         SE_TextureTransfer* textureTransfer = &mTexTransferArray[i];
-        SE_Texture texture = new SE_Texture;
+        SE_Texture* texture = new SE_Texture;
         for(int j = 0 ; j < textureTransfer->getTextureUnitNum() ; j++)
         {
             SE_TextureUnitTransfer* texUnitTransfer = textureTransfer->getTextureUnit(j);
-            SE_TextureUnit* texUnit = new SE_TextureUnit;
-            texUnit->setTextureCoordData(resourceManager->getTexCoordData(texUnitTransfer->getTexCoordDataID()));
+			SE_TextureUnit* texUnit = new SE_TextureUnit(texUnitTransfer->getType());
+            texUnit->setTextureCoordData(resourceManager->getTextureCoordData(texUnitTransfer->getTexCoordDataID()));
             SE_ImageDataID* imageDataID = new SE_ImageDataID[texUnitTransfer->getImageDataNum()];
             for(int n = 0 ; n < texUnitTransfer->getImageDataNum() ; n++)
             {
-                imageDataID[n] = *texUnitTransfer->getImageDataID(n);
+                imageDataID[n] = texUnitTransfer->getImageDataID(n);
             }
             texUnit->setImageData(imageDataID, texUnitTransfer->getImageDataNum());
             texture->setTextureUnit(texUnitTransfer->getType(), texUnit);
@@ -35,9 +37,9 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
     }
     for(int i = 0 ; i < mSurfaceNum; i++)
     {
-        SE_SurfaceDataTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
+        SE_SurfaceTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
         SE_Surface* surface = new SE_Surface;
-        surface->setMaterialData(resourceManager->getMaterialData(surfaceTransfer->materialDataID));
+        surface->setMaterialData(resourceManager->getMaterialData(surfaceTransfer->getMaterialDataID()));
         int*  facetArray= new int[surfaceTransfer->getFacetNum()];
         memmove(facetArray, surfaceTransfer->getFacetArray(), sizeof(int) * surfaceTransfer->getFacetNum());
         surface->setGeometryData(mesh->getGeometryData());
@@ -64,6 +66,7 @@ void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
             mTexTransferArray  = new SE_TextureTransfer[mTexNum];
         }
         int i;
+		int j;
         for(i = 0 ; i < mTexNum ; i++)
         {
             SE_TextureTransfer* textureTransfer = &mTexTransferArray[i];
@@ -121,7 +124,7 @@ void SE_MeshTransfer::write(SE_BufferOutput& outBuffer)
             outBuffer.writeInt(textureTransfer->getTextureUnitNum());
             for(int j = 0 ; j < textureTransfer->getTextureUnitNum() ; j++)
             {
-                SE_TextureUnit* texUnit = textureTransfer->getTextureUnit(j);
+                SE_TextureUnitTransfer* texUnit = textureTransfer->getTextureUnit(j);
                 outBuffer.writeInt(texUnit->getType());
                 texUnit->getTexCoordDataID().write(outBuffer);
                 outBuffer.writeInt(texUnit->getImageDataNum());

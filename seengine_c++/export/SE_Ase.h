@@ -5,7 +5,7 @@
 #include <string.h>
 #define ASE_OK 1
 #define ASE_ERROR 0
-
+class SE_BufferOutput;
 typedef float Vector3[3];
 struct ASE_Vertex
 {
@@ -31,7 +31,6 @@ struct ASE_Face
     int materialID;
 	ASE_Face()
 	{
-        for(int i = 0 ; i < mesh)
 		memset(vi, 0, sizeof(int) * 3);
 		materialID = -1;
 	}
@@ -151,6 +150,7 @@ public:
         return mSceneObject;
     }
     void Write(const char* filename);
+	void Write(SE_BufferOutput& output, SE_BufferOutput& outputScene);
 	typedef void (ASE_Loader::*ParserFun)( const char * );
 private:
 	int CharIsTokenDelimiter( int ch );

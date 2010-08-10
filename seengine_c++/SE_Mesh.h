@@ -1,18 +1,20 @@
 #ifndef SE_MESH_H
 #define SE_MESH_H
 #include "SE_Vector.h"
+#include "SE_ID.h"
 class SE_TextureCoordData;
-class SE_ImageDataID;
+class SE_GeometryData;
+class SE_MaterialData;
 class SE_TextureUnit
 {
 public:
-    SE_TextureUnit();
+    SE_TextureUnit(int type);
     ~SE_TextureUnit();
     void setTextureCoordData(SE_TextureCoordData* texCoordData)
     {
         mTexCoord = texCoordData;
     }
-    bool setImageData(SE_ImageDataID* imageIDArray, int num)
+    void setImageData(SE_ImageDataID* imageIDArray, int num)
     {
         mImageArray = imageIDArray;
         mImageNum = num;
@@ -31,7 +33,7 @@ public:
             return NULL;
         return mImageArray[index];
     }
-    SE_ImageDataID getImage()
+    SE_ImageDataID* getImage()
     {
         return mImageArray;
     }
@@ -53,7 +55,7 @@ public:
                        TEXTURE5, TEXTURE6, TEXTURE7, TEXUNIT_NUM};
     void setTextureUnit(int texType, SE_TextureUnit* texUnit);
     void removeTextureUnit(int texType);
-    SE_TextureUnit* getTexUnit(int texType);
+    SE_TextureUnit* getTextureUnit(int texType);
 private:
     SE_TextureUnit** mTexUnitArray;
 };
@@ -75,6 +77,39 @@ public:
     void setFacets(int* facets, int num);
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
+	    int getSampleMin()
+    {
+        return mSampleMin;
+    }
+    int getSampleMag()
+    {
+        return mSampleMag;
+    }
+    int getWrapS()
+    {
+        return mWrapS;
+    }
+    int getWrapT()
+    {
+        return mWrapT;
+    }
+    
+    void setSampleMin(int min)
+    {
+        mSampleMin = min;
+    }
+    void setSampleMag(int mag)
+    {
+        mSampleMag = mag;
+    }
+    void setWrapS(int wraps)
+    {
+        mWrapS = wraps;
+    }
+    void setWrapT(int wrapt)
+    {
+        mWrapT = wrapt;
+    }
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -83,13 +118,20 @@ private:
     SE_GeometryData* mGeometryData;
     SE_Vector3f mColor;
     SE_ProgramDataID mProgramDataID;
+	int mSampleMin;
+    int mSampleMag;
+    int mWrapS;
+    int mWrapT;
 };
 class SE_Mesh
 {
 public:
     SE_Mesh(int surfaceNum, int texNum);
     ~SE_Mesh();
-    SE_GeometryData* getGeometryData();
+    SE_GeometryData* getGeometryData()
+	{
+        return mGeometryData;
+	}
     SE_Vector3f getColor()
     {
         return mColor;
@@ -102,6 +144,10 @@ public:
     {
         return mSurfaceArray[index];
     }
+	int getSurfaceNum()
+	{
+		return mSurfaceNum;
+	}
     void setSurface(int index, SE_Surface* surface)
     {
         mSurfaceArray[index] = surface;
@@ -118,8 +164,6 @@ public:
     {
         mGeometryData = geomData;
     }
-    int getSurfaceNum();
-    SE_Surface* getSurface(int index);
 private:
     SE_GeometryData* mGeometryData;
     SE_Surface** mSurfaceArray;

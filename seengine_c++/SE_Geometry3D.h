@@ -136,18 +136,18 @@ public:
     SE_Sphere();
     SE_Sphere(const SE_Vector3f& center, float r);
     void createFromPoints(SE_Vector3f* points, int num);
-    SE_Vector3f getCenter();
-    float getRadius();
+    SE_Vector3f getCenter() const;
+    float getRadius() const;
     void set(const SE_Vector3f& center, float r);
-    SE_IntersectResult intersect(const SE_AABB& aabb);
-    SE_IntersectResult intersect(const SE_Ray& ray);
-    SE_IntersectResult intersect(const SE_OBB& obb);
-    SE_Plane_Side whichSide(const SE_Plane& plane);
-    SE_IntersectResult intersect(const SE_Sphere& sphere);
-    bool containPoint(const SE_Vector3f& point);
+    SE_IntersectResult intersect(const SE_AABB& aabb) const;
+    SE_IntersectResult intersect(const SE_Ray& ray) const;
+    SE_IntersectResult intersect(const SE_OBB& obb) const;
+    SE_Plane_Side whichSide(const SE_Plane& plane) const;
+    SE_IntersectResult intersect(const SE_Sphere& sphere) const;
+    bool containPoint(const SE_Vector3f& point) const;
 private:
     void ritterSphere(SE_Vector3f* points, int num);
-    void sphereOfSphereAndPoint(SE_Vector3f* point);
+    void sphereOfSphereAndPoint(const SE_Vector3f& point);
     void sphereFromDistantPoints(SE_Vector3f* points, int pointNum);
     void mostSeparatedPointsOnAABB(int* min , int* max, SE_Vector3f* points, int numPoint);
 
@@ -161,15 +161,15 @@ public:
     SE_AABB();
     SE_AABB(const SE_Vector3f& min, const SE_Vector3f& max);
     void createFromPoints(SE_Vector3f* points, int num);
-    SE_Vector3f getMin();
-    SE_Vector3f getMax();
-    SE_Vector3f getExtent();
-    SE_Vector3f getCenter();
-    SE_IntersectResult intersect(const SE_AABB& aabb);
-    SE_IntersectResult intersect(const SE_OBB& obb);
-    SE_IntersectResult intersect(const SE_Sphere& sphere);
-    SE_IntersectResult intersect(const SE_Ray& ray);
-    SE_Plane_Side whichSide(const SE_Plane& plane);
+    SE_Vector3f getMin() const;
+    SE_Vector3f getMax() const;
+    SE_Vector3f getExtent() const;
+    SE_Vector3f getCenter() const;
+    SE_IntersectResult intersect(const SE_AABB& aabb) const;
+    SE_IntersectResult intersect(const SE_OBB& obb) const;
+    SE_IntersectResult intersect(const SE_Sphere& sphere) const;
+    SE_IntersectResult intersect(const SE_Ray& ray) const;
+    SE_Plane_Side whichSide(const SE_Plane& plane) const;
 private:
     SE_Vector3f mMin;
     SE_Vector3f mMax;
@@ -180,16 +180,16 @@ public:
     SE_OBB();
     void createFromPoints(SE_Vector3f* points, int num);
     void createFromAABB(const SE_AABB& aabb);
-    void getBoxVertex(SE_Vector3f out[8]);
-    SE_Vector3f getCenter();
-    void getAxis(SE_Vector3f axis[3]);
-    void getExtent(float e[3]);
+    void getBoxVertex(SE_Vector3f out[8]) const;
+    SE_Vector3f getCenter() const;
+    void getAxis(SE_Vector3f axis[3]) const;
+    void getExtent(float e[3]) const;
     void transfrom(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
-    SE_IntersectResult intersect(const SE_AABB& aabb);
-    SE_IntersectResult intersect(const SE_OBB& obb);
-    SE_IntersectResult intersect(const SE_Sphere& sphere);
-    SE_IntersectResult intersect(const SE_Ray& ray);
-    SE_Plane_Side whichSide(const SE_Plane& plane);
+    SE_IntersectResult intersect(const SE_AABB& aabb) const;
+    SE_IntersectResult intersect(const SE_OBB& obb) const;
+    SE_IntersectResult intersect(const SE_Sphere& sphere) const;
+    SE_IntersectResult intersect(const SE_Ray& ray) const;
+    SE_Plane_Side whichSide(const SE_Plane& plane) const;
 private:
     SE_Vector3f mCenter;
     SE_Vector3f mAxis[3];

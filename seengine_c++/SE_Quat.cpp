@@ -61,7 +61,7 @@ SE_Vector3f SE_Quat::map(const SE_Vector3f& v) const
     SE_Quat ret = mul(vq).mul(inverse());
     return SE_Vector3f(ret.x, ret.y , ret.z);
 }
-SE_Matrix3f SE_Quat::toMatrix() const
+SE_Matrix3f SE_Quat::toMatrix3f() const
 {
     float m00 = 1 - 2 * y * y - 2 * z * z;
     float m01 = 2 * x * y - 2 * w * z;

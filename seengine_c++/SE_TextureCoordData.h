@@ -49,8 +49,8 @@ public:
         texFaceNum = num;
     }
 private:
-    SE_TextureCoordData(const SE_TextureUnitData&);
-    SE_TextureCoordData& operator=(const SE_TextureUnitData&);
+    SE_TextureCoordData(const SE_TextureCoordData&);
+    SE_TextureCoordData& operator=(const SE_TextureCoordData&);
 private:
     SE_Vector2f* texVertexArray;
     int texVertexNum;

@@ -2,12 +2,15 @@
 #define SE_GEOMETRYDATA_H
 class SE_Vector3f;
 class SE_Vector3i;
+class SE_Quat;
+class SE_Matrix4f;
+class SE_Matrix3f;
 class SE_GeometryData
 {
 public:
     SE_GeometryData();
     ~SE_GeometryData();
-    SE_Vecotr3f* getVertexArray()
+    SE_Vector3f* getVertexArray()
     {
         return vertexArray;
     }
@@ -33,7 +36,7 @@ public:
     void setNormalArray(SE_Vector3f* na, int num);
 
     static void transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_GeometryData* dst);
-    static void transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
+    static void transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate, SE_GeometryData* dst);
 private:
     SE_GeometryData(const SE_GeometryData&);
     SE_GeometryData& operator=(const SE_GeometryData&);
