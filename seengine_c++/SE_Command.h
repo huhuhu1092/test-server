@@ -12,7 +12,7 @@ public:
     virtual ~SE_Command();
     virtual void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta) = 0;
     virtual bool expire(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
-private:
+protected:
     SE_Application* mApp;
     SE_TimeMS mWaitTime;
     bool mbRealTime;

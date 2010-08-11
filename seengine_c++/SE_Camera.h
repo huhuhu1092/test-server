@@ -12,7 +12,7 @@ public:
     SE_Camera();
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
-    SE_Camera(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float ratio, float near, float far);
+    SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
     int cullBV(const SE_BoundingVolume& bv);
     void setViewport(int x, int y, int w, int h);
     SE_Rect<int> getViewport();
@@ -28,7 +28,7 @@ public:
     void rotateLocal(const SE_Quat& rotate);
     void create(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
-    void create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float ratio, float near, float far);
+    void create(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
     SE_Matrix4f getPerspectiveMatrix();
 private:
     SE_Frustum mFrustum;

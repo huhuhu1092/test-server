@@ -7,53 +7,18 @@ SE_Camera::SE_Camera()
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
 {
-    mFrustum.set(fov, ratio, near, far);
-    SE_Vector3f zDir = location - target;
-    if(zDir.isZero())
-    {
-        LOGI("### camera direction is zero ####\n");
-        zDir.set(0, 0, 1);
-    }
-    zDir = zDir.normalize();
-    SE_Vector3f upDir(0, 1, 0);
-    if(upDir == zDir)
-    {
-        upDir.set(0, 0, -1);
-    }
-    SE_Vector3f leftDir = upDir.cross(zDir);
-    upDir = zDir.cross(leftDir);
-    mAxisX = leftDir.normalize();
-    mAxisY = upDir.normalize();
-    mAxisZ = zDir;
-    mLocation = location;
-    mChanged = true;
-    mViewport.left = 0;
-    mViewport.right = 0;
-    mViewport.top = 0;
-    mViewport.bottom = 0;
+	create(location, target, fov, ratio, near, far);
+
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {
-    mFrustum.set(fov, ratio, near, far);
-    mLocation = location;
-    mAxisX = xAxis;
-    mAxisY = yAxis;
-    mAxisZ = zAxis;
-    mViewport.left = 0;
-    mViewport.right = 0;
-    mViewport.top = 0;
-    mViewport.bottom = 0;
-    mChanged = true;    
+	create(location, xAxis, yAxis, zAxis, fov, ratio, far, near);
+
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& yAxis, float fov, float ratio, float near, float far)
 {
-    mFrustum.set(fov, ratio, near, far);
-    SE_Vector3f xAxis = yAxis.cross(zAxis);
-    mAxisX = xAxis.normalize();
-    mAxisY = zAxis.cross(xAxis).normalize();
-    mAxisZ = zAxis.normalize();
-    mLocation = location;
-    mChanged = true;
+	create(location, zAxis, yAxis, fov, ratio, near, far);
+
 }
 int SE_Camera::cullBV(const SE_BoundingVolume& bv)
 {
@@ -175,11 +140,55 @@ void SE_Camera::rotateLocal(const SE_Quat& rotate)
     mChanged = true;
 }
 void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
-{}
+{
+    mFrustum.set(fov, ratio, near, far);
+    SE_Vector3f zDir = location - target;
+    if(zDir.isZero())
+    {
+        LOGI("### camera direction is zero ####\n");
+        zDir.set(0, 0, 1);
+    }
+    zDir = zDir.normalize();
+    SE_Vector3f upDir(0, 1, 0);
+    if(upDir == zDir)
+    {
+        upDir.set(0, 0, -1);
+    }
+    SE_Vector3f leftDir = upDir.cross(zDir);
+    upDir = zDir.cross(leftDir);
+    mAxisX = leftDir.normalize();
+    mAxisY = upDir.normalize();
+    mAxisZ = zDir;
+    mLocation = location;
+    mChanged = true;
+    mViewport.left = 0;
+    mViewport.right = 0;
+    mViewport.top = 0;
+    mViewport.bottom = 0;
+}
 void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
-{}
-void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& dir, const SE_Vector3f& up, float fov, float ratio, float near, float far)
-{}
+{
+    mFrustum.set(fov, ratio, near, far);
+    mLocation = location;
+    mAxisX = xAxis;
+    mAxisY = yAxis;
+    mAxisZ = zAxis;
+    mViewport.left = 0;
+    mViewport.right = 0;
+    mViewport.top = 0;
+    mViewport.bottom = 0;
+    mChanged = true;    
+}
+void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far)
+{
+    mFrustum.set(fov, ratio, near, far);
+    SE_Vector3f xAxis = up.cross(zAxis);
+    mAxisX = xAxis.normalize();
+    mAxisY = zAxis.cross(xAxis).normalize();
+    mAxisZ = zAxis.normalize();
+    mLocation = location;
+    mChanged = true;
+}
 SE_Matrix4f SE_Camera::getPerspectiveMatrix()
 {
 	return mFrustum.getPerspectiveMatrix();

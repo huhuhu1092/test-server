@@ -31,7 +31,7 @@ SE_StringID::SE_StringID(const char* id, int size)
 }
 SE_StringID::SE_StringID(const SE_StringID& id)
 {
-    SE_StringID::_Impl* mImpl = new SE_StringID::_Impl;
+    mImpl = new SE_StringID::_Impl;
     if(!mImpl)
         return ;
     mImpl->id = id.mImpl->id;

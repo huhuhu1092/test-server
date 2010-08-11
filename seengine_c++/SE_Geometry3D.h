@@ -24,6 +24,10 @@ template <class T>
 struct SE_Rect
 {
     T left ,right, top, bottom;
+	SE_Rect()
+	{
+		left = right = top = bottom = 0;
+	}
 };
 class SE_Rect3D
 {

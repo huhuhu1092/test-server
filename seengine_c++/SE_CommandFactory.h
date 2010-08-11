@@ -19,12 +19,18 @@ struct SE_CommandEntry
     SE_CommandEntry(const SE_CommandID& cid, SE_CreateCommandFunc* dcf): id(cid), cf(dcf)
     {
     }
+	~SE_CommandEntry()
+	{
+		delete cf;
+	}
 };
 class SE_CommandFactory
 {
 public:
-    SE_CommandFactory(SE_CommandEntry** entryArray, int size);
-    virtual SE_Command* create(SE_Application* app, const SE_CommandID& id) ;
+    SE_CommandFactory();
+    SE_CommandFactory(SE_CommandEntry* entryArray[], int size);
+    void set(SE_CommandEntry* entryArray[], int size);
+    SE_Command* create(SE_Application* app, const SE_CommandID& id) ;
     virtual ~SE_CommandFactory();
 private:
     SE_CommandEntry** mEntryArray;

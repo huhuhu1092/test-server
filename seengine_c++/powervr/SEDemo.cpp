@@ -8,6 +8,8 @@
 #include "SE_Common.h"
 #include "SE_Camera.h"
 #include "SE_Application.h"
+#include "SE_SystemCommand.h"
+#include "SE_SystemCommandFactory.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -64,18 +66,32 @@ private:
 };
 bool SEDemo::InitApplication()
 {
-	char* argv[] = {"SEDemo", "home.ASE", "home"};
-    init(3, argv);
+	SE_Application::getInstance()->setAppID(13718215879);
+	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
+	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
+	SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
+#ifdef WIN32
+	c->dataPath = "D:\\model\\jme\\home\\newhome3";
+#else
+	c->dataPath = "%s/%s", "/home/luwei/model/jme/home/newhome3";
+#endif
+	c->fileName = "home";
+	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
 bool SEDemo::InitView()
 {
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
+	SE_UpdateCameraCommand* c = (SE_UpdateCameraCommand*)SE_Application::getInstance()->createCommand("SE_UpdateCameraCommand");
+	c->width = dwCurrentWidth;
+	c->height = dwCurrentHeight;
+	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
 bool SEDemo::ReleaseView()
 {
+	
 	return true;
 }
 bool SEDemo::QuitApplication()
@@ -124,6 +140,7 @@ bool SEDemo::RenderScene()
 {
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
+	SE_Application::getInstance()->run();
 	return true;
 }
 PVRShell* NewDemo()

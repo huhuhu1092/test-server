@@ -321,6 +321,11 @@ void SE_ResourceManager::_Impl::process(SE_BufferInput& inputBuffer)
 	::process(inputBuffer, resourceManager);
 }
 //////////////////////
+SE_ResourceManager::SE_ResourceManager()
+{
+	mImpl = new SE_ResourceManager::_Impl;
+	mImpl->resourceManager = this;
+}
 SE_ResourceManager::SE_ResourceManager(const char* dataPath)
 {
     mImpl = new SE_ResourceManager::_Impl;
@@ -468,7 +473,7 @@ void SE_ResourceManager::removeMaterialData(const SE_MaterialDataID& materialID)
 }
 void SE_ResourceManager::loadBaseData(const char* baseResourceName)
 {
-    std::string resourcePath = mImpl->dataPath + "/" + baseResourceName;
+    std::string resourcePath = mImpl->dataPath + "/" + baseResourceName + "_basedata.cbf";
     char* data = NULL;
     int len = 0;
     SE_IO::readFileAll(resourcePath.c_str(), data, len);
@@ -530,9 +535,13 @@ const char* SE_ResourceManager::getDataPath()
 {
 	return mImpl->dataPath.c_str();
 }
+void SE_ResourceManager::setDataPath(const char* datapath)
+{
+	mImpl->dataPath = datapath;
+}
 SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
 {
-    std::string scenePath = mImpl->dataPath + "/" + sceneName;
+    std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
     char* data = NULL;
     int len = 0;
 	SE_IO::readFileAll(scenePath.c_str(), data, len);

@@ -12,16 +12,16 @@ SE_Application* SE_Application::getInstance()
 {
     if(mInstance == NULL)
     {
-        mInstance = new SE_Application("/home/luwei/");
+        mInstance = new SE_Application;
     }
     return mInstance;
 }
-SE_Application::SE_Application(const char* dataPath)
+SE_Application::SE_Application()
 {
     memset(mCameraArray, 0, sizeof(SE_Camera*) * MAX_CAMERA_NUM);
     mCurrentCamera = NULL;
     mSceneManager = new SE_SceneManager;
-    mResourceManager = new SE_ResourceManager(dataPath);
+    mResourceManager = new SE_ResourceManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -69,6 +69,32 @@ void SE_Application::run()
     mPrevTime = currTime;
     update(mPrevTime, mFrameRate);
     mFrameNum++;   
+}
+void SE_Application::createCamera(int index)
+{
+	if(index < 0 || index >= MAX_CAMERA_NUM)
+		return;
+    SE_Camera* c = mCameraArray[index];
+	if(c)
+		delete c;
+	c = new SE_Camera;
+	mCameraArray[index] = c;
+}
+SE_Camera* SE_Application::getCamera(int index)
+{
+	if(index < 0 || index >= MAX_CAMERA_NUM)
+		return NULL;
+	return mCameraArray[index];
+}
+void SE_Application::setCurrentCamera(int index)
+{
+	if(index < 0 || index >= MAX_CAMERA_NUM)
+		return;
+	mCurrentCamera = mCameraArray[index];
+}
+SE_Camera* SE_Application::getCurrentCamera()
+{
+	return mCurrentCamera;
 }
 void SE_Application::sendCommand(SE_Command* command)
 {

@@ -12,6 +12,7 @@ class SE_Spatial;
 class SE_ResourceManager
 {
 public:
+	SE_ResourceManager();
     SE_ResourceManager(const char* dataPath);
     ~SE_ResourceManager();
     SE_GeometryData* getGeometryData(const SE_GeometryDataID& geomID);

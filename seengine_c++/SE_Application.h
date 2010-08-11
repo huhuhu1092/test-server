@@ -11,7 +11,7 @@ class SE_SceneManager;
 class SE_Application
 {
 public:
-    enum {MAX_CAMERA_NUM = 16};
+    enum {MAIN_CAMERA = 0, MAX_CAMERA_NUM = 16};
     typedef int SE_APPID;
     virtual ~SE_Application();
     void run();
@@ -38,7 +38,12 @@ public:
 		return mSceneManager;
 	}
     static SE_Application* getInstance();
-
+	SE_Camera* getMainCamera();
+	//index 1 to max camera num
+	void createCamera(int index);
+	SE_Camera* getCamera(int index);
+	void setCurrentCamera(int index);
+	SE_Camera* getCurrentCamera();
 protected:
 	class _CommandWrapper
     {
@@ -61,7 +66,7 @@ protected:
     virtual void setUpEnv();
     virtual void processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
-    SE_Application(const char* dataPath);
+    SE_Application();
 	bool isRemoved(const _CommandWrapper& c);
 protected:
     struct _CommandFactoryEntry
