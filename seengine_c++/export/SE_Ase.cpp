@@ -257,6 +257,11 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         output.writeFloat(go->wireframeColor[2]);
         int texNum = 0;
         int materialref = go->materialref;
+        if(materialref == -1)
+        {
+            output.writeInt(texNum);
+            continue;
+        }
         _MaterialData mdData = materialVector[materialref];
         int startpos = 0;
         if(mdData.subMaterialNum > 1)

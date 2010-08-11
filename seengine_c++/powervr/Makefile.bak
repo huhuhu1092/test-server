@@ -1,0 +1,797 @@
+PLAT_CC  = gcc
+PLAT_CPP = g++
+PLAT_AR  = ar
+RM = rm -f
+SDKDIR = /home/luwei/program/powervr_emulator/SDKPackage
+PLATFORM = LinuxPC
+SEENG_DIR = /home/luwei/program/streamserver_git/test-server/seengine_c++
+OUTNAME = SEDemo
+## X11 lib define
+X11_LIBS = -lX11 -lXau
+WS = X11
+X11_INC = /usr/include/X11
+LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
+               -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -g
+
+PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
+	   $(X11_INC) 
+
+PLAT_OBJPATH = $(PLATFORM)/$(WS)
+PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 $(X11_LIBS)
+INCLUDES += -I$(SDKDIR)/Shell  \
+			-I$(SDKDIR)/Shell/API/KEGL \
+			-I$(SDKDIR)/Shell/OS/LinuxX11 \
+			-I$(SEENG_DIR) \
+			-I$(SEENG_DIR)/export \
+			-I$(SEENG_DIR)/command \
+			$(addprefix -I, $(PLAT_INC))
+
+VPATH +=  ../ : \
+	  ../command : \
+	  ../export : \
+	  ../cscript : \
+	  $(SDKDIR)/Shell            : \
+	  $(SDKDIR)/Shell/API/KEGL   : \
+	  $(SDKDIR)/Shell/OS/LinuxX11
+DEPEND_FLAG = $(PLAT_CFLAGS) $(INCLUDES)
+##SRC_LUA = lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c  ldump.c lfunc.c  lgc.c linit.c liolib.c llex.c \
+##	  lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c lstring.c lstrlib.c ltable.c ltablib.c ltm.c \
+##	  lundump.c lvm.c lzio.c print.c
+
+SRCS_CPP = SE_Buffer.cpp   \
+	SE_DataTransfer.cpp  \
+	SE_ImageData.cpp      \
+	SE_Mesh.cpp           \
+	SE_ResFileHeader.cpp   \
+	SE_Camera.cpp         \
+	SE_File.cpp          \
+	SE_IO.cpp            \
+	SE_MeshSimObject.cpp  \
+	SE_ResourceManager.cpp \
+	SE_TextureCoordData.cpp \
+	SE_Command.cpp         \
+	SE_Geometry3D.cpp    \
+	SE_Log.cpp           \
+	SE_Object.cpp         \
+	SE_SceneManager.cpp    \
+	SE_Texture.cpp          \
+	SE_CommandFactory.cpp  \
+	SE_Geometry.cpp        \
+	SE_MaterialData.cpp    \
+	SE_Quat.cpp   \
+	SE_ShaderProgram.cpp \
+	SE_Time.cpp          \
+	SE_GeometryData.cpp  \
+	SE_Application.cpp    \
+	SE_Common.cpp          \
+	SE_Math.cpp     \
+	SE_RenderManager.cpp  \
+	SE_SimObject.cpp   \
+	SE_Utils.cpp \
+	SE_BoundingVolume.cpp   \
+	SE_CommonNode.cpp    \
+	SE_ID.cpp         \
+	SE_Matrix.cpp     \
+	SE_RenderUnit.cpp  \
+	SE_Spatial.cpp    \
+	SE_Vector.cpp \
+	SE_Ase.cpp \
+	SE_SystemCommand.cpp \
+	SE_SystemCommandFactory.cpp \
+	SEDemo.cpp \
+	PVRShell.cpp \
+	PVRShellAPI.cpp \
+	PVRShellOS.cpp
+SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
+SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
+OBJ_C = $(SRCS_C:.c=.o)
+OBJ_CPP = $(SRCS_CPP:.cpp=.o)
+OBJECTS += $(OBJ_C)
+OBJECTS += $(OBJ_CPP)
+
+$(OUTNAME): $(OBJ_C) $(OBJ_CPP) depend
+	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
+
+depend: 
+	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
+
+%.o: %.c
+	$(PLAT_CC) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+%.o: %.cpp
+	$(PLAT_CPP) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+print_info:
+	@echo $(OBJECTS)
+	@echo $(OUTNAME)
+	@echo $(INCLUDES)
+	@echo $(PLAT_CFLAGS)
+	@echo $(VPATH)
+	@echo $(SRCS)
+clean:
+	$(RM) $(OBJECTS) $(OUTNAME)
+# DO NOT DELETE
+
+../SE_Buffer.o: ../SE_Buffer.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Buffer.o: /usr/include/assert.h /usr/include/features.h
+../SE_Buffer.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Buffer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Buffer.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Buffer.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Buffer.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Buffer.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Buffer.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Buffer.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Buffer.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Buffer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Buffer.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Buffer.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Buffer.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Buffer.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Buffer.o: ../SE_Matrix.h ../SE_Quat.h ../SE_Utils.h
+../SE_DataTransfer.o: ../SE_DataTransfer.h ../SE_ID.h ../SE_Vector.h
+../SE_DataTransfer.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../SE_DataTransfer.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_DataTransfer.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_DataTransfer.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_DataTransfer.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_DataTransfer.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_DataTransfer.o: /usr/include/time.h /usr/include/endian.h
+../SE_DataTransfer.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_DataTransfer.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_DataTransfer.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_DataTransfer.o: /usr/include/sys/sysmacros.h
+../SE_DataTransfer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_DataTransfer.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_DataTransfer.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_DataTransfer.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_DataTransfer.o: /usr/include/bits/stdio_lim.h
+../SE_DataTransfer.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../SE_DataTransfer.o: ../SE_Mesh.h ../SE_Utils.h ../SE_Buffer.h
+../SE_DataTransfer.o: ../SE_ResourceManager.h
+../SE_ImageData.o: ../SE_ImageData.h
+../SE_ImageData.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_ImageData.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_ImageData.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_ImageData.o: /usr/include/stdint.h /usr/include/features.h
+../SE_ImageData.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_ImageData.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_ImageData.o: /usr/include/gnu/stubs-32.h /usr/include/bits/wchar.h
+../SE_Mesh.o: ../SE_Mesh.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Mesh.o: /usr/include/assert.h /usr/include/features.h
+../SE_Mesh.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Mesh.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Mesh.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Mesh.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Mesh.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Mesh.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Mesh.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Mesh.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Mesh.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Mesh.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Mesh.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Mesh.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Mesh.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Mesh.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Mesh.o: ../SE_ID.h
+../SE_Camera.o: ../SE_Camera.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Camera.o: /usr/include/assert.h /usr/include/features.h
+../SE_Camera.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Camera.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Camera.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Camera.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Camera.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Camera.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Camera.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Camera.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Camera.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Camera.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Camera.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Camera.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Camera.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Camera.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Camera.o: ../SE_Matrix.h ../SE_Quat.h ../SE_Geometry3D.h ../SE_Log.h
+../SE_Camera.o: ../SE_BoundingVolume.h
+../SE_File.o: ../SE_File.h /usr/include/stdio.h /usr/include/features.h
+../SE_File.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_File.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_File.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
+../SE_File.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+../SE_File.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_File.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_File.o: ../SE_Buffer.h
+../SE_IO.o: ../SE_IO.h ../SE_Log.h /usr/include/stdio.h
+../SE_IO.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_IO.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_IO.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_IO.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_IO.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_IO.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_IO.o: /usr/include/bits/sys_errlist.h
+../SE_MeshSimObject.o: ../SE_MeshSimObject.h ../SE_SimObject.h ../SE_Object.h
+../SE_MeshSimObject.o: ../SE_ID.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_MeshSimObject.o: /usr/include/assert.h /usr/include/features.h
+../SE_MeshSimObject.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_MeshSimObject.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_MeshSimObject.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_MeshSimObject.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_MeshSimObject.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_MeshSimObject.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_MeshSimObject.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_MeshSimObject.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_MeshSimObject.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_MeshSimObject.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_MeshSimObject.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_MeshSimObject.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_MeshSimObject.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_MeshSimObject.o: /usr/include/bits/stdio_lim.h
+../SE_MeshSimObject.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../SE_MeshSimObject.o: ../SE_Quat.h ../SE_Mesh.h ../SE_GeometryData.h
+../SE_MeshSimObject.o: ../SE_DataTransfer.h ../SE_Application.h ../SE_Time.h
+../SE_MeshSimObject.o: ../SE_Command.h ../SE_ResourceManager.h ../SE_Buffer.h
+../SE_MeshSimObject.o: ../SE_RenderUnit.h
+../SE_MeshSimObject.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_MeshSimObject.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_MeshSimObject.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_MeshSimObject.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+../SE_MeshSimObject.o: ../SE_MaterialData.h
+../SE_ResourceManager.o: ../SE_ResourceManager.h ../SE_ID.h ../SE_Utils.h
+../SE_ResourceManager.o: ../SE_Buffer.h ../SE_ResFileHeader.h ../SE_IO.h
+../SE_ResourceManager.o: ../SE_ImageData.h
+../SE_ResourceManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_ResourceManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_ResourceManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_ResourceManager.o: /usr/include/stdint.h /usr/include/features.h
+../SE_ResourceManager.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_ResourceManager.o: /usr/include/bits/wordsize.h
+../SE_ResourceManager.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_ResourceManager.o: /usr/include/bits/wchar.h ../SE_MaterialData.h
+../SE_ResourceManager.o: ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_ResourceManager.o: /usr/include/assert.h /usr/include/stdlib.h
+../SE_ResourceManager.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_ResourceManager.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_ResourceManager.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_ResourceManager.o: /usr/include/bits/byteswap.h
+../SE_ResourceManager.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_ResourceManager.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_ResourceManager.o: /usr/include/sys/sysmacros.h
+../SE_ResourceManager.o: /usr/include/bits/pthreadtypes.h
+../SE_ResourceManager.o: /usr/include/alloca.h /usr/include/string.h
+../SE_ResourceManager.o: /usr/include/xlocale.h /usr/include/stdio.h
+../SE_ResourceManager.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_ResourceManager.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_ResourceManager.o: /usr/include/bits/sys_errlist.h ../SE_GeometryData.h
+../SE_ResourceManager.o: ../SE_TextureCoordData.h ../SE_DataTransfer.h
+../SE_ResourceManager.o: ../SE_Matrix.h ../SE_Spatial.h ../SE_Quat.h
+../SE_ResourceManager.o: ../SE_Object.h ../SE_ShaderProgram.h
+../SE_TextureCoordData.o: ../SE_TextureCoordData.h ../SE_Vector.h
+../SE_TextureCoordData.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../SE_TextureCoordData.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_TextureCoordData.o: /usr/include/sys/cdefs.h
+../SE_TextureCoordData.o: /usr/include/bits/wordsize.h
+../SE_TextureCoordData.o: /usr/include/gnu/stubs.h
+../SE_TextureCoordData.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_TextureCoordData.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_TextureCoordData.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_TextureCoordData.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_TextureCoordData.o: /usr/include/bits/byteswap.h
+../SE_TextureCoordData.o: /usr/include/sys/select.h
+../SE_TextureCoordData.o: /usr/include/bits/select.h
+../SE_TextureCoordData.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_TextureCoordData.o: /usr/include/sys/sysmacros.h
+../SE_TextureCoordData.o: /usr/include/bits/pthreadtypes.h
+../SE_TextureCoordData.o: /usr/include/alloca.h /usr/include/string.h
+../SE_TextureCoordData.o: /usr/include/xlocale.h /usr/include/stdio.h
+../SE_TextureCoordData.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_TextureCoordData.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_TextureCoordData.o: /usr/include/bits/sys_errlist.h
+../SE_Command.o: ../SE_Command.h ../SE_ID.h ../SE_Time.h
+../SE_Geometry3D.o: ../SE_Geometry3D.h ../SE_Vector.h ../SE_Math.h
+../SE_Geometry3D.o: ../SE_Common.h /usr/include/assert.h
+../SE_Geometry3D.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_Geometry3D.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_Geometry3D.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_Geometry3D.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_Geometry3D.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_Geometry3D.o: /usr/include/time.h /usr/include/endian.h
+../SE_Geometry3D.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_Geometry3D.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_Geometry3D.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_Geometry3D.o: /usr/include/sys/sysmacros.h
+../SE_Geometry3D.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Geometry3D.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Geometry3D.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Geometry3D.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Geometry3D.o: /usr/include/bits/stdio_lim.h
+../SE_Geometry3D.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../SE_Geometry3D.o: ../SE_Quat.h ../SE_Log.h
+../SE_Log.o: ../SE_Log.h ../SE_Common.h /usr/include/assert.h
+../SE_Log.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_Log.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_Log.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_Log.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_Log.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_Log.o: /usr/include/time.h /usr/include/endian.h
+../SE_Log.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_Log.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_Log.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_Log.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+../SE_Log.o: /usr/include/alloca.h /usr/include/string.h
+../SE_Log.o: /usr/include/xlocale.h /usr/include/stdio.h /usr/include/libio.h
+../SE_Log.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Log.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Object.o: ../SE_Object.h ../SE_Buffer.h ../SE_Log.h
+../SE_SceneManager.o: ../SE_SceneManager.h ../SE_ID.h ../SE_CommonNode.h
+../SE_SceneManager.o: ../SE_Spatial.h ../SE_Matrix.h ../SE_Vector.h
+../SE_SceneManager.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../SE_SceneManager.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_SceneManager.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_SceneManager.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_SceneManager.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_SceneManager.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_SceneManager.o: /usr/include/time.h /usr/include/endian.h
+../SE_SceneManager.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_SceneManager.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_SceneManager.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_SceneManager.o: /usr/include/sys/sysmacros.h
+../SE_SceneManager.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_SceneManager.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_SceneManager.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_SceneManager.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_SceneManager.o: /usr/include/bits/stdio_lim.h
+../SE_SceneManager.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h
+../SE_SceneManager.o: ../SE_Object.h ../SE_Application.h ../SE_Time.h
+../SE_SceneManager.o: ../SE_Command.h ../SE_Camera.h ../SE_Geometry3D.h
+../SE_SceneManager.o: ../SE_RenderManager.h ../SE_ResourceManager.h
+../SE_CommandFactory.o: ../SE_CommandFactory.h ../SE_Common.h
+../SE_CommandFactory.o: /usr/include/assert.h /usr/include/features.h
+../SE_CommandFactory.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_CommandFactory.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_CommandFactory.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_CommandFactory.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_CommandFactory.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_CommandFactory.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_CommandFactory.o: /usr/include/bits/byteswap.h
+../SE_CommandFactory.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_CommandFactory.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_CommandFactory.o: /usr/include/sys/sysmacros.h
+../SE_CommandFactory.o: /usr/include/bits/pthreadtypes.h
+../SE_CommandFactory.o: /usr/include/alloca.h /usr/include/string.h
+../SE_CommandFactory.o: /usr/include/xlocale.h /usr/include/stdio.h
+../SE_CommandFactory.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_CommandFactory.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_CommandFactory.o: /usr/include/bits/sys_errlist.h ../SE_Command.h
+../SE_CommandFactory.o: ../SE_ID.h ../SE_Time.h
+../SE_Geometry.o: ../SE_Geometry.h ../SE_Spatial.h ../SE_Matrix.h
+../SE_Geometry.o: ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Geometry.o: /usr/include/assert.h /usr/include/features.h
+../SE_Geometry.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Geometry.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Geometry.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Geometry.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Geometry.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Geometry.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Geometry.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Geometry.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Geometry.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Geometry.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Geometry.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Geometry.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Geometry.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Geometry.o: /usr/include/bits/stdio_lim.h
+../SE_Geometry.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h ../SE_ID.h
+../SE_Geometry.o: ../SE_Object.h ../SE_SimObject.h ../SE_Buffer.h
+../SE_Geometry.o: ../SE_Camera.h ../SE_Geometry3D.h ../SE_RenderUnit.h
+../SE_Geometry.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_Geometry.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_Geometry.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_Geometry.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+../SE_Geometry.o: ../SE_MaterialData.h ../SE_RenderManager.h
+../SE_Quat.o: ../SE_Quat.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Quat.o: /usr/include/assert.h /usr/include/features.h
+../SE_Quat.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Quat.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Quat.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Quat.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Quat.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Quat.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Quat.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Quat.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Quat.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Quat.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Quat.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Quat.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Quat.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Quat.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Quat.o: ../SE_Matrix.h
+../SE_ShaderProgram.o: ../SE_ShaderProgram.h
+../SE_ShaderProgram.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_ShaderProgram.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_ShaderProgram.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_ShaderProgram.o: /usr/include/stdint.h /usr/include/features.h
+../SE_ShaderProgram.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_ShaderProgram.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_ShaderProgram.o: /usr/include/gnu/stubs-32.h /usr/include/bits/wchar.h
+../SE_ShaderProgram.o: ../SE_Log.h
+../SE_Time.o: ../SE_Time.h /usr/include/sys/time.h /usr/include/features.h
+../SE_Time.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Time.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Time.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
+../SE_Time.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Time.o: /usr/include/bits/time.h /usr/include/sys/select.h
+../SE_Time.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Time.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+../SE_Time.o: /usr/include/bits/confname.h /usr/include/getopt.h
+../SE_GeometryData.o: ../SE_GeometryData.h ../SE_Vector.h ../SE_Math.h
+../SE_GeometryData.o: ../SE_Common.h /usr/include/assert.h
+../SE_GeometryData.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_GeometryData.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_GeometryData.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_GeometryData.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_GeometryData.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_GeometryData.o: /usr/include/time.h /usr/include/endian.h
+../SE_GeometryData.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_GeometryData.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_GeometryData.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_GeometryData.o: /usr/include/sys/sysmacros.h
+../SE_GeometryData.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_GeometryData.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_GeometryData.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_GeometryData.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_GeometryData.o: /usr/include/bits/stdio_lim.h
+../SE_GeometryData.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../SE_GeometryData.o: ../SE_Quat.h
+../SE_Application.o: ../SE_Application.h ../SE_Time.h ../SE_ID.h
+../SE_Application.o: ../SE_Command.h ../SE_SceneManager.h
+../SE_Application.o: ../SE_ResourceManager.h ../SE_RenderManager.h
+../SE_Application.o: ../SE_Matrix.h ../SE_Vector.h ../SE_Math.h
+../SE_Application.o: ../SE_Common.h /usr/include/assert.h
+../SE_Application.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_Application.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_Application.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_Application.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_Application.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_Application.o: /usr/include/time.h /usr/include/endian.h
+../SE_Application.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_Application.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_Application.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_Application.o: /usr/include/sys/sysmacros.h
+../SE_Application.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Application.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Application.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Application.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Application.o: /usr/include/bits/stdio_lim.h
+../SE_Application.o: /usr/include/bits/sys_errlist.h ../SE_Camera.h
+../SE_Application.o: ../SE_Quat.h ../SE_Geometry3D.h ../SE_CommandFactory.h
+../SE_Common.o: ../SE_Common.h /usr/include/assert.h /usr/include/features.h
+../SE_Common.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Common.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Common.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Common.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Common.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Common.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Common.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Common.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Common.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Common.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Common.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Common.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Common.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Common.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_Math.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../SE_Math.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_Math.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_Math.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_Math.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_Math.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_Math.o: /usr/include/time.h /usr/include/endian.h
+../SE_Math.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_Math.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_Math.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_Math.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+../SE_Math.o: /usr/include/alloca.h /usr/include/string.h
+../SE_Math.o: /usr/include/xlocale.h /usr/include/stdio.h
+../SE_Math.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_Math.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_Math.o: /usr/include/bits/sys_errlist.h /usr/include/math.h
+../SE_Math.o: /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h
+../SE_Math.o: /usr/include/bits/huge_vall.h /usr/include/bits/inf.h
+../SE_Math.o: /usr/include/bits/nan.h /usr/include/bits/mathdef.h
+../SE_Math.o: /usr/include/bits/mathcalls.h
+../SE_RenderManager.o: ../SE_RenderManager.h ../SE_Matrix.h ../SE_Vector.h
+../SE_RenderManager.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../SE_RenderManager.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_RenderManager.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_RenderManager.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_RenderManager.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_RenderManager.o: /usr/include/bits/types.h
+../SE_RenderManager.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_RenderManager.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_RenderManager.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_RenderManager.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_RenderManager.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_RenderManager.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_RenderManager.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_RenderManager.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_RenderManager.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_RenderManager.o: /usr/include/bits/stdio_lim.h
+../SE_RenderManager.o: /usr/include/bits/sys_errlist.h ../SE_RenderUnit.h
+../SE_RenderManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_RenderManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_RenderManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_RenderManager.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+../SE_RenderManager.o: ../SE_Quat.h ../SE_MaterialData.h ../SE_ID.h
+../SE_SimObject.o: ../SE_SimObject.h ../SE_Object.h ../SE_Log.h
+../SE_Utils.o: ../SE_Utils.h /usr/include/netinet/in.h
+../SE_Utils.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_Utils.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_Utils.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_Utils.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+../SE_Utils.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
+../SE_Utils.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Utils.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Utils.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Utils.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Utils.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Utils.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Utils.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/uio.h
+../SE_Utils.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
+../SE_Utils.o: /usr/include/asm/socket.h /usr/include/asm-generic/socket.h
+../SE_Utils.o: /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h
+../SE_Utils.o: /usr/include/bits/in.h
+../SE_BoundingVolume.o: ../SE_BoundingVolume.h ../SE_Vector.h ../SE_Math.h
+../SE_BoundingVolume.o: ../SE_Common.h /usr/include/assert.h
+../SE_BoundingVolume.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_BoundingVolume.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_BoundingVolume.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_BoundingVolume.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_BoundingVolume.o: /usr/include/bits/types.h
+../SE_BoundingVolume.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_BoundingVolume.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_BoundingVolume.o: /usr/include/bits/byteswap.h
+../SE_BoundingVolume.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_BoundingVolume.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_BoundingVolume.o: /usr/include/sys/sysmacros.h
+../SE_BoundingVolume.o: /usr/include/bits/pthreadtypes.h
+../SE_BoundingVolume.o: /usr/include/alloca.h /usr/include/string.h
+../SE_BoundingVolume.o: /usr/include/xlocale.h /usr/include/stdio.h
+../SE_BoundingVolume.o: /usr/include/libio.h /usr/include/_G_config.h
+../SE_BoundingVolume.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+../SE_BoundingVolume.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h
+../SE_BoundingVolume.o: ../SE_Matrix.h ../SE_Geometry3D.h
+../SE_CommonNode.o: ../SE_CommonNode.h ../SE_Spatial.h ../SE_Matrix.h
+../SE_CommonNode.o: ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_CommonNode.o: /usr/include/assert.h /usr/include/features.h
+../SE_CommonNode.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_CommonNode.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_CommonNode.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_CommonNode.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_CommonNode.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_CommonNode.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_CommonNode.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_CommonNode.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_CommonNode.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_CommonNode.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_CommonNode.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_CommonNode.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_CommonNode.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_CommonNode.o: /usr/include/bits/stdio_lim.h
+../SE_CommonNode.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h ../SE_ID.h
+../SE_CommonNode.o: ../SE_Object.h ../SE_Buffer.h ../SE_Camera.h
+../SE_CommonNode.o: ../SE_Geometry3D.h
+../SE_ID.o: ../SE_ID.h ../SE_Common.h /usr/include/assert.h
+../SE_ID.o: /usr/include/features.h /usr/include/bits/predefs.h
+../SE_ID.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../SE_ID.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../SE_ID.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../SE_ID.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_ID.o: /usr/include/time.h /usr/include/endian.h
+../SE_ID.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_ID.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_ID.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_ID.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+../SE_ID.o: /usr/include/alloca.h /usr/include/string.h
+../SE_ID.o: /usr/include/xlocale.h /usr/include/stdio.h /usr/include/libio.h
+../SE_ID.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_ID.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_ID.o: ../SE_Buffer.h
+../SE_Matrix.o: ../SE_Matrix.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Matrix.o: /usr/include/assert.h /usr/include/features.h
+../SE_Matrix.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Matrix.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Matrix.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Matrix.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Matrix.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Matrix.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Matrix.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Matrix.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Matrix.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Matrix.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Matrix.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Matrix.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Matrix.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Matrix.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../SE_RenderUnit.o: ../SE_RenderUnit.h
+../SE_RenderUnit.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2.h
+../SE_RenderUnit.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/GLES2/gl2platform.h
+../SE_RenderUnit.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
+../SE_RenderUnit.o: /usr/include/stdint.h /usr/include/features.h
+../SE_RenderUnit.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_RenderUnit.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_RenderUnit.o: /usr/include/gnu/stubs-32.h /usr/include/bits/wchar.h
+../SE_RenderUnit.o: ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_RenderUnit.o: /usr/include/assert.h /usr/include/stdlib.h
+../SE_RenderUnit.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_RenderUnit.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_RenderUnit.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_RenderUnit.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_RenderUnit.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_RenderUnit.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_RenderUnit.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_RenderUnit.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_RenderUnit.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_RenderUnit.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_RenderUnit.o: /usr/include/bits/stdio_lim.h
+../SE_RenderUnit.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h
+../SE_RenderUnit.o: ../SE_Matrix.h ../SE_MaterialData.h ../SE_ID.h
+../SE_RenderUnit.o: ../SE_Mesh.h ../SE_ResourceManager.h ../SE_Application.h
+../SE_RenderUnit.o: ../SE_Time.h ../SE_Command.h ../SE_ImageData.h
+../SE_RenderUnit.o: ../SE_Log.h ../SE_GeometryData.h ../SE_TextureCoordData.h
+../SE_RenderUnit.o: ../SE_ShaderProgram.h
+../SE_Spatial.o: ../SE_Spatial.h ../SE_Matrix.h ../SE_Vector.h ../SE_Math.h
+../SE_Spatial.o: ../SE_Common.h /usr/include/assert.h /usr/include/features.h
+../SE_Spatial.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Spatial.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Spatial.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Spatial.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Spatial.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Spatial.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Spatial.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Spatial.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Spatial.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Spatial.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Spatial.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Spatial.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Spatial.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Spatial.o: /usr/include/bits/stdio_lim.h
+../SE_Spatial.o: /usr/include/bits/sys_errlist.h ../SE_Quat.h ../SE_ID.h
+../SE_Spatial.o: ../SE_Object.h ../SE_Buffer.h ../SE_BoundingVolume.h
+../SE_Spatial.o: ../SE_Geometry3D.h ../SE_Log.h
+../SE_Vector.o: ../SE_Vector.h ../SE_Math.h ../SE_Common.h
+../SE_Vector.o: /usr/include/assert.h /usr/include/features.h
+../SE_Vector.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Vector.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Vector.o: /usr/include/gnu/stubs-32.h /usr/include/stdlib.h
+../SE_Vector.o: /usr/include/sys/types.h /usr/include/bits/types.h
+../SE_Vector.o: /usr/include/bits/typesizes.h /usr/include/time.h
+../SE_Vector.o: /usr/include/endian.h /usr/include/bits/endian.h
+../SE_Vector.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
+../SE_Vector.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+../SE_Vector.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+../SE_Vector.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../SE_Vector.o: /usr/include/string.h /usr/include/xlocale.h
+../SE_Vector.o: /usr/include/stdio.h /usr/include/libio.h
+../SE_Vector.o: /usr/include/_G_config.h /usr/include/wchar.h
+../SE_Vector.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+../export/SE_Ase.o: ../export/SE_Ase.h /usr/include/string.h
+../export/SE_Ase.o: /usr/include/features.h /usr/include/bits/predefs.h
+../export/SE_Ase.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+../export/SE_Ase.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+../export/SE_Ase.o: /usr/include/xlocale.h ../SE_Log.h ../SE_GeometryData.h
+../export/SE_Ase.o: ../SE_ResourceManager.h ../SE_ID.h ../SE_Vector.h
+../export/SE_Ase.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
+../export/SE_Ase.o: /usr/include/stdlib.h /usr/include/sys/types.h
+../export/SE_Ase.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../export/SE_Ase.o: /usr/include/time.h /usr/include/endian.h
+../export/SE_Ase.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../export/SE_Ase.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../export/SE_Ase.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../export/SE_Ase.o: /usr/include/sys/sysmacros.h
+../export/SE_Ase.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../export/SE_Ase.o: /usr/include/stdio.h /usr/include/libio.h
+../export/SE_Ase.o: /usr/include/_G_config.h /usr/include/wchar.h
+../export/SE_Ase.o: /usr/include/bits/stdio_lim.h
+../export/SE_Ase.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../export/SE_Ase.o: ../SE_Quat.h ../SE_Utils.h ../SE_Buffer.h
+../export/SE_Ase.o: ../SE_ResFileHeader.h ../SE_File.h ../SE_Application.h
+../export/SE_Ase.o: ../SE_Time.h ../SE_Command.h ../SE_CommonNode.h
+../export/SE_Ase.o: ../SE_Spatial.h ../SE_Object.h ../SE_Geometry.h
+../export/SE_Ase.o: ../SE_BoundingVolume.h ../SE_Geometry3D.h
+../export/SE_Ase.o: ../SE_MeshSimObject.h ../SE_SimObject.h
+../command/SE_SystemCommand.o: ../command/SE_SystemCommand.h ../SE_Command.h
+../command/SE_SystemCommand.o: ../SE_ID.h ../SE_Time.h ../SE_Application.h
+../command/SE_SystemCommand.o: ../SE_ResourceManager.h ../SE_SceneManager.h
+../command/SE_SystemCommand.o: ../export/SE_Ase.h /usr/include/string.h
+../command/SE_SystemCommand.o: /usr/include/features.h
+../command/SE_SystemCommand.o: /usr/include/bits/predefs.h
+../command/SE_SystemCommand.o: /usr/include/sys/cdefs.h
+../command/SE_SystemCommand.o: /usr/include/bits/wordsize.h
+../command/SE_SystemCommand.o: /usr/include/gnu/stubs.h
+../command/SE_SystemCommand.o: /usr/include/gnu/stubs-32.h
+../command/SE_SystemCommand.o: /usr/include/xlocale.h ../SE_Vector.h
+../command/SE_SystemCommand.o: ../SE_Math.h ../SE_Common.h
+../command/SE_SystemCommand.o: /usr/include/assert.h /usr/include/stdlib.h
+../command/SE_SystemCommand.o: /usr/include/sys/types.h
+../command/SE_SystemCommand.o: /usr/include/bits/types.h
+../command/SE_SystemCommand.o: /usr/include/bits/typesizes.h
+../command/SE_SystemCommand.o: /usr/include/time.h /usr/include/endian.h
+../command/SE_SystemCommand.o: /usr/include/bits/endian.h
+../command/SE_SystemCommand.o: /usr/include/bits/byteswap.h
+../command/SE_SystemCommand.o: /usr/include/sys/select.h
+../command/SE_SystemCommand.o: /usr/include/bits/select.h
+../command/SE_SystemCommand.o: /usr/include/bits/sigset.h
+../command/SE_SystemCommand.o: /usr/include/bits/time.h
+../command/SE_SystemCommand.o: /usr/include/sys/sysmacros.h
+../command/SE_SystemCommand.o: /usr/include/bits/pthreadtypes.h
+../command/SE_SystemCommand.o: /usr/include/alloca.h /usr/include/stdio.h
+../command/SE_SystemCommand.o: /usr/include/libio.h /usr/include/_G_config.h
+../command/SE_SystemCommand.o: /usr/include/wchar.h
+../command/SE_SystemCommand.o: /usr/include/bits/stdio_lim.h
+../command/SE_SystemCommand.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
+../command/SE_SystemCommand.o: ../SE_Camera.h ../SE_Quat.h ../SE_Geometry3D.h
+../command/SE_SystemCommandFactory.o: ../command/SE_SystemCommandFactory.h
+../command/SE_SystemCommandFactory.o: ../SE_CommandFactory.h ../SE_Common.h
+../command/SE_SystemCommandFactory.o: /usr/include/assert.h
+../command/SE_SystemCommandFactory.o: /usr/include/features.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/predefs.h
+../command/SE_SystemCommandFactory.o: /usr/include/sys/cdefs.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/wordsize.h
+../command/SE_SystemCommandFactory.o: /usr/include/gnu/stubs.h
+../command/SE_SystemCommandFactory.o: /usr/include/gnu/stubs-32.h
+../command/SE_SystemCommandFactory.o: /usr/include/stdlib.h
+../command/SE_SystemCommandFactory.o: /usr/include/sys/types.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/types.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/typesizes.h
+../command/SE_SystemCommandFactory.o: /usr/include/time.h
+../command/SE_SystemCommandFactory.o: /usr/include/endian.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/endian.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/byteswap.h
+../command/SE_SystemCommandFactory.o: /usr/include/sys/select.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/select.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/sigset.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/time.h
+../command/SE_SystemCommandFactory.o: /usr/include/sys/sysmacros.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/pthreadtypes.h
+../command/SE_SystemCommandFactory.o: /usr/include/alloca.h
+../command/SE_SystemCommandFactory.o: /usr/include/string.h
+../command/SE_SystemCommandFactory.o: /usr/include/xlocale.h
+../command/SE_SystemCommandFactory.o: /usr/include/stdio.h
+../command/SE_SystemCommandFactory.o: /usr/include/libio.h
+../command/SE_SystemCommandFactory.o: /usr/include/_G_config.h
+../command/SE_SystemCommandFactory.o: /usr/include/wchar.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/stdio_lim.h
+../command/SE_SystemCommandFactory.o: /usr/include/bits/sys_errlist.h
+../command/SE_SystemCommandFactory.o: ../SE_Command.h ../SE_ID.h ../SE_Time.h
+../command/SE_SystemCommandFactory.o: ../command/SE_SystemCommand.h
+../powervr/SEDemo.o: /home/luwei/program/powervr_emulator/SDKPackage/Shell/PVRShell.h
+../powervr/SEDemo.o: /usr/include/stdlib.h /usr/include/features.h
+../powervr/SEDemo.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../powervr/SEDemo.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../powervr/SEDemo.o: /usr/include/gnu/stubs-32.h /usr/include/sys/types.h
+../powervr/SEDemo.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../powervr/SEDemo.o: /usr/include/time.h /usr/include/endian.h
+../powervr/SEDemo.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../powervr/SEDemo.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../powervr/SEDemo.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../powervr/SEDemo.o: /usr/include/sys/sysmacros.h
+../powervr/SEDemo.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+../powervr/SEDemo.o: /usr/include/stdio.h /usr/include/libio.h
+../powervr/SEDemo.o: /usr/include/_G_config.h /usr/include/wchar.h
+../powervr/SEDemo.o: /usr/include/bits/stdio_lim.h
+../powervr/SEDemo.o: /usr/include/bits/sys_errlist.h /usr/include/math.h
+../powervr/SEDemo.o: /usr/include/bits/huge_val.h
+../powervr/SEDemo.o: /usr/include/bits/huge_valf.h
+../powervr/SEDemo.o: /usr/include/bits/huge_vall.h /usr/include/bits/inf.h
+../powervr/SEDemo.o: /usr/include/bits/nan.h /usr/include/bits/mathdef.h
+../powervr/SEDemo.o: /usr/include/bits/mathcalls.h ../export/SE_Ase.h
+../powervr/SEDemo.o: /usr/include/string.h /usr/include/xlocale.h
+../powervr/SEDemo.o: ../SE_ResourceManager.h ../SE_ID.h ../SE_Spatial.h
+../powervr/SEDemo.o: ../SE_Matrix.h ../SE_Vector.h ../SE_Math.h
+../powervr/SEDemo.o: ../SE_Common.h /usr/include/assert.h ../SE_Quat.h
+../powervr/SEDemo.o: ../SE_Object.h ../SE_Log.h ../SE_Camera.h
+../powervr/SEDemo.o: ../SE_Geometry3D.h ../SE_Application.h ../SE_Time.h
+../powervr/SEDemo.o: ../SE_Command.h ../command/SE_SystemCommand.h
+../powervr/SEDemo.o: ../command/SE_SystemCommandFactory.h
+../powervr/SEDemo.o: ../SE_CommandFactory.h /usr/include/ctype.h
+../powervr/SEDemo.o: /usr/include/stdint.h /usr/include/bits/wchar.h

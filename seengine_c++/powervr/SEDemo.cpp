@@ -23,31 +23,6 @@
 #include <vector>
 #define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
-static int init(int argc, char** argv)
-{
-    if(argc < 3)
-        return 1;
-	std::string outPath;
-	std::string inPath;
-	std::string tmp;
-#ifdef WIN32
-	tmp = ("%s\\%s", "D:\\model\\jme\\home\\newhome3");
-    outPath = tmp + argv[2];
-	inPath = tmp + argv[1];
-#else
-	tmp = "%s/%s", "/home/luwei/model/jme/home/newhome3";
-    outPath = tmp + argv[2];
-    inPath = tmp + argv[1];
-#endif
-	ASE_Loader loader(inPath.c_str(), 0, 0);
-    loader.Load();
-	loader.Write(outPath.c_str());
-#ifdef WIN32
-    char* argvn[] = {"D:\\model\\jme\\home\\newhome3", argv[2]};
-#else
-    char* argvn[] = {"/home/luwei/model/jme/home/newhome3", argv[2]};
-#endif
-}
 static void drawScene(int width, int height)
 {
 }
@@ -73,7 +48,7 @@ bool SEDemo::InitApplication()
 #ifdef WIN32
 	c->dataPath = "D:\\model\\jme\\home\\newhome3";
 #else
-	c->dataPath = "%s/%s", "/home/luwei/model/jme/home/newhome3";
+	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
 	c->fileName = "home";
 	SE_Application::getInstance()->postCommand(c);

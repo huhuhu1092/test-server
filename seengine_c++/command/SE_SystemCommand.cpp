@@ -13,8 +13,8 @@ SE_InitAppCommand::~SE_InitAppCommand()
 {}
 void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-    std::string inPath = dataPath + "\\" + fileName + ".ASE";
-    std::string outPath = dataPath + "\\" + fileName;
+    std::string inPath = dataPath + SE_SEP + fileName + ".ASE";
+    std::string outPath = dataPath + SE_SEP + fileName;
     ASE_Loader loader(inPath.c_str(), 0, 0);
     loader.Load();
 	loader.Write(outPath.c_str());

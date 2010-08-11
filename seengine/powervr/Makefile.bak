@@ -80,7 +80,7 @@ SRCS_CPP =         acc.cpp \
 		   PVRShell.cpp \
 		   PVRShellAPI.cpp \
 		   PVRShellOS.cpp
-SRCS := $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
+SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
 SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
 OBJ_C = $(SRCS_C:.c=.o)
 OBJ_CPP = $(SRCS_CPP:.cpp=.o)
@@ -1524,5 +1524,4 @@ clean:
 ../powervr/SEDemo.o: ../SE_AABB.h ../SE_Sphere.h ../SE_RenderState.h
 ../powervr/SEDemo.o: ../SE_List.h ../SE_Log.h ../SE_World.h ../SE_Camera.h
 ../powervr/SEDemo.o: ../SE_Input.h ../SE_SaveState.h /usr/include/ctype.h
-../powervr/SEDemo.o: /usr/include/dlfcn.h /usr/include/bits/dlfcn.h
 ../powervr/SEDemo.o: ../renderer/SE_Renderer.h ../SE_Memory.h ../SE_Init.h

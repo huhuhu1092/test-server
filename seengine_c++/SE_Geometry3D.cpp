@@ -1,5 +1,6 @@
 #include "SE_Geometry3D.h"
 #include "SE_Math.h"
+#include "SE_Log.h"
 SE_Rect3D::SE_Rect3D()
 {
     mExtent[0] = mExtent[1] = 0;
@@ -523,7 +524,7 @@ void SE_OBB::transfrom(const SE_Vector3f& scale, const SE_Quat& rotate, const SE
     yAxis = yAxis.normalize();
     zAxis = zAxis.normalize();
 #ifdef DEBUG
-    if(xAxis.cross(yAxis) != zAxis)
+    if(!(xAxis.cross(yAxis) == zAxis))
     {
         LOGI("### rotate can not equal\n");
     }

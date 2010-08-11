@@ -240,28 +240,30 @@ template <class TID, class T>
 class ResourceMap
 {
 public:
+    typedef std::map<TID, T*> RMap;
     T* get(const TID& id);
     void set(const TID& id, T* data);
     void remove(const TID& id);
     ~ResourceMap();
 private:
-    typedef std::map<TID, T*> RMap;
     RMap m;
 };
+
 template <class TID, class T>
 void ResourceMap<TID, T>::remove(const TID& id)
 {
-    RMap::iterator it = m.find(id);
+    typename RMap::iterator it = m.find(id);
     if(it != m.end())
     {
         delete it->second;
         m.erase(it);
     }
 }
+
 template <class TID, class T>
 T* ResourceMap<TID, T>::get(const TID& id)
 {
-    RMap::iterator it = m.find(id);
+    typename RMap::iterator it = m.find(id);
     if(it == m.end())
         return NULL;
     else
@@ -270,7 +272,7 @@ T* ResourceMap<TID, T>::get(const TID& id)
 template <class TID, class T>
 void ResourceMap<TID, T>::set(const TID& id, T* data)
 {
-    RMap::iterator it = m.find(id);
+    typename RMap::iterator it = m.find(id);
     if(it == m.end())
     {
         m.insert(std::pair<TID, T*>(id, data));
@@ -285,7 +287,7 @@ void ResourceMap<TID, T>::set(const TID& id, T* data)
 template <class TID, class T>
 ResourceMap<TID, T>::~ResourceMap()
 {
-    RMap::iterator it;
+    typename RMap::iterator it;
     for(it = m.begin() ; it != m.end() ; it++)
     {
         T* data = it->second;
