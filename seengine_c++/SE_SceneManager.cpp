@@ -40,6 +40,7 @@ void SE_SceneManager::createScene(const char* sceneFileName)
 		delete mSceneRoot;
     mSceneRoot = new SE_CommonNode(SE_Application::getInstance()->createCommonID(), NULL);
 	SE_Spatial* scene = SE_Application::getInstance()->getResourceManager()->loadScene(sceneFileName);
+	scene->setParent(mSceneRoot);
 	mSceneRoot->addChild(scene);
 }
 void SE_SceneManager::updateSpatialIDMap()

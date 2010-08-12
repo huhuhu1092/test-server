@@ -17,6 +17,7 @@ public:
     SE_StringID& read(SE_BufferInput& input);
     const char* getStr() const;
     bool isValid() const;
+	void print() const;
 	static SE_StringID INVALID;
 private:
     struct _Impl;
@@ -36,6 +37,7 @@ public:
     friend bool operator<(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator>(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid);
+	void print() const;
 	static SE_CommonID INVALID;
 private:
     unsigned int id[4];

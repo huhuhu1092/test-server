@@ -158,7 +158,7 @@ static void processMaterialData(SE_BufferInput& inputBuffer, SE_ResourceManager*
     }
 
 }
-static void processImageData(SE_BufferInput inputBuffer, SE_ResourceManager* resourceManager)
+static void processImageData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     int imageDataNum = inputBuffer.readInt();
     for(int i = 0 ; i < imageDataNum ; i++)
@@ -168,7 +168,7 @@ static void processImageData(SE_BufferInput inputBuffer, SE_ResourceManager* res
         int imageType = inputBuffer.readInt();
         std::string str = inputBuffer.readString();
         std::string dataPath = resourceManager->getDataPath();
-        std::string imageDataPath = dataPath + "/" + str;
+        std::string imageDataPath = dataPath + SE_SEP + str;
         SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType);
         resourceManager->setImageData(imageDataid, imageData); 
     }
@@ -279,6 +279,7 @@ void ResourceMap<TID, T>::set(const TID& id, T* data)
     }
     else
     {
+        SE_ASSERT(0);
         T* oldData = it->second;
         it->second = data;
         delete oldData;
@@ -493,8 +494,9 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
     int version = inputBuffer.readInt();
     if(version != SE_VERSION)
         return false;
+	int endian = inputBuffer.readInt();
     int dataLen = inputBuffer.readInt();
-    if(dataLen != inputBuffer.getDataLen())
+    if(dataLen != (inputBuffer.getDataLen() - 16))
         return false;
     return true;
 }
@@ -502,6 +504,8 @@ static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
     SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
     spatial->setParent(parent);
+	if(parent)
+	    parent->addChild(spatial);
     return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
@@ -555,6 +559,8 @@ SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
         SE_SceneID sceneID;
         sceneID.read(inputBuffer);
         SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
+        //SE_CommonNode* root = new SE_CommonNode;
+        //root->read(inputBuffer);
         return spatial;
     }
     else

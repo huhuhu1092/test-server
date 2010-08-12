@@ -163,19 +163,25 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     SE_CommandList::iterator it;
     SE_CommandList tmpList = mCommandList;
     mCommandList.clear();
-    for(it = tmpList.begin(); it != tmpList.end(); it++)
+    for(it = tmpList.begin(); it != tmpList.end(); )
     {
         SE_Command* c = *it;
         if(c->expire(realDelta, simulateDelta))
         {
             c->handle(realDelta, simulateDelta);
             delete c;
-            it = tmpList.erase(it);
+            tmpList.erase(it++);
+			/*
             if(it == tmpList.end())
                 break;
             else
                 --it;
+				*/
         }
+		else
+		{
+			it++;
+		}
     }
     if(tmpList.empty())
         return;
@@ -244,5 +250,6 @@ SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
         if(command)
             return command;
     }
+	return NULL;
 }
 

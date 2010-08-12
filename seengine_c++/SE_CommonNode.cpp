@@ -45,7 +45,7 @@ void SE_CommonNode::updateWorldTransform()
         s->updateWorldTransform();
     }
 }
-int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
+int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {
     int ret = spatialTravel->visit(this);
     if(ret)
@@ -54,8 +54,8 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
     for(; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-        ret = spatialTravel->visit(s);
-        if(ret && !travelAways)
+        ret = s->travel(spatialTravel, travelAlways);
+        if(ret && !travelAlways)
             break;
     }
     return ret;
@@ -91,8 +91,24 @@ void SE_CommonNode::write(SE_BufferOutput& output)
     output.writeString("SE_CommonNode");
     output.writeInt(mImpl->children.size());
     SE_Spatial::write(output);
+    /*
+    std::list<SE_Spatial*>::iterator it;
+    for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+        s->write(output);
+    }
+    */
 }
 void SE_CommonNode::read(SE_BufferInput& input)
 {
+    //std::string str = input.readString();
+    //int childNum = input.readInt();
     SE_Spatial::read(input);
+    /*
+    if(childNum > 0)
+    {
+
+    }
+    */
 }

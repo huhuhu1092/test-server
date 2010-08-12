@@ -2,6 +2,7 @@
 #if defined(WIN32)
     #include <winsock2.h>
 #else
+    #include <unistd.h>
     #if defined(ANDOIRD)
         #include <sys/endian.h>
     #else
@@ -23,4 +24,12 @@ unsigned int SE_Util::net2HostInt32(unsigned int i)
 unsigned short SE_Util::net2HostInt16(unsigned short s)
 {
 	return ntohs(s);
+}
+void SE_Util::sleep(unsigned int s)
+{
+#if defined(WIN32)
+    Sleep(s);
+#else
+    sleep(s)
+#endif
 }

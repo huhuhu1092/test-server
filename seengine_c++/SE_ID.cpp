@@ -1,6 +1,7 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_Buffer.h"
+#include "SE_Log.h"
 #include <string>
 
 ///////////////////////
@@ -53,6 +54,10 @@ bool SE_StringID::isValid() const
 {
     SE_StringID invalid("");
     return *this == invalid;
+}
+void SE_StringID::print() const
+{
+	LOGI("%s\n", mImpl->id.c_str());
 }
 SE_StringID& SE_StringID::read(SE_BufferInput& input)
 {
@@ -133,6 +138,10 @@ bool SE_CommonID::isValid()
     SE_CommonID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
     return *this == invalid;
 
+}
+void SE_CommonID::print() const
+{
+    LOGI("%d, %d, %d, %d\n", id[0], id[1], id[2], id[3]);
 }
 bool operator==(const SE_CommonID& lid, const SE_CommonID& rid)
 {

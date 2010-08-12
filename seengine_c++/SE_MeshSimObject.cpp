@@ -15,12 +15,14 @@ IMPLEMENT_OBJECT(SE_MeshSimObject)
 SE_MeshSimObject::SE_MeshSimObject() : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
 }
+/*
 SE_MeshSimObject::SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh) : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
     mMesh = mesh;
     mOwnMesh = ownMesh;
     mWorldGeomData = new SE_GeometryData;
 }
+*/
 SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(meshID);
@@ -30,6 +32,8 @@ SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NU
         mOwnMesh = true;
         mWorldGeomData = new SE_GeometryData;
     } 
+    mMeshID = meshID;
+
 }
 SE_MeshSimObject::~SE_MeshSimObject()
 {
@@ -65,11 +69,13 @@ void SE_MeshSimObject::read(SE_BufferInput& input)
         mOwnMesh = true;
         mWorldGeomData = new SE_GeometryData;
     }
+	SE_SimObject::read(input);
 }
 void SE_MeshSimObject::write(SE_BufferOutput& output)
 {
     output.writeString("SE_MeshSimObject");
     mMeshID.write(output);
+	SE_SimObject::write(output);
 }
 int SE_MeshSimObject::getSurfaceNum()
 {

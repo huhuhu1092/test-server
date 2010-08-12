@@ -94,22 +94,52 @@ static void writeHeader(SE_BufferOutput& output, int dataLen)
     output.writeInt(SE_ENDIAN);
     output.writeInt(dataLen);
 }
+class _WriteSceneTravel : public SE_SpatialTravel
+{
+public:
+	_WriteSceneTravel(SE_BufferOutput& out) : mOut(out)
+	{}
+	int visit(SE_Spatial* spatial)
+	{
+		spatial->write(mOut);
+		return 0;
+	}
+    int visit(SE_SimObject* simObject)
+	{
+		return 0;
+	}
+public:
+	SE_BufferOutput& mOut;
+};
 void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
 {
     int materialNum = mSceneObject->mMats.size();
-    std::vector<_MaterialData> materialVector(materialNum);
-    std::vector<int> indexWhichHasSubmaterial;
+	int numWhichHasSubmaterial = 0;
+	int materialRealNum = materialNum;
     int i;
+	for(i = 0 ; i < materialNum ; i++)
+	{
+		ASE_Material* srcm = &mSceneObject->mMats[i];
+		materialRealNum += srcm->numsubmaterials;
+		if(srcm->numsubmaterials > 0)
+		{
+			numWhichHasSubmaterial++;
+		}
+	}
+    std::vector<_MaterialData> materialVector(materialRealNum);
+    std::vector<int> indexWhichHasSubmaterial(numWhichHasSubmaterial);
+	int l = 0;
+	int mi = 0;
     for(i = 0 ; i < materialNum ; i++)
     {
         ASE_Material* srcm = &mSceneObject->mMats[i];
         _MaterialData md;
         md.subMaterialNum = srcm->numsubmaterials;
         md.md = srcm->materialData;
-        materialVector.push_back(md);
+        materialVector[mi++] = md;
         if(srcm->numsubmaterials > 0)
         {
-            indexWhichHasSubmaterial.push_back(i);
+            indexWhichHasSubmaterial[l++] = i;
         }
     }
     std::vector<int>::iterator it;
@@ -122,33 +152,52 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
             _MaterialData md;
             md.subMaterialNum = 0;
             md.md = m->submaterials[j];
-            materialVector.push_back(md);
+            materialVector[mi++] = md;
+
         }
     }
     std::vector<_MaterialData>::iterator itMaterial;
     output.writeShort(SE_MATERIALDATA_ID);
-    for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
+	output.writeInt(materialVector.size());
+	int mmm = materialVector.size();
+    //for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
+    for(i = 0 ; i < materialVector.size() ; i++)
     {
         SE_MaterialDataID mid = SE_Application::getInstance()->createCommonID();
-        itMaterial->mid = mid;
+        mid.print();
+		SE_Util::sleep(100);
+        materialVector[i].mid = mid;
         mid.write(output);
-        output.writeVector3f(itMaterial->md.ambient);
-        output.writeVector3f(itMaterial->md.diffuse);
-        output.writeVector3f(itMaterial->md.specular);
+        output.writeVector3f(materialVector[i].md.ambient);
+        output.writeVector3f(materialVector[i].md.diffuse);
+        output.writeVector3f(materialVector[i].md.specular);
         output.writeVector3f(SE_Vector3f(0, 0, 0));
     }
     /////////////////////////////write texture data ///////////////
     output.writeShort(SE_IMAGEDATA_ID);
+    int imageDataNum = 0;
     for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
     {
         std::string texStr(itMaterial->md.texName);
         if(texStr != "")
         {
+            imageDataNum++;
+        }
+    }
+    output.writeInt(imageDataNum);
+    for(itMaterial = materialVector.begin() ; itMaterial != materialVector.end() ; itMaterial++)
+    {
+        std::string texStr(itMaterial->md.texName);
+        if(texStr != "")
+        {
+            size_t pos = texStr.find('.');
+            std::string name = texStr.substr(0, pos);
+            name = name + ".raw";
 			SE_ImageDataID tid = texStr.c_str();
             itMaterial->tid = tid;
             tid.write(output);
             output.writeInt(0); // image data type
-            output.writeString(texStr.c_str());
+            output.writeString(name.c_str());
         }
     }
     /////////////////////////////write geom data /////////////////////////////////////////////
@@ -168,6 +217,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_GeometryDataID gid = SE_Application::getInstance()->createCommonID();
+        SE_Util::sleep(100);
         rotateAxis.x = go->rotateAxis[0];
         rotateAxis.y = go->rotateAxis[1];
         rotateAxis.z = go->rotateAxis[2];
@@ -209,6 +259,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
 
     ////////////////////////write texture coordinate///////////////////////////////////////////////
     output.writeShort(SE_TEXCOORDDATA_ID);
+    output.writeInt(geomDataNum);
     n = 0;
     for(itGeomObj = mSceneObject->mGeomObjects.begin();
     itGeomObj != mSceneObject->mGeomObjects.end();
@@ -217,6 +268,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_TextureCoordDataID tcid = SE_Application::getInstance()->createCommonID();
+        SE_Util::sleep(100);
         tcid.write(output);
         geomTexCoordData[n++].texCoordID = tcid;
         output.writeInt(mesh->numTVertexes);
@@ -246,8 +298,9 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
+        SE_Util::sleep(100);
         meshID.write(output);
-        meshIDVector.push_back(meshID);
+        meshIDVector[n] = meshID;
         SE_GeometryDataID geomID = geomTexCoordData[n].geomID;
         SE_TextureCoordDataID texCoordID = geomTexCoordData[n].texCoordID;
         n++;
@@ -260,11 +313,11 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         if(materialref == -1)
         {
             output.writeInt(texNum);
-            continue;
+            goto WRIET_SURFACE;
         }
         _MaterialData mdData = materialVector[materialref];
         int startpos = 0;
-        if(mdData.subMaterialNum > 1)
+        if(mdData.subMaterialNum > 0)
         {
             int j;
             for(j = 0 ; j < (materialref - 1) ; j++)
@@ -272,9 +325,11 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
                 _MaterialData d = materialVector[j];
                 startpos += d.subMaterialNum;
             }
+            int k = startpos;
             for(int j = 0 ; j < mdData.subMaterialNum ; j++)
             {
-                _MaterialData subMaterialData = materialVector[startpos++];
+                _MaterialData subMaterialData = materialVector[materialNum + k];
+                k++;
                 std::string texStr(subMaterialData.md.texName);
                 if(texStr != "")
                 {
@@ -294,7 +349,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         int subMaterialStartPos = 0;
         for(i = 0 ; i < texNum ; i++)
         {
-            if(mdData.subMaterialNum > 1)
+            if(mdData.subMaterialNum > 0)
             {
                 int j;
                 for(j = 0 ; j < (materialref - 1) ; j++)
@@ -304,7 +359,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
                 }
                 for(int j = 0 ; j < mdData.subMaterialNum ; j++)
                 {
-                    _MaterialData subMaterialData = materialVector[startpos++];
+                    _MaterialData subMaterialData = materialVector[materialNum + subMaterialStartPos];
+                    subMaterialStartPos++;
                     std::string texStr(subMaterialData.md.texName);
                     if(texStr != "")
                     {
@@ -332,28 +388,33 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
             
         }
         ///write surface
+WRIET_SURFACE:
         if(mesh->numFaceGroup > 0)
         {
             SE_ASSERT(mesh->numFaceGroup == mesh->faceGroup.size());
             output.writeInt(mesh->numFaceGroup);
             std::vector<std::list<int> >::iterator itFaceGroup;
-            int indexM = subMaterialStartPos;
+            int indexM = startpos;
             int texIndex = 0;
             for(itFaceGroup = mesh->faceGroup.begin() ; itFaceGroup != mesh->faceGroup.end(); itFaceGroup++)
             {
-                _MaterialData md = materialVector[indexM];
+                _MaterialData md = materialVector[materialNum + indexM];
                 std::string texStr(md.md.texName);
-                if(texStr != "")
-                {
-                    output.writeInt(texIndex);
-                }
                 md.mid.write(output);
                 output.writeInt(itFaceGroup->size());
                 std::list<int>::iterator itFace;
                 for(itFace = itFaceGroup->begin() ; itFace != itFaceGroup->end() ; 
-					itFaceGroup++)
+					itFace++)
                 {
                     output.writeInt(*itFace);
+                }
+                if(texStr != "")
+                {
+                    output.writeInt(texIndex);
+                }
+                else
+                {
+                    output.writeInt(-1);
                 }
                 indexM++;
                 texIndex++;
@@ -363,22 +424,25 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         {
             output.writeInt(1); //just has one surface
             std::string texStr(mdData.md.texName);
-            if(texStr != "")
-            {
-                output.writeInt(0); // the texture index is 0;
-            }
             mdData.mid.write(output);
             output.writeInt(mesh->numFaces); // facets num;
             for(int f = 0 ; f < mesh->numFaces ; f++)
                 output.writeInt(f);
+            if(texStr != "")
+            {
+                output.writeInt(0); // the texture index is 0;
+            }
+            else
+            {
+                output.writeInt(-1);
+            }
         }
     }
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
+    SE_Util::sleep(100);
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
     rootNode->setBVType(SE_BoundingVolume::AABB);
-    spatialID.write(outScene);
-    rootNode->write(outScene);
     n = 0;
     for(itGeomObj = mSceneObject->mGeomObjects.begin();
     itGeomObj != mSceneObject->mGeomObjects.end();
@@ -388,6 +452,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = meshIDVector[n++];
         SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
+        SE_Util::sleep(100);
         SE_Geometry* child = new SE_Geometry(childID, rootNode);
         rootNode->addChild(child);
         SE_Vector3f translate, scale, rotateAxis;
@@ -406,9 +471,14 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
         q.set(go->rotateAngle, rotateAxis);
         child->setBVType(SE_BoundingVolume::AABB);
         SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
+		meshObj->setName(go->name);
         child->attachSimObject(meshObj);
-        child->write(outScene);
     }
+    SE_SceneID sceneID = SE_Application::getInstance()->createCommonID();
+    SE_Util::sleep(100);
+    sceneID.write(outScene);
+	_WriteSceneTravel wst(outScene);
+	rootNode->travel(&wst, true);
     LOGI("write end\n");
 }
 void ASE_Loader::Write(const char* outFileName)

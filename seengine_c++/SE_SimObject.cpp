@@ -1,4 +1,5 @@
 #include "SE_SimObject.h"
+#include "SE_Buffer.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_SimObject)
 SE_SimObject::SE_SimObject()
@@ -15,9 +16,13 @@ void SE_SimObject::doTransform(const SE_Matrix4f& m)
 void SE_SimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
 {}
 void SE_SimObject::read(SE_BufferInput& input)
-{}
+{
+	mName = input.readString();
+}
 void SE_SimObject::write(SE_BufferOutput& output)
-{}
+{
+	output.writeString(mName.c_str());
+}
 SE_Vector3f* SE_SimObject::getVertexArray()
 {
 	return 0;

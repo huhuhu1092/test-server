@@ -56,59 +56,56 @@ void SE_MeshTransfer::createFromMesh(SE_Mesh* mesh)
 }
 void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
 {
-    while(inputBuffer.hasMore())
+    mGeomDataID.read(inputBuffer);
+    mColor = inputBuffer.readVector3f();
+    mTexNum = inputBuffer.readInt();
+    if(mTexNum > 0)
     {
-        mGeomDataID.read(inputBuffer);
-        mColor = inputBuffer.readVector3f();
-        mTexNum = inputBuffer.readInt();
-        if(mTexNum > 0)
+        mTexTransferArray  = new SE_TextureTransfer[mTexNum];
+    }
+    int i;
+	int j;
+    for(i = 0 ; i < mTexNum ; i++)
+    {
+        SE_TextureTransfer* textureTransfer = &mTexTransferArray[i];
+        int texUnitNum = inputBuffer.readInt();
+        SE_TextureUnitTransfer* texUnitTransfer = new SE_TextureUnitTransfer[texUnitNum];
+        textureTransfer->setTextureUnitTransfer(texUnitTransfer, texUnitNum);
+        for(int j = 0 ; j < texUnitNum ; j++)
         {
-            mTexTransferArray  = new SE_TextureTransfer[mTexNum];
-        }
-        int i;
-		int j;
-        for(i = 0 ; i < mTexNum ; i++)
-        {
-            SE_TextureTransfer* textureTransfer = &mTexTransferArray[i];
-            int texUnitNum = inputBuffer.readInt();
-            SE_TextureUnitTransfer* texUnitTransfer = new SE_TextureUnitTransfer[texUnitNum];
-            textureTransfer->setTextureUnitTransfer(texUnitTransfer, texUnitNum);
-            for(int j = 0 ; j < texUnitNum ; j++)
+            int type = inputBuffer.readInt();
+            SE_TextureCoordDataID texDataID;
+            texDataID.read(inputBuffer);
+            texUnitTransfer->setTextureCoordDataID(texDataID);
+            int imageNum = inputBuffer.readInt();
+            SE_ImageDataID* imageDataIDArray = new SE_ImageDataID[imageNum];
+            for(int n = 0 ; n < imageNum ; n++)
             {
-                int type = inputBuffer.readInt();
-                SE_TextureCoordDataID texDataID;
-                texDataID.read(inputBuffer);
-                texUnitTransfer->setTextureCoordDataID(texDataID);
-                int imageNum = inputBuffer.readInt();
-                SE_ImageDataID* imageDataIDArray = new SE_ImageDataID[imageNum];
-                for(int n = 0 ; n < imageNum ; n++)
-                {
-                    std::string str = inputBuffer.readString();
-                    SE_ImageDataID imageID(str.c_str());
-                    imageDataIDArray[n] = imageID;
-                }
-                texUnitTransfer->setImageDataID(imageDataIDArray, imageNum);
-                texUnitTransfer->setType(type);
+                std::string str = inputBuffer.readString();
+                SE_ImageDataID imageID(str.c_str());
+                imageDataIDArray[n] = imageID;
             }
-        } 
-        mSurfaceNum = inputBuffer.readInt();
-        mSurfaceTransferArray = new SE_SurfaceTransfer[mSurfaceNum];
-        for(i = 0 ; i < mSurfaceNum ; i++)
-        {
-            SE_SurfaceTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
-            int texIndex = inputBuffer.readInt();
-            SE_MaterialDataID materialID;
-            materialID.read(inputBuffer);
-            surfaceTransfer->setMaterialDataID(materialID);
-            surfaceTransfer->setTextureIndex(texIndex);
-            int facetNum = inputBuffer.readInt();
-            int* facets = new int[facetNum];
-            for(j = 0 ; j < facetNum ; j++)
-            {
-                facets[j] = inputBuffer.readInt();
-            }
-            surfaceTransfer->setFacets(facets, facetNum);
+            texUnitTransfer->setImageDataID(imageDataIDArray, imageNum);
+            texUnitTransfer->setType(type);
         }
+    } 
+    mSurfaceNum = inputBuffer.readInt();
+    mSurfaceTransferArray = new SE_SurfaceTransfer[mSurfaceNum];
+    for(i = 0 ; i < mSurfaceNum ; i++)
+    {
+        SE_SurfaceTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
+        SE_MaterialDataID materialID;
+        materialID.read(inputBuffer);
+        surfaceTransfer->setMaterialDataID(materialID);
+        int facetNum = inputBuffer.readInt();
+        int* facets = new int[facetNum];
+        for(j = 0 ; j < facetNum ; j++)
+        {
+            facets[j] = inputBuffer.readInt();
+        }
+        surfaceTransfer->setFacets(facets, facetNum);
+		int texIndex = inputBuffer.readInt();
+        surfaceTransfer->setTextureIndex(texIndex);
     }
 
 }

@@ -67,9 +67,21 @@ void SE_Geometry::updateBoundingVolume()
 {
     
 }
-int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAways)
+int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {
-    return spatialTravel->visit(this);
+    int r = spatialTravel->visit(this);
+    SE_Geometry::_Impl::SimObjectList::iterator it;
+    for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+    {
+        SE_SimObject* so = *it;
+        int ret = spatialTravel->visit(so);
+        if(ret && !travelAlways)
+            break;
+    }
+	if(travelAlways)
+		return 0;
+	else
+		return r;
 }
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {

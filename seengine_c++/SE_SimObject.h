@@ -2,6 +2,7 @@
 #define SE_SIMOBJECT_H
 #include "SE_Object.h"
 #include <vector>
+#include <string>
 class SE_RenderUnit;
 class SE_Matrix4f;
 class SE_Quat;
@@ -27,6 +28,16 @@ public:
     virtual int getFaceNum();
     virtual int getSurfaceNum();
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
+public:
+	const char* getName()
+	{
+		return mName.c_str();
+	}
+	void setName(const char* name)
+	{
+		mName = name;
+	}
 private:
+	std::string mName;
 };
 #endif
