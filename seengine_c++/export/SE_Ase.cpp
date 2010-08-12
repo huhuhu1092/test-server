@@ -336,13 +336,15 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         output.writeFloat(go->wireframeColor[2]);
         int texNum = 0;
         int materialref = go->materialref;
+        int startpos = 0;
+        int subMaterialStartPos = 0;
+        _MaterialData mdData;
         if(materialref == -1)
         {
             output.writeInt(texNum);
             goto WRIET_SURFACE;
         }
-        _MaterialData mdData = materialVector[materialref];
-        int startpos = 0;
+        mdData = materialVector[materialref];
         if(mdData.subMaterialNum > 0)
         {
             int j;
@@ -372,7 +374,6 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
             }
         }
         output.writeInt(texNum);
-        int subMaterialStartPos = 0;
         for(i = 0 ; i < texNum ; i++)
         {
             if(mdData.subMaterialNum > 0)

@@ -30,7 +30,6 @@ INCLUDES += -I$(SDKDIR)/Shell  \
 VPATH +=  ../ : \
 	  ../command : \
 	  ../export : \
-	  ../cscript : \
 	  $(SDKDIR)/Shell            : \
 	  $(SDKDIR)/Shell/API/KEGL   : \
 	  $(SDKDIR)/Shell/OS/LinuxX11
@@ -93,17 +92,20 @@ OBJECTS += $(OBJ_CPP)
 $(OUTNAME): $(OBJ_C) $(OBJ_CPP) depend
 	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
 
-depend: 
-	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
-
 %.o: %.c
 	$(PLAT_CC) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
 
 %.o: %.cpp
+	@echo $<
+	@echo $@
 	$(PLAT_CPP) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+depend: 
+	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
 
 print_info:
 	@echo $(OBJECTS)
+	@echo $(OBJ_CPP)
 	@echo $(OUTNAME)
 	@echo $(INCLUDES)
 	@echo $(PLAT_CFLAGS)
@@ -264,7 +266,7 @@ clean:
 ../SE_ResourceManager.o: /usr/include/bits/sys_errlist.h ../SE_GeometryData.h
 ../SE_ResourceManager.o: ../SE_TextureCoordData.h ../SE_DataTransfer.h
 ../SE_ResourceManager.o: ../SE_Matrix.h ../SE_Spatial.h ../SE_Quat.h
-../SE_ResourceManager.o: ../SE_Object.h ../SE_ShaderProgram.h
+../SE_ResourceManager.o: ../SE_Object.h ../SE_ShaderProgram.h ../SE_Log.h
 ../SE_TextureCoordData.o: ../SE_TextureCoordData.h ../SE_Vector.h
 ../SE_TextureCoordData.o: ../SE_Math.h ../SE_Common.h /usr/include/assert.h
 ../SE_TextureCoordData.o: /usr/include/features.h /usr/include/bits/predefs.h
@@ -522,24 +524,28 @@ clean:
 ../SE_RenderManager.o: /home/luwei/program/powervr_emulator/SDKPackage/Builds/OGLES2/Include/KHR/khrplatform.h
 ../SE_RenderManager.o: /usr/include/stdint.h /usr/include/bits/wchar.h
 ../SE_RenderManager.o: ../SE_Quat.h ../SE_MaterialData.h ../SE_ID.h
-../SE_SimObject.o: ../SE_SimObject.h ../SE_Object.h ../SE_Log.h
-../SE_Utils.o: ../SE_Utils.h /usr/include/netinet/in.h
-../SE_Utils.o: /usr/include/features.h /usr/include/bits/predefs.h
-../SE_Utils.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-../SE_Utils.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-../SE_Utils.o: /usr/include/stdint.h /usr/include/bits/wchar.h
-../SE_Utils.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
-../SE_Utils.o: /usr/include/sys/types.h /usr/include/bits/types.h
-../SE_Utils.o: /usr/include/bits/typesizes.h /usr/include/time.h
-../SE_Utils.o: /usr/include/endian.h /usr/include/bits/endian.h
-../SE_Utils.o: /usr/include/bits/byteswap.h /usr/include/sys/select.h
-../SE_Utils.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-../SE_Utils.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
-../SE_Utils.o: /usr/include/bits/pthreadtypes.h /usr/include/bits/uio.h
-../SE_Utils.o: /usr/include/bits/socket.h /usr/include/bits/sockaddr.h
-../SE_Utils.o: /usr/include/asm/socket.h /usr/include/asm-generic/socket.h
-../SE_Utils.o: /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h
-../SE_Utils.o: /usr/include/bits/in.h
+../SE_RenderManager.o: ../SE_Camera.h ../SE_Geometry3D.h ../SE_Application.h
+../SE_RenderManager.o: ../SE_Time.h ../SE_Command.h ../SE_Log.h
+../SE_SimObject.o: ../SE_SimObject.h ../SE_Object.h ../SE_Buffer.h
+../SE_SimObject.o: ../SE_Log.h
+../SE_Utils.o: ../SE_Utils.h /usr/include/unistd.h /usr/include/features.h
+../SE_Utils.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
+../SE_Utils.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+../SE_Utils.o: /usr/include/gnu/stubs-32.h /usr/include/bits/posix_opt.h
+../SE_Utils.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+../SE_Utils.o: /usr/include/bits/confname.h /usr/include/getopt.h
+../SE_Utils.o: /usr/include/netinet/in.h /usr/include/stdint.h
+../SE_Utils.o: /usr/include/bits/wchar.h /usr/include/sys/socket.h
+../SE_Utils.o: /usr/include/sys/uio.h /usr/include/sys/types.h
+../SE_Utils.o: /usr/include/time.h /usr/include/endian.h
+../SE_Utils.o: /usr/include/bits/endian.h /usr/include/bits/byteswap.h
+../SE_Utils.o: /usr/include/sys/select.h /usr/include/bits/select.h
+../SE_Utils.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+../SE_Utils.o: /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h
+../SE_Utils.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
+../SE_Utils.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+../SE_Utils.o: /usr/include/asm-generic/socket.h /usr/include/asm/sockios.h
+../SE_Utils.o: /usr/include/asm-generic/sockios.h /usr/include/bits/in.h
 ../SE_BoundingVolume.o: ../SE_BoundingVolume.h ../SE_Vector.h ../SE_Math.h
 ../SE_BoundingVolume.o: ../SE_Common.h /usr/include/assert.h
 ../SE_BoundingVolume.o: /usr/include/features.h /usr/include/bits/predefs.h
@@ -595,7 +601,7 @@ clean:
 ../SE_ID.o: /usr/include/xlocale.h /usr/include/stdio.h /usr/include/libio.h
 ../SE_ID.o: /usr/include/_G_config.h /usr/include/wchar.h
 ../SE_ID.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-../SE_ID.o: ../SE_Buffer.h
+../SE_ID.o: ../SE_Buffer.h ../SE_Log.h
 ../SE_Matrix.o: ../SE_Matrix.h ../SE_Vector.h ../SE_Math.h ../SE_Common.h
 ../SE_Matrix.o: /usr/include/assert.h /usr/include/features.h
 ../SE_Matrix.o: /usr/include/bits/predefs.h /usr/include/sys/cdefs.h
@@ -698,7 +704,7 @@ clean:
 ../export/SE_Ase.o: ../SE_Time.h ../SE_Command.h ../SE_CommonNode.h
 ../export/SE_Ase.o: ../SE_Spatial.h ../SE_Object.h ../SE_Geometry.h
 ../export/SE_Ase.o: ../SE_BoundingVolume.h ../SE_Geometry3D.h
-../export/SE_Ase.o: ../SE_MeshSimObject.h ../SE_SimObject.h
+../export/SE_Ase.o: ../SE_MeshSimObject.h ../SE_SimObject.h ../SE_IO.h
 ../command/SE_SystemCommand.o: ../command/SE_SystemCommand.h ../SE_Command.h
 ../command/SE_SystemCommand.o: ../SE_ID.h ../SE_Time.h ../SE_Application.h
 ../command/SE_SystemCommand.o: ../SE_ResourceManager.h ../SE_SceneManager.h
@@ -730,6 +736,8 @@ clean:
 ../command/SE_SystemCommand.o: /usr/include/bits/stdio_lim.h
 ../command/SE_SystemCommand.o: /usr/include/bits/sys_errlist.h ../SE_Matrix.h
 ../command/SE_SystemCommand.o: ../SE_Camera.h ../SE_Quat.h ../SE_Geometry3D.h
+../command/SE_SystemCommand.o: ../SE_CommonNode.h ../SE_Spatial.h
+../command/SE_SystemCommand.o: ../SE_Object.h
 ../command/SE_SystemCommandFactory.o: ../command/SE_SystemCommandFactory.h
 ../command/SE_SystemCommandFactory.o: ../SE_CommandFactory.h ../SE_Common.h
 ../command/SE_SystemCommandFactory.o: /usr/include/assert.h

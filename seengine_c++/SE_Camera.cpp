@@ -20,6 +20,10 @@ SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, cons
 	create(location, zAxis, yAxis, fov, ratio, near, far);
 
 }
+SE_Rect<int> SE_Camera::getViewport()
+{
+    return mViewport;
+}
 int SE_Camera::cullBV(const SE_BoundingVolume& bv)
 {
     SE_Plane cullPlanes[6];

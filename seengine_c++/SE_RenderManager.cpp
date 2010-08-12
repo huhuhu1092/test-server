@@ -1,5 +1,9 @@
 #include "SE_RenderManager.h"
 #include "SE_RenderUnit.h"
+#include "SE_Camera.h"
+#include "SE_Application.h"
+#include "SE_Geometry3D.h"
+#include "SE_Log.h"
 #include <string.h>
 SE_RenderManager::SE_RenderManager()
 {
@@ -25,7 +29,10 @@ SE_RenderManager::~SE_RenderManager()
 }
 void SE_RenderManager::beginDraw()
 {
-
+    SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+    SE_Rect<int> rect = currCamera->getViewport();
+    glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+    LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
 }
 void SE_RenderManager::endDraw()
 {}

@@ -30,6 +30,6 @@ void SE_Util::sleep(unsigned int s)
 #if defined(WIN32)
     Sleep(s);
 #else
-    sleep(s)
+    //sleep(s);
 #endif
 }

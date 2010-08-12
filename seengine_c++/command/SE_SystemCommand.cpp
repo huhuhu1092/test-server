@@ -7,6 +7,8 @@
 #include "SE_Matrix.h"
 #include "SE_Camera.h"
 #include "SE_Quat.h"
+#include "SE_CommonNode.h"
+
 SE_InitAppCommand::SE_InitAppCommand(SE_Application* app) : SE_Command(app)
 {}
 SE_InitAppCommand::~SE_InitAppCommand()
@@ -23,6 +25,8 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadBaseData(fileName.c_str()); 
     SE_SceneManager* sceneManager = mApp->getSceneManager();
 	sceneManager->createScene(fileName.c_str());
+    SE_CommonNode* rootScene = sceneManager->getRoot();
+    rootScene->updateWorldTransform();
 	mApp->createCamera(SE_Application::MAIN_CAMERA);
 	mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
 }
@@ -38,4 +42,5 @@ void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta
 	SE_Vector3f up(0, 0, 1);
 	SE_Camera* c = mApp->getCurrentCamera();
 	c->create(location, zAxis, up, 90.0f,((float)height)/ width, 1.0f, 1000.0f);
+    c->setViewport(0, 0, width, height);
 }

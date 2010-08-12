@@ -189,6 +189,7 @@ void SE_Frustum::set(float fovAngle, float ratio, float n, float f)
     mNear = n;
     mFar = f;
     mFovAngle = fovAngle;
+    mRatio = ratio;
 }
 SE_Rect<float> SE_Frustum::getNearPlaneRect()
 {
