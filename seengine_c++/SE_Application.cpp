@@ -67,7 +67,7 @@ void SE_Application::run()
     SE_TimeMS currTime = SE_Time::getCurrentTimeMS();
     SE_TimeMS delta = currTime - mPrevTime;
     mPrevTime = currTime;
-    update(mPrevTime, mFrameRate);
+    update(delta, mFrameRate);
     mFrameNum++;   
 }
 void SE_Application::createCamera(int index)

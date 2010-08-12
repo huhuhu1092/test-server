@@ -122,6 +122,10 @@ public:
     {
         return mMaterialDataID;
     }
+    SE_ProgramDataID getProgramDataID()
+    {
+        return mProgramDataID;
+    }
     int getFacetNum()
     {
         return mFacetNum;
@@ -171,6 +175,10 @@ public:
     {
         mMaterialDataID = materialDataID;
     }
+    void setProgramDataID(const SE_ProgramDataID& pid)
+    {
+        mProgramDataID = pid;
+    }
     void setFacets(int* facets, int num)
     {
         mFacetArray = facets;
@@ -179,6 +187,7 @@ public:
 private:
     int mTexIndex;
     SE_MaterialDataID mMaterialDataID;
+    SE_ProgramDataID mProgramDataID;
     int mFacetNum;
     int* mFacetArray;
     int mSampleMin;

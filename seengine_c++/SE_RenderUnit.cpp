@@ -88,7 +88,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
     else
     {
     }
-    GLint wraps, wrapt;
+	GLint wraps , wrapt;
     switch(wrapS)
     {
     case REPEAT:
@@ -110,7 +110,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
         wrapt = GL_REPEAT;
         break;
     }
-    GLint sampleMin, sampleMag;
+	GLint sampleMin, sampleMag;
     switch(min)
     {
     case NEAREST:
@@ -161,6 +161,12 @@ void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray,
         return;
     }
     SE_TextureUnit* texUnit = tex->getTextureUnit(SE_Texture::TEXTURE0);
+	if(!texUnit)
+	{
+		imageIDArray = NULL;
+		imageIDNum = 0;
+		return;
+	}
     imageIDNum = texUnit->getImageNum();
     imageIDArray = texUnit->getImage();    
 }
@@ -321,7 +327,8 @@ void SE_TriSurfaceRenderUnit::draw()
     int texVertexNum;
     getVertex(vertex, vertexNum);
     getBaseColorTexVertex(texVertex, texVertexNum);
-    SE_ASSERT(vertexNum == texVertexNum);
+	if(texVertexNum > 0)
+        SE_ASSERT(vertexNum == texVertexNum);
     glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
 	if(texVertex)
         glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);

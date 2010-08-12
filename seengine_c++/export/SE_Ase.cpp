@@ -14,6 +14,7 @@
 #include "SE_Geometry.h"
 #include "SE_BoundingVolume.h"
 #include "SE_MeshSimObject.h"
+#include "SE_IO.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -111,7 +112,7 @@ public:
 public:
 	SE_BufferOutput& mOut;
 };
-void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
+void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const char* shaderPath)
 {
     int materialNum = mSceneObject->mMats.size();
 	int numWhichHasSubmaterial = 0;
@@ -286,6 +287,31 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene)
             output.writeInt(mesh->tfaces[i].vi[2]);
         }
     }
+///////////////////// write shader program ////
+    output.writeShort(SE_SHADERPROGRAMDATA_ID);
+    int spNum = 1;
+    output.writeInt(spNum);// shader program num;
+    std::vector<SE_ProgramDataID> programDataVector(spNum);
+    for(i = 0 ; i < spNum ; i++)
+    {
+        SE_ProgramDataID proID = "main_vertex_shader";
+        programDataVector[i] = proID;
+        SE_Util::sleep(100);
+        proID.write(output);
+        std::string str(shaderPath);
+        std::string vertexShaderPath = str + SE_SEP + "main_vertex_shader.glsl";
+        std::string fragmentShaderPath = str + SE_SEP + "main_fragment_shader.glsl";
+        char* vertexShader = NULL;
+        int vertexShaderLen = 0;
+        char* fragmentShader = NULL;
+        int fragmentShaderLen = 0;
+        SE_IO::readFileAll(vertexShaderPath.c_str(), vertexShader, vertexShaderLen);
+        SE_IO::readFileAll(fragmentShaderPath.c_str(), fragmentShader, fragmentShaderLen);
+        output.writeInt(vertexShaderLen);
+        output.writeInt(fragmentShaderLen);
+        output.writeBytes(vertexShader, vertexShaderLen);
+        output.writeBytes(fragmentShader, fragmentShaderLen);
+    }
 ///////////////////// write mesh //////////////// 
     std::vector<SE_MeshID> meshIDVector(geomDataNum);
     output.writeShort(SE_MESHDATA_ID);
@@ -408,6 +434,7 @@ WRIET_SURFACE:
                 {
                     output.writeInt(*itFace);
                 }
+                programDataVector[0].write(output);
                 if(texStr != "")
                 {
                     output.writeInt(texIndex);
@@ -428,6 +455,7 @@ WRIET_SURFACE:
             output.writeInt(mesh->numFaces); // facets num;
             for(int f = 0 ; f < mesh->numFaces ; f++)
                 output.writeInt(f);
+            programDataVector[0].write(output);
             if(texStr != "")
             {
                 output.writeInt(0); // the texture index is 0;
@@ -481,11 +509,11 @@ WRIET_SURFACE:
 	rootNode->travel(&wst, true);
     LOGI("write end\n");
 }
-void ASE_Loader::Write(const char* outFileName)
+void ASE_Loader::Write(const char* dataPath, const char* outFileName)
 {
     SE_BufferOutput outBase, outScene;
     SE_BufferOutput outBaseHeader, outSceneHeader;
-    Write(outBase, outScene);
+    Write(outBase, outScene, dataPath);
     writeHeader(outBaseHeader, outBase.getDataLen());
     writeHeader(outSceneHeader, outScene.getDataLen());
     std::string outBaseFileName(outFileName);

@@ -149,8 +149,8 @@ public:
     {
         return mSceneObject;
     }
-    void Write(const char* filename);
-	void Write(SE_BufferOutput& output, SE_BufferOutput& outputScene);
+    void Write(const char* outPath, const char* filename);
+	void Write(SE_BufferOutput& output, SE_BufferOutput& outputScene, const char* shaderPath);
 	typedef void (ASE_Loader::*ParserFun)( const char * );
 private:
 	int CharIsTokenDelimiter( int ch );

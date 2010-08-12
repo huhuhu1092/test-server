@@ -17,7 +17,7 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     std::string outPath = dataPath + SE_SEP + fileName;
     ASE_Loader loader(inPath.c_str(), 0, 0);
     loader.Load();
-	loader.Write(outPath.c_str());
+	loader.Write(dataPath.c_str(), outPath.c_str());
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	resourceManager->loadBaseData(fileName.c_str()); 

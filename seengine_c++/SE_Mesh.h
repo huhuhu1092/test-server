@@ -138,6 +138,8 @@ public:
     }
     SE_Texture* getTexture(int index)
     {
+		if(index < 0 || index >= mTextureNum)
+			return NULL;
         return mTextureArray[index];
     }
     SE_Surface* getSurface(int index)

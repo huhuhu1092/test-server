@@ -18,6 +18,10 @@ SE_Surface::SE_Surface()
     mMaterialData = NULL;
     mFacetArray = NULL;
     mFacetNum = NULL;
+	mSampleMin = NEAREST;
+    mSampleMag = NEAREST;
+    mWrapS = REPEAT;
+    mWrapT = REPEAT;
 }
 SE_Surface::~SE_Surface()
 {

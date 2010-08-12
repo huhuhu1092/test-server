@@ -10,6 +10,7 @@
 #include "SE_DataTransfer.h"
 #include "SE_Spatial.h"
 #include "SE_ShaderProgram.h"
+#include "SE_Log.h"
 #include <map>
 #include <vector>
 
@@ -181,6 +182,7 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
         SE_MeshID meshID;
         meshID.read(inputBuffer);
         SE_MeshTransfer* meshTransfer = new SE_MeshTransfer;
+		LOGI("## i = %d ##", i);
         if(meshTransfer)
         {
             meshTransfer->read(inputBuffer);
@@ -191,19 +193,23 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
 }
 static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-    SE_ProgramDataID programDataID;
-    programDataID.read(inputBuffer);
-    int vertexShaderLen = inputBuffer.readInt();
-    int fragmentShaderLen = inputBuffer.readInt();
-    char* vertexShaderBytes = new char[vertexShaderLen + 1];
-    char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
-    inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
-    inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
-    vertexShaderBytes[vertexShaderLen] = '\0';
-    fragmentShaderBytes[fragmentShaderLen] = '\0';
-    resourceManager->setShaderProgram(programDataID, vertexShaderBytes, fragmentShaderBytes);
-    delete[] vertexShaderBytes;
-    delete[] fragmentShaderBytes;
+    int spNum = inputBuffer.readInt();
+    for(int i = 0 ; i < spNum ; i++)
+    {
+		SE_ProgramDataID programDataID;
+		programDataID.read(inputBuffer);
+		int vertexShaderLen = inputBuffer.readInt();
+		int fragmentShaderLen = inputBuffer.readInt();
+		char* vertexShaderBytes = new char[vertexShaderLen + 1];
+		char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
+		inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
+		inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
+		vertexShaderBytes[vertexShaderLen] = '\0';
+		fragmentShaderBytes[fragmentShaderLen] = '\0';
+		resourceManager->setShaderProgram(programDataID, vertexShaderBytes, fragmentShaderBytes);
+		delete[] vertexShaderBytes;
+		delete[] fragmentShaderBytes;
+    }
 }
 static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {

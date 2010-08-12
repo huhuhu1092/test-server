@@ -40,6 +40,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
         SE_SurfaceTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
         SE_Surface* surface = new SE_Surface;
         surface->setMaterialData(resourceManager->getMaterialData(surfaceTransfer->getMaterialDataID()));
+        surface->setProgramDataID(surfaceTransfer->getProgramDataID());
         int*  facetArray= new int[surfaceTransfer->getFacetNum()];
         memmove(facetArray, surfaceTransfer->getFacetArray(), sizeof(int) * surfaceTransfer->getFacetNum());
         surface->setGeometryData(mesh->getGeometryData());
@@ -104,6 +105,9 @@ void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
             facets[j] = inputBuffer.readInt();
         }
         surfaceTransfer->setFacets(facets, facetNum);
+        SE_ProgramDataID pid;
+        pid.read(inputBuffer);
+        surfaceTransfer->setProgramDataID(pid);
 		int texIndex = inputBuffer.readInt();
         surfaceTransfer->setTextureIndex(texIndex);
     }
