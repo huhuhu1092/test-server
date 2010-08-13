@@ -211,6 +211,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
     int n = 0;
     SE_Matrix4f modelToWorldM, worldToModelM;
     SE_Matrix3f rotateM;
+	SE_Quat rotateQ;
     SE_Vector3f rotateAxis, scale, translate;
     for(itGeomObj = mSceneObject->mGeomObjects.begin();
         itGeomObj != mSceneObject->mGeomObjects.end();
@@ -229,7 +230,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         translate.x = go->translate[0];
         translate.y = go->translate[1];
         translate.z = go->translate[2];
-        rotateM.setRotateFromAxis(go->rotateAngle, rotateAxis);
+		rotateQ.set(go->rotateAngle, rotateAxis);
+		rotateM = rotateQ.toMatrix3f();//.setRotateFromAxis(go->rotateAngle, rotateAxis);
         modelToWorldM.set(rotateM, scale, translate);
         worldToModelM = modelToWorldM.inverse();
         geomTexCoordData[n++].geomID = gid;
@@ -241,7 +243,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         for(i = 0 ; i < mesh->numVertexes ; i++)
         {
             SE_Vector4f p(mesh->vertexes[i].x, mesh->vertexes[i].y, mesh->vertexes[i].z, 1.0f);
-            p = worldToModelM.map(p);
+            //p = worldToModelM.map(p);
             output.writeFloat(p.x);
             output.writeFloat(p.y);
             output.writeFloat(p.z);
@@ -495,10 +497,14 @@ WRIET_SURFACE:
         rotateAxis.x = go->rotateAxis[0];
         rotateAxis.y = go->rotateAxis[1];
         rotateAxis.z = go->rotateAxis[2];
-        child->setLocalTranslate(translate);
-        child->setLocalScale(scale);
+        //child->setLocalTranslate(translate);
+		child->setLocalTranslate(SE_Vector3f(0, 0, 0));
+        //child->setLocalScale(scale);
+        child->setLocalScale(SE_Vector3f(1.0, 1.0, 1.0));
+
         SE_Quat q;
-        q.set(go->rotateAngle, rotateAxis);
+        //q.set(go->rotateAngle, rotateAxis);
+		q.set(0, SE_Vector3f(0, 0, 0));
         child->setBVType(SE_BoundingVolume::AABB);
         SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
 		meshObj->setName(go->name);

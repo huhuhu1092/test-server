@@ -9,6 +9,15 @@
 #include "SE_Memory.h"
 #include "SE_Log.h"
 #include "SE_ShaderProgram.h"
+static void checkGLError()
+{
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR)
+    {
+        LOGI("### gl error = %d ####\n", error);
+        SE_ASSERT(0);
+    }
+}
 /*** static function and data structure*/
 struct _ShaderData
 {
@@ -510,6 +519,7 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
             if(!SE_String_IsEmpty(&md->texturename))
             {
                 glEnable(GL_TEXTURE_2D);
+				//checkGLError();
 				glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 				glActiveTexture(GL_TEXTURE0);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

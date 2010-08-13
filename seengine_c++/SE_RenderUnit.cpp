@@ -14,7 +14,7 @@ static void checkGLError()
     if(error != GL_NO_ERROR)
     {
         LOGI("### gl error = %d ####\n", error);
-        SE_ASSERT(0);
+        //SE_ASSERT(0);
     }
 }
 /////////////////////////////////
@@ -73,7 +73,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
         return;
     }
     glEnable(GL_TEXTURE_2D);
-    checkGLError();
+    //checkGLError();
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     checkGLError();
 	glActiveTexture(GL_TEXTURE0);
