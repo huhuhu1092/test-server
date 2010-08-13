@@ -5,6 +5,7 @@
 #include "SE_Camera.h"
 #include "SE_Command.h"
 #include "SE_CommandFactory.h"
+#include "SE_RenderManager.h"
 #include <string.h>
 #include <algorithm>
 SE_Application* SE_Application::mInstance = NULL;
@@ -22,6 +23,7 @@ SE_Application::SE_Application()
     mCurrentCamera = NULL;
     mSceneManager = new SE_SceneManager;
     mResourceManager = new SE_ResourceManager;
+    mRenderManager = new SE_RenderManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -46,15 +48,15 @@ SE_Application::~SE_Application()
     {
         delete it->factory;
     }
+    delete mRenderManager;
 }
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
-    SE_RenderManager renderManager;
-    mSceneManager->renderScene(mCurrentCamera, renderManager);
-    renderManager.beginDraw();
-    renderManager.draw();
-    renderManager.endDraw();
+    mRenderManager->beginDraw();
+    mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
+    mRenderManager->draw();
+    mRenderManager->endDraw();
 }
 void SE_Application::run()
 {

@@ -20,7 +20,7 @@ static GLuint loadShader(GLenum type, const char* shaderSrc)
 			char* infoLog = new char[sizeof(char) * infoLen];
 			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
 			LOGI("Error compiling shader: \n%s\n", infoLog);
-			delete infoLog;
+			delete[] infoLog;
 		}
 		glDeleteShader(shader);
 		return 0;
@@ -66,7 +66,7 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
             char* infoLog = new char[sizeof(char) * infoLen];
 	        glGetProgramInfoLog(programObject, infoLen, 0, infoLog);
 	        LOGI("Error linking program: \n%s\n", infoLog);
-	        delete infoLog;
+	        delete[] infoLog;
 	    }
 	    glDeleteProgram(programObject);
         mHasInit = false;

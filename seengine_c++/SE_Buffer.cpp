@@ -134,7 +134,7 @@ void SE_BufferOutput::writeBytes(const char* cb, int count)
         char* newData = new char[newLen];
         if(!newData)
             return;
-        memcpy(newData, mData, mLen);
+        memcpy(newData, mData, mOffset);
         delete[] mData;
         mLen = newLen;
         mData = newData;

@@ -9,11 +9,17 @@
 #include <string.h>
 SE_RenderManager::SE_RenderManager()
 {
+    
     for(int i = 0 ; i < RQ_NUM ; i++)
     {
         mRenderQueue[i] = new RenderUnitList;
     }
-    
+    /*
+    for(int i = 0 ; i < RQ_NUM ; i++)
+    {
+        mRenderQueue[i] = NULL;
+    }
+    */
 }
 SE_RenderManager::~SE_RenderManager()
 {
@@ -26,8 +32,10 @@ SE_RenderManager::~SE_RenderManager()
             SE_RenderUnit* ru = *it;
             delete ru;
         }
+        ruList->clear();
         delete ruList;
     }
+
 }
 void SE_RenderManager::beginDraw()
 {
@@ -39,6 +47,18 @@ void SE_RenderManager::beginDraw()
     shaderProgram->use();
 	glClearColor(1.0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    for(int i = 0 ; i  < RQ_NUM ; i++)
+    {
+        RenderUnitList* ruList = mRenderQueue[i];
+        RenderUnitList::iterator it;
+        for(it = ruList->begin() ; it != ruList->end() ;it++)
+        {
+            SE_RenderUnit* ru = *it;
+            delete ru;
+        }
+        ruList->clear();
+    }
 }
 void SE_RenderManager::endDraw()
 {}
@@ -55,7 +75,7 @@ void SE_RenderManager::draw()
             SE_RenderUnit* ru = *it;
 			ru->setViewToPerspectiveMatrix(m);
 			LOGI("### draw %d ###\n", j++);
-			if(j == 42)
+			if(j >= 130)
             ru->draw();
         }
 

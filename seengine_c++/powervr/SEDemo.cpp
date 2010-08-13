@@ -41,7 +41,7 @@ private:
 };
 bool SEDemo::InitApplication()
 {
-	SE_Application::getInstance()->setAppID(13718215879);
+	SE_Application::getInstance()->setAppID(18215879);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
 	SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");

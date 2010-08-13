@@ -8,6 +8,16 @@
 #include "SE_TextureCoordData.h"
 #include "SE_ID.h"
 #include "SE_ShaderProgram.h"
+static void checkGLError()
+{
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR)
+    {
+        LOGI("### gl error = %d ####\n", error);
+        SE_ASSERT(0);
+    }
+}
+/////////////////////////////////
 SE_RenderUnit::~SE_RenderUnit()
 {}
 void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
@@ -20,19 +30,19 @@ SE_ImageDataID SE_RenderUnit::getCubeMapImageID()
 {
     return SE_ImageDataID::INVALID;
 }
-void SE_RenderUnit::getVertex(SE_Vector3f*& vertex, int & vertexNum)
+void SE_RenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {}
-void SE_RenderUnit::getBaseColorTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_RenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {}
 
-void SE_RenderUnit::getBumpMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_RenderUnit::getBumpMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {}
 bool SE_RenderUnit::bumpMapCoordSameAsBaseColor()
 {
     return true;
 }
 
-void SE_RenderUnit::getCubeMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_RenderUnit::getCubeMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {}
 bool SE_RenderUnit::cubeMapCoordSameAsBaseColor()
 {
@@ -47,6 +57,7 @@ SE_Vector3f SE_RenderUnit::getColor()
 {
     return SE_Vector3f(0, 0, 0);
 }
+
 void SE_RenderUnit::draw()
 {}
 #ifdef DEBUG
@@ -62,8 +73,11 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
         return;
     }
     glEnable(GL_TEXTURE_2D);
+    checkGLError();
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    checkGLError();
 	glActiveTexture(GL_TEXTURE0);
+    checkGLError();
     GLuint texid = imageData->getTexID();
 #ifdef DEBUG
 	LOGI("## texid = %d ##\n", texid);
@@ -71,6 +85,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
     if(texid == 0)
     {
         glGenTextures(1, &texid);
+        checkGLError();
         imageData->setTexID(texid);
 #ifdef DEBUG
 		LOGI("### texSize = %d ###\n", texSize);
@@ -78,6 +93,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
 #endif
     }
     glBindTexture(GL_TEXTURE_2D, texid);
+    checkGLError();
     if(!imageData->isCompressTypeByHardware())
     {
         GLint internalFormat = GL_RGB;
@@ -94,6 +110,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
+        checkGLError();
     }
     else
     {
@@ -145,9 +162,13 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
     }
             
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
+    checkGLError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
+    checkGLError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampleMin );
+    checkGLError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampleMag ); 
+    checkGLError();
     return;
 }
 
@@ -202,7 +223,7 @@ SE_ImageDataID SE_TriSurfaceRenderUnit::getCubeMapImageID()
 {
     return getImageDataID(mSurface, SE_Texture::TEXTURE2);
 }
-void SE_TriSurfaceRenderUnit::getVertex(SE_Vector3f*& vertex, int & vertexNum)
+void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
     if(mVertex != NULL)
     {
@@ -216,21 +237,30 @@ void SE_TriSurfaceRenderUnit::getVertex(SE_Vector3f*& vertex, int & vertexNum)
     int* facets = mSurface->getFacetArray();
     SE_Vector3i* faceArray = geomData->getFaceArray();
     SE_Vector3f* vertexArray = geomData->getVertexArray();
-    mVertex = new SE_Vector3f[facetNum * 3];
+    mVertex = new _Vector3f[facetNum * 3];
     mVertexNum = facetNum * 3;
     int k = 0;
     for(int i = 0 ; i < facetNum ; i++)
     {
         SE_Vector3i f = faceArray[facets[i]];
-        mVertex[k++] = vertexArray[f.x];
-        mVertex[k++] = vertexArray[f.y];
-        mVertex[k++] = vertexArray[f.z];
+        mVertex[k].d[0] = vertexArray[f.x].x;
+        mVertex[k].d[1] = vertexArray[f.x].y;
+        mVertex[k].d[2] = vertexArray[f.x].z;
+        k++;
+        mVertex[k].d[0] = vertexArray[f.y].x;
+        mVertex[k].d[1] = vertexArray[f.y].y;
+        mVertex[k].d[2] = vertexArray[f.y].z;
+        k++;
+        mVertex[k].d[0] = vertexArray[f.z].x;
+        mVertex[k].d[1] = vertexArray[f.z].y;
+        mVertex[k].d[2] = vertexArray[f.z].z;
+        k++;
     }
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
 
-void SE_TriSurfaceRenderUnit::getBaseColorTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_TriSurfaceRenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {
     if(mTexVertex)
     {
@@ -250,29 +280,37 @@ void SE_TriSurfaceRenderUnit::getBaseColorTexVertex(SE_Vector2f*& texVertex, int
     SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
     SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
     SE_Vector2f* texVertexArray = texCoordData->getTexVertexArray();
+    int texFaceNum = texCoordData->getTexFaceNum();
     int facetNum = mSurface->getFacetNum();
     int* facets = mSurface->getFacetArray();
-    mTexVertex = new SE_Vector2f[facetNum * 3];
+    mTexVertex = new _Vector2f[facetNum * 3];
     mTexVertexNum = facetNum * 3;
     int k = 0 ;
     for(int i = 0 ; i < facetNum ; i++)
     {
+        SE_ASSERT(facets[i] < texFaceNum);
         SE_Vector3i f = texFaceArray[facets[i]];
-        mTexVertex[k++] = texVertexArray[f.x];
-        mTexVertex[k++] = texVertexArray[f.y];
-        mTexVertex[k++] = texVertexArray[f.z];
+        mTexVertex[k].d[0] = texVertexArray[f.x].x;
+        mTexVertex[k].d[1] = texVertexArray[f.x].y;
+        k++;
+        mTexVertex[k].d[0] = texVertexArray[f.y].x;
+        mTexVertex[k].d[1] = texVertexArray[f.y].y;
+        k++;
+        mTexVertex[k].d[0] = texVertexArray[f.z].x;
+        mTexVertex[k].d[1] = texVertexArray[f.z].y;
+        k++;
     }
     texVertex = mTexVertex;
     texVertexNum = mTexVertexNum;
 }
 
-void SE_TriSurfaceRenderUnit::getBumpMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_TriSurfaceRenderUnit::getBumpMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {}
 bool SE_TriSurfaceRenderUnit::bumpMapCoordSameAsBaseColor()
 {
     return true;
 }
-void SE_TriSurfaceRenderUnit::getCubeMapTexVertex(SE_Vector2f*& texVertex, int& texVertexNum)
+void SE_TriSurfaceRenderUnit::getCubeMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {}
 bool SE_TriSurfaceRenderUnit::cubeMapCoordSameAsBaseColor()
 {
@@ -309,7 +347,9 @@ void SE_TriSurfaceRenderUnit::draw()
     {
         loadBaseColorTexture2D(imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
         glUniform1i(shaderProgram->getBaseColorTextureUnifyLoc(), 0);
+        checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 1);
+        checkGLError();
     }
     else
     {
@@ -330,28 +370,47 @@ void SE_TriSurfaceRenderUnit::draw()
             color[2] = c.z;
         }
 		glDisable(GL_TEXTURE_2D);
+        checkGLError();
 		glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+        checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
+        checkGLError();
     }
     float matrixData[16];
     m.getColumnSequence(matrixData);
     glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, matrixData); 
-    SE_Vector3f* vertex = NULL;
+    checkGLError();
+    _Vector3f* vertex = NULL;
     int vertexNum = 0;
-    SE_Vector2f* texVertex = NULL;
+    _Vector2f* texVertex = NULL;
     int texVertexNum = 0;
     getVertex(vertex, vertexNum);
     getBaseColorTexVertex(texVertex, texVertexNum);
 	if(texVertexNum > 0)
         SE_ASSERT(vertexNum == texVertexNum);
     glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
+    checkGLError();
 	if(texVertex)
+    {
         glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);
+        checkGLError();
+    }
     glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
-	glEnableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
+    checkGLError();
+    if(texVertex)
+    {
+	    glEnableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
+        checkGLError();
+    }
+    else
+    {
+        glDisableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
+        checkGLError();
+    }
 #ifdef DEBUG
 	LOGI("### vertexNum = %d #####\n", vertexNum);
 #endif
     glDrawArrays(GL_TRIANGLES, 0, vertexNum);
+    checkGLError();
 
 }

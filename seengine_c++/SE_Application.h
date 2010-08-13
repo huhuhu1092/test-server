@@ -8,6 +8,7 @@ class SE_CommandFactory;
 class SE_Camera;
 class SE_ResourceManager;
 class SE_SceneManager;
+class SE_RenderManager;
 class SE_Application
 {
 public:
@@ -96,6 +97,7 @@ protected:
     SE_Camera* mCurrentCamera;
     SE_SceneManager* mSceneManager;
     SE_ResourceManager* mResourceManager;
+    SE_RenderManager* mRenderManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;
