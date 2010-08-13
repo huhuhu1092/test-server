@@ -182,7 +182,7 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
         SE_MeshID meshID;
         meshID.read(inputBuffer);
         SE_MeshTransfer* meshTransfer = new SE_MeshTransfer;
-		LOGI("## i = %d ##", i);
+		LOGI("## process mesh i = %d ##\n", i);
         if(meshTransfer)
         {
             meshTransfer->read(inputBuffer);
@@ -236,7 +236,8 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 processMeshData(inputBuffer, resourceManager);
                 break;
             case SE_SHADERPROGRAMDATA_ID:
-                processShaderProgram(inputBuffer, resourceManager);
+	
+				processShaderProgram(inputBuffer, resourceManager);
                 break;
         }
     }

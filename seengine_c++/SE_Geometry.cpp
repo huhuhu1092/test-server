@@ -61,11 +61,11 @@ void SE_Geometry::read(SE_BufferInput& input)
 }
 void SE_Geometry::updateWorldTransform()
 {
-
+	SE_Spatial::updateWorldTransform();
 }
 void SE_Geometry::updateBoundingVolume()
 {
-    
+	SE_Spatial::updateBoundingVolume();
 }
 int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {

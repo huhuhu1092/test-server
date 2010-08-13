@@ -49,6 +49,9 @@ SE_Vector3f SE_RenderUnit::getColor()
 }
 void SE_RenderUnit::draw()
 {}
+#ifdef DEBUG
+static int texSize = 0;
+#endif
 void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
 {
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
@@ -62,10 +65,17 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glActiveTexture(GL_TEXTURE0);
     GLuint texid = imageData->getTexID();
-    if(!glIsTexture(texid))
+#ifdef DEBUG
+	LOGI("## texid = %d ##\n", texid);
+#endif
+    if(texid == 0)
     {
         glGenTextures(1, &texid);
         imageData->setTexID(texid);
+#ifdef DEBUG
+		LOGI("### texSize = %d ###\n", texSize);
+		texSize++;
+#endif
     }
     glBindTexture(GL_TEXTURE_2D, texid);
     if(!imageData->isCompressTypeByHardware())
@@ -198,6 +208,7 @@ void SE_TriSurfaceRenderUnit::getVertex(SE_Vector3f*& vertex, int & vertexNum)
     {
         vertex = mVertex;
         vertexNum = mVertexNum;
+		SE_ASSERT(0);
         return;
     }
     SE_GeometryData* geomData = mSurface->getGeometryData();
@@ -279,15 +290,18 @@ SE_Vector3f SE_TriSurfaceRenderUnit::getColor()
 }
 SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
 {
-    delete mVertex;
-    delete mTexVertex;
+	if(mVertex)
+        delete[] mVertex;
+	if(mTexVertex)
+        delete[] mTexVertex;
 }
+static bool _Used = false;
 void SE_TriSurfaceRenderUnit::draw()
 {
     SE_Matrix4f m = mViewToPerspective.mul(mWorldTransform);
 	SE_ProgramDataID spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
-    shaderProgram->use();
+    //shaderProgram->use();
     SE_ImageDataID* imageDataArray;
     int imageDataNum;
     getBaseColorImageID(imageDataArray, imageDataNum);
@@ -315,16 +329,17 @@ void SE_TriSurfaceRenderUnit::draw()
             color[1] = c.y;
             color[2] = c.z;
         }
+		glDisable(GL_TEXTURE_2D);
 		glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
     }
     float matrixData[16];
     m.getColumnSequence(matrixData);
     glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, matrixData); 
-    SE_Vector3f* vertex;
-    int vertexNum;
-    SE_Vector2f* texVertex;
-    int texVertexNum;
+    SE_Vector3f* vertex = NULL;
+    int vertexNum = 0;
+    SE_Vector2f* texVertex = NULL;
+    int texVertexNum = 0;
     getVertex(vertex, vertexNum);
     getBaseColorTexVertex(texVertex, texVertexNum);
 	if(texVertexNum > 0)
@@ -334,6 +349,9 @@ void SE_TriSurfaceRenderUnit::draw()
         glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);
     glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
 	glEnableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
+#ifdef DEBUG
+	LOGI("### vertexNum = %d #####\n", vertexNum);
+#endif
     glDrawArrays(GL_TRIANGLES, 0, vertexNum);
 
 }

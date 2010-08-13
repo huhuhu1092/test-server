@@ -450,10 +450,10 @@ SE_Result SE_Renderer_BeginDraw(SE_Renderer* renderer)
 	shaderData->u_obj_to_world_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_obj_to_world_matrix");
 	shaderData->u_world_to_view_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_world_to_view_matrix");
 	shaderData->u_view_to_projective_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_view_to_projective_matrix");
-	shaderData->u_texture_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_texture");
+	shaderData->u_texture_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_basecolor_texture");
 	shaderData->u_shading_mode_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_shading_mode");
 	shaderData->u_color_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_color");
-	shaderData->u_mvp_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_mvp_matrix");
+	shaderData->u_mvp_matrix_loc = glGetUniformLocation(SE_ShaderProgram_GetProgramHandler(shaderData->shaderProgram), "u_wvp_matrix");
     SE_Mat4f_GetMatrixColumnSequence(&renderer->worldToView, m);
     glUniformMatrix4fv(shaderData->u_world_to_view_matrix_loc, 1, 0, m);
 	SE_Mat4f_GetMatrixColumnSequence(&renderer->viewToProjective, m);

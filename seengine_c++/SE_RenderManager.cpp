@@ -4,6 +4,8 @@
 #include "SE_Application.h"
 #include "SE_Geometry3D.h"
 #include "SE_Log.h"
+#include "SE_ShaderProgram.h"
+#include "SE_ResourceManager.h"
 #include <string.h>
 SE_RenderManager::SE_RenderManager()
 {
@@ -33,6 +35,10 @@ void SE_RenderManager::beginDraw()
     SE_Rect<int> rect = currCamera->getViewport();
     glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
     LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
+	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
+    shaderProgram->use();
+	glClearColor(1.0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void SE_RenderManager::endDraw()
 {}
@@ -43,10 +49,13 @@ void SE_RenderManager::draw()
     {
         RenderUnitList* ruList = mRenderQueue[i];
         RenderUnitList::iterator it;
+		int j = 0;
         for(it = ruList->begin() ; it != ruList->end() ;it++)
         {
             SE_RenderUnit* ru = *it;
-            ru->setWorldTransform(m);
+			ru->setViewToPerspectiveMatrix(m);
+			LOGI("### draw %d ###\n", j++);
+			if(j == 42)
             ru->draw();
         }
 

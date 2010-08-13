@@ -8,7 +8,7 @@
 class SE_ImageData
 {
 public:
-    enum PIXELFORMAT {INVALID, RGB_565, RGB, RGBA};
+    enum PIXELFORMAT {RGB, RGBA, RGB_565, INVALID};
     enum COMPRESS_TYPE {RAW, JPEG, PNG, TGA, ETC1, PVR, NVIDIA};
     SE_ImageData()
     {
