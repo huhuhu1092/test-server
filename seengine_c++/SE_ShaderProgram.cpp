@@ -111,6 +111,12 @@ void SE_ShaderProgram::link()
 	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
 	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
 	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
+    LOGI("### m_a_position_loc = %d ###\n", m_a_position_loc);
+    LOGI("### m_a_tex_coord_loc = %d ###\n", m_a_tex_coord_loc);
+    LOGI("### m_u_texture_loc = %d ###\n", m_u_texture_loc);
+    LOGI("### m_u_shading_mode_loc = %d ###\n", m_u_shading_mode_loc);
+    LOGI("### m_u_color_loc = %d ###\n", m_u_color_loc);
+    LOGI("### m_u_wvp_matrix_loc = %d ###\n", m_u_wvp_matrix_loc);
 #endif
 }
 
