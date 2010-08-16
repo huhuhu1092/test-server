@@ -8,49 +8,49 @@ public:
     static const SE_Quat IDENTITY;
     SE_Quat()
     {
-	x = 0;
-	y = 0;
-	z = 0;
-	w = 1;
+	    x = 0;
+	    y = 0;
+	    z = 0;
+	    w = 1;
     }
     SE_Quat(float x, float y, float z, float w)
     {
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->w = w;
+	    this->x = x;
+	    this->y = y;
+	     this->z = z;
+	    this->w = w;
     }
     SE_Quat(const SE_Vector3f& v, float w)
     {
-	this->x = v.x;
-	this->y = v.y;
-	this->z = v.z;
-	this->w = w;
+	    this->x = v.x;
+	    this->y = v.y;
+	    this->z = v.z;
+	    this->w = w;
     }
     SE_Quat(float d[4])
     {
-	for(int i = 0 ; i < 4 ; i++)
-	{
-	    this->d[i] = d[i];
-	}
+	    for(int i = 0 ; i < 4 ; i++)
+	    {
+	        this->d[i] = d[i];
+	    }
     }
     SE_Quat(float angle, const SE_Vector3f& axis);
     SE_Quat(const SE_Quat& q)
     {
-	for(int i = 0 ; i < 4 ; i++)
-	{
-	    d[i] = q.d[i];
-	}
+	    for(int i = 0 ; i < 4 ; i++)
+	    {
+	        d[i] = q.d[i];
+	    }
     }
     SE_Quat& operator=(const SE_Quat& rq)
     {
-	if(this == &rq)
+	    if(this == &rq)
+	        return *this;
+	    for(int i = 0 ; i < 4 ; i++)
+	    {
+	        d[i] = rq.d[i];
+	    }
 	    return *this;
-	for(int i = 0 ; i < 4 ; i++)
-	{
-	    d[i] = rq.d[i];
-	}
-	return *this;
     }
     void identity()
     {
@@ -98,11 +98,11 @@ public:
 private:
     union
     {
-	float d[4];
-	struct
-	{
-	    float x, y, z , w;
-	};
+	    float d[4];
+	    struct
+	    {
+	        float x, y, z , w;
+	    };
     };
 
 };

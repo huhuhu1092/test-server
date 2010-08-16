@@ -29,7 +29,7 @@ public:
     float det() const;
     bool hasInverse() const
     {
-	return det() != 0;
+	    return det() != 0;
     }
 
 private:
@@ -84,7 +84,7 @@ public:
     void setRotateFromAxis(float angle, const SE_Vector3f& axis);
     bool hasInverse() const
     {
-	return det() != 0;
+	    return det() != 0;
     }
 private:
     union

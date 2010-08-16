@@ -11,7 +11,7 @@ SE_Matrix2f::SE_Matrix2f(float d[4])
 {
     for(int i = 0 ; i < 4 ; i++)
     {
-	this->d[i] = d[i];
+	    this->d[i] = d[i];
     }
 }
 SE_Matrix2f::SE_Matrix2f(float m00, float m01, float m10, float m11)
@@ -36,16 +36,16 @@ SE_Matrix2f::SE_Matrix2f(const SE_Matrix2f& rm)
 {
     for(int i = 0 ; i < 4 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
 }
 SE_Matrix2f& SE_Matrix2f::operator=(const SE_Matrix2f& rm)
 {
     if(this == &rm)
-	return *this;
+	    return *this;
     for(int i = 0 ; i < 4 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
     return *this;
 }
@@ -117,7 +117,7 @@ SE_Matrix3f::SE_Matrix3f(float d[9])
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	this->d[i] = d[i];
+	    this->d[i] = d[i];
     }
 }
 SE_Matrix3f::SE_Matrix3f(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
@@ -150,16 +150,16 @@ SE_Matrix3f::SE_Matrix3f(const SE_Matrix3f& rm)
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
 }
 SE_Matrix3f& SE_Matrix3f::operator=(const SE_Matrix3f& rm)
 {
     if(this == &rm)
-	return *this;
+	    return *this;
     for(int i = 0 ; i < 9 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
     return *this;
 }
@@ -172,7 +172,7 @@ SE_Matrix3f SE_Matrix3f::mulScalar(float f) const
     SE_Matrix3f ret;
     for(int i = 0 ; i < 9 ; i++)
     {
-	ret.d[i] = d[i] * f;
+	    ret.d[i] = d[i] * f;
     }
     return ret;
 }
@@ -181,12 +181,12 @@ SE_Matrix3f SE_Matrix3f::mul(const SE_Matrix3f& rm) const
     SE_Matrix3f ret;
     for(int i = 0 ; i < 3 ; i++)
     {
-	SE_Vector3f r = getRow(i);
-	for(int j = 0 ; j < 3 ; j++)
-	{
-	    SE_Vector3f c = rm.getColumn(j);
-	    ret.d[i * 3 + j] = r.dot(c);
-	}
+	    SE_Vector3f r = getRow(i);
+	    for(int j = 0 ; j < 3 ; j++)
+	    {
+	        SE_Vector3f c = rm.getColumn(j);
+	        ret.d[i * 3 + j] = r.dot(c);
+	    }
     }
     return ret;
 }
@@ -219,8 +219,8 @@ SE_Vector3f SE_Matrix3f::map(const SE_Vector3f& v) const
     SE_Vector3f ret;
     for(int i = 0 ; i < 3 ; i++)
     {
-	SE_Vector3f r = getRow(i);
-	ret.d[i] = r.dot(v);
+	    SE_Vector3f r = getRow(i);
+	    ret.d[i] = r.dot(v);
     }
     return ret;
 }
@@ -244,8 +244,8 @@ bool SE_Matrix3f::isZero() const
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	if(d[i] != 0.0f)
-	    return false;
+	    if(d[i] != 0.0f)
+	        return false;
     }
     return true;
 }
@@ -274,7 +274,7 @@ SE_Matrix3f SE_Matrix3f::inverse() const
     SE_Matrix3f adjMT;
     if(det == 0.0f)
     {
-	return SE_Matrix3f();
+	    return SE_Matrix3f();
     }
     adjM.m00 = m11 * m22 - m12 * m21;
     adjM.m01 = -(m10 * m22 - m12 * m20);
@@ -317,7 +317,7 @@ void SE_Matrix3f::getSequence(float out[9]) const
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	out[i] = d[i];
+	    out[i] = d[i];
     }
 }
 void SE_Matrix3f::setColumn(const SE_Vector3f& c0, const SE_Vector3f& c1, const SE_Vector3f& c2)
@@ -417,7 +417,7 @@ SE_Matrix4f::SE_Matrix4f(float d[16])
 {
     for(int i = 0 ; i < 16 ; i++)
     {
-	this->d[i] = d[i];
+	    this->d[i] = d[i];
     }
 }
 SE_Matrix4f::SE_Matrix4f(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3)
@@ -446,7 +446,7 @@ SE_Matrix4f::SE_Matrix4f(const SE_Matrix4f& rm)
 {
     for(int i = 0 ; i < 16 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
 }
 SE_Matrix4f::SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t)
@@ -456,10 +456,10 @@ SE_Matrix4f::SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t)
 SE_Matrix4f& SE_Matrix4f::operator=(const SE_Matrix4f& rm)
 {
     if(this == &rm)
-	return *this;
+	    return *this;
     for(int i = 0 ; i < 16 ; i++)
     {
-	d[i] = rm.d[i];
+	    d[i] = rm.d[i];
     }
     return *this;
 }
@@ -485,7 +485,7 @@ SE_Vector4f SE_Matrix4f::map(const SE_Vector4f& v) const
     SE_Vector4f ret;
     for(int i = 0 ; i < 4 ; i++)
     {
-	SE_Vector4f r = getRow(i);
+	    SE_Vector4f r = getRow(i);
         ret.d[i] = r.dot(v);
     }
     return ret;
@@ -499,41 +499,41 @@ SE_Matrix4f SE_Matrix4f::inverse() const
     float det = this->det();
     if(det == 0.0f)
     {
-	return IDENTITY;
+	    return IDENTITY;
     }
     SE_Vector4f lastRow = getRow(3);
     if(lastRow.x == 0.0f && lastRow.y == 0.0f && lastRow.z == 0.0f && lastRow.w == 1.0f)
     {
-	SE_Matrix3f rs = toMatrix3f();
-	SE_Vector3f t = getTranslate();
-	SE_Matrix3f inverseRs = rs.inverse();
-	t = inverseRs.map(t);
-	t = t.neg();
-	SE_Matrix4f ret;
-	ret.set(inverseRs, t);
-	return ret;
+	    SE_Matrix3f rs = toMatrix3f();
+	    SE_Vector3f t = getTranslate();
+	    SE_Matrix3f inverseRs = rs.inverse();
+	    t = inverseRs.map(t);
+	    t = t.neg();
+	    SE_Matrix4f ret;
+	    ret.set(inverseRs, t);
+	    return ret;
     }
     else
     {
-	SE_Matrix4f adjM;
-	for(int i = 0 ; i < 4 ; i++)
-	{
-	    for(int j = 0 ; j < 4 ; j++)
+	    SE_Matrix4f adjM;
+	    for(int i = 0 ; i < 4 ; i++)
 	    {
-		SE_Matrix3f coffM = cofactorM(i, j);
-		float coffDet = coffM.det();
-		if(((i + j) % 2) == 0)
-		{
-		    adjM.d[i * 4 + j] = coffDet / det;
-		}
-		else
-		{
-		    adjM.d[i * 4 + j] = -coffDet / det;
-		}
+	        for(int j = 0 ; j < 4 ; j++)
+	        {
+		        SE_Matrix3f coffM = cofactorM(i, j);
+		        float coffDet = coffM.det();
+		        if(((i + j) % 2) == 0)
+		        {
+		            adjM.d[i * 4 + j] = coffDet / det;
+		        }
+		        else
+		        {
+		            adjM.d[i * 4 + j] = -coffDet / det;
+		        }
+	        }
 	    }
-	}
-	SE_Matrix4f ret = adjM.transpose();
-	return ret;
+	    SE_Matrix4f ret = adjM.transpose();
+	    return ret;
     }
 }
 SE_Matrix3f SE_Matrix4f::cofactorM(int row, int column) const
@@ -542,16 +542,16 @@ SE_Matrix3f SE_Matrix4f::cofactorM(int row, int column) const
     int outIndex = 0;
     for(int i = 0 ; i < 4 ; i++)
     {
-	if(i != row)
-	{
-	    for(int j = 0 ; j < 4 ; j++)
-	    {
-		if(j != column)
-		{
-		    ret.d[outIndex++] = d[i * 4 + j];
-		}
-	    }
-	}
+        if(i != row)
+        {
+            for(int j = 0 ; j < 4 ; j++)
+            {
+                if(j != column)
+                {
+                    ret.d[outIndex++] = d[i * 4 + j];
+                }
+            }
+        }
     }
     return ret;
 }
@@ -560,8 +560,8 @@ SE_Matrix4f SE_Matrix4f::transpose() const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 4 ; i++)
     {
-	SE_Vector4f v = getRow(i);
-	ret.setColumn(i, v);
+	    SE_Vector4f v = getRow(i);
+	    ret.setColumn(i, v);
     }
     return ret;
 }
@@ -601,7 +601,7 @@ SE_Matrix4f SE_Matrix4f::mulScalar(float f) const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	ret.d[i] = d[i] * f;
+	    ret.d[i] = d[i] * f;
     }
     return ret;
 }
@@ -610,12 +610,12 @@ SE_Matrix4f SE_Matrix4f::mul(const SE_Matrix4f& rm) const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 4 ; i++)
     {
-	SE_Vector4f r = getRow(i);
-	for(int j = 0 ; j < 4 ; j++)
-	{
-	    SE_Vector4f c = rm.getColumn(j);
-	    ret.d[i * 4 + j] = r.dot(c);
-	}
+        SE_Vector4f r = getRow(i);
+        for(int j = 0 ; j < 4 ; j++)
+        {
+            SE_Vector4f c = rm.getColumn(j);
+            ret.d[i * 4 + j] = r.dot(c);
+        }
     }
     return ret;
 }
@@ -646,7 +646,7 @@ void SE_Matrix4f::setRow(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_
     SE_Vector4f vr[] = {r0, r1, r2, r3};
     for(int i = 0 ; i < 4 ; i++)
     {
-	setRow(i, vr[i]);
+	    setRow(i, vr[i]);
     }
 }
 void SE_Matrix4f::setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const SE_Vector4f& c2, const SE_Vector4f& c3)
@@ -654,7 +654,7 @@ void SE_Matrix4f::setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const 
     SE_Vector4f cr[] = {c0, c1, c2, c3};
     for(int i = 0 ; i < 4 ; i++)
     {
-	setColumn(i, cr[i]);
+	    setColumn(i, cr[i]);
     }
 }
 void  SE_Matrix4f::set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, const SE_Vector3f& translate)

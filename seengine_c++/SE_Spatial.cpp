@@ -178,7 +178,7 @@ void SE_Spatial::read(SE_BufferInput& input)
     mBVType = input.readInt();
     mLocalTranslate = input.readVector3f();
     mLocalScale = input.readVector3f();
-    mWorldRotate = input.readQuat();
+    mLocalRotate = input.readQuat();
 }
 void SE_Spatial::write(SE_BufferOutput& output)
 {

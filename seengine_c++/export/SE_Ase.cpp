@@ -243,15 +243,10 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         for(i = 0 ; i < mesh->numVertexes ; i++)
         {
             SE_Vector4f p(mesh->vertexes[i].x, mesh->vertexes[i].y, mesh->vertexes[i].z, 1.0f);
-            //p = worldToModelM.map(p);
+            p = worldToModelM.map(p);
             output.writeFloat(p.x);
             output.writeFloat(p.y);
             output.writeFloat(p.z);
-            /*
-            output.writeFloat(mesh->vertexes[i].x);
-            output.writeFloat(mesh->vertexes[i].y);
-            output.writeFloat(mesh->vertexes[i].z);
-            */
         }
         for(i = 0 ; i < mesh->numFaces ; i++)
         {
@@ -497,14 +492,14 @@ WRIET_SURFACE:
         rotateAxis.x = go->rotateAxis[0];
         rotateAxis.y = go->rotateAxis[1];
         rotateAxis.z = go->rotateAxis[2];
-        //child->setLocalTranslate(translate);
-		child->setLocalTranslate(SE_Vector3f(0, 0, 0));
-        //child->setLocalScale(scale);
-        child->setLocalScale(SE_Vector3f(1.0, 1.0, 1.0));
-
+        child->setLocalTranslate(translate);
+		//child->setLocalTranslate(SE_Vector3f(0, 0, 0));
+        child->setLocalScale(scale);
+        //child->setLocalScale(SE_Vector3f(1.0, 1.0, 1.0));
         SE_Quat q;
-        //q.set(go->rotateAngle, rotateAxis);
-		q.set(0, SE_Vector3f(0, 0, 0));
+        q.set(go->rotateAngle, rotateAxis);
+        child->setLocalRotate(q);
+		//q.set(0, SE_Vector3f(0, 0, 0));
         child->setBVType(SE_BoundingVolume::AABB);
         SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
 		meshObj->setName(go->name);
