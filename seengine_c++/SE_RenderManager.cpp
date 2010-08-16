@@ -9,12 +9,14 @@
 #include <string.h>
 static void checkGLError()
 {
+	/*
     GLenum error = glGetError();
     if(error != GL_NO_ERROR)
     {
         LOGI("### gl error = %d ####\n", error);
         SE_ASSERT(0);
     }
+	*/
 }
 SE_RenderManager::SE_RenderManager()
 {
@@ -52,7 +54,9 @@ void SE_RenderManager::beginDraw()
     SE_Rect<int> rect = currCamera->getViewport();
     glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
     checkGLError();
+#ifdef DEBUG
     LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
+#endif
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
     shaderProgram->use();
 	glClearColor(1.0, 0, 0, 0);
@@ -87,7 +91,9 @@ void SE_RenderManager::draw()
         {
             SE_RenderUnit* ru = *it;
 			ru->setViewToPerspectiveMatrix(m);
+#ifdef DEBUG
 			LOGI("### draw %d ###\n", j++);
+#endif
 			//if(j >= 130)
             ru->draw();
         }

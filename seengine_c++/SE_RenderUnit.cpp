@@ -10,12 +10,14 @@
 #include "SE_ShaderProgram.h"
 static void checkGLError()
 {
+	/*
     GLenum error = glGetError();
     if(error != GL_NO_ERROR)
     {
         LOGI("### gl error = %d ####\n", error);
         //SE_ASSERT(0);
     }
+	*/
 }
 /////////////////////////////////
 SE_RenderUnit::~SE_RenderUnit()

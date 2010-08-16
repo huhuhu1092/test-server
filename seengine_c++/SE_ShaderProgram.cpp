@@ -3,12 +3,14 @@
 #include "SE_Common.h"
 static void checkGLError()
 {
+	/*
     GLenum error = glGetError();
     if(error != GL_NO_ERROR)
     {
         LOGI("### gl error = %d ####\n", error);
         SE_ASSERT(0);
     }
+	*/
 }
 static GLuint loadShader(GLenum type, const char* shaderSrc)
 {
@@ -143,12 +145,14 @@ void SE_ShaderProgram::link()
 	checkGLError();
 	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 	checkGLError();
+#ifdef DEBUG
     LOGI("### m_a_position_loc = %d ###\n", m_a_position_loc);
     LOGI("### m_a_tex_coord_loc = %d ###\n", m_a_tex_coord_loc);
     LOGI("### m_u_texture_loc = %d ###\n", m_u_texture_loc);
     LOGI("### m_u_shading_mode_loc = %d ###\n", m_u_shading_mode_loc);
     LOGI("### m_u_color_loc = %d ###\n", m_u_color_loc);
     LOGI("### m_u_wvp_matrix_loc = %d ###\n", m_u_wvp_matrix_loc);
+#endif
 #endif
 }
 
