@@ -6,6 +6,7 @@ class SE_StringID
 {
 public:
     SE_StringID();
+    ~SE_StringID();
     SE_StringID(const char* id);
     SE_StringID(const char* id, int size);
     SE_StringID(const SE_StringID& id);

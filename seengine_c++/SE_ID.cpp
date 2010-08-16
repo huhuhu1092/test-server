@@ -10,6 +10,10 @@ struct SE_StringID::_Impl
 {
     std::string id;
 };
+SE_StringID::~SE_StringID()
+{
+    delete mImpl;
+}
 SE_StringID::SE_StringID()
 {
     mImpl = new SE_StringID::_Impl;

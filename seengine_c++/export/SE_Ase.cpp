@@ -309,6 +309,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         output.writeInt(fragmentShaderLen);
         output.writeBytes(vertexShader, vertexShaderLen);
         output.writeBytes(fragmentShader, fragmentShaderLen);
+        delete[] vertexShader;
+        delete[] fragmentShader;
     }
 ///////////////////// write mesh //////////////// 
     std::vector<SE_MeshID> meshIDVector(geomDataNum);
