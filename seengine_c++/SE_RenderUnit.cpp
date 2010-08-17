@@ -94,6 +94,11 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
 		texSize++;
 #endif
     }
+    else
+    {
+        glBindTexture(GL_TEXTURE_2D, texid);
+        return;
+    }
     glBindTexture(GL_TEXTURE_2D, texid);
     checkGLError();
     if(!imageData->isCompressTypeByHardware())
@@ -349,9 +354,9 @@ void SE_TriSurfaceRenderUnit::draw()
     {
         loadBaseColorTexture2D(imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
         glUniform1i(shaderProgram->getBaseColorTextureUnifyLoc(), 0);
-        checkGLError();
+        //checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 1);
-        checkGLError();
+        //checkGLError();
     }
     else
     {
@@ -372,16 +377,16 @@ void SE_TriSurfaceRenderUnit::draw()
             color[2] = c.z;
         }
 		glDisable(GL_TEXTURE_2D);
-        checkGLError();
+        //checkGLError();
 		glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
-        checkGLError();
+        //checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
-        checkGLError();
+        //checkGLError();
     }
     float matrixData[16];
     m.getColumnSequence(matrixData);
     glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, matrixData); 
-    checkGLError();
+    //checkGLError();
     _Vector3f* vertex = NULL;
     int vertexNum = 0;
     _Vector2f* texVertex = NULL;
@@ -391,28 +396,28 @@ void SE_TriSurfaceRenderUnit::draw()
 	if(texVertexNum > 0)
         SE_ASSERT(vertexNum == texVertexNum);
     glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
-    checkGLError();
+    //checkGLError();
 	if(texVertex)
     {
         glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);
         checkGLError();
     }
     glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
-    checkGLError();
+    //checkGLError();
     if(texVertex)
     {
 	    glEnableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
-        checkGLError();
+        //checkGLError();
     }
     else
     {
         glDisableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
-        checkGLError();
+        //checkGLError();
     }
 #ifdef DEBUG
 	LOGI("### vertexNum = %d #####\n", vertexNum);
 #endif
     glDrawArrays(GL_TRIANGLES, 0, vertexNum);
-    checkGLError();
+    //checkGLError();
 
 }
