@@ -12,6 +12,7 @@ public:
     void beginDraw();
     void endDraw();
     void draw();
+    void sort();
     void addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq = RQ0 );
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{

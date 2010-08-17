@@ -6,6 +6,7 @@
 #include "SE_Command.h"
 #include "SE_CommandFactory.h"
 #include "SE_RenderManager.h"
+#include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
 SE_Application* SE_Application::mInstance = NULL;
@@ -29,6 +30,8 @@ SE_Application::SE_Application()
     mPrevTime = 0;
     mFrameRate = 30;
     mStarted = false;
+    mFpsPrevTime = 0;
+    mFpsFrameNum = 0;
 }
 SE_Application::~SE_Application()
 {
@@ -71,6 +74,15 @@ void SE_Application::run()
     mPrevTime = currTime;
     update(delta, mFrameRate);
     mFrameNum++;   
+    SE_TimeMS fpsDelta = currTime - mFpsPrevTime;
+    mFpsFrameNum++;
+    if(fpsDelta > 1000)
+    {
+        float fFPS = 1000.0f * mFpsFrameNum /(float)fpsDelta;
+        LOGI("FPS : %f\n", fFPS);
+        mFpsFrameNum = 0;
+        mFpsPrevTime = currTime;
+    }
 }
 void SE_Application::createCamera(int index)
 {

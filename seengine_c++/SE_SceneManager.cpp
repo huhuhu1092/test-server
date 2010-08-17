@@ -25,6 +25,7 @@ void SE_SceneManager::renderScene(SE_Camera* camera, SE_RenderManager& renderMan
     renderManager.setPerspectiveMatrix(perspectiveMatrix);
     renderManager.setWorldToViewMatrix(camera->getWorldToViewMatrix());
     mSceneRoot->renderScene(camera, &renderManager);
+    renderManager.sort();
 }
 SE_CommonNode* SE_SceneManager::getRoot()
 {

@@ -22,7 +22,7 @@ static void checkGLError()
 /////////////////////////////////
 SE_RenderUnit::~SE_RenderUnit()
 {}
-void SE_RenderUnit::getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum)
+void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
 {}
 SE_ImageDataID SE_RenderUnit::getBumpMapImageID()
 {
@@ -65,10 +65,10 @@ void SE_RenderUnit::draw()
 #ifdef DEBUG
 static int texSize = 0;
 #endif
-void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
+void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
 {
-    //SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    //SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
     if(imageData == NULL)
     {
         LOGI("### can not load texture: ###\n");
@@ -188,7 +188,7 @@ SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
     mTexVertexNum = 0;
     mPrimitiveType = TRIANGLES;
 }
-void SE_TriSurfaceRenderUnit::getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum)
+void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
 {
     SE_Texture* tex = mSurface->getTexture();
     if(!tex)
@@ -207,7 +207,6 @@ void SE_TriSurfaceRenderUnit::getBaseColorImage(SE_ImageData*& imageIDArray, int
     imageIDNum = texUnit->getImageNum();
     imageIDArray = texUnit->getImage();    
 }
-/*
 static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
 {
     SE_Texture* tex = surface->getTexture();
@@ -222,14 +221,13 @@ static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
     return id;
 
 }
-*/
 SE_ImageDataID SE_TriSurfaceRenderUnit::getBumpMapImageID()
 {
-    return SE_ImageDataID();//getImageDataID(mSurface, SE_Texture::TEXTURE1);
+    return getImageDataID(mSurface, SE_Texture::TEXTURE1);
 }
 SE_ImageDataID SE_TriSurfaceRenderUnit::getCubeMapImageID()
 {
-    return SE_ImageDataID();//getImageDataID(mSurface, SE_Texture::TEXTURE2);
+    return getImageDataID(mSurface, SE_Texture::TEXTURE2);
 }
 void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
@@ -245,7 +243,7 @@ void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
     int* facets = mSurface->getFacetArray();
     SE_Vector3i* faceArray = geomData->getFaceArray();
     SE_Vector3f* vertexArray = geomData->getVertexArray();
-    mVertex = (_Vector3f*)malloc(sizeof(_Vector3f) * facetNum * 3);//new _Vector3f[facetNum * 3];
+    mVertex = new _Vector3f[facetNum * 3];
     mVertexNum = facetNum * 3;
     int k = 0;
     for(int i = 0 ; i < facetNum ; i++)
@@ -337,8 +335,7 @@ SE_Vector3f SE_TriSurfaceRenderUnit::getColor()
 SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
 {
 	if(mVertex)
-        //delete[] mVertex;
-		free(mVertex);
+        delete[] mVertex;
 	if(mTexVertex)
         delete[] mTexVertex;
 }
@@ -349,9 +346,9 @@ void SE_TriSurfaceRenderUnit::draw()
 	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
     //shaderProgram->use();
-    SE_ImageData* imageDataArray;
-    int imageDataNum;
-    getBaseColorImage(imageDataArray, imageDataNum);
+    SE_ImageDataID* imageDataArray = NULL;
+    int imageDataNum = 0;
+    getBaseColorImageID(imageDataArray, imageDataNum);
     if(imageDataArray)
     {
 		/*
@@ -378,7 +375,7 @@ void SE_TriSurfaceRenderUnit::draw()
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
 		*/
 		
-        loadBaseColorTexture2D(&imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+        loadBaseColorTexture2D(imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
         glUniform1i(shaderProgram->getBaseColorTextureUnifyLoc(), 0);
         //checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 1);

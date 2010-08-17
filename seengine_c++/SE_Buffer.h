@@ -1,5 +1,6 @@
 #ifndef SE_BUFFER_H
 #define SE_BUFFER_H
+#include <string>
 class SE_Vector2f;
 class SE_Vector3f;
 class SE_Vector4f;
@@ -60,7 +61,7 @@ public:
     SE_Matrix4f readMatrix4f();
     SE_Quat readQuat();
     //this is the string ended by '\0', user need to release the memory returned
-    char* readString();
+    std::string readString();
     char* readBytes(int len);
     bool readBytes(char* out, int len);
 

@@ -16,7 +16,7 @@ class SE_RenderUnit
 {
 public:
     virtual ~SE_RenderUnit();
-    virtual void getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum);
+    virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
@@ -49,7 +49,7 @@ public:
 	{
 		return mViewToPerspective;
 	}
-    void loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
+    void loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
@@ -61,7 +61,7 @@ class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 public:
     SE_TriSurfaceRenderUnit(SE_Surface* mesh);
     ~SE_TriSurfaceRenderUnit();
-    virtual void getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum);
+    virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);

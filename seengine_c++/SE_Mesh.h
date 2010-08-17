@@ -16,7 +16,7 @@ public:
     {
         mTexCoord = texCoordData;
     }
-    void setImageData(SE_ImageData* imageIDArray, int num)
+    void setImageData(SE_ImageDataID* imageIDArray, int num)
     {
         mImageArray = imageIDArray;
         mImageNum = num;
@@ -29,13 +29,13 @@ public:
     {
         return mImageNum;
     }
-    SE_ImageData* getImage(int index)
+    SE_ImageDataID getImage(int index)
     {
         if(index < 0 || index >= mImageNum)
             return NULL;
-        return &mImageArray[index];
+        return mImageArray[index];
     }
-    SE_ImageData* getImage()
+    SE_ImageDataID* getImage()
     {
         return mImageArray;
     }
@@ -45,7 +45,7 @@ public:
     }
 private:
     SE_TextureCoordData* mTexCoord;
-    SE_ImageData* mImageArray;
+    SE_ImageDataID* mImageArray;
     int mImageNum;
 };
 class SE_Texture

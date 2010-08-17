@@ -105,6 +105,8 @@ protected:
     SE_CommandList mCommandList;
     SE_CommandFactoryList mCommandFactoryList;
     bool mStarted;
+    int mFpsFrameNum;
+    SE_TimeMS mFpsPrevTime;
     SE_APPID mAppID;
     static SE_Application* mInstance;
 };

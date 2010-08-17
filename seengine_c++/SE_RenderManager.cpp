@@ -32,6 +32,33 @@ SE_RenderManager::SE_RenderManager()
     }
     */
 }
+static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
+{
+    SE_ImageDataID* leftImageDataArray = NULL;
+    int leftImageDataArrayNum = 0;
+    SE_ImageDataID* rightImageDataArray = NULL;
+    int rightImageDataArrayNum = 0;
+    left->getBaseColorImageID(leftImageDataArray, leftImageDataArrayNum);
+    right->getBaseColorImageID(rightImageDataArray, rightImageDataArrayNum);
+    if(leftImageDataArray == NULL && rightImageDataArray != NULL)
+        return true;
+    if(leftImageDataArray != NULL && rightImageDataArray == NULL)
+        return false;
+    if(leftImageDataArray == NULL && rightImageDataArray == NULL)
+        return false;
+    if(leftImageDataArray[0] < rightImageDataArray[0])
+        return true;
+    else
+        return false;
+}
+void SE_RenderManager::sort()
+{
+    for(int i = 0 ; i < RQ_NUM ; i++)
+    {
+        RenderUnitList* ruList = mRenderQueue[i];
+        ruList->sort(_CompareRenderUnit) ;
+    }
+}
 SE_RenderManager::~SE_RenderManager()
 {
     for(int i = 0 ; i  < RQ_NUM ; i++)
@@ -82,7 +109,9 @@ void SE_RenderManager::endDraw()
 void SE_RenderManager::draw()
 {
     SE_Matrix4f m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
+#ifdef DEBUG
 	int j = 0;
+#endif
     for(int i = 0 ; i < RQ_NUM ; i++)
     {
         RenderUnitList* ruList = mRenderQueue[i];
@@ -93,11 +122,15 @@ void SE_RenderManager::draw()
 			ru->setViewToPerspectiveMatrix(m);
 			//if(j >= 130)
             ru->draw();
+#ifdef DEBUG
 			j++;
+#endif
         }
 
     }
+#ifdef DEBUG
 	LOGI("### draw %d ###\n", j);
+#endif
 }
 void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq)
 {

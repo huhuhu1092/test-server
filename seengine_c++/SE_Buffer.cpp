@@ -305,7 +305,7 @@ SE_Quat SE_BufferInput::readQuat()
     SE_Vector4f v = readVector4f();
     return SE_Quat(v.x, v.y, v.z, v.w);
 }
-char* SE_BufferInput::readString()
+std::string SE_BufferInput::readString()
 {
     int len = readInt();
     char* data = new char[len + 1];
@@ -313,10 +313,12 @@ char* SE_BufferInput::readString()
     {
         memset(data, 0, len + 1);
         readBytes(data, len);
-        return data;
+        std::string ret(data);
+        delete[] data;
+        return ret;
     }
     else
-        return NULL;
+        return std::string();
 }
 bool SE_BufferInput::readBytes(char* out, int len)
 {
