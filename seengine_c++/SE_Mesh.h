@@ -2,6 +2,8 @@
 #define SE_MESH_H
 #include "SE_Vector.h"
 #include "SE_ID.h"
+#include "SE_Common.h"
+#include "SE_ImageData.h"
 class SE_TextureCoordData;
 class SE_GeometryData;
 class SE_MaterialData;
@@ -14,7 +16,7 @@ public:
     {
         mTexCoord = texCoordData;
     }
-    void setImageData(SE_ImageDataID* imageIDArray, int num)
+    void setImageData(SE_ImageData* imageIDArray, int num)
     {
         mImageArray = imageIDArray;
         mImageNum = num;
@@ -27,13 +29,13 @@ public:
     {
         return mImageNum;
     }
-    SE_ImageDataID getImage(int index)
+    SE_ImageData* getImage(int index)
     {
         if(index < 0 || index >= mImageNum)
             return NULL;
-        return mImageArray[index];
+        return &mImageArray[index];
     }
-    SE_ImageDataID* getImage()
+    SE_ImageData* getImage()
     {
         return mImageArray;
     }
@@ -43,7 +45,7 @@ public:
     }
 private:
     SE_TextureCoordData* mTexCoord;
-    SE_ImageDataID* mImageArray;
+    SE_ImageData* mImageArray;
     int mImageNum;
 };
 class SE_Texture
@@ -70,6 +72,8 @@ public:
     int getFacetNum();
     int* getFacetArray();
     SE_Vector3f getColor();
+	void getVertex(_Vector3f*& vertex, int & vertexNum);
+	void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
     SE_ProgramDataID getProgramDataID();
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
@@ -122,6 +126,10 @@ private:
     int mSampleMag;
     int mWrapS;
     int mWrapT;
+	_Vector3f* mVertex;
+	int mVertexNum;
+	_Vector2f* mTexVertex;
+	int mTexVertexNum;
 };
 class SE_Mesh
 {

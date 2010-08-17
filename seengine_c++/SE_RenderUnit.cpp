@@ -22,7 +22,7 @@ static void checkGLError()
 /////////////////////////////////
 SE_RenderUnit::~SE_RenderUnit()
 {}
-void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
+void SE_RenderUnit::getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum)
 {}
 SE_ImageDataID SE_RenderUnit::getBumpMapImageID()
 {
@@ -65,13 +65,13 @@ void SE_RenderUnit::draw()
 #ifdef DEBUG
 static int texSize = 0;
 #endif
-void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
+void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
 {
-    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
+    //SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    //SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
     if(imageData == NULL)
     {
-        LOGI("### can not load texture: %s ###\n", imageDataID.getStr());
+        LOGI("### can not load texture: ###\n");
         return;
     }
     glEnable(GL_TEXTURE_2D);
@@ -115,7 +115,6 @@ void SE_RenderUnit::loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE
         {
             type = GL_UNSIGNED_SHORT_5_6_5;
         }
-
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
         checkGLError();
     }
@@ -189,7 +188,7 @@ SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
     mTexVertexNum = 0;
     mPrimitiveType = TRIANGLES;
 }
-void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
+void SE_TriSurfaceRenderUnit::getBaseColorImage(SE_ImageData*& imageIDArray, int& imageIDNum)
 {
     SE_Texture* tex = mSurface->getTexture();
     if(!tex)
@@ -208,6 +207,7 @@ void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray,
     imageIDNum = texUnit->getImageNum();
     imageIDArray = texUnit->getImage();    
 }
+/*
 static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
 {
     SE_Texture* tex = surface->getTexture();
@@ -222,13 +222,14 @@ static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
     return id;
 
 }
+*/
 SE_ImageDataID SE_TriSurfaceRenderUnit::getBumpMapImageID()
 {
-    return getImageDataID(mSurface, SE_Texture::TEXTURE1);
+    return SE_ImageDataID();//getImageDataID(mSurface, SE_Texture::TEXTURE1);
 }
 SE_ImageDataID SE_TriSurfaceRenderUnit::getCubeMapImageID()
 {
-    return getImageDataID(mSurface, SE_Texture::TEXTURE2);
+    return SE_ImageDataID();//getImageDataID(mSurface, SE_Texture::TEXTURE2);
 }
 void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
@@ -244,7 +245,7 @@ void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
     int* facets = mSurface->getFacetArray();
     SE_Vector3i* faceArray = geomData->getFaceArray();
     SE_Vector3f* vertexArray = geomData->getVertexArray();
-    mVertex = new _Vector3f[facetNum * 3];
+    mVertex = (_Vector3f*)malloc(sizeof(_Vector3f) * facetNum * 3);//new _Vector3f[facetNum * 3];
     mVertexNum = facetNum * 3;
     int k = 0;
     for(int i = 0 ; i < facetNum ; i++)
@@ -336,7 +337,8 @@ SE_Vector3f SE_TriSurfaceRenderUnit::getColor()
 SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
 {
 	if(mVertex)
-        delete[] mVertex;
+        //delete[] mVertex;
+		free(mVertex);
 	if(mTexVertex)
         delete[] mTexVertex;
 }
@@ -344,19 +346,44 @@ static bool _Used = false;
 void SE_TriSurfaceRenderUnit::draw()
 {
     SE_Matrix4f m = mViewToPerspective.mul(mWorldTransform);
-	SE_ProgramDataID spID = mSurface->getProgramDataID();
+	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
     //shaderProgram->use();
-    SE_ImageDataID* imageDataArray;
+    SE_ImageData* imageDataArray;
     int imageDataNum;
-    getBaseColorImageID(imageDataArray, imageDataNum);
+    getBaseColorImage(imageDataArray, imageDataNum);
     if(imageDataArray)
     {
-        loadBaseColorTexture2D(imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+		/*
+		SE_MaterialData* md = mSurface->getMaterialData();
+        float color[3];
+        if(md)
+        {
+			color[0] = md->ambient.x;
+			color[1] = md->ambient.y;
+			color[2] = md->ambient.z;
+
+        }
+        else
+        {
+            SE_Vector3f c = mSurface->getColor();
+            color[0] = c.x;
+            color[1] = c.y;
+            color[2] = c.z;
+        }
+		glDisable(GL_TEXTURE_2D);
+        //checkGLError();
+		glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+        //checkGLError();
+		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
+		*/
+		
+        loadBaseColorTexture2D(&imageDataArray[0], (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
         glUniform1i(shaderProgram->getBaseColorTextureUnifyLoc(), 0);
         //checkGLError();
 		glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 1);
         //checkGLError();
+		
     }
     else
     {
@@ -391,8 +418,8 @@ void SE_TriSurfaceRenderUnit::draw()
     int vertexNum = 0;
     _Vector2f* texVertex = NULL;
     int texVertexNum = 0;
-    getVertex(vertex, vertexNum);
-    getBaseColorTexVertex(texVertex, texVertexNum);
+    mSurface->getVertex(vertex, vertexNum);
+    mSurface->getBaseColorTexVertex(texVertex, texVertexNum);
 	if(texVertexNum > 0)
         SE_ASSERT(vertexNum == texVertexNum);
     glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
@@ -400,7 +427,7 @@ void SE_TriSurfaceRenderUnit::draw()
 	if(texVertex)
     {
         glVertexAttribPointer(shaderProgram->getBaseColorTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, texVertex);
-        checkGLError();
+        //checkGLError();
     }
     glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
     //checkGLError();

@@ -20,5 +20,14 @@ enum SE_Plane_Side {SE_POSITIVE, SE_NEGATIVE, SE_OTHER};
 enum SE_PRIMITIVE_TYPE {LINES, LINE_STRIP, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP};
 enum SE_SAMPLE_TYPE {NEAREST, LINEAR};
 enum SE_WRAP_TYPE {REPEAT, CLAMP};
+//for pass data to opengl
+struct _Vector3f
+{
+    float d[3];
+};
+struct _Vector2f
+{
+    float d[2];
+};
 extern const char* SE_SEP;
 #endif

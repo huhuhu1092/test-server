@@ -2,45 +2,50 @@
 #include "SE_Common.h"
 #include "SE_Buffer.h"
 #include "SE_Log.h"
-#include <string>
 
 ///////////////////////
 SE_StringID SE_StringID::INVALID("");
+/*
 struct SE_StringID::_Impl
 {
     std::string id;
 };
+*/
 SE_StringID::~SE_StringID()
 {
-    delete mImpl;
 }
 SE_StringID::SE_StringID()
 {
-    mImpl = new SE_StringID::_Impl;
+    //mImpl = new SE_StringID::_Impl;
 }
 const char* SE_StringID::getStr() const
 {
-    return mImpl->id.c_str();
+    return mStr.c_str();
 }
 SE_StringID::SE_StringID(const char* id)
 {
     SE_ASSERT(id);
-    mImpl = new SE_StringID::_Impl;
-    mImpl->id = id;
+    //mImpl = new SE_StringID::_Impl;
+    //mImpl->id = id;
+	mStr = id;
 }
 SE_StringID::SE_StringID(const char* id, int size)
 {
     SE_ASSERT(id);
-    mImpl = new SE_StringID::_Impl;
-    mImpl->id.assign(id, size);
+    //mImpl = new SE_StringID::_Impl;
+    mStr.assign(id, size);
 }
+/*
 SE_StringID::SE_StringID(const SE_StringID& id)
 {
     mImpl = new SE_StringID::_Impl;
     if(!mImpl)
         return ;
     mImpl->id = id.mImpl->id;
+
 }
+*/
+/*
 SE_StringID& SE_StringID::operator=(const SE_StringID& id)
 {
     if(this == &id)
@@ -54,6 +59,7 @@ SE_StringID& SE_StringID::operator=(const SE_StringID& id)
     mImpl = tmp;
     return *this;
 }
+*/
 bool SE_StringID::isValid() const
 {
     SE_StringID invalid("");
@@ -61,28 +67,28 @@ bool SE_StringID::isValid() const
 }
 void SE_StringID::print() const
 {
-	LOGI("%s\n", mImpl->id.c_str());
+	LOGI("%s\n", mStr.c_str());
 }
 SE_StringID& SE_StringID::read(SE_BufferInput& input)
 {
     std::string str = input.readString();
-    mImpl->id = str;
+    mStr = str;
     return *this;
 }
 void SE_StringID::write(SE_BufferOutput& output)
 {
-    output.writeString(mImpl->id.c_str());
+    output.writeString(mStr.c_str());
 }
 bool operator==(const SE_StringID& id1, const SE_StringID& id2)
 {
-    if(id1.mImpl->id == id2.mImpl->id)
+    if(id1.mStr == id2.mStr)
         return true;
     else
         return false;
 }
 bool operator<(const SE_StringID& id1, const SE_StringID& id2)
 {
-    if(id1.mImpl->id < id2.mImpl->id)
+    if(id1.mStr < id2.mStr)
         return true;
     else
         return false;
@@ -90,7 +96,7 @@ bool operator<(const SE_StringID& id1, const SE_StringID& id2)
 }
 bool operator>(const SE_StringID& id1, const SE_StringID& id2)
 {
-    if(id1.mImpl->id > id2.mImpl->id)
+    if(id1.mStr > id2.mStr)
         return true;
     else
         return false;

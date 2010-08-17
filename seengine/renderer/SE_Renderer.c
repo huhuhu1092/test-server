@@ -317,7 +317,6 @@ static void createRenderUnitByMesh(SE_Renderer* renderer, SE_Mesh* mesh, int sub
         SE_SubMesh* subMesh = SE_Mesh_GetSubMesh(mesh, subIndex);
 		SE_FaceList* faceList = &subMesh->faceList;
 		vertexCount = faceList->num * 3;
-
         vertexArray = (SE_Vector3f*)SE_Malloc(vertexCount * sizeof(SE_Vector3f));
 		if(!vertexArray)
 		{
@@ -372,14 +371,12 @@ static void createRenderUnit(SE_Renderer* renderer, SE_Spatial* spatial)
 	SE_List* children = spatial->children;
     if(spatialBv)
     {
-		
         int cullret =  SE_Camera_CullBoundingVolume(mainCamera, spatialBv);
         if(cullret == -1)
-	{
+	    {
             /*LOGI("## cull object : %s ###\n", SE_String_GetData(&spatial->name));*/
-	    return;
-	}
-			
+	        return;
+	    }	
     }    
     if(children)
 	{
@@ -564,7 +561,6 @@ SE_Result SE_Renderer_Draw(SE_Renderer* renderer)
             glEnableVertexAttribArray(shaderData->a_position_loc);
 	        glEnableVertexAttribArray(shaderData->a_tex_coord_loc);
             glDrawArrays(GL_TRIANGLES, 0, renderGeometry->vertexCount);
-
             /*setPolygonOffset(-1.0f, -2.0f);*/
 		}
 	}

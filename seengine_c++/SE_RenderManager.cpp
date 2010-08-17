@@ -82,23 +82,22 @@ void SE_RenderManager::endDraw()
 void SE_RenderManager::draw()
 {
     SE_Matrix4f m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
+	int j = 0;
     for(int i = 0 ; i < RQ_NUM ; i++)
     {
         RenderUnitList* ruList = mRenderQueue[i];
         RenderUnitList::iterator it;
-		int j = 0;
         for(it = ruList->begin() ; it != ruList->end() ;it++)
         {
             SE_RenderUnit* ru = *it;
 			ru->setViewToPerspectiveMatrix(m);
-#ifdef DEBUG
-			LOGI("### draw %d ###\n", j++);
-#endif
 			//if(j >= 130)
             ru->draw();
+			j++;
         }
 
     }
+	LOGI("### draw %d ###\n", j);
 }
 void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq)
 {

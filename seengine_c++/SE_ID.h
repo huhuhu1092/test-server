@@ -1,5 +1,6 @@
 #ifndef SE_ID_H
 #define SE_ID_H
+#include <string>
 class SE_BufferOutput;
 class SE_BufferInput;
 class SE_StringID
@@ -9,8 +10,9 @@ public:
     ~SE_StringID();
     SE_StringID(const char* id);
     SE_StringID(const char* id, int size);
-    SE_StringID(const SE_StringID& id);
-    SE_StringID& operator=(const SE_StringID& id);
+
+    //SE_StringID(const SE_StringID& id);
+    //SE_StringID& operator=(const SE_StringID& id);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator>(const SE_StringID& id1, const SE_StringID& id2);
@@ -21,8 +23,7 @@ public:
 	void print() const;
 	static SE_StringID INVALID;
 private:
-    struct _Impl;
-    _Impl* mImpl;
+	std::string mStr;
 };
 class SE_CommonID
 {

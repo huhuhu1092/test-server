@@ -9,6 +9,7 @@
 #include "SE_Quat.h"
 #include "SE_CommonNode.h"
 
+
 SE_InitAppCommand::SE_InitAppCommand(SE_Application* app) : SE_Command(app)
 {}
 SE_InitAppCommand::~SE_InitAppCommand()
@@ -17,9 +18,9 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     std::string inPath = dataPath + SE_SEP + fileName + ".ASE";
     std::string outPath = dataPath + SE_SEP + fileName;
-    ASE_Loader loader(inPath.c_str(), 0, 0);
-    loader.Load();
-	loader.Write(dataPath.c_str(), outPath.c_str());
+    //ASE_Loader loader(inPath.c_str(), 0, 0);
+    //loader.Load();
+	//loader.Write(dataPath.c_str(), outPath.c_str());
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	resourceManager->loadBaseData(fileName.c_str()); 
