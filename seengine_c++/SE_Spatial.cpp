@@ -45,7 +45,9 @@ void SE_Spatial::updateWorldTransform()
     mWorldTransform.set(mWorldRotate.toMatrix3f(), mWorldScale, mWorldTranslate);
 }
 void SE_Spatial::updateBoundingVolume()
-{}
+{
+
+}
 
 const SE_Matrix4f& SE_Spatial::getWorldTransform()
 {

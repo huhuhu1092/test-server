@@ -5,6 +5,7 @@
 #include "SE_Common.h"
 #include "SE_RenderUnit.h"
 #include "SE_RenderManager.h"
+#include "SE_BoundingVolume.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_Geometry)
 struct SE_Geometry::_Impl
@@ -28,7 +29,6 @@ SE_Geometry::~SE_Geometry()
 void SE_Geometry::attachSimObject(SE_SimObject* go)
 {
     mImpl->attachObject.push_back(go);
-    go->doTransform(getWorldTransform());
 }
 void SE_Geometry::detachSimObject(SE_SimObject* go)
 {
@@ -65,7 +65,34 @@ void SE_Geometry::updateWorldTransform()
 }
 void SE_Geometry::updateBoundingVolume()
 {
-	SE_Spatial::updateBoundingVolume();
+	if(mWorldBoundingVolume)
+	{
+		delete mWorldBoundingVolume;
+		mWorldBoundingVolume = NULL;
+	}
+	switch(getBVType())
+	{
+	case SE_BoundingVolume::AABB:
+	    mWorldBoundingVolume = new SE_AABBBV;
+		break;
+	case SE_BoundingVolume::OBB:
+		mWorldBoundingVolume = new SE_OBBBV;
+		break;
+	case SE_BoundingVolume::SPHERE:
+		mWorldBoundingVolume = new SE_SphereBV;
+		break;
+	}
+	if(mWorldBoundingVolume)
+	{
+        SE_Geometry::_Impl::SimObjectList::iterator it;
+        for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+        {
+            (*it)->doTransform(getWorldTransform());
+			SE_Vector3f* points = (*it)->getVertexArray();
+			int num = (*it)->getVertexNum();
+			mWorldBoundingVolume->createFromPoints(points, num);
+		}
+	}
 }
 int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {

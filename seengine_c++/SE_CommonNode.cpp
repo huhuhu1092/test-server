@@ -1,6 +1,7 @@
 #include "SE_CommonNode.h"
 #include "SE_Buffer.h"
 #include "SE_Camera.h"
+#include "SE_BoundingVolume.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_CommonNode)
 struct SE_CommonNode::_Impl
@@ -85,6 +86,31 @@ void SE_CommonNode::updateBoundingVolume()
         SE_Spatial* s = *it;
         s->updateBoundingVolume();
     }
+	if(mWorldBoundingVolume)
+	{
+		delete mWorldBoundingVolume;
+		mWorldBoundingVolume = NULL;
+	}
+	switch(getBVType())
+	{
+	case SE_BoundingVolume::AABB:
+	    mWorldBoundingVolume = new SE_AABBBV;
+		break;
+	case SE_BoundingVolume::OBB:
+		mWorldBoundingVolume = new SE_OBBBV;
+		break;
+	case SE_BoundingVolume::SPHERE:
+		mWorldBoundingVolume = new SE_SphereBV;
+		break;
+	}
+	if(mWorldBoundingVolume)
+	{
+		for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+		{
+			SE_Spatial* s = *it;
+			mWorldBoundingVolume->merge(s->getWorldBoundingVolume());	        
+		}
+	}
 }
 void SE_CommonNode::write(SE_BufferOutput& output)
 {

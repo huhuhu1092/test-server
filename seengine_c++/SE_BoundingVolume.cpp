@@ -1,4 +1,5 @@
 #include "SE_BoundingVolume.h"
+#include "SE_Utils.h"
 SE_BoundingVolume::SE_BoundingVolume()
 {}
 SE_BoundingVolume::~SE_BoundingVolume()
@@ -36,9 +37,14 @@ SE_BoundingVolume::BV_TYPE SE_SphereBV::getType() const
 {
 	return SPHERE;
 }
-/////////////////////////////////////////////
-SE_AABBBV::SE_AABBBV()
+void SE_SphereBV::merge(const SE_BoundingVolume* bv)
 {}
+/////////////////////////////////////////////
+SE_AABBBV::SE_AABBBV() : mAABB(SE_Vector3f(SE_FLT_MAX, SE_FLT_MAX, SE_FLT_MAX), 
+							   SE_Vector3f(-SE_FLT_MAX, -SE_FLT_MAX, -SE_FLT_MAX))
+{
+
+}
 SE_AABBBV::~SE_AABBBV()
 {}
 SE_AABBBV::SE_AABBBV(const SE_AABB& aabb)
@@ -66,6 +72,24 @@ bool SE_AABBBV::intersect(const SE_BoundingVolume& bv) const
 SE_BoundingVolume::BV_TYPE SE_AABBBV::getType() const
 {
 	return AABB;
+}
+void SE_AABBBV::merge(const SE_BoundingVolume* bv)
+{
+	if(!bv || bv->getType() != AABB)
+	{
+		return;
+	}
+	SE_AABBBV* aabbBv = (SE_AABBBV*)bv;
+	const SE_Vector3f& min1 = mAABB.getMin();
+	const SE_Vector3f& max1 = mAABB.getMax();
+	const SE_Vector3f& min2 = aabbBv->mAABB.getMin();
+	const SE_Vector3f& max2 = aabbBv->mAABB.getMax();
+	SE_Vector3f minf, maxf;
+	for(int i = 0 ; i < 3 ; i++)
+	{
+		minf.d[i] = SE_Util::min(min1.d[i], min2.d[i]);
+		maxf.d[i] = SE_Util::max(max1.d[i], max2.d[i]);
+	}
 }
 ///////////////////////////////////////////
 SE_OBBBV::SE_OBBBV()
@@ -98,7 +122,8 @@ SE_BoundingVolume::BV_TYPE SE_OBBBV::getType() const
 {
 	return OBB;
 }
-
+void SE_OBBBV::merge(const SE_BoundingVolume* bv)
+{}
 
 
 

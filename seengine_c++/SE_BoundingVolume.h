@@ -20,6 +20,7 @@ public:
     virtual SE_IntersectResult intersect(const SE_Ray& ray) const = 0;
     virtual bool intersect(const SE_BoundingVolume& bv) const = 0;
     virtual BV_TYPE getType() const = 0;
+	virtual void merge(const SE_BoundingVolume* bv) = 0;
 };
 class SE_SphereBV : public SE_BoundingVolume
 {
@@ -35,6 +36,7 @@ public:
     virtual SE_IntersectResult intersect(const SE_Ray& ray) const;
     virtual bool intersect(const SE_BoundingVolume& bv) const;
     virtual BV_TYPE getType() const;
+	virtual void merge(const SE_BoundingVolume* bv);
 private:
     SE_Sphere mSphere;
 };
@@ -51,7 +53,8 @@ public:
     virtual SE_Plane_Side whichSide(const SE_Plane& plane) const;
     virtual SE_IntersectResult intersect(const SE_Ray& ray) const;
     virtual bool intersect(const SE_BoundingVolume& bv) const;
-    virtual BV_TYPE getType() const; 
+    virtual BV_TYPE getType() const;
+	virtual void merge(const SE_BoundingVolume* bv);
 private:
     SE_AABB mAABB;
 };
@@ -69,6 +72,7 @@ public:
     virtual SE_IntersectResult intersect(const SE_Ray& ray) const;
     virtual bool intersect(const SE_BoundingVolume& bv) const; 
     virtual BV_TYPE getType() const;
+	virtual void merge(const SE_BoundingVolume* bv);
 private:
     SE_OBB mOBB;
 };

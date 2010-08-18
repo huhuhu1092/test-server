@@ -70,10 +70,10 @@ public:
     SE_Plane(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
     void set(const SE_Vector3f& normal, float d);
     void set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
-    SE_Vector3f getNormal();
-    float getDistance();
-    SE_Plane_Side whichSide(const SE_Vector3f& point);
-    float distance(const SE_Vector3f& point);
+    SE_Vector3f getNormal() const;
+    float getDistance() const;
+    SE_Plane_Side whichSide(const SE_Vector3f& point) const;
+    float distance(const SE_Vector3f& point) const;
     SE_Plane transform(const SE_Matrix4f& m);
 private:
     SE_Vector3f mNormal;
@@ -86,8 +86,8 @@ public:
     SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end);
 	// normalized indicate that whether dir is normalized.
     SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized);
-    SE_Vector3f getOrigin();
-    SE_Vector3f getDirection();
+    SE_Vector3f getOrigin() const;
+    SE_Vector3f getDirection() const;
 private:
     SE_Vector3f mOrigin;
     SE_Vector3f mDir;
@@ -97,10 +97,10 @@ class SE_Triangle
 public:
     SE_Triangle();
     SE_Triangle(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
-    SE_Plane createPlane();
-    bool isCollinear();
-    void getPoint(SE_Vector3f point[3]);
+    bool isCollinear() const;
+    void getPoint(SE_Vector3f point[3]) const;
     void set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
+    SE_IntersectResult intersect(const SE_Ray& ray) const;
 private:
     SE_Vector3f mP0;
     SE_Vector3f mP1;
@@ -139,10 +139,10 @@ class SE_Sphere
 public:
     SE_Sphere();
     SE_Sphere(const SE_Vector3f& center, float r);
+	void set(const SE_Vector3f& center, float r);
     void createFromPoints(SE_Vector3f* points, int num);
     SE_Vector3f getCenter() const;
     float getRadius() const;
-    void set(const SE_Vector3f& center, float r);
     SE_IntersectResult intersect(const SE_AABB& aabb) const;
     SE_IntersectResult intersect(const SE_Ray& ray) const;
     SE_IntersectResult intersect(const SE_OBB& obb) const;
@@ -164,6 +164,7 @@ class SE_AABB
 public:
     SE_AABB();
     SE_AABB(const SE_Vector3f& min, const SE_Vector3f& max);
+	void set(const SE_Vector3f& min, const SE_Vector3f& max);
     void createFromPoints(SE_Vector3f* points, int num);
     SE_Vector3f getMin() const;
     SE_Vector3f getMax() const;
@@ -173,6 +174,7 @@ public:
     SE_IntersectResult intersect(const SE_OBB& obb) const;
     SE_IntersectResult intersect(const SE_Sphere& sphere) const;
     SE_IntersectResult intersect(const SE_Ray& ray) const;
+    SE_IntersectResult intersect(const SE_Plane& plane) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
 private:
     SE_Vector3f mMin;
@@ -182,6 +184,7 @@ class SE_OBB
 {
 public:
     SE_OBB();
+	void set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3]);
     void createFromPoints(SE_Vector3f* points, int num);
     void createFromAABB(const SE_AABB& aabb);
     void getBoxVertex(SE_Vector3f out[8]) const;

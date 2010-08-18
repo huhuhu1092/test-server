@@ -76,7 +76,7 @@ SE_Plane::SE_Plane(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector
 {
     set(p0, p1, p2);
 }
-SE_Vector3f SE_Plane::getNormal()
+SE_Vector3f SE_Plane::getNormal() const
 {
     return mNormal;
 }
@@ -108,11 +108,11 @@ void SE_Plane::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector
     }
 }
 
-float SE_Plane::getDistance()
+float SE_Plane::getDistance() const
 {
     return mDistance;
 }
-SE_Plane_Side SE_Plane::whichSide(const SE_Vector3f& point)
+SE_Plane_Side SE_Plane::whichSide(const SE_Vector3f& point) const
 {
     float ret = mNormal.dot(point) - mDistance;
     if(ret == 0.0f)
@@ -122,7 +122,7 @@ SE_Plane_Side SE_Plane::whichSide(const SE_Vector3f& point)
     else
         return SE_NEGATIVE;
 }
-float SE_Plane::distance(const SE_Vector3f& point)
+float SE_Plane::distance(const SE_Vector3f& point) const
 {
     return SE_Fabs(mNormal.dot(point) - mDistance);
 }
@@ -149,15 +149,120 @@ SE_Ray::SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized)
 	else 
 		mDir = dir;
 }
-SE_Vector3f SE_Ray::getOrigin()
+SE_Vector3f SE_Ray::getOrigin() const
 {
     return mOrigin;
 }
-SE_Vector3f SE_Ray::getDirection()
+SE_Vector3f SE_Ray::getDirection() const
 {
    return mDir;
 }
-
+////////////////////////
+SE_Triangle::SE_Triangle()
+{}
+SE_Triangle::SE_Triangle(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2) : mP0(p0), mP1(p1), mP2(p2)
+{
+}
+bool SE_Triangle::isCollinear() const
+{
+    SE_Vector3f v0 = mP1 - mP0;
+    SE_Vector3f v1 = mP2 - mP0;
+    float d = v0.dot(v1) / (v0.length() * v1.length());
+    if(d == 1.0f)
+        return true;
+    else
+        return false;
+}
+void SE_Triangle::getPoint(SE_Vector3f point[3]) const
+{
+    point[0] = mP0;
+    point[1] = mP1;
+    point[2] = mP2;
+}
+void SE_Triangle::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2)
+{
+    mP0 = p0;
+    mP1 = p1;
+    mP2 = p2;
+}
+SE_IntersectResult SE_Triangle::intersect(const SE_Ray& ray) const
+{
+    SE_Vector3f origin, dir;
+	SE_Vector3f normal;
+	float d;
+	SE_Vector3f p0, p1, p2;
+	SE_Plane plane;
+	SE_Vector3f p; /*the intersection of ray and plane*/
+	float t;
+	float nvDot; /*normal and dir dot*/
+	SE_Vector3f r, q1, q2;
+	SE_Matrix2f inverseM; /*matrix computed by q1, q2*/
+	SE_Vector2f v; /*vector computed by r and q1, q2*/
+	SE_Vector2f bc; /*barycentric coordinate w1, w2*/
+	float w0; /*barycentric coordiate w0 */
+	float data[4];
+    SE_IntersectResult ret;
+    plane.set(mP0, mP1, mP2);
+    if(isCollinear())
+    {
+        //do intersection test for collinear
+        return ret;
+    }
+    origin = ray.getOrigin();
+    dir = ray.getDirection();
+    normal = plane.getNormal();
+    d = plane.getDistance();
+    nvDot = normal.dot(dir);
+    if(nvDot == 0.0f)
+    {
+        ret.intersected = false;
+        return ret;
+    }
+    t = (d - normal.dot(origin)) / nvDot;
+    if(t < 0)
+    {
+        ret.intersected = false;
+        return ret;
+    }
+    p = origin + dir.mul(t);
+    r = p - mP0;
+    q1 = mP1 - mP0;
+    q2 = mP2 - mP0;
+    v.x = r.dot(q1);
+    v.y = r.dot(q2);
+    data[0] = q1.dot(q1);
+    data[1] = q1.dot(q2);
+    data[2] = q1.dot(q2);
+    data[3] = q2.dot(q2);
+    SE_Matrix2f m(data);
+    if(!m.hasInverse())
+    {
+        ret.intersected = false;
+        return ret;
+    }
+    inverseM = m.inverse();
+    bc = inverseM.map(v);
+    if((bc.x + bc.y) <= 1.0f && bc.x >= 0.0f && bc.y >= 0.0f)
+    {
+        w0 = 1 - bc.x - bc.y;
+        ret.intersected = true;
+        ret.intersectPoint.resize(2);
+        ret.intersectPoint[0].x = w0;
+        ret.intersectPoint[0].y = bc.x;
+        ret.intersectPoint[0].z = bc.y;
+        ret.intersectPoint[1].x = p.x;
+        ret.intersectPoint[1].y = p.y;
+        ret.intersectPoint[1].z = p.z;
+        ret.distance.resize(1);
+        ret.distance[0] = p.distance(origin);
+        return ret;
+    }
+    else
+    {
+        ret.intersected = false;
+        return ret;
+    }
+}
 ///////////////////////
 SE_Frustum::SE_Frustum()
 {
@@ -374,7 +479,36 @@ SE_IntersectResult SE_Sphere::intersect(const SE_AABB& aabb) const
 }
 SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray) const
 {
-    return SE_IntersectResult();
+    SE_IntersectResult ret;
+    SE_Vector3f origin = ray.getOrigin();
+    SE_Vector3f dir = ray.getDirection();
+    SE_Vector3f dist = origin - mCenter;
+    float b, c; // quadratic equation b and c : t2 + 2bt + c = 0
+    b = dist.dot(dir);
+    c = dist.dot(dist) - mRadius * mRadius;
+    if(c > 0.0f && b > 0.0f)
+    {
+        ret.intersected = 0;
+        return ret;
+    }
+    float discr = b * b - c;
+    if(discr < 0.0f)
+    {
+        ret.intersected = 0;
+        return ret;
+    }
+    float t = -b - SE_Sqrtf(discr);
+    if(t < 0.0f)
+    {
+        t = 0.0f;
+    }
+    SE_Vector3f resultP = dir.mul(t);
+    ret.intersected = 1;
+    ret.intersectPoint.resize(1);
+    ret.intersectPoint[0] = origin + resultP;
+    ret.distance.resize(1);
+    ret.distance[0] = resultP.length();
+    return ret;
 }
 SE_IntersectResult SE_Sphere::intersect(const SE_OBB& obb) const
 {
@@ -468,13 +602,81 @@ SE_IntersectResult SE_AABB::intersect(const SE_Sphere& sphere) const
 }
 SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray) const
 {
-	return SE_IntersectResult();
+    SE_IntersectResult ret;
+    float tmin = -SE_FLT_MAX;
+    float tmax = SE_FLT_MAX;
+	float t1, t2;
+    SE_Vector3f dir = ray.getDirection();
+    SE_Vector3f origin = ray.getOrigin(); 
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        if(SE_Fabs(dir.d[i]) < SE_FLOAT_EQUAL_EPSILON)
+        {
+            if(origin.d[i] < mMin.d[i] || origin.d[i] > mMax.d[i])
+            {
+                ret.intersected = false;
+                return ret;
+            }
+        }
+        else
+        {
+            float ood = 1.0f / dir.d[i];
+            t1 = (mMin.d[i] - origin.d[i]) * ood;
+            t2 = (mMax.d[i] - origin.d[i]) * ood;
+            if(t1 > t2)
+            {
+                float tmp;
+                tmp = t1;
+                t1 = t2;
+                t2 = tmp;
+            }
+            if(t1 > tmin)
+                tmin = t1;
+            if(t2 < tmax)
+                tmax = t2;
+            if(tmin > tmax)
+            {
+                ret.intersected = false;
+                return ret;
+            }
+            if(tmax < 0)
+            {
+                ret.intersected = false;
+                return ret;
+            }
+        }
+    }
+    ret.intersected = true;
+    ret.distance.resize(1);
+    ret.distance[0] = tmin;
+    ret.intersectPoint.resize(1);
+    ret.intersectPoint[0] = origin + dir.mul(tmin);
+	return ret;
+}
+SE_IntersectResult SE_AABB::intersect(const SE_Plane& plane) const
+{
+    SE_Vector3f center = getCenter();
+    SE_Vector3f extent = mMax - center;
+    SE_Vector3f normal = plane.getNormal();
+    float r = extent.x * SE_Fabs(normal.x) + extent.y * SE_Fabs(normal.y) + extent.z * SE_Fabs(normal.z);
+    float s = normal.dot(center) - plane.getDistance();
+    SE_IntersectResult ret;
+	if(SE_Fabs(s) <= r)
+        ret.intersected = true;
+    else
+        ret.intersected = false;
+    return ret;
+
 }
 SE_Plane_Side SE_AABB::whichSide(const SE_Plane& plane) const
 {
 	return SE_NEGATIVE;
 }
-
+void SE_AABB::set(const SE_Vector3f& min, const SE_Vector3f& max)
+{
+	mMin = min;
+	mMax = max;
+}
 /////////////////////////////////////////////////
 SE_OBB::SE_OBB()
 {
@@ -653,7 +855,15 @@ SE_Plane_Side SE_OBB::whichSide(const SE_Plane& plane) const
 {
 	return SE_NEGATIVE;
 }
-
+void SE_OBB::set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3])
+{
+	mCenter = center;
+	for(int i = 0 ; i < 3 ; i++)
+	{
+	    mAxis[i] = axis[i];
+		mExtent[i] = extent[3];
+	}
+}
 
 
 
