@@ -26,7 +26,7 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadBaseData(fileName.c_str()); 
     SE_SceneManager* sceneManager = mApp->getSceneManager();
 	sceneManager->createScene(fileName.c_str());
-    SE_CommonNode* rootScene = sceneManager->getRoot();
+    SE_Spatial* rootScene = sceneManager->getRoot();
     rootScene->updateWorldTransform();
 	rootScene->updateBoundingVolume();
 	mApp->createCamera(SE_Application::MAIN_CAMERA);

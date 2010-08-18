@@ -35,11 +35,11 @@ public:
     SE_Rect3D();
     SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, 
               float e[2]);
-    SE_Vector3f getCenter();
-    SE_Vector3f getXAxis();
-    SE_Vector3f getYAxis();
-    void getExtent(float out[2]);
-    void getVertex(SE_Vector3f v[4]);
+    SE_Vector3f getCenter() const;
+    SE_Vector3f getXAxis() const;
+    SE_Vector3f getYAxis() const;
+    void getExtent(float out[2]) const;
+    void getVertex(SE_Vector3f v[4]) const;
 private:
     SE_Vector3f mCenter;
     SE_Vector3f mAxis[2];
@@ -52,9 +52,9 @@ public:
     SE_Segment(const SE_Vector3f& start, const SE_Vector3f& end);
 	//if dir is normalized , the len is the length of dir. otherwise len == 1.0
     SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir, float len);
-    SE_Vector3f getStart();
-    SE_Vector3f getEnd();
-    SE_Vector3f getDirection();
+    SE_Vector3f getStart() const;
+    SE_Vector3f getEnd() const;
+    SE_Vector3f getDirection() const;
 private:
     SE_Vector3f mStart;
     SE_Vector3f mEnd;
@@ -111,16 +111,16 @@ class SE_Frustum
 public:
     SE_Frustum();
     SE_Frustum(float fovAngle, float ratio, float n, float f);
-    SE_Rect<float> getNearPlaneRect();
-    SE_Matrix4f getPerspectiveMatrix();
-    SE_Plane getLeftPlane();
-    SE_Plane getRightPlane();
-    SE_Plane getTopPlane();
-    SE_Plane getBottomPlane();
-    SE_Plane getFarPlane();
-    SE_Plane getNearPlane();
-    float getNear();
-    float getFar();
+    SE_Rect<float> getNearPlaneRect() const;
+    SE_Matrix4f getPerspectiveMatrix() const;
+    SE_Plane getLeftPlane() const;
+    SE_Plane getRightPlane() const;
+    SE_Plane getTopPlane() const;
+    SE_Plane getBottomPlane() const;
+    SE_Plane getFarPlane() const;
+    SE_Plane getNearPlane() const;
+    float getNear() const;
+    float getFar() const;
     void set(float fovAngle, float ratio, float n, float f);
 private:
     SE_Plane mLeftp;

@@ -12,24 +12,24 @@ SE_Rect3D::SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const 
     mExtent[0] = e[0];
     mExtent[1] = e[1];
 }
-SE_Vector3f SE_Rect3D::getCenter()
+SE_Vector3f SE_Rect3D::getCenter() const
 {
     return mCenter;
 }
-SE_Vector3f SE_Rect3D::getXAxis()
+SE_Vector3f SE_Rect3D::getXAxis() const
 {
     return mAxis[0];
 }
-SE_Vector3f SE_Rect3D::getYAxis()
+SE_Vector3f SE_Rect3D::getYAxis() const
 {
     return mAxis[1];
 }
-void SE_Rect3D::getExtent(float out[2])
+void SE_Rect3D::getExtent(float out[2]) const
 {
     out[0] = mExtent[0];
     out[1] = mExtent[1];
 }
-void SE_Rect3D::getVertex(SE_Vector3f v[4])
+void SE_Rect3D::getVertex(SE_Vector3f v[4]) const
 {
     v[0] = mCenter - mAxis[0] * mExtent[0] - mAxis[1] * mExtent[1];
     v[1] = mCenter + mAxis[0] * mExtent[0] - mAxis[1] * mExtent[1];
@@ -50,15 +50,15 @@ SE_Segment::SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir, float l
     mStart = start;
     mEnd = start + dir * len;
 }
-SE_Vector3f SE_Segment::getStart()
+SE_Vector3f SE_Segment::getStart() const
 {
     return mStart;
 }
-SE_Vector3f SE_Segment::getEnd()
+SE_Vector3f SE_Segment::getEnd() const
 {
     return mEnd;
 }
-SE_Vector3f SE_Segment::getDirection()
+SE_Vector3f SE_Segment::getDirection() const
 {
     return mEnd - mStart;
 }
@@ -89,7 +89,8 @@ SE_Plane SE_Plane::transform(const SE_Matrix4f& m)
 {
     SE_Vector4f v(mNormal, -mDistance);
     SE_Vector4f out = m.map(v);
-    return SE_Plane(out.xyz(), out.w);
+	SE_Vector3f n = out.xyz();
+	return SE_Plane(n.normalize(), out.w / n.length());
 }
 void SE_Plane::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2)
 {
@@ -296,7 +297,7 @@ void SE_Frustum::set(float fovAngle, float ratio, float n, float f)
     mFovAngle = fovAngle;
     mRatio = ratio;
 }
-SE_Rect<float> SE_Frustum::getNearPlaneRect()
+SE_Rect<float> SE_Frustum::getNearPlaneRect() const
 {
     SE_Rect<float> out;
 	float fovRadian, e;
@@ -308,7 +309,7 @@ SE_Rect<float> SE_Frustum::getNearPlaneRect()
     out.bottom = - mNear * mRatio / e;
     return out;
 }
-SE_Matrix4f SE_Frustum::getPerspectiveMatrix()
+SE_Matrix4f SE_Frustum::getPerspectiveMatrix() const
 {
     SE_Matrix4f out;
     SE_Rect<float> nearrect;
@@ -339,35 +340,35 @@ SE_Matrix4f SE_Frustum::getPerspectiveMatrix()
     out.set(3, 3, 0);
     return out;
 }
-SE_Plane SE_Frustum::getLeftPlane()
+SE_Plane SE_Frustum::getLeftPlane() const
 {
     return mLeftp;
 }
-SE_Plane SE_Frustum::getRightPlane()
+SE_Plane SE_Frustum::getRightPlane() const
 {
     return mRightp;
 }
-SE_Plane SE_Frustum::getTopPlane()
+SE_Plane SE_Frustum::getTopPlane() const
 {
     return mTopp;
 }
-SE_Plane SE_Frustum::getBottomPlane()
+SE_Plane SE_Frustum::getBottomPlane() const
 {
     return mBottomp;
 }
-SE_Plane SE_Frustum::getFarPlane()
+SE_Plane SE_Frustum::getFarPlane() const
 {
     return mFarp;
 }
-SE_Plane SE_Frustum::getNearPlane()
+SE_Plane SE_Frustum::getNearPlane() const
 {
     return mNearp;
 }
-float SE_Frustum::getNear()
+float SE_Frustum::getNear() const
 {
     return mNear;
 }
-float SE_Frustum::getFar()
+float SE_Frustum::getFar() const
 {
     return mFar;
 }
@@ -542,8 +543,8 @@ SE_AABB::SE_AABB(const SE_Vector3f& min, const SE_Vector3f& max) : mMin(min), mM
 void SE_AABB::createFromPoints(SE_Vector3f* points, int num)
 {
 	int i;
-    SE_Vector3f& min = points[0];
-    SE_Vector3f& max = points[0];
+    SE_Vector3f min = points[0];
+    SE_Vector3f max = points[0];
     for(i = 1 ; i < num ; i++)
     {
         SE_Vector3f& v = points[i];
@@ -670,7 +671,11 @@ SE_IntersectResult SE_AABB::intersect(const SE_Plane& plane) const
 }
 SE_Plane_Side SE_AABB::whichSide(const SE_Plane& plane) const
 {
-	return SE_NEGATIVE;
+	SE_IntersectResult ret = intersect(plane);
+	if(ret.intersected)
+		return SE_OTHER;
+	SE_Vector3f center = getCenter();
+	return plane.whichSide(center);
 }
 void SE_AABB::set(const SE_Vector3f& min, const SE_Vector3f& max)
 {

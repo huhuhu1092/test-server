@@ -12,12 +12,15 @@ public:
     ~SE_SceneManager();
     // render a scene to render manager which will render it to render target
     void renderScene(SE_Camera* camera, SE_RenderManager& renderManager);
-    SE_CommonNode* getRoot();
+    SE_Spatial* getRoot();
     SE_Spatial* find(const SE_SpatialID& spatialID);
     void createScene(const char* sceneFileName);
     void updateSpatialIDMap();
 private:
-    SE_CommonNode* mSceneRoot;
+	SE_SceneManager(const SE_SceneManager&);
+	SE_SceneManager& operator=(const SE_SceneManager&);
+private:
+    SE_Spatial* mSceneRoot;
     struct SpatialIDMap;
     SpatialIDMap* mSpatialIDMap;
 };

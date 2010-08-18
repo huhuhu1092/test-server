@@ -20,11 +20,11 @@ SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, cons
 	create(location, zAxis, yAxis, fov, ratio, near, far);
 
 }
-SE_Rect<int> SE_Camera::getViewport()
+SE_Rect<int> SE_Camera::getViewport() const
 {
     return mViewport;
 }
-int SE_Camera::cullBV(const SE_BoundingVolume& bv)
+int SE_Camera::cullBV(const SE_BoundingVolume& bv) const
 {
     SE_Plane cullPlanes[6];
     SE_Plane_Side planeSide = SE_NEGATIVE;
@@ -33,14 +33,14 @@ int SE_Camera::cullBV(const SE_BoundingVolume& bv)
     {
         SE_Plane_Side p = bv.whichSide(cullPlanes[i]);
         if(p == SE_POSITIVE)
-            return -1;
+            return SE_FULL_CULL;
         if(p != SE_NEGATIVE)
             planeSide = p;
     }
     if(planeSide == SE_NEGATIVE)
-        return 1;
+        return SE_NOT_CULL;
     else
-        return 0;
+        return SE_PART_CULL;
 }
 void SE_Camera::setViewport(int x, int y, int w, int h)
 {
@@ -49,12 +49,12 @@ void SE_Camera::setViewport(int x, int y, int w, int h)
     mViewport.top = y;
     mViewport.bottom = y + h;
 }
-SE_Matrix4f SE_Camera::getWorldToViewMatrix()
+SE_Matrix4f SE_Camera::getWorldToViewMatrix() const
 {
     SE_Matrix4f vtow = getViewToWorldMatrix();
     return vtow.inverse(); 
 }
-SE_Matrix4f SE_Camera::getViewToWorldMatrix()
+SE_Matrix4f SE_Camera::getViewToWorldMatrix() const
 {
     SE_Matrix3f rm;
     rm.setColumn(0, mAxisX);
@@ -86,8 +86,16 @@ SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
     dir.z = mAxisX.z * xv / dirLen + mAxisY.z * yv / dirLen + mAxisZ.z * (-mFrustum.getNear()) / dirLen;
     return SE_Ray(mLocation, dir, false);
 }
-void SE_Camera::getFrustumPlanes(SE_Plane planes[6])
+void SE_Camera::getFrustumPlanes(SE_Plane planes[6]) const
 {
+	if(!mChanged)
+	{
+		for(int i = 0 ; i < 6 ; i++)
+		{
+			planes[i] = mPlanes[i];
+		}
+		return;
+	}
     SE_Plane lplanes[6];
     lplanes[0] = mFrustum.getLeftPlane();
     lplanes[1] = mFrustum.getRightPlane();
@@ -100,8 +108,61 @@ void SE_Camera::getFrustumPlanes(SE_Plane planes[6])
     vtom = vtom.transpose();
     for(int i = 0 ; i < 6 ; i++)
     {
-        planes[i] = lplanes[i].transform(vtom);
+        SE_Plane p = lplanes[i].transform(vtom);
+		planes[i].set(p.getNormal().neg(), p.getDistance());
+		mPlanes[i] = planes[i];
     }
+#ifdef DEBUG
+	/*
+	SE_Plane nplanes[6];
+	SE_Vector3f NearLeftBottom, NearLeftTop, NearRightBottom, NearRightTop,
+		        FarLeftBottom, FarLeftTop, FarRightBottom, FarRightTop;
+	SE_Vector3f tmp1;
+	SE_Vector3f tmp[4];
+	SE_Rect<float> nearplane = mFrustum.getNearPlaneRect();
+	tmp[0] = mAxisZ.mul(-mFrustum.getNear());
+	tmp[1] = mAxisX.mul(nearplane.left);
+	tmp[2] = mAxisY.mul(nearplane.bottom);
+	tmp[3] = mLocation;
+	NearLeftBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+	tmp1 = tmp[0] + tmp[1] + tmp[2];
+	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+	FarLeftBottom = mLocation + tmp1;
+
+	tmp[1] = mAxisX.mul(nearplane.left);
+	tmp[2] = mAxisY.mul(nearplane.top);
+	NearLeftTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    tmp1 = tmp[0] + tmp[1] + tmp[2];
+	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+	FarLeftTop = mLocation + tmp1;
+
+	tmp[1] = mAxisX.mul(nearplane.right);
+	tmp[2] = mAxisY.mul(nearplane.bottom);
+	NearRightBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    tmp1 = tmp[0] + tmp[1] + tmp[2];
+	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+	FarRightBottom = mLocation + tmp1;
+
+	tmp[1] = mAxisX.mul(nearplane.right);
+	tmp[2] = mAxisY.mul(nearplane.top);
+	NearRightTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+
+	tmp1 = tmp[0] + tmp[1] + tmp[2];
+	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+	FarRightTop = mLocation + tmp1;
+
+	nplanes[0].set(NearLeftBottom, mLocation, NearLeftTop);
+	nplanes[1].set(NearRightTop, mLocation, NearRightBottom);
+	nplanes[2].set(mLocation, NearLeftBottom, NearRightBottom);
+	nplanes[3].set(mLocation, NearRightTop, NearLeftTop);
+	nplanes[4].set(NearLeftBottom, NearRightBottom, NearRightTop);
+	nplanes[5].set(FarLeftBottom, FarLeftTop, FarRightTop);
+    for(int i = 0 ; i < 6 ; i++)
+    {
+        planes[i] = nplanes[i];
+    }
+	*/
+#endif
 }
 void SE_Camera::setLocation(const SE_Vector3f& loc)
 {
@@ -193,7 +254,7 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, co
     mLocation = location;
     mChanged = true;
 }
-SE_Matrix4f SE_Camera::getPerspectiveMatrix()
+SE_Matrix4f SE_Camera::getPerspectiveMatrix() const
 {
 	return mFrustum.getPerspectiveMatrix();
 }

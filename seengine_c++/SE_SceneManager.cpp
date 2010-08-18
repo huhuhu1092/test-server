@@ -27,7 +27,7 @@ void SE_SceneManager::renderScene(SE_Camera* camera, SE_RenderManager& renderMan
     mSceneRoot->renderScene(camera, &renderManager);
     renderManager.sort();
 }
-SE_CommonNode* SE_SceneManager::getRoot()
+SE_Spatial* SE_SceneManager::getRoot()
 {
     return mSceneRoot;
 }
@@ -39,10 +39,13 @@ void SE_SceneManager::createScene(const char* sceneFileName)
 {
 	if(mSceneRoot != NULL)
 		delete mSceneRoot;
+	mSceneRoot = SE_Application::getInstance()->getResourceManager()->loadScene(sceneFileName);
+	/*
     mSceneRoot = new SE_CommonNode(SE_Application::getInstance()->createCommonID(), NULL);
 	SE_Spatial* scene = SE_Application::getInstance()->getResourceManager()->loadScene(sceneFileName);
 	scene->setParent(mSceneRoot);
 	mSceneRoot->addChild(scene);
+	*/
 }
 void SE_SceneManager::updateSpatialIDMap()
 {}

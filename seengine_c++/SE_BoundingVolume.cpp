@@ -54,16 +54,20 @@ void SE_AABBBV::write(SE_BufferOutput& output) const
 void SE_AABBBV::read(SE_BufferInput& input)
 {}
 void SE_AABBBV::createFromPoints(SE_Vector3f* points, int num)
-{}
+{
+	mAABB.createFromPoints(points, num);
+}
 void SE_AABBBV::transform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
-{}
+{
+	
+}
 SE_Plane_Side SE_AABBBV::whichSide(const SE_Plane& plane) const
 {
-	return SE_NEGATIVE;
+	return mAABB.whichSide(plane);
 }
 SE_IntersectResult SE_AABBBV::intersect(const SE_Ray& ray) const
 {
-	return SE_IntersectResult();
+	return mAABB.intersect(ray);
 }
 bool SE_AABBBV::intersect(const SE_BoundingVolume& bv) const
 {
@@ -90,6 +94,7 @@ void SE_AABBBV::merge(const SE_BoundingVolume* bv)
 		minf.d[i] = SE_Util::min(min1.d[i], min2.d[i]);
 		maxf.d[i] = SE_Util::max(max1.d[i], max2.d[i]);
 	}
+	mAABB.set(minf, maxf);
 }
 ///////////////////////////////////////////
 SE_OBBBV::SE_OBBBV()

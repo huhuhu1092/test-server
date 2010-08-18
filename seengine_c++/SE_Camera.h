@@ -13,15 +13,15 @@ public:
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
-    int cullBV(const SE_BoundingVolume& bv);
+    int cullBV(const SE_BoundingVolume& bv) const;
     void setViewport(int x, int y, int w, int h);
-    SE_Rect<int> getViewport();
-    SE_Matrix4f getWorldToViewMatrix();
-    SE_Matrix4f getViewToWorldMatrix();
+    SE_Rect<int> getViewport() const;
+    SE_Matrix4f getWorldToViewMatrix() const;
+    SE_Matrix4f getViewToWorldMatrix() const;
     void setFrustum(float fov, float ratio, float near, float far);
     void translateLocal(const SE_Vector3f& translate);
     SE_Ray screenCoordinateToRay(int x, int y);
-    void getFrustumPlanes(SE_Plane planes[6]);
+    void getFrustumPlanes(SE_Plane planes[6]) const;
     void setLocation(const SE_Vector3f& loc);
     //0: x axis, 1
     void rotateLocal(float angle, SE_AXIS_TYPE axis);
@@ -29,7 +29,7 @@ public:
     void create(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
-    SE_Matrix4f getPerspectiveMatrix();
+    SE_Matrix4f getPerspectiveMatrix() const;
 private:
     SE_Frustum mFrustum;
     SE_Rect<int> mViewport;
@@ -37,6 +37,7 @@ private:
     SE_Vector3f mAxisX;
     SE_Vector3f mAxisY;
     SE_Vector3f mAxisZ;
+	mutable SE_Plane mPlanes[6];
     bool mChanged;
 };
 #endif
