@@ -27,10 +27,13 @@ struct SE_CommandEntry
 class SE_CommandFactory
 {
 public:
+	enum {DEFAULT_SIZE = 100};
     SE_CommandFactory();
     SE_CommandFactory(SE_CommandEntry* entryArray[], int size);
     void set(SE_CommandEntry* entryArray[], int size);
     SE_Command* create(SE_Application* app, const SE_CommandID& id) ;
+	void add(const SE_CommandID& commandID, SE_CreateCommandFunc* cf);
+	void remove(const SE_CommandID& commandID);
     virtual ~SE_CommandFactory();
 private:
     SE_CommandEntry** mEntryArray;

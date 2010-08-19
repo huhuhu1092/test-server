@@ -13,6 +13,7 @@ public:
     std::string dataPath;
     std::string fileName; // the prefix of the file
 };
+//////////////////////////////////////
 class SE_UpdateCameraCommand : public SE_Command
 {
 public:
@@ -22,5 +23,19 @@ public:
 public:
     int width;
     int height;
+};
+///////////////////////////////////////
+class SE_MoveCameraCommand : public SE_Command
+{
+public:
+    SE_MoveCameraCommand(SE_Application* app);
+    ~SE_MoveCameraCommand();
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:
+    SE_Camera* camera;
+	float rotateAngle;
+	SE_AXIS_TYPE axis;
+	SE_Vector3f translate;
+
 };
 #endif

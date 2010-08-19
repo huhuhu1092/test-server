@@ -97,6 +97,8 @@ void SE_Geometry::updateBoundingVolume()
 int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {
     int r = spatialTravel->visit(this);
+	if(r)
+		return r;
     SE_Geometry::_Impl::SimObjectList::iterator it;
     for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
     {
