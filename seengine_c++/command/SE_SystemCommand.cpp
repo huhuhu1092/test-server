@@ -8,8 +8,8 @@
 #include "SE_Camera.h"
 #include "SE_Quat.h"
 #include "SE_CommonNode.h"
-
-
+#include "SE_Geometry3D.h"
+#include "SE_SpatialTravel.h"
 SE_InitAppCommand::SE_InitAppCommand(SE_Application* app) : SE_Command(app)
 {}
 SE_InitAppCommand::~SE_InitAppCommand()
@@ -45,4 +45,27 @@ void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta
 	SE_Camera* c = mApp->getCurrentCamera();
 	c->create(location, zAxis, up, 90.0f,((float)height)/ width, 1.0f, 1000.0f);
     c->setViewport(0, 0, width, height);
+}
+
+SE_MoveCameraCommand::SE_MoveCameraCommand(SE_Application* app) : SE_Command(app)
+{
+}
+SE_MoveCameraCommand::~SE_MoveCameraCommand()
+{}
+void SE_MoveCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+	SE_Vector3f startLocation = camera->getLocation();
+	camera->rotateLocal(rotateAngle, axis);
+	camera->translateLocal(translate);
+	SE_Vector3f endLocation = camera->getLocation();
+    SE_Sphere sphere;
+	sphere.set(startLocation, 2);
+	SE_SceneManager* sceneManager = mApp->getSceneManager();
+	SE_Spatial* rootScene = sceneManager->getRoot();
+	SE_MovingSphereStaticSpatialIntersect moveTravel(sphere, endLocation);
+	rootScene->travel(&moveTravel, true);
+	if(moveTravel.intersected)
+	{
+		camera->setLocation(moveTravel.location);
+	}
 }

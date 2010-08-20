@@ -474,10 +474,7 @@ float SE_Sphere::getRadius() const
 {
     return mRadius;
 }
-SE_IntersectResult SE_Sphere::intersect(const SE_AABB& aabb) const
-{
-    return SE_IntersectResult();
-}
+
 SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray) const
 {
     SE_IntersectResult ret;
@@ -511,10 +508,7 @@ SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray) const
     ret.distance[0] = resultP.length();
     return ret;
 }
-SE_IntersectResult SE_Sphere::intersect(const SE_OBB& obb) const
-{
-    return SE_IntersectResult();
-}
+
 SE_Plane_Side SE_Sphere::whichSide(const SE_Plane& plane) const
 {
 	return SE_NEGATIVE;
@@ -593,14 +587,8 @@ SE_IntersectResult SE_AABB::intersect(const SE_AABB& aabb) const
     return ret;
     
 }
-SE_IntersectResult SE_AABB::intersect(const SE_OBB& obb) const
-{
-	return SE_IntersectResult();
-}
-SE_IntersectResult SE_AABB::intersect(const SE_Sphere& sphere) const
-{
-	return SE_IntersectResult();
-}
+
+
 SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray) const
 {
     SE_IntersectResult ret;
@@ -743,10 +731,7 @@ void SE_OBB::transfrom(const SE_Vector3f& scale, const SE_Quat& rotate, const SE
     mAxis[1] = yAxis;
     mAxis[2] = zAxis;
 }
-SE_IntersectResult SE_OBB::intersect(const SE_AABB& aabb) const
-{
-	return SE_IntersectResult();
-}
+
 SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
 {
     float ra, rb;
@@ -848,10 +833,7 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
 
 
 }
-SE_IntersectResult SE_OBB::intersect(const SE_Sphere& sphere) const
-{
-	return SE_IntersectResult();
-}
+
 SE_IntersectResult SE_OBB::intersect(const SE_Ray& ray) const
 {
 	return SE_IntersectResult();
@@ -869,6 +851,146 @@ void SE_OBB::set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3]
 		mExtent[i] = extent[3];
 	}
 }
+float SE_GeometryIntersect::pointAABBDistanceSquare(const SE_Vector3f& point, const SE_AABB& aabb)
+{
+    float sqDist = 0.0f;
+    int i;
+	const SE_Vector3f& min = aabb.getMin();
+	const SE_Vector3f& max = aabb.getMax();
+    for(i = 0 ; i < 3 ; i++)
+    {
+        float v = point.d[i];
+        if(v < min.d[i]) sqDist += (min.d[i] - v) * (min.d[i] - v);
+        if(v > max.d[i]) sqDist += (v - max.d[i]) * (v - max.d[i]);
+    }
+    return sqDist;
+}
+int SE_GeometryIntersect::sphereAABB(const SE_Sphere& sphere, const SE_AABB& aabb)
+{
+	float sqDist = pointAABBDistanceSquare(sphere.getCenter(), aabb);
+    return sqDist <= sphere.getRadius() * sphere.getRadius();
+}
+int SE_GeometryIntersect::movingSphereStaticAABB(const SE_Sphere& sphere, const SE_AABB& aabb, 
+		                             const SE_Vector3f& endPoint, SE_Vector3f* out)
+{
+	SE_Sphere s;
+    SE_Vector3f midDir;
+    float r, interval;
+	midDir = (endPoint - sphere.getCenter()).mul(0.5);
+	s.set(sphere.getCenter() + midDir, midDir.length() + sphere.getRadius());
+	if(!SE_GeometryIntersect::sphereAABB(s, aabb))
+        return 0;
+	interval = (endPoint - sphere.getCenter()).length();
+    if(interval < 2.0f)
+    {
+        *out = sphere.getCenter();
+        return 1;
+    }
+	if(movingSphereStaticAABB(sphere, aabb, s.getCenter(), out))
+        return 1;
+    return movingSphereStaticAABB(s, aabb, endPoint, out);
+}
+int SE_GeometryIntersect::movingSphereStaticPlane(const SE_Sphere& sphere, const SE_Plane& plane, const SE_Vector3f& dirOfSphere, SE_Vector3f* out)
+{
+	SE_Vector3f planeNormal = plane.getNormal();
+	float planeD = plane.getDistance();
+	float dist = planeNormal.dot(sphere.getCenter()) - planeD;
+	if(SE_Fabs(dist) <= sphere.getRadius())
+    {
+		*out = sphere.getCenter();
+        return 1;
+    }
+    else
+    {
+        float denom = planeNormal.dot(dirOfSphere);
+        if(denom * dist >= 0.0f)
+        {
+            return 0;
+        }
+        else
+        {
+			float r = dist >0.0f ? sphere.getRadius() : -sphere.getRadius();
+            float t = (r - dist) / denom;
+            if(t >= 0.0f && t <= 1.0f)
+			{
+				*out = dirOfSphere.mul(t) + sphere.getCenter() - planeNormal.mul(r);
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+}
+int SE_GeometryIntersect::movingOBBStaticAABB(const SE_OBB obb, const SE_AABB& aabb, SE_AXIS_TYPE axis, float dist, SE_OBB* out)
+{
+    SE_Vector3f moveDir;
+	SE_Vector3f obbAxis[3];
+	obb.getAxis(obbAxis);
+    switch(axis)
+    {
+    case SE_AXIS_X:
+        moveDir = obbAxis[0].mul(dist);
+        break;
+    case SE_AXIS_Y:
+		moveDir = obbAxis[1].mul(dist);
+        break;
+    case SE_AXIS_Z:
+		moveDir = obbAxis[2].mul(dist);
+        break;
+    }
+	SE_Vector3f endCenter = obb.getCenter() + moveDir;
+	SE_Vector3f aabbCenter = aabb.getCenter();
+	SE_Vector3f aabbExtent = aabb.getExtent();
+	SE_OBB aabbObb;
+	SE_Vector3f aabbObbAxis[3];
+	aabbObbAxis[0].set(1, 0, 0);
+	aabbObbAxis[1].set(0, 1, 0);
+	aabbObbAxis[2].set(0, 0, 1);
+	float aabbObbExtent[3];
+	aabbObbExtent[0] = SE_Fabs(aabbExtent.x / 2);
+	aabbObbExtent[1] = SE_Fabs(aabbExtent.y / 2);
+	aabbObbExtent[2] = SE_Fabs(aabbExtent.z / 2);
+	aabbObb.set(aabbCenter, aabbObbAxis, aabbObbExtent);
+	SE_Vector3f distV = endCenter - obb.getCenter();
+	SE_Vector3f mid = distV.mul(0.5);
+	SE_Vector3f obbWithEndCenter = obb.getCenter() + mid;
+	SE_Vector3f obbWithEndAxis[3];
+	obb.getAxis(obbWithEndAxis);
+	float obbWithEndExtent[3];
+	obb.getExtent(obbWithEndExtent);
+	int index = 0;
+	switch(axis)
+	{
+	case SE_AXIS_X:
+		index = 0;
+		break;
+	case SE_AXIS_Y:
+		index = 1;
+		break;
+	case SE_AXIS_Z:
+		index = 2;
+		break;
+	}
+	float moveAxisExtent = distV.length() + 2 * obbWithEndExtent[index];
+	obbWithEndExtent[index] = moveAxisExtent / 2;
+	SE_OBB obbWithEnd;
+	obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
+	SE_IntersectResult ret = aabbObb.intersect(obbWithEnd);
+	if(!ret.intersected)
+		return 0;
+	float interval = distV.length();
+	if(interval <= 2.0f)
+	{
+		*out = obb;
+		return 1;
+	}
+	if(movingOBBStaticAABB(obb, aabb, axis, dist / 2, out))
+		return 1;
+	obb.getAxis(obbWithEndAxis);
+	obb.getExtent(obbWithEndExtent);
+	obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
+	return movingOBBStaticAABB(obbWithEnd, aabb, axis, dist / 2, out);
 
-
-
+}

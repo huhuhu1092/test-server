@@ -1,8 +1,10 @@
 #ifndef SE_SYSTEMCOMMAND_H
 #define SE_SYSTEMCOMMAND_H
 #include "SE_Command.h"
+#include "SE_Vector.h"
 #include <string>
 class SE_Application;
+class SE_Camera;
 class SE_InitAppCommand : public SE_Command
 {
 public:

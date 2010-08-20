@@ -23,6 +23,10 @@ public:
     SE_Ray screenCoordinateToRay(int x, int y);
     void getFrustumPlanes(SE_Plane planes[6]) const;
     void setLocation(const SE_Vector3f& loc);
+	SE_Vector3f getLocation()
+	{
+		return mLocation;
+	}
     //0: x axis, 1
     void rotateLocal(float angle, SE_AXIS_TYPE axis);
     void rotateLocal(const SE_Quat& rotate);

@@ -21,6 +21,8 @@ public:
     virtual bool intersect(const SE_BoundingVolume& bv) const = 0;
     virtual BV_TYPE getType() const = 0;
 	virtual void merge(const SE_BoundingVolume* bv) = 0;
+	virtual int movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out) = 0;
+	virtual int movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out) = 0;
 };
 class SE_SphereBV : public SE_BoundingVolume
 {
@@ -37,6 +39,12 @@ public:
     virtual bool intersect(const SE_BoundingVolume& bv) const;
     virtual BV_TYPE getType() const;
 	virtual void merge(const SE_BoundingVolume* bv);
+	virtual int movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out);
+	virtual int movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out);
+	SE_Sphere getGeometry()
+	{
+		return mSphere;
+	}
 private:
     SE_Sphere mSphere;
 };
@@ -55,6 +63,12 @@ public:
     virtual bool intersect(const SE_BoundingVolume& bv) const;
     virtual BV_TYPE getType() const;
 	virtual void merge(const SE_BoundingVolume* bv);
+	virtual int movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out);
+	virtual int movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out);
+	SE_AABB getGeometry()
+	{
+		mAABB;
+	}
 private:
     SE_AABB mAABB;
 };
@@ -73,6 +87,12 @@ public:
     virtual bool intersect(const SE_BoundingVolume& bv) const; 
     virtual BV_TYPE getType() const;
 	virtual void merge(const SE_BoundingVolume* bv);
+	virtual int movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out);
+	virtual int movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out);
+	SE_OBB getGeometry()
+	{
+		return mOBB;
+	}
 private:
     SE_OBB mOBB;
 };

@@ -143,9 +143,7 @@ public:
     void createFromPoints(SE_Vector3f* points, int num);
     SE_Vector3f getCenter() const;
     float getRadius() const;
-    SE_IntersectResult intersect(const SE_AABB& aabb) const;
     SE_IntersectResult intersect(const SE_Ray& ray) const;
-    SE_IntersectResult intersect(const SE_OBB& obb) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
     SE_IntersectResult intersect(const SE_Sphere& sphere) const;
     bool containPoint(const SE_Vector3f& point) const;
@@ -171,8 +169,6 @@ public:
     SE_Vector3f getExtent() const;
     SE_Vector3f getCenter() const;
     SE_IntersectResult intersect(const SE_AABB& aabb) const;
-    SE_IntersectResult intersect(const SE_OBB& obb) const;
-    SE_IntersectResult intersect(const SE_Sphere& sphere) const;
     SE_IntersectResult intersect(const SE_Ray& ray) const;
     SE_IntersectResult intersect(const SE_Plane& plane) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
@@ -192,14 +188,22 @@ public:
     void getAxis(SE_Vector3f axis[3]) const;
     void getExtent(float e[3]) const;
     void transfrom(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
-    SE_IntersectResult intersect(const SE_AABB& aabb) const;
     SE_IntersectResult intersect(const SE_OBB& obb) const;
-    SE_IntersectResult intersect(const SE_Sphere& sphere) const;
     SE_IntersectResult intersect(const SE_Ray& ray) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
 private:
     SE_Vector3f mCenter;
     SE_Vector3f mAxis[3];
     float mExtent[3];
+};
+class SE_GeometryIntersect
+{
+public:
+	static int movingSphereStaticAABB(const SE_Sphere& sphere, const SE_AABB& aabb, 
+		                             const SE_Vector3f& endPoint, SE_Vector3f* out);
+	static int sphereAABB(const SE_Sphere& sphere, const SE_AABB& aabb);
+	static float pointAABBDistanceSquare(const SE_Vector3f& point, const SE_AABB& aabb);
+	static int movingSphereStaticPlane(const SE_Sphere& sphere, const SE_Plane& plane, const SE_Vector3f& dirOfSphere, SE_Vector3f* out);
+	static int movingOBBStaticAABB(const SE_OBB obb, const SE_AABB& aabb, SE_AXIS_TYPE axis, float dist, SE_OBB* out);
 };
 #endif

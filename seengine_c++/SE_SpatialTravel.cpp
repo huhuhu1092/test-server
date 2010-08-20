@@ -55,3 +55,76 @@ SE_Spatial* SE_FindSpatialCollision::getCollisionSpatial()
 {
 	return mMinResult.spatial;
 }
+SE_MovingSphereStaticSpatialIntersect::SE_MovingSphereStaticSpatialIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint)
+{
+	intersected = false;
+	this->sphere = sphere;
+	this->endPoint = endPoint;
+	location.set(endPoint.x, endPoint.y, endPoint.z);
+}
+int SE_MovingSphereStaticSpatialIntersect::visit(SE_Spatial* spatial)
+{
+    SE_Vector3f intersectPoint;
+	if(!spatial->canDoCollision())
+		return 1;
+	SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
+	if(!bv)
+        return 0;
+	int ret = bv->movingSphereIntersect(sphere, endPoint, &intersectPoint);
+	if(ret)
+	{
+		SE_Vector3f center = sphere.getCenter();
+		SE_Vector3f dir = (endPoint - center).normalize();
+		float minDist = (location - center).dot(dir);
+		float dist = (intersectPoint - center).dot(dir);
+		if(minDist < dist)
+		{
+			location = intersectPoint;
+		}
+		return 0;
+	}
+	else
+		return 1;
+}
+int SE_MovingSphereStaticSpatialIntersect::visit(SE_SimObject* so)
+{
+	return 0;
+}
+
+SE_MovingSpatialIntersect::SE_MovingSpatialIntersect(SE_Spatial* s)
+{
+	moveSpatial = s;
+}
+
+int SE_MovingSpatialIntersect::visit(SE_Spatial* spatial)
+{
+	SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
+	if(!bv)
+	{
+		return 0;
+	}
+	SE_BoundingVolume* moveBV = moveSpatial->getWorldBoundingVolume();
+	if(!moveBV)
+	{
+		return 1;
+	}
+	SE_OBB obb;
+	SE_AABB aabb;
+	SE_Sphere sphere;
+	switch(moveBV->getType())
+	{
+	case SE_BoundingVolume::AABB:
+		aabb = ((SE_AABBBV*)moveBV)->getGeometry();
+		obb.createFromAABB(aabb);
+
+		break;
+	case SE_BoundingVolume::OBB:
+		obb = ((SE_OBBBV*)moveBV)->getGeometry();
+		break;
+	case SE_BoundingVolume::SPHERE:
+		sphere = ((SE_SphereBV*)moveBV)->getGeometry();
+		break;
+	}
+}
+int SE_MovingSpatialIntersect::visit(SE_SimObject* so)
+{}

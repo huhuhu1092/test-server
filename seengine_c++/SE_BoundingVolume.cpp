@@ -1,5 +1,6 @@
 #include "SE_BoundingVolume.h"
 #include "SE_Utils.h"
+
 SE_BoundingVolume::SE_BoundingVolume()
 {}
 SE_BoundingVolume::~SE_BoundingVolume()
@@ -32,6 +33,14 @@ SE_IntersectResult SE_SphereBV::intersect(const SE_Ray& ray) const
 bool SE_SphereBV::intersect(const SE_BoundingVolume& bv) const
 {
 	return false;
+}
+int SE_SphereBV::movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out)
+{
+	return 0;
+}
+int SE_SphereBV::movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
+{
+	return 0;
 }
 SE_BoundingVolume::BV_TYPE SE_SphereBV::getType() const
 {
@@ -96,6 +105,14 @@ void SE_AABBBV::merge(const SE_BoundingVolume* bv)
 	}
 	mAABB.set(minf, maxf);
 }
+int SE_AABBBV::movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out)
+{
+	return SE_GeometryIntersect::movingSphereStaticAABB(sphere, mAABB, endPoint, out);
+}
+int SE_AABBBV::movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
+{
+	return 0;
+}
 ///////////////////////////////////////////
 SE_OBBBV::SE_OBBBV()
 {}
@@ -129,6 +146,13 @@ SE_BoundingVolume::BV_TYPE SE_OBBBV::getType() const
 }
 void SE_OBBBV::merge(const SE_BoundingVolume* bv)
 {}
-
+int SE_OBBBV::movingSphereIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint, SE_Vector3f* out)
+{
+	return 0;
+}
+int SE_OBBBV::movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out)
+{
+	return 0;
+}
 
 
