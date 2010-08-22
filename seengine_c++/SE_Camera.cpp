@@ -1,6 +1,12 @@
 #include "SE_Camera.h"
 #include "SE_Log.h"
 #include "SE_BoundingVolume.h"
+IMPLEMENT_OBJECT(SE_Camera)
+///////////////
+SE_Camera::~SE_Camera()
+{
+	LOGI("### destroctor ~SE_Camera ####\n");
+}
 SE_Camera::SE_Camera()
 {
     mChanged = true;

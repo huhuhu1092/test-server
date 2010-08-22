@@ -1,5 +1,6 @@
 #include "SE_SystemCommandFactory.h"
 #include "SE_SystemCommand.h"
+/*
 class SE_CreateInitAppCommand : public SE_CreateCommandFunc
 {
 public:
@@ -16,11 +17,13 @@ public:
 		return new SE_UpdateCameraCommand(app);
 	}
 };
-
+*/
 SE_SystemCommandFactory::SE_SystemCommandFactory()
 {
-	SE_CommandEntry* systemCommandEntry[2];
-	systemCommandEntry[0] = new SE_CommandEntry(SE_CommandID("SE_InitAppCommand"), new SE_CreateInitAppCommand);
-	systemCommandEntry[1] = new SE_CommandEntry(SE_CommandID("SE_UpdateCameraCommand"), new SE_CreateUpdateCameraCommand);
-    set(systemCommandEntry, 2);
+	SE_CommandEntry* systemCommandEntry[4];
+	systemCommandEntry[0] = new SE_CommandEntry(SE_CommandID("SE_InitAppCommand"), new SE_CommandCreateFunc<SE_InitAppCommand>);
+	systemCommandEntry[1] = new SE_CommandEntry(SE_CommandID("SE_UpdateCameraCommand"), new SE_CommandCreateFunc<SE_UpdateCameraCommand>);
+	systemCommandEntry[2] = new SE_CommandEntry(SE_CommandID("SE_KeyEventCommand"), new SE_CommandCreateFunc<SE_KeyEventCommand>);
+	systemCommandEntry[3] = new SE_CommandEntry(SE_CommandID("SE_MotionEventCommand"), new SE_CommandCreateFunc<SE_MotionEventCommand>);
+    set(systemCommandEntry, 4);
 }

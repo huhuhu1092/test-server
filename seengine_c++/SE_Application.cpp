@@ -6,6 +6,7 @@
 #include "SE_Command.h"
 #include "SE_CommandFactory.h"
 #include "SE_RenderManager.h"
+#include "SE_InputManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -25,6 +26,7 @@ SE_Application::SE_Application()
     mSceneManager = new SE_SceneManager;
     mResourceManager = new SE_ResourceManager;
     mRenderManager = new SE_RenderManager;
+	mInputManager = new SE_InputManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -46,6 +48,8 @@ SE_Application::~SE_Application()
         delete mSceneManager;
     if(mResourceManager)
         delete mResourceManager;
+	if(mInputManager)
+		delete mInputManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {
@@ -84,15 +88,14 @@ void SE_Application::run()
         mFpsPrevTime = currTime;
     }
 }
-void SE_Application::createCamera(int index)
+void SE_Application::setCamera(int index, SE_Camera* camera)
 {
 	if(index < 0 || index >= MAX_CAMERA_NUM)
 		return;
     SE_Camera* c = mCameraArray[index];
 	if(c)
 		delete c;
-	c = new SE_Camera;
-	mCameraArray[index] = c;
+	mCameraArray[index] = camera;
 }
 SE_Camera* SE_Application::getCamera(int index)
 {

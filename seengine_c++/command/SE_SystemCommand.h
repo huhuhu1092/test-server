@@ -5,6 +5,8 @@
 #include <string>
 class SE_Application;
 class SE_Camera;
+class SE_KeyEvent;
+class SE_MotionEvent;
 class SE_InitAppCommand : public SE_Command
 {
 public:
@@ -27,6 +29,23 @@ public:
     int height;
 };
 ///////////////////////////////////////
+class SE_KeyEventCommand : public SE_Command
+{
+public:
+	SE_KeyEventCommand(SE_Application* app);
+	~SE_KeyEventCommand();
+	void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+	SE_KeyEvent* keyEvent;
+};
+class SE_MotionEventCommand : public SE_Command
+{
+public:
+	SE_MotionEventCommand(SE_Application* app);
+	~SE_MotionEventCommand();
+	void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+	SE_MotionEvent* motionEvent;
+};
+////////////////////////////////////////
 class SE_MoveCameraCommand : public SE_Command
 {
 public:

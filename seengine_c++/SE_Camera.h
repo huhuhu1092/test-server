@@ -5,11 +5,14 @@
 #include "SE_Quat.h"
 #include "SE_Geometry3D.h"
 #include "SE_Common.h"
+#include "SE_Object.h"
 class SE_BoundingVolume;
-class SE_Camera
+class SE_Camera : public SE_Object
 {
+DECLARE_OBJECT(SE_Camera)
 public:
     SE_Camera();
+	~SE_Camera();
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);

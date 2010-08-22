@@ -9,6 +9,7 @@ class SE_Camera;
 class SE_ResourceManager;
 class SE_SceneManager;
 class SE_RenderManager;
+class SE_InputManager;
 class SE_Application
 {
 public:
@@ -38,10 +39,14 @@ public:
 	{
 		return mSceneManager;
 	}
+	SE_InputManager* getInputManager()
+	{
+		return mInputManager;
+	}
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
-	//index 1 to max camera num
-	void createCamera(int index);
+	//index 0 to max camera num
+	void setCamera(int index, SE_Camera* camera);
 	SE_Camera* getCamera(int index);
 	void setCurrentCamera(int index);
 	SE_Camera* getCurrentCamera();
@@ -98,6 +103,7 @@ protected:
     SE_SceneManager* mSceneManager;
     SE_ResourceManager* mResourceManager;
     SE_RenderManager* mRenderManager;
+	SE_InputManager* mInputManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

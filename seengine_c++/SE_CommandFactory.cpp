@@ -27,7 +27,7 @@ SE_CommandFactory::SE_CommandFactory(SE_CommandEntry* entryArray[], int size)
     set(entryArray, size);
 
 }
-void SE_CommandFactory::add(const SE_CommandID& commandID, SE_CreateCommandFunc* cf)
+void SE_CommandFactory::add(const SE_CommandID& commandID, SE_CommandCreateFuncBase* cf)
 {
 	if(!mEntryArray)
 	{

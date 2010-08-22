@@ -17,6 +17,10 @@ void SE_Object::read(SE_BufferInput& input)
 {}
 void SE_Object::write(SE_BufferOutput& output)
 {}
+void SE_Object::onKeyEvent(SE_KeyEvent* keyEvent)
+{}
+void SE_Object::onMotionEvent(SE_MotionEvent* motionEvent)
+{}
 void SE_Object::reg(const char* className, SE_ObjectCreateFunc* ocFunc)
 {
     if(!mObjProp.init)
@@ -57,4 +61,7 @@ SE_Object* SE_Object::create(const char* className)
     }
 
 }
+SE_Object::~SE_Object()
+{
 
+}

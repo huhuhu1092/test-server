@@ -5,6 +5,8 @@
 class SE_Object;
 class SE_BufferInput;
 class SE_BufferOutput;
+class SE_KeyEvent;
+class SE_MotionEvent;
 class SE_ObjectCreateFunc
 {
 public:
@@ -14,8 +16,11 @@ class SE_Object
 {
 public:
     SE_Object();
+	virtual ~SE_Object();
     virtual void read(SE_BufferInput& input);
     virtual void write(SE_BufferOutput& output);
+	virtual void onKeyEvent(SE_KeyEvent* keyEvent);
+	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
     static SE_Object* create(const char* className);
     static void reg(const char* className, SE_ObjectCreateFunc* ocFunc);
     static void unreg(const char* className);

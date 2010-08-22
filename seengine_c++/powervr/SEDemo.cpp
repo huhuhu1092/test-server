@@ -10,6 +10,7 @@
 #include "SE_Application.h"
 #include "SE_SystemCommand.h"
 #include "SE_SystemCommandFactory.h"
+#include "SE_InputEvent.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -88,10 +89,24 @@ void SEDemo::handleInput(int width, int height)
     }
     if((buttonState & ePVRShellButtonLeft))
     {
-	     bPressed = 1;
+		SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
+		if(c)
+		{
+			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
+			c->motionEvent = ke;
+			SE_Application::getInstance()->postCommand(c);
+		}
+	    bPressed = 1;
     }
     else if(bPressed)
     {
+        SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
+		if(c)
+		{
+			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP, prevPointer[0] * width, prevPointer[1] * height);
+			c->motionEvent = ke;
+			SE_Application::getInstance()->postCommand(c);
+		}
         bPressed = 0;
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
@@ -115,6 +130,7 @@ bool SEDemo::RenderScene()
 {
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
+    handleInput(dwCurrentWidth, dwCurrentHeight);
 	SE_Application::getInstance()->run();
 	return true;
 }

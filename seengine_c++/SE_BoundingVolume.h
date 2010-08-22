@@ -67,7 +67,7 @@ public:
 	virtual int movingOBBIntersect(const SE_OBB& obb, SE_AXIS_TYPE axis, float dist, SE_Vector3f* out);
 	SE_AABB getGeometry()
 	{
-		mAABB;
+		return mAABB;
 	}
 private:
     SE_AABB mAABB;

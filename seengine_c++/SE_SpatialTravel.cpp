@@ -127,4 +127,6 @@ int SE_MovingSpatialIntersect::visit(SE_Spatial* spatial)
 	}
 }
 int SE_MovingSpatialIntersect::visit(SE_SimObject* so)
-{}
+{
+	return 0;
+}
