@@ -33,7 +33,6 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     rootScene->updateWorldTransform();
 	rootScene->updateBoundingVolume();
 	mApp->setCamera(SE_Application::MAIN_CAMERA, new SE_MotionEventCamera);
-	mApp->setCamera(SE_Application::MAIN_CAMERA, new SE_MotionEventCamera);
 	mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
 	SE_InputManager* inputManager = mApp->getInputManager();
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
@@ -45,7 +44,7 @@ SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
 {}
 void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	SE_Vector3f location(45.4441,	-234.7624,	90.7012);
+	SE_Vector3f location(45.4441,	-234.7624,	93.7012);
 	SE_Vector3f zAxis(0, -1, 0);
 	SE_Vector3f up(0, 0, 1);
 	SE_Camera* c = mApp->getCurrentCamera();

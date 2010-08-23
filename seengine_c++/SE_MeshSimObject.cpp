@@ -10,10 +10,15 @@
 #include "SE_ResourceManager.h"
 #include "SE_Buffer.h"
 #include "SE_Mesh.h"
+#include "SE_BoundingVolume.h"
 #include "SE_RenderUnit.h"
+#include "SE_Spatial.h"
+#include "SE_BoundingVolume.h"
+#include "SE_Geometry3D.h"
 IMPLEMENT_OBJECT(SE_MeshSimObject)
-SE_MeshSimObject::SE_MeshSimObject() : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
+SE_MeshSimObject::SE_MeshSimObject(SE_Spatial* spatial) : SE_SimObject(spatial), mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
+	mSelected = false;
 }
 /*
 SE_MeshSimObject::SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh) : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
@@ -48,6 +53,11 @@ void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
     SE_ASSERT(mWorldGeomData);
     SE_GeometryData* localMeshGeomData = mMesh->getGeometryData();
     SE_GeometryData::transform(localMeshGeomData, m, mWorldGeomData);    
+}
+void SE_MeshSimObject::onClick()
+{
+
+	mSelected = true;
 }
 void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
 {
@@ -119,19 +129,69 @@ void SE_MeshSimObject::getSurfaceFacet(int surfaceIndex, int*& facets, int& face
     facets = surface->getFacetArray();
     faceNum = surface->getFacetNum();
 }
+SE_RenderUnit* SE_MeshSimObject::createSelectedFrame()
+{
+    SE_Spatial* spatial = getSpatial();
+	SE_RenderUnit* ru = NULL;
+	if(spatial)
+	{
+		SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
+		if(bv)
+		{
+			SE_AABBBV* aabbBV = NULL;
+			SE_SphereBV* sphereBV = NULL;
+			SE_OBBBV* obbBV = NULL; 
+			switch(bv->getType())
+			{
+			case SE_BoundingVolume::AABB:
+				{
+				    aabbBV = (SE_AABBBV*)bv;
+					SE_AABB aabb = aabbBV->getGeometry();
+                    SE_Segment edge[12];
+					aabb.getEdge(edge);
+				    ru = new SE_LineSegRenderUnit(edge, 12, SE_Vector3f(0, 1, 0));
+				}
+				break;
+			case SE_BoundingVolume::SPHERE:
+				{
+					sphereBV = (SE_SphereBV*)bv;
+				}
+				break;
+			case SE_BoundingVolume::OBB:
+				{
+					obbBV = (SE_OBBBV*)bv;
+				}
+				break;
+			}
+		}
+	}
+	return ru;
+}
 SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
 {
     if(!mMesh)
         return RenderUnitVector();
     int surfaceNum = getSurfaceNum();
     RenderUnitVector ruv;
-    ruv.resize(surfaceNum, NULL);
+	if(mSelected)
+	{
+		ruv.resize(surfaceNum + 1, NULL);
+	}
+	else
+	{
+        ruv.resize(surfaceNum, NULL);
+	}
     for(int i = 0 ; i < surfaceNum ; i++)
     {
         SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
         ruv[i] = tsru;
     }
+	if(mSelected)
+	{
+		SE_RenderUnit* ru = createSelectedFrame();
+        ruv[surfaceNum] = ru;
+	}
     return ruv;
 }
 

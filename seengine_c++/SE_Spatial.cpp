@@ -37,6 +37,10 @@ SE_Spatial::~SE_Spatial()
     if(mWorldBoundingVolume)
         delete mWorldBoundingVolume;
 }
+SE_Spatial::SPATIAL_TYPE SE_Spatial::getSpatialType()
+{
+	return NONE;
+}
 void SE_Spatial::updateWorldTransform()
 {
     updateWorldScale();

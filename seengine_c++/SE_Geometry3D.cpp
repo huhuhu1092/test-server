@@ -670,6 +670,128 @@ void SE_AABB::set(const SE_Vector3f& min, const SE_Vector3f& max)
 	mMin = min;
 	mMax = max;
 }
+void SE_AABB::getEdge(SE_Segment edge[12])
+{
+	SE_Vector3f p0, p1;
+    //edge 1
+    p0.x = mMin.x;
+    p0.y = mMin.y;
+    p0.z = mMin.z;
+
+    p1.x = mMax.x;
+    p1.y = mMin.y;
+    p1.z = mMin.z;
+	edge[0].set(p0, p1);
+    //edge 2
+    p0.x = mMax.x;
+    p0.y = mMin.y;
+    p0.z = mMin.z;
+
+    p1.x = mMax.x;
+    p1.y = mMin.y;
+    p1.z = mMax.z;
+	edge[1].set(p0, p1);
+
+    //edge 3
+    p0.x = mMax.x;
+    p0.y = mMin.y;
+    p0.z = mMax.z;
+
+    p1.x = mMin.x;
+    p1.y = mMin.y;
+    p1.z = mMax.z;
+    edge[2].set(p0, p1);
+
+    //edge 4
+    p0.x = mMin.x;
+    p0.y = mMin.y;
+    p0.z = mMax.z;
+    
+    p1.x = mMin.x;
+    p1.y = mMin.y;
+    p1.z = mMin.z;
+    edge[3].set(p0, p1);
+
+    //edge 5
+    p0.x = mMin.x;
+    p0.y = mMin.y;
+    p0.z = mMin.z;
+
+    p1.x = mMin.x;
+    p1.y = mMax.y;
+    p1.z = mMin.z;
+    edge[4].set(p0, p1);
+
+    //edge 6
+    p0.x = mMin.x;
+    p0.y = mMax.y;
+    p0.z = mMin.z;
+    
+    p1.x = mMax.x;
+    p1.y = mMax.y;
+    p1.z = mMin.z;
+    edge[5].set(p0, p1);
+
+    //edge 7
+    p0.x = mMax.x;
+    p0.y = mMax.y;
+    p0.z = mMin.z;
+
+    p1.x = mMax.x;
+    p1.y = mMin.y;
+    p1.z = mMin.z;
+    edge[6].set(p0, p1);
+
+    //edge 8
+    p0.x = mMax.x;
+    p0.y = mMax.y;
+    p0.z = mMax.z;
+    
+    p1.x = mMin.x;
+    p1.y = mMax.y;
+    p1.z = mMax.z;
+    edge[7].set(p0, p1);
+
+    //edge 9
+    p0.x = mMin.x;
+    p0.y = mMax.y;
+    p0.z = mMax.z;
+
+    p1.x = mMin.x;
+    p1.y = mMax.y;
+    p1.z = mMin.z;
+    edge[8].set(p0, p1);
+
+    //edge 10
+    p0.x = mMax.x;
+    p0.y = mMax.y;
+    p0.z = mMax.z;
+
+    p1.x = mMax.x;
+    p1.y = mMin.y;
+    p1.z = mMax.z;
+    edge[9].set(p0, p1);
+
+    //edge 11
+    p0.x = mMax.x;
+    p0.y = mMax.y;
+    p0.z = mMax.z;
+
+    p1.x = mMax.x;
+    p1.y = mMax.y;
+    p1.z = mMin.z;
+    edge[10].set(p0, p1);
+
+    //edge 12
+    p0.x = mMin.x;
+    p0.y = mMax.y;
+    p0.z = mMax.z;
+
+    p1.x = mMin.x;
+    p1.y = mMin.y;
+    p1.z = mMax.z;
+	edge[11].set(p0, p1);
+}
 /////////////////////////////////////////////////
 SE_OBB::SE_OBB()
 {

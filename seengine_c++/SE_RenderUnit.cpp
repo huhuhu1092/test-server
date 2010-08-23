@@ -8,6 +8,7 @@
 #include "SE_TextureCoordData.h"
 #include "SE_ID.h"
 #include "SE_ShaderProgram.h"
+#include "SE_Geometry3D.h"
 static void checkGLError()
 {
 	/*
@@ -23,7 +24,10 @@ static void checkGLError()
 SE_RenderUnit::~SE_RenderUnit()
 {}
 void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
-{}
+{
+	imageIDArray = NULL;
+	imageIDNum = 0;
+}
 SE_ImageDataID SE_RenderUnit::getBumpMapImageID()
 {
     return SE_ImageDataID::INVALID;
@@ -33,19 +37,31 @@ SE_ImageDataID SE_RenderUnit::getCubeMapImageID()
     return SE_ImageDataID::INVALID;
 }
 void SE_RenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
-{}
+{
+	vertex = NULL;
+	vertexNum = 0;
+}
 void SE_RenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
-{}
+{
+	texVertex = NULL;
+	texVertexNum = 0;
+}
 
 void SE_RenderUnit::getBumpMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
-{}
+{
+	texVertex = NULL;
+	texVertexNum = 0;
+}
 bool SE_RenderUnit::bumpMapCoordSameAsBaseColor()
 {
     return true;
 }
 
 void SE_RenderUnit::getCubeMapTexVertex(_Vector2f*& texVertex, int& texVertexNum)
-{}
+{
+	texVertex = NULL;
+	texVertexNum = 0;
+}
 bool SE_RenderUnit::cubeMapCoordSameAsBaseColor()
 {
     return true;
@@ -444,4 +460,51 @@ void SE_TriSurfaceRenderUnit::draw()
     glDrawArrays(GL_TRIANGLES, 0, vertexNum);
     //checkGLError();
 
+}
+//////////////////////////////////
+SE_LineSegRenderUnit::SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Vector3f& color)
+{
+	mSegmentNum = num;
+	if(num > 0)
+	{
+		mSegments = new SE_Segment[num];
+	}
+	for(int i = 0 ; i < num;  i++)
+	{
+		mSegments[i] = seg[i];
+	}
+	mColor = color;
+}
+void SE_LineSegRenderUnit::draw()
+{
+	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
+	float color[3];
+	color[0] = mColor.x;
+	color[1] = mColor.y;
+	color[2] = mColor.z;
+	glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+	glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
+	SE_Matrix4f m;
+	m.identity();
+	float data[16];
+	m.getColumnSequence(data);
+    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, data);
+    _Vector3f* points = new _Vector3f[mSegmentNum * 2];
+	int k = 0;
+	for(int i = 0 ; i < mSegmentNum ; i++)
+	{
+		const SE_Segment& se = mSegments[i];
+		const SE_Vector3f& start = se.getStart();
+		const SE_Vector3f& end = se.getEnd();
+		for(int i = 0 ; i < 3 ; i++)
+		    points[k].d[i] = start.d[i];
+		k++;
+		for(int i = 0 ; i < 3 ; i++)
+		    points[k].d[i] = end.d[i];
+		k++;
+	}
+	glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT,
+		                  GL_FALSE, 0, points);
+	glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
+	glDrawArrays(GL_LINES, 0, mSegmentNum * 2);
 }

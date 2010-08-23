@@ -1,9 +1,12 @@
 #include "SE_SimObject.h"
 #include "SE_Buffer.h"
+#include "SE_Spatial.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_SimObject)
-SE_SimObject::SE_SimObject()
-{}
+SE_SimObject::SE_SimObject(SE_Spatial* spatial)
+{
+	mSpatial = spatial;
+}
 SE_SimObject::~SE_SimObject()
 {}
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
@@ -27,6 +30,8 @@ SE_Vector3f* SE_SimObject::getVertexArray()
 {
 	return 0;
 }
+void SE_SimObject::onClick()
+{}
 int SE_SimObject::getVertexNum()
 {
 	return 0;

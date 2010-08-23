@@ -84,6 +84,11 @@ private:
 class SE_LineSegRenderUnit : public SE_RenderUnit
 {
 public:
-    SE_LineSegRenderUnit(const SE_Segment& seg, const SE_Vector3f& color);
+    SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Vector3f& color);
+	virtual void draw();
+private:
+	SE_Vector3f mColor;
+	SE_Segment* mSegments;
+	int mSegmentNum;
 };
 #endif

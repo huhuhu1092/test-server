@@ -1,6 +1,7 @@
 #include "SE_SpatialTravel.h"
 #include "SE_SimObject.h"
 #include "SE_BoundingVolume.h"
+#include "SE_Log.h"
 SE_FindSpatialCollision::SE_FindSpatialCollision(const SE_Ray& ray): mRay(ray)
 {
 	
@@ -73,13 +74,17 @@ int SE_MovingSphereStaticSpatialIntersect::visit(SE_Spatial* spatial)
 	int ret = bv->movingSphereIntersect(sphere, endPoint, &intersectPoint);
 	if(ret)
 	{
-		SE_Vector3f center = sphere.getCenter();
-		SE_Vector3f dir = (endPoint - center).normalize();
-		float minDist = (location - center).dot(dir);
-		float dist = (intersectPoint - center).dot(dir);
-		if(minDist < dist)
+		if(spatial->getSpatialType() == SE_Spatial::GEOMETRY)
 		{
-			location = intersectPoint;
+		    SE_Vector3f center = sphere.getCenter();
+		    SE_Vector3f dir = (endPoint - center).normalize();
+		    float minDist = (location - center).dot(dir);
+		    float dist = (intersectPoint - center).dot(dir);
+		    if(minDist > dist)
+		    {
+			    location = intersectPoint;
+		    }
+		    intersected = true;
 		}
 		return 0;
 	}
@@ -88,6 +93,7 @@ int SE_MovingSphereStaticSpatialIntersect::visit(SE_Spatial* spatial)
 }
 int SE_MovingSphereStaticSpatialIntersect::visit(SE_SimObject* so)
 {
+	LOGI("### collision object = %s ####\n", so->getName());
 	return 0;
 }
 

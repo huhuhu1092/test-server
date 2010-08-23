@@ -83,7 +83,7 @@ void SEDemo::handleInput(int width, int height)
     /*LOGI("## buttonstate = %d ##\n", buttonState);*/
     if(pointerLocation)
     {
-        LOGI("### pointer location = %f, %f", pointerLocation[0], pointerLocation[1]);
+		LOGI("### pointer location = %f, %f ###\n", pointerLocation[0], pointerLocation[1]);
         prevPointer[0] = pointerLocation[0];
         prevPointer[1] = pointerLocation[1];
     }

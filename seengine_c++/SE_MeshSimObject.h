@@ -15,7 +15,7 @@ class SE_MeshSimObject : public SE_SimObject
 {
     DECLARE_OBJECT(SE_MeshSimObject)
 public:
-    SE_MeshSimObject();
+    SE_MeshSimObject(SE_Spatial* spatial = NULL);
     SE_MeshSimObject(const SE_MeshID& meshID);
     //SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh);
     ~SE_MeshSimObject();
@@ -31,10 +31,14 @@ public:
     int getFaceNum();
     void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
     RenderUnitVector createRenderUnit();
+	void onClick();
+private:
+	SE_RenderUnit* createSelectedFrame();
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;
     SE_MeshID mMeshID;
     bool mOwnMesh;
+	bool mSelected;
 };
 #endif

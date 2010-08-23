@@ -24,6 +24,7 @@ class SE_Spatial : public SE_Object
 public:
     enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04};
     enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4};
+	enum SPATIAL_TYPE {NONE, NODE, GEOMETRY};
     SE_Spatial(SE_Spatial* parent = NULL);
     SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
     virtual ~SE_Spatial();
@@ -119,6 +120,7 @@ public:
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
+	virtual SPATIAL_TYPE getSpatialType();
 protected:
     void updateWorldTranslate();
     void updateWorldRotate();

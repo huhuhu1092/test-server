@@ -55,6 +55,12 @@ public:
     SE_Vector3f getStart() const;
     SE_Vector3f getEnd() const;
     SE_Vector3f getDirection() const;
+	void set(const SE_Vector3f& p0, const SE_Vector3f& p1)
+	{
+		mStart = p0;
+		mEnd = p1;
+	}
+
 private:
     SE_Vector3f mStart;
     SE_Vector3f mEnd;
@@ -172,6 +178,7 @@ public:
     SE_IntersectResult intersect(const SE_Ray& ray) const;
     SE_IntersectResult intersect(const SE_Plane& plane) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
+	void getEdge(SE_Segment edge[12]);
 private:
     SE_Vector3f mMin;
     SE_Vector3f mMax;

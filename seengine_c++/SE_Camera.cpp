@@ -180,13 +180,13 @@ void SE_Camera::rotateLocal(float angle, SE_AXIS_TYPE axis)
     SE_Quat q;
     switch(axis)
     {
-    case 0:
+    case SE_AXIS_X:
         q.set(angle, SE_Vector3f(1, 0, 0));
         break;
-    case 1:
+    case SE_AXIS_Y:
         q.set(angle, SE_Vector3f(0, 1, 0));
         break;
-    case 2:
+    case SE_AXIS_Z:
         q.set(angle, SE_Vector3f(0, 0, 1));
         break;
     }
@@ -197,8 +197,8 @@ void SE_Camera::rotateLocal(const SE_Quat& rotate)
     SE_Vector3f localxAxis(1, 0, 0);
     SE_Vector3f localyAxis(0, 1, 0);
     SE_Vector3f localzAxis(0, 0, 1);
-    localxAxis = rotate.map(mAxisX);
-    localyAxis = rotate.map(mAxisY);
+    localxAxis = rotate.map(localxAxis);
+    localyAxis = rotate.map(localyAxis);
     //localzAxis = rotate.map(zAxis);
     SE_Matrix4f vtom = getViewToWorldMatrix();
     SE_Vector4f worldxAxis = vtom.map(SE_Vector4f(localxAxis, 0));

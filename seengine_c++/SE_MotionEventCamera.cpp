@@ -4,6 +4,7 @@
 #include "SE_Geometry3D.h"
 #include "SE_Spatial.h"
 #include "SE_SpatialTravel.h"
+#include "SE_SimObject.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_MotionEventCamera)
 SE_MotionEventCamera::SE_MotionEventCamera()
@@ -48,6 +49,10 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 			int viewportWidth = viewport.right - viewport.left;
 			float ratio = -180.0f / viewportWidth;
 			float angle = ratio * deltaX;
+			if(SE_Fabs(deltaY) > 9)
+			{
+				LOGI("#####\n");
+			}
 			rotateLocal(angle, SE_AXIS_Y);
 			SE_Vector3f startLocation = getLocation();
 			SE_Vector3f translate(0, 0, deltaY);
@@ -63,6 +68,12 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 			{
 				setLocation(moveTravel.location);
 			}
+			LOGI("### deltax = %f, deltay = %f, startLocation = (%f, %f, %f),  \
+				 endLocation = (%f, %f, %f) ## \n" , deltaX, deltaY, startLocation.x, 
+				                                   startLocation.y, startLocation.z,
+												   endLocation.x, endLocation.y, endLocation.z);
+			mPrevX = motionEvent->getX();
+			mPrevY = motionEvent->getY();
 		}
  	}
 	else if(motionEvent->getType() == SE_MotionEvent::UP && mPrevType == SE_MotionEvent::MOVE)
@@ -71,6 +82,14 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 	}
 	else if(motionEvent->getType() == SE_MotionEvent::UP && mPrevType == SE_MotionEvent::DOWN)
 	{
-
+		SE_Ray ray = screenCoordinateToRay(mPrevX, mPrevY);
+        SE_FindSpatialCollision spatialCollision(ray);
+		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
+		root->travel(&spatialCollision, true);
+		SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
+		SE_SimObject* so = spatialCollision.getCollisionObject();
+		if(so)
+			so->onClick();
+        clearState();
 	}
 }

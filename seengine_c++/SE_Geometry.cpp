@@ -29,10 +29,12 @@ SE_Geometry::~SE_Geometry()
 void SE_Geometry::attachSimObject(SE_SimObject* go)
 {
     mImpl->attachObject.push_back(go);
+	go->setSpatial(this);
 }
 void SE_Geometry::detachSimObject(SE_SimObject* go)
 {
     mImpl->attachObject.remove(go);
+	go->setSpatial(NULL);
 }
 void SE_Geometry::write(SE_BufferOutput& output)
 {
@@ -55,7 +57,7 @@ void SE_Geometry::read(SE_BufferInput& input)
         std::string str = input.readString();
         SE_SimObject* obj = (SE_SimObject*)SE_Object::create(str.c_str());
         obj->read(input);
-        mImpl->attachObject.push_back(obj);
+        attachSimObject(obj);
     }
     SE_Spatial::read(input);
 }
@@ -112,6 +114,10 @@ int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 	else
 		return r;
 }
+SE_Spatial::SPATIAL_TYPE SE_Geometry::getSpatialType()
+{
+	return GEOMETRY;
+}
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
     SE_BoundingVolume* bv = getWorldBoundingVolume();
@@ -129,8 +135,11 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         SE_SimObject::RenderUnitVector::iterator itRU;
         for(itRU = renderUnitVector.begin() ; itRU!= renderUnitVector.end(); itRU++)
         {
-            (*itRU)->setWorldTransform(getWorldTransform());
-            renderManager->addRenderUnit(*itRU);
+			if(*itRU)
+			{
+                (*itRU)->setWorldTransform(getWorldTransform());
+                renderManager->addRenderUnit(*itRU);
+			}
         }
     }
 }

@@ -46,6 +46,10 @@ void SE_CommonNode::updateWorldTransform()
         s->updateWorldTransform();
     }
 }
+SE_Spatial::SPATIAL_TYPE SE_CommonNode::getSpatialType()
+{
+	return NODE;
+}
 int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 {
     int ret = spatialTravel->visit(this);

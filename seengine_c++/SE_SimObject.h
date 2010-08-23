@@ -10,11 +10,20 @@ class SE_Vector3f;
 class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Vector3i;
+class SE_Spatial;
 class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)
 public:
-    SE_SimObject();
+    SE_SimObject(SE_Spatial* parent = NULL);
+	void setSpatial(SE_Spatial* parent)
+	{
+		mSpatial = parent;
+	}
+	SE_Spatial* getSpatial()
+	{
+		return mSpatial;
+	}
     virtual ~SE_SimObject();
     typedef std::vector<SE_RenderUnit*> RenderUnitVector;
     virtual RenderUnitVector createRenderUnit();
@@ -28,6 +37,7 @@ public:
     virtual int getFaceNum();
     virtual int getSurfaceNum();
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
+	virtual void onClick();
 public:
 	const char* getName()
 	{
@@ -39,5 +49,6 @@ public:
 	}
 private:
 	std::string mName;
+	SE_Spatial* mSpatial;
 };
 #endif
