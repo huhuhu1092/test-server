@@ -78,6 +78,10 @@ SRCS_CPP = SE_Buffer.cpp   \
 	SE_Ase.cpp \
 	SE_SystemCommand.cpp \
 	SE_SystemCommandFactory.cpp \
+	SE_InputEvent.cpp \
+	SE_InputManager.cpp \
+	SE_MotionEventCamera.cpp \
+	SE_SpatialTravel.cpp \
 	SEDemo.cpp \
 	PVRShell.cpp \
 	PVRShellAPI.cpp \
