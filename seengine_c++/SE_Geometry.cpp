@@ -118,6 +118,43 @@ SE_Spatial::SPATIAL_TYPE SE_Geometry::getSpatialType()
 {
 	return GEOMETRY;
 }
+static SE_RenderUnit* createSelectedFrame(SE_Spatial* spatial)
+{
+	SE_RenderUnit* ru = NULL;
+	if(spatial)
+	{
+		SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
+		if(bv)
+		{
+			SE_AABBBV* aabbBV = NULL;
+			SE_SphereBV* sphereBV = NULL;
+			SE_OBBBV* obbBV = NULL; 
+			switch(bv->getType())
+			{
+			case SE_BoundingVolume::AABB:
+				{
+				    aabbBV = (SE_AABBBV*)bv;
+					SE_AABB aabb = aabbBV->getGeometry();
+                    SE_Segment edge[12];
+					aabb.getEdge(edge);
+				    ru = new SE_LineSegRenderUnit(edge, 12, SE_Vector3f(0, 1, 0));
+				}
+				break;
+			case SE_BoundingVolume::SPHERE:
+				{
+					sphereBV = (SE_SphereBV*)bv;
+				}
+				break;
+			case SE_BoundingVolume::OBB:
+				{
+					obbBV = (SE_OBBBV*)bv;
+				}
+				break;
+			}
+		}
+	}
+	return ru;
+}
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
     SE_BoundingVolume* bv = getWorldBoundingVolume();
@@ -142,4 +179,9 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
 			}
         }
     }
+	if(isSelected())
+	{
+		SE_RenderUnit* ru = createSelectedFrame(this);
+		renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+	}
 }

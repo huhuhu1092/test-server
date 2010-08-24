@@ -486,10 +486,13 @@ void SE_LineSegRenderUnit::draw()
 	glUniform1i(shaderProgram->getShadingModeUnifyLoc(), 0);
 	SE_Matrix4f m;
 	m.identity();
+	m = mViewToPerspective.mul(m);
 	float data[16];
 	m.getColumnSequence(data);
     glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, data);
     _Vector3f* points = new _Vector3f[mSegmentNum * 2];
+	if(!points)
+		return;
 	int k = 0;
 	for(int i = 0 ; i < mSegmentNum ; i++)
 	{
@@ -507,4 +510,5 @@ void SE_LineSegRenderUnit::draw()
 		                  GL_FALSE, 0, points);
 	glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
 	glDrawArrays(GL_LINES, 0, mSegmentNum * 2);
+    delete[] points;
 }

@@ -15,6 +15,7 @@ class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)
 public:
+    typedef std::vector<SE_RenderUnit*> RenderUnitVector;
     SE_SimObject(SE_Spatial* parent = NULL);
 	void setSpatial(SE_Spatial* parent)
 	{
@@ -25,7 +26,6 @@ public:
 		return mSpatial;
 	}
     virtual ~SE_SimObject();
-    typedef std::vector<SE_RenderUnit*> RenderUnitVector;
     virtual RenderUnitVector createRenderUnit();
     virtual void doTransform(const SE_Matrix4f& m);
     virtual void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);

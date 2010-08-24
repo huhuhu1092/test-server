@@ -12,6 +12,7 @@ struct SE_SceneManager::SpatialIDMap
 SE_SceneManager::SE_SceneManager()
 {
 	mSceneRoot = NULL;
+	mSelectedSpatial = NULL;
     mSpatialIDMap = new SE_SceneManager::SpatialIDMap;
 }
 SE_SceneManager::~SE_SceneManager()
@@ -30,6 +31,15 @@ void SE_SceneManager::renderScene(SE_Camera* camera, SE_RenderManager& renderMan
 SE_Spatial* SE_SceneManager::getRoot()
 {
     return mSceneRoot;
+}
+void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
+{
+	if(mSelectedSpatial)
+	{
+		mSelectedSpatial->setSelected(false);
+	}
+	mSelectedSpatial = spatial;
+	mSelectedSpatial->setSelected(true);
 }
 SE_Spatial* SE_SceneManager::find(const SE_SpatialID& spatialID)
 {

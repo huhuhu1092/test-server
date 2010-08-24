@@ -88,8 +88,11 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 		root->travel(&spatialCollision, true);
 		SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
 		SE_SimObject* so = spatialCollision.getCollisionObject();
-		if(so)
-			so->onClick();
+		if(collisionSpatial)
+		{
+            SE_Application::getInstance()->getSceneManager()->setSelectedSpatial(collisionSpatial);
+			//collisionSpatial->setSelected(true);
+		}
         clearState();
 	}
 }

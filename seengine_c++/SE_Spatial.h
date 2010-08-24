@@ -22,8 +22,8 @@ class SE_Spatial : public SE_Object
 {
     DECLARE_OBJECT(SE_Spatial);
 public:
-    enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04};
-    enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4};
+    enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04, SELECTED_MASK = 0x08};
+    enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4, SELECTED = 0x8};
 	enum SPATIAL_TYPE {NONE, NODE, GEOMETRY};
     SE_Spatial(SE_Spatial* parent = NULL);
     SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
@@ -110,6 +110,21 @@ public:
             mState &= (~COLLISIONABLE);
         }
     }
+	void setSelected(bool selected)
+	{
+		if(selected)
+		{
+            mState |= SELECTED;
+		}
+		else
+		{
+			mState &= (~SELECTED);
+		}
+	}
+	bool isSelected()
+	{
+		return (mState & SELECTED_MASK) == SELECTED; 
+	}
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
     virtual void attachSimObject(SE_SimObject* go);

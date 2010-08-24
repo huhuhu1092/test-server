@@ -30,10 +30,8 @@ public:
     SE_Vector3i* getFaceArray();
     int getFaceNum();
     void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
-    RenderUnitVector createRenderUnit();
 	void onClick();
-private:
-	SE_RenderUnit* createSelectedFrame();
+    RenderUnitVector createRenderUnit();
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;
