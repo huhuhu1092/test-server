@@ -42,7 +42,7 @@ private:
 class SE_KeyEvent
 {
 public:
-	enum TYPE {PRESS, RELEASE};
+	enum TYPE {DOWN, UP};
 	enum CODE {
 		          KEY_UP,
 				  KEY_DOWN,
@@ -63,7 +63,7 @@ public:
 				  KEY_8,
 				  KEY_9,
 				  KEY_0,
-				  KEY_NUM
+				  KEY_NUN
 	          };
 	SE_KeyEvent(TYPE t, CODE k);
 	TYPE getType()

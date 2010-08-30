@@ -49,6 +49,7 @@ public:
     void setDataPath(const char* datapath);
 
     bool checkHeader(SE_BufferInput& input);
+    void releaseHardwareResource();
 private:
 //    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
     static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);

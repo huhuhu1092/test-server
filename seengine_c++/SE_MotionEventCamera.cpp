@@ -93,6 +93,12 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
             SE_Application::getInstance()->getSceneManager()->setSelectedSpatial(collisionSpatial);
 			//collisionSpatial->setSelected(true);
 		}
+        if(so)
+        {
+            LOGI("## selected object = %s ####\n", so->getName());
+            SE_Application::getInstance()->setResponseValue(1);
+            SE_Application::getInstance()->setResponseString(so->getName());
+        }
         clearState();
 	}
 }

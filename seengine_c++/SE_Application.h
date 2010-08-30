@@ -4,6 +4,7 @@
 #include "SE_ID.h"
 #include "SE_Command.h"
 #include <list>
+#include <string>
 class SE_CommandFactory;
 class SE_Camera;
 class SE_ResourceManager;
@@ -17,6 +18,8 @@ public:
     typedef int SE_APPID;
     virtual ~SE_Application();
     void run();
+    void start();
+    void shutdown();
     void sendCommand(SE_Command* command);
     void postCommand(SE_Command* command);
     bool registerCommandFactory(const SE_CommandFactoryID& cfID, SE_CommandFactory* commandFactory);
@@ -50,6 +53,24 @@ public:
 	SE_Camera* getCamera(int index);
 	void setCurrentCamera(int index);
 	SE_Camera* getCurrentCamera();
+//////////////////////////////////
+    int getResponseValue()
+    {
+        return mResponseValue;
+    }
+    void setResponseValue(int v)
+    {
+        mResponseValue = v;
+    }
+    const char* getResponseString()
+    {
+        return mResponseString.c_str();
+    }
+    void setResponseString(const char* v)
+    {
+        mResponseString = v;
+    }
+/////////////////////////////////
 protected:
 	class _CommandWrapper
     {
@@ -114,6 +135,8 @@ protected:
     int mFpsFrameNum;
     SE_TimeMS mFpsPrevTime;
     SE_APPID mAppID;
+    int mResponseValue;
+    std::string mResponseString;
     static SE_Application* mInstance;
 };
 #endif

@@ -6,6 +6,7 @@ class SE_Application;
 class SE_CommandCreateFuncBase
 {
 public:
+    virtual ~SE_CommandCreateFuncBase() {}
 	virtual SE_Command* create(SE_Application* app, const SE_CommandID& id) = 0;
 };
 template <class T>

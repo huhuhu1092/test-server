@@ -10,6 +10,7 @@ class SE_MotionEvent;
 class SE_ObjectCreateFunc
 {
 public:
+    virtual ~SE_ObjectCreateFunc() {}
     virtual SE_Object* create() = 0;
 };
 class SE_Object

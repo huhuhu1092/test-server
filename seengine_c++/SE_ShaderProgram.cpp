@@ -1,6 +1,7 @@
 #include "SE_ShaderProgram.h"
 #include "SE_Log.h"
 #include "SE_Common.h"
+#include <string.h>
 static void checkGLError()
 {
 	/*
@@ -46,7 +47,46 @@ static GLuint loadShader(GLenum type, const char* shaderSrc)
     return shader;
 }
 
-SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSrc) : mHasInit(false)
+SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSrc) : mHasInit(false) , mVertexShaderSrc(NULL), mFragmentShaderSrc(NULL)
+{
+#ifdef GLES_20
+    init(vertexShaderSrc, fragmentShaderSrc);
+    int vertexShaderSrcLen = strlen(vertexShaderSrc);
+    int fragmentShaderSrcLen = strlen(fragmentShaderSrc);
+    mVertexShaderSrc = new char[vertexShaderSrcLen + 1];
+    mFragmentShaderSrc = new char[fragmentShaderSrcLen + 1];
+    strncpy(mVertexShaderSrc, vertexShaderSrc, vertexShaderSrcLen);
+    strncpy(mFragmentShaderSrc, fragmentShaderSrc, fragmentShaderSrcLen);
+    mVertexShaderSrc[vertexShaderSrcLen] = '\0';
+    mFragmentShaderSrc[fragmentShaderSrcLen] = '\0';
+#endif
+}
+GLuint SE_ShaderProgram::getHandler()
+{
+    return mShaderProgramObject;
+}
+bool SE_ShaderProgram::initOK()
+{
+    return mHasInit;
+}
+void SE_ShaderProgram::releaseHardwareResource()
+{
+    if(mHasInit)
+    {
+        glDeleteProgram(mShaderProgramObject);
+    }
+    mShaderProgramObject = 0;
+    mHasInit = false;
+}
+void SE_ShaderProgram::init()
+{
+    if(mVertexShaderSrc == NULL)
+        return;
+    if(mFragmentShaderSrc == NULL)
+        return;
+    init(mVertexShaderSrc, mFragmentShaderSrc);
+}
+void SE_ShaderProgram::init(char* vertexShaderSrc, char* fragmentShaderSrc)
 {
 #ifdef GLES_20
     GLuint vertexShader;
@@ -105,14 +145,6 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
     mHasInit = true;
 #endif
 }
-GLuint SE_ShaderProgram::getHandler()
-{
-    return mShaderProgramObject;
-}
-bool SE_ShaderProgram::initOK()
-{
-    return mHasInit;
-}
 void SE_ShaderProgram::use()
 {
 #ifdef GLES_20
@@ -129,6 +161,10 @@ SE_ShaderProgram::~SE_ShaderProgram()
     {
         glDeleteProgram(mShaderProgramObject);
     }
+    if(mVertexShaderSrc)
+        delete[] mVertexShaderSrc;
+    if(mFragmentShaderSrc)
+        delete[] mFragmentShaderSrc;
 }
 void SE_ShaderProgram::link()
 {

@@ -3,7 +3,8 @@
 #include "SE_InputEvent.h"
 SE_InputManager::SE_InputManager()
 {
-
+    mKeyEventObserverList.clear();
+    mMotionEventObserverList.clear();
 }
 void SE_InputManager::update(SE_KeyEvent* keyEvent)
 {

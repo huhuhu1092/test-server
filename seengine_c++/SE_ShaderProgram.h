@@ -9,6 +9,8 @@ public:
     SE_ShaderProgram(char* vertexShader, char* fragmentShader);
     ~SE_ShaderProgram();
     GLuint getHandler();
+    void releaseHardwareResource();
+    void init();
     bool initOK();
     void use();
     GLint getPositionAttributeLoc()
@@ -37,6 +39,7 @@ public:
     }
 protected:
     void link();
+    void init(char* vertexShaderSrc, char* fragmentShaderSrc);
 private:
     GLuint mShaderProgramObject;
     bool mHasInit;
@@ -47,5 +50,7 @@ private:
     GLint m_u_color_loc;
 	GLint m_u_wvp_matrix_loc;
     GLint m_u_texture_loc;
+    char* mVertexShaderSrc;
+    char* mFragmentShaderSrc;
 };
 #endif

@@ -15,6 +15,7 @@ class SE_RenderManager;
 class SE_SpatialTravel
 {
 public:
+    virtual ~SE_SpatialTravel() {}
     virtual int visit(SE_Spatial* spatial) = 0;
     virtual int visit(SE_SimObject* simObject) = 0;
 };
