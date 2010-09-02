@@ -25,11 +25,28 @@ INCLUDES += -I$(SDKDIR)/Shell  \
 			-I$(SEENG_DIR) \
 			-I$(SEENG_DIR)/export \
 			-I$(SEENG_DIR)/command \
+            -I$(SEENG_DIR)/bullet \
+			-I$(SEENG_DIR)/bullet/BulletCollision/BroadphaseCollision \
+			-I$(SEENG_DIR)/bullet/BulletCollision/CollisionDispatch \
+            -I$(SEENG_DIR)/bullet/BulletCollision/CollisionShapes \
+            -I$(SEENG_DIR)/bullet/BulletCollision/NarrowPhaseCollision \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/ConstraintSolver \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/Dynamics \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/Vehicle \
+            -I$(SEENG_DIR)/bullet/LinearMath \
 			$(addprefix -I, $(PLAT_INC))
 
 VPATH +=  ../ : \
 	  ../command : \
 	  ../export : \
+	  ../bullet/BulletCollision/BroadphaseCollision : \
+	  ../bullet/BulletCollision/CollisionDispatch : \
+	  ../bullet/BulletCollision/CollisionShapes : \
+	  ../bullet/BulletCollision/NarrowPhaseCollision : \
+	  ../bullet/BulletDynamics/ConstraintSolver : \
+	  ../bullet/BulletDynamics/Dynamics : \
+	  ../bullet/BulletDynamics/Vehicle : \
+	  ../bullet/LinearMath : \
 	  $(SDKDIR)/Shell            : \
 	  $(SDKDIR)/Shell/API/KEGL   : \
 	  $(SDKDIR)/Shell/OS/LinuxX11
@@ -37,6 +54,93 @@ DEPEND_FLAG = $(PLAT_CFLAGS) $(INCLUDES)
 ##SRC_LUA = lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c  ldump.c lfunc.c  lgc.c linit.c liolib.c llex.c \
 ##	  lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c lstring.c lstrlib.c ltable.c ltablib.c ltm.c \
 ##	  lundump.c lvm.c lzio.c print.c
+SRC_BULLET =  btAlignedAllocator.cpp \
+	          btGeometryUtil.cpp \
+	          btQuickprof.cpp \
+	          btSerializer.cpp \
+	 btAxisSweep3.cpp \
+	 btBroadphaseProxy.cpp \
+	 btCollisionAlgorithm.cpp \
+	 btDispatcher.cpp \
+	 btMultiSapBroadphase.cpp \
+	 btOverlappingPairCache.cpp \
+	 btSimpleBroadphase.cpp \
+	 btDbvtBroadphase.cpp \
+	 btQuantizedBvh.cpp \
+	 btDbvt.cpp \
+	 btCollisionDispatcher.cpp \
+	 btCollisionObject.cpp \
+	 btCollisionWorld.cpp \
+	 btCompoundCollisionAlgorithm.cpp \
+	 btConvexConcaveCollisionAlgorithm.cpp \
+	 btConvexConvexAlgorithm.cpp \
+	 btConvexPlaneCollisionAlgorithm.cpp \
+	 btDefaultCollisionConfiguration.cpp \
+	 btEmptyCollisionAlgorithm.cpp \
+	  btManifoldResult.cpp \
+	  btSimulationIslandManager.cpp \
+	  btSphereBoxCollisionAlgorithm.cpp \
+	  btSphereSphereCollisionAlgorithm.cpp \
+	  btSphereTriangleCollisionAlgorithm.cpp \
+	  btUnionFind.cpp \
+	  SphereTriangleDetector.cpp \
+	  btActivatingCollisionAlgorithm.cpp \
+	  btBoxBoxCollisionAlgorithm.cpp \
+	  btBoxBoxDetector.cpp \
+	  btBoxShape.cpp \
+	  btBvhTriangleMeshShape.cpp \
+	  btCapsuleShape.cpp \
+	  btCollisionShape.cpp \
+	  btCompoundShape.cpp \
+	  btConcaveShape.cpp \
+	  btConeShape.cpp \
+	  btConvexHullShape.cpp \
+	  btConvexInternalShape.cpp \
+	  btConvexShape.cpp \
+	  btConvexTriangleMeshShape.cpp \
+	  btCylinderShape.cpp \
+	  btEmptyShape.cpp \
+	  btHeightfieldTerrainShape.cpp \
+	  btMinkowskiSumShape.cpp \
+	  btMultiSphereShape.cpp \
+	  btOptimizedBvh.cpp \
+	  btPolyhedralConvexShape.cpp \
+	  btSphereShape.cpp \
+	  btStaticPlaneShape.cpp \
+	  btStridingMeshInterface.cpp \
+	  btTetrahedronShape.cpp \
+	  btTriangleBuffer.cpp \
+	  btTriangleCallback.cpp \
+	  btTriangleIndexVertexArray.cpp \
+	  btTriangleMesh.cpp \
+	  btTriangleMeshShape.cpp \
+	  btUniformScalingShape.cpp \
+	 btContinuousConvexCollision.cpp \
+	 btConvexCast.cpp \
+	 btGjkConvexCast.cpp \
+	 btGjkEpaPenetrationDepthSolver.cpp \
+	 btGjkPairDetector.cpp \
+	 btMinkowskiPenetrationDepthSolver.cpp \
+	 btPersistentManifold.cpp \
+	 btRaycastCallback.cpp \
+	 btSubSimplexConvexCast.cpp \
+	 btVoronoiSimplexSolver.cpp \
+	 btGjkEpa2.cpp \
+	btConeTwistConstraint.cpp \
+	btContactConstraint.cpp \
+	btGeneric6DofConstraint.cpp \
+	btHingeConstraint.cpp \
+	btPoint2PointConstraint.cpp \
+	btSequentialImpulseConstraintSolver.cpp \
+	btSolve2LinearConstraint.cpp \
+	btTypedConstraint.cpp \
+	btContinuousDynamicsWorld.cpp \
+	btDiscreteDynamicsWorld.cpp \
+	btRigidBody.cpp \
+	btSimpleDynamicsWorld.cpp \
+	Bullet-C-API.cpp \
+	btRaycastVehicle.cpp \
+	btWheelInfo.cpp 
 
 SRCS_CPP = SE_Buffer.cpp   \
 	SE_DataTransfer.cpp  \
@@ -82,10 +186,12 @@ SRCS_CPP = SE_Buffer.cpp   \
 	SE_InputManager.cpp \
 	SE_MotionEventCamera.cpp \
 	SE_SpatialTravel.cpp \
+	SE_SimObjectState.cpp \
 	SEDemo.cpp \
 	PVRShell.cpp \
 	PVRShellAPI.cpp \
-	PVRShellOS.cpp
+	PVRShellOS.cpp \
+	$(SRC_BULLET)
 SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
 SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
 OBJ_C = $(SRCS_C:.c=.o)

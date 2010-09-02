@@ -6,9 +6,13 @@ IMPLEMENT_OBJECT(SE_SimObject)
 SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 {
 	mSpatial = spatial;
+    mState = NULL;
 }
 SE_SimObject::~SE_SimObject()
-{}
+{
+    if(mState)
+        delete mState;
+}
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 {
 	RenderUnitVector v;
