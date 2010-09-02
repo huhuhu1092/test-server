@@ -11,6 +11,7 @@ class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Vector3i;
 class SE_Spatial;
+class SE_SimObjectState;
 class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)
@@ -47,8 +48,20 @@ public:
 	{
 		mName = name;
 	}
+    // SE_SimObject will own the state . it will delete the mState
+    void setSimObjectState(SE_SimObjectState* state)
+    {
+        if(mState)
+            delete mState;
+        mState = state;
+    }
+    SE_SimObjectState* getSimObjectState()
+    {
+        return mState;
+    }
 private:
 	std::string mName;
 	SE_Spatial* mSpatial;
+    SE_SimObjectState* mState;
 };
 #endif
