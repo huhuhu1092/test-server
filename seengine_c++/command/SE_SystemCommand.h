@@ -46,6 +46,14 @@ public:
 	SE_MotionEvent* motionEvent;
 };
 ////////////////////////////////////////
+class SE_LoadSceneCommand : public SE_Command
+{
+public:
+    SE_LoadSceneCommand(SE_Application* app);
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+    std::string sceneName;
+};
+////////////////////////////////////////
 class SE_MoveCameraCommand : public SE_Command
 {
 public:

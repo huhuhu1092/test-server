@@ -34,6 +34,7 @@ SE_Application::SE_Application()
     mStarted = false;
     mFpsPrevTime = 0;
     mFpsFrameNum = 0;
+    mResponseValue = 0;
 }
 SE_Application::~SE_Application()
 {
@@ -64,6 +65,16 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
     mRenderManager->draw();
     mRenderManager->endDraw();
+}
+void SE_Application::start()
+{}
+void SE_Application::shutdown()
+{
+    if(mResourceManager)
+    {
+        mResourceManager->releaseHardwareResource();
+    }
+
 }
 void SE_Application::run()
 {

@@ -2,7 +2,9 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_SceneManager.h"
+#ifndef ANDROID
 #include "SE_Ase.h"
+#endif
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Camera.h"
@@ -21,20 +23,26 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     std::string inPath = dataPath + SE_SEP + fileName + ".ASE";
     std::string outPath = dataPath + SE_SEP + fileName;
+#ifndef ANDROID
     ASE_Loader loader(inPath.c_str(), 0, 0);
     loader.Load();
 	loader.Write(dataPath.c_str(), outPath.c_str());
+#endif
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
-	resourceManager->loadBaseData(fileName.c_str()); 
-    SE_SceneManager* sceneManager = mApp->getSceneManager();
-	sceneManager->createScene(fileName.c_str());
-    SE_Spatial* rootScene = sceneManager->getRoot();
-    rootScene->updateWorldTransform();
-	rootScene->updateBoundingVolume();
+    if(dataPath != "")
+    {
+	    resourceManager->loadBaseData(fileName.c_str()); 
+        SE_SceneManager* sceneManager = mApp->getSceneManager();
+	    sceneManager->createScene(fileName.c_str());
+        SE_Spatial* rootScene = sceneManager->getRoot();
+        rootScene->updateWorldTransform();
+	    rootScene->updateBoundingVolume();
+    }
 	mApp->setCamera(SE_Application::MAIN_CAMERA, new SE_MotionEventCamera);
 	mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
 	SE_InputManager* inputManager = mApp->getInputManager();
+    inputManager->removeMotionEventObserver(NULL);
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
 }
 ////////////////
@@ -81,6 +89,22 @@ void SE_MotionEventCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	SE_InputManager* inputManager = mApp->getInputManager();
 	inputManager->update(motionEvent);
 }
+//////////////
+SE_LoadSceneCommand::SE_LoadSceneCommand(SE_Application* app) : SE_Command(app)
+{}
+void SE_LoadSceneCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    if(sceneName == "")
+        return;
+    SE_ResourceManager* resourceManager = mApp->getResourceManager();
+	resourceManager->loadBaseData(sceneName.c_str()); 
+    SE_SceneManager* sceneManager = mApp->getSceneManager();
+	sceneManager->createScene(sceneName.c_str());
+    SE_Spatial* rootScene = sceneManager->getRoot();
+    rootScene->updateWorldTransform();
+	rootScene->updateBoundingVolume();
+}
+
 ////////////////////////////////////////////////////////
 SE_MoveCameraCommand::SE_MoveCameraCommand(SE_Application* app) : SE_Command(app)
 {

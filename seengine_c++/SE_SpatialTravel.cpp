@@ -131,6 +131,7 @@ int SE_MovingSpatialIntersect::visit(SE_Spatial* spatial)
 		sphere = ((SE_SphereBV*)moveBV)->getGeometry();
 		break;
 	}
+    return 0;
 }
 int SE_MovingSpatialIntersect::visit(SE_SimObject* so)
 {
