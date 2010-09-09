@@ -135,7 +135,7 @@ void SE_Application::sendCommand(SE_Command* command)
 SE_CommonID SE_Application::createCommonID()
 {
     SE_TimeUS currTime = SE_Time::getCurrentTimeUS();
-    return SE_CommonID(mAppID, (unsigned int)currTime, 0, 0);
+	return SE_CommonID(mAppID.first, mAppID.second, (unsigned int)currTime, 0);
 }
 /*
 class isPriorityLessThan

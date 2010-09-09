@@ -42,12 +42,15 @@ private:
 };
 bool SEDemo::InitApplication()
 {
-	SE_Application::getInstance()->setAppID(18215879);
+	SE_Application::SE_APPID appid;
+	appid.first = 137;
+	appid.second = 18215879;
+	SE_Application::getInstance()->setAppID(appid);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
 	SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "c:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif

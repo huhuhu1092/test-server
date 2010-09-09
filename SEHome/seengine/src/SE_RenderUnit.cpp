@@ -220,8 +220,8 @@ void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray,
 		imageIDNum = 0;
 		return;
 	}
-    imageIDNum = texUnit->getImageNum();
-    imageIDArray = texUnit->getImage();    
+    imageIDNum = texUnit->getImageDataIDNum();
+    imageIDArray = texUnit->getImageDataID();    
 }
 static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
 {
@@ -231,9 +231,9 @@ static SE_ImageDataID getImageDataID(SE_Surface* surface, int texType)
     SE_TextureUnit* texUnit = tex->getTextureUnit(texType);
     if(!texUnit)
         return SE_ImageDataID::INVALID;
-    int imageIDNum = texUnit->getImageNum();
+    int imageIDNum = texUnit->getImageDataIDNum();
     SE_ASSERT(imageIDNum == 1);
-    SE_ImageDataID id = texUnit->getImage(0);
+    SE_ImageDataID id = texUnit->getImageDataID(0);
     return id;
 
 }

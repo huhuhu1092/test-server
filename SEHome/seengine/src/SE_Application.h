@@ -15,7 +15,11 @@ class SE_Application
 {
 public:
     enum {MAIN_CAMERA = 0, MAX_CAMERA_NUM = 16};
-    typedef int SE_APPID;
+    struct SE_APPID
+	{
+		int first;
+		int second;
+	};
     virtual ~SE_Application();
     void run();
     void start();

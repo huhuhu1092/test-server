@@ -271,19 +271,25 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         tcid.write(output);
         geomTexCoordData[n++].texCoordID = tcid;
         output.writeInt(mesh->numTVertexes);
-        output.writeInt(mesh->numFaces);
+		if(mesh->numTVertexes > 0)
+            output.writeInt(mesh->numFaces);
+		else
+			output.writeInt(0);
         int i;
-        for(i = 0 ; i < mesh->numTVertexes ; i++)
-        {
-            output.writeFloat(mesh->tvertexes[i].s);
-            output.writeFloat(mesh->tvertexes[i].t);
-        }
-        for(i = 0 ; i < mesh->numFaces ; i++)
-        {
-            output.writeInt(mesh->tfaces[i].vi[0]);
-            output.writeInt(mesh->tfaces[i].vi[1]);
-            output.writeInt(mesh->tfaces[i].vi[2]);
-        }
+		if(mesh->numTVertexes > 0)
+		{
+			for(i = 0 ; i < mesh->numTVertexes ; i++)
+			{
+				output.writeFloat(mesh->tvertexes[i].s);
+				output.writeFloat(mesh->tvertexes[i].t);
+			}
+			for(i = 0 ; i < mesh->numFaces ; i++)
+			{
+				output.writeInt(mesh->tfaces[i].vi[0]);
+				output.writeInt(mesh->tfaces[i].vi[1]);
+				output.writeInt(mesh->tfaces[i].vi[2]);
+			}
+		}
     }
 ///////////////////// write shader program ////
     output.writeShort(SE_SHADERPROGRAMDATA_ID);

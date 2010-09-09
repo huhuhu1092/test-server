@@ -17,7 +17,7 @@ class SE_MeshSimObject : public SE_SimObject
 public:
     SE_MeshSimObject(SE_Spatial* spatial = NULL);
     SE_MeshSimObject(const SE_MeshID& meshID);
-    //SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh);
+    SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh);
     ~SE_MeshSimObject();
     void doTransform(const SE_Matrix4f& m);
     void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
@@ -32,6 +32,7 @@ public:
     void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
 	void onClick();
     RenderUnitVector createRenderUnit();
+	SE_Mesh* getMesh();
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;

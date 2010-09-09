@@ -39,7 +39,14 @@ public:
     SE_Vector3f getXAxis() const;
     SE_Vector3f getYAxis() const;
     void getExtent(float out[2]) const;
-    void getVertex(SE_Vector3f v[4]) const;
+	// v is array of 4 element
+    void getVertex(SE_Vector3f* v) const;
+	//faces is array of 2 element
+    void getFaces(SE_Vector3i* faces) const;
+	void setCenter(const SE_Vector3f& center);
+	//xAxis must perpendicular with yAxis
+	void setAxis(const SE_Vector3f& xAxis, const SE_Vector3f& yAxis);
+	void setExtent(float e[2]);
 private:
     SE_Vector3f mCenter;
     SE_Vector3f mAxis[2];

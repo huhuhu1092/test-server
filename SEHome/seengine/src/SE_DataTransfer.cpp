@@ -23,7 +23,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
         for(int j = 0 ; j < textureTransfer->getTextureUnitNum() ; j++)
         {
             SE_TextureUnitTransfer* texUnitTransfer = textureTransfer->getTextureUnit(j);
-			SE_TextureUnit* texUnit = new SE_TextureUnit(texUnitTransfer->getType());
+			SE_TextureUnit* texUnit = new SE_TextureUnit();
             texUnit->setTextureCoordData(resourceManager->getTextureCoordData(texUnitTransfer->getTexCoordDataID()));
             SE_ImageDataID* imageDataArray = new SE_ImageDataID[texUnitTransfer->getImageDataNum()];
             for(int n = 0 ; n < texUnitTransfer->getImageDataNum() ; n++)
@@ -33,7 +33,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
 				//SE_ImageData* imageData = resourceManager->getImageData(id);
                 //imageDataArray[n] = *imageData;
             }
-            texUnit->setImageData(imageDataArray, texUnitTransfer->getImageDataNum());
+            texUnit->setImageDataID(imageDataArray, texUnitTransfer->getImageDataNum());
             texture->setTextureUnit(texUnitTransfer->getType(), texUnit);
         }
         mesh->setTexture(i, texture);

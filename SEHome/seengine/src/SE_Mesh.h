@@ -4,49 +4,92 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+#include <string.h>
 class SE_TextureCoordData;
 class SE_GeometryData;
 class SE_MaterialData;
 class SE_TextureUnit
 {
 public:
-    SE_TextureUnit(int type);
+    SE_TextureUnit();
     ~SE_TextureUnit();
     void setTextureCoordData(SE_TextureCoordData* texCoordData)
     {
         mTexCoord = texCoordData;
     }
-    void setImageData(SE_ImageDataID* imageIDArray, int num)
+    void setImageDataID(SE_ImageDataID* imageIDArray, int num)
     {
-        mImageArray = imageIDArray;
-        mImageNum = num;
+		if(mImageDataArray)
+		{
+			delete[] mImageDataArray;
+			mImageDataArray = NULL;
+			mImageDataNum = 0;
+		}
+        mImageDataIDArray = imageIDArray;
+        mImageDataIDNum = num;
     }
+	void setImageDataNum(int num)
+	{
+		if(num <= 0)
+			return;
+		mImageDataArray = new SE_ImageData*[num];
+		memset(mImageDataArray, 0, sizeof(SE_ImageData*) * num);
+		if(!mImageDataArray)
+			return;
+		mImageDataNum = num;
+		if(mImageDataIDArray)
+		{
+			delete[] mImageDataIDArray;
+			mImageDataIDArray = NULL;
+			mImageDataIDNum = 0;
+		}
+	}
+    void setImageData(int index, SE_ImageData* imageData)
+	{
+		if(index < 0 || index >= mImageDataNum)
+		{
+			return;
+		}
+		mImageDataArray[index] = imageData;
+	}
+	SE_ImageData* getImageData(int index)
+	{
+		if(index < 0 || index >= mImageDataNum)
+		{
+			return NULL;
+		}
+		SE_ImageData* imageData = mImageDataArray[index];
+		return imageData;
+	}
     SE_TextureCoordData* getTextureCoordData()
     {
         return mTexCoord;
     }
-    int getImageNum()
+    int getImageDataIDNum()
     {
-        return mImageNum;
+        return mImageDataIDNum;
     }
-    SE_ImageDataID getImage(int index)
+    SE_ImageDataID getImageDataID(int index)
     {
-        if(index < 0 || index >= mImageNum)
-            return NULL;
-        return mImageArray[index];
+        if(index < 0 || index >= mImageDataIDNum)
+			return SE_ImageDataID::INVALID;
+        return mImageDataIDArray[index];
     }
-    SE_ImageDataID* getImage()
+    SE_ImageDataID* getImageDataID()
     {
-        return mImageArray;
+        return mImageDataIDArray;
     }
     bool hasMultiImage()
     {
-        return mImageNum > 1;
+        return mImageDataIDNum > 1 || mImageDataNum > 1;
     }
 private:
     SE_TextureCoordData* mTexCoord;
-    SE_ImageDataID* mImageArray;
-    int mImageNum;
+    SE_ImageDataID* mImageDataIDArray;
+    int mImageDataIDNum;
+
+	SE_ImageData** mImageDataArray;
+	int mImageDataNum;
 };
 class SE_Texture
 {
@@ -81,7 +124,7 @@ public:
     void setFacets(int* facets, int num);
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
-	    int getSampleMin()
+	int getSampleMin()
     {
         return mSampleMin;
     }
@@ -131,6 +174,10 @@ private:
 	_Vector2f* mTexVertex;
 	int mTexVertexNum;
 };
+// SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
+// about the data they use. So they will not release the pointer they own.
+// this pointer data are released by the data provider. The data provider can be 
+// resource manager, or a primitive.
 class SE_Mesh
 {
 public:

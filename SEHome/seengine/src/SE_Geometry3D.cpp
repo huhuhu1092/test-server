@@ -29,12 +29,35 @@ void SE_Rect3D::getExtent(float out[2]) const
     out[0] = mExtent[0];
     out[1] = mExtent[1];
 }
-void SE_Rect3D::getVertex(SE_Vector3f v[4]) const
+void SE_Rect3D::getVertex(SE_Vector3f* v) const
 {
     v[0] = mCenter - mAxis[0] * mExtent[0] - mAxis[1] * mExtent[1];
     v[1] = mCenter + mAxis[0] * mExtent[0] - mAxis[1] * mExtent[1];
     v[2] = mCenter + mAxis[0] * mExtent[0] + mAxis[1] * mExtent[1];
     v[3] = mCenter - mAxis[0] * mExtent[0] + mAxis[1] * mExtent[1];
+}
+void SE_Rect3D::getFaces(SE_Vector3i* faces) const
+{
+	faces[0].x = 0;
+	faces[0].y = 1;
+	faces[0].z = 2;
+	faces[1].x = 2;
+	faces[1].y = 3;
+	faces[1].z = 0;
+}
+void SE_Rect3D::setCenter(const SE_Vector3f& center)
+{
+	mCenter = center;
+}
+void SE_Rect3D::setAxis(const SE_Vector3f& xAxis, const SE_Vector3f& yAxis)
+{
+	mAxis[0] = xAxis;
+	mAxis[1] = yAxis;
+}
+void SE_Rect3D::setExtent(float e[2])
+{
+	mExtent[0] = e[0];
+	mExtent[1] = e[1];
 }
 /////////////////////
 

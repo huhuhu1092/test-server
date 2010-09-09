@@ -124,20 +124,24 @@ static void processTextureCoordData(SE_BufferInput& inputBuffer, SE_ResourceMana
         texCoordID.read(inputBuffer);
         int texVertexNum = inputBuffer.readInt();
         int texFaceNum = inputBuffer.readInt();
-        SE_Vector2f* texVertexArray = new SE_Vector2f[texVertexNum];
-        SE_Vector3i* texFaceArray = new SE_Vector3i[texFaceNum];
-        for(int i = 0 ; i < texVertexNum ; i++)
-        {
-            texVertexArray[i].x = inputBuffer.readFloat();
-            texVertexArray[i].y = inputBuffer.readFloat();
-        }
-        for(int i = 0 ; i  < texFaceNum ; i++)
-        {
-            texFaceArray[i].d[0] = inputBuffer.readInt();
-            texFaceArray[i].d[1] = inputBuffer.readInt();
-            texFaceArray[i].d[2] = inputBuffer.readInt();
-        }
-        
+		SE_Vector2f* texVertexArray = NULL;
+        SE_Vector3i* texFaceArray = NULL;
+		if(texVertexNum > 0)
+		{
+			texVertexArray = new SE_Vector2f[texVertexNum];
+			texFaceArray = new SE_Vector3i[texFaceNum];
+			for(int i = 0 ; i < texVertexNum ; i++)
+			{
+				texVertexArray[i].x = inputBuffer.readFloat();
+				texVertexArray[i].y = inputBuffer.readFloat();
+			}
+			for(int i = 0 ; i  < texFaceNum ; i++)
+			{
+				texFaceArray[i].d[0] = inputBuffer.readInt();
+				texFaceArray[i].d[1] = inputBuffer.readInt();
+				texFaceArray[i].d[2] = inputBuffer.readInt();
+			}
+		}
         SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
         texCoordData->setTexVertexArray(texVertexArray, texVertexNum);
         texCoordData->setTexFaceArray(texFaceArray, texFaceNum);

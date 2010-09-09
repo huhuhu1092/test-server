@@ -2,16 +2,20 @@
 #include "SE_GeometryData.h"
 #include "SE_TextureCoordData.h"
 #include <string.h>
-SE_TextureUnit::SE_TextureUnit(int type)
+SE_TextureUnit::SE_TextureUnit()
 {
     mTexCoord = NULL;
-    mImageArray = NULL;
-    mImageNum = 0;
+    mImageDataIDArray = NULL;
+    mImageDataIDNum = 0;
+	mImageDataArray = NULL;
+	mImageDataNum = 0;
 }
 SE_TextureUnit::~SE_TextureUnit()
 {
-    if(mImageArray)
-        delete[] mImageArray;
+    if(mImageDataIDArray)
+        delete[] mImageDataIDArray;
+	if(mImageDataArray)
+		delete[] mImageDataArray;
 }
 //////////
 SE_Surface::SE_Surface()
@@ -141,6 +145,12 @@ void SE_Surface::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
     SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
     SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
     SE_Vector2f* texVertexArray = texCoordData->getTexVertexArray();
+	if(texVertexArray == NULL || texFaceArray == NULL)
+	{
+        texVertex = 0;
+        texVertexNum = 0;
+		return;
+	}
     int texFaceNum = texCoordData->getTexFaceNum();
     int facetNum = getFacetNum();
     int* facets = getFacetArray();

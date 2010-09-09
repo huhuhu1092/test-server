@@ -20,6 +20,7 @@ enum SE_Plane_Side {SE_POSITIVE, SE_NEGATIVE, SE_OTHER};
 enum SE_PRIMITIVE_TYPE {LINES, LINE_STRIP, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP};
 enum SE_SAMPLE_TYPE {NEAREST, LINEAR};
 enum SE_WRAP_TYPE {REPEAT, CLAMP};
+enum SE_OWN_TYPE {NOT_OWN, OWN};// this is used to determine whether to delete a pointer
 //for pass data to opengl
 struct _Vector3f
 {

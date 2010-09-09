@@ -20,14 +20,14 @@ SE_MeshSimObject::SE_MeshSimObject(SE_Spatial* spatial) : SE_SimObject(spatial),
 {
 	mSelected = false;
 }
-/*
+
 SE_MeshSimObject::SE_MeshSimObject(SE_Mesh* mesh, bool ownMesh) : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
     mMesh = mesh;
     mOwnMesh = ownMesh;
     mWorldGeomData = new SE_GeometryData;
 }
-*/
+
 SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(false)
 {
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(meshID);
@@ -46,6 +46,10 @@ SE_MeshSimObject::~SE_MeshSimObject()
         delete mMesh;
     delete mWorldGeomData;
 }
+SE_Mesh* SE_MeshSimObject::getMesh()
+{
+	return mMesh;
+}
 void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
 {
     if(!mMesh)
@@ -56,7 +60,6 @@ void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
 }
 void SE_MeshSimObject::onClick()
 {
-
 	mSelected = true;
 }
 void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
@@ -69,10 +72,24 @@ void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rota
 }
 void SE_MeshSimObject::read(SE_BufferInput& input)
 {
+	if(mMesh && mOwnMesh)
+	{
+		delete mMesh;
+		mMesh = NULL;
+		mOwnMesh = false;
+	}
+	if(mWorldGeomData)
+	{
+		delete mWorldGeomData;
+		mWorldGeomData = NULL;
+	}
     mMeshID.read(input);
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(mMeshID);
     if(!meshTransfer)
+	{
+		mMeshID = SE_MeshID::INVALID;
         return;
+	}
 	mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
     if(mMesh)
     {

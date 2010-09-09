@@ -12,6 +12,7 @@ class SE_BufferOutput;
 class SE_Vector3i;
 class SE_Spatial;
 class SE_SimObjectState;
+class SE_Mesh;
 class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)
@@ -39,6 +40,7 @@ public:
     virtual int getSurfaceNum();
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
 	virtual void onClick();
+	virtual SE_Mesh* getMesh();
 public:
 	const char* getName()
 	{
