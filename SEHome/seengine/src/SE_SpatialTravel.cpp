@@ -11,6 +11,8 @@ SE_FindSpatialCollision::~SE_FindSpatialCollision()
 int SE_FindSpatialCollision::visit(SE_Spatial* spatial)
 {
 	SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
+	if(bv == NULL)
+		return 0;
 	SE_IntersectResult ret = bv->intersect(mRay);
 	if(ret.intersected)
 	{
@@ -41,6 +43,7 @@ int SE_FindSpatialCollision::visit(SE_SimObject* so)
 	{
 		mResult.simObject = so;
 		mResult.distance = distance;
+		mResult.spatial = so->getSpatial();
 		if(mResult.distance < mMinResult.distance)
 		{
 			mMinResult = mResult;

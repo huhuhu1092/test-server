@@ -12,11 +12,14 @@
 #include "SE_ImageData.h"
 class SE_Surface;
 class SE_Segment;
+class SE_ImageData;
+class SE_ShaderProgram;
 class SE_RenderUnit
 {
 public:
     virtual ~SE_RenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
+	virtual void getBaseColorImage(SE_ImageData** imageDataArray, int& imageDataNum);
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
@@ -49,7 +52,7 @@ public:
 	{
 		return mViewToPerspective;
 	}
-    void loadBaseColorTexture2D(const SE_ImageDataID& imageDataID, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
+    void loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
@@ -62,6 +65,7 @@ public:
     SE_TriSurfaceRenderUnit(SE_Surface* mesh);
     ~SE_TriSurfaceRenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
+	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
@@ -74,6 +78,8 @@ public:
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
+private:
+	void setColorAndMaterial(SE_ShaderProgram* shaderProgram);
 private:
     SE_Surface* mSurface;
     _Vector3f* mVertex;

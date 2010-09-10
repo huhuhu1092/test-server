@@ -61,6 +61,11 @@ public:
 		SE_ImageData* imageData = mImageDataArray[index];
 		return imageData;
 	}
+	void getImageData(SE_ImageData**& imageDataArray, int& imageDataNum)
+	{
+        imageDataArray = mImageDataArray;
+		imageDataNum = mImageDataNum;
+	}
     SE_TextureCoordData* getTextureCoordData()
     {
         return mTexCoord;

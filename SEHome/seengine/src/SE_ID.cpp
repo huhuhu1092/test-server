@@ -1,6 +1,7 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_Buffer.h"
+#include "SE_Application.h"
 #include "SE_Log.h"
 
 ///////////////////////
@@ -170,7 +171,50 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
     return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
 
 }
-
+SE_ImageDataID SE_ID::createImageDataID(const char* str)
+{
+	return SE_StringID(str);
+}
+SE_MeshID SE_ID::createMeshID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_SpatialID SE_ID::createSpatialID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_GeometryDataID SE_ID::createGeometryDataID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_TextureCoordDataID SE_ID::createTextureCoordDataID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_MaterialDataID SE_ID::createMaterialDataID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_SceneID SE_ID::createSceneID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
+SE_ProgramDataID SE_ID::createProgramDataID(const char* str)
+{
+	return SE_StringID(str);
+}
+SE_CommandID SE_ID::createCommandID(const char* str)
+{
+    return SE_CommandID(str);
+}
+SE_CommandFactoryID SE_ID::createCommandFactoryID(const char* str)
+{
+	return SE_CommandFactoryID(str);
+}
+SE_PrimitiveID SE_ID::createPrimitiveID()
+{
+	return SE_Application::getInstance()->createCommonID();
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

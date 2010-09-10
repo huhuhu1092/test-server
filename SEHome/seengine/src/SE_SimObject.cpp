@@ -18,6 +18,11 @@ SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 	RenderUnitVector v;
 	return v;
 }
+SE_SimObject::RenderUnitVector SE_SimObject::createWireRenderUnit()
+{
+	RenderUnitVector v;
+	return v;
+}
 SE_Mesh* SE_SimObject::getMesh()
 {
 	return NULL;

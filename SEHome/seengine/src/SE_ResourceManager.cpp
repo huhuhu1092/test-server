@@ -10,6 +10,7 @@
 #include "SE_DataTransfer.h"
 #include "SE_Spatial.h"
 #include "SE_ShaderProgram.h"
+#include "SE_Primitive.h"
 #include "SE_Log.h"
 #include <map>
 #include <vector>
@@ -216,6 +217,18 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
 		delete[] fragmentShaderBytes;
     }
 }
+static void processPrimitive(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+	/*
+	int primitiveNum = inputBuffer.readInt();
+	for(int i = 0 ; i < primitiveNum ; i++)
+	{
+		std::string primitiveName = inputBuffer.readString();
+		SE_Primitive* primitive = SE_Object::create(primitiveName.c_str());
+		primitive->read(inputBuffer);
+	}
+	*/
+}
 static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     if(!resourceManager->checkHeader(inputBuffer))
@@ -241,9 +254,10 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 processMeshData(inputBuffer, resourceManager);
                 break;
             case SE_SHADERPROGRAMDATA_ID:
-	
 				processShaderProgram(inputBuffer, resourceManager);
                 break;
+			case SE_PRIMITIVEDATA_ID:
+				processPrimitive(inputBuffer, resourceManager);
         }
     }
 }
@@ -321,6 +335,7 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_MaterialDataID, SE_MaterialData> materialDataMap;
     ResourceMap<SE_MeshID, SE_MeshTransfer> meshMap;
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram> shaderMap;
+	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
@@ -352,36 +367,29 @@ SE_ResourceManager::~SE_ResourceManager()
 SE_GeometryData* SE_ResourceManager::getGeometryData(const SE_GeometryDataID& geomID)
 {
     return mImpl->geomDataMap.get(geomID);
-    /*
-    SE_ResourceManager::_Impl::_GeometryDataMap::iterator it = mImpl->geomDataMap.find(geomID);
-    if(it == mImpl->geomDataMap.end())
-        return NULL;
-    else
-        return it->second;
-        */
+
 }
 void SE_ResourceManager::setGeometryData(const SE_GeometryDataID& geomID, SE_GeometryData* data)
 {
     mImpl->geomDataMap.set(geomID, data);
-    /*
-    SE_ResourceManager::_Impl::_GeometryDataMap::iterator it = mImpl->geomDataMap.find(geomID);
-    if(it == mImpl->geomDataMap.end())
-    {
-        mImpl->geomDataMap[geomID] = data;
-        return NULL;
-    }
-    else
-    {
-        SE_GeometryData* prev = it->second;
-        it->second = data;
-        return prev;
-    }
-    */
+
 }
 void SE_ResourceManager::removeGeometryData(const SE_GeometryDataID& geomID)
 {
     mImpl->geomDataMap.remove(geomID);
 } 
+SE_Primitive* SE_ResourceManager::getPrimitive(const SE_PrimitiveID& primitiveID)
+{
+	return mImpl->primitiveMap.get(primitiveID);
+}
+void SE_ResourceManager::setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive)
+{
+	mImpl->primitiveMap.set(primitiveID, primitive);
+}
+void SE_ResourceManager::removePrimitive(const SE_PrimitiveID& primitiveID)
+{
+	mImpl->primitiveMap.remove(primitiveID);
+}
 SE_TextureCoordData* SE_ResourceManager::getTextureCoordData(const SE_TextureCoordDataID& texCoordID)
 {
     return mImpl->texCoordDataMap.get(texCoordID);
@@ -396,20 +404,6 @@ SE_TextureCoordData* SE_ResourceManager::getTextureCoordData(const SE_TextureCoo
 void SE_ResourceManager::setTextureCoordData(const SE_TextureCoordDataID& texCoordID, SE_TextureCoordData* data)
 {
     mImpl->texCoordDataMap.set(texCoordID, data);
-    /*
-    SE_ResourceManager::_Impl::_TexureUnitDataMap::iterator it = mImpl->texUnitDataMap.find(texID);
-    if(it == mImpl->texUnitDataMap.end())
-    {
-        mImpl->texUnitDataMap[texID] = data;
-        return NULL;
-    }
-    else
-    {
-        SE_TextureCoordData* prev = it->second;
-        it->second = data;
-        return prev;
-    }
-*/
 }
 void SE_ResourceManager::removeTextureCoordData(const SE_TextureCoordDataID& texCoordID)
 {
@@ -489,9 +483,10 @@ SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_
 SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& programDataID)
 {
     SE_ShaderProgram* shader = mImpl->shaderMap.get(programDataID);
-    if(shader->initOK())
+    if(shader && shader->initOK())
         return shader;
-    shader->init();
+	if(shader)
+        shader->init();
     return shader;
 }
 void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader)
@@ -555,7 +550,7 @@ void SE_ResourceManager::releaseHardwareResource()
         GLuint texid = imgData->getTexID();
         if(texid != 0)
         {
-            LOGI("### delete texture %s ##", id.getStr());
+            LOGI("### delete texture %s ##\n", id.getStr());
             glDeleteTextures(1, &texid);
         }
         imgData->setTexID(0);

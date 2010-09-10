@@ -56,6 +56,22 @@ typedef SE_CommonID SE_SceneID;
 typedef SE_StringID SE_ProgramDataID;
 typedef SE_StringID SE_CommandID;
 typedef SE_StringID SE_CommandFactoryID;
+typedef SE_CommonID SE_PrimitiveID;
+class SE_ID
+{
+public:
+	static SE_ImageDataID createImageDataID(const char* str);
+	static SE_MeshID createMeshID();
+	static SE_SpatialID createSpatialID();
+	static SE_GeometryDataID createGeometryDataID();
+	static SE_TextureCoordDataID createTextureCoordDataID();
+	static SE_MaterialDataID createMaterialDataID();
+	static SE_SceneID createSceneID();
+	static SE_ProgramDataID createProgramDataID(const char* str);
+	static SE_CommandID createCommandID(const char* str);
+	static SE_CommandFactoryID createCommandFactoryID(const char* str);
+	static SE_PrimitiveID createPrimitiveID();
+};
 ///////////////////////////
 /*
 class SE_GeometryDataID

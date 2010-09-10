@@ -1,6 +1,7 @@
 #ifndef SE_SIMOBJECT_H
 #define SE_SIMOBJECT_H
 #include "SE_Object.h"
+#include "SE_SimObjectState.h"
 #include <vector>
 #include <string>
 class SE_RenderUnit;
@@ -11,7 +12,6 @@ class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Vector3i;
 class SE_Spatial;
-class SE_SimObjectState;
 class SE_Mesh;
 class SE_SimObject : public SE_Object
 {
@@ -29,6 +29,7 @@ public:
 	}
     virtual ~SE_SimObject();
     virtual RenderUnitVector createRenderUnit();
+	virtual RenderUnitVector createWireRenderUnit();
     virtual void doTransform(const SE_Matrix4f& m);
     virtual void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
     virtual void read(SE_BufferInput& input);

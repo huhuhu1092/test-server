@@ -4,12 +4,19 @@
 #include "SE_Common.h"
 #include "SE_MaterialData.h"
 #include "SE_Mesh.h"
+#include "SE_ID.h"
+#include "SE_Common.h"
 class SE_Primitive
 {
 public:
-	enum {SE_NORMALIZE_RECT, SE_NORMALIZE_SPHERE, SE_NORMALIZE_CUBE};
-	virtual ~SE_Primitive() {}
-	virtual SE_Mesh* createMesh() {return NULL;}
+	//static SE_PrimitiveID normalizeRectPrimitiveID;
+	//static SE_PrimitiveID normalizeCubePrimitiveID;
+	virtual ~SE_Primitive() 
+	{}
+	virtual SE_Mesh* createMesh() 
+	{
+		return NULL;
+	}
 };
 // primitive contain the data which used by SE_Mesh, so it can not allocate on stack
 // it must be own by some global structure.
@@ -27,21 +34,17 @@ private:
 		}
 	};
 public:
-	SE_RectPrimitive(const SE_Rect3D& rect);
+	//SE_RectPrimitive(const SE_Rect3D& rect);
+	static void create(const SE_Rect3D& rect, SE_RectPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
-	void setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own)
-	{
-		if(texUnitType >= SE_Texture::TEXUNIT_NUM || texUnitType < SE_Texture::TEXTURE0)
-			return;
-		mImageDataArray[texUnitType].imageData = imageData;
-		mImageDataArray[texUnitType].own = own;
-	}
-    void setMaterialData(const SE_MaterialData* materialData)
+	void setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own);
+    void setMaterialData(const SE_MaterialData& materialData)
 	{
 		if(mMaterialData)
 			delete mMaterialData;
 		mMaterialData = new SE_MaterialData;
-		*mMaterialData = *materialData;
+		*mMaterialData = materialData;
 	}
 	void setColor(const SE_Vector3f& color)
 	{
@@ -67,16 +70,23 @@ public:
 	{
 		mProgramDataID = programID;
 	}
+	//virtual void read(SE_BufferInput& input);
+	//virtual void write(SE_BufferOutput& output);
 	virtual SE_Mesh* createMesh();
 private:
+	SE_RectPrimitive();
+	SE_RectPrimitive(const SE_Rect3D& rect);
 	SE_RectPrimitive(const SE_RectPrimitive&);
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
 
 private:
 	SE_Rect3D mRect3D;
-	_ImageData mImageDataArray[SE_Texture::TEXUNIT_NUM];
-	SE_GeometryData* mGeometryData;
-	SE_TextureCoordData* mTexCoordData;
+	//_ImageData mImageDataArray[SE_Texture::TEXUNIT_NUM];
+	//SE_GeometryData* mGeometryData;
+	//SE_TextureCoordData* mTexCoordData;
+	SE_Wrapper<_ImageData>* mImageDataArray[SE_Texture::TEXUNIT_NUM];
+	SE_Wrapper<SE_GeometryData>* mGeometryData;
+	SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
 	SE_Vector3f mColor;
     int mSampleMin;

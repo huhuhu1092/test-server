@@ -1,6 +1,8 @@
 #include "SE_Geometry3D.h"
 #include "SE_Math.h"
 #include "SE_Log.h"
+static float e[2] = {1, 1};
+SE_Rect3D SE_Rect3D::normalizeRect = SE_Rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e);
 SE_Rect3D::SE_Rect3D()
 {
     mExtent[0] = mExtent[1] = 0;

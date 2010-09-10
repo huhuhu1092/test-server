@@ -32,6 +32,7 @@ struct SE_Rect
 class SE_Rect3D
 {
 public:
+	static SE_Rect3D normalizeRect;
     SE_Rect3D();
     SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, 
               float e[2]);

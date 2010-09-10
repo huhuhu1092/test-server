@@ -11,6 +11,10 @@
 #include "SE_SystemCommand.h"
 #include "SE_SystemCommandFactory.h"
 #include "SE_InputEvent.h"
+#include "SE_Primitive.h"
+#include "SE_Geometry.h"
+#include "SE_MeshSimObject.h"
+#include "SE_SceneManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -114,6 +118,27 @@ void SEDemo::handleInput(int width, int height)
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
     {
+		float e[2] = {1, 1};
+		SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e);
+		SE_RectPrimitive* primitive = NULL;
+		SE_PrimitiveID primitiveID;
+		SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+		SE_Mesh* mesh = primitive->createMesh();
+		SE_MeshSimObject* simObj = new SE_MeshSimObject(mesh, OWN);
+		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
+		SE_SpatialID spatialID = SE_ID::createSpatialID();
+        SE_Geometry* geometry = new SE_Geometry(spatialID, root);
+		root->addChild(geometry);
+		geometry->attachSimObject(simObj);
+		SE_Camera* camera = SE_Application::getInstance()->getCurrentCamera();
+		SE_Vector3f v = camera->getLocation();
+		SE_Quat q;
+		q.set(90, SE_Vector3f(1, 0, 0));
+		v = v - SE_Vector3f(0, 0, -5);
+		geometry->setLocalTranslate(v);
+		geometry->setLocalRotate(q);
+		geometry->updateWorldTransform();
+		simObj->setName("rect primitive");
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))

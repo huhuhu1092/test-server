@@ -9,6 +9,7 @@ class SE_Mesh;
 class SE_MeshTransfer;
 class SE_ShaderProgram;
 class SE_Spatial;
+class SE_Primitive;
 class SE_ResourceManager
 {
 public:
@@ -39,6 +40,9 @@ public:
     void setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader);
     void removeShaderProgram(const SE_ProgramDataID& programDataID);
     
+	SE_Primitive* getPrimitive(const SE_PrimitiveID& primitveID);
+	void setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive);
+	void removePrimitive(const SE_PrimitiveID& primitiveID);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */

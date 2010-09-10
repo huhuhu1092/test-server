@@ -36,6 +36,7 @@ void SE_Geometry::detachSimObject(SE_SimObject* go)
     mImpl->attachObject.remove(go);
 	go->setSpatial(NULL);
 }
+
 void SE_Geometry::write(SE_BufferOutput& output)
 {
     output.writeString("SE_Geometry");
@@ -64,6 +65,11 @@ void SE_Geometry::read(SE_BufferInput& input)
 void SE_Geometry::updateWorldTransform()
 {
 	SE_Spatial::updateWorldTransform();
+	SE_Geometry::_Impl::SimObjectList::iterator it;
+    for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+    {
+        (*it)->doTransform(getWorldTransform());
+	}
 }
 void SE_Geometry::updateBoundingVolume()
 {
@@ -89,7 +95,7 @@ void SE_Geometry::updateBoundingVolume()
         SE_Geometry::_Impl::SimObjectList::iterator it;
         for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
         {
-            (*it)->doTransform(getWorldTransform());
+            //(*it)->doTransform(getWorldTransform());
 			SE_Vector3f* points = (*it)->getVertexArray();
 			int num = (*it)->getVertexNum();
 			mWorldBoundingVolume->createFromPoints(points, num);
@@ -118,7 +124,7 @@ SE_Spatial::SPATIAL_TYPE SE_Geometry::getSpatialType()
 {
 	return GEOMETRY;
 }
-static SE_RenderUnit* createSelectedFrame(SE_Spatial* spatial)
+static SE_RenderUnit* createSelectedFrame(SE_Geometry* spatial)
 {
 	SE_RenderUnit* ru = NULL;
 	if(spatial)
@@ -151,6 +157,10 @@ static SE_RenderUnit* createSelectedFrame(SE_Spatial* spatial)
 				}
 				break;
 			}
+		}
+		else
+		{
+
 		}
 	}
 	return ru;
