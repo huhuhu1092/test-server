@@ -163,7 +163,7 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
     return ruv;
 }
 
-SE_SimObject::RenderUnitVector SE_SimObject::createWireRenderUnit()
+SE_RenderUnit* SE_MeshSimObject::createWireRenderUnit()
 {
     int faceNum = getFaceNum();
 	int vertexNum = getVertexNum();
@@ -178,5 +178,7 @@ SE_SimObject::RenderUnitVector SE_SimObject::createWireRenderUnit()
         seg[n++].set(vertex[f->y], vertex[f->z]);
 		seg[n++].set(vertex[f->z], vertex[f->x]);
 	}
-	RenderUnitVector 
+    SE_RenderUnit* ru = new SE_LineSegRenderUnit(seg, faceNum * 3, SE_Vector3f(0, 1, 0));
+	delete[] seg;
+	return ru;
 }

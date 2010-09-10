@@ -28,7 +28,7 @@ void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imag
 	imageIDArray = NULL;
 	imageIDNum = 0;
 }
-void SE_RenderUnit::getBaseColorImage(SE_ImageData** imageDataArray, int& imageDataNum)
+void SE_RenderUnit::getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum)
 {
 	imageDataArray = NULL;
 	imageDataNum = 0;

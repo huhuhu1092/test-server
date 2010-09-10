@@ -45,7 +45,23 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
     if(leftImageDataArray != NULL && rightImageDataArray == NULL)
         return false;
     if(leftImageDataArray == NULL && rightImageDataArray == NULL)
-        return false;
+	{
+		SE_ImageData** leftBaseColorImage = NULL;
+        int leftBaseColorImageNum;
+        SE_ImageData** rightBaseColorImage = NULL;
+        int rightBaseColorImageNum;
+		left->getBaseColorImage(leftBaseColorImage, leftBaseColorImageNum);
+		right->getBaseColorImage(rightBaseColorImage, rightBaseColorImageNum);
+		if(leftBaseColorImageNum > 0 && rightBaseColorImageNum == 0)
+			return false;
+		if(leftBaseColorImageNum == 0 && rightBaseColorImageNum > 0)
+			return true;
+		if(leftBaseColorImageNum == 0 && rightBaseColorImageNum == 0)
+			return false;
+        SE_ImageData* leftImageData = leftBaseColorImage[0];
+		SE_ImageData* rightImageData = rightBaseColorImage[0];
+		return leftImageData < rightImageData;
+	}
     if(leftImageDataArray[0] < rightImageDataArray[0])
         return true;
     else

@@ -178,17 +178,20 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT
 	if(texUnitType >= SE_Texture::TEXUNIT_NUM || texUnitType < SE_Texture::TEXTURE0)
 		return;
     _ImageData* img = new _ImageData;
-    if(!imageData)
+    if(!img)
         return;
     img->imageData = imageData;
     img->own = own;
     SE_Wrapper<_ImageData>* imageDataWrapper = mImageDataArray[texUnitType];
-    imageDataWrapper->dec();
-    if(imageDataWrapper->getNum() == 0)
-    {
-        delete imageDataWrapper;
-        mImageDataArray[texUnitType] = NULL;
-    }
+	if(imageDataWrapper)
+	{
+        imageDataWrapper->dec();
+        if(imageDataWrapper->getNum() == 0)
+        {
+            delete imageDataWrapper;
+            mImageDataArray[texUnitType] = NULL;
+        }
+	}
     imageDataWrapper = new SE_Wrapper<_ImageData>(img, SE_Wrapper<_ImageData>::NOT_ARRAY);
     mImageDataArray[texUnitType] = imageDataWrapper;
 }

@@ -158,10 +158,6 @@ static SE_RenderUnit* createSelectedFrame(SE_Geometry* spatial)
 				break;
 			}
 		}
-		else
-		{
-
-		}
 	}
 	return ru;
 }
@@ -192,6 +188,17 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
 	if(isSelected())
 	{
 		SE_RenderUnit* ru = createSelectedFrame(this);
-		renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+		if(ru != NULL)
+		    renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+		else
+		{
+            SE_Geometry::_Impl::SimObjectList::iterator it;
+            for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+            {
+                SE_SimObject* so = *it;
+				SE_RenderUnit* ru = so->createWireRenderUnit();
+				renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+			}
+		}
 	}
 }

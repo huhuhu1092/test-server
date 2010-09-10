@@ -19,7 +19,7 @@ class SE_RenderUnit
 public:
     virtual ~SE_RenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
-	virtual void getBaseColorImage(SE_ImageData** imageDataArray, int& imageDataNum);
+	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
     virtual SE_ImageDataID getBumpMapImageID();
     virtual SE_ImageDataID getCubeMapImageID();
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);

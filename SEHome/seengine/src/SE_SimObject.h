@@ -29,7 +29,7 @@ public:
 	}
     virtual ~SE_SimObject();
     virtual RenderUnitVector createRenderUnit();
-	virtual RenderUnitVector createWireRenderUnit();
+	virtual SE_RenderUnit* createWireRenderUnit();
     virtual void doTransform(const SE_Matrix4f& m);
     virtual void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
     virtual void read(SE_BufferInput& input);

@@ -123,6 +123,10 @@ void SEDemo::handleInput(int width, int height)
 		SE_RectPrimitive* primitive = NULL;
 		SE_PrimitiveID primitiveID;
 		SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+		if(!primitive)
+			return;
+		SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData("TVscreen");
+		primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
 		SE_Mesh* mesh = primitive->createMesh();
 		SE_MeshSimObject* simObj = new SE_MeshSimObject(mesh, OWN);
 		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
@@ -137,6 +141,7 @@ void SEDemo::handleInput(int width, int height)
 		v = v - SE_Vector3f(0, 0, -5);
 		geometry->setLocalTranslate(v);
 		geometry->setLocalRotate(q);
+		geometry->setLocalScale(SE_Vector3f(4, 4, 4));
 		geometry->updateWorldTransform();
 		simObj->setName("rect primitive");
         LOGI("## left ##\n");

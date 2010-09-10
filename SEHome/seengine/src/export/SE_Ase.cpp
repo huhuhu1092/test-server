@@ -194,12 +194,12 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         {
             size_t pos = texStr.find('.');
             std::string name = texStr.substr(0, pos);
-            name = name + ".raw";
-			SE_ImageDataID tid = texStr.c_str();
+			std::string filename = name + ".raw";
+			SE_ImageDataID tid = name.c_str();//texStr.c_str();
             itMaterial->tid = tid;
             tid.write(output);
             output.writeInt(0); // image data type
-            output.writeString(name.c_str());
+            output.writeString(filename.c_str());
         }
     }
     /////////////////////////////write geom data /////////////////////////////////////////////

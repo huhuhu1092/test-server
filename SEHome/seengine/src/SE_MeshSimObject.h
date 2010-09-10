@@ -33,7 +33,7 @@ public:
     void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
 	void onClick();
     RenderUnitVector createRenderUnit();
-	RenderUnitVector createWireRenderUnit();
+	SE_RenderUnit* createWireRenderUnit();
 	SE_Mesh* getMesh();
 private:
     SE_GeometryData* mWorldGeomData;
