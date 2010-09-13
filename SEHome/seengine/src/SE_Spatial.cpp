@@ -84,6 +84,18 @@ SE_Vector3f SE_Spatial::getWorldScale()
 {
     return mWorldScale;
 }
+void SE_Spatial::updateWorldLayer()
+{
+    if(mParent)
+    {
+        SE_Layer parentLayer = mParent->getWorldLayer();
+        mWorldLayer = parentLayer + mLocalLayer;
+    }
+    else
+    {
+        mWorldLayer = mLocalLayer;
+    }
+}
 void SE_Spatial::updateWorldTranslate()
 {
     if(mParent)

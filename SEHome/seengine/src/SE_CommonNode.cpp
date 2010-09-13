@@ -46,6 +46,16 @@ void SE_CommonNode::updateWorldTransform()
         s->updateWorldTransform();
     }
 }
+void SE_CommonNode::updateWorldLayer()
+{
+    SE_Spatial::updateWorldLayer();
+    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
+    for(; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+        s->updateWorldLayer();
+    }
+}
 SE_Spatial::SPATIAL_TYPE SE_CommonNode::getSpatialType()
 {
 	return NODE;

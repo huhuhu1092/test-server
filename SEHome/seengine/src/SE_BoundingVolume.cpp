@@ -100,8 +100,8 @@ void SE_AABBBV::merge(const SE_BoundingVolume* bv)
 	SE_Vector3f minf, maxf;
 	for(int i = 0 ; i < 3 ; i++)
 	{
-		minf.d[i] = SE_Util::min(min1.d[i], min2.d[i]);
-		maxf.d[i] = SE_Util::max(max1.d[i], max2.d[i]);
+		minf.d[i] = std::min(min1.d[i], min2.d[i]);
+		maxf.d[i] = std::max(max1.d[i], max2.d[i]);
 	}
 	mAABB.set(minf, maxf);
 }

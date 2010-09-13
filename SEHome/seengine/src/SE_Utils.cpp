@@ -33,3 +33,32 @@ void SE_Util::sleep(unsigned int s)
     //sleep(s);
 #endif
 }
+int SE_Util::findHighBit(int v)
+{
+	unsigned int bit = 0;
+	while(v > 1)
+	{
+		bit++;
+		v >>= 1;
+	}
+	return bit;
+}
+bool SE_Util::isPower2(int v)
+{
+	if(v >= 0)
+	    return (v & (v - 1)) == 0;
+	else
+		return 0;
+}
+int SE_Util::higherPower2(int v)
+{
+    if(isPower2(v))
+        return v;
+	return 1 << (findHighBit(v) + 1);
+}
+int SE_Util::lowerPower2(int v)
+{
+	if(isPower2(v))
+		return v;
+	return 1 << (findHighBit(v));
+}

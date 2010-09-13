@@ -158,6 +158,7 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
     {
         SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
+        tsru->setLayer(getSpatial()->getWorldLayer());
         ruv[i] = tsru;
     }
     return ruv;

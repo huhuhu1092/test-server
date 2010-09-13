@@ -5,6 +5,66 @@
 #else
 #include <GLES/gl.h>
 #endif
+class SE_ImageDataPortion
+{
+public:
+    SE_ImageDataPortion()
+    {
+        mX = 0;
+        mY = 0;
+        mWidth = 0;
+        mHeight = 0;
+    }
+    bool isValid()
+    {
+        return mWidth != 0 && mHeight != 0;
+    }
+    SE_ImageDataPortion(int x, int y, int w, int h)
+    {
+        mX = x;
+        mY = y;
+        mWidth = w;
+        mHeight = h;
+    }
+    int getX()
+    {
+        return mX;
+    }
+    int getY()
+    {
+        return mY;
+    }
+    int getWidth()
+    {
+        return mWidth;
+    }
+    int getHeight()
+    {
+        return mHeight;
+    }
+    void setX(int x)
+    {
+        mX = x;
+    }
+    void setY(int y)
+    {
+        mY = y;
+    }
+    void setWidth(int w )
+    {
+        mWidth = w;
+    }
+    void setHeight(int h)
+    {
+        mHeight = h;
+    }
+    static SE_ImageDataPortion INVALID;
+private:
+    int mX;
+    int mY;
+    int mWidth;
+    int mHeight;
+};
 class SE_ImageData
 {
 public:
@@ -23,6 +83,21 @@ public:
     {
         if(data)
             delete[] data;
+    }
+    // the bytes of per pixel
+    int getPixelSize()
+    {
+        switch(pixelFormat)
+        {
+            case RGB:
+                return 3;
+            case RGBA:
+                return 4;
+            case RGB_565:
+                return 2;
+            default:
+                return 0;
+        }
     }
     int getHeight()
     {return height;}

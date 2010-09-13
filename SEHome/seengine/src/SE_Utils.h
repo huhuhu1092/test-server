@@ -9,6 +9,11 @@ public:
     static unsigned int net2HostInt32(unsigned int i);
     static unsigned short net2HostInt16(unsigned short s);
     static void sleep(unsigned int s);
+	static int findHighBit(int v);
+	static int higherPower2(int v);
+	static int lowerPower2(int v);
+	static bool isPower2(int v);
+	/*
 	template <class T>
 	static T min(T a, T b)
 	{
@@ -19,6 +24,7 @@ public:
 	{
 		return a > b ? a : b;
 	}
+	*/
 };
 
 #endif /** end SE_UTILS_H*/

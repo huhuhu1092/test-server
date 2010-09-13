@@ -6,6 +6,7 @@
 #include "SE_Mesh.h"
 #include "SE_ID.h"
 #include "SE_Common.h"
+#include "SE_ImageData.h"
 class SE_Primitive
 {
 public:
@@ -32,13 +33,24 @@ private:
 			imageData = NULL;
 			own = NOT_OWN;
 		}
+        ~_ImageData()
+        {
+            if(own == OWN && imageData)
+            {
+                delete imageData;
+                imageData = NULL;
+            }
+        }
 	};
 public:
 	//SE_RectPrimitive(const SE_Rect3D& rect);
 	static void create(const SE_Rect3D& rect, SE_RectPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
-	void setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own);
+    //when imageData's width and height is not power of 2
+    //we need to adjust the texture coordidate
+	void setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+    //void setImagePortion(const SE_ImageDataPortion& portion);
     void setMaterialData(const SE_MaterialData& materialData)
 	{
 		if(mMaterialData)
@@ -94,5 +106,8 @@ private:
 	int mWrapS;
 	int mWrapT;
 	SE_ProgramDataID mProgramDataID;
+    SE_ImageDataPortion mImageDataPortion;
+    int mAdjustedStartX;//the x coordinate after change width to power2 width
+    int mAdjustedStartY;//the y coordinate after change height to power2 height
 };
 #endif

@@ -10,6 +10,7 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+#include "SE_Layer.h"
 class SE_Surface;
 class SE_Segment;
 class SE_ImageData;
@@ -36,6 +37,14 @@ public:
     virtual void draw();
 public:
     SE_PRIMITIVE_TYPE getPrimitiveType();
+    void setLayer(const SE_Layer& layer)
+    {
+        mLayer = layer;
+    }
+    SE_Layer getLayer() const
+    {
+        return mLayer;
+    }
     void setWorldTransform(const SE_Matrix4f& m)
 	{
 		mWorldTransform = m;
@@ -53,11 +62,11 @@ public:
 		return mViewToPerspective;
 	}
     void loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
-
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
     SE_Matrix4f mWorldTransform;
     SE_Matrix4f mViewToPerspective;
+    SE_Layer mLayer;
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 {

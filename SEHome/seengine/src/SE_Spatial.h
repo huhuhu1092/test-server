@@ -4,6 +4,7 @@
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_ID.h"
+#include "SE_Layer.h"
 #include "SE_Object.h"
 class SE_BoundingVolume;
 class SE_Spatial;
@@ -126,6 +127,19 @@ public:
 	{
 		return (mState & SELECTED_MASK) == SELECTED; 
 	}
+    void setLocalLayer(const SE_Layer& layer)
+    {
+        mLocalLayer = layer;
+    }
+    SE_Layer getLocalLayer()
+    {
+        return mLocalLayer;
+    }
+    SE_Layer getWorldLayer()
+    {
+        return mWorldLayer;
+    }
+public:
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
     virtual void attachSimObject(SE_SimObject* go);
@@ -133,6 +147,7 @@ public:
     virtual int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
+    virtual void updateWorldLayer();
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
@@ -158,5 +173,7 @@ private:
     SE_SpatialID mSpatialID;
     int mState;
     int mBVType;
+    SE_Layer mLocalLayer;
+    SE_Layer mWorldLayer;
 };
 #endif

@@ -6,6 +6,7 @@
 #include "SE_Log.h"
 #include "SE_ShaderProgram.h"
 #include "SE_ResourceManager.h"
+#include "SE_Layer.h"
 #include <string.h>
 static void checkGLError()
 {
@@ -38,6 +39,12 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
     int leftImageDataArrayNum = 0;
     SE_ImageDataID* rightImageDataArray = NULL;
     int rightImageDataArrayNum = 0;
+    const SE_Layer& leftLayer = left->getLayer();
+    const SE_Layer& rightLayer = right->getLayer();
+    if(leftLayer < rightLayer)
+        return true;
+    if(leftLayer > rightLayer)
+        return false;
     left->getBaseColorImageID(leftImageDataArray, leftImageDataArrayNum);
     right->getBaseColorImageID(rightImageDataArray, rightImageDataArrayNum);
     if(leftImageDataArray == NULL && rightImageDataArray != NULL)
