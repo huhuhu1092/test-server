@@ -3,5 +3,5 @@ SE_ImageDataPortion SE_ImageDataPortion::INVALID = SE_ImageDataPortion(0, 0, 0, 
 ////////////////////////////////
 bool SE_ImageData::isCompressTypeByHardware()
 {
-    return compressType == ETC1;
+    return mCompressType == ETC1;
 }

@@ -1,6 +1,6 @@
 #ifndef SE_UTILS_H
 #define SE_UTILS_H
-
+#include <wchar.h>
 class SE_Util
 {
 public:
@@ -13,6 +13,7 @@ public:
 	static int higherPower2(int v);
 	static int lowerPower2(int v);
 	static bool isPower2(int v);
+    static wchar_t* utf8ToUnicode(const char* utf8str);
 	/*
 	template <class T>
 	static T min(T a, T b)

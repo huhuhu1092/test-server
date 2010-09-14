@@ -70,7 +70,7 @@ public:
 	}
 	PTR_TYPE getPtrType() const
 	{
-		return mPtrType
+		return mPtrType;
 	}
 private:
 	void release()

@@ -14,9 +14,8 @@ public:
 	//static SE_PrimitiveID normalizeCubePrimitiveID;
 	virtual ~SE_Primitive() 
 	{}
-	virtual SE_Mesh* createMesh() 
+	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 	{
-		return NULL;
 	}
 };
 // primitive contain the data which used by SE_Mesh, so it can not allocate on stack
@@ -84,7 +83,7 @@ public:
 	}
 	//virtual void read(SE_BufferInput& input);
 	//virtual void write(SE_BufferOutput& output);
-	virtual SE_Mesh* createMesh();
+	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
 private:
 	SE_RectPrimitive();
 	SE_RectPrimitive(const SE_Rect3D& rect);
@@ -109,5 +108,171 @@ private:
     SE_ImageDataPortion mImageDataPortion;
     int mAdjustedStartX;//the x coordinate after change width to power2 width
     int mAdjustedStartY;//the y coordinate after change height to power2 height
+};
+
+class SE_BoxPrimitive : public SE_Primitive
+{
+public:
+	enum FACE_INDEX {LEFT, RIGHT, TOP, BOTTOM, FRONT, BACK, ALL};
+	static void create(const SE_Vector3f& scale, SE_BoxPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+	~SE_BoxPrimitive();
+	void setColor(FACE_INDEX index, const SE_Vector3f& color)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setColor(color);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setColor(color);
+			}
+		}
+			
+	}
+	void setProgramDataID(FACE_INDEX index, const SE_ProgramDataID& programID)
+	{
+        if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setProgramDataID(programID);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setProgramDataID(programID);
+			}
+		}
+	}
+	void setImageData(FACE_INDEX index , SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setImageData(imageData, texUnitType, own, imageDataPortion);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setImageData(imageData, texUnitType, own, imageDataPortion);
+			}
+		}
+	}
+	void setSampleMin(FACE_INDEX index ,int smin)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setSampleMin(smin);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setSampleMin(smin);
+			}
+		}
+	}
+	void setSampleMag(FACE_INDEX index ,int smag)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setSampleMag(smag);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setSampleMag(smag);
+			}
+		}
+	}
+	void setWrapS(FACE_INDEX index ,int ws)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setWrapS(ws);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setWrapS(ws);
+			}
+		}
+	}
+	void setWrapT(FACE_INDEX index ,int wt)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setWrapT(wt);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setWrapT(wt);
+			}
+		}
+	}
+    void setMaterialData(FACE_INDEX index ,const SE_MaterialData& materialData)
+	{
+		if(index < LEFT || index > ALL)
+			return;
+		if(index < ALL)
+		{
+			if(mRectPrimitive[index])
+				mRectPrimitive[index]->setMaterialData(materialData);
+		}
+		else
+		{
+			for(int i = LEFT; i < ALL ; i++)
+			{
+				if(mRectPrimitive[i])
+					mRectPrimitive[i]->setMaterialData(materialData);
+			}
+		}
+	}
+	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
+	SE_BoxPrimitive* clone();
+private:
+	SE_BoxPrimitive();
+	SE_BoxPrimitive(const SE_Rect3D& rect);
+	SE_BoxPrimitive(const SE_RectPrimitive&);
+	SE_BoxPrimitive& operator=(const SE_RectPrimitive&);
+
+private:
+	SE_RectPrimitive* mRectPrimitive[6];
+	SE_PrimitiveID mRectPrimitiveID[6];
+	SE_Vector3f mScale;
 };
 #endif

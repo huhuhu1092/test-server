@@ -72,22 +72,23 @@ public:
     enum COMPRESS_TYPE {RAW, JPEG, PNG, TGA, ETC1, PVR, NVIDIA};
     SE_ImageData()
     {
-        width = 0;
-        height = 0;
-        pixelFormat = INVALID;
-        bytesPerRow = 0;
-        data = 0;
-        texid = 0;
+        mWidth = 0;
+        mHeight = 0;
+        mPixelFormat = INVALID;
+        mBytesPerRow = 0;
+        mData = 0;
+        mTexid = 0;
+		mIsFliped = 0;
     }
     ~SE_ImageData()
     {
-        if(data)
-            delete[] data;
+        if(mData)
+            delete[] mData;
     }
     // the bytes of per pixel
     int getPixelSize()
     {
-        switch(pixelFormat)
+        switch(mPixelFormat)
         {
             case RGB:
                 return 3;
@@ -100,61 +101,70 @@ public:
         }
     }
     int getHeight()
-    {return height;}
+    {return mHeight;}
     int getWidth()
-    {return width;}
+    {return mWidth;}
     int getPixelFormat()
-    {return pixelFormat;}
+    {return mPixelFormat;}
     int getBytesPerRow()
-    {return bytesPerRow;}
+    {return mBytesPerRow;}
     char* getData()
-    {return data;}
+    {return mData;}
     GLuint getTexID()
     {
-        return texid;
+        return mTexid;
     }
 
     void setTexID(GLuint texID)
     {
-        texid = texID;
+        mTexid = texID;
     }
 	void setData(char* data)
 	{
-		this->data = data;
+		this->mData = data;
 	}
     void setHeight(int h)
-    {height = h;}
+    {mHeight = h;}
     void setWidth(int w)
-    {width = w;}
+    {mWidth = w;}
     void setPixelFormat(int pf)
     {
-        pixelFormat = pf;
+		mPixelFormat = pf;
     }
     void setBytesPerRow(int bpr)
     {
-        bytesPerRow = bpr;
+        mBytesPerRow = bpr;
     }
     void setCompressType(int ct)
     {
-        compressType = ct;
+        mCompressType = ct;
     }
+	bool isFliped()
+	{
+		return mIsFliped;
+	}
+	void setIsFliped(bool flip)
+	{
+		mIsFliped = flip;
+	}
     int getCompressType()
     {
-        return compressType;
+        return mCompressType;
     }
     bool isRawData()
     {
-        return compressType == RAW;
+        return mCompressType == RAW;
     }
     bool isCompressTypeByHardware();
 
 private:
-    int height;
-    int width;
-    int pixelFormat;
-    int bytesPerRow;
-    int compressType;
-    char* data;
-    GLuint texid;
+    int mHeight;
+    int mWidth;
+    int mPixelFormat;
+    int mBytesPerRow;
+    int mCompressType;
+	bool mIsFliped;
+    char* mData;
+    GLuint mTexid;
 };
 #endif

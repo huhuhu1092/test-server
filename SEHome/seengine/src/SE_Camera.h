@@ -37,6 +37,17 @@ public:
     void create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
     SE_Matrix4f getPerspectiveMatrix() const;
+	//camera will own bv, camera will delete mBoundingVolume which is assigned by bv;
+	void setBoundingVolume(const SE_BoundingVolume* bv)
+	{
+		if(mBoundingVolume)
+			delete mBoundingVolume;
+		mBoundingVolume = bv;
+	}
+	const SE_BoundingVolume* getBoundingVolume() const
+	{
+		return mBoundingVolume;
+	}
 private:
     SE_Frustum mFrustum;
     SE_Rect<int> mViewport;
@@ -46,5 +57,6 @@ private:
     SE_Vector3f mAxisZ;
 	mutable SE_Plane mPlanes[6];
     bool mChanged;
+	const SE_BoundingVolume* mBoundingVolume;
 };
 #endif

@@ -15,6 +15,8 @@
 #include "SE_Geometry.h"
 #include "SE_MeshSimObject.h"
 #include "SE_SceneManager.h"
+#include "SE_ImageCodec.h"
+#include "SE_CommonNode.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -118,6 +120,10 @@ void SEDemo::handleInput(int width, int height)
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
     {
+#if defined(WIN32)
+		PCWSTR filePath = L"C:\\model\\test\\我的文件.jpg";
+		SE_ImageData* imgd = SE_ImageCodec::load(filePath);
+#endif
 		float e[2] = {1, 1};
 		SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e);
 		SE_RectPrimitive* primitive = NULL;
@@ -126,25 +132,55 @@ void SEDemo::handleInput(int width, int height)
 		if(!primitive)
 			return;
 		SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData("TVscreen");
-		primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
-		SE_Mesh* mesh = primitive->createMesh();
-		SE_MeshSimObject* simObj = new SE_MeshSimObject(mesh, OWN);
+		//primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
+		primitive->setImageData(imgd, SE_Texture::TEXTURE0, OWN, SE_ImageDataPortion(0, 0, imgd->getWidth() / 2, imgd->getHeight() / 2));
+		SE_Mesh** meshArray = NULL;
+		int meshNum = 0;
+		primitive->createMesh(meshArray, meshNum);
 		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
-		SE_SpatialID spatialID = SE_ID::createSpatialID();
-        SE_Geometry* geometry = new SE_Geometry(spatialID, root);
-		root->addChild(geometry);
-		geometry->attachSimObject(simObj);
-		SE_Camera* camera = SE_Application::getInstance()->getCurrentCamera();
+        SE_Camera* camera = SE_Application::getInstance()->getCurrentCamera();
+		for(int i = 0 ; i < meshNum ; i++)
+		{
+		    SE_MeshSimObject* simObj = new SE_MeshSimObject(meshArray[i], OWN);
+		    simObj->setName("rect primitive");
+		    SE_SpatialID spatialID = SE_ID::createSpatialID();
+            SE_Geometry* geometry = new SE_Geometry(spatialID, root);
+		    root->addChild(geometry);
+		    geometry->attachSimObject(simObj);
+		    SE_Vector3f v = camera->getLocation();
+		    SE_Quat q;
+		    q.set(90, SE_Vector3f(1, 0, 0));
+		    v  = v + SE_Vector3f(0, 10, 0);
+		    geometry->setLocalTranslate(v);
+		    geometry->setLocalRotate(q);
+		    geometry->setLocalScale(SE_Vector3f(4, 4, 4));
+		    geometry->updateWorldTransform();
+            LOGI("## left ##\n");
+		}
+		if(meshArray)
+		{
+			delete[] meshArray;
+		}
+		SE_BoxPrimitive* boxPrimitive = NULL;
+		SE_PrimitiveID boxPrimitiveID;
+		SE_BoxPrimitive::create(SE_Vector3f(1, 1, 1), boxPrimitive, boxPrimitiveID);
+		boxPrimitive->createMesh(meshArray, meshNum);
+		SE_SpatialID groupSpatialID = SE_Application::getInstance()->createCommonID();
+		SE_CommonNode* groupNode = new SE_CommonNode(groupSpatialID, root);
 		SE_Vector3f v = camera->getLocation();
-		SE_Quat q;
-		q.set(90, SE_Vector3f(1, 0, 0));
-		v = v - SE_Vector3f(0, 0, -5);
-		geometry->setLocalTranslate(v);
-		geometry->setLocalRotate(q);
-		geometry->setLocalScale(SE_Vector3f(4, 4, 4));
-		geometry->updateWorldTransform();
-		simObj->setName("rect primitive");
-        LOGI("## left ##\n");
+		v = v + SE_Vector3f(0, 15, 0);
+		groupNode->setLocalTranslate(v);
+		for(int i = 0 ; i < meshNum ; i++)
+		{
+			SE_Mesh* mesh = meshArray[i];
+            SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
+			SE_Geometry* geometry = new SE_Geometry(spatialID, groupNode);
+			groupNode->addChild(geometry);
+			SE_MeshSimObject* simObj = new SE_MeshSimObject(mesh, OWN);
+		    simObj->setName("rect primitive");
+			geometry->attachSimObject(simObj);
+		}
+		groupNode->updateWorldTransform();
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {

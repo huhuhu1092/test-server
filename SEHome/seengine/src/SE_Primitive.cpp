@@ -243,8 +243,8 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT
     }
     int width = imageData->getWidth();
 	int height = imageData->getHeight();
-    int power2Width = 0;
-    int power2Height = 0;
+    int power2Width = width;
+    int power2Height = height;
 	if(!SE_Util::isPower2(width))
     {
         power2Width = SE_Util::higherPower2(width);
@@ -311,12 +311,24 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT
     }
     SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
     SE_Vector2f* texVertex = new SE_Vector2f[4];
+	SE_Wrapper<_ImageData>* imageDataPower2 = mImageDataArray[texUnitType];
+
     if(!imageDataPortion.isValid())
     {
-        texVertex[0] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
-        texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
-        texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
-        texVertex[3] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
+		if(imageDataPower2->getPtr()->imageData->isFliped())
+		{
+            texVertex[0] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
+            texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
+            texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
+            texVertex[3] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
+		}
+		else
+		{
+			texVertex[0] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
+			texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
+			texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
+			texVertex[3] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
+		}
     }
     else
     {
@@ -324,10 +336,20 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT
         int portiony = imageDataPortion.getY();
         int portionw = imageDataPortion.getWidth();
         int portionh = imageDataPortion.getHeight();
-        texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width, (power2Height - (starty + height - portionh - portiony)) / (float)power2Height);
-        texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - (starty + height - portionh - portiony)) / (float)power2Height);
-        texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portiony) / (float)power2Height);
-        texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width,  (power2Height - starty - portiony) / (float)power2Height);
+		if(imageDataPower2->getPtr()->imageData->isFliped())
+		{
+            texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width, (power2Height - starty - portionh - portiony) / (float)power2Height);
+            texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portionh - portiony) / (float)power2Height);
+            texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portiony) / (float)power2Height);
+            texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width,  (power2Height - starty - portiony) / (float)power2Height);
+		}
+		else
+		{
+            texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width,  (starty + portiony + portionh) / (float)power2Height);
+            texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (starty + portiony + portionh) / (float)power2Height);
+            texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (starty + portiony) / (float)power2Height);
+            texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width, (starty + portiony) / (float)power2Height);
+		}
     }
     texCoordData->setTexVertexArray(texVertex, 4);
     texCoordData->setTexFaceArray(texFaces, 2);
@@ -336,11 +358,15 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT
     mAdjustedStartY = starty;
 }
 
-SE_Mesh* SE_RectPrimitive::createMesh()
+void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
 {
 	std::auto_ptr<SE_Mesh> mesh(new SE_Mesh(1, 1)); // rect has just one surface and one texture
 	if(!mesh.get())
-		return NULL;
+	{
+		outMesh = NULL;
+		outMeshNum = 0;
+		return;
+	}
     std::auto_ptr<SE_Surface> surface(new SE_Surface);
     std::auto_ptr<SE_Texture> texture(new SE_Texture);
 	mesh->setGeometryData(mGeometryData->getPtr());
@@ -372,5 +398,104 @@ SE_Mesh* SE_RectPrimitive::createMesh()
     surface.release();
     texture.release();
 	SE_Mesh* ret = mesh.release();
-	return ret;
+	outMesh = new SE_Mesh*[1];
+	outMesh[0] = ret;
+	outMeshNum = 1;
+	return;
+}
+
+/////////
+void SE_BoxPrimitive::create(const SE_Vector3f& scale, SE_BoxPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
+{
+	float e[6][2] = { {scale.x, scale.y},
+	                  {scale.x, scale.y },
+	                  {scale.z, scale.y},
+	                  {scale.z, scale.y},
+	                  {scale.x, scale.z},
+	                  {scale.x, scale.z}
+	}; 
+	//front, back, left, right, top, bottom
+	SE_Rect3D rectArray[] = { SE_Rect3D(SE_Vector3f(0, 0, 1), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e[0]),
+		                      SE_Rect3D(SE_Vector3f(0, 0, -1), SE_Vector3f(-1, 0, 0),SE_Vector3f(0, 1, 0), e[1]),
+							  SE_Rect3D(SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), e[2]),
+							  SE_Rect3D(SE_Vector3f(1, 0, 0), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 1, 0), e[3]),
+							  SE_Rect3D(SE_Vector3f(0, 1, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, -1), e[4]),
+							  SE_Rect3D(SE_Vector3f(0, -1, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, 1), e[5])
+	                        };
+#ifdef DEBUG
+	{
+		SE_Vector3f vertexarray[8] = {
+			                          SE_Vector3f(-1, -1, 1).mul(scale),
+									  SE_Vector3f(1, -1, 1).mul(scale),
+									  SE_Vector3f(1, 1, 1).mul(scale),
+									  SE_Vector3f(-1, 1, 1).mul(scale),
+									  SE_Vector3f(-1, -1, -1).mul(scale),
+									  SE_Vector3f(1, -1, -1).mul(scale),
+									  SE_Vector3f(1, 1, -1).mul(scale),
+									  SE_Vector3f(-1, 1, -1).mul(scale)
+		                             };
+		int index[6][4] = {
+			               {0, 1, 2, 3},
+						   {5, 4, 7, 6},
+						   {4, 0, 3, 7},
+						   {1, 5, 6 ,2},
+						   {3, 2, 6, 7},
+						   {4, 5, 1, 0}
+		                 }; 
+	    for(int i = 0 ; i < 6 ; i++)
+		{
+	        SE_Vector3f vertex[4];
+			SE_Rect3D* rect = &rectArray[i];
+     	    rect->getVertex(vertex);
+            for(int j = 0 ; j < 4 ; j++)
+			{
+				SE_ASSERT(vertex[j] == vertexarray[index[i][j]]);
+			}
+		}
+	}
+#endif
+    SE_BoxPrimitive* boxPrimitive = new SE_BoxPrimitive;
+	for(int i = 0 ; i < 6 ; i++)
+	{   
+		SE_RectPrimitive* rectPrimitive = NULL;
+	    SE_PrimitiveID rectPrimitiveID;
+		const SE_Rect3D& rect = rectArray[i];
+	    SE_RectPrimitive::create(rect, boxPrimitive->mRectPrimitive[i],
+			                     boxPrimitive->mRectPrimitiveID[i]);
+	}
+	boxPrimitive->mScale = scale;
+	outPrimitive = boxPrimitive;
+	outPrimitiveID = SE_Application::getInstance()->createCommonID();
+}
+SE_BoxPrimitive::SE_BoxPrimitive()
+{
+	memset(mRectPrimitive, 0, sizeof(SE_RectPrimitive*) * 6);
+}
+SE_BoxPrimitive::~SE_BoxPrimitive()
+{
+	for(int i = 0 ; i < 6 ; i++)
+	{
+		SE_Application::getInstance()->getResourceManager()->removePrimitive(mRectPrimitiveID[i]);
+	}
+}
+void SE_BoxPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
+{
+	outMesh = new SE_Mesh*[6];
+	outMeshNum = 6;
+	memset(outMesh, 0, sizeof(SE_Mesh*) * 6);
+	for(int i = 0 ; i < 6 ; i++)
+	{
+		if(mRectPrimitive[i])
+		{
+			SE_Mesh** primitive = NULL;
+			int primitiveNum = 0;
+			mRectPrimitive[i]->createMesh(primitive, primitiveNum);
+			if(primitive)
+			    outMesh[i] = primitive[0];
+		}
+	}
+}
+SE_BoxPrimitive* SE_BoxPrimitive::clone()
+{
+	return NULL;
 }

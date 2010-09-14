@@ -6,25 +6,28 @@ IMPLEMENT_OBJECT(SE_Camera)
 SE_Camera::~SE_Camera()
 {
 	LOGI("### destroctor ~SE_Camera ####\n");
+	if(mBoundingVolume)
+		delete mBoundingVolume;
 }
 SE_Camera::SE_Camera()
 {
     mChanged = true;
+	mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
 {
 	create(location, target, fov, ratio, near, far);
-
+    mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {
 	create(location, xAxis, yAxis, zAxis, fov, ratio, far, near);
-
+    mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& yAxis, float fov, float ratio, float near, float far)
 {
 	create(location, zAxis, yAxis, fov, ratio, near, far);
-
+    mBoundingVolume = NULL;
 }
 SE_Rect<int> SE_Camera::getViewport() const
 {
