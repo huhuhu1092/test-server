@@ -141,6 +141,7 @@ protected:
     SE_APPID mAppID;
     int mResponseValue;
     std::string mResponseString;
+	int mObjectCount;
     static SE_Application* mInstance;
 };
 #endif

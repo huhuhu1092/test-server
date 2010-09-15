@@ -104,7 +104,7 @@ void SE_RenderManager::beginDraw()
     SE_Rect<int> rect = currCamera->getViewport();
     glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
     checkGLError();
-#ifdef DEBUG
+#ifdef DEBUG0
     LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
 #endif
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
@@ -132,7 +132,7 @@ void SE_RenderManager::endDraw()
 void SE_RenderManager::draw()
 {
     SE_Matrix4f m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
-#ifdef DEBUG
+#ifdef DEBUG0
 	int j = 0;
 #endif
     for(int i = 0 ; i < RQ_NUM ; i++)
@@ -145,13 +145,13 @@ void SE_RenderManager::draw()
 			ru->setViewToPerspectiveMatrix(m);
 			//if(j >= 130)
             ru->draw();
-#ifdef DEBUG
+#ifdef DEBUG0
 			j++;
 #endif
         }
 
     }
-#ifdef DEBUG
+#ifdef DEBUG0
 	LOGI("### draw %d ###\n", j);
 #endif
 }

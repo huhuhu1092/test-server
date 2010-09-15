@@ -412,13 +412,26 @@ const SE_Matrix4f SE_Matrix4f::IDENTITY = SE_Matrix4f(SE_Vector4f(1, 0, 0, 0),
 SE_Matrix4f::SE_Matrix4f()
 {
     memset(d, 0, sizeof(float) * 16);
+	identity();
 }
-SE_Matrix4f::SE_Matrix4f(float d[16])
+SE_Matrix4f::SE_Matrix4f(float d[16], int sequence)
 {
-    for(int i = 0 ; i < 16 ; i++)
-    {
-	    this->d[i] = d[i];
-    }
+	if(sequence == ROW_SEQUENCE)
+	{
+        for(int i = 0 ; i < 16 ; i++)
+        {
+	        this->d[i] = d[i];
+        }
+	}
+	else
+	{
+		for(int i = 0 ; i < 16 ; i += 4)
+		{
+			int column = i / 4;
+			SE_Vector4f v(d[i], d[i + 1], d[i + 2], d[i + 3]);
+            setColumn(column, v);
+		}
+	}
 }
 SE_Matrix4f::SE_Matrix4f(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3)
 {

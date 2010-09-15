@@ -83,7 +83,7 @@ SE_Vector3f SE_RenderUnit::getColor()
 
 void SE_RenderUnit::draw()
 {}
-#ifdef DEBUG
+#ifdef DEBUG0
 static int texSize = 0;
 #endif
 void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
@@ -100,7 +100,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE
 	glActiveTexture(GL_TEXTURE0);
     checkGLError();
     GLuint texid = imageData->getTexID();
-#ifdef DEBUG
+#ifdef DEBUG0
 	LOGI("## texid = %d ##\n", texid);
 #endif
     if(texid == 0)
@@ -108,7 +108,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE
         glGenTextures(1, &texid);
         checkGLError();
         imageData->setTexID(texid);
-#ifdef DEBUG
+#ifdef DEBUG0
 		LOGI("### texSize = %d ###\n", texSize);
 		texSize++;
 #endif
@@ -480,7 +480,7 @@ void SE_TriSurfaceRenderUnit::draw()
         glDisableVertexAttribArray(shaderProgram->getBaseColorTexCoordAttributeLoc());
         //checkGLError();
     }
-#ifdef DEBUG
+#ifdef DEBUG0
 	LOGI("### vertexNum = %d #####\n", vertexNum);
 #endif
     glDrawArrays(GL_TRIANGLES, 0, vertexNum);

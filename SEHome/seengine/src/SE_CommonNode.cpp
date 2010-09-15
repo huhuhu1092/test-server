@@ -30,6 +30,13 @@ SE_CommonNode::~SE_CommonNode()
 }
 void SE_CommonNode::addChild(SE_Spatial* child)
 {
+	std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
+    for(; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+		if(s == child)
+			return;
+	}
     mImpl->children.push_back(child);
 }
 void SE_CommonNode::removeChild(SE_Spatial* child)

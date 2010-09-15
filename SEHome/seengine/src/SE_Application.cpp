@@ -35,6 +35,7 @@ SE_Application::SE_Application()
     mFpsPrevTime = 0;
     mFpsFrameNum = 0;
     mResponseValue = 0;
+	mObjectCount = 0;
 }
 SE_Application::~SE_Application()
 {
@@ -135,7 +136,7 @@ void SE_Application::sendCommand(SE_Command* command)
 SE_CommonID SE_Application::createCommonID()
 {
     SE_TimeUS currTime = SE_Time::getCurrentTimeUS();
-	return SE_CommonID(mAppID.first, mAppID.second, (unsigned int)currTime, 0);
+	return SE_CommonID(mAppID.first, mAppID.second, (unsigned int)currTime, mObjectCount++);
 }
 /*
 class isPriorityLessThan

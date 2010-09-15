@@ -2,10 +2,10 @@
 #define SE_SIMOBJECT_H
 #include "SE_Object.h"
 #include "SE_SimObjectState.h"
+#include "SE_Matrix.h"
 #include <vector>
 #include <string>
 class SE_RenderUnit;
-class SE_Matrix4f;
 class SE_Quat;
 class SE_Vector3f;
 class SE_BufferInput;
@@ -62,9 +62,18 @@ public:
     {
         return mState;
     }
+	void setLocalMatrix(const SE_Matrix4f& localMatrix)
+	{
+		mLocalMatrix = localMatrix;
+	}
+	SE_Matrix4f getLocalMatrix()
+	{
+		return mLocalMatrix;
+	}
 private:
 	std::string mName;
 	SE_Spatial* mSpatial;
     SE_SimObjectState* mState;
+	SE_Matrix4f mLocalMatrix;
 };
 #endif

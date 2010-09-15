@@ -102,9 +102,10 @@ private:
 class SE_Matrix4f
 {
 public:
+	enum  {COL_SEQUENCE, ROW_SEQUENCE};
     static const SE_Matrix4f IDENTITY;
     SE_Matrix4f();
-    SE_Matrix4f(float d[16]);
+    SE_Matrix4f(float d[16], int sequence = ROW_SEQUENCE);
     SE_Matrix4f(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3);
     SE_Matrix4f(const SE_Matrix4f& rm);
     SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t);

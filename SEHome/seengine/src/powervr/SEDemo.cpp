@@ -17,6 +17,7 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
+#include "SE_Physics.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -37,6 +38,10 @@ static void drawScene(int width, int height)
 class SEDemo : public PVRShell
 {
 public:
+	SEDemo()
+	{
+		mPhysics = NULL;
+	}
 	virtual bool InitApplication();
 	virtual bool InitView();
 	virtual bool ReleaseView();
@@ -44,7 +49,8 @@ public:
 	virtual bool RenderScene();
 private:
 	void handleInput(int width, int height);
-    
+private:
+	SE_Physics* mPhysics;
 };
 bool SEDemo::InitApplication()
 {
@@ -83,6 +89,8 @@ bool SEDemo::QuitApplication()
 {
 	return true;
 }
+static SE_Vector3f startPos;
+static SE_CommonNode* groupNode = NULL;
 void SEDemo::handleInput(int width, int height)
 {
     static float prevPointer[2];
@@ -139,6 +147,8 @@ void SEDemo::handleInput(int width, int height)
 		primitive->createMesh(meshArray, meshNum);
 		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
         SE_Camera* camera = SE_Application::getInstance()->getCurrentCamera();
+		SE_Quat q;
+		q.set(90, SE_Vector3f(1, 0, 0));
 		for(int i = 0 ; i < meshNum ; i++)
 		{
 		    SE_MeshSimObject* simObj = new SE_MeshSimObject(meshArray[i], OWN);
@@ -148,8 +158,6 @@ void SEDemo::handleInput(int width, int height)
 		    root->addChild(geometry);
 		    geometry->attachSimObject(simObj);
 		    SE_Vector3f v = camera->getLocation();
-		    SE_Quat q;
-		    q.set(90, SE_Vector3f(1, 0, 0));
 		    v  = v + SE_Vector3f(0, 10, 0);
 		    geometry->setLocalTranslate(v);
 		    geometry->setLocalRotate(q);
@@ -164,12 +172,18 @@ void SEDemo::handleInput(int width, int height)
 		SE_BoxPrimitive* boxPrimitive = NULL;
 		SE_PrimitiveID boxPrimitiveID;
 		SE_BoxPrimitive::create(SE_Vector3f(1, 1, 1), boxPrimitive, boxPrimitiveID);
+		//boxPrimitive->SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData("TVscreen");
+		//primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
+		boxPrimitive->setImageData(SE_BoxPrimitive::ALL, imageData, SE_Texture::TEXTURE0, NOT_OWN);
 		boxPrimitive->createMesh(meshArray, meshNum);
 		SE_SpatialID groupSpatialID = SE_Application::getInstance()->createCommonID();
-		SE_CommonNode* groupNode = new SE_CommonNode(groupSpatialID, root);
+	    groupNode = new SE_CommonNode(groupSpatialID, root);
+		root->addChild(groupNode);
 		SE_Vector3f v = camera->getLocation();
-		v = v + SE_Vector3f(0, 15, 0);
+		v = v + SE_Vector3f(0, 25, 0);
+		//v = SE_Vector3f(0, -50, v.z);
 		groupNode->setLocalTranslate(v);
+		groupNode->setLocalRotate(q);
 		for(int i = 0 ; i < meshNum ; i++)
 		{
 			SE_Mesh* mesh = meshArray[i];
@@ -181,13 +195,20 @@ void SEDemo::handleInput(int width, int height)
 			geometry->attachSimObject(simObj);
 		}
 		groupNode->updateWorldTransform();
+		SE_Application::getInstance()->getSceneManager()->updateSpatialIDMap();
+        startPos = v;//SE_Vector3f(0, 50, 0);
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
+		mPhysics = new SE_Physics;
+		mPhysics->setStartPos(startPos);
+		mPhysics->initPhysics();
         LOGI("## right ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+		if(mPhysics)
+		    mPhysics->exitPhysics();
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
@@ -200,6 +221,22 @@ bool SEDemo::RenderScene()
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
     handleInput(dwCurrentWidth, dwCurrentHeight);
+	if(mPhysics)
+	{
+	    mPhysics->stepSimulation(1.0f / 60);
+	    SE_Matrix4f m = mPhysics->getObjMatrix();
+		SE_Vector3f v = m.getTranslate();
+		if(groupNode)
+		{
+			groupNode->setLocalTranslate(v);
+			groupNode->updateWorldTransform();
+		}
+		for(int i = 0 ; i < 4 ; i++)
+		{
+			SE_Vector4f v = m.getColumn(i);
+			LOGI("## %d : %f %f %f %f\n", i, v.x, v.y, v.z, v.w);
+		}
+	}
 	SE_Application::getInstance()->run();
 	return true;
 }

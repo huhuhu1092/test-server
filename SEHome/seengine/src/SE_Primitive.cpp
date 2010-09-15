@@ -418,7 +418,7 @@ void SE_BoxPrimitive::create(const SE_Vector3f& scale, SE_BoxPrimitive*& outPrim
 	SE_Rect3D rectArray[] = { SE_Rect3D(SE_Vector3f(0, 0, 1), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e[0]),
 		                      SE_Rect3D(SE_Vector3f(0, 0, -1), SE_Vector3f(-1, 0, 0),SE_Vector3f(0, 1, 0), e[1]),
 							  SE_Rect3D(SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), e[2]),
-							  SE_Rect3D(SE_Vector3f(1, 0, 0), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 1, 0), e[3]),
+							  SE_Rect3D(SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, -1), SE_Vector3f(0, 1, 0), e[3]),
 							  SE_Rect3D(SE_Vector3f(0, 1, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, -1), e[4]),
 							  SE_Rect3D(SE_Vector3f(0, -1, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, 1), e[5])
 	                        };

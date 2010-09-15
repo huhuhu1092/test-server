@@ -56,7 +56,8 @@ void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
         return;
     SE_ASSERT(mWorldGeomData);
     SE_GeometryData* localMeshGeomData = mMesh->getGeometryData();
-    SE_GeometryData::transform(localMeshGeomData, m, mWorldGeomData);    
+	SE_Matrix4f worldM = m.mul(getLocalMatrix());
+    SE_GeometryData::transform(localMeshGeomData, worldM, mWorldGeomData);    
 }
 void SE_MeshSimObject::onClick()
 {
@@ -64,11 +65,10 @@ void SE_MeshSimObject::onClick()
 }
 void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
 {
-    if(!mMesh)
-        return;
-    SE_ASSERT(mWorldGeomData);
-    SE_GeometryData* localMeshGeomData = mMesh->getGeometryData();
-    SE_GeometryData::transform(localMeshGeomData, scale, rotate, translate, mWorldGeomData);
+	SE_Matrix4f m;
+	m.set(rotate.toMatrix3f(), scale, translate);
+	doTransform(m);
+    //SE_GeometryData::transform(localMeshGeomData, scale, rotate, translate, mWorldGeomData);
 }
 void SE_MeshSimObject::read(SE_BufferInput& input)
 {
