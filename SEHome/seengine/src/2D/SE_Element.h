@@ -5,7 +5,7 @@ class SE_Element
 {
 public:
     SE_Element();
-    SE_Element(int left, int right, int top, int bottom);
+    SE_Element(float left, float right, float top, float bottom);
     virtual ~SE_Element();
     float getWidth()
     {
@@ -23,22 +23,60 @@ public:
     {
         mHeight = h;
     }
-    void setImage(const SE_ImageDataID& imageDataID);
-    SE_ImageDataID getImageDataID();
+    void setLeft(float left)
+    {
+        mLeft = left;
+    }
+    void setTop(float top)
+    {
+        mTop = top
+    }
+    void setImage(const SE_ImageDataID& imageDataID)
+    {
+        mImageDataID = imageDataID;
+    }
+    SE_ImageDataID getImageDataID()
+    {
+        return mImageDataID;
+    }
     //it is rotated around the center
-    void setLocalRotate(const SE_Quat& q);
-    SE_Quat getLocalRotate();
+    void setLocalRotate(const SE_Quat& q)
+    {
+        mLocalRotate = q;
+    }
+    SE_Quat getLocalRotate()
+    {
+        return mLocalRotate;
+    }
     //it is scaled from its center
-    void setLocalScale(const SE_Vector3f& scale);
-    SE_Vector3f getLocalScale();
-    //the translate is the top and left of this element relatevie to its parent
-    void setLocalTranslate(const SE_Vector3f& translate);
-    SE_Vector3f getLocalTranslate();
-    void setLocalLayer(const SE_Layer& layer);
-    SE_Layer getLocalLayer();
+    void setLocalScale(const SE_Vector3f& scale)
+    {
+        mLocalScale = scale;
+    }
+    SE_Vector3f getLocalScale()
+    {
+        return mLocalScale;
+    }
+    //the translate is midpoint this element relatevie to its parent
+    //void setLocalTranslate(const SE_Vector3f& translate);
+    SE_Vector3f getLocalTranslate()
+    {
+        mLocalTranslate.x = mLeft + mWidth / 2;
+        mLocalTranslate.y 
+    }
+    void setLocalLayer(const SE_Layer& layer)
+    {
+        mLocalLayer = layer;
+    }
+    SE_Layer getLocalLayer()
+    {
+        return mLocalLayer;
+    }
 public:
     virtual SE_Spatial* createSpatial();
 private:
+    float mTop;
+    float mLeft;
     float mWidth;
     float mHeight; 
     SE_Element* mParent;
