@@ -6,12 +6,12 @@ IMPLEMENT_OBJECT(SE_SimObject)
 SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 {
 	mSpatial = spatial;
-    mState = NULL;
+    mPropertySet = NULL;
 }
 SE_SimObject::~SE_SimObject()
 {
-    if(mState)
-        delete mState;
+    if(mPropertySet)
+        delete mPropertySet;
 }
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 {

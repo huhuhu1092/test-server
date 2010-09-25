@@ -347,6 +347,24 @@ SE_Matrix4f SE_Frustum::getPerspectiveMatrix() const
     r = nearrect.right;
     b = nearrect.bottom;
     t = nearrect.top;
+	/*
+	out.set(0, 0, 2  / (r - l));
+    out.set(0, 1,  0);
+    out.set(0, 2,  0);
+    out.set(0, 3, -(r + l) / (r - l));
+    out.set(1, 0, 0);
+    out.set(1, 1, 2/ (t - b));
+    out.set(1, 2, 0);
+    out.set(1, 3, -(t + b) / (t - b));
+    out.set(2, 0, 0);
+    out.set(2, 1, 0);
+    out.set(2, 2, -2 / (f - n));
+    out.set(2, 3, -(f + n) / (f - n));
+    out.set(3, 0, 0);
+    out.set(3, 1, 0);
+    out.set(3, 2, 0);
+    out.set(3, 3, 1);
+	*/
     out.set(0, 0, (2 * n) / (r - l));
     out.set(0, 1,  0);
     out.set(0, 2,  (r + l) / (r - l));

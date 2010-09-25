@@ -100,12 +100,14 @@ SE_RenderManager::~SE_RenderManager()
 }
 void SE_RenderManager::beginDraw()
 {
-    SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+     SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
     SE_Rect<int> rect = currCamera->getViewport();
     glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
     checkGLError();
 #ifdef DEBUG0
     LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
+	SE_Vector3f location = currCamera->getLocation();
+	LOGI("## location = %f, %f, %f\n", location.x, location.y, location.z);
 #endif
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
     shaderProgram->use();
@@ -114,6 +116,9 @@ void SE_RenderManager::beginDraw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	checkGLError();
     glEnable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	checkGLError();
     for(int i = 0 ; i  < RQ_NUM ; i++)
     {

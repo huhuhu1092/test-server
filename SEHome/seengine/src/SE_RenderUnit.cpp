@@ -194,6 +194,7 @@ void SE_RenderUnit::loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE
     checkGLError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampleMag ); 
     checkGLError();
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     return;
 }
 

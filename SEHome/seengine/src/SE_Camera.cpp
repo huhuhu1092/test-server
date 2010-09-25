@@ -21,7 +21,7 @@ SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, flo
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {
-	create(location, xAxis, yAxis, zAxis, fov, ratio, far, near);
+	create(location, xAxis, yAxis, zAxis, fov, ratio, near, far);
     mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& yAxis, float fov, float ratio, float near, float far)

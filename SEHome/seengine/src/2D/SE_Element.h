@@ -57,13 +57,6 @@ public:
     {
         return mLocalScale;
     }
-    //the translate is midpoint this element relatevie to its parent
-    //void setLocalTranslate(const SE_Vector3f& translate);
-    SE_Vector3f getLocalTranslate()
-    {
-        mLocalTranslate.x = mLeft + mWidth / 2;
-        mLocalTranslate.y 
-    }
     void setLocalLayer(const SE_Layer& layer)
     {
         mLocalLayer = layer;
@@ -74,6 +67,7 @@ public:
     }
 public:
     virtual SE_Spatial* createSpatial();
+    virtual void updateWorldTransform();
 private:
     float mTop;
     float mLeft;

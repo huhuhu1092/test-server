@@ -4,13 +4,13 @@ SE_Command::~SE_Command()
 bool SE_Command::expire(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_TimeMS compareTime;
-    if(mbRealTime)
+    if(mTimeType == REAL)
     {
         compareTime = realDelta;
     }
     else
         compareTime = simulateDelta;
-    if(mWaitTime > compareTime)
+    if(mWaitTime > 0)
     {
         mWaitTime -= compareTime;
         return false;

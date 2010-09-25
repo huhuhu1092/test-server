@@ -1,7 +1,7 @@
-#include "SE_SimObjectState.h"
-SE_SimObjectState::SE_SimObjectState()
+#include "SE_PropertySet.h"
+SE_PropertySet::SE_PropertySet()
 {}
-SE_SimObjectState::~SE_SimObjectState()
+SE_PropertySet::~SE_PropertySet()
 {
     PropertyMap::iterator it;
     for(it = mPropertyMap.begin() ; it != mPropertyMap.end(); it++)
@@ -9,7 +9,7 @@ SE_SimObjectState::~SE_SimObjectState()
         clearContent(it);
     }
 }
-char SE_SimObjectState::getChar(const char* name, char defaultValue)
+char SE_PropertySet::getChar(const char* name, char defaultValue)
 {
     std::string str(name);
     PropertyMap::iterator it = mPropertyMap.find(str);
@@ -19,7 +19,7 @@ char SE_SimObjectState::getChar(const char* name, char defaultValue)
         return it->second.prop.c;
     
 }
-unsigned char SE_SimObjectState::getUChar(const char* name, unsigned char defaultValue)
+unsigned char SE_PropertySet::getUChar(const char* name, unsigned char defaultValue)
 {
     std::string str(name);
     PropertyMap::iterator it = mPropertyMap.find(str);
@@ -28,7 +28,7 @@ unsigned char SE_SimObjectState::getUChar(const char* name, unsigned char defaul
     else
         return it->second.prop.uc;
 }
-short SE_SimObjectState::getShort(const char* name, short defaultValue)
+short SE_PropertySet::getShort(const char* name, short defaultValue)
 {
     std::string str(name);
     PropertyMap::iterator it = mPropertyMap.find(str);
@@ -38,7 +38,7 @@ short SE_SimObjectState::getShort(const char* name, short defaultValue)
         return it->second.prop.s;
 
 }
-unsigned short SE_SimObjectState::getUShort(const char* name, unsigned short defaultValue)
+unsigned short SE_PropertySet::getUShort(const char* name, unsigned short defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -47,7 +47,7 @@ unsigned short SE_SimObjectState::getUShort(const char* name, unsigned short def
         return it->second.prop.us;
 
 }
-int SE_SimObjectState::getInt(const char* name, int defaultValue)
+int SE_PropertySet::getInt(const char* name, int defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -56,7 +56,7 @@ int SE_SimObjectState::getInt(const char* name, int defaultValue)
         return it->second.prop.i;
 
 }
-unsigned int SE_SimObjectState::getUInt(const char* name, unsigned int defaultValue)
+unsigned int SE_PropertySet::getUInt(const char* name, unsigned int defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -65,7 +65,7 @@ unsigned int SE_SimObjectState::getUInt(const char* name, unsigned int defaultVa
         return it->second.prop.ui;
 
 }
-float SE_SimObjectState::getFloat(const char* name, float defaultValue)
+float SE_PropertySet::getFloat(const char* name, float defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -74,7 +74,7 @@ float SE_SimObjectState::getFloat(const char* name, float defaultValue)
         return it->second.prop.f;
 
 }
-const char* SE_SimObjectState::getString(const char* name, const char* defaultValue)
+const char* SE_PropertySet::getString(const char* name, const char* defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -83,7 +83,7 @@ const char* SE_SimObjectState::getString(const char* name, const char* defaultVa
         return it->second.prop.str8;
 
 }
-const short* SE_SimObjectState::getUniString(const char* name, const short* defaultValue)
+const short* SE_PropertySet::getUniString(const char* name, const short* defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -92,7 +92,7 @@ const short* SE_SimObjectState::getUniString(const char* name, const short* defa
         return it->second.prop.str16;
 
 }
-SE_Data* SE_SimObjectState::getData(const char* name, SE_Data* defaultValue)
+SE_Data* SE_PropertySet::getData(const char* name, SE_Data* defaultValue)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -101,7 +101,7 @@ SE_Data* SE_SimObjectState::getData(const char* name, SE_Data* defaultValue)
         return it->second.prop.data;
 
 }
-void SE_SimObjectState::clearContent(PropertyMap::iterator& it)
+void SE_PropertySet::clearContent(PropertyMap::iterator& it)
 {
     switch(it->second.type)
     {
@@ -120,7 +120,7 @@ void SE_SimObjectState::clearContent(PropertyMap::iterator& it)
     }
 
 }
-void SE_SimObjectState::setContent(const char* name, const _Property& p)
+void SE_PropertySet::setContent(const char* name, const _Property& p)
 {
     PropertyMap::iterator it = mPropertyMap.find(name);
     if(it == mPropertyMap.end())
@@ -133,14 +133,14 @@ void SE_SimObjectState::setContent(const char* name, const _Property& p)
     it->second.prop = p.prop;
 }
 
-void SE_SimObjectState::setChar(const char* name, char c)
+void SE_PropertySet::setChar(const char* name, char c)
 {
     _Property p;
     p.type = CHAR;
     p.prop.c = c;
     setContent(name, p);
 }
-void SE_SimObjectState::setUChar(const char* name, unsigned char uc)
+void SE_PropertySet::setUChar(const char* name, unsigned char uc)
 {
     _Property p;
     p.type = UCHAR;
@@ -148,7 +148,7 @@ void SE_SimObjectState::setUChar(const char* name, unsigned char uc)
     setContent(name, p);
 
 }
-void SE_SimObjectState::setShort(const char* name, short s)
+void SE_PropertySet::setShort(const char* name, short s)
 {
     _Property p;
     p.type = SHORT;
@@ -157,7 +157,7 @@ void SE_SimObjectState::setShort(const char* name, short s)
 
 
 }
-void SE_SimObjectState::setUShort(const char* name, unsigned short us)
+void SE_PropertySet::setUShort(const char* name, unsigned short us)
 {
     _Property p;
     p.type = USHORT;
@@ -166,7 +166,7 @@ void SE_SimObjectState::setUShort(const char* name, unsigned short us)
 
 
 }
-void SE_SimObjectState::setInt(const char* name, int i)
+void SE_PropertySet::setInt(const char* name, int i)
 {
     _Property p;
     p.type = INT;
@@ -174,7 +174,7 @@ void SE_SimObjectState::setInt(const char* name, int i)
     setContent(name, p);
 
 }
-void SE_SimObjectState::setUInt(const char* name, unsigned int ui)
+void SE_PropertySet::setUInt(const char* name, unsigned int ui)
 {
     _Property p;
     p.type = UINT;
@@ -182,7 +182,7 @@ void SE_SimObjectState::setUInt(const char* name, unsigned int ui)
     setContent(name, p);
 
 }
-void SE_SimObjectState::setFloat(const char* name, float f)
+void SE_PropertySet::setFloat(const char* name, float f)
 {
     _Property p;
     p.type = FLOAT;
@@ -190,7 +190,7 @@ void SE_SimObjectState::setFloat(const char* name, float f)
     setContent(name, p);
 
 }
-void SE_SimObjectState::setString(const char* name, const char* s, int len)
+void SE_PropertySet::setString(const char* name, const char* s, int len)
 {
     _Property p;
     p.type = STRING;
@@ -213,7 +213,7 @@ void SE_SimObjectState::setString(const char* name, const char* s, int len)
     }
 
 }
-void SE_SimObjectState::setUniString(const char* name, const short* s16, int len)
+void SE_PropertySet::setUniString(const char* name, const short* s16, int len)
 {
     _Property p;
     p.type = UNISTRING;
@@ -226,7 +226,7 @@ void SE_SimObjectState::setUniString(const char* name, const short* s16, int len
     }
 
 }
-void SE_SimObjectState::setData(const char* name, SE_Data* data)
+void SE_PropertySet::setData(const char* name, SE_Data* data)
 {
     _Property p;
     p.type = DATA;

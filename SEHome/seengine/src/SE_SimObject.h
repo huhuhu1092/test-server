@@ -1,7 +1,7 @@
 #ifndef SE_SIMOBJECT_H
 #define SE_SIMOBJECT_H
 #include "SE_Object.h"
-#include "SE_SimObjectState.h"
+#include "SE_PropertySet.h"
 #include "SE_Matrix.h"
 #include <vector>
 #include <string>
@@ -52,15 +52,15 @@ public:
 		mName = name;
 	}
     // SE_SimObject will own the state . it will delete the mState
-    void setSimObjectState(SE_SimObjectState* state)
+    void setPropertySet(SE_PropertySet* pro)
     {
-        if(mState)
-            delete mState;
-        mState = state;
+        if(mPropertySet)
+            delete mPropertySet;
+        mPropertySet =pro;
     }
-    SE_SimObjectState* getSimObjectState()
+    SE_PropertySet* getPropertySet()
     {
-        return mState;
+        return mPropertySet;
     }
 	void setLocalMatrix(const SE_Matrix4f& localMatrix)
 	{
@@ -73,7 +73,7 @@ public:
 private:
 	std::string mName;
 	SE_Spatial* mSpatial;
-    SE_SimObjectState* mState;
+    SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;
 };
 #endif

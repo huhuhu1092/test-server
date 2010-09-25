@@ -147,7 +147,7 @@ SE_CommonID& SE_CommonID::read(SE_BufferInput& input)
 bool SE_CommonID::isValid()
 {
     SE_CommonID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-    return *this == invalid;
+    return *this != invalid;
 
 }
 void SE_CommonID::print() const

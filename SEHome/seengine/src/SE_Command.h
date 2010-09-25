@@ -6,7 +6,8 @@ class SE_Application;
 class SE_Command
 {
 public:
-    SE_Command(SE_Application* app, SE_TimeMS waitTime = 0, bool realTime = true) : mApp(app), mWaitTime(waitTime), mbRealTime(realTime)
+    enum TIME_TYPE {REAL, SIMULATE};
+    SE_Command(SE_Application* app, SE_TimeMS waitTime = 0, TIME_TYPE timeType = REAL) : mApp(app), mWaitTime(waitTime), mTimeType(timeType)
     {
     }
     virtual ~SE_Command();
@@ -15,6 +16,6 @@ public:
 protected:
     SE_Application* mApp;
     SE_TimeMS mWaitTime;
-    bool mbRealTime;
+    TIME_TYPE mTimeType;
 };
 #endif

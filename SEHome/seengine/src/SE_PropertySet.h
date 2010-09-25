@@ -1,5 +1,5 @@
-#ifndef SE_SIMOBJECTSTATE_H
-#define SE_SIMOBJECTSTATE_H
+#ifndef SE_PROPERTYSET_H
+#define SE_PROPERTYSET_H
 #include <map>
 #include <string>
 class SE_Data
@@ -9,11 +9,11 @@ public:
     {}
 };
 
-class SE_SimObjectState
+class SE_PropertySet
 {
 public:
-    SE_SimObjectState();
-    ~SE_SimObjectState();
+    SE_PropertySet();
+    ~SE_PropertySet();
     char getChar(const char* name, char defaultValue = 0);
     unsigned char getUChar(const char* name, unsigned char defaultValue = 0);
     short getShort(const char* name, short defaultValue = 0);
@@ -34,6 +34,9 @@ public:
     void setString(const char* name, const char* s, int len = 0);
     void setUniString(const char* name, const short* s16 , int len);
     void setData(const char* name, SE_Data* data);
+private:
+    SE_PropertySet(const SE_PropertySet&);
+    SE_PropertySet& operator=(const SE_PropertySet&);
 private:
     enum TYPE {CHAR, UCHAR, SHORT, USHORT, INT, UINT, FLOAT, STRING, UNISTRING, DATA};
     struct _Property

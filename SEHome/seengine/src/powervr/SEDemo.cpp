@@ -18,6 +18,7 @@
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
 #include "SE_Physics.h"
+#include "SE_2DCommand.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -29,8 +30,8 @@
 #include <string.h>
 #include <string>
 #include <vector>
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH  480
+#define SCREEN_HEIGHT 800
 static void drawScene(int width, int height)
 {
 }
@@ -51,15 +52,20 @@ private:
 	void handleInput(int width, int height);
 private:
 	SE_Physics* mPhysics;
+	EyeData eyeData;
 };
 bool SEDemo::InitApplication()
 {
+	//PVRShellSet(prefWidth, SCREEN_WIDTH);
+	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
 	SE_Application::getInstance()->setAppID(appid);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
+	//SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
+    //c->data = &eyeData;
 	SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
 	c->dataPath = "c:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
@@ -213,6 +219,12 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
+		SE_2DAnimation* c = new SE_2DAnimation(SE_Application::getInstance(), 60, SE_Command::SIMULATE);
+		c->leftEyeID = eyeData.leftEyeID;
+		c->rightEyeID = eyeData.rightEyeID;
+		c->duration = 300;
+		c->leftEyeSpatialID = eyeData.leftSpatialID;
+		SE_Application::getInstance()->postCommand(c);
 	    LOGI("## down ##\n");
     }
 }
@@ -221,6 +233,7 @@ bool SEDemo::RenderScene()
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
     handleInput(dwCurrentWidth, dwCurrentHeight);
+	/*
 	if(mPhysics)
 	{
 	    mPhysics->stepSimulation(1.0f / 60);
@@ -237,6 +250,7 @@ bool SEDemo::RenderScene()
 			LOGI("## %d : %f %f %f %f\n", i, v.x, v.y, v.z, v.w);
 		}
 	}
+	*/
 	SE_Application::getInstance()->run();
 	return true;
 }

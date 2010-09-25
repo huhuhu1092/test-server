@@ -45,6 +45,10 @@ public:
     {
         return mSpatialID;
     }
+    void setSpatialID(const SE_SpatialID& spatialID)
+    {
+        mSpatialID = spatialID;
+    }
     void setLocalTranslate(const SE_Vector3f& translate);
     void setLocalRotate(const SE_Quat& rotate);
     void setLocalRotate(const SE_Matrix3f& rotate);
