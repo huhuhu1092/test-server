@@ -12,6 +12,7 @@ public:
     void removeChild(SE_Spatial* child);
     void updateWorldTransform();
     void updateBoundingVolume();
+	void updateRenderState();
     void updateWorldLayer();
     int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
 	void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);

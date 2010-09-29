@@ -14,6 +14,7 @@ public:
     void attachSimObject(SE_SimObject* go);
     void detachSimObject(SE_SimObject* go);
     void updateWorldTransform();
+	void updateRenderState();
     void updateBoundingVolume();
     int travel(SE_SpatialTravel* spatialTravel, bool travalAways);
     void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);

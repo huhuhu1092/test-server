@@ -34,7 +34,6 @@ SE_Application::SE_Application()
     mStarted = false;
     mFpsPrevTime = 0;
     mFpsFrameNum = 0;
-    mResponseValue = 0;
 	mObjectCount = 0;
 }
 SE_Application::~SE_Application()
@@ -282,3 +281,34 @@ SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
 	return NULL;
 }
 
+void SE_Application::sendMessage(SE_Message* message)
+{
+	mMessageList.push_back(message);
+}
+int SE_Application::getMessageCount()
+{
+	return mMessageList.size();
+}
+void SE_Application::releaseMessage()
+{
+	SE_MessageList::iterator it;
+	for(it = mMessageList.begin() ; it != mMessageList.end() ; it++)
+	{
+		SE_Message* msg = *it;
+		delete msg;
+	}
+	mMessageList.clear();
+}
+SE_Application::_MessageVector SE_Application::getMessage()
+{
+    _MessageVector v;
+	v.resize(mMessageList.size());
+	SE_MessageList::iterator it;
+	int i = 0;
+	for(it = mMessageList.begin() ; it != mMessageList.end() ; it++)
+	{
+		SE_Message* msg = *it;
+		v[i++] = msg;
+	}
+	return v;
+}

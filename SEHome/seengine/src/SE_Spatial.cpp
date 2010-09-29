@@ -36,6 +36,16 @@ SE_Spatial::~SE_Spatial()
 {
     if(mWorldBoundingVolume)
         delete mWorldBoundingVolume;
+	for(int i = 0 ; i < RENDERSTATE_NUM ; i++)
+	{
+		_RenderStateProperty* p = &mRenderState[i];
+		if(p->renderData)
+		{
+			p->renderData->dec();
+			if(p->renderData->getNum() == 0)
+				delete p->renderData;
+		}
+	}
 }
 SE_Spatial::SPATIAL_TYPE SE_Spatial::getSpatialType()
 {
@@ -52,7 +62,68 @@ void SE_Spatial::updateBoundingVolume()
 {
 
 }
-
+void SE_Spatial::setRenderStateSource(RENDER_STATE_TYPE type, RENDER_STATE_SOURCE rsSource)
+{
+    if(type < 0 || type >= RENDERSTATE_NUM)
+		return;
+	mRenderState[type].renderSource = rsSource;
+}
+void SE_Spatial::setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own)
+{
+	if(type < 0 || type >= RENDERSTATE_NUM)
+		return;
+	_RenderStateProperty* p = &mRenderState[type];
+	SE_Wrapper<_RenderStateData>* pRenderStateData = p->renderData;
+	if(pRenderStateData)
+	{
+		pRenderStateData->dec();
+		if(pRenderStateData->getNum() == 0)
+			delete pRenderStateData;
+	}
+	_RenderStateData* rsd = new _RenderStateData;
+	rsd->own = own;
+	rsd->renderState = rs;
+	pRenderStateData = new SE_Wrapper<_RenderStateData>(rsd, SE_Wrapper<_RenderStateData>::NOT_ARRAY);
+	p->renderData = pRenderStateData;
+	p->renderSource = SELF_OWN;
+}
+SE_RenderState* SE_Spatial::getRenderState(RENDER_STATE_TYPE type)
+{
+    if(type < 0 || type >= RENDERSTATE_NUM)
+		return NULL;
+	_RenderStateProperty* p = &mRenderState[type];
+	SE_Wrapper<_RenderStateData>* renderData = p->renderData;
+	if(!renderData)
+		return NULL;
+	return renderData->getPtr()->renderState;
+}
+void SE_Spatial::updateRenderState()
+{
+	if(!mParent)
+		return;
+	for(int i = 0 ; i < RENDERSTATE_NUM ; i++)
+	{
+		_RenderStateProperty* parentRenderProperty = &mParent->mRenderState[i];
+		SE_Wrapper<_RenderStateData>* parentRenderStateData = parentRenderProperty->renderData;
+		_RenderStateProperty* pRenderProperty = &mRenderState[i];
+		if(pRenderProperty->renderSource == INHERIT_PARENT && parentRenderStateData)
+		{
+			if(!pRenderProperty->renderData)
+			{
+				pRenderProperty->renderData = parentRenderStateData;
+				parentRenderStateData->inc();
+			}
+			else
+			{
+				pRenderProperty->renderData->dec();
+				if(pRenderProperty->renderData->getNum() == 0)
+					delete pRenderProperty->renderData;
+				pRenderProperty->renderData = parentRenderStateData;
+				parentRenderStateData->inc();
+			}
+		}
+	}
+}
 const SE_Matrix4f& SE_Spatial::getWorldTransform()
 {
     return mWorldTransform;

@@ -43,6 +43,16 @@ void SE_CommonNode::removeChild(SE_Spatial* child)
 {
     mImpl->children.remove(child);
 }
+void SE_CommonNode::updateRenderState()
+{
+	SE_Spatial::updateRenderState();
+    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
+    for(; it != mImpl->children.end() ; it++)
+    {
+        SE_Spatial* s = *it;
+		s->updateRenderState();
+	}
+}
 void SE_CommonNode::updateWorldTransform()
 {
     SE_Spatial::updateWorldTransform();

@@ -38,6 +38,10 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
         SE_Spatial* rootScene = sceneManager->getRoot();
         rootScene->updateWorldTransform();
 	    rootScene->updateBoundingVolume();
+		SE_DepthTestState* rs = new SE_DepthTestState();
+		rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_ENABLE);
+		rootScene->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
+		rootScene->updateRenderState();
     }
 	mApp->setCamera(SE_Application::MAIN_CAMERA, new SE_MotionEventCamera);
 	mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);

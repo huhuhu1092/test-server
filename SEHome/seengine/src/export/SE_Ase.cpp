@@ -57,21 +57,21 @@ static const short SUB_MATERIAL_ID = 0x0005;
 static const short MESH_ID = 0x0006;
 
 
-ASE_Loader::ASE_Loader(const char* filename, bool verbose, bool meshanims) : mCurrGeomObject(NULL), mCurrMtl(NULL),mCurrSubMtl(NULL),mCurrMesh(NULL), mInSubDiffuse(false)
+ASE_Loader::ASE_Loader() : mCurrGeomObject(NULL), mCurrMtl(NULL),mCurrSubMtl(NULL),mCurrMesh(NULL), mInSubDiffuse(false)
 {
     mSceneObject = new ASE_SceneObject;
-    _verbose = verbose;
-    strncpy(meshFileName, filename, 256);
 }
 ASE_Loader::~ASE_Loader()
 {
     delete mSceneObject;
 }
+/*
 void ASE_Loader::Load()
 {
     ASE_Load(meshFileName, _verbose);
 
 }
+*/
 struct _MaterialData
 {
     int subMaterialNum;
@@ -167,7 +167,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
     {
         SE_MaterialDataID mid = SE_Application::getInstance()->createCommonID();
         mid.print();
-		SE_Util::sleep(SLEEP_COUNT);
+		//SE_Util::sleep(SLEEP_COUNT);
         materialVector[i].mid = mid;
         mid.write(output);
         output.writeVector3f(materialVector[i].md.ambient);
@@ -220,7 +220,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_GeometryDataID gid = SE_Application::getInstance()->createCommonID();
-        SE_Util::sleep(SLEEP_COUNT);
+        //SE_Util::sleep(SLEEP_COUNT);
         rotateAxis.x = go->rotateAxis[0];
         rotateAxis.y = go->rotateAxis[1];
         rotateAxis.z = go->rotateAxis[2];
@@ -267,7 +267,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_TextureCoordDataID tcid = SE_Application::getInstance()->createCommonID();
-        SE_Util::sleep(SLEEP_COUNT);
+        //SE_Util::sleep(SLEEP_COUNT);
         tcid.write(output);
         geomTexCoordData[n++].texCoordID = tcid;
         output.writeInt(mesh->numTVertexes);
@@ -300,7 +300,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
     {
         SE_ProgramDataID proID = "main_vertex_shader";
         programDataVector[i] = proID;
-        SE_Util::sleep(SLEEP_COUNT);
+        //SE_Util::sleep(SLEEP_COUNT);
         proID.write(output);
         std::string str(shaderPath);
         std::string vertexShaderPath = str + SE_SEP + "main_vertex_shader.glsl";
@@ -330,7 +330,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = SE_Application::getInstance()->createCommonID();
-        SE_Util::sleep(SLEEP_COUNT);
+        //SE_Util::sleep(SLEEP_COUNT);
         meshID.write(output);
         meshIDVector[n] = meshID;
         SE_GeometryDataID geomID = geomTexCoordData[n].geomID;
@@ -475,7 +475,7 @@ WRIET_SURFACE:
     }
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
-    SE_Util::sleep(SLEEP_COUNT);
+    //SE_Util::sleep(SLEEP_COUNT);
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
     rootNode->setBVType(SE_BoundingVolume::AABB);
     n = 0;
@@ -487,7 +487,7 @@ WRIET_SURFACE:
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = meshIDVector[n++];
         SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
-        SE_Util::sleep(SLEEP_COUNT);
+        //SE_Util::sleep(SLEEP_COUNT);
         SE_Geometry* child = new SE_Geometry(childID, rootNode);
         rootNode->addChild(child);
         SE_Vector3f translate, scale, rotateAxis;
@@ -514,7 +514,7 @@ WRIET_SURFACE:
         child->attachSimObject(meshObj);
     }
     SE_SceneID sceneID = SE_Application::getInstance()->createCommonID();
-    SE_Util::sleep(SLEEP_COUNT);
+    //SE_Util::sleep(SLEEP_COUNT);
     sceneID.write(outScene);
 	_WriteSceneTravel wst(outScene);
 	rootNode->travel(&wst, true);
@@ -541,7 +541,7 @@ void ASE_Loader::Write(const char* dataPath, const char* outFileName)
 /*
 ** ASE_Load
 */
-void ASE_Loader::ASE_Load( const char *filename, bool verbose)
+void ASE_Loader::Load( const char *filename, bool verbose)
 {
 	FILE *fp = fopen( filename, "rb" );
         

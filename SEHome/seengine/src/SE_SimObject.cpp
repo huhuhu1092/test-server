@@ -7,6 +7,7 @@ SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 {
 	mSpatial = spatial;
     mPropertySet = NULL;
+	memset(mRenderState , 0, sizeof(SE_RenderState*) * SE_Spatial::RENDERSTATE_NUM);
 }
 SE_SimObject::~SE_SimObject()
 {

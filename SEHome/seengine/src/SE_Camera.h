@@ -6,7 +6,7 @@
 #include "SE_Geometry3D.h"
 #include "SE_Common.h"
 #include "SE_Object.h"
-class SE_BoundingVolume;
+#include "SE_BoundingVolume.h"
 class SE_Camera : public SE_Object
 {
 DECLARE_OBJECT(SE_Camera)
@@ -29,6 +29,18 @@ public:
 	SE_Vector3f getLocation()
 	{
 		return mLocation;
+	}
+	SE_Vector3f getAxisX()
+	{
+		return mAxisX;
+	}
+	SE_Vector3f getAxisY()
+	{
+		return mAxisY;
+	}
+	SE_Vector3f getAxisZ()
+	{
+		return mAxisZ;
 	}
     //0: x axis, 1
     void rotateLocal(float angle, SE_AXIS_TYPE axis);

@@ -92,4 +92,20 @@ private:
 	int mNum;
 	PTR_TYPE mPtrType;
 };
+template <class T>
+struct SE_PointerOwner
+{
+    T* ptr;
+	SE_OWN_TYPE own;
+	SE_PointerOwner()
+	{
+		ptr = NULL;
+		own = NOT_OWN;
+	} 
+	~SE_PointerOwner()
+	{
+		if(own == OWN && ptr)
+			delete ptr;
+	}
+};
 #endif

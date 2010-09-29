@@ -6,6 +6,7 @@
 #include "SE_ID.h"
 #include "SE_Layer.h"
 #include "SE_Object.h"
+#include "SE_RenderState.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_SimObject;
@@ -27,6 +28,8 @@ public:
     enum {VISIBILITY_MASK = 0x01, MOVABILITY_MASK = 0x02, COLLISION_MASK = 0x04, SELECTED_MASK = 0x08};
     enum {VISIBLE = 0x1, MOVABLE = 0x2, COLLISIONABLE = 0x4, SELECTED = 0x8};
 	enum SPATIAL_TYPE {NONE, NODE, GEOMETRY};
+	enum RENDER_STATE_TYPE {DEPTHTESTSTATE, BLENDSTATE, RENDERSTATE_NUM};
+	enum RENDER_STATE_SOURCE {INHERIT_PARENT, SELF_OWN};
     SE_Spatial(SE_Spatial* parent = NULL);
     SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
     virtual ~SE_Spatial();
@@ -143,6 +146,11 @@ public:
     {
         return mWorldLayer;
     }
+	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
+	//dont use getRenderState to get some spatial's renderstate and then 
+	// set it to the other spatial;
+	SE_RenderState* getRenderState(RENDER_STATE_TYPE type);
+	void setRenderStateSource(RENDER_STATE_TYPE type, RENDER_STATE_SOURCE rsSource);
 public:
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
@@ -152,6 +160,7 @@ public:
     virtual void updateWorldTransform();
     virtual void updateBoundingVolume();
     virtual void updateWorldLayer();
+	virtual void updateRenderState();
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
@@ -163,6 +172,31 @@ protected:
 protected:
     SE_BoundingVolume* mWorldBoundingVolume;
 private:
+	struct _RenderStateData
+	{
+		SE_OWN_TYPE own;
+		SE_RenderState* renderState;
+		_RenderStateData()
+		{
+			own = OWN;
+			renderState= NULL;
+		}
+		~_RenderStateData()
+		{
+			if(renderState && own == OWN)
+				delete renderState;
+		}
+	};
+	struct _RenderStateProperty
+	{
+        SE_Wrapper<_RenderStateData>* renderData;
+		RENDER_STATE_SOURCE renderSource;
+		_RenderStateProperty()
+		{
+			renderData = NULL;
+			renderSource = INHERIT_PARENT;
+		}
+	};
     SE_Matrix4f mWorldTransform;
 
     SE_Vector3f mLocalTranslate;
@@ -179,5 +213,6 @@ private:
     int mBVType;
     SE_Layer mLocalLayer;
     SE_Layer mWorldLayer;
+	_RenderStateProperty mRenderState[RENDERSTATE_NUM];
 };
 #endif

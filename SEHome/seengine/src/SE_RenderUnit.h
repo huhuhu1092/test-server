@@ -1,7 +1,9 @@
 #ifndef SE_RENDERUNIT_H
 #define SE_RENDERUNIT_H
 #ifdef GLES_20
-#include <GLES2/gl2.h>
+    #include <GLES2/gl2.h>
+#else
+    #include <GLES/gl.h>
 #endif
 #include "SE_Vector.h"
 #include "SE_Quat.h"
@@ -11,13 +13,16 @@
 #include "SE_Common.h"
 #include "SE_ImageData.h"
 #include "SE_Layer.h"
+#include "SE_Spatial.h"
 class SE_Surface;
 class SE_Segment;
 class SE_ImageData;
 class SE_ShaderProgram;
+class SE_RenderState;
 class SE_RenderUnit
 {
 public:
+	SE_RenderUnit();
     virtual ~SE_RenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
 	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
@@ -61,12 +66,15 @@ public:
 	{
 		return mViewToPerspective;
 	}
+	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own);
+	void applyRenderState();
     void loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
     SE_Matrix4f mWorldTransform;
     SE_Matrix4f mViewToPerspective;
     SE_Layer mLayer;
+	SE_PointerOwner<SE_RenderState> mRenderState[SE_Spatial::RENDERSTATE_NUM];
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 {

@@ -6,6 +6,8 @@
 #include "SE_SpatialTravel.h"
 #include "SE_SimObject.h"
 #include "SE_Log.h"
+#include "SE_Message.h"
+#include "SE_MessageDefine.h"
 IMPLEMENT_OBJECT(SE_MotionEventCamera)
 SE_MotionEventCamera::SE_MotionEventCamera()
 {
@@ -96,8 +98,16 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
         if(so)
         {
             LOGI("## selected object = %s ####\n", so->getName());
-            SE_Application::getInstance()->setResponseValue(1);
-            SE_Application::getInstance()->setResponseString(so->getName());
+			SE_Message* msg = new SE_Message;
+			msg->type = SE_MSG_SIMOBJECT_NAME;
+			SE_Struct* sestruct = new SE_Struct(1);
+			SE_StructItem* sitem = new SE_StructItem(1);
+			SE_StdString* stdString = new SE_StdString;
+			stdString->data = so->getName();
+			sitem->setDataItem(stdString);
+			sestruct->setStructItem(0, sitem);
+			msg->data = sestruct;
+			SE_Application::getInstance()->sendMessage(msg);
         }
         clearState();
 	}

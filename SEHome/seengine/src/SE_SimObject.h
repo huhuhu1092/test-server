@@ -3,6 +3,7 @@
 #include "SE_Object.h"
 #include "SE_PropertySet.h"
 #include "SE_Matrix.h"
+#include "SE_Spatial.h"
 #include <vector>
 #include <string>
 class SE_RenderUnit;
@@ -11,8 +12,8 @@ class SE_Vector3f;
 class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Vector3i;
-class SE_Spatial;
 class SE_Mesh;
+class SE_RenderState;
 class SE_SimObject : public SE_Object
 {
     DECLARE_OBJECT(SE_SimObject)
@@ -70,10 +71,20 @@ public:
 	{
 		return mLocalMatrix;
 	}
+	//this function is call by SE_Geometry. you can not invoke this function
+	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* rs)
+	{
+		mRenderState[type] = rs;
+	}
+	SE_RenderState** getRenderState()
+	{
+		return mRenderState;
+	}
 private:
 	std::string mName;
 	SE_Spatial* mSpatial;
     SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;
+	SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];
 };
 #endif

@@ -80,6 +80,7 @@ bool SEDemo::InitView()
 {
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
+	LOGI("## width = %d, height = %d ###\n", dwCurrentWidth,dwCurrentHeight);
 	SE_UpdateCameraCommand* c = (SE_UpdateCameraCommand*)SE_Application::getInstance()->createCommand("SE_UpdateCameraCommand");
 	c->width = dwCurrentWidth;
 	c->height = dwCurrentHeight;
@@ -252,6 +253,24 @@ bool SEDemo::RenderScene()
 	}
 	*/
 	SE_Application::getInstance()->run();
+	int messageCount = SE_Application::getInstance()->getMessageCount();
+	if(messageCount > 0)
+	{
+	    SE_Application::_MessageVector messageVector = SE_Application::getInstance()->getMessage();
+		for(int i = 0 ; i < messageVector.size() ; i++)
+		{
+			SE_Message* msg = messageVector[i];
+			LOGI("### msg type = %d ####\n", msg->type);
+			SE_Struct* structData = msg->data;
+			int structItemSize = structData->getCount();
+			LOGI("### struct item size = %d ####\n", structItemSize);
+			SE_StructItem* item = structData->getStructItem(0);
+			SE_DataItem di = item->getDataItem(0);
+			SE_StdString* strData = (SE_StdString*)di.data.virtualData;
+			LOGI("#### obj name = %s #### \n", strData->data.c_str());
+		}
+		SE_Application::getInstance()->releaseMessage();
+	}
 	return true;
 }
 PVRShell* NewDemo()

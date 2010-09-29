@@ -159,6 +159,11 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
         SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
         tsru->setLayer(getSpatial()->getWorldLayer());
+		SE_RenderState** rs = getRenderState();
+		for(int j = 0 ; j < SE_Spatial::RENDERSTATE_NUM ; j++)
+		{
+			tsru->setRenderState((SE_Spatial::RENDER_STATE_TYPE)j, rs[j], NOT_OWN);
+		}
         ruv[i] = tsru;
     }
     return ruv;

@@ -3,8 +3,10 @@
 #include "SE_Time.h"
 #include "SE_ID.h"
 #include "SE_Command.h"
+#include "SE_Message.h"
 #include <list>
 #include <string>
+#include <vector>
 class SE_CommandFactory;
 class SE_Camera;
 class SE_ResourceManager;
@@ -20,12 +22,18 @@ public:
 		int first;
 		int second;
 	};
+	typedef std::vector<SE_Message*> _MessageVector;
     virtual ~SE_Application();
     void run();
     void start();
     void shutdown();
     void sendCommand(SE_Command* command);
     void postCommand(SE_Command* command);
+	void sendMessage(SE_Message* message);
+	int getMessageCount();
+	//after getMessage , the message's pointer are copy to _MessageVector
+	_MessageVector getMessage();
+	void releaseMessage();
     bool registerCommandFactory(const SE_CommandFactoryID& cfID, SE_CommandFactory* commandFactory);
     bool unreginsterCommandFactory(const SE_CommandFactoryID& cfID);
     SE_Command* createCommand(const SE_CommandID& commandID);
@@ -57,24 +65,6 @@ public:
 	SE_Camera* getCamera(int index);
 	void setCurrentCamera(int index);
 	SE_Camera* getCurrentCamera();
-//////////////////////////////////
-    int getResponseValue()
-    {
-        return mResponseValue;
-    }
-    void setResponseValue(int v)
-    {
-        mResponseValue = v;
-    }
-    const char* getResponseString()
-    {
-        return mResponseString.c_str();
-    }
-    void setResponseString(const char* v)
-    {
-        mResponseString = v;
-    }
-/////////////////////////////////
 protected:
 	class _CommandWrapper
     {
@@ -123,6 +113,7 @@ protected:
     //typedef std::list<_CommanDWrapper> SE_CommandList;
     typedef std::list<SE_Command*> SE_CommandList;
     typedef std::list<_CommandFactoryEntry> SE_CommandFactoryList;
+	typedef std::list<SE_Message*> SE_MessageList;
     SE_Camera* mCameraArray[MAX_CAMERA_NUM];
     SE_Camera* mCurrentCamera;
     SE_SceneManager* mSceneManager;
@@ -139,9 +130,8 @@ protected:
     int mFpsFrameNum;
     SE_TimeMS mFpsPrevTime;
     SE_APPID mAppID;
-    int mResponseValue;
-    std::string mResponseString;
 	int mObjectCount;
+	SE_MessageList mMessageList;
     static SE_Application* mInstance;
 };
 #endif

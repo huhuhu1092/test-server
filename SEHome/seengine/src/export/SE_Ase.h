@@ -2,6 +2,7 @@
 #define ASE_LIB_H
 #include <list>
 #include <vector>
+#include <string>
 #include <string.h>
 #define ASE_OK 1
 #define ASE_ERROR 0
@@ -35,7 +36,43 @@ struct ASE_Face
 		materialID = -1;
 	}
 } ;
-
+struct ASE_Matrix4f
+{
+	float m[16];
+};
+struct ASE_Bone
+{
+	std::string name;
+	std::list<ASE_Bone*> children;
+	ASE_Bone* parent;
+	ASE_Matrix4f* matrixseq;
+	int matrixseqnum;
+	ASE_Bone()
+	{
+		parent = NULL;
+	    matrixseq = NULL;
+		matrixseqnum = 0;
+	}
+};
+struct ASE_BoneWeight
+{
+	enum {INVALID_BONE_INDEX = -1};
+	int boneIndex;
+	float weight;
+	ASE_BoneWeight()
+	{
+        boneIndex = INVALID_BONE_INDEX;
+		weight = 0;
+	}
+};
+struct ASE_SkinJointController
+{
+	typedef std::vector<ASE_BoneWeight> JointList;
+	std::vector<ASE_Bone*> jointvector;
+	std::string objName;
+	std::vector<JointList> vertexJointVector;//every vertex in object has a cooresponding JointList
+	
+};
 struct ASE_Mesh
 {
 	int numFaces;
@@ -124,7 +161,11 @@ struct ASE_Material
             delete[] submaterials;
     }
 };
-
+struct ASE_GeometryObjectGroup
+{
+	std::string groupName;
+	std::list<ASE_GeometryObject*> children;
+};
 struct ASE_SceneObject
 {
     std::list<ASE_GeometryObject*> mGeomObjects;
@@ -142,9 +183,9 @@ struct ASE_SceneObject
 class ASE_Loader
 {
 public:
-    ASE_Loader(const char* filename, bool verbose, bool meshanims);
+    ASE_Loader();
     ~ASE_Loader();
-    void Load();
+    void Load( const char *filename, bool verbose);
     ASE_SceneObject* getSceneObject()
     {
         return mSceneObject;
@@ -155,7 +196,7 @@ public:
 private:
 	int CharIsTokenDelimiter( int ch );
     void ASE_Process();
-	void ASE_Load( const char *filename, bool verbose);
+	
     int ASE_GetToken(bool restOfLine);
 	void ASE_ParseBracedBlock( ParserFun parser );
     void ASE_SkipEnclosingBraces();

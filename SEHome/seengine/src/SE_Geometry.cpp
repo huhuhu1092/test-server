@@ -12,6 +12,7 @@ struct SE_Geometry::_Impl
 {
     typedef std::list<SE_SimObject*> SimObjectList;
     SimObjectList attachObject;
+
 };
 ///////////////////////////////////////////////
 SE_Geometry::SE_Geometry(SE_Spatial* parent) : SE_Spatial(parent)
@@ -61,6 +62,19 @@ void SE_Geometry::read(SE_BufferInput& input)
         attachSimObject(obj);
     }
     SE_Spatial::read(input);
+}
+void SE_Geometry::updateRenderState()
+{
+	SE_Spatial::updateRenderState();
+	SE_Geometry::_Impl::SimObjectList::iterator it;
+    for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
+    {
+        SE_SimObject* obj = *it;
+	    for(int i = 0 ; i < SE_Spatial::RENDERSTATE_NUM ; i++)
+	    {
+			obj->setRenderState((SE_Spatial::RENDER_STATE_TYPE)i, getRenderState((SE_Spatial::RENDER_STATE_TYPE)i));	
+	    }
+	}
 }
 void SE_Geometry::updateWorldTransform()
 {

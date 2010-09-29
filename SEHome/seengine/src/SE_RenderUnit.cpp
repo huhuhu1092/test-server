@@ -9,6 +9,7 @@
 #include "SE_ID.h"
 #include "SE_ShaderProgram.h"
 #include "SE_Geometry3D.h"
+#include "SE_Spatial.h"
 static void checkGLError()
 {
 	/*
@@ -21,6 +22,9 @@ static void checkGLError()
 	*/
 }
 /////////////////////////////////
+SE_RenderUnit::SE_RenderUnit()
+{
+}
 SE_RenderUnit::~SE_RenderUnit()
 {}
 void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
@@ -80,7 +84,27 @@ SE_Vector3f SE_RenderUnit::getColor()
 {
     return SE_Vector3f(0, 0, 0);
 }
-
+void SE_RenderUnit::setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own)
+{
+	if(type < 0 || type >= SE_Spatial::RENDERSTATE_NUM)
+		return;
+	SE_PointerOwner<SE_RenderState>* p = &mRenderState[type];
+	if(p->own == OWN && p->ptr)
+		delete p->ptr;
+	p->own = own;
+	p->ptr = renderState;
+}
+void SE_RenderUnit::applyRenderState()
+{
+	if(!mRenderState)
+		return;
+	for(int i = 0 ; i < SE_Spatial::RENDERSTATE_NUM ; i++)
+	{
+		SE_RenderState* rs = mRenderState[i].ptr;
+		if(rs)
+			rs->apply();
+	}
+}
 void SE_RenderUnit::draw()
 {}
 #ifdef DEBUG0
