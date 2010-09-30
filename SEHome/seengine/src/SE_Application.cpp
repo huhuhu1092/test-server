@@ -7,6 +7,7 @@
 #include "SE_CommandFactory.h"
 #include "SE_RenderManager.h"
 #include "SE_InputManager.h"
+#include "SE_AnimationManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -51,6 +52,8 @@ SE_Application::~SE_Application()
         delete mResourceManager;
 	if(mInputManager)
 		delete mInputManager;
+	if(mAnimationManager)
+		delete mAnimationManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {
@@ -61,6 +64,7 @@ SE_Application::~SE_Application()
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
+	mAnimationManager->update(realDelta, simulateDelta);
     mRenderManager->beginDraw();
     mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
     mRenderManager->draw();

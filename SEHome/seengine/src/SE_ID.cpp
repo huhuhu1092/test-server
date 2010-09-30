@@ -215,6 +215,10 @@ SE_PrimitiveID SE_ID::createPrimitiveID()
 {
 	return SE_Application::getInstance()->createCommonID();
 }
+SE_AnimationID SE_ID::createAnimationID()
+{
+    return SE_Application::getInstance()->createCommonID();
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

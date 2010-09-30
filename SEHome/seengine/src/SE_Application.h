@@ -13,6 +13,7 @@ class SE_ResourceManager;
 class SE_SceneManager;
 class SE_RenderManager;
 class SE_InputManager;
+class SE_AnimationManager;
 class SE_Application
 {
 public:
@@ -120,6 +121,7 @@ protected:
     SE_ResourceManager* mResourceManager;
     SE_RenderManager* mRenderManager;
 	SE_InputManager* mInputManager;
+	SE_AnimationManager* mAnimationManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

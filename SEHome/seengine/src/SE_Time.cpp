@@ -54,7 +54,10 @@ SE_TimeUS SE_Time::getCurrentTimeUS()
     return timeMS; 
 #endif    
 }
-
+float SE_Time::div(SE_TimeMS a, SE_TimeMS b)
+{
+    return a / (float)b;
+}
 /*
 SE_Timer::SE_Timer(int frameRate)
 {

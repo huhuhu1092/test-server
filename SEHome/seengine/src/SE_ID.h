@@ -57,6 +57,7 @@ typedef SE_StringID SE_ProgramDataID;
 typedef SE_StringID SE_CommandID;
 typedef SE_StringID SE_CommandFactoryID;
 typedef SE_CommonID SE_PrimitiveID;
+typedef SE_CommonID SE_AnimationID;
 class SE_ID
 {
 public:
@@ -71,6 +72,7 @@ public:
 	static SE_CommandID createCommandID(const char* str);
 	static SE_CommandFactoryID createCommandFactoryID(const char* str);
 	static SE_PrimitiveID createPrimitiveID();
+    static SE_AnimationID createAnimationID();
 };
 ///////////////////////////
 /*
