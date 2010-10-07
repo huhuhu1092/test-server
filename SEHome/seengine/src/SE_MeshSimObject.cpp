@@ -50,6 +50,21 @@ SE_Mesh* SE_MeshSimObject::getMesh()
 {
 	return mMesh;
 }
+void SE_MeshSimObject::setMesh(SE_Mesh* mesh, SE_OWN_TYPE own)
+{
+    if(mMesh && mOwnMesh == OWN)
+    {
+        delete mMesh;
+    }
+    if(mWorldGeomData)
+        delete mWorldGeomData;
+    mMesh = mesh;
+    mOwnMesh = own;
+    mWorldGeomData = new SE_GeometryData;
+    SE_Spatial* parent = getSpatial();
+    SE_Matrix4f m = parent->getWorldTransform();
+    doTransform(m);
+}
 void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
 {
     if(!mMesh)

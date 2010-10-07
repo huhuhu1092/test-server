@@ -1,6 +1,7 @@
 #ifndef SE_ANIMATION_H
 #define SE_ANIMATION_H
 #include "SE_Time.h"
+#include "SE_ID.h"
 class SE_Interpolate;
 class SE_Animation
 {
@@ -62,6 +63,30 @@ public:
     {
         return mAnimState == PAUSE;
     }
+    void setSpatialID(const SE_SpatialID& spatialID)
+    {
+        mSpatialID = spatialID;
+    }
+    void setPrimitiveID(const SE_PrimitiveID& primitiveID)
+    {
+        mPrimitiveID = primitiveID;
+    }
+    void setSimObjectID(const SE_SimObjectID& simObjectID)
+    {
+        mSimObjectID = simObjectID;
+    }
+    SE_SpatialID getSpatialID()
+    {
+        return mSpatialID;
+    }
+    SE_PrimitiveID getPrimitiveID()
+    {
+        return mPrimitiveID;
+    }
+    SE_SimObjectID getSimObjectID()
+    {
+        return mSimObjectID;
+    }
 public:
     virtual void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     virtual void onRun();
@@ -79,5 +104,8 @@ private:
     SE_TimeMS mDuration;
     SE_TimeMS mPassedTime;
     SE_Interpolate* mInterpolate;
+    SE_SpatialID mSpatialID;
+    SE_PrimitiveID mPrimitiveID;
+    SE_SimObjectID mSimObjectID;
 };
 #endif

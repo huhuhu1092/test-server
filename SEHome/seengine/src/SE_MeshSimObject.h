@@ -35,6 +35,7 @@ public:
     RenderUnitVector createRenderUnit();
 	SE_RenderUnit* createWireRenderUnit();
 	SE_Mesh* getMesh();
+    void setMesh(SE_Mesh* mesh, SE_OWN_TYPE own);
 private:
     SE_GeometryData* mWorldGeomData;
     SE_Mesh* mMesh;

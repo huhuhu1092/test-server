@@ -14,6 +14,7 @@ public:
     // render a scene to render manager which will render it to render target
     void renderScene(SE_Camera* camera, SE_RenderManager& renderManager);
     SE_Spatial* getRoot();
+    void setRoot(SE_Spatial* spatial);
     SE_Spatial* find(const SE_SpatialID& spatialID);
     //add a spatial child to scene manager, it must indicate a parent
 	//the parent must be added in scene

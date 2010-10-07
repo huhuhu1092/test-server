@@ -2,6 +2,8 @@
 #include "SE_Utils.h"
 #include "SE_ImageData.h"
 #include "SE_Log.h"
+#include "utf/ConvertUTF.h"
+#include <string.h>
 #ifdef ANDROID
 #include "SkImageDecoder.h"
 #else
@@ -14,12 +16,23 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
 {
     ILuint	imgId;
 	ILenum	error;
-    wchar_t* filePathUnicode = SE_Util::utf8ToUnicode(filePath);
+    //wchar_t* filePathUnicode = SE_Util::utf8ToUnicode(filePath);
+    UTF16 filePathUnicode[512];
+    memset(filePathUnicode, 0, sizeof(UTF16) * 512);
+    int filePathLen = strlen(filePath);
+    const UTF8* end = (const UTF8*)(filePath + filePathLen);
+    UTF16* dstEnd = filePathUnicode + 512;
+    ConversionFlags flag = strictConversion;
+	const UTF8* srcStart = (const UTF8*)filePath;
+	UTF16* dstStart = filePathUnicode;
+    ConversionResult ret = ConvertUTF8toUTF16(&srcStart, end, &dstStart, dstEnd, flag);
+    if(ret != conversionOK)
+        return NULL;
     ilInit();
     iluInit();
     ilGenImages(1, &imgId);
     ilBindImage(imgId);
-    if(!ilLoadImage(filePathUnicode))
+    if(!ilLoadImage((wchar_t*)filePathUnicode))
     {
         return NULL;
     }

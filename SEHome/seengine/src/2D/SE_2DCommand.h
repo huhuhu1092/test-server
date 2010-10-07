@@ -2,6 +2,7 @@
 #define SE_2DCOMMAND_H
 #include "SE_Command.h"
 #include "SE_Primitive.h"
+#include <string>
 class SE_Application;
 struct EyeData
 {
@@ -18,7 +19,8 @@ public:
 public:
     float width;
     float height;
-	EyeData* data;
+    std::string dataPath;
+    std::string fileName;
 };
 class SE_2DAnimation : public SE_Command
 {

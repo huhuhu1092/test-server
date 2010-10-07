@@ -27,6 +27,8 @@ SE_Mesh* SE_SimObject::getMesh()
 {
 	return NULL;
 }
+void SE_SimObject::setMesh(SE_Mesh* m, SE_OWN_TYPE own)
+{}
 void SE_SimObject::doTransform(const SE_Matrix4f& m)
 {}
 void SE_SimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)

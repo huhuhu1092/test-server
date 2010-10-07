@@ -219,6 +219,10 @@ SE_AnimationID SE_ID::createAnimationID()
 {
     return SE_Application::getInstance()->createCommonID();
 }
+SE_SimObjectID SE_ID::createSimObjectID()
+{
+    return SE_Application::getInstance()->createCommonID();
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

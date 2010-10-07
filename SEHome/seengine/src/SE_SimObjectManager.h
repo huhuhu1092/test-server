@@ -1,0 +1,15 @@
+#ifndef SE_SIMOBJECTMANAGER_H
+#define SE_SIMOBJECTMANAGER_H
+#include "SE_ID.h"
+#include "SE_SimObject.h"
+#include "SE_ObjectManager.h"
+class SE_SimObjectManager
+{
+public:
+    void set(const SE_SimObjectID& simObjectID, SE_SimObject* simObject);
+    SE_SimObject* get(const SE_SimObjectID& simObjectID);
+    void remove(const SE_SimObjectID& simObjectiD);
+private:
+    SE_ObjectManager<SE_SimObjectID, SE_SimObject> mSimObjectManager;
+};
+#endif

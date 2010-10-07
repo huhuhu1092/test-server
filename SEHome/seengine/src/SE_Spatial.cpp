@@ -6,6 +6,8 @@ IMPLEMENT_OBJECT(SE_Spatial)
 SE_Spatial::SE_Spatial(SE_Spatial* parent)
 {
     mWorldTransform.identity();
+    mPrevMatrix.identity();
+    mPostMatrix.identity();
     mLocalTranslate.setZero();
     mLocalScale.set(1.0f, 1.0f, 1.0f);
     mLocalRotate.identity();
@@ -20,6 +22,8 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
 SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {
     mWorldTransform.identity();
+    mPrevMatrix.identity();
+    mPostMatrix.identity();
     mLocalTranslate.setZero();
     mLocalScale.set(1.0f, 1.0f, 1.0f);
     mLocalRotate.identity();
@@ -53,10 +57,24 @@ SE_Spatial::SPATIAL_TYPE SE_Spatial::getSpatialType()
 }
 void SE_Spatial::updateWorldTransform()
 {
-    updateWorldScale();
-    updateWorldRotate();
-    updateWorldTranslate();
-    mWorldTransform.set(mWorldRotate.toMatrix3f(), mWorldScale, mWorldTranslate);
+    //updateWorldScale();
+    //updateWorldRotate();
+    //updateWorldTranslate();
+    if(mParent)
+    {
+        SE_Matrix4f parentM = mParent->getWorldTransform();
+        SE_Matrix4f localM;
+		localM.set(mLocalRotate.toMatrix3f(), mLocalScale, mLocalTranslate);
+        localM = mPrevMatrix.mul(localM).mul(mPostMatrix);
+        mWorldTransform = parentM.mul(localM);
+    }
+    else
+    {
+        SE_Matrix4f localM;
+		localM.set(mLocalRotate.toMatrix3f(), mLocalScale, mLocalTranslate);
+        mWorldTransform = mPrevMatrix.mul(localM).mul(mPostMatrix);
+        //mWorldTransform.set(mWorldRotate.toMatrix3f(), mWorldScale, mWorldTranslate);
+    }
 }
 void SE_Spatial::updateBoundingVolume()
 {
@@ -139,6 +157,7 @@ SE_Spatial* SE_Spatial::setParent(SE_Spatial* parent)
     mParent = parent;
     return ret;
 }
+/*
 SE_Vector3f SE_Spatial::getWorldTranslate()
 {
     return mWorldTranslate;
@@ -155,6 +174,7 @@ SE_Vector3f SE_Spatial::getWorldScale()
 {
     return mWorldScale;
 }
+*/
 void SE_Spatial::updateWorldLayer()
 {
     if(mParent)
@@ -167,6 +187,7 @@ void SE_Spatial::updateWorldLayer()
         mWorldLayer = mLocalLayer;
     }
 }
+/*
 void SE_Spatial::updateWorldTranslate()
 {
     if(mParent)
@@ -200,20 +221,30 @@ void SE_Spatial::updateWorldScale()
         mWorldScale = mLocalScale;
     }
 }
+*/
 SE_Vector3f SE_Spatial::localToWorld(const SE_Vector3f& v)
 {
+    /*
     SE_Vector3f scaledV = mWorldScale.mul(v);
     SE_Vector3f rotatedV = mWorldRotate.map(scaledV);
     SE_Vector3f translateV = mWorldTranslate.add(rotatedV);
-    return translateV;
+    */
+    SE_Vector4f v4(v.x, v.y, v.z, 0);
+    v4 = mWorldTransform.map(v4);
+    return v4.xyz();
 }
 SE_Vector3f SE_Spatial::worldToLocal(const SE_Vector3f& v)
 {
+    /*
     SE_Vector3f translatedV = v.subtract(mWorldTranslate);
     SE_Vector3f rotatedV = mWorldRotate.inverse().map(translatedV);
     SE_Vector3f inverseScale(1 / mWorldScale.x, 1 / mWorldScale.y, 1 / mWorldScale.z);
     SE_Vector3f scaledV = inverseScale.mul(rotatedV);
-    return scaledV;
+    */
+    SE_Matrix4f inverseTransform = mWorldTransform.inverse();
+    SE_Vector4f v4(v.x, v.y, v.z, 0);
+    v4 = inverseTransform.map(v4);
+    return v4.xyz();
 }
 
 SE_Vector3f SE_Spatial::getLocalTranslate()

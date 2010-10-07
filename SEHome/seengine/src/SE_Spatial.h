@@ -36,10 +36,10 @@ public:
     const SE_Matrix4f& getWorldTransform();
     SE_Spatial* getParent();
     SE_Spatial* setParent(SE_Spatial* parent);
-    SE_Vector3f getWorldTranslate();
-    SE_Matrix3f getWorldRotateMatrix();
-    SE_Quat getWorldRotate();
-    SE_Vector3f getWorldScale();
+    //SE_Vector3f getWorldTranslate();
+    //SE_Matrix3f getWorldRotateMatrix();
+    //SE_Quat getWorldRotate();
+    //SE_Vector3f getWorldScale();
     SE_Vector3f getLocalTranslate();
     SE_Matrix3f getLocalRotateMatrix();
     SE_Quat getLocalRotate();
@@ -58,6 +58,22 @@ public:
     void setLocalScale(const SE_Vector3f& scale);
     SE_Vector3f localToWorld(const SE_Vector3f& v);
     SE_Vector3f worldToLocal(const SE_Vector3f& v);
+    void setPrevMatrix(const SE_Matrix4f& m)
+    {
+        mPrevMatrix = m;
+    }
+    SE_Matrix4f getPrevMatrix()
+    {
+        return mPrevMatrix;
+    }
+    void setPostMatrix(const SE_Matrix4f& m)
+    {
+        mPostMatrix = m;
+    } 
+    SE_Matrix4f getPostMatrix()
+    {
+        return mPostMatrix;
+    }
 	SE_BoundingVolume* getWorldBoundingVolume()
 	{
 		return mWorldBoundingVolume;
@@ -166,9 +182,9 @@ public:
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
 	virtual SPATIAL_TYPE getSpatialType();
 protected:
-    void updateWorldTranslate();
-    void updateWorldRotate();
-    void updateWorldScale();
+    //void updateWorldTranslate();
+    //void updateWorldRotate();
+    //void updateWorldScale();
 protected:
     SE_BoundingVolume* mWorldBoundingVolume;
 private:
@@ -214,5 +230,7 @@ private:
     SE_Layer mLocalLayer;
     SE_Layer mWorldLayer;
 	_RenderStateProperty mRenderState[RENDERSTATE_NUM];
+    SE_Matrix4f mPrevMatrix;
+    SE_Matrix4f mPostMatrix;
 };
 #endif

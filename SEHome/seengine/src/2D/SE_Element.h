@@ -1,12 +1,34 @@
 #ifndef SE_ELEMENT_H
 #define SE_ELEMENT_H
 #include "SE_Layer.h"
+#include "SE_Vector.h"
+#include "SE_Quat.h"
+#include "SE_ID.h"
+#include "SE_Animation.h"
+#include <string>
+class SE_Spatial;
+class SE_Element;
+class SE_ElementTravel
+{
+public:
+    ~SE_ElementTravel()
+    {}
+    virtual void visit(SE_Element* e) = 0;
+};
 class SE_Element
 {
 public:
     SE_Element();
-    SE_Element(float left, float right, float top, float bottom);
+    SE_Element(float left, float top, float width, float height);
     virtual ~SE_Element();
+	float getLeft()
+	{
+		return mLeft;
+	}
+	float getTop()
+	{
+		return mTop;
+	}
     float getWidth()
     {
         return mWidth;
@@ -29,9 +51,9 @@ public:
     }
     void setTop(float top)
     {
-        mTop = top
+        mTop = top;
     }
-    void setImage(const SE_ImageDataID& imageDataID)
+    void setImageDataID(const SE_ImageDataID& imageDataID)
     {
         mImageDataID = imageDataID;
     }
@@ -65,19 +87,88 @@ public:
     {
         return mLocalLayer;
     }
+    void setName(const char* name)
+    {
+        mName = name;
+    }
+    std::string getName()
+    {
+        return mName;
+    }
+    void setParent(SE_Element* parent)
+    {
+        mParent = parent;
+    }
+    SE_Element* getParent()
+    {
+        return mParent;
+    }
+    void setImageDataX(int x)
+    {
+        mImageX = x;
+    }
+    void setImageDataY(int y)
+    {
+        mImageY = y;
+    }
+    void setImageDataWidth(int w)
+    {
+        mImageWidth = w;
+    }
+    void setImageDataHeight(int h)
+    {
+        mImageHeight = h;
+    }
+    void setAnimation(SE_Animation* anim)
+    {
+        if(mAnimation)
+            delete mAnimation;
+        mAnimation = anim;
+    }
+    SE_Animation* getAnimation()
+    {
+        return mAnimation;
+    }
+    SE_SimObjectID getSimObjectID()
+    {
+        return mSimObjectID;
+    }
+    SE_SpatialID getSpatialID()
+    {
+        return mSpatialID;
+    }
+    SE_PrimitiveID getPrimitiveID()
+    {
+        return mPrimitiveID;
+    }
 public:
-    virtual SE_Spatial* createSpatial();
+    virtual SE_Spatial* createSpatial(SE_Spatial* parent);
     virtual void updateWorldTransform();
+    virtual void addChild(SE_Element* e);
+    virtual void removeChild(SE_Element* e);
+    virtual void travel(SE_ElementTravel* travel);
+private:
+    SE_Element(const SE_Element&);
+    SE_Element& operator=(const SE_Element&);
 private:
     float mTop;
     float mLeft;
     float mWidth;
     float mHeight; 
+    int mImageX;
+    int mImageY;
+    int mImageWidth;
+    int mImageHeight;
     SE_Element* mParent;
     SE_ImageDataID mImageDataID;
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
     SE_Layer mLocalLayer;
+    std::string mName;
+    SE_Animation* mAnimation;
+    SE_SimObjectID mSimObjectID;
+    SE_SpatialID mSpatialID;
+    SE_PrimitiveID mPrimitiveID;
 };
 #endif

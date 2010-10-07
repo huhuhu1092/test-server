@@ -43,6 +43,7 @@ public:
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
 	virtual void onClick();
 	virtual SE_Mesh* getMesh();
+    virtual void setMesh(SE_Mesh*, SE_OWN_TYPE own);
 public:
 	const char* getName()
 	{

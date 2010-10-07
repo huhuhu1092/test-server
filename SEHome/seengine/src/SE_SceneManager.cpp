@@ -79,6 +79,12 @@ SE_Spatial* SE_SceneManager::getRoot()
 {
     return mSceneRoot;
 }
+void SE_SceneManager::setRoot(SE_Spatial* root)
+{
+    if(mSceneRoot)
+        delete mSceneRoot;
+    mSceneRoot = root;
+}
 void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
 {
 	if(mSelectedSpatial)

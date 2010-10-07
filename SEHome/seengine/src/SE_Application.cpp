@@ -8,6 +8,8 @@
 #include "SE_RenderManager.h"
 #include "SE_InputManager.h"
 #include "SE_AnimationManager.h"
+#include "SE_ElementManager.h"
+#include "SE_SimObjectManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -28,6 +30,9 @@ SE_Application::SE_Application()
     mResourceManager = new SE_ResourceManager;
     mRenderManager = new SE_RenderManager;
 	mInputManager = new SE_InputManager;
+	mAnimationManager = new SE_AnimationManager;
+	mElementManager = new SE_ElementManager;
+    mSimObjectManager = new SE_SimObjectManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -54,6 +59,10 @@ SE_Application::~SE_Application()
 		delete mInputManager;
 	if(mAnimationManager)
 		delete mAnimationManager;
+	if(mElementManager)
+		delete mElementManager;
+    if(mSimObjectManager)
+        delete mSimObjectManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {

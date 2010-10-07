@@ -12,6 +12,7 @@ public:
     SE_Animation* getAnimation(const SE_AnimationID& animID);
     void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     void removeAllEndedAnimation();
+    ~SE_AnimationManager();
 private:
     typedef std::map<SE_AnimationID, SE_Animation*> _AnimationMap;
     _AnimationMap mAnimationMap;

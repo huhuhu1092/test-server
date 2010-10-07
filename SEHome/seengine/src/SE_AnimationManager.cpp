@@ -2,6 +2,22 @@
 #include "SE_Animation.h"
 #include "SE_Application.h"
 #include <list>
+SE_AnimationManager::~SE_AnimationManager()
+{
+    _AnimationMap::iterator it;
+    std::list<SE_AnimationID> needToRemove;
+    for(it = mAnimationMap.begin() ; it != mAnimationMap.end() ; it++)
+    {
+        SE_Animation* anim = it->second;
+        needToRemove.push_back(it->first);
+        delete anim;
+    }
+    std::list<SE_AnimationID>::iterator itRemove;
+    for(itRemove = needToRemove.begin() ; itRemove != needToRemove.end() ; itRemove++)
+    {
+        mAnimationMap.erase(*itRemove);
+    }
+}
 SE_AnimationID SE_AnimationManager::addAnimation(SE_Animation* anim)
 {
     if(!anim)
@@ -40,6 +56,7 @@ void SE_AnimationManager::removeAllEndedAnimation()
         if(anim->isEnd())
         {
             needToRemove.push_back(it->first);
+            delete anim;
         }
     }
     std::list<SE_AnimationID>::iterator itRemove;

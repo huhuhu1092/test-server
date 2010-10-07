@@ -56,6 +56,11 @@ void SE_Animation::nextFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 }
 void SE_Animation::oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+    if(mPassedTime > mDuration)
+    {
+        end();
+        return;
+    }
     float percent = SE_Time::div(mPassedTime, mDuration);
     if(mInterpolate)
         percent = mInterpolate->calc(percent);
