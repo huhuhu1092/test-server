@@ -223,6 +223,10 @@ SE_SimObjectID SE_ID::createSimObjectID()
 {
     return SE_Application::getInstance()->createCommonID();
 }
+SE_ElementID SE_ID::createElementID(const char* str)
+{
+	return SE_StringID(str);
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

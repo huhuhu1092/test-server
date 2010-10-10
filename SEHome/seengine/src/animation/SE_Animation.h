@@ -8,6 +8,7 @@ class SE_Animation
 public:
     enum RUN_MODE {NOT_REPEAT, REPEAT, ONE_FRAME, REVERSE_NOT_REPEAT, REVERSE_REPEAT, REVERSE_ONE_FRAME};
     enum TIME_MODE {REAL, SIMULATE};
+    enum ANIM_STATE{RUNNING, END, PAUSE};
     SE_Animation();
     virtual ~SE_Animation();
     void run();
@@ -18,6 +19,10 @@ public:
     void setDuration(SE_TimeMS duration)
     {
         mDuration = duration;
+    }
+    ANIM_STATE getAnimState()
+    {
+        return mAnimState;
     }
     SE_TimeMS getDuration()
     {
@@ -87,17 +92,55 @@ public:
     {
         return mSimObjectID;
     }
+	void setFrameNum(int frameNum)
+	{
+		mFrameNum = frameNum;
+	}
+	int getFrameNum()
+	{
+		return mFrameNum;
+	}
+	SE_TimeMS getTimePerFrame()
+	{
+		return mTimePerFrame;
+	}
+	void setTimePerFrame(SE_TimeMS t)
+	{
+		mTimePerFrame = t;
+	}
+	int getCurrentFrame()
+	{
+		return mCurrFrame;
+	}
+	void reset()
+	{
+		mPassedTime = 0;
+		mCurrFrame = -1;
+	}
 public:
     virtual void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     virtual void onRun();
     virtual void onPause();
     virtual void onEnd();
     virtual void onRestore();
-    virtual void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent);
+    virtual void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex);
+	virtual SE_Animation* clone();
+protected:
+    void setAnimState(ANIM_STATE as)
+    {
+        mAnimState = as;
+    }
+    void setPassedTime(SE_TimeMS passt)
+    {
+        mPassedTime = passt;
+    }
+    void setCurrentFrame(int f)
+    {
+        mCurrFrame = f;
+    }
 private:
     void oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 private:
-    enum ANIM_STATE{RUNNING, END, PAUSE};
     ANIM_STATE mAnimState;
     RUN_MODE mRunMode;
     TIME_MODE mTimeMode;
@@ -107,5 +150,8 @@ private:
     SE_SpatialID mSpatialID;
     SE_PrimitiveID mPrimitiveID;
     SE_SimObjectID mSimObjectID;
+	int mFrameNum;
+	int mCurrFrame;
+	SE_TimeMS mTimePerFrame;
 };
 #endif

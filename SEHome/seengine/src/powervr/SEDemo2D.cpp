@@ -17,7 +17,8 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-#include "SE_Physics.h"
+#include "SE_MessageDefine.h"
+//#include "SE_Physics.h"
 #include "SE_2DCommand.h"
 #include "SE_ElementManager.h"
 #include "SE_AnimationManager.h"
@@ -43,7 +44,8 @@ class SEDemo : public PVRShell
 public:
 	SEDemo()
 	{
-		mPhysics = NULL;
+		//mPhysics = NULL;
+		mSelectedSpatial = NULL;
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -53,7 +55,8 @@ public:
 private:
 	void handleInput(int width, int height);
 private:
-	SE_Physics* mPhysics;
+	//SE_Physics* mPhysics;
+    SE_Spatial* mSelectedSpatial;
 };
 bool SEDemo::InitApplication()
 {
@@ -81,6 +84,10 @@ bool SEDemo::InitView()
 	int dwCurrentWidth = PVRShellGet (prefWidth);
 	int dwCurrentHeight = PVRShellGet (prefHeight);
 	LOGI("## width = %d, height = %d ###\n", dwCurrentWidth,dwCurrentHeight);
+	SE_2DUpdateCameraCommand* c = new SE_2DUpdateCameraCommand(SE_Application::getInstance());
+    c->width = dwCurrentWidth;
+    c->height = dwCurrentHeight;
+	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
 bool SEDemo::ReleaseView()
@@ -92,8 +99,57 @@ bool SEDemo::QuitApplication()
 {
 	return true;
 }
-static SE_Vector3f startPos;
-static SE_CommonNode* groupNode = NULL;
+class SE_RunAllAnimationTravel : public SE_SpatialTravel
+{
+public:
+    int visit(SE_Spatial* spatial)
+    {
+		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+		SE_ElementID elementID = spatial->getElementID();
+		SE_AnimationID animID = spatial->getAnimationID();
+		animManager->removeAnimation(animID);
+		SE_Element* element = elementManager->findByName(elementID.getStr());
+		if(element)
+		{
+			SE_Animation* anim = element->getAnimation();
+			SE_Animation* cloneAnim = NULL;
+			if(anim)
+			{
+				cloneAnim = anim->clone();
+				animID = animManager->addAnimation(cloneAnim);
+				spatial->setAnimationID(animID);
+				cloneAnim->setRunMode(SE_Animation::REPEAT);
+				cloneAnim->run();
+			}
+		}
+		return 0;
+    }
+    int visit(SE_SimObject* simObject)
+	{
+        return 1;
+	}
+};
+class SE_PauseAllAnimationTravel : public SE_SpatialTravel
+{
+public:
+	int visit(SE_Spatial* spatial)
+	{
+        SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+		SE_AnimationID animID = spatial->getAnimationID();
+		SE_Animation* anim = animManager->getAnimation(animID);
+		if(anim)
+		{
+			anim->setRunMode(SE_Animation::ONE_FRAME);
+			anim->pause();
+		}
+		return 0;
+	}
+	int visit(SE_SimObject* simObject)
+	{
+        return 0;
+	}
+};
 void SEDemo::handleInput(int width, int height)
 {
     static float prevPointer[2];
@@ -131,39 +187,67 @@ void SEDemo::handleInput(int width, int height)
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
     {
-        SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-        SE_Element* element = elementManager->findByName("lefteye");
-        if(element)
-        {
-            SE_Animation* anim = element->getAnimation();
-            anim->setSpatialID(element->getSpatialID());
-            anim->setPrimitiveID(element->getPrimitiveID());
-            anim->setSimObjectID(element->getSimObjectID());
-            SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
-            animationManager->addAnimation(anim);
-            anim->run();
+		if(mSelectedSpatial)
+		{
+            SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+			SE_Element* element = elementManager->findByName(mSelectedSpatial->getElementID().getStr());
+            if(element)
+            {
+                SE_Animation* anim = element->getAnimation();
+				if(anim)
+				{
+					SE_Animation* newAnim = anim->clone();
+                    SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+					SE_AnimationID animID = mSelectedSpatial->getAnimationID();
+					animationManager->removeAnimation(animID);
+					animID = animationManager->addAnimation(newAnim);
+			        mSelectedSpatial->setAnimationID(animID);
+                    newAnim->run();
+				}
+			}
         }
+		else
+		{
+			SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	        SE_Spatial* root = sceneManager->getRoot();
+	        SE_RunAllAnimationTravel rat;
+	        root->travel(&rat, true);
+		}
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
-		/*
-		mPhysics = new SE_Physics;
-		mPhysics->setStartPos(startPos);
-		mPhysics->initPhysics();
-		*/
+		if(mSelectedSpatial)
+		{
+		    SE_AnimationID animID = mSelectedSpatial->getAnimationID();
+		    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+		    SE_Animation* anim = animManager->getAnimation(animID);
+			if(anim)
+		        anim->nextFrame(30, 30);
+		}
         LOGI("## right ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
-		/*
-		if(mPhysics)
-		    mPhysics->exitPhysics();
-		*/
+		if(mSelectedSpatial)
+		{
+			SE_PauseAllAnimationTravel rat;
+			mSelectedSpatial->travel(&rat, true);
+		}
+		else
+		{
+            SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	        SE_Spatial* root = sceneManager->getRoot();
+	        SE_PauseAllAnimationTravel rat;
+	        root->travel(&rat, true);
+		}
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
+		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+		sceneManager->setSelectedSpatial(NULL);
+		mSelectedSpatial = NULL;
 	    LOGI("## down ##\n");
     }
 }
@@ -199,6 +283,10 @@ bool SEDemo::RenderScene()
 		{
 			SE_Message* msg = messageVector[i];
 			LOGI("### msg type = %d ####\n", msg->type);
+			if(msg->type == SE_MSG_SIMOBJECT_NAME)
+			{
+				mSelectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
+			}
 			SE_Struct* structData = msg->data;
 			int structItemSize = structData->getCount();
 			LOGI("### struct item size = %d ####\n", structItemSize);

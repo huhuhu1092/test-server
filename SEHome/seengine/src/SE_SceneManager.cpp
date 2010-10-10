@@ -92,7 +92,8 @@ void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
 		mSelectedSpatial->setSelected(false);
 	}
 	mSelectedSpatial = spatial;
-	mSelectedSpatial->setSelected(true);
+	if(mSelectedSpatial)
+	    mSelectedSpatial->setSelected(true);
 }
 SE_Spatial* SE_SceneManager::find(const SE_SpatialID& spatialID)
 {

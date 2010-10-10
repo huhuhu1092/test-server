@@ -6,14 +6,13 @@
 #include "SE_SimObject.h"
 #include "SE_SimObjectManager.h"
 #include "SE_Log.h"
+#include "SE_Interpolate.h"
 #include <utility>
 #include <algorithm>
 SE_TextureCoordAnimation::SE_TextureCoordAnimation()
 {
     mUnitWidth = 1;
     mUnitHeight = 1;
-    mTimePerFrame = 0;
-	mCurrFrame = 0;
 }
 SE_TextureCoordAnimation::~SE_TextureCoordAnimation()
 {}
@@ -29,20 +28,18 @@ void SE_TextureCoordAnimation::onRun()
 {
     if(mCoordList.size() > 0)
     {
-        mTimePerFrame = getDuration() / mCoordList.size();
+        setTimePerFrame(getDuration() / mCoordList.size());
     }
+	setFrameNum(mCoordList.size());
 }
-void SE_TextureCoordAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent)
+void SE_TextureCoordAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex)
 {
-    SE_TimeMS passedTime = getPassedTime();
-	LOGI("## passedTime = %d ##\n", passedTime);
-    int frame = passedTime / mTimePerFrame;
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-    if(frame == mCurrFrame)
+    if(frameIndex == getCurrentFrame())
         return;
     _CoordList::iterator it = mCoordList.begin();
-    for(int i = 0 ; i < frame ; i++)
+	for(int i = 0 ; i < frameIndex && it != mCoordList.end(); i++)
     {
         it++;
     }
@@ -62,7 +59,31 @@ void SE_TextureCoordAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateD
         SE_SimObject* simObject = simObjectManager->get(getSimObjectID());
         simObject->setMesh(meshArray[0], OWN);
         delete[] meshArray;
-		mCurrFrame = frame;
     }
 }
 
+SE_Animation* SE_TextureCoordAnimation::clone()
+{
+	SE_TextureCoordAnimation* anim = new SE_TextureCoordAnimation;
+	if(!anim)
+		return NULL;
+    anim->setAnimState(getAnimState());
+    anim->setRunMode(getRunMode());
+    anim->setTimeMode(getTimeMode());
+    anim->setDuration(getDuration());
+    anim->setPassedTime(getPassedTime());
+    SE_Interpolate* interpolate = getInterpolate();
+    if(interpolate)
+        anim->setInterpolate(interpolate->clone());
+    anim->setSpatialID(getSpatialID());
+    anim->setPrimitiveID(getPrimitiveID());
+    anim->setSimObjectID(getSimObjectID());
+    anim->setFrameNum(getFrameNum());
+    anim->setCurrentFrame(getCurrentFrame());
+    anim->setTimePerFrame(getTimePerFrame());
+    anim->mUnitWidth = mUnitWidth;
+    anim->mUnitHeight = mUnitHeight;
+    anim->mCoordList = mCoordList;
+    anim->mImageDataID = mImageDataID;
+    return anim;
+}

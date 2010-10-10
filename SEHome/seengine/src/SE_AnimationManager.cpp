@@ -34,6 +34,7 @@ void SE_AnimationManager::removeAnimation(const SE_AnimationID& animID)
         SE_Animation* anim = it->second;
         anim->end();
         delete anim;
+		mAnimationMap.erase(it);
     }
 }
 SE_Animation*  SE_AnimationManager::getAnimation(const SE_AnimationID& animID)

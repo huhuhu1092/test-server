@@ -14,13 +14,16 @@
 #include "SE_IO.h"
 #include "SE_ElementManager.h"
 #include "SE_RenderState.h"
+#include "SE_SceneManager.h"
+#include "SE_SimObject.h"
+#include "SE_AnimationManager.h"
+#include "SE_Animation.h"
+#include "SE_Spatial.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
 SE_Init2D::SE_Init2D(SE_Application* app) : SE_Command(app)
 {
-    width = 480;
-    height = 800;
 }
 SE_Init2D::~SE_Init2D()
 {}
@@ -45,11 +48,22 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     root->updateWorldLayer();
 	root->updateRenderState();
     sceneManager->addSpatial(NULL, root);
-    SE_Vector3f location(0, 0, 1000);
-    float ratio = height /width;
-    float angle = 2 * SE_RadianToAngle(atanf(width / 2000));
+}
+//////////////
+SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)
+{
+	width = 480;
+	height = 800;
+}
+SE_2DUpdateCameraCommand::~SE_2DUpdateCameraCommand()
+{}
+void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    SE_Vector3f location(0, 0, 10);
+    float ratio = height / (float)width;
+    float angle = 2 * SE_RadianToAngle(atanf(width / 20));
     SE_Camera* camera = new SE_MotionEventCamera;
-	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 2000);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
+	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
 	camera->setViewport(0, 0, width, height);
     mApp->setCamera(SE_Application::MAIN_CAMERA, camera);
     mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
@@ -57,60 +71,46 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     inputManager->removeMotionEventObserver(NULL);
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
 }
-//////////////
-SE_2DAnimation::SE_2DAnimation(SE_Application* app, SE_TimeMS duration, TIME_TYPE type) : SE_Command(app, duration, type)
-{
-	n = 0;
-}
-SE_2DAnimation::~SE_2DAnimation()
+////////////////
+SE_2DRunAllAnimation::SE_2DRunAllAnimation(SE_Application* app) : SE_Command(app)
 {}
-static int eyeCoord[] = {0, 64, 224};
-void SE_2DAnimation::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+SE_2DRunAllAnimation::~SE_2DRunAllAnimation()
+{}
+class SE_RunAllAnimationTravel : public SE_SpatialTravel
 {
-	SE_ImageDataID eyeData("eye");
-	SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData(eyeData);
-	SE_RectPrimitive* leftEyePrimitive = (SE_RectPrimitive*)SE_Application::getInstance()->getResourceManager()->getPrimitive(leftEyeID);
-	SE_RectPrimitive* rightEyePrimitive = (SE_RectPrimitive*)SE_Application::getInstance()->getResourceManager()->getPrimitive(rightEyeID);
-    if(n >= 0 && n < 3)
-	{
-		float x = eyeCoord[n];
-		leftEyePrimitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN, SE_ImageDataPortion(x, 0, 32, 32));
-		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-		sceneManager->removeSpatial(leftEyeSpatialID);
-		SE_Spatial* rootNode = sceneManager->getRoot();
-		SE_Mesh** leftEyeMesh;
-		int leftEyeMeshNum;
-		leftEyePrimitive->createMesh(leftEyeMesh, leftEyeMeshNum);
-		for(int i = 0 ; i < leftEyeMeshNum ; i++)
+public:
+    int visit(SE_Spatial* spatial)
+    {
+		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+		SE_ElementID elementID = spatial->getElementID();
+		SE_AnimationID animID = spatial->getAnimationID();
+		animManager->removeAnimation(animID);
+		SE_Element* element = elementManager->findByName(elementID.getStr());
+		if(element)
 		{
-			SE_SpatialID geomID = leftEyeSpatialID;//mApp->createCommonID();
-			SE_Geometry* geom = new SE_Geometry(geomID, rootNode);
-			geom->setLocalLayer(SE_Layer(SE_Layer::LAYER2));
-			rootNode->addChild(geom);
-			sceneManager->addSpatial(rootNode, geom);
-			SE_MeshSimObject* simObj = new SE_MeshSimObject(leftEyeMesh[i], OWN);
-			simObj->setName("body");
-			geom->attachSimObject(simObj);
-			geom->setLocalTranslate(SE_Vector3f(-29, 314, 0));
-			geom->setLocalScale(SE_Vector3f(32 / (float)2, 32 / (float)2, 1));
+			SE_Animation* anim = element->getAnimation();
+			SE_Animation* cloneAnim = NULL;
+			if(anim)
+			{
+				cloneAnim = anim->clone();
+				animID = animManager->addAnimation(cloneAnim);
+				spatial->setAnimationID(animID);
+				cloneAnim->setRunMode(SE_Animation::REPEAT);
+				cloneAnim->run();
+			}
 		}
-		rootNode->updateWorldLayer();
-		rootNode->updateWorldTransform();
-		n++;
-	}
-	else
+		return 0;
+    }
+    int visit(SE_SimObject* simObject)
 	{
-		n = 0;
+        return 1;
 	}
-	if(duration > 0)
-	{
-	    SE_2DAnimation* c = new SE_2DAnimation(SE_Application::getInstance(), 60, SE_Command::SIMULATE);
-	    c->n = n;
-	    c->leftEyeID = leftEyeID;
-	    c->rightEyeID = rightEyeID;
-	    c->duration = duration - simulateDelta;
-		c->leftEyeSpatialID = leftEyeSpatialID;
-		mApp->postCommand(c);
-	}
-
+};
+void SE_2DRunAllAnimation::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+	SE_SceneManager* sceneManager = mApp->getSceneManager();
+	SE_Spatial* root = sceneManager->getRoot();
+	SE_RunAllAnimationTravel rat;
+	root->travel(&rat, true);
 }

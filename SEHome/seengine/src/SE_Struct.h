@@ -6,6 +6,7 @@
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_Matrix.h"
+class SE_Spatial;
 class SE_VirtualData
 {
 public:
@@ -23,6 +24,17 @@ public:
 		return str;
 	}
 	std::string data;
+};
+class SE_SpatialData : public SE_VirtualData
+{
+public:
+	SE_VirtualData* clone()
+	{
+		SE_SpatialData* s = new SE_SpatialData;
+		s->spatial = spatial;
+		return s;
+	}
+	SE_Spatial* spatial;
 };
 struct SE_DataItem
 {

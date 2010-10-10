@@ -48,15 +48,14 @@ public:
     }
     void removeCoord(const Point& p);
 public:
-    virtual void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent);
+    virtual void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex);
     virtual void onRun();
+	virtual SE_Animation* clone();
 private:
     int mUnitWidth;
     int mUnitHeight;
     typedef std::list<Point> _CoordList;
     _CoordList mCoordList;
     SE_ImageDataID mImageDataID;
-    SE_TimeMS mTimePerFrame;
-	int mCurrFrame;
 };
 #endif

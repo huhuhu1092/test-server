@@ -1,7 +1,7 @@
 #include "SE_Layer.h"
 SE_Layer::SE_Layer()
 {
-    mLayer = LAYER1;
+    mLayer = 0;
 }
 SE_Layer::SE_Layer(int layer) : mLayer(layer)
 {

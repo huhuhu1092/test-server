@@ -17,22 +17,24 @@ public:
     ~SE_Init2D();
     void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 public:
-    float width;
-    float height;
     std::string dataPath;
     std::string fileName;
 };
-class SE_2DAnimation : public SE_Command
+class SE_2DUpdateCameraCommand : public SE_Command
 {
 public:
-    SE_2DAnimation(SE_Application* app, SE_TimeMS duration, TIME_TYPE type);
-    ~SE_2DAnimation();
+    SE_2DUpdateCameraCommand(SE_Application* app);
+    ~SE_2DUpdateCameraCommand();
     void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 public:
-	int n;
-	SE_PrimitiveID leftEyeID;
-	SE_PrimitiveID rightEyeID;
-	SE_SpatialID leftEyeSpatialID;
-	SE_TimeMS duration;
+    int width;
+    int height;
+};
+class SE_2DRunAllAnimation : public SE_Command
+{
+public:
+    SE_2DRunAllAnimation(SE_Application* app);
+	~SE_2DRunAllAnimation();
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 };
 #endif

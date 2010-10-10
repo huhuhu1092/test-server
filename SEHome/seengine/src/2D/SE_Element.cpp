@@ -89,10 +89,18 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
     geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
     geom->setLocalLayer(mLocalLayer);
+	SE_ElementID eid = SE_ID::createElementID(mName.c_str());
+	geom->setElementID(eid);
     delete[] meshArray;
     mSpatialID = spatialID;
     mPrimitiveID = primitiveID;
     mSimObjectID = simObjectID;
+	if(mAnimation)
+	{
+        mAnimation->setSpatialID(mSpatialID);
+        mAnimation->setPrimitiveID(mPrimitiveID);
+        mAnimation->setSimObjectID(mSimObjectID);
+	}
 	return geom;
 }
 void SE_Element::travel(SE_ElementTravel* travel)

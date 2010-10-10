@@ -12,14 +12,18 @@
 #include "SE_ShaderProgram.h"
 #include "SE_Primitive.h"
 #include "SE_Log.h"
+#include "SE_ImageCodec.h"
 #include <map>
 #include <vector>
-
 struct _MeshData
 {
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
+static SE_ImageData* loadCommonCompressImage(const char* imageName)
+{
+	return SE_ImageCodec::load(imageName);   
+}
 static SE_ImageData* loadRawImage(const char* imageName)
 {
     char* data = NULL;
@@ -60,10 +64,9 @@ static SE_ImageData* loadImage(const char* imageName, int type)
         return loadRawImage(imageName); 
         break;
     case SE_ImageData::JPEG:
-        break;
     case SE_ImageData::PNG:
-        break;
     case SE_ImageData::TGA:
+		return loadCommonCompressImage(imageName);
         break;
     case SE_ImageData::ETC1:
         break;

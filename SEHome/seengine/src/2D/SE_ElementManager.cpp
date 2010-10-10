@@ -28,6 +28,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         element->setParent(NULL);
         elementManager->setRoot(element);
     }
+    bool hasLayer = false;
     while(pAttribute)
     {
         const char* name = pAttribute->Name();
@@ -91,8 +92,13 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
             {
                 LOGI("... parse layer value error\n");
             }
+            hasLayer = true;
         }
         pAttribute = pAttribute->Next();
+    }
+    if(!hasLayer)
+    {
+        element->setLocalLayer(indent);
     }
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
@@ -184,9 +190,10 @@ void SE_ElementGroupHandler::handle(SE_Element* parent, TiXmlElement* xmlElement
     }
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
+    int i = 1;
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
-        elementManager->handleXmlChild(element, pChild, indent + 1);
+        elementManager->handleXmlChild(element, pChild, i++);
     }
 }
 void SE_AnimationHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)

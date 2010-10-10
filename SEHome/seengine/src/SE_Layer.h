@@ -4,7 +4,6 @@
 class SE_Layer
 {
 public:
-    enum {LAYER1, LAYER2, LAYER3, LAYER4, LAYER5, LAYER6, LAYER7, LAYER8, LAYER_NUN};
     SE_Layer();
     SE_Layer(int layer);
     ~SE_Layer();

@@ -4,5 +4,6 @@ class SE_Interpolate
 {
 public:
     virtual float calc(float input);
+	virtual SE_Interpolate* clone();
 };
 #endif

@@ -16,33 +16,38 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
 {
     ILuint	imgId;
 	ILenum	error;
-    //wchar_t* filePathUnicode = SE_Util::utf8ToUnicode(filePath);
-    UTF16 filePathUnicode[512];
-    memset(filePathUnicode, 0, sizeof(UTF16) * 512);
-    int filePathLen = strlen(filePath);
-    const UTF8* end = (const UTF8*)(filePath + filePathLen);
-    UTF16* dstEnd = filePathUnicode + 512;
-    ConversionFlags flag = strictConversion;
-	const UTF8* srcStart = (const UTF8*)filePath;
-	UTF16* dstStart = filePathUnicode;
-    ConversionResult ret = ConvertUTF8toUTF16(&srcStart, end, &dstStart, dstEnd, flag);
-    if(ret != conversionOK)
-        return NULL;
     ilInit();
     iluInit();
     ilGenImages(1, &imgId);
     ilBindImage(imgId);
-    if(!ilLoadImage((wchar_t*)filePathUnicode))
+#if defined(WIN32)
+    wchar_t fileWideChar[512];
+	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
+	MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);
+    if(!ilLoadImage(fileWideChar))
     {
         return NULL;
     }
+#else
+    if(!ilLoadImage(filePath))
+    {
+        return NULL;
+    }
+#endif
+
     int width = ilGetInteger(IL_IMAGE_WIDTH);
     int height = ilGetInteger(IL_IMAGE_HEIGHT);
     int bpp = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
     unsigned char* src = ilGetData();
     int pixelSize = bpp / 8;
-    char* dst = new char[width * height * pixelSize];
-    memcpy(dst, src, width * height * pixelSize);
+    unsigned char* dst = new unsigned char[width * height * pixelSize];
+	for(int y = height - 1 ; y >= 0 ; y--)
+	{
+		unsigned char* srcData = src + y * width * pixelSize;
+		unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
+		memcpy(dstData, srcData, width * pixelSize);
+	}
+    //memcpy(dst, src, width * height * pixelSize);
     SE_ImageData* imageData = new SE_ImageData;
     imageData->setWidth(width);
     imageData->setHeight(height);
@@ -62,7 +67,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
         break;
     }
     imageData->setBytesPerRow(width * pixelSize);
-    imageData->setData(dst);
+    imageData->setData((char*)dst);
     imageData->setCompressType(SE_ImageData::RAW);
     return imageData;
 }

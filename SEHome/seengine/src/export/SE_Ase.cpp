@@ -14,6 +14,7 @@
 #include "SE_Geometry.h"
 #include "SE_BoundingVolume.h"
 #include "SE_MeshSimObject.h"
+#include "SE_ImageData.h"
 #include "SE_IO.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -194,12 +195,23 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         {
             size_t pos = texStr.find('.');
             std::string name = texStr.substr(0, pos);
-			std::string filename = name + ".raw";
-			SE_ImageDataID tid = name.c_str();//texStr.c_str();
+            std::string ext = texStr.substr(pos + 1);
+			SE_ImageDataID tid = texStr.c_str();
             itMaterial->tid = tid;
             tid.write(output);
-            output.writeInt(0); // image data type
-            output.writeString(filename.c_str());
+            if(ext == "raw")
+            {
+                output.writeInt(SE_ImageData::RAW); // image data type
+            }
+            else if(ext == "png")
+            {
+                output.writeInt(SE_ImageData::PNG);
+            }
+            else if(ext == "jpg" || ext == "jpeg")
+            {
+                output.writeInt(SE_ImageData::JPEG);
+            }
+            output.writeString(texStr.c_str());
         }
     }
     /////////////////////////////write geom data /////////////////////////////////////////////
@@ -664,7 +676,101 @@ void ASE_Loader::ASE_SkipRestOfLine(  )
 {
 	ASE_GetToken( true );
 }
+void ASE_Loader::ASE_KeyBONEINFO(const char* token)
+{
 
+    if(!strcmp(token , "*BONENUM"))    
+    {
+        ASE_GetToken(false);
+        ASE_GetToken(false);
+        int num = atoi(s_token);
+        mCurrSkinJointController->jointVector.resize(num, 0);
+    }
+	else if(!strcmp(token, "*OBJHASBONE"))
+	{
+		ASE_GetToken(false);
+		ASE_GetToken(false);
+		mCurrSkinJointController->objName = s_token;
+	}
+    else if(!strcmp(token, "*BONERELATION"))
+    {
+        ASE_GetToken(false);
+		int index = atoi(s_token);
+		ASE_GetToken(false);
+        int childCount = atoi(s_token);
+        ASE_GetToken(false);
+        ASE_GetToken(false);
+        ASE_Bone* currBone = new ASE_Bone;
+        std::string currBoneName(s_token);
+        currBone->name = currBoneName;
+        for(int i = 0 ; i < mCurrSkinJointController->jointVector.size() ; i++)
+        {
+            ASE_Bone* bone = mCurrSkinJointController->jointVector[i];
+            if(bone)
+            {
+                std::list<ASE_Bone*>::iterator it = bone->children.begin();
+                for(; it != bone->children.end() ; it++)
+                {
+                    ASE_Bone* child = *it;
+                    if(child->name == currBoneName)
+                    {
+                        currBone->parent = bone;
+                        break;
+                    }
+                }
+            }
+        }
+        for(int i = 0 ; i < childCount ; i++)
+        {
+            ASE_GetToken(false);
+            ASE_GetToken(false);
+            ASE_Bone* child = new ASE_Bone;
+            child->name = s_token;
+            child->parent = currBone;
+            currBone->children.push_back(child);
+        }
+		mCurrSkinJointController->jointVector[index] = currBone;
+    }
+    else if(!strcmp(token, "*VERTEXINFO"))
+    {
+		ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEVERTEXINFO);
+    }
+}
+void ASE_Loader::ASE_KeyBONEVERTEXINFO(const char* token)
+{
+    if(!strcmp(token, "*VERTEXNUM"))
+    {
+        ASE_GetToken(false);
+        int vertexNum = atoi(s_token);
+        mCurrSkinJointController->vertexJointVector.resize(vertexNum);
+    }
+    else if(!strcmp(token, "*VERTEX"))
+    {
+        ASE_GetToken(false);
+        int index = atoi(s_token);
+        ASE_GetToken(false);
+        ASE_GetToken(false);
+        int boneNum = atoi(s_token);
+        mCurrSkinJointController->vertexJointVector[index].resize(boneNum);
+		ASE_GetToken(false);
+        for(int i = 0 ; i < boneNum ; i++)
+        {
+            ASE_GetToken(false);
+            ASE_GetToken(false);
+			ASE_GetToken(false);
+            int boneIndex = atoi(s_token);
+            ASE_GetToken(false);
+            ASE_GetToken(false);
+            ASE_GetToken(false);
+            ASE_GetToken(false);
+            float weight = atof(s_token);
+            ASE_BoneWeight bw;
+            bw.boneIndex = boneIndex;
+            bw.weight = weight;
+            mCurrSkinJointController->vertexJointVector[index][i] = bw;
+        }
+    }
+}
 void ASE_Loader::ASE_KeyMAP_DIFFUSE( const char *token )
 {
     char buffer[1024], buff1[1024], buff2[1024];
@@ -1177,7 +1283,7 @@ void ASE_Loader::ASE_Process(  )
 		else if ( !strcmp( s_token, "*GEOMOBJECT" ) )
 		{
 			LOGI( "GEOMOBJECT\n"  );
-                    ASE_GeometryObject *obj = new ASE_GeometryObject;
+            ASE_GeometryObject *obj = new ASE_GeometryObject;
 			mSceneObject->mGeomObjects.push_back(obj);
 			mCurrGeomObject = obj;
 			ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyGEOMOBJECT );
@@ -1185,6 +1291,13 @@ void ASE_Loader::ASE_Process(  )
 			geomCount++;
 #endif
 	    }	
+        else if(!strcmp(s_token, "*BONEINFO"))
+        {
+	         ASE_SkinJointController* skinJointController = new ASE_SkinJointController;
+             mSceneObject->mSkinJointController.push_back(skinJointController);
+             mCurrSkinJointController = skinJointController;
+             ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEINFO);
+        }
 	}
 #ifdef DEBUG
 	LOGI(".. geomCount = %d \n", geomCount);

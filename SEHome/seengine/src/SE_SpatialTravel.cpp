@@ -44,7 +44,15 @@ int SE_FindSpatialCollision::visit(SE_SimObject* so)
 		mResult.simObject = so;
 		mResult.distance = distance;
 		mResult.spatial = so->getSpatial();
-		if(mResult.distance < mMinResult.distance)
+		if(mResult.spatial != NULL && mMinResult.spatial == NULL)
+		{
+			mMinResult = mResult;
+		}
+		else if(mResult.spatial->getWorldLayer() > mMinResult.spatial->getWorldLayer())
+		{
+			mMinResult = mResult;
+		}
+		else if(mResult.distance < mMinResult.distance)
 		{
 			mMinResult = mResult;
 		}

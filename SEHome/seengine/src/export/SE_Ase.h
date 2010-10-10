@@ -68,7 +68,7 @@ struct ASE_BoneWeight
 struct ASE_SkinJointController
 {
 	typedef std::vector<ASE_BoneWeight> JointList;
-	std::vector<ASE_Bone*> jointvector;
+	std::vector<ASE_Bone*> jointVector;
 	std::string objName;
 	std::vector<JointList> vertexJointVector;//every vertex in object has a cooresponding JointList
 	
@@ -170,6 +170,7 @@ struct ASE_SceneObject
 {
     std::list<ASE_GeometryObject*> mGeomObjects;
     std::vector<ASE_Material> mMats;
+    std::list<ASE_SkinJointController*> mSkinJointController;
     ~ASE_SceneObject()
     {
         std::list<ASE_GeometryObject*>::iterator it;
@@ -213,6 +214,8 @@ private:
     void ASE_KeyGEOMOBJECT( const char *token );
     void ASE_KeyMAP_SUBMATERIAL(const char* token);
     void ASE_KeyNODETM(const char* token);
+    void ASE_KeyBONEINFO(const char* token);
+    void ASE_KeyBONEVERTEXINFO(const char* token);
     void ASE_AdjustSubMtl();
 private:
     ASE_SceneObject* mSceneObject;
@@ -222,6 +225,7 @@ private:
     ASE_Material* mCurrMtl;
 	ASE_MaterialData* mCurrSubMtl;
     ASE_Mesh* mCurrMesh;
+    ASE_SkinJointController* mCurrSkinJointController;
 	bool mInSubDiffuse;
 };
 #endif

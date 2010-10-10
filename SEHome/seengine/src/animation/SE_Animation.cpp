@@ -1,5 +1,6 @@
 #include "SE_Animation.h"
 #include "SE_Interpolate.h"
+#include "SE_Log.h"
 SE_Animation::SE_Animation()
 {
     mAnimState = END;
@@ -8,6 +9,9 @@ SE_Animation::SE_Animation()
     mDuration = 0;
     mPassedTime = 0;
     mInterpolate = NULL;
+	mCurrFrame = -1;
+	mFrameNum = 0;
+	mTimePerFrame = 0;
 }
 SE_Animation::~SE_Animation()
 {
@@ -56,15 +60,53 @@ void SE_Animation::nextFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 }
 void SE_Animation::oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-    if(mPassedTime > mDuration)
+	if(mPassedTime > mDuration)
     {
-        end();
-        return;
+		if(mRunMode == NOT_REPEAT || mRunMode == REVERSE_NOT_REPEAT)
+		{
+            end();
+            return;
+		}
+		else
+		{
+			mPassedTime -= mDuration;
+		}
     }
+
     float percent = SE_Time::div(mPassedTime, mDuration);
     if(mInterpolate)
         percent = mInterpolate->calc(percent);
-    onUpdate(realDelta, simulateDelta, percent);
+	SE_TimeMS passedTime = getPassedTime();
+	LOGI("## passedTime = %d ##\n", passedTime);
+    int frame = mCurrFrame;
+	if(mRunMode != ONE_FRAME && mRunMode != REVERSE_ONE_FRAME)
+	{
+		if(mRunMode == REPEAT || mRunMode == NOT_REPEAT)
+		{
+	        frame = passedTime / mTimePerFrame;
+		}
+		else if(mRunMode == REVERSE_REPEAT || mRunMode == REVERSE_NOT_REPEAT)
+		{
+            frame = (mDuration - passedTime) /  mTimePerFrame;
+		}
+	}
+	else
+	{
+		if(mRunMode == ONE_FRAME)
+		{
+			frame++;
+			if(frame >= mFrameNum)
+				frame = 0;
+		}
+		else
+		{
+			frame--;
+			if(frame < 0)
+				frame = mFrameNum - 1;
+		}
+	}
+    onUpdate(realDelta, simulateDelta, percent, frame);
+	mCurrFrame = frame;
     if(mTimeMode == REAL)
         mPassedTime += realDelta;
     else
@@ -86,5 +128,9 @@ void SE_Animation::onEnd()
 {}
 void SE_Animation::onRestore()
 {}
-void SE_Animation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent)
+void SE_Animation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex)
 {}
+SE_Animation* SE_Animation::clone()
+{
+	return NULL;
+}

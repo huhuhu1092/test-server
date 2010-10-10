@@ -162,6 +162,22 @@ public:
     {
         return mWorldLayer;
     }
+	void setAnimationID(const SE_AnimationID& animID)
+	{
+		mAnimationID = animID;
+	}
+	SE_AnimationID getAnimationID()
+	{
+		return mAnimationID;
+	}
+	void setElementID(const SE_ElementID& eid)
+	{
+		mElementID = eid;
+	}
+	SE_ElementID getElementID()
+	{
+		return mElementID;
+	}
 	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
 	//dont use getRenderState to get some spatial's renderstate and then 
 	// set it to the other spatial;
@@ -232,5 +248,7 @@ private:
 	_RenderStateProperty mRenderState[RENDERSTATE_NUM];
     SE_Matrix4f mPrevMatrix;
     SE_Matrix4f mPostMatrix;
+	SE_AnimationID mAnimationID;
+	SE_ElementID mElementID;
 };
 #endif
