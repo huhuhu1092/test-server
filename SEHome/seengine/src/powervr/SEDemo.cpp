@@ -220,12 +220,6 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
-		SE_2DAnimation* c = new SE_2DAnimation(SE_Application::getInstance(), 60, SE_Command::SIMULATE);
-		c->leftEyeID = eyeData.leftEyeID;
-		c->rightEyeID = eyeData.rightEyeID;
-		c->duration = 300;
-		c->leftEyeSpatialID = eyeData.leftSpatialID;
-		SE_Application::getInstance()->postCommand(c);
 	    LOGI("## down ##\n");
     }
 }

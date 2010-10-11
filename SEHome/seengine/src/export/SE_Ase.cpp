@@ -113,7 +113,7 @@ public:
 public:
 	SE_BufferOutput& mOut;
 };
-static const int SLEEP_COUNT = 50;
+//static const int SLEEP_COUNT = 50;
 void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const char* shaderPath)
 {
     int materialNum = mSceneObject->mMats.size();
@@ -485,6 +485,8 @@ WRIET_SURFACE:
             }
         }
     }
+    // write bone animation data //
+    
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     //SE_Util::sleep(SLEEP_COUNT);
@@ -700,9 +702,9 @@ void ASE_Loader::ASE_KeyBONEINFO(const char* token)
         int childCount = atoi(s_token);
         ASE_GetToken(false);
         ASE_GetToken(false);
-        ASE_Bone* currBone = new ASE_Bone;
+        ASE_Bone* currBone = NULL;
         std::string currBoneName(s_token);
-        currBone->name = currBoneName;
+        bool findCurrBoneInChildrenList = false;
         for(int i = 0 ; i < mCurrSkinJointController->jointVector.size() ; i++)
         {
             ASE_Bone* bone = mCurrSkinJointController->jointVector[i];
@@ -714,11 +716,17 @@ void ASE_Loader::ASE_KeyBONEINFO(const char* token)
                     ASE_Bone* child = *it;
                     if(child->name == currBoneName)
                     {
-                        currBone->parent = bone;
+                        findCurrBoneInChildrenList = true;
+                        currBone = child;
                         break;
                     }
                 }
             }
+        }
+        if(!findCurrBoneInChildrenList)
+        {
+            currBone = new ASE_Bone;
+            currBone->name = currBoneName;
         }
         for(int i = 0 ; i < childCount ; i++)
         {
@@ -735,7 +743,69 @@ void ASE_Loader::ASE_KeyBONEINFO(const char* token)
     {
 		ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEVERTEXINFO);
     }
+    else if(!strcmp(s_token , "*BONEMATRIX"))
+    {
+        ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEMATRIX);
+    }
 }
+void ASE_Loader::ASE_KeyBONEMATRIXINFO(const char* token)
+{
+    if(!strcmp(token, "*NAME"))
+    {
+        ASE_GetToken(false);
+        std::string boneName = s_token;
+        int boneNum = mCurrSkinJointController->jointVector.size();
+        ASE_Bone* bone = NULL;
+        for(int i = 0 ; i < boneNum ; i++)
+        {
+            ASE_Bone* b = mCurrSkinJointController->jointVector[i];
+            if(b->name == boneName)
+            {
+                bone = b;
+                break;
+            }
+        }
+        mCurrBone = bone;
+    }
+    else if(!strcmp(token, "*MATRIX"))
+    {
+        for(int i = 0 ; i < 16 ; i++)
+        {
+            ASE_GetToken(false);
+            mCurrBone->matrixbase.m[i] = atof(s_token);
+        }
+    }
+    else if(!strcmp(token, "*MATRIXARRAY"))
+    {
+        ASE_GetToken(false);
+        int num = atoi(s_token);
+        mCurrBone->matrixseqnum = num;
+        mCurrBone->matrixseq = new ASE_Matrix4f[num];
+        for(int i = 0 ; i < num ; i++)
+        {
+            for(int j = 0 ; j < 16 ; j++)
+            {
+                ASE_GetToken(false);
+                mCurrBone->matrixseq[i].m[j] = atof(s_token);
+            }
+        }
+    }
+}
+void ASE_Loader::ASE_KeyBONEMATRIX(const char* token)
+{
+    if(!strcmp(token, "*BONENUM"))
+    {
+        ASE_GetToken(false);
+        int boneNum = atoi(s_token);
+        int size = mCurrSkinJointController->jointVector.size();
+        SE_ASSERT(size == boneNum);
+    }
+    else if(!strcmp(token, "*BONE"))
+    {
+        ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEMATRIXINFO);
+    }
+}
+
 void ASE_Loader::ASE_KeyBONEVERTEXINFO(const char* token)
 {
     if(!strcmp(token, "*VERTEXNUM"))
@@ -1298,6 +1368,7 @@ void ASE_Loader::ASE_Process(  )
              mCurrSkinJointController = skinJointController;
              ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEINFO);
         }
+
 	}
 #ifdef DEBUG
 	LOGI(".. geomCount = %d \n", geomCount);

@@ -39,6 +39,10 @@ struct ASE_Face
 struct ASE_Matrix4f
 {
 	float m[16];
+    ASE_Matrix4f()
+    {
+        memset(m, 0, sizeof(float) * 16);
+    }
 };
 struct ASE_Bone
 {
@@ -47,6 +51,7 @@ struct ASE_Bone
 	ASE_Bone* parent;
 	ASE_Matrix4f* matrixseq;
 	int matrixseqnum;
+    ASE_Matrix4f matrixbase;
 	ASE_Bone()
 	{
 		parent = NULL;
@@ -216,6 +221,8 @@ private:
     void ASE_KeyNODETM(const char* token);
     void ASE_KeyBONEINFO(const char* token);
     void ASE_KeyBONEVERTEXINFO(const char* token);
+    void ASE_KeyBONEMATRIX(const char* token);
+    void ASE_KeyBONEMATRIXINFO(const char* token);
     void ASE_AdjustSubMtl();
 private:
     ASE_SceneObject* mSceneObject;
@@ -226,6 +233,7 @@ private:
 	ASE_MaterialData* mCurrSubMtl;
     ASE_Mesh* mCurrMesh;
     ASE_SkinJointController* mCurrSkinJointController;
+    ASE_Bone* mCurrBone;
 	bool mInSubDiffuse;
 };
 #endif
