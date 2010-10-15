@@ -90,7 +90,7 @@ public:
     {
         mBVType = bvType;
     }
-    bool canVisible()
+    bool isVisible()
     {
         return (mState & VISIBILITY_MASK) == VISIBLE;
     }

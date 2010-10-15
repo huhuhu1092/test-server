@@ -2,6 +2,7 @@
 #include "SE_GeometryData.h"
 #include "SE_TextureCoordData.h"
 #include <string.h>
+#include <set>
 SE_TextureUnit::SE_TextureUnit()
 {
     mTexCoord = NULL;
@@ -9,6 +10,7 @@ SE_TextureUnit::SE_TextureUnit()
     mImageDataIDNum = 0;
 	mImageDataArray = NULL;
 	mImageDataNum = 0;
+
 }
 SE_TextureUnit::~SE_TextureUnit()
 {
@@ -16,6 +18,7 @@ SE_TextureUnit::~SE_TextureUnit()
         delete[] mImageDataIDArray;
 	if(mImageDataArray)
 		delete[] mImageDataArray;
+
 }
 //////////
 SE_Surface::SE_Surface()
@@ -30,6 +33,15 @@ SE_Surface::SE_Surface()
     mWrapT = REPEAT;
 	mVertex = NULL;
 	mTexVertex = NULL;
+
+    mFaceVertex = NULL;
+    mFaceVertexNum = 0;
+    mFaceTexVertex = 0;
+    mFaceTexVertexNum = 0;
+    mIndex = NULL;
+    mIndexNum = 0; 
+    mIndexInGeometryData = NULL;
+    mIndexInGeometryDataNum = 0;
 }
 SE_Surface::~SE_Surface()
 {
@@ -39,6 +51,14 @@ SE_Surface::~SE_Surface()
 		delete[] mVertex;
 	if(mTexVertex)
 		delete[] mTexVertex;
+    if(mFaceVertex)
+        delete[] mFaceVertex;
+    if(mFaceTexVertex)
+        delete[] mFaceTexVertex;
+    if(mIndex)
+        delete[] mIndex;
+	if(mIndexInGeometryData)
+        delete[] mIndexInGeometryData;
 }
 SE_GeometryData* SE_Surface::getGeometryData()
 {
@@ -90,9 +110,159 @@ SE_ProgramDataID SE_Surface::getProgramDataID()
 {
     return mProgramDataID;
 }
+void SE_Surface::getVertexIndexInGeometryData(int*& outArray, int& outNum)
+{
+    if(mIndexInGeometryData)
+    {
+        outArray = mIndexInGeometryData;
+        outNum = mIndexInGeometryDataNum;
+        return;
+    }    
+    SE_GeometryData* geomData = getGeometryData();
+    int facetNum = getFacetNum();
+    int* facets = getFacetArray();
+    SE_Vector3i* faceArray = geomData->getFaceArray();
+    mIndexInGeometryData = new int[facetNum * 3];
+    mIndexInGeometryDataNum = facetNum * 3;
+    int k = 0;
+    for(int i = 0 ; i < facetNum ; i++)
+    {
+        SE_Vector3i face = faceArray[facets[i]];
+        mIndexInGeometryData[k++] = face.x;
+        mIndexInGeometryData[k++] = face.y;
+        mIndexInGeometryData[k++] = face.z;
+    }
+    outArray = mIndexInGeometryData;
+    outNum = mIndexInGeometryDataNum;
+}
+void SE_Surface::getFaceVertex(_Vector3f*& vertex, int& vertexNum)
+{
+    if(mVertex)
+    {
+        delete[] mVertex;
+        mVertex = NULL;
+        mVertexNum = 0;
+    }
+    if(mFaceVertex != NULL)
+    {
+        vertex = mFaceVertex;
+        vertexNum = mFaceVertexNum;
+        return;
+    }
+    SE_GeometryData* geomData = getGeometryData();
+    int facetNum = getFacetNum();
+    int* facets = getFacetArray();
+    SE_Vector3i* faceArray = geomData->getFaceArray();
+    SE_Vector3f* vertexArray = geomData->getVertexArray();
+    mFaceVertex = new _Vector3f[facetNum * 3];//(_Vector3f*)malloc(sizeof(_Vector3f) * facetNum * 3);//
+    mFaceVertexNum = facetNum * 3;
+    int k = 0;
+    for(int i = 0 ; i < facetNum ; i++)
+    {
+        SE_Vector3i f = faceArray[facets[i]];
+        mFaceVertex[k].d[0] = vertexArray[f.x].x;
+        mFaceVertex[k].d[1] = vertexArray[f.x].y;
+        mFaceVertex[k].d[2] = vertexArray[f.x].z;
+        k++;
+        mFaceVertex[k].d[0] = vertexArray[f.y].x;
+        mFaceVertex[k].d[1] = vertexArray[f.y].y;
+        mFaceVertex[k].d[2] = vertexArray[f.y].z;
+        k++;
+        mFaceVertex[k].d[0] = vertexArray[f.z].x;
+        mFaceVertex[k].d[1] = vertexArray[f.z].y;
+        mFaceVertex[k].d[2] = vertexArray[f.z].z;
+        k++;
+    }
+    vertex = mFaceVertex;
+    vertexNum = mFaceVertexNum;
+}
+void SE_Surface::getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertexNum)
+{
+    if(mTexVertex)
+    {
+        delete[] mTexVertex;
+        mTexVertexNum = 0;
+    }
+    if(mFaceTexVertex)
+    {
+        texVertex = mFaceTexVertex;
+        texVertexNum = mFaceTexVertexNum;
+        return;
+    }
+    SE_Texture* tex = getTexture();
+    if(!tex)
+    {
+        texVertex = NULL;
+        texVertexNum = 0;
+        return;
+    }
+    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_Texture::TEXTURE0);
+    SE_ASSERT(texUnit != NULL);
+    SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
+    SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
+    SE_Vector2f* texVertexArray = texCoordData->getTexVertexArray();
+	if(texVertexArray == NULL || texFaceArray == NULL)
+	{
+        texVertex = 0;
+        texVertexNum = 0;
+		return;
+	}
+    int texFaceNum = texCoordData->getTexFaceNum();
+    int facetNum = getFacetNum();
+    int* facets = getFacetArray();
+    mFaceTexVertex = new _Vector2f[facetNum * 3];
+    mFaceTexVertexNum = facetNum * 3;
+    int k = 0 ;
+    for(int i = 0 ; i < facetNum ; i++)
+    {
+        SE_ASSERT(facets[i] < texFaceNum);
+        SE_Vector3i f = texFaceArray[facets[i]];
+        mFaceTexVertex[k].d[0] = texVertexArray[f.x].x;
+        mFaceTexVertex[k].d[1] = texVertexArray[f.x].y;
+        k++;
+        mFaceTexVertex[k].d[0] = texVertexArray[f.y].x;
+        mFaceTexVertex[k].d[1] = texVertexArray[f.y].y;
+        k++;
+        mFaceTexVertex[k].d[0] = texVertexArray[f.z].x;
+        mFaceTexVertex[k].d[1] = texVertexArray[f.z].y;
+        k++;
+    }
+    texVertex = mFaceTexVertex;
+    texVertexNum = mFaceTexVertexNum;
+}
+void SE_Surface::getVertexIndex(int*& index, int& indexNum)
+{
+    if(mIndex)
+    {
+        index = mIndex;
+        indexNum = mIndexNum;
+        return;
+    }
+    int facetNum = getFacetNum();
+    int* facets = getFacetArray();
+    SE_GeometryData* geomData = getGeometryData();
+    SE_Vector3i* faceArray = geomData->getFaceArray();
+    mIndexNum = facetNum * 3;
+    mIndex = new int[mIndexNum];
+    int k = 0;
+    for(int i = 0 ; i < facetNum ; i++)
+    { 
+        SE_Vector3i f = faceArray[facets[i]];
+        mIndex[k++] = f.x;
+        mIndex[k++] = f.y;
+        mIndex[k++] = f.z;
+    } 
+    index = mIndex;
+    indexNum = indexNum;
+}
 void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
-    if(mVertex != NULL)
+    if(mFaceVertex)
+    {
+        delete[] mFaceVertex;
+        mFaceVertexNum = 0;
+    }
+    if(mVertex)
     {
         vertex = mVertex;
         vertexNum = mVertexNum;
@@ -103,30 +273,36 @@ void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
     int* facets = getFacetArray();
     SE_Vector3i* faceArray = geomData->getFaceArray();
     SE_Vector3f* vertexArray = geomData->getVertexArray();
-    mVertex = new _Vector3f[facetNum * 3];//(_Vector3f*)malloc(sizeof(_Vector3f) * facetNum * 3);//
-    mVertexNum = facetNum * 3;
-    int k = 0;
+    std::set<int> vertexIndexSet;
     for(int i = 0 ; i < facetNum ; i++)
     {
         SE_Vector3i f = faceArray[facets[i]];
-        mVertex[k].d[0] = vertexArray[f.x].x;
-        mVertex[k].d[1] = vertexArray[f.x].y;
-        mVertex[k].d[2] = vertexArray[f.x].z;
-        k++;
-        mVertex[k].d[0] = vertexArray[f.y].x;
-        mVertex[k].d[1] = vertexArray[f.y].y;
-        mVertex[k].d[2] = vertexArray[f.y].z;
-        k++;
-        mVertex[k].d[0] = vertexArray[f.z].x;
-        mVertex[k].d[1] = vertexArray[f.z].y;
-        mVertex[k].d[2] = vertexArray[f.z].z;
-        k++;
+        vertexIndexSet.insert(f.x);
+        vertexIndexSet.insert(f.y);
+        vertexIndexSet.insert(f.z);
+    }
+    mVertexNum = vertexIndexSet.size();
+    mVertex = new _Vector3f[mVertexNum];
+    std::set<int>::iterator it;
+    int i = 0;
+    for(it = vertexIndexSet.begin() ; it != vertexIndexSet.end() ; it++)
+    {
+        mVertex[i].d[0] = vertexArray[*it].x;
+        mVertex[i].d[1] = vertexArray[*it].y;
+        mVertex[i].d[2] = vertexArray[*it].z;
+        i++;
     }
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
 void SE_Surface::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {
+    if(mFaceTexVertex)
+    {
+        delete[] mFaceTexVertex;
+        mFaceTexVertex = NULL;
+        mFaceTexVertexNum = 0;
+    }
     if(mTexVertex)
     {
         texVertex = mTexVertex;
@@ -154,25 +330,23 @@ void SE_Surface::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
     int texFaceNum = texCoordData->getTexFaceNum();
     int facetNum = getFacetNum();
     int* facets = getFacetArray();
-    mTexVertex = new _Vector2f[facetNum * 3];
-    mTexVertexNum = facetNum * 3;
-    int k = 0 ;
+    std::set<int> texVertexIndex;
     for(int i = 0 ; i < facetNum ; i++)
     {
-        SE_ASSERT(facets[i] < texFaceNum);
         SE_Vector3i f = texFaceArray[facets[i]];
-        mTexVertex[k].d[0] = texVertexArray[f.x].x;
-        mTexVertex[k].d[1] = texVertexArray[f.x].y;
-        k++;
-        mTexVertex[k].d[0] = texVertexArray[f.y].x;
-        mTexVertex[k].d[1] = texVertexArray[f.y].y;
-        k++;
-        mTexVertex[k].d[0] = texVertexArray[f.z].x;
-        mTexVertex[k].d[1] = texVertexArray[f.z].y;
-        k++;
+        texVertexIndex.insert(f.x);
+        texVertexIndex.insert(f.y);
     }
-    texVertex = mTexVertex;
-    texVertexNum = mTexVertexNum;
+    mTexVertexNum = texVertexIndex.size();
+    mTexVertex = new _Vector2f[mTexVertexNum];
+    std::set<int>::iterator it;
+    int i = 0;
+    for(it = texVertexIndex.begin() ; it != texVertexIndex.end() ; it++)
+    {
+        mTexVertex[i].d[0] = texVertexArray[*it].x;
+        mTexVertex[i].d[1] = texVertexArray[*it].y;
+        i++;
+    }
 }
 void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {
@@ -233,4 +407,12 @@ SE_Mesh::~SE_Mesh()
     }
     delete[] mSurfaceArray;
     delete[] mTextureArray;
+}
+void SE_Mesh::clearVertexInfo()
+{
+    for(int i = 0 ; i < mSurfaceNum ; i++)
+    {
+        SE_Surface* surface = mSurfaceArray[i];
+        surface->clearVertexInfo();
+    }
 }

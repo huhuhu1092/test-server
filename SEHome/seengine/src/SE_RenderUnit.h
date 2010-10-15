@@ -41,7 +41,14 @@ public:
     virtual SE_Vector3f getColor();
     virtual void draw();
 public:
-    SE_PRIMITIVE_TYPE getPrimitiveType();
+    SE_PRIMITIVE_TYPE getPrimitiveType()
+    {
+        return mPrimitiveType;
+    }
+    void setPrimitiveType(SE_PRIMITIVE_TYPE ptype)
+    {
+        mPrimitiveType = ptype;
+    }
     void setLayer(const SE_Layer& layer)
     {
         mLayer = layer;

@@ -120,8 +120,11 @@ public:
     int getFacetNum();
     int* getFacetArray();
     SE_Vector3f getColor();
+    void getVertexIndex(int*& index, int& indexNum);
 	void getVertex(_Vector3f*& vertex, int & vertexNum);
 	void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
+    void getFaceVertex(_Vector3f*& vertex, int& vertexNUm);
+    void getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertecNum);
     SE_ProgramDataID getProgramDataID();
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
@@ -162,6 +165,34 @@ public:
     {
         mWrapT = wrapt;
     }
+    void clearVertexInfo()
+    {
+        if(mVertex)
+        {
+            delete[] mVertex;
+            mVertex = NULL;
+        }
+        if(mTexVertex)
+        {
+            delete[] mTexVertex;
+            mTexVertex = NULL;
+        }
+        if(mFaceVertex)
+        {
+            delete[] mFaceVertex;
+            mFaceVertex = NULL;
+        }
+        if(mFaceTexVertex)
+        {
+            delete[] mFaceTexVertex;
+            mFaceTexVertex = NULL;
+        }
+        mVertexNum = 0;
+        mTexVertexNum = 0;
+        mFaceVertexNum = 0;
+        mFaceTexVertexNum = 0;
+    }
+    void getVertexIndexInGeometryData(int*& outArray , int& outNum);
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -178,6 +209,15 @@ private:
 	int mVertexNum;
 	_Vector2f* mTexVertex;
 	int mTexVertexNum;
+
+    _Vector3f* mFaceVertex;
+    int mFaceVertexNum;
+    _Vector2f* mFaceTexVertex;
+    int mFaceTexVertexNum;
+    int* mIndex;
+    int mIndexNum; 
+    int* mIndexInGeometryData;
+    int mIndexInGeometryDataNum;
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.
@@ -226,6 +266,7 @@ public:
     {
         mGeometryData = geomData;
     }
+    void clearVertexInfo();
 private:
     SE_GeometryData* mGeometryData;
     SE_Surface** mSurfaceArray;

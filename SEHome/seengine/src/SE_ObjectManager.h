@@ -1,6 +1,11 @@
 #ifndef SE_OBJECTMANAGER_H
 #define SE_OBJECTMANAGER_H
 #include <map>
+template <class T>
+struct SE_FindObjCondition
+{
+	virtual bool isSatisfy(T *) = 0;
+};
 template <class TID, class T>
 class SE_ObjectManager
 {
@@ -9,6 +14,7 @@ public:
     T* get(const TID& id);
     void set(const TID& id, T* data);
     void remove(const TID& id);
+	T* find(SE_FindObjCondition<T>& fc);
     ~SE_ObjectManager();
 private:
     RMap m;
@@ -59,5 +65,17 @@ SE_ObjectManager<TID, T>::~SE_ObjectManager()
         delete data;
     }
 }
-
+template <class TID, class T>
+T* SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc)
+{
+    typename RMap::iterator it;
+    for(it = m.begin() ; it != m.end() ; it++)
+    {
+		T* data = it->second;
+		if(fc.isSatisfy(data))
+		{
+			return data;
+		}
+	}
+}
 #endif

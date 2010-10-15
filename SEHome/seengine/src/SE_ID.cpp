@@ -227,6 +227,10 @@ SE_ElementID SE_ID::createElementID(const char* str)
 {
 	return SE_StringID(str);
 }
+SE_SkinJointControllerID SE_ID::createSkinJointControllerID(const char* str)
+{
+    return SE_StringID(str);
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

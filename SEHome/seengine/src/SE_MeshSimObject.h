@@ -9,9 +9,6 @@ class SE_BufferOutput;
 class SE_Mesh;
 class SE_GeometryData;
 class SE_Matrix4f;
-class SE_Quat;
-class SE_Vector3f;
-class SE_Vector3i;
 class SE_MeshSimObject : public SE_SimObject
 {
     DECLARE_OBJECT(SE_MeshSimObject)

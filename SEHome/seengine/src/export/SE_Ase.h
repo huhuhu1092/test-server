@@ -160,9 +160,38 @@ struct ASE_Material
 		submaterials = NULL;
 		numsubmaterials = 0;
 	}
+	ASE_Material(const ASE_Material& mat)
+	{
+		submaterials = NULL;
+		numsubmaterials = 0;
+		materialData = mat.materialData;
+		numsubmaterials = mat.numsubmaterials;
+		if(numsubmaterials > 0)
+		{
+		    submaterials = new ASE_MaterialData[numsubmaterials];
+			memcpy(submaterials, mat.submaterials, sizeof(ASE_MaterialData) * numsubmaterials);
+		}
+	}
+	ASE_Material& operator=(const ASE_Material& mat)
+	{
+		if(this == &mat)
+			return *this;
+		if(numsubmaterials > 0)
+			delete[] submaterials;
+		numsubmaterials = 0;
+		submaterials = NULL;
+		materialData = mat.materialData;
+		numsubmaterials = mat.numsubmaterials;
+		if(numsubmaterials > 0)
+		{
+		    submaterials = new ASE_MaterialData[numsubmaterials];
+			memcpy(submaterials, mat.submaterials, sizeof(ASE_MaterialData) * numsubmaterials);
+		}
+		return *this;
+	}
     ~ASE_Material()
     {
-        if(submaterials)
+        if(numsubmaterials > 0)
             delete[] submaterials;
     }
 };
@@ -198,6 +227,7 @@ public:
     }
     void Write(const char* outPath, const char* filename);
 	void Write(SE_BufferOutput& output, SE_BufferOutput& outputScene, const char* shaderPath);
+	void LoadEnd();
 	typedef void (ASE_Loader::*ParserFun)( const char * );
 private:
 	int CharIsTokenDelimiter( int ch );
@@ -235,6 +265,7 @@ private:
     ASE_SkinJointController* mCurrSkinJointController;
     ASE_Bone* mCurrBone;
 	bool mInSubDiffuse;
+	int mMatStartPos;
 };
 #endif
 

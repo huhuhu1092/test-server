@@ -174,6 +174,15 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
         SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
         tsru->setLayer(getSpatial()->getWorldLayer());
+		tsru->setPrimitiveType(getPrimitiveType());
+        if(!isUseWorldMatrix())
+        {
+            tsru->setWorldTransform(getSpatial()->getWorldTransform().mul(getLocalMatrix()));
+        }
+        else
+        {
+            tsru->setWorldTransform(getWorldMatrix());
+        }
 		SE_RenderState** rs = getRenderState();
 		for(int j = 0 ; j < SE_Spatial::RENDERSTATE_NUM ; j++)
 		{

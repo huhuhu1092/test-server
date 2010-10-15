@@ -9,6 +9,7 @@ public:
     void set(const SE_SimObjectID& simObjectID, SE_SimObject* simObject);
     SE_SimObject* get(const SE_SimObjectID& simObjectID);
     void remove(const SE_SimObjectID& simObjectiD);
+	SE_SimObject* findByName(const char* name);
 private:
     SE_ObjectManager<SE_SimObjectID, SE_SimObject> mSimObjectManager;
 };

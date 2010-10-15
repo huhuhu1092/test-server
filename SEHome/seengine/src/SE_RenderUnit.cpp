@@ -427,6 +427,13 @@ void SE_TriSurfaceRenderUnit::setColorAndMaterial(SE_ShaderProgram* shaderProgra
 }
 void SE_TriSurfaceRenderUnit::draw()
 {
+    if(mPrimitiveType != TRIANGLES &&
+	   mPrimitiveType != TRIANGLE_STRIP && 
+	   mPrimitiveType != TRIANGLE_FAN &&
+	   mPrimitiveType != TRIANGLES_INDEX)
+    {
+        return;
+    }
     SE_Matrix4f m = mViewToPerspective.mul(mWorldTransform);
 	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
@@ -482,8 +489,19 @@ void SE_TriSurfaceRenderUnit::draw()
     int vertexNum = 0;
     _Vector2f* texVertex = NULL;
     int texVertexNum = 0;
-    mSurface->getVertex(vertex, vertexNum);
-    mSurface->getBaseColorTexVertex(texVertex, texVertexNum);
+    int* indexArray = NULL;
+    int indexNum = 0;
+    if(mPrimitiveType == TRIANGLES)
+    {
+        mSurface->getFaceVertex(vertex, vertexNum);
+        mSurface->getBaseColorFaceTexVertex(texVertex, texVertexNum);
+    }
+    else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
+    {
+        mSurface->getVertex(vertex, vertexNum);
+        mSurface->getVertexIndex(indexArray, indexNum);
+        mSurface->getBaseColorTexVertex(texVertex, texVertexNum);
+    }
 	if(texVertexNum > 0)
         SE_ASSERT(vertexNum == texVertexNum);
     glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, vertex);
@@ -508,7 +526,22 @@ void SE_TriSurfaceRenderUnit::draw()
 #ifdef DEBUG0
 	LOGI("### vertexNum = %d #####\n", vertexNum);
 #endif
-    glDrawArrays(GL_TRIANGLES, 0, vertexNum);
+    if(mPrimitiveType == TRIANGLES)
+    {
+        glDrawArrays(GL_TRIANGLES, 0, vertexNum);
+    }
+    else if(mPrimitiveType == TRIANGLE_STRIP)
+    {
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexNum);
+    }
+    else if(mPrimitiveType == TRIANGLE_FAN)
+    {
+        glDrawArrays(GL_TRIANGLE_FAN, 0, vertexNum);
+    }
+    else if(mPrimitiveType == TRIANGLES_INDEX)
+    {
+        glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, indexArray);
+    }
     //checkGLError();
 
 }

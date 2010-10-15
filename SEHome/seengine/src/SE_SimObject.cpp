@@ -8,6 +8,10 @@ SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 	mSpatial = spatial;
     mPropertySet = NULL;
 	memset(mRenderState , 0, sizeof(SE_RenderState*) * SE_Spatial::RENDERSTATE_NUM);
+    mLocalMatrix.identity();
+    mWorldMatrix.identity();
+    mUseWorldMatrix = false;
+    mPrimitiveType = TRIANGLES;
 }
 SE_SimObject::~SE_SimObject()
 {
@@ -26,6 +30,14 @@ SE_RenderUnit* SE_SimObject::createWireRenderUnit()
 SE_Mesh* SE_SimObject::getMesh()
 {
 	return NULL;
+}
+SE_Vector3f SE_SimObject::localToWorld(const SE_Vector3f& v)
+{
+    SE_Spatial* spatial = getSpatial();
+    SE_Matrix4f worldTransform = spatial->getWorldTransform();
+    SE_Vector4f v4(v, 1);
+    v4 = worldTransform.mul(getLocalMatrix()).map(v4);
+    return v4.xyz();
 }
 void SE_SimObject::setMesh(SE_Mesh* m, SE_OWN_TYPE own)
 {}

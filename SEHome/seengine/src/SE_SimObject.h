@@ -4,11 +4,11 @@
 #include "SE_PropertySet.h"
 #include "SE_Matrix.h"
 #include "SE_Spatial.h"
+#include "SE_Vector.h"
+#include "SE_Quat.h"
 #include <vector>
 #include <string>
 class SE_RenderUnit;
-class SE_Quat;
-class SE_Vector3f;
 class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Vector3i;
@@ -81,11 +81,41 @@ public:
 	{
 		return mRenderState;
 	}
+    //if world matrix is set , we will use this matrix be world transform
+    //and will not use spatial's world transform . 
+    void setWorldMatrix(const SE_Matrix4f& m)
+    {
+        mWorldMatrix = m;
+    }
+    SE_Matrix4f getWorldMatrix()
+    {
+        return mWorldMatrix;
+    }
+    void setUseWorldMatrix(bool v)
+    {
+        mUseWorldMatrix = v;
+    }
+    bool isUseWorldMatrix()
+    {
+        return mUseWorldMatrix;
+    }
+    SE_Vector3f localToWorld(const SE_Vector3f& v);
+    void setPrimitiveType(SE_PRIMITIVE_TYPE ptype)
+    {
+        mPrimitiveType = ptype;
+    }
+    SE_PRIMITIVE_TYPE getPrimitiveType()
+    {
+        return mPrimitiveType;
+    }
 private:
 	std::string mName;
 	SE_Spatial* mSpatial;
     SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;
 	SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];
+    SE_Matrix4f mWorldMatrix;
+    bool mUseWorldMatrix;
+    SE_PRIMITIVE_TYPE mPrimitiveType;
 };
 #endif

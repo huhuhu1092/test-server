@@ -61,6 +61,7 @@ static const short MESH_ID = 0x0006;
 ASE_Loader::ASE_Loader() : mCurrGeomObject(NULL), mCurrMtl(NULL),mCurrSubMtl(NULL),mCurrMesh(NULL), mInSubDiffuse(false)
 {
     mSceneObject = new ASE_SceneObject;
+	mMatStartPos = 0;
 }
 ASE_Loader::~ASE_Loader()
 {
@@ -486,7 +487,66 @@ WRIET_SURFACE:
         }
     }
     // write bone animation data //
-    
+    if(mSceneObject->mSkinJointController.size() > 0)
+    {
+        output.writeShort(SE_SKINJOINTCONTROLLER_ID);
+        output.writeInt(mSceneObject->mSkinJointController.size());
+		std::list<ASE_SkinJointController*>::iterator itSkinJointController;
+		for(itSkinJointController = mSceneObject->mSkinJointController.begin() ; 
+			itSkinJointController != mSceneObject->mSkinJointController.end() ; 
+			itSkinJointController++)
+        {
+            ASE_SkinJointController* skinJointController = *itSkinJointController;
+            output.writeInt(skinJointController->jointVector.size());
+            for(int j = 0 ; j < skinJointController->jointVector.size() ; j++)
+            {
+                ASE_Bone* bone = skinJointController->jointVector[j];
+                output.writeString(bone->name.c_str());
+                output.writeInt(bone->matrixseqnum);
+                for(int n = 0 ; n < bone->matrixseqnum ; n++)
+                {
+                    output.writeFloatArray(bone->matrixseq[n].m, 16);     
+                }
+                output.writeFloatArray(bone->matrixbase.m, 16);
+            }
+            for(int j = 0 ; j < skinJointController->jointVector.size() ; j++)
+            {
+                ASE_Bone* bone = skinJointController->jointVector[j];
+                output.writeInt(bone->children.size());
+                std::list<ASE_Bone*>::iterator it ;
+                for(it = bone->children.begin() ; it != bone->children.end() ; it++)
+                {
+                    ASE_Bone* childBone = *it;
+                    output.writeString(childBone->name.c_str());
+                }
+                /*
+                if(bone->parent)
+                {
+                    output.writeString(bone->parent->name.c_str());
+                }
+                else
+                {
+                    output.writeString("####");
+                }
+                */
+            }
+            output.writeString(skinJointController->objName.c_str());
+            output.writeInt(skinJointController->vertexJointVector.size());
+            if(skinJointController->vertexJointVector.size() > 0)
+            {
+                for(int i = 0 ; i < skinJointController->vertexJointVector.size() ; i++)
+                {
+                    output.writeInt(skinJointController->vertexJointVector[i].size());
+                    for(int j = 0 ; j < skinJointController->vertexJointVector[i].size(); j++)
+                    {
+                        output.writeInt(skinJointController->vertexJointVector[i][j].boneIndex);
+                        output.writeFloat(skinJointController->vertexJointVector[i][j].weight);
+
+                    }
+                }
+            }
+        }
+    }
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     //SE_Util::sleep(SLEEP_COUNT);
@@ -503,6 +563,12 @@ WRIET_SURFACE:
         SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
         //SE_Util::sleep(SLEEP_COUNT);
         SE_Geometry* child = new SE_Geometry(childID, rootNode);
+		std::string mname = go->name;
+		if(mname == "Bone01" || mname == "Bone02" || mname == "Bone03" || 
+		   mname == "Bone04")
+		{
+			child->setVisible(false);
+		}
         rootNode->addChild(child);
         SE_Vector3f translate, scale, rotateAxis;
         translate.x = go->translate[0];
@@ -995,13 +1061,21 @@ void ASE_Loader::ASE_KeyMATERIAL_LIST( const char *token )
 	{
 		ASE_GetToken( false );
 		LOGI( "..num materials: %s\n", s_token  );
-		mSceneObject->mMats.resize(atoi(s_token));
+		int count = atoi(s_token);
+		int precount = mSceneObject->mMats.size();
+		std::vector<ASE_Material> copyMat = mSceneObject->mMats;
+		mSceneObject->mMats.resize(precount + count);
+		for(int i = 0 ; i < precount ; i++)
+		{
+			mSceneObject->mMats[i] = copyMat[i];
+		}
+		mMatStartPos += precount;
 	}
 	else if ( !strcmp( token, "*MATERIAL" ) )
 	{
 		ASE_GetToken(false);
         LOGI(  "..material %s \n",  s_token  );
-        int nCurrMtl = atoi(s_token);
+        int nCurrMtl = atoi(s_token) + mMatStartPos;
 		mCurrMtl = &mSceneObject->mMats[nCurrMtl];
 		ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyMATERIAL );
 	}
@@ -1293,8 +1367,8 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 	else if ( !strcmp( token, "*MATERIAL_REF" ) )
 	{
 		ASE_GetToken( false );
-
-		mCurrGeomObject->materialref = atoi( s_token );
+        int index = atoi( s_token );
+		mCurrGeomObject->materialref = mMatStartPos + index;
 	}
 	// loads a sequence of animation frames
 	else if ( !strcmp( token, "*NODE_TM" ) )
@@ -1373,6 +1447,10 @@ void ASE_Loader::ASE_Process(  )
 #ifdef DEBUG
 	LOGI(".. geomCount = %d \n", geomCount);
 #endif
+
+}
+void ASE_Loader::LoadEnd()
+{
     ASE_AdjustSubMtl();
 }
 void ASE_Loader::ASE_AdjustSubMtl()
@@ -1396,12 +1474,14 @@ void ASE_Loader::ASE_AdjustSubMtl()
             {
                 faceGroupSet[obj->mesh->faces[i].materialID]++;
             }
+			obj->mesh->faceGroup.clear();
             obj->mesh->faceGroup.resize(subMatlNum);
             for(int i = 0 ; i < obj->mesh->numFaces; i++)
             {
                 std::list<int>* l = &(obj->mesh->faceGroup[obj->mesh->faces[i].materialID]);
                 l->push_back(i);
             } 
+			obj->mesh->numFaceGroup = 0;
             for(int i = 0 ; i < subMatlNum ; i++)
             {
                 if(faceGroupSet[i] > 0)

@@ -94,6 +94,8 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 }
 void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
+	if(!isVisible())
+		return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
     if(bv)
     {

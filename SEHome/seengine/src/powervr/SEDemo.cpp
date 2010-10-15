@@ -19,6 +19,11 @@
 #include "SE_CommonNode.h"
 #include "SE_Physics.h"
 #include "SE_2DCommand.h"
+#include "SE_Bone.h"
+#include "SE_BoneAnimation.h"
+#include "SE_SkinJointController.h"
+#include "SE_SimObjectManager.h"
+#include "SE_AnimationManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -214,8 +219,26 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+		/*
 		if(mPhysics)
 		    mPhysics->exitPhysics();
+			*/
+		SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+		SE_SkinJointController* skinJointController = resourceManager->getSkinJointController("objLoft07");
+		SE_BoneAnimation* anim = new SE_BoneAnimation();
+		SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+		SE_SimObject* simobj = simObjectManager->findByName("objLoft07");
+		SE_Spatial* spatial = simobj->getSpatial();
+		anim->setRunMode(SE_Animation::NOT_REPEAT);
+		anim->setTimeMode(SE_Animation::SIMULATE);
+		anim->setDuration(1000);
+		anim->setSimObject(simobj);
+		anim->setSkinJointController(skinJointController);
+		SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+		animManager->removeAnimation(spatial->getAnimationID());
+		SE_AnimationID animID = animManager->addAnimation(anim);
+		spatial->setAnimationID(animID);
+		anim->run();
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))

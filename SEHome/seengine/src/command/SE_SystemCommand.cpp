@@ -26,9 +26,13 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 #ifndef ANDROID
     ASE_Loader loader;
 	loader.Load(inPath.c_str(), 0);
-	loader.Write(dataPath.c_str(), outPath.c_str());
 	inPath = dataPath + SE_SEP + "bone.txt";
 	loader.Load(inPath.c_str(), 0);
+	inPath = dataPath + SE_SEP + "ttt.ASE";
+	loader.Load(inPath.c_str(), 0);
+	loader.LoadEnd();
+	loader.Write(dataPath.c_str(), outPath.c_str());
+
 #endif
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());

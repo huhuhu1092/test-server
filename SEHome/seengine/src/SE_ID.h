@@ -60,6 +60,7 @@ typedef SE_CommonID SE_PrimitiveID;
 typedef SE_CommonID SE_AnimationID;
 typedef SE_CommonID SE_SimObjectID;
 typedef SE_StringID SE_ElementID;
+typedef SE_StringID SE_SkinJointControllerID;
 class SE_ID
 {
 public:
@@ -77,6 +78,7 @@ public:
     static SE_AnimationID createAnimationID();
     static SE_SimObjectID createSimObjectID();
 	static SE_ElementID createElementID(const char* str);
+    static SE_SkinJointControllerID createSkinJointControllerID(const char* str);
 };
 ///////////////////////////
 /*

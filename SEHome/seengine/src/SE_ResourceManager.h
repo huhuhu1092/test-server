@@ -10,6 +10,7 @@ class SE_MeshTransfer;
 class SE_ShaderProgram;
 class SE_Spatial;
 class SE_Primitive;
+class SE_SkinJointController;
 class SE_ResourceManager
 {
 public:
@@ -43,6 +44,10 @@ public:
 	SE_Primitive* getPrimitive(const SE_PrimitiveID& primitveID);
 	void setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive);
 	void removePrimitive(const SE_PrimitiveID& primitiveID);
+
+    SE_SkinJointController* getSkinJointController(const SE_SkinJointControllerID& id);
+    void setSkinJointController(const SE_SkinJointControllerID& id, SE_SkinJointController* c);
+    void removeSkinJointController(const SE_SkinJointControllerID& id);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */

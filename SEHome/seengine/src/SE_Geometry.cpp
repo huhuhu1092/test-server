@@ -6,6 +6,8 @@
 #include "SE_RenderUnit.h"
 #include "SE_RenderManager.h"
 #include "SE_BoundingVolume.h"
+#include "SE_SimObjectManager.h"
+#include "SE_Application.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_Geometry)
 struct SE_Geometry::_Impl
@@ -54,12 +56,15 @@ void SE_Geometry::write(SE_BufferOutput& output)
 void SE_Geometry::read(SE_BufferInput& input)
 {
     int attachObjNum = input.readInt();
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     for(int i = 0 ; i < attachObjNum ; i++)
     {
         std::string str = input.readString();
         SE_SimObject* obj = (SE_SimObject*)SE_Object::create(str.c_str());
         obj->read(input);
         attachSimObject(obj);
+        SE_SimObjectID id = SE_ID::createSimObjectID();
+        simObjectManager->set(id, obj);
     }
     SE_Spatial::read(input);
 }
@@ -177,6 +182,8 @@ static SE_RenderUnit* createSelectedFrame(SE_Geometry* spatial)
 }
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {
+	if(!isVisible())
+		return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
     if(bv)
     {
@@ -194,7 +201,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         {
 			if(*itRU)
 			{
-				(*itRU)->setWorldTransform(getWorldTransform().mul(so->getLocalMatrix()));
+				//(*itRU)->setWorldTransform(getWorldTransform().mul(so->getLocalMatrix()));
                 renderManager->addRenderUnit(*itRU);
 			}
         }

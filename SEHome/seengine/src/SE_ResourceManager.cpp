@@ -13,6 +13,8 @@
 #include "SE_Primitive.h"
 #include "SE_Log.h"
 #include "SE_ImageCodec.h"
+#include "SE_SkinJointController.h"
+#include "SE_Bone.h"
 #include <map>
 #include <vector>
 struct _MeshData
@@ -200,6 +202,90 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
     }
 
 }
+static SE_Bone* findBone(const std::string& boneName, std::vector<SE_Bone*>& boneVector)
+{
+    std::vector<SE_Bone*>::iterator it;
+    for(it = boneVector.begin(); it != boneVector.end() ; it++)
+    {
+        if((*it)->getName() == boneName)
+            return *it;
+    }
+    return NULL;
+}
+static void processSkinJointController(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+    int skinControllerNum = inputBuffer.readInt();
+    for(int i = 0 ; i < skinControllerNum ; i++)
+    {
+        SE_SkinJointController* skinJointController = new SE_SkinJointController;
+        int boneNum = inputBuffer.readInt();
+        skinJointController->mBoneVector.resize(boneNum);
+        for(int j = 0 ; j < boneNum ; j++)
+        {
+            SE_Bone* bone = new SE_Bone;
+            skinJointController->mBoneVector[j] = bone;
+            std::string boneName = inputBuffer.readString();
+			bone->setName(boneName.c_str());
+            int matrixnum = inputBuffer.readInt();
+            float* mdata = NULL;
+            if(matrixnum > 0)
+            {
+                mdata = new float[matrixnum * 16];
+            }
+            float* dst = mdata;
+            for(int n = 0 ; n < matrixnum ; n++)
+            {
+                for(int k = 0 ; k < 16 ; k++)
+                {
+                    dst[k] = inputBuffer.readFloat();
+                } 
+                dst += 16;
+            }
+            if(matrixnum > 0)
+            {
+                bone->setMatrixArray(mdata, matrixnum);
+            }
+            float basedata[16];
+            for(int n = 0 ; n < 16 ; n++)
+            {
+                basedata[n] = inputBuffer.readFloat();
+            }
+            SE_Matrix4f m(basedata);
+            bone->setBaseMatrix(m);
+        }
+        for(int j = 0 ; j < boneNum ; j++)
+        {
+            SE_Bone* bone = skinJointController->mBoneVector[j];
+            int childsize = inputBuffer.readInt();
+            for(int n = 0 ; n < childsize ; n++)
+            {
+                std::string childname = inputBuffer.readString();
+                SE_Bone* boneHasName = findBone(childname, skinJointController->mBoneVector);
+                SE_ASSERT(boneHasName != NULL);
+                bone->addChild(boneHasName);
+                boneHasName->setParent(bone);
+            }
+        }
+        std::string meshName = inputBuffer.readString();
+        skinJointController->mMeshName = meshName;
+        int vertexNum = inputBuffer.readInt();
+        skinJointController->mVertexBoneWeightInfo.resize(vertexNum);
+        for(int n = 0 ; n < vertexNum ; n++)
+        {
+            int boneWeightNum = inputBuffer.readInt();
+            skinJointController->mVertexBoneWeightInfo[n].resize(boneWeightNum);
+            for(int k = 0 ; k < boneWeightNum ; k++)
+            {
+                int boneIndex = inputBuffer.readInt();
+                float weight = inputBuffer.readFloat();
+                SE_BoneWeight bw(boneIndex, weight);
+                skinJointController->mVertexBoneWeightInfo[n][k] = bw;
+            }
+        }
+        SE_SkinJointControllerID skinJointControllerID = SE_ID::createSkinJointControllerID(meshName.c_str());
+        resourceManager->setSkinJointController(skinJointControllerID, skinJointController);
+    }
+}
 static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     int spNum = inputBuffer.readInt();
@@ -261,6 +347,8 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 break;
 			case SE_PRIMITIVEDATA_ID:
 				processPrimitive(inputBuffer, resourceManager);
+			case SE_SKINJOINTCONTROLLER_ID:
+				processSkinJointController(inputBuffer, resourceManager);
         }
     }
 }
@@ -339,6 +427,7 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_MeshID, SE_MeshTransfer> meshMap;
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram> shaderMap;
 	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
+    ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 //////////////////////////////////
@@ -542,6 +631,18 @@ void SE_ResourceManager::setMeshTransfer(const SE_MeshID& meshID, SE_MeshTransfe
 {
     mImpl->meshMap.set(meshID, meshTransfer);
 
+}
+SE_SkinJointController* SE_ResourceManager::getSkinJointController(const SE_SkinJointControllerID& id)
+{
+    return mImpl->skinJointControllerMap.get(id);
+}
+void SE_ResourceManager::setSkinJointController(const SE_SkinJointControllerID& id, SE_SkinJointController* c)
+{
+    mImpl->skinJointControllerMap.set(id, c);
+}
+void SE_ResourceManager::removeSkinJointController(const SE_SkinJointControllerID& id)
+{
+    mImpl->skinJointControllerMap.remove(id);
 }
 void SE_ResourceManager::releaseHardwareResource()
 {
