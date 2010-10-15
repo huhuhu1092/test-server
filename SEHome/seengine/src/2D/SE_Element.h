@@ -11,7 +11,7 @@ class SE_Element;
 class SE_ElementTravel
 {
 public:
-    ~SE_ElementTravel()
+    virtual ~SE_ElementTravel()
     {}
     virtual void visit(SE_Element* e) = 0;
 };

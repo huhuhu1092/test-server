@@ -1,4 +1,5 @@
 #include "SE_Utils.h"
+#include <string.h>
 #if defined(WIN32)
     #include <winsock2.h>
 #else
@@ -94,7 +95,6 @@ static inline unsigned int utf8_to_utf32(const unsigned char *src, size_t length
         default:
             return 0xffff;
     }
-    
     //printf("Char at %p: len=%d, utf-16=%p\n", src, length, (void*)result);
 }
 void utf8_to_utf16(const unsigned char *src, size_t srcLen,

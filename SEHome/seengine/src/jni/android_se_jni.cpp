@@ -12,11 +12,12 @@
 #include "SE_SystemCommandFactory.h"
 #include "SE_SystemCommand.h"
 #include "SE_InputEvent.h"
+#include "SE_Struct.h"
 #define LOG_TAG "SEJNI"
 //namespace android {
 
 static SE_Application* gApp = NULL;
-static void se_init(JNIEnv* env, jobject clazz, jint userid, jstring datapath, jstring scenename)
+static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstring datapath, jstring scenename)
 {
     LOGI("## init command ###");
     if(gApp != NULL)
@@ -25,7 +26,10 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid, jstring datapath, j
         return;
     }
     gApp = SE_Application::getInstance();
-    gApp->setAppID(userid);
+    SE_Application::SE_APPID appid;
+    appid.first = userid0;
+    appid.second = userid1;
+    gApp->setAppID(appid);
     gApp->start();
     SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
     gApp->registerCommandFactory("SystemCommand", sf);
@@ -76,6 +80,7 @@ static void se_sendLoadSceneCommand(JNIEnv* env, jobject clazz, jstring name)
         gApp->postCommand(c);
     }
 }
+/*
 static jstring se_getResponseName(JNIEnv* env, jobject clazz)
 {
     android::String16 str;
@@ -96,6 +101,7 @@ static jstring se_getResponseStringValue(JNIEnv* env, jobject clazz)
     return env->NewString((const jchar*)s16.string(), s16.size());
 
 }
+*/
 static void se_sendUpdateCameraCommand(JNIEnv* env, jobject clazz, jint width, jint height)
 {
     LOGI("## update camera command ###");
@@ -109,19 +115,110 @@ static void se_runOneFrame(JNIEnv* env, jobject clazz)
 {
     gApp->run();
 }
+jint se_getMessageNum(JNIEnv* env, jobject clazz)
+{
+    return gApp->getMessageCount();
+}
+jint se_getMessageType(JNIEnv* env, jobject clazz, jint messageIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    return msg->type;
+}
+jint se_getMessageItemNum(JNIEnv* env, jobject clazz, jint messageIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    return structData->getCount();
+}
+jint se_getMessageItemType(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    return di.type;
+}
+jint se_getByteMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    jint ret = di.data.c;
+    return ret;
+}
+jint se_getShortMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    jint ret = di.data.s;
+    return ret;
+
+}
+jint se_getIntMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    jint ret = di.data.i;
+    return ret;
+
+}
+jfloat se_getFloatMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    jfloat ret = di.data.f;
+    return ret;
+
+}
+jstring se_getStringMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
+{
+    SE_Application::_MessageVector messageVector = gApp->getMessage();
+    SE_Message* msg = messageVector[messageIndex];
+    SE_Struct* structData = msg->data;
+    SE_StructItem* item = structData->getStructItem(itemIndex);
+    SE_DataItem di = item->getDataItem(0);
+    SE_StdString* strData = (SE_StdString*)di.data.virtualData;
+    const char* str = strData->data.c_str();
+    android::String16 s16(str);
+    return env->NewString((const jchar*)s16.string(), s16.size());
+}
+void se_releaseMessage(JNIEnv* env, jobject clazz)
+{
+    gApp->releaseMessage();
+}
 static const char *classPathName = "com/android/se/SEApplication";
 
 static JNINativeMethod methods[] = {
-  {"init", "(ILjava/lang/String;Ljava/lang/String;)V", (void*)se_init },
+  {"init", "(IILjava/lang/String;Ljava/lang/String;)V", (void*)se_init },
   {"destroy", "()V", (void*)se_destroy},
   {"resize", "(II)V", (void*)se_resize},
   {"sendKeyCommand", "(II)V", (void*)se_sendKeyCommand},
   {"sendMotionCommand", "(III)V", (void*)se_sendMotionCommand},
   {"sendLoadSceneCommand", "(Ljava/lang/String;)V", (void*)se_sendLoadSceneCommand},
   {"sendUpdateCameraCommand", "(II)V", (void*)se_sendUpdateCameraCommand},
-  {"getResponseName", "()Ljava/lang/String;", (void*)se_getResponseName},
-  {"getResponseContentSize", "()I", (void*)se_getResponseContentSize},
-  {"getResponseStringValue", "()Ljava/lang/String;", (void*)se_getResponseStringValue},
+  {"getMessageNum", "()I", (void*)se_getMessageNum},
+  {"getMessageType", "(I)I", (void*)se_getMessageType},
+  {"getMessageItemNum", "(I)I", (void*)se_getMessageItemNum},
+  {"getByteMessageItem", "(II)I", (void*)se_getByteMessageItem},
+  {"getShortMessageItem", "(II)I", (void*)se_getShortMessageItem}, 
+  {"getIntMessageItem", "(II)I", (void*)se_getIntMessageItem},
+  {"getFloatMessageItem", "(II)F", (void*)se_getFloatMessageItem},
+  {"getStringMessageItem", "(II)Ljava/lang/String;", (void*)se_getStringMessageItem},
+  {"releaseMessage", "()V", (void*)se_releaseMessage},
   {"runOneFrame", "()V", (void*)se_runOneFrame},
 };
 

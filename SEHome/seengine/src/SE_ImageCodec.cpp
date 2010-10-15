@@ -2,10 +2,14 @@
 #include "SE_Utils.h"
 #include "SE_ImageData.h"
 #include "SE_Log.h"
-#include "utf/ConvertUTF.h"
 #include <string.h>
 #ifdef ANDROID
 #include "SkImageDecoder.h"
+#include "SkBitmap.h"
+#include "SkCanvas.h"
+#include "SkString.h"
+#include "SkStream.h"
+
 #else
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -14,6 +18,7 @@
 
 SE_ImageData* SE_ImageCodec::load(const char* filePath)
 {
+#if defined(WIN32)
     ILuint	imgId;
 	ILenum	error;
     ilInit();
@@ -70,9 +75,59 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
     imageData->setData((char*)dst);
     imageData->setCompressType(SE_ImageData::RAW);
     return imageData;
+#else
+    SkFILEStream fileStream(filePath);
+    SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
+    SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
+    SkImageDecoder* decoder = SkImageDecoder::Factory(&fileStream);
+    SkBitmap* bitmap = new SkBitmap();
+    if(!decoder->decode(&fileStream, bitmap, prefConfig, mode))
+    {
+        printf("decode error \n");
+    }
+    LOGI("... image width X height = %d X %d\n", bitmap->width(), bitmap->height());
+    LOGI("... image config = %d \n", bitmap->config());
+    LOGI("... image rowbytes = %d\n", bitmap->rowBytes());
+    int width = bitmap->width();
+    int height = bitmap->height();
+    int rowBytes = bitmap->rowBytes();
+    int pixelFormat;
+    if(bitmap->getConfig() == SkBitmap::kARGB_8888_Config)
+    {
+        pixelFormat = SE_ImageData::RGBA;
+    }
+    else if(bitmap->getConfig() == SkBitmap::kRGB_565_Config)
+    {
+        pixelFormat = SE_ImageData::RGB_565;
+    }
+    else
+    {
+        pixelFormat = SE_ImageData::RGBA;
+    }
+    char* data = (char*)bitmap->getPixels();
+    char* newData = (char*)malloc(height * rowBytes);
+    if(newData)
+    {
+        int i,j;
+        int rowbytes = rowBytes;
+        for(i = 0 ; i < height ; i++)
+        {
+            memcpy(newData + i * rowbytes, data + (height - 1 - i) * rowbytes, rowbytes);
+        }
+    }
+    SE_ImageData* imageData = new SE_ImageData;
+    imageData->setWidth(width);
+    imageData->setHeight(height);
+    imageData->setBytesPerRow(rowBytes);
+    imageData->setPixelFormat(pixelFormat);
+    imageData->setData(newData);
+    imageData->setCompressType(SE_ImageData::RAW);
+    return imageData;
+#endif
 }
 SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath)
 {
+#if defined(WIN32)
     ILuint	imgId;
 	ILenum	error;
     ilInit();
@@ -117,4 +172,7 @@ SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath)
     imageData->setData(dst);
     imageData->setCompressType(SE_ImageData::RAW);
     return imageData;
+#else 
+    return NULL;
+#endif
 }

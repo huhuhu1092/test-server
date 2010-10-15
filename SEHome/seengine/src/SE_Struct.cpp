@@ -292,6 +292,7 @@ SE_DataItem& SE_DataItem::operator=(const SE_DataItem& right)
         data.virtualData = right.data.virtualData->clone();
         break;
     }
+    return *this;
 }
 //////////////
 SE_DataItemGroup::SE_DataItemGroup(int size)
