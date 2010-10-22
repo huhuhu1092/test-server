@@ -24,6 +24,7 @@
 #include "SE_SkinJointController.h"
 #include "SE_SimObjectManager.h"
 #include "SE_AnimationManager.h"
+#include "SE_TableManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -63,6 +64,14 @@ bool SEDemo::InitApplication()
 {
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+	SE_ImageTableManager tableManager;
+    SE_ImageTableSet* imageSet = new SE_ImageTableSet;
+	tableManager.setTableSet(SE_StringID("test1"), imageSet);
+	SE_ImageTable* imageTable = new SE_ImageTable;
+	imageSet->setTable(SE_StringID("test2"), imageTable);
+	imageTable->setItem(SE_StringID("test3"), SE_StringID("testid.png"));
+	SE_StringID value;
+	bool ret = tableManager.getValue("test1/test2/test3", value);
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;

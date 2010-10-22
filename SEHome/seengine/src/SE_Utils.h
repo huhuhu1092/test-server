@@ -1,6 +1,8 @@
 #ifndef SE_UTILS_H
 #define SE_UTILS_H
 #include <wchar.h>
+#include <string>
+#include <vector>
 class SE_Util
 {
 public:
@@ -14,18 +16,8 @@ public:
 	static int lowerPower2(int v);
 	static bool isPower2(int v);
     static wchar_t* utf8ToUnicode(const char* utf8str);
-	/*
-	template <class T>
-	static T min(T a, T b)
-	{
-		return a > b ? b : a;
-	}
-	template <class T>
-	static T max(T a, T b)
-	{
-		return a > b ? a : b;
-	}
-	*/
+	typedef std::vector<std::string> SplitStringList;
+    static SplitStringList splitString(const char* path, const char* split);
 };
 
 #endif /** end SE_UTILS_H*/

@@ -15,6 +15,7 @@ public:
     void set(const TID& id, T* data);
     void remove(const TID& id);
 	T* find(SE_FindObjCondition<T>& fc);
+    bool isContain(const TID& id);
     ~SE_ObjectManager();
 private:
     RMap m;
@@ -77,5 +78,14 @@ T* SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc)
 			return data;
 		}
 	}
+}
+template <class TID, class T>
+bool SE_ObjectManager<TID, T>::isContain(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+        return false;
+    else
+        return true;
 }
 #endif

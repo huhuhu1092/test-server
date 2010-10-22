@@ -299,6 +299,8 @@ void SE_Spatial::read(SE_BufferInput& input)
     mLocalTranslate = input.readVector3f();
     mLocalScale = input.readVector3f();
     mLocalRotate = input.readQuat();
+	mPrevMatrix = input.readMatrix4f();
+	mPostMatrix = input.readMatrix4f();
 }
 void SE_Spatial::write(SE_BufferOutput& output)
 {
@@ -308,6 +310,11 @@ void SE_Spatial::write(SE_BufferOutput& output)
     output.writeVector3f(mLocalTranslate);
     output.writeVector3f(mLocalScale);
     output.writeQuat(mLocalRotate);
+	float m[16];
+	mPrevMatrix.getSequence(m, 16);
+	output.writeFloatArray(m, 16);
+	mPostMatrix.getSequence(m, 16);
+	output.writeFloatArray(m, 16);
 }
 void SE_Spatial::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
 {}

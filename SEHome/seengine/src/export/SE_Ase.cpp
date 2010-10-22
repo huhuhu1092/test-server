@@ -16,6 +16,7 @@
 #include "SE_MeshSimObject.h"
 #include "SE_ImageData.h"
 #include "SE_IO.h"
+#include "SE_KeyFrame.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -62,6 +63,7 @@ ASE_Loader::ASE_Loader() : mCurrGeomObject(NULL), mCurrMtl(NULL),mCurrSubMtl(NUL
 {
     mSceneObject = new ASE_SceneObject;
 	mMatStartPos = 0;
+    mCurrGeometryObjectGroup = NULL;
 }
 ASE_Loader::~ASE_Loader()
 {
@@ -549,7 +551,6 @@ WRIET_SURFACE:
     }
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
-    //SE_Util::sleep(SLEEP_COUNT);
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
     rootNode->setBVType(SE_BoundingVolume::AABB);
     n = 0;
@@ -560,16 +561,9 @@ WRIET_SURFACE:
         ASE_GeometryObject* go = *itGeomObj;
         ASE_Mesh* mesh = go->mesh;
         SE_MeshID meshID = meshIDVector[n++];
-        SE_SpatialID childID = SE_Application::getInstance()->createCommonID();
-        //SE_Util::sleep(SLEEP_COUNT);
+        SE_SpatialID childID = SE_ID::createSpatialID();
         SE_Geometry* child = new SE_Geometry(childID, rootNode);
 		std::string mname = go->name;
-		if(mname == "Bone01" || mname == "Bone02" || mname == "Bone03" || 
-		   mname == "Bone04")
-		{
-			child->setVisible(false);
-		}
-        rootNode->addChild(child);
         SE_Vector3f translate, scale, rotateAxis;
         translate.x = go->translate[0];
         translate.y = go->translate[1];
@@ -580,15 +574,72 @@ WRIET_SURFACE:
         rotateAxis.x = go->rotateAxis[0];
         rotateAxis.y = go->rotateAxis[1];
         rotateAxis.z = go->rotateAxis[2];
-        child->setLocalTranslate(translate);
-		//child->setLocalTranslate(SE_Vector3f(0, 0, 0));
-        child->setLocalScale(scale);
-        //child->setLocalScale(SE_Vector3f(1.0, 1.0, 1.0));
         SE_Quat q;
         q.set(go->rotateAngle, rotateAxis);
-        child->setLocalRotate(q);
-		//q.set(0, SE_Vector3f(0, 0, 0));
-        child->setBVType(SE_BoundingVolume::AABB);
+        SE_Matrix4f childMatrix;
+        childMatrix.set(q.toMatrix3f(), scale, translate);
+		if(mname == "Bone01" || mname == "Bone02" || mname == "Bone03" || 
+		   mname == "Bone04")
+		{
+			child->setVisible(false);
+		}
+        std::list<ASE_GeometryObjectGroup*>::iterator itGroup;
+        bool childAdded = false;
+        for(itGroup = mSceneObject->mGeometryObjectGroup.begin() ;
+            itGroup != mSceneObject->mGeometryObjectGroup.end();
+            itGroup++)
+        {
+            ASE_GeometryObjectGroup* group = *itGroup;
+            std::string::size_type pos = group->parent.name.find("Dummy");
+			if(go->parentName == "Dummy01")
+			{
+				LOGI("### obj parent Dummy01\n");
+			}
+            if(pos != std::string::npos && group->parent.name == go->parentName)
+            {
+                SE_Spatial* parentSpatial = group->parent.spatial;
+                if(!parentSpatial)
+                {
+                    SE_SpatialID parentid = SE_ID::createSpatialID();
+                    parentSpatial = new SE_CommonNode(parentid, rootNode);
+                    parentSpatial->setBVType(SE_BoundingVolume::AABB);
+                    rootNode->addChild(parentSpatial);
+					group->parent.spatial = parentSpatial;
+                }
+                parentSpatial->addChild(child);
+                child->setParent(parentSpatial);
+                SE_Vector3f translate, scale, rotateaxis;
+                float angle;
+                translate.x = group->parent.baseTranslate[0];
+                translate.y = group->parent.baseTranslate[1];
+                translate.z = group->parent.baseTranslate[2];
+                scale.x = group->parent.baseScale[0];
+                scale.y = group->parent.baseScale[1];
+                scale.z = group->parent.baseScale[2];
+                rotateaxis.x = group->parent.baseRotate[0];
+                rotateaxis.y = group->parent.baseRotate[1];
+                rotateaxis.z = group->parent.baseRotate[2];
+                angle = group->parent.baseRotate[3];
+                SE_Quat q;
+                q.set(angle, rotateaxis);
+                SE_Matrix4f parentMatrix;
+                parentMatrix.set(q.toMatrix3f(), scale, translate);
+                parentSpatial->setPrevMatrix(parentMatrix);
+                SE_Matrix4f parentMatrixInverse = parentMatrix.inverse();
+                childMatrix = parentMatrixInverse.mul(childMatrix);
+                child->setPrevMatrix(childMatrix);
+				child->setBVType(SE_BoundingVolume::AABB);
+                childAdded = true;
+            }
+        }
+        if(!childAdded)
+        {
+            rootNode->addChild(child);
+            child->setLocalTranslate(translate);
+            child->setLocalScale(scale);
+            child->setLocalRotate(q);
+            child->setBVType(SE_BoundingVolume::AABB);
+        }
         SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
 		meshObj->setName(go->name);
         child->attachSimObject(meshObj);
@@ -1273,7 +1324,17 @@ void ASE_Loader::ASE_KeyMESH_ANIMATION( const char *token )
 }
 void ASE_Loader::ASE_KeyNODETM(const char* token)
 {
-    if(!strcmp( token, "*TM_POS" ))
+    if(!strcmp(token, "*NODE_NAME"))
+    {
+        ASE_GetToken(false);
+        std::string str = s_token;
+		SE_Util::SplitStringList nameList = SE_Util::splitString(s_token, "\"");
+        SE_ASSERT(nameList.size() == 1);
+		std::string name = *nameList.begin();
+        ASE_GeometryObjectGroup* group = findGroup(name);
+        mCurrGeometryObjectGroup = group;
+    }
+    else if(!strcmp( token, "*TM_POS" ))
     {
         ASE_GetToken(false);
         float x = atof(s_token);
@@ -1281,9 +1342,18 @@ void ASE_Loader::ASE_KeyNODETM(const char* token)
         float y = atof(s_token);
         ASE_GetToken(false);
         float z = atof(s_token);
-        mCurrGeomObject->translate[0] = x;
-        mCurrGeomObject->translate[1] = y;
-        mCurrGeomObject->translate[2] = z;
+        if(mCurrGeometryObjectGroup)
+        {
+            mCurrGeometryObjectGroup->parent.baseTranslate[0] = x;
+            mCurrGeometryObjectGroup->parent.baseTranslate[1] = y;
+            mCurrGeometryObjectGroup->parent.baseTranslate[2] = z;
+        }
+        else
+        {
+            mCurrGeomObject->translate[0] = x;
+            mCurrGeomObject->translate[1] = y;
+            mCurrGeomObject->translate[2] = z;
+        }
     }
     else if(!strcmp( token, "*TM_ROTAXIS" ))
     {
@@ -1293,15 +1363,31 @@ void ASE_Loader::ASE_KeyNODETM(const char* token)
         float y = atof(s_token);
         ASE_GetToken(false);
         float z = atof(s_token);
-        mCurrGeomObject->rotateAxis[0] = x;
-        mCurrGeomObject->rotateAxis[1] = y;
-        mCurrGeomObject->rotateAxis[2] = z;
+        if(mCurrGeometryObjectGroup)
+        {
+            mCurrGeometryObjectGroup->parent.baseRotate[0] = x;
+            mCurrGeometryObjectGroup->parent.baseRotate[1] = y;
+            mCurrGeometryObjectGroup->parent.baseRotate[2] = z;
+        }
+        else
+        {
+            mCurrGeomObject->rotateAxis[0] = x;
+            mCurrGeomObject->rotateAxis[1] = y;
+            mCurrGeomObject->rotateAxis[2] = z;
+        }
     }
     else if(!strcmp( token, "*TM_ROTANGLE"))
     {
         ASE_GetToken(false);
         float x = atof(s_token);
-        mCurrGeomObject->rotateAngle = x * 180.0 / 3.1415926;
+        if(mCurrGeometryObjectGroup)
+        {
+            mCurrGeometryObjectGroup->parent.baseRotate[3] = x;
+        }
+        else
+		{
+            mCurrGeomObject->rotateAngle = x * 180.0 / 3.1415926;
+		}
     }
     else if(!strcmp( token, "*TM_SCALE"))
     {
@@ -1311,10 +1397,18 @@ void ASE_Loader::ASE_KeyNODETM(const char* token)
         float y = atof(s_token);
         ASE_GetToken(false);
         float z = atof(s_token);
-
-        mCurrGeomObject->scale[0] = x;
-        mCurrGeomObject->scale[1] = y;
-        mCurrGeomObject->scale[2] = z;
+        if(mCurrGeometryObjectGroup)
+        {
+            mCurrGeometryObjectGroup->parent.baseScale[0] = x;
+            mCurrGeometryObjectGroup->parent.baseScale[1] = y;
+            mCurrGeometryObjectGroup->parent.baseScale[2] = z;
+        }
+        else
+        {
+            mCurrGeomObject->scale[0] = x;
+            mCurrGeomObject->scale[1] = y;
+            mCurrGeomObject->scale[2] = z;
+        }
         
     }
     else if(!strcmp( token, "*TM_SCALEAXIS"))
@@ -1325,10 +1419,15 @@ void ASE_Loader::ASE_KeyNODETM(const char* token)
         float y = atof(s_token);
         ASE_GetToken(false);
         float z = atof(s_token);
-        mCurrGeomObject->scaleAxis[0] = x;
-        mCurrGeomObject->scaleAxis[1] = y;
-        mCurrGeomObject->scaleAxis[2] = z;
-
+		if(mCurrGeometryObjectGroup)
+		{
+		}
+		else
+		{
+            mCurrGeomObject->scaleAxis[0] = x;
+            mCurrGeomObject->scaleAxis[1] = y;
+            mCurrGeomObject->scaleAxis[2] = z;
+		}
     }
     else if(!strcmp( token, "*TM_SCALEAXISANG"))
     {}
@@ -1349,7 +1448,24 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 	}
 	else if ( !strcmp( token, "*NODE_PARENT" ) )
 	{
-		ASE_SkipRestOfLine();
+        ASE_GetToken(false);
+        std::string str = s_token;
+		SE_Util::SplitStringList parentnameList = SE_Util::splitString(s_token, "\"");
+        SE_ASSERT(parentnameList.size() == 1);
+		std::string parentname = *parentnameList.begin();
+		ASE_GeometryObjectGroup* group = findGroup(parentname.c_str());
+        if(!group)
+        {
+            group = new ASE_GeometryObjectGroup;
+            mSceneObject->mGeometryObjectGroup.push_back(group);
+            group->parent.name = parentname;
+            group->children.push_back(mCurrGeomObject);
+        }
+        else
+        {
+            group->children.push_back(mCurrGeomObject);
+        }
+		mCurrGeomObject->parentName = parentname;
 	}
 	// ignore unused data blocks
 	else if ( !strcmp( token, "*TM_ANIMATION" ) )
@@ -1373,6 +1489,7 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 	// loads a sequence of animation frames
 	else if ( !strcmp( token, "*NODE_TM" ) )
 	{
+        mCurrGeometryObjectGroup = NULL;
 		ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyNODETM );
 	}
     else if(!strcmp(token, "*WIREFRAME_COLOR"))
@@ -1430,11 +1547,16 @@ void ASE_Loader::ASE_Process(  )
             ASE_GeometryObject *obj = new ASE_GeometryObject;
 			mSceneObject->mGeomObjects.push_back(obj);
 			mCurrGeomObject = obj;
+            mCurrGeometryObjectGroup = NULL;
 			ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyGEOMOBJECT );
 #ifdef DEBUG
 			geomCount++;
 #endif
 	    }	
+		else if(!strcmp(s_token, "*HELPEROBJECT"))
+		{
+			ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyHELPEROBJECT);
+		}
         else if(!strcmp(s_token, "*BONEINFO"))
         {
 	         ASE_SkinJointController* skinJointController = new ASE_SkinJointController;
@@ -1490,5 +1612,125 @@ void ASE_Loader::ASE_AdjustSubMtl()
         }
     }
 }
+SE_KeyFrame* ASE_Loader::findKeyFrame(ASE_HelperObject* parent, unsigned int key)
+{
+	std::list<SE_KeyFrame*>::iterator it;
+	for(it = parent->keyFrames.begin() ; it != parent->keyFrames.end() ; it++)
+	{
+		SE_KeyFrame* kf = *it;
+		if(kf->key == key)
+			return kf;
+	}
+	return NULL;
+}
+void ASE_Loader::ASE_KeyCONTROLROTTRACK(const char* token)
+{
+    if(!strcmp(token, "*CONTROL_ROT_SAMPLE"))
+    {
+        ASE_GetToken(false);
+        unsigned int key = atoi(s_token);
+        ASE_GetToken(false);
+        float x = atof(s_token);
+        ASE_GetToken(false);
+        float y = atof(s_token);
+        ASE_GetToken(false);
+        float z = atof(s_token);
+        ASE_GetToken(false);
+        float w = atof(s_token);
+        if(mCurrGeometryObjectGroup)
+        {
+            SE_KeyFrame* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
+            if(frame == NULL)
+            {
+                frame = new SE_KeyFrame;
+                frame->key = key;
+                mCurrGeometryObjectGroup->parent.keyFrames.push_back(frame);
+            }
+            frame->rotate.x = x;
+            frame->rotate.y = y;
+            frame->rotate.z = z;
+            frame->rotate.w = w;
+        }
+    } 
+}
+void ASE_Loader::ASE_KeyCONTROLPOSTRACK(const char* token)
+{
+    if(!strcmp(token, "*CONTROL_POS_SAMPLE"))
+    {
+        ASE_GetToken(false);
+        unsigned int key = atoi(s_token);
+        ASE_GetToken(false);
+        float x = atof(s_token);
+        ASE_GetToken(false);
+        float y = atof(s_token);
+        ASE_GetToken(false);
+        float z = atof(s_token);
+        if(mCurrGeometryObjectGroup)
+        {
+            SE_KeyFrame* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
+            if(frame == NULL)
+            {
+                frame = new SE_KeyFrame;
+                frame->key = key;
+                mCurrGeometryObjectGroup->parent.keyFrames.push_back(frame);
+            }
+            frame->translate.x = x;
+            frame->translate.y = y;
+            frame->translate.z = z;
+        }
+    }
+}
+void ASE_Loader::ASE_KeyTMANIMATION(const char* token)
+{
+    if(!strcmp(token, "NODE_NAME"))
+    {
+        ASE_GetToken(false);
+        std::string str = s_token;
+        ASE_GeometryObjectGroup* group = findGroup(str);
+        mCurrGeometryObjectGroup = group;
+    }
+    else if(!strcmp(token, "*CONTROL_POS_TRACK"))
+    {
+		ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyCONTROLPOSTRACK);
+    }
+    else if(!strcmp(token, "*CONTROL_ROT_TRACK"))
+    {
+		ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyCONTROLROTTRACK);
+    }
+}
+void ASE_Loader::ASE_KeyHELPEROBJECT(const char* token)
+{
+    if(!strcmp(token, "*NODE_NAME"))
+    {
+        ASE_GetToken(false);
+        std::string str = s_token;
+        SE_Util::SplitStringList nameList = SE_Util::splitString(s_token, "\"");
+        SE_ASSERT(nameList.size() == 1);
+		std::string name = *nameList.begin();
+        ASE_GeometryObjectGroup* group = findGroup(name);
+        if(!group)
+        {
+            group = new ASE_GeometryObjectGroup;
+            group->parent.name = name;
+			mSceneObject->mGeometryObjectGroup.push_back(group);
+            //mCurrGeometryObjectGroup = group;
+        }
+    }
+    else if(!strcmp(token, "*NODE_TM"))
+    {
+        ASE_ParseBracedBlock( &ASE_Loader::ASE_KeyNODETM );
+    }
+}
 ///////////////////////////////
-
+ASE_GeometryObjectGroup* ASE_Loader::findGroup(std::string parentname)
+{
+    std::list<ASE_GeometryObjectGroup*>::iterator it = mSceneObject->mGeometryObjectGroup.begin();
+    for(; it != mSceneObject->mGeometryObjectGroup.end() ; it++)
+    {
+        if((*it)->parent.name == parentname)
+        {
+            return *it;
+        }
+    }
+    return NULL;
+}

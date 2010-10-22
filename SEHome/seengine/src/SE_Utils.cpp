@@ -1,5 +1,6 @@
 #include "SE_Utils.h"
 #include <string.h>
+#include <list>
 #if defined(WIN32)
     #include <winsock2.h>
 #else
@@ -151,4 +152,55 @@ wchar_t* SE_Util::utf8ToUnicode(const char* utf8str)
         utf8_to_utf16((const unsigned char*)p, len, str, bufSize);
     }
     return buf;
+}
+SE_Util::SplitStringList SE_Util::splitString(const char* path, const char* split)
+{
+    std::list<std::string> retList;
+    std::vector<std::string> ret;
+    if(!path)
+        return ret;
+    if(!split)
+    {
+        ret.resize(1);
+        ret[0] = path;
+        return ret;
+    }
+    std::string str = path;
+    std::string strSplit = split;
+    std::string::size_type pos = 0;
+    std::string::size_type start = 0;
+    while(pos < str.size())
+    {
+        pos = str.find(strSplit, start);
+        if(pos != std::string::npos)
+        {
+            std::string::size_type n = pos - start;
+            if(n > 0)
+            {
+                std::string subStr = str.substr(start, n);
+                retList.push_back(subStr);
+            }
+            start = pos + 1;
+        }
+        else
+        {
+            std::string subStr = str.substr(start);
+			if(subStr != "")
+                retList.push_back(subStr);
+            pos = str.size();
+        }
+    }
+    if(retList.empty())
+    {
+        retList.push_back(path);
+    }
+    ret.resize(retList.size());
+    std::list<std::string>::iterator it;
+    int i = 0;
+    for(it = retList.begin() ; it != retList.end() ;it++)
+    {
+        ret[i++] = *it;
+    }
+    return ret;
+    
 }

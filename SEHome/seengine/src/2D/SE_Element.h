@@ -5,7 +5,9 @@
 #include "SE_Quat.h"
 #include "SE_ID.h"
 #include "SE_Animation.h"
+#include "SE_MountPoint.h"
 #include <string>
+#include <list>
 class SE_Spatial;
 class SE_Element;
 class SE_ElementTravel
@@ -87,13 +89,13 @@ public:
     {
         return mLocalLayer;
     }
-    void setName(const char* name)
+    void setID(const char* id)
     {
-        mName = name;
+        mID = id;
     }
-    std::string getName()
+    SE_ElementID getID()
     {
-        return mName;
+        return mID;
     }
     void setParent(SE_Element* parent)
     {
@@ -141,6 +143,26 @@ public:
     {
         return mPrimitiveID;
     }
+    float getPivotX()
+    {
+        return mPivotX;
+    }
+    float getPivotY()
+    {
+        return mPivotY;
+    }
+    void setPivotX(float x)
+    {
+        mPivotX = x;
+    }
+    void setPivotY(float y)
+    {
+        mPivotY = y;
+    }
+    void addMountPoint(const SE_MountPoint& mountPoint);
+    void removeMountPoint(const SE_MountPointID& mountPointID);
+    void clearMountPoint();
+    SE_MountPoint findMountPoint(const SE_MountPointID& mountPointID);
 public:
     virtual SE_Spatial* createSpatial(SE_Spatial* parent);
     virtual void updateWorldTransform();
@@ -155,6 +177,8 @@ private:
     float mLeft;
     float mWidth;
     float mHeight; 
+    float mPivotX;
+    float mPivotY;
     int mImageX;
     int mImageY;
     int mImageWidth;
@@ -165,10 +189,12 @@ private:
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
     SE_Layer mLocalLayer;
-    std::string mName;
+    SE_ElementID mID;
     SE_Animation* mAnimation;
     SE_SimObjectID mSimObjectID;
     SE_SpatialID mSpatialID;
     SE_PrimitiveID mPrimitiveID;
+    typedef std::list<SE_MountPoint> _MountPointList;
+    _MountPointList mMountPointList;
 };
 #endif

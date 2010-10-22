@@ -81,6 +81,13 @@ public:
 	{}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_MountPointHandler : public SE_XmlElementHandler
+{
+public:
+    SE_MountPointHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent); 
+};
 class SE_ElementManager
 {
 public:

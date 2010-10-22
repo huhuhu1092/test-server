@@ -34,9 +34,9 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         const char* name = pAttribute->Name();
         const char* value = pAttribute->Value();
         int ival = -1;
-        if(!strcmp(name, "name"))
+        if(!strcmp(name, "id"))
         {
-            element->setName(value);
+            element->setID(value);
         }
         else if(!strcmp(name, "x"))
         {
@@ -94,6 +94,28 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
             }
             hasLayer = true;
         }
+        else if(!strcmp(name, "pivotx"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setPivotX(ival);
+            }
+            else
+            {
+                LOGI("... parse pivotx value error\n");
+            }
+        }
+        else if(!strcmp(name, "pivoty"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setPivotY(ival);
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+        }
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
@@ -127,9 +149,9 @@ void SE_ElementGroupHandler::handle(SE_Element* parent, TiXmlElement* xmlElement
         const char* name = pAttribute->Name();
         const char* value = pAttribute->Value();
         int ival = -1;
-        if(!strcmp(name, "name"))
+        if(!strcmp(name, "id"))
         {
-            element->setName(value);
+            element->setID(value);
         }
         else if(!strcmp(name, "x"))
         {
@@ -516,6 +538,11 @@ void SE_ElementManager::handleXmlChild(SE_Element* parent, TiXmlNode* currNode, 
         break;
     }
 }
+void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    SE_ElementGroup* elementGroup = (SE_ElementGroup*)parent;
+
+}
 void SE_ElementManager::handleDeclaration(TiXmlDeclaration* decl)
 {}
 void SE_ElementManager::load(SE_Element* parent, const char* filePath)
@@ -583,7 +610,7 @@ public:
     }
     void visit(SE_Element* e)
     {
-        std::string name = e->getName();
+		std::string name = e->getID().getStr();
         if(elementName == name)
             selectedElement = e;
     }

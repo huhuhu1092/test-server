@@ -151,6 +151,7 @@ public:
         return d[row * 4 + column];
     }
     void getColumnSequence(float out[16]) const;
+    void getSequence(float* out, int size) const;
 private:
     union
     {

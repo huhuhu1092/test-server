@@ -16,13 +16,13 @@ void SE_ElementGroup::removeChild(SE_Element* e)
     mChildren.remove(e);
     e->setParent(NULL);
 }
-void SE_ElementGroup::removeChild(const char* name)
+void SE_ElementGroup::removeChild(const char* id)
 {
     _ElementList::iterator it;
     for(it = mChildren.begin() ; it != mChildren.end() ; it++)
     {
         SE_Element* e = *it;
-        if(e->getName() == name)
+        if(e->getID() == id)
             break;
     }
     if(it != mChildren.end())

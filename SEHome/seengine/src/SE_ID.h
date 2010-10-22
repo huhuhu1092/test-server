@@ -14,6 +14,7 @@ public:
     //SE_StringID(const SE_StringID& id);
     //SE_StringID& operator=(const SE_StringID& id);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
+	friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator>(const SE_StringID& id1, const SE_StringID& id2);
     void write(SE_BufferOutput& output);
@@ -61,6 +62,7 @@ typedef SE_CommonID SE_AnimationID;
 typedef SE_CommonID SE_SimObjectID;
 typedef SE_StringID SE_ElementID;
 typedef SE_StringID SE_SkinJointControllerID;
+typedef SE_StringID SE_MountPointID;
 class SE_ID
 {
 public:
@@ -79,6 +81,7 @@ public:
     static SE_SimObjectID createSimObjectID();
 	static SE_ElementID createElementID(const char* str);
     static SE_SkinJointControllerID createSkinJointControllerID(const char* str);
+	static SE_MountPointID createMountPointID(const char* str);
 };
 ///////////////////////////
 /*

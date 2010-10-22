@@ -7,7 +7,10 @@
 #define ASE_OK 1
 #define ASE_ERROR 0
 class SE_BufferOutput;
+class SE_KeyFrame;
+class SE_Spatial;
 typedef float Vector3[3];
+typedef float Vector4[4];
 struct ASE_Vertex
 {
 	float x, y, z;
@@ -25,7 +28,6 @@ struct ASE_TVertex
 		s = t = 0.0f;
 	}
 } ;
-
 struct ASE_Face
 {
     int vi[3];
@@ -109,6 +111,7 @@ struct ASE_Mesh
 struct ASE_GeometryObject
 {
     char name[256];
+    std::string parentName;
     ASE_Mesh* mesh;
     int materialref;
 	std::list<ASE_Mesh*> animMeshList;
@@ -195,16 +198,35 @@ struct ASE_Material
             delete[] submaterials;
     }
 };
+struct ASE_HelperObject
+{
+    std::string name;
+    Vector3 baseTranslate;
+    Vector3 baseScale;
+    Vector4 baseRotate;
+    std::list<SE_KeyFrame*> keyFrames;
+    SE_Spatial* spatial;
+    ASE_HelperObject()
+    {
+        baseTranslate[0] = baseTranslate[1] = baseTranslate[2] = 0;
+        baseScale[0] = baseScale[1] = baseScale[2] = 1;
+        baseRotate[0] = baseRotate[1] = baseRotate[2] = 0;
+        baseRotate[3] = 1;
+        spatial = NULL; 
+    }
+};
 struct ASE_GeometryObjectGroup
 {
-	std::string groupName;
+	ASE_HelperObject parent;
 	std::list<ASE_GeometryObject*> children;
 };
+
 struct ASE_SceneObject
 {
     std::list<ASE_GeometryObject*> mGeomObjects;
     std::vector<ASE_Material> mMats;
     std::list<ASE_SkinJointController*> mSkinJointController;
+    std::list<ASE_GeometryObjectGroup*> mGeometryObjectGroup;
     ~ASE_SceneObject()
     {
         std::list<ASE_GeometryObject*>::iterator it;
@@ -253,7 +275,13 @@ private:
     void ASE_KeyBONEVERTEXINFO(const char* token);
     void ASE_KeyBONEMATRIX(const char* token);
     void ASE_KeyBONEMATRIXINFO(const char* token);
+    void ASE_KeyHELPEROBJECT(const char* token);
+    void ASE_KeyCONTROLROTTRACK(const char* token);
+    void ASE_KeyCONTROLPOSTRACK(const char* token);
+    void ASE_KeyTMANIMATION(const char* token);
     void ASE_AdjustSubMtl();
+    ASE_GeometryObjectGroup* findGroup(std::string parentname);
+	SE_KeyFrame* findKeyFrame(ASE_HelperObject* parent, unsigned int key);
 private:
     ASE_SceneObject* mSceneObject;
     typedef std::list<ASE_GeometryObject*> GeomObjectList;
@@ -264,6 +292,7 @@ private:
     ASE_Mesh* mCurrMesh;
     ASE_SkinJointController* mCurrSkinJointController;
     ASE_Bone* mCurrBone;
+    ASE_GeometryObjectGroup* mCurrGeometryObjectGroup;
 	bool mInSubDiffuse;
 	int mMatStartPos;
 };

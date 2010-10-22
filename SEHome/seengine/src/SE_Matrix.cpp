@@ -679,6 +679,13 @@ void  SE_Matrix4f::set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, cons
     SE_Matrix3f rs = rotate.mul(sm);
     set(rs, translate);
 }
+void SE_Matrix4f::getSequence(float* out, int size) const
+{
+    for(int i = 0 ; i < 16 && i < size ; i++)
+    {
+        out[i] = d[i];
+    }
+}
 void SE_Matrix4f::getColumnSequence(float out[16]) const
 {
     out[0] = m00;

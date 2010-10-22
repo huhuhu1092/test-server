@@ -53,6 +53,14 @@ public:
 	{
 		mName = name;
 	}
+	void setID(const SE_SimObjectID& simObjID)
+	{
+		mID = simObjID;
+	}
+	SE_SimObjectID getID()
+	{
+		return mID;
+	}
     // SE_SimObject will own the state . it will delete the mState
     void setPropertySet(SE_PropertySet* pro)
     {
@@ -110,6 +118,7 @@ public:
     }
 private:
 	std::string mName;
+	SE_SimObjectID mID;
 	SE_Spatial* mSpatial;
     SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;

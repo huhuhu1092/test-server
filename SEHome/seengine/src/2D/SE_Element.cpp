@@ -8,6 +8,8 @@
 #include "SE_MeshSimObject.h"
 #include "SE_Geometry.h"
 #include "SE_SimObjectManager.h"
+#include "SE_MountPoint.h"
+#include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
 #endif
@@ -17,6 +19,7 @@ SE_Element::SE_Element()
 	mImageX = mImageY = mImageWidth = mImageHeight = 0;
 	mAnimation = NULL;
 	mParent = NULL;
+    mPivotX = mPivotY = 0;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -30,6 +33,7 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mImageHeight = 0;
 	mAnimation = NULL;
 	mParent = NULL;
+    mPivotX = mPivotY = 0;
 }
 SE_Element::~SE_Element()
 {
@@ -79,7 +83,7 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
     primitive->createMesh(meshArray, meshNum);
     SE_ASSERT(meshNum == 1);
     SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
-    simObject->setName(mName.c_str());
+    simObject->setName(mID.getStr());
     SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     simObjectManager->set(simObjectID, simObject);
@@ -89,7 +93,7 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
     geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
     geom->setLocalLayer(mLocalLayer);
-	SE_ElementID eid = SE_ID::createElementID(mName.c_str());
+	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
 	geom->setElementID(eid);
     delete[] meshArray;
     mSpatialID = spatialID;
@@ -109,3 +113,43 @@ void SE_Element::travel(SE_ElementTravel* travel)
 }
 void SE_Element::updateWorldTransform()
 {}
+void SE_Element::addMountPoint(const SE_MountPoint& mountPoint)
+{
+    mMountPointList.push_back(mountPoint);
+}
+class isIDEqual
+{
+public:
+    bool operator()(const SE_MountPoint& mp)
+    {
+        if(mp.getID() == id)
+            return true;
+        else
+            return false;
+    }
+    SE_MountPointID id;
+};
+
+void SE_Element::removeMountPoint(const SE_MountPointID& mountPointID)
+{
+    isIDEqual e;
+    e.id = mountPointID;
+    mMountPointList.remove_if(e);
+}
+
+void SE_Element::clearMountPoint()
+{
+    mMountPointList.clear();
+}
+
+SE_MountPoint SE_Element::findMountPoint(const SE_MountPointID& mountPointID)
+{
+    isIDEqual e;
+    e.id = mountPointID;
+    std::list<SE_MountPoint>::iterator it = find_if(mMountPointList.begin(), mMountPointList.end(), e); 
+	if(it != mMountPointList.end())
+		return *it;
+	else
+		return SE_MountPoint();
+}
+

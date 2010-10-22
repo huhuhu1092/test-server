@@ -87,6 +87,10 @@ bool operator==(const SE_StringID& id1, const SE_StringID& id2)
     else
         return false;
 }
+bool operator!=(const SE_StringID& id1, const SE_StringID& id2)
+{
+	return !(id1 == id2);
+}
 bool operator<(const SE_StringID& id1, const SE_StringID& id2)
 {
     if(id1.mStr < id2.mStr)
@@ -230,6 +234,10 @@ SE_ElementID SE_ID::createElementID(const char* str)
 SE_SkinJointControllerID SE_ID::createSkinJointControllerID(const char* str)
 {
     return SE_StringID(str);
+}
+SE_MountPointID SE_ID::createMountPointID(const char* str)
+{
+	return SE_StringID(str);
 }
 ////////////////////////////////////////////
 /*
