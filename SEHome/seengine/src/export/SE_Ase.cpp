@@ -1612,12 +1612,12 @@ void ASE_Loader::ASE_AdjustSubMtl()
         }
     }
 }
-SE_KeyFrame* ASE_Loader::findKeyFrame(ASE_HelperObject* parent, unsigned int key)
+SE_KeyFrame<SE_Transform>* ASE_Loader::findKeyFrame(ASE_HelperObject* parent, unsigned int key)
 {
-	std::list<SE_KeyFrame*>::iterator it;
+	std::list<SE_KeyFrame<SE_Transform>*>::iterator it;
 	for(it = parent->keyFrames.begin() ; it != parent->keyFrames.end() ; it++)
 	{
-		SE_KeyFrame* kf = *it;
+		SE_KeyFrame<SE_Transform>* kf = *it;
 		if(kf->key == key)
 			return kf;
 	}
@@ -1639,17 +1639,17 @@ void ASE_Loader::ASE_KeyCONTROLROTTRACK(const char* token)
         float w = atof(s_token);
         if(mCurrGeometryObjectGroup)
         {
-            SE_KeyFrame* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
+            SE_KeyFrame<SE_Transform>* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
             if(frame == NULL)
             {
-                frame = new SE_KeyFrame;
+                frame = new SE_KeyFrame<SE_Transform>;
                 frame->key = key;
                 mCurrGeometryObjectGroup->parent.keyFrames.push_back(frame);
             }
-            frame->rotate.x = x;
-            frame->rotate.y = y;
-            frame->rotate.z = z;
-            frame->rotate.w = w;
+            frame->data.rotate.x = x;
+            frame->data.rotate.y = y;
+            frame->data.rotate.z = z;
+            frame->data.rotate.w = w;
         }
     } 
 }
@@ -1667,16 +1667,16 @@ void ASE_Loader::ASE_KeyCONTROLPOSTRACK(const char* token)
         float z = atof(s_token);
         if(mCurrGeometryObjectGroup)
         {
-            SE_KeyFrame* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
+            SE_KeyFrame<SE_Transform>* frame = findKeyFrame(&mCurrGeometryObjectGroup->parent, key);
             if(frame == NULL)
             {
-                frame = new SE_KeyFrame;
+                frame = new SE_KeyFrame<SE_Transform>;
                 frame->key = key;
                 mCurrGeometryObjectGroup->parent.keyFrames.push_back(frame);
             }
-            frame->translate.x = x;
-            frame->translate.y = y;
-            frame->translate.z = z;
+            frame->data.translate.x = x;
+            frame->data.translate.y = y;
+            frame->data.translate.z = z;
         }
     }
 }

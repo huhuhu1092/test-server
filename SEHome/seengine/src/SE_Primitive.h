@@ -3,10 +3,12 @@
 #include "SE_Geometry3D.h"
 #include "SE_Common.h"
 #include "SE_MaterialData.h"
-#include "SE_Mesh.h"
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+class SE_Mesh;
+class SE_GeometryData;
+class SE_TextureCoordData;
 class SE_Primitive
 {
 public:
@@ -48,7 +50,7 @@ public:
 	~SE_RectPrimitive();
     //when imageData's width and height is not power of 2
     //we need to adjust the texture coordidate
-	void setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void setImageData(SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
     //void setImagePortion(const SE_ImageDataPortion& portion);
     void setMaterialData(const SE_MaterialData& materialData)
 	{
@@ -95,7 +97,7 @@ private:
 	//_ImageData mImageDataArray[SE_Texture::TEXUNIT_NUM];
 	//SE_GeometryData* mGeometryData;
 	//SE_TextureCoordData* mTexCoordData;
-	SE_Wrapper<_ImageData>* mImageDataArray[SE_Texture::TEXUNIT_NUM];
+	SE_Wrapper<_ImageData>* mImageDataArray[SE_TEXUNIT_NUM];
 	SE_Wrapper<SE_GeometryData>* mGeometryData;
 	SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
@@ -153,7 +155,7 @@ public:
 			}
 		}
 	}
-	void setImageData(FACE_INDEX index , SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+	void setImageData(FACE_INDEX index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{
 		if(index < LEFT || index > ALL)

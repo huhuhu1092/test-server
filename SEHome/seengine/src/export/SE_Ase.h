@@ -4,10 +4,10 @@
 #include <vector>
 #include <string>
 #include <string.h>
+#include "SE_KeyFrame.h"
 #define ASE_OK 1
 #define ASE_ERROR 0
 class SE_BufferOutput;
-class SE_KeyFrame;
 class SE_Spatial;
 typedef float Vector3[3];
 typedef float Vector4[4];
@@ -204,7 +204,7 @@ struct ASE_HelperObject
     Vector3 baseTranslate;
     Vector3 baseScale;
     Vector4 baseRotate;
-    std::list<SE_KeyFrame*> keyFrames;
+    std::list<SE_KeyFrame<SE_Transform>*> keyFrames;
     SE_Spatial* spatial;
     ASE_HelperObject()
     {
@@ -281,7 +281,7 @@ private:
     void ASE_KeyTMANIMATION(const char* token);
     void ASE_AdjustSubMtl();
     ASE_GeometryObjectGroup* findGroup(std::string parentname);
-	SE_KeyFrame* findKeyFrame(ASE_HelperObject* parent, unsigned int key);
+	SE_KeyFrame<SE_Transform>* findKeyFrame(ASE_HelperObject* parent, unsigned int key);
 private:
     ASE_SceneObject* mSceneObject;
     typedef std::list<ASE_GeometryObject*> GeomObjectList;

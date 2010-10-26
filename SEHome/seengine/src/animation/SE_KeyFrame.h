@@ -3,26 +3,19 @@
 #include "SE_Quat.h"
 #include "SE_Vector.h"
 #include <list>
-struct SE_Transfrom
+#include <vector>
+struct SE_Transform
 {
     SE_Quat rotate;
     SE_Vector3f translate;
     SE_Vector3f scale;
 };
-template <typename T>
-struct SE_KeyRange
-{
-    unsigned int first;
-    unsigned int second;
-    T calculate()
-    {
-        return T();
-    }
-};
 
+//T is the data type
 template <typename T>
-struct SE_KeyFrame
+class SE_KeyFrame
 {
+public:
     SE_KeyFrame()
     {
         key = 0;
@@ -42,19 +35,15 @@ public:
     {
         mKeyFrameSequence.push_back(kf);
     }
-    void setKeyFrame(unsigned int key, SE_KeyFrame<T>* kf);
+    void setKeyFrame(SE_KeyFrame<T>* kf);
     //if key is not in key frame sequnce , it will return the 
     //first key frame
-    SE_KeyFrame<T> getKeyFrame(unsigned int key);
+    SE_KeyFrame<T>* getKeyFrame(unsigned int key);
     int getKeyFrameNum()
     {
         return mKeyFrameSequence.size();
     }
 private:
-
-private:
-
-    std::vector<SE_KeyRange> mKeys;
     typedef std::list<SE_KeyFrame<T>*> _KeyFrameSequence;
     _KeyFrameSequence mKeyFrameSequence;
 };
@@ -102,25 +91,21 @@ SE_KeyFrameSequence<T>& SE_KeyFrameSequence<T>::operator=(const SE_KeyFrameSeque
     return *this;
 }    
 template <typename T>
-void SE_KeyFrameSequence<T>::setKeyFrame(const SE_KeyFrame<T>& kf)
+void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
 {
     _KeyFrameSequence::iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
-        if((*it)->key == kf.key)
+        if((*it)->key == kf->key)
         {
-            (*it)->data = kf.data
-            (*it)->key = kf.key;
+            *it = kf;
             return;
         }
     }
-    SE_KeyFrame<T>* newkf = new SE_KeyFrame<T>;
-    newkf->key = kf.key;
-    newkf->data = kf.data;
     mKeyFrameSequence.push_back(newkf);
 }
 template <typename T>
-SE_KeyFrame<T>* SE_KeyFrameSequence::getKeyFrame(unsigned int key)
+SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key)
 {
     _KeyFrameSequence::iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
@@ -130,7 +115,6 @@ SE_KeyFrame<T>* SE_KeyFrameSequence::getKeyFrame(unsigned int key)
             return *it;
         }
     }
-    it = mKeyFrameSequence.begin();
-    return *it;
+    return NULL;
 }
 #endif

@@ -24,23 +24,23 @@ class SE_RenderUnit
 public:
 	SE_RenderUnit();
     virtual ~SE_RenderUnit();
+	//base color image use TEXTURE0
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
 	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
-    virtual SE_ImageDataID getBumpMapImageID();
-    virtual SE_ImageDataID getCubeMapImageID();
-    virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
 
-    virtual void getBumpMapTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-    virtual bool bumpMapCoordSameAsBaseColor();
+	//texIndex start from 1
+    virtual void getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
+	virtual void getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
+    virtual void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
 
-    virtual void getCubeMapTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-    virtual bool cubeMapCoordSameAsBaseColor();
-
+    virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
 public:
+    bool decorateTexCoordSameAsBaseColor(int texIndex);
+
     SE_PRIMITIVE_TYPE getPrimitiveType()
     {
         return mPrimitiveType;
@@ -73,15 +73,22 @@ public:
 	{
 		return mViewToPerspective;
 	}
+	void setColorBlendMode(int mode)
+	{
+		mColorBlendMode = mode;
+	}
 	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own);
 	void applyRenderState();
-    void loadBaseColorTexture2D(SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
+    void loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
     SE_Matrix4f mWorldTransform;
     SE_Matrix4f mViewToPerspective;
     SE_Layer mLayer;
 	SE_PointerOwner<SE_RenderState> mRenderState[SE_Spatial::RENDERSTATE_NUM];
+	int mHasTexCoord[SE_TEXUNIT_NUM];
+	int mHasTexture[SE_TEXUNIT_NUM];
+	int mColorBlendMode;
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 {
@@ -90,20 +97,26 @@ public:
     ~SE_TriSurfaceRenderUnit();
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
 	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
-    virtual SE_ImageDataID getBumpMapImageID();
-    virtual SE_ImageDataID getCubeMapImageID();
-    virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
 
-    virtual void getBumpMapTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-    bool bumpMapCoordSameAsBaseColor();
-    virtual void getCubeMapTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-    bool cubeMapCoordSameAsBaseColor();
+	void getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
+    void getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
+    void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+
+    virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
 private:
 	void setColorAndMaterial(SE_ShaderProgram* shaderProgram);
+	void setColor(SE_ShaderProgram* shaderProgram);
+    void setImage(int index , SE_ShaderProgram* shaderProgram);
+	void setImageAndColor(SE_ShaderProgram* shaderProgram);
+	void setVertex(SE_ShaderProgram* shaderProgram, _Vector3f*& vertex, int& vertexNum, int*& indexArray, int& indexNum);
+	void setTexVertex(SE_ShaderProgram* shaderProgram, int vertexNum);
+	void setTexColorBlendMode(SE_ShaderProgram* shaderProgram);
+	void getImageDataID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
+	void getImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
 private:
     SE_Surface* mSurface;
     _Vector3f* mVertex;

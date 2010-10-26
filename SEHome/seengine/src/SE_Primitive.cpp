@@ -4,12 +4,13 @@
 #include "SE_Application.h"
 #include "SE_Utils.h"
 #include "SE_ResourceManager.h"
+#include "SE_Mesh.h"
 #include <memory>
 //SE_PrimitiveID SE_Primitive::normalizeRectPrimitiveID = SE_CommonID(0, 0, 0, 0);
 //SE_PrimitiveID SE_Primitive::normalizeCubePrimitiveID = SE_CommonID(0, 0, 0, 1);
 SE_RectPrimitive::SE_RectPrimitive(const SE_Rect3D& rect) : mRect3D(rect)
 {
-    memset(mImageDataArray, 0, sizeof(SE_Wrapper<_ImageData>*) * SE_Texture::TEXUNIT_NUM);
+    memset(mImageDataArray, 0, sizeof(SE_Wrapper<_ImageData>*) * SE_TEXUNIT_NUM);
     mGeometryData = NULL;
     mTexCoordData = NULL;
     mMaterialData = NULL;
@@ -30,7 +31,7 @@ SE_RectPrimitive::~SE_RectPrimitive()
         delete mTexCoordData;
     if(mMaterialData)
         delete mMaterialData;
-    for(int i = 0 ; i < SE_Texture::TEXUNIT_NUM ; i++)
+    for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
     {
         SE_Wrapper<_ImageData>* p = mImageDataArray[i];
 		if(p)
@@ -167,7 +168,7 @@ SE_RectPrimitive* SE_RectPrimitive::clone()
      primitive->mWrapT = mWrapT;
      primitive->mColor = mColor;
      primitive->mProgramDataID = mProgramDataID;
-     for(int i = 0 ; i < SE_Texture::TEXUNIT_NUM ; i++)
+     for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
      {
          if(mImageDataArray[i])
          {
@@ -216,9 +217,9 @@ void SE_RectPrimitive::setImagePortion(const SE_ImageDataPortion& portion)
     mTexCoordData  = new SE_Wrapper<SE_TextureCoordData>(texCoordData, SE_Wrapper<SE_TextureCoordData>::NOT_ARRAY);
 }
 */
-void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_Texture::TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion)
+void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion)
 {
-	if(texUnitType >= SE_Texture::TEXUNIT_NUM || texUnitType < SE_Texture::TEXTURE0)
+	if(texUnitType >= SE_TEXUNIT_NUM || texUnitType < SE_TEXTURE0)
 		return;
     _ImageData* img = new _ImageData;
     if(!img)
@@ -384,7 +385,7 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     surface->setSampleMag(mSampleMag);
     surface->setWrapS(mWrapS);
     surface->setWrapT(mWrapT);
-    for(int i = 0 ; i < SE_Texture::TEXUNIT_NUM ; i++)
+    for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
     {
         SE_TextureUnit* texUnit = new SE_TextureUnit();
         texUnit->setImageDataNum(1);

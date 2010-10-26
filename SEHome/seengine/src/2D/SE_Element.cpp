@@ -72,11 +72,11 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
     SE_ImageDataPortion dataPortion(mImageX, mImageY, mImageWidth, mImageHeight);
     if(mImageWidth == 0 || mImageHeight == 0)
     {
-        primitive->setImageData(imageData, SE_Texture::TEXTURE0,NOT_OWN);
+        primitive->setImageData(imageData, SE_TEXTURE0,NOT_OWN);
     }
     else
     {
-        primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN, dataPortion);
+        primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, dataPortion);
     }
     SE_Mesh** meshArray = NULL;
     int meshNum = 0;

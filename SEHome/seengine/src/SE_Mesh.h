@@ -101,8 +101,6 @@ class SE_Texture
 public:
     SE_Texture();
     ~SE_Texture();
-    enum TEXUNIT_TYPE {TEXTURE0, TEXTURE1, TEXTURE2, TEXTURE3, TEXTURE4,
-                       TEXTURE5, TEXTURE6, TEXTURE7, TEXUNIT_NUM};
     void setTextureUnit(int texType, SE_TextureUnit* texUnit);
     void removeTextureUnit(int texType);
     SE_TextureUnit* getTextureUnit(int texType);
@@ -123,8 +121,11 @@ public:
     void getVertexIndex(int*& index, int& indexNum);
 	void getVertex(_Vector3f*& vertex, int & vertexNum);
 	void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
+	void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+
     void getFaceVertex(_Vector3f*& vertex, int& vertexNUm);
     void getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertecNum);
+	void getDecorateFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
     SE_ProgramDataID getProgramDataID();
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
@@ -132,6 +133,14 @@ public:
     void setFacets(int* facets, int num);
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
+	void setColorBlendMode(int mode)
+	{
+		mColorBlendMode = mode;
+	}
+	int getColorBlendMode()
+	{
+		return mColorBlendMode;
+	}
 	int getSampleMin()
     {
         return mSampleMin;
@@ -218,6 +227,7 @@ private:
     int mIndexNum; 
     int* mIndexInGeometryData;
     int mIndexInGeometryDataNum;
+	int mColorBlendMode;
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.

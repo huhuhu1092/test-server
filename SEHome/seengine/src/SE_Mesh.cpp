@@ -42,6 +42,8 @@ SE_Surface::SE_Surface()
     mIndexNum = 0; 
     mIndexInGeometryData = NULL;
     mIndexInGeometryDataNum = 0;
+
+	mColorBlendMode = SE_COLOR_MODE;
 }
 SE_Surface::~SE_Surface()
 {
@@ -196,7 +198,7 @@ void SE_Surface::getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertex
         texVertexNum = 0;
         return;
     }
-    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_Texture::TEXTURE0);
+    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_TEXTURE0);
     SE_ASSERT(texUnit != NULL);
     SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
     SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
@@ -229,6 +231,16 @@ void SE_Surface::getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertex
     }
     texVertex = mFaceTexVertex;
     texVertexNum = mFaceTexVertexNum;
+}
+void SE_Surface::getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
+{
+	texVertex = NULL;
+	texVertexNum = 0;
+}
+void SE_Surface::getDecorateFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
+{
+	texVertex = NULL;
+	texVertexNum = 0;
 }
 void SE_Surface::getVertexIndex(int*& index, int& indexNum)
 {
@@ -316,7 +328,7 @@ void SE_Surface::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
         texVertexNum = 0;
         return;
     }
-    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_Texture::TEXTURE0);
+    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_TEXTURE0);
     SE_ASSERT(texUnit != NULL);
     SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
     SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
@@ -355,14 +367,14 @@ void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 ///////
 SE_Texture::SE_Texture()
 {
-    mTexUnitArray = new SE_TextureUnit*[TEXUNIT_NUM];
-    memset(mTexUnitArray, 0, sizeof(SE_TextureUnit*) * TEXUNIT_NUM);
+    mTexUnitArray = new SE_TextureUnit*[SE_TEXUNIT_NUM];
+    memset(mTexUnitArray, 0, sizeof(SE_TextureUnit*) * SE_TEXUNIT_NUM);
 }
 SE_Texture::~SE_Texture()
 {
     if(mTexUnitArray)
     {
-        for(int i = 0 ; i < TEXUNIT_NUM ; i++)
+        for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
         {
             if(mTexUnitArray[i])
                 delete mTexUnitArray[i];
@@ -372,13 +384,13 @@ SE_Texture::~SE_Texture()
 }
 void SE_Texture::setTextureUnit(int texType, SE_TextureUnit* texUnit)
 {
-    if(texType < 0 || texType >= TEXUNIT_NUM)
+    if(texType < 0 || texType >= SE_TEXUNIT_NUM)
         return ;
     mTexUnitArray[texType] = texUnit;
 }
 SE_TextureUnit* SE_Texture::getTextureUnit(int texType)
 {
-    if(texType < 0 || texType >= TEXUNIT_NUM)
+    if(texType < 0 || texType >= SE_TEXUNIT_NUM)
         return 0;
 	return mTexUnitArray[texType];
 }
