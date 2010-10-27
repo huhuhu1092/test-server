@@ -57,6 +57,10 @@ public:
 	{
 		return mSceneManager;
 	}
+	SE_RenderManager* getRenderManager()
+	{
+		return mRenderManager;
+	}
 	SE_InputManager* getInputManager()
 	{
 		return mInputManager;

@@ -174,18 +174,19 @@ void SE_ShaderProgram::link()
 	checkGLError();
 	m_a_tex_coord0_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
 	checkGLError();
-    m_a_tex_coord1_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord1");
-    m_a_tex_coord2_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord2");
-    //m_a_tex_coord3_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord3");
-
 	m_u_texture0_loc = glGetUniformLocation(mShaderProgramObject, "u_texture0");
     m_u_texture1_loc = glGetUniformLocation(mShaderProgramObject, "u_texture1");
     m_u_texture2_loc = glGetUniformLocation(mShaderProgramObject, "u_texture2");
-    //m_u_texture3_loc = glGetUniformLocation(mShaderProgramObject, "u_texture3");
+    m_u_texture3_loc = glGetUniformLocation(mShaderProgramObject, "u_texture3");
+    m_a_tex_coord1_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord1");
+    m_a_tex_coord2_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord2");
+    m_a_tex_coord3_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord3");
+
+
 	checkGLError();
 	m_u_tex1_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex1_coord_same_as_tex0");
 	m_u_tex2_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex2_coord_same_as_tex0");
-	//m_u_tex3_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_same_as_tex0");
+	m_u_tex3_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_same_as_tex0");
 	m_u_tex_combine_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_tex_combine_mode");
 	checkGLError();
 	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
@@ -217,7 +218,7 @@ GLint SE_ShaderProgram::getTextureCoordAttributeLoc(int index)
         ret = m_a_tex_coord2_loc;
         break;
     case 3:
-        //ret = m_a_tex_coord3_loc;
+        ret = m_a_tex_coord3_loc;
         break;
     default:
 		break;
@@ -239,7 +240,7 @@ GLint SE_ShaderProgram::getTextureUnifyLoc(int index)
         ret = m_u_texture2_loc;
         break;
     case 3:
-        //ret = m_u_texture3_loc;
+        ret = m_u_texture3_loc;
         break;
     default:
 		break;
@@ -258,7 +259,7 @@ GLint SE_ShaderProgram::getTexCoordSameAsTex0(int index)
 		ret = m_u_tex2_coord_same_as_tex0;
 		break;
 	case 3:
-		//ret = m_u_tex3_coord_same_as_tex0;
+		ret = m_u_tex3_coord_same_as_tex0;
 		break;
 	}
 	return ret;

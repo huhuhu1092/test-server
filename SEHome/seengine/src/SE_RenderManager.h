@@ -1,6 +1,7 @@
 #ifndef SE_RENDERMANAGER_H
 #define SE_RENDERMANAGER_H
 #include "SE_Matrix.h"
+#include "SE_Vector.h"
 #include <list>
 class SE_RenderUnit;
 class SE_RenderManager
@@ -22,10 +23,15 @@ public:
 	{
 		mPerspectiveMatrix = m;
 	}
+	void setBackground(const SE_Vector3f& background)
+	{
+		mBackground = background;
+	}
 private:
     typedef std::list<SE_RenderUnit*> RenderUnitList;
     RenderUnitList* mRenderQueue[RQ_NUM];
     SE_Matrix4f mWorldToViewMatrix;
     SE_Matrix4f mPerspectiveMatrix;
+	SE_Vector3f mBackground;
 };
 #endif

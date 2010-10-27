@@ -111,7 +111,7 @@ void SE_RenderManager::beginDraw()
 #endif
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
     shaderProgram->use();
-	glClearColor(1.0, 0, 0, 0);
+	glClearColor(mBackground.x, mBackground.y, mBackground.z, 1.0);
 	checkGLError();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	checkGLError();

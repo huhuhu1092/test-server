@@ -9,6 +9,7 @@
 #include "SE_Geometry.h"
 #include "SE_SimObjectManager.h"
 #include "SE_MountPoint.h"
+#include "SE_Mesh.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
@@ -44,44 +45,88 @@ void SE_Element::addChild(SE_Element* e)
 {}
 void SE_Element::removeChild(SE_Element* e)
 {}
+static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_ImageDataID& imageDataID)
+{
+	SE_ImageData* imageData = NULL;
+    std::string dataPath = resourceManager->getDataPath();
+#if defined(WIN32)
+    std::string filePath = dataPath + "\\" + imageDataID.getStr();
+	const char* str = filePath.c_str();
+	wchar_t wideFilePath[512];
+	MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
+	imageData = SE_ImageCodec::load(wideFilePath);
+#else
+#endif
+	return imageData;
+}
 SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 {
     float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    SE_ImageData* imageData = resourceManager->getImageData(mImageDataID);
-    if(!imageData)
-    {
-        std::string dataPath = resourceManager->getDataPath();
-#if defined(WIN32)
-        std::string filePath = dataPath + "\\" + mImageDataID.getStr();
-		const char* str = filePath.c_str();
-		wchar_t wideFilePath[512];
-		MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
-		imageData = SE_ImageCodec::load(wideFilePath);
-#else
-#endif
-		if(imageData)
-		{
-            resourceManager->setImageData(mImageDataID, imageData);
-		}
-    }
+	SE_ImageData* tex1 = NULL;
+	SE_ImageData* tex2 = NULL;
+	SE_ImageData* imageData = NULL;
+	if(mImageDataID == SE_ImageDataID::INVALID)
+	{
+		tex1 = getImage(resourceManager, "Female dress_001_C.png");
+		tex2 = getImage(resourceManager, "Female dress_001_M.png");
+	}
+	else
+	{
+        imageData = resourceManager->getImageData(mImageDataID);
+        if(!imageData)
+        {
+		    imageData = getImage(resourceManager, mImageDataID);
+		    if(imageData)
+		    {
+                resourceManager->setImageData(mImageDataID, imageData);
+		    }
+        }
+	}
     SE_RectPrimitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
     SE_RectPrimitive::create(rect3D, primitive, primitiveID);
     SE_ImageDataPortion dataPortion(mImageX, mImageY, mImageWidth, mImageHeight);
     if(mImageWidth == 0 || mImageHeight == 0)
     {
-        primitive->setImageData(imageData, SE_TEXTURE0,NOT_OWN);
+		if(imageData)
+		{
+            primitive->setImageData(imageData, SE_TEXTURE0,NOT_OWN);
+		}
+		else
+		{
+			primitive->setImageData(tex1, SE_TEXTURE1, OWN);
+			primitive->setImageData(tex2, SE_TEXTURE2, OWN);
+		}
     }
     else
     {
-        primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, dataPortion);
+		if(imageData)
+		{
+            primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, dataPortion);
+		}
+		else
+		{
+            primitive->setImageData(tex1, SE_TEXTURE1, OWN, dataPortion);
+            primitive->setImageData(tex2, SE_TEXTURE2, OWN, dataPortion);
+		}
     }
     SE_Mesh** meshArray = NULL;
     int meshNum = 0;
     primitive->createMesh(meshArray, meshNum);
     SE_ASSERT(meshNum == 1);
+	for(int i = 0 ; i < meshArray[0]->getSurfaceNum(); i++)
+	{
+		SE_Surface* surface = meshArray[0]->getSurface(i);
+		if(imageData)
+		    surface->setColorBlendMode(SE_TEXTURE0_MODE);
+		else
+		{
+			surface->setColorBlendMode(SE_COLOR_TEXTURE1_TEXTURE2_MODE);
+			surface->setColor(SE_Vector3f(1, 0, 1));
+		}
+	}
     SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
     simObject->setName(mID.getStr());
     SE_SimObjectID simObjectID = SE_ID::createSimObjectID();

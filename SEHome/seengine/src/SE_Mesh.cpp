@@ -43,7 +43,7 @@ SE_Surface::SE_Surface()
     mIndexInGeometryData = NULL;
     mIndexInGeometryDataNum = 0;
 
-	mColorBlendMode = SE_COLOR_MODE;
+	mColorBlendMode = SE_TEXTURE0_MODE;
 }
 SE_Surface::~SE_Surface()
 {

@@ -11,7 +11,6 @@
 #include "SE_Geometry3D.h"
 #include "SE_Spatial.h"
 #include <vector>
-static int _decorateTexFlag[SE_TEXUNIT_NUM] = {0x0, 0x1, 0x2, 0x4};
 struct _TextureBlendProperty
 {
     _TextureBlendProperty()
@@ -165,7 +164,7 @@ SE_RenderUnit::SE_RenderUnit()
 {
 	memset(mHasTexCoord, 0, sizeof(int) * SE_TEXUNIT_NUM);
 	memset(mHasTexture, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	mColorBlendMode = SE_COLOR_TEXTURE0_MODE;
+	mColorBlendMode = SE_TEXTURE0_MODE;
 }
 SE_RenderUnit::~SE_RenderUnit()
 {}
@@ -286,8 +285,26 @@ void SE_RenderUnit::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TY
     }
     else
     {
+		if(glIsTexture(texid) == GL_TRUE)
+		{
+			LOGI("### is texture ####\n");
+		}
         glBindTexture(GL_TEXTURE_2D, texid);
-        return;
+		return;
+		/*
+		GLenum error = glGetError();
+		if(error == GL_NO_ERROR)
+		{
+			return;
+		}
+		else if(error == GL_INVALID_ENUM)
+		{
+			LOGI("### bindtexture error ###\n");
+            glGenTextures(1, &texid);
+            checkGLError();
+            imageData->setTexID(texid);
+		}
+		*/
     }
     glBindTexture(GL_TEXTURE_2D, texid);
     checkGLError();
@@ -319,6 +336,7 @@ void SE_RenderUnit::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TY
         break;
     case CLAMP:
         wraps = GL_CLAMP_TO_EDGE;
+		break;
     default:
         wraps = GL_REPEAT;
     }
@@ -326,6 +344,7 @@ void SE_RenderUnit::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TY
     {
     case REPEAT:
         wrapt = GL_REPEAT;
+		break;
     case CLAMP:
         wrapt = GL_CLAMP_TO_EDGE;
         break;
@@ -624,7 +643,7 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 		{
             SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
             loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-            glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
+            //glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
 			hasTexture = true;
         }
 		else
@@ -640,7 +659,7 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 		    if(imageData)
 		    {
                 loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-                glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
+                //glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
 				hasTexture = true;
 			}
 
@@ -651,6 +670,7 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 		}
 	}
 	mHasTexture[index] = hasTexture;
+	glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
 }
 void SE_TriSurfaceRenderUnit::setImageAndColor(SE_ShaderProgram* shaderProgram)
 {
@@ -695,7 +715,21 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
     int texVertexNum = 0;
 	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-        getDecorateTexVertex(i, texVertex, texVertexNum);
+		if(i == 0)
+		{
+            if(mPrimitiveType == TRIANGLES)
+            {
+				mSurface->getBaseColorFaceTexVertex(texVertex, texVertexNum);
+            }
+            else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
+            {
+				mSurface->getBaseColorTexVertex(texVertex, texVertexNum);
+            }
+		}
+		else
+		{
+            getDecorateTexVertex(i, texVertex, texVertexNum);
+		}
 		if(texVertexNum > 0)
 		{
 			SE_ASSERT(vertexNum == texVertexNum);
@@ -731,7 +765,7 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 	}
 	if(textureAllFound)
 	{
-        glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), mColorBlendMode);
+        glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), blendMode);
 	}
 	else
 	{
