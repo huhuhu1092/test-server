@@ -46,6 +46,10 @@ uniform int u_tex2_coord_same_as_tex0;
 uniform int u_tex3_coord_same_as_tex0;
 uniform int u_tex_combine_mode;
 uniform vec3 u_color;
+uniform vec3 u_colora;
+uniform vec3 u_colorr;
+uniform vec3 u_colorg;
+uniform vec3 u_colorb;
 void main()
 {
     if(u_tex_combine_mode == COLOR_MODE)
@@ -104,7 +108,24 @@ void main()
         {
             color2 = texture2D(u_texture2, v_tex_coord0); 
         }
-        gl_FragColor = vec4(u_color.r * color1.r * color2.r , u_color.g * color1.g * color2.g, u_color.b * color1.b * color2.b, color1.a);
+        float alpha = 0.0;
+        vec3 background = vec3(color1.r, color1.g, color1.b);
+        alpha = color2.b;
+        float r3 = alpha == 0.0 ? background.r : alpha * u_colorb.r * background.r;
+        float g3 = alpha == 0.0 ? background.g : alpha * u_colorb.g * background.g;
+        float b3 = alpha == 0.0 ? background.b : alpha * u_colorb.b * background.b;
+        alpha = color2.g;
+        background = vec3(r3, g3, b3);
+        float r2 = alpha == 0.0 ? background.r : alpha * u_colorg.r * background.r;
+        float g2 = alpha == 0.0 ? background.g : alpha * u_colorg.g * background.g;
+        float b2 = alpha == 0.0 ? background.b : alpha * u_colorg.b * background.b;
+        alpha = color2.r;
+        background = vec3(r2, g2, b2);
+        float r1 =  alpha == 0.0 ? background.r : alpha * u_colorr.r * background.r;
+        float g1 =  alpha == 0.0 ? background.g : alpha * u_colorr.g * background.g;
+        float b1 =  alpha == 0.0 ? background.b : alpha * u_colorr.b * background.b;
+       
+        gl_FragColor = vec4(r1, g1, b1 ,color1.a);
     }
     else if(u_tex_combine_mode == TEXTURE2_TEXTURE3_MODE)
     {
