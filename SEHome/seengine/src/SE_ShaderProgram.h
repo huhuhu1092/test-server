@@ -37,6 +37,7 @@ public:
     }
 	// index start from 1
 	GLint getTexCoordSameAsTex0(int index);
+	GLint getMarkColorUniformLoc(int index);
 protected:
     void link();
     void init(char* vertexShaderSrc, char* fragmentShaderSrc);
@@ -58,6 +59,10 @@ private:
     GLint m_u_tex1_coord_same_as_tex0;
     GLint m_u_tex2_coord_same_as_tex0;
 	GLint m_u_tex3_coord_same_as_tex0;
+	GLint m_u_colora;
+	GLint m_u_colorr;
+	GLint m_u_colorg;
+	GLint m_u_colorb;
     char* mVertexShaderSrc;
     char* mFragmentShaderSrc;
 };

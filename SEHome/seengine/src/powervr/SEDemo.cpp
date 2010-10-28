@@ -162,7 +162,7 @@ void SEDemo::handleInput(int width, int height)
 			return;
 		SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData("TVscreen");
 		//primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
-		primitive->setImageData(imgd, SE_Texture::TEXTURE0, OWN, SE_ImageDataPortion(0, 0, imgd->getWidth() / 2, imgd->getHeight() / 2));
+		primitive->setImageData(imgd, SE_TEXTURE0, OWN, SE_ImageDataPortion(0, 0, imgd->getWidth() / 2, imgd->getHeight() / 2));
 		SE_Mesh** meshArray = NULL;
 		int meshNum = 0;
 		primitive->createMesh(meshArray, meshNum);
@@ -195,7 +195,7 @@ void SEDemo::handleInput(int width, int height)
 		SE_BoxPrimitive::create(SE_Vector3f(1, 1, 1), boxPrimitive, boxPrimitiveID);
 		//boxPrimitive->SE_ImageData* imageData = SE_Application::getInstance()->getResourceManager()->getImageData("TVscreen");
 		//primitive->setImageData(imageData, SE_Texture::TEXTURE0, NOT_OWN);
-		boxPrimitive->setImageData(SE_BoxPrimitive::ALL, imageData, SE_Texture::TEXTURE0, NOT_OWN);
+		boxPrimitive->setImageData(SE_BoxPrimitive::ALL, imageData, SE_TEXTURE0, NOT_OWN);
 		boxPrimitive->createMesh(meshArray, meshNum);
 		SE_SpatialID groupSpatialID = SE_Application::getInstance()->createCommonID();
 	    groupNode = new SE_CommonNode(groupSpatialID, root);

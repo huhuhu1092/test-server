@@ -53,7 +53,7 @@ SE_KeyFrameSequence<T>::SE_KeyFrameSequence()
 template <typename T>
 SE_KeyFrameSequence<T>::~SE_KeyFrameSequence()
 {
-    _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         delete *it;
@@ -63,7 +63,7 @@ SE_KeyFrameSequence<T>::~SE_KeyFrameSequence()
 template <typename T>
 SE_KeyFrameSequence<T>::SE_KeyFrameSequence(const SE_KeyFrameSequence<T>& right)
 {
-    _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::iterator it ;
     for(it = right.begin() ; it != right.end() ; it++)   
     {
         SE_KeyFrame<T>* f = *it;
@@ -80,7 +80,7 @@ SE_KeyFrameSequence<T>& SE_KeyFrameSequence<T>::operator=(const SE_KeyFrameSeque
         return;
     }
     mKeyFrameSequence.clear();
-    _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::iterator it ;
     for(it = right.begin() ; it != right.end() ; it++)   
     {
         SE_KeyFrame<T>* f = *it;
@@ -93,7 +93,7 @@ SE_KeyFrameSequence<T>& SE_KeyFrameSequence<T>::operator=(const SE_KeyFrameSeque
 template <typename T>
 void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
 {
-    _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         if((*it)->key == kf->key)
@@ -107,7 +107,7 @@ void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
 template <typename T>
 SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key)
 {
-    _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         if((*it)->key == key)

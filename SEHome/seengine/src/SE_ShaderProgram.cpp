@@ -191,6 +191,10 @@ void SE_ShaderProgram::link()
 	checkGLError();
 	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
 	checkGLError();
+	m_u_colora = glGetUniformLocation(mShaderProgramObject, "u_colora");
+	m_u_colorr = glGetUniformLocation(mShaderProgramObject, "u_colorr");
+	m_u_colorg = glGetUniformLocation(mShaderProgramObject, "u_colorg");
+	m_u_colorb = glGetUniformLocation(mShaderProgramObject, "u_colorb");
 	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 	checkGLError();
 #ifdef DEBUG0
@@ -260,6 +264,26 @@ GLint SE_ShaderProgram::getTexCoordSameAsTex0(int index)
 		break;
 	case 3:
 		ret = m_u_tex3_coord_same_as_tex0;
+		break;
+	}
+	return ret;
+}
+GLint SE_ShaderProgram::getMarkColorUniformLoc(int index)
+{
+	GLint ret = -1;
+	switch(index)
+	{
+	case 0:
+		ret = m_u_colora;
+		break;
+	case 1:
+		ret = m_u_colorr;
+		break;
+	case 2:
+		ret = m_u_colorg;
+		break;
+	case 3:
+		ret = m_u_colorb;
 		break;
 	}
 	return ret;

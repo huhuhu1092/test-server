@@ -141,6 +141,14 @@ public:
 	{
 		return mColorBlendMode;
 	}
+	SE_Vector3f getMarkColor(int index)
+	{
+		return mMarkColor[index];
+	}
+	void setMarkColor(int index, const SE_Vector3f& c)
+	{
+		mMarkColor[index] = c;
+	}
 	int getSampleMin()
     {
         return mSampleMin;
@@ -228,6 +236,7 @@ private:
     int* mIndexInGeometryData;
     int mIndexInGeometryDataNum;
 	int mColorBlendMode;
+	SE_Vector3f mMarkColor[4];
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.

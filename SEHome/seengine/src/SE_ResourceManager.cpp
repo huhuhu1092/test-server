@@ -347,8 +347,10 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 break;
 			case SE_PRIMITIVEDATA_ID:
 				processPrimitive(inputBuffer, resourceManager);
+                break;
 			case SE_SKINJOINTCONTROLLER_ID:
 				processSkinJointController(inputBuffer, resourceManager);
+                break;
         }
     }
 }

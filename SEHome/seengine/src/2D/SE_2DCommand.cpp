@@ -19,6 +19,7 @@
 #include "SE_AnimationManager.h"
 #include "SE_Animation.h"
 #include "SE_Spatial.h"
+#include "SE_RenderManager.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -48,6 +49,8 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     root->updateWorldLayer();
 	root->updateRenderState();
     sceneManager->addSpatial(NULL, root);
+	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
+	renderManager->setBackground(SE_Vector3f(1, 1, 1));
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)

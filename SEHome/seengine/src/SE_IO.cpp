@@ -1,6 +1,9 @@
 #include "SE_IO.h"
 #include "SE_Log.h"
 #include <stdio.h>
+#if defined(WIN32)
+#include <Shobjidl.h>
+#endif
 static int getFileSize(FILE* fp)
 {
 	int		pos;

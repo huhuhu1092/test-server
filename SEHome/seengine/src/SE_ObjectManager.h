@@ -4,6 +4,7 @@
 template <class T>
 struct SE_FindObjCondition
 {
+	virtual ~SE_FindObjCondition() {}
 	virtual bool isSatisfy(T *) = 0;
 };
 template <class TID, class T>

@@ -124,7 +124,9 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 		else
 		{
 			surface->setColorBlendMode(SE_COLOR_TEXTURE1_TEXTURE2_MODE);
-			surface->setColor(SE_Vector3f(1, 0, 1));
+			SE_Vector3f color[4] = {SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1)};
+			for(int i = 0 ; i < 4 ; i++)
+			    surface->setMarkColor(i, color[i]);
 		}
 	}
     SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);

@@ -601,6 +601,7 @@ void SE_TriSurfaceRenderUnit::setColor(SE_ShaderProgram* shaderProgram)
 {
     SE_MaterialData* md = mSurface->getMaterialData();
     float color[3];
+	SE_Vector3f c = mSurface->getColor();
     if(md)
     {
 		color[0] = md->ambient.x;
@@ -610,13 +611,20 @@ void SE_TriSurfaceRenderUnit::setColor(SE_ShaderProgram* shaderProgram)
     }
     else
     {
-        SE_Vector3f c = mSurface->getColor();
         color[0] = c.x;
         color[1] = c.y;
         color[2] = c.z;
     }
     //checkGLError();
 	glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+	for(int i = 0 ; i < 4 ; i++)
+	{
+	    c = mSurface->getMarkColor(i);
+	    color[0] = c.x;
+	    color[1] = c.y;
+	    color[2] = c.z;
+	    glUniform3fv(shaderProgram->getMarkColorUniformLoc(i), 1, color);
+	}
     //checkGLError()
 }
 void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgram)
