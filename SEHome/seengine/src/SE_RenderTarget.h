@@ -76,6 +76,8 @@ public;
     SE_FrameBufferTarget();
     void create();
     bool prepare();
+private:
+    
 };
 class SE_TextureTarget : public SE_RenderTarget
 {
