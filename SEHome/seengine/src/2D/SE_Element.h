@@ -8,6 +8,7 @@
 #include "SE_MountPoint.h"
 #include <string>
 #include <list>
+#include <map>
 class SE_Spatial;
 class SE_Element;
 class SE_ElementTravel
@@ -17,20 +18,25 @@ public:
     {}
     virtual void visit(SE_Element* e) = 0;
 };
+struct SE_ElementData
+{
+	SE_StringID dataID;
+	SE_MountPointID mountPointID;
+};
 class SE_Element
 {
 public:
     SE_Element();
     SE_Element(float left, float top, float width, float height);
     virtual ~SE_Element();
-	float getLeft()
-	{
-		return mLeft;
-	}
-	float getTop()
-	{
-		return mTop;
-	}
+    float getLeft()
+    {
+	return mLeft;
+    }
+    float getTop()
+    {
+        return mTop;
+    }
     float getWidth()
     {
         return mWidth;
@@ -63,6 +69,22 @@ public:
     {
         return mImageDataID;
     }
+	SE_ActionID getActionID()
+	{
+		return mActionID;
+	}
+	void setActionID(const SE_ActionID& actionID)
+	{
+		mActionID = actionID;
+	}
+	void setStateTableID(const SE_StateTableID& stID)
+	{
+		mStateTableID = stID;
+	}
+	SE_StateTableID getStateTableID()
+	{
+		return mStateTableID;
+	}
     //it is rotated around the center
     void setLocalRotate(const SE_Quat& q)
     {
@@ -121,16 +143,6 @@ public:
     {
         mImageHeight = h;
     }
-    void setAnimation(SE_Animation* anim)
-    {
-        if(mAnimation)
-            delete mAnimation;
-        mAnimation = anim;
-    }
-    SE_Animation* getAnimation()
-    {
-        return mAnimation;
-    }
     SE_SimObjectID getSimObjectID()
     {
         return mSimObjectID;
@@ -159,6 +171,15 @@ public:
     {
         mPivotY = y;
     }
+	void setImageMapRef(const SE_StringID& imageMapRef)
+	{
+		mImageMapRef = imageMapRef;
+	}
+	SE_StringID getImageMapRef()
+	{
+		return mImageMapRef;
+	}
+	SE_StringID getWorldImageMapRef();
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
@@ -168,10 +189,14 @@ public:
     virtual void updateWorldTransform();
     virtual void addChild(SE_Element* e);
     virtual void removeChild(SE_Element* e);
+	virtual void removeChild(const SE_ElementID& id);
     virtual void travel(SE_ElementTravel* travel);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
+	SE_Spatial* createSpatialFromImageData();
+	SE_Spatial* createSpatialFromActionData();
+	SE_Spatial* createSpatialFromStateTableData();
 private:
     float mTop;
     float mLeft;
@@ -184,17 +209,21 @@ private:
     int mImageWidth;
     int mImageHeight;
     SE_Element* mParent;
-    SE_ImageDataID mImageDataID;
+    SE_ElementData mImage;
+    SE_ElementData mAction;
+    SE_ElementData mStateTable;
+	SE_StringID mImageMapRef;//indicate imagemap file name
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
     SE_Layer mLocalLayer;
     SE_ElementID mID;
-    SE_Animation* mAnimation;
     SE_SimObjectID mSimObjectID;
     SE_SpatialID mSpatialID;
     SE_PrimitiveID mPrimitiveID;
-    typedef std::list<SE_MountPoint> _MountPointList;
-    _MountPointList mMountPointList;
+    typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
+    _MountPointList mMountPointMap;
+    typedef std::list<SE_Element*> _ElementList;
+    _ElementList mChildren;
 };
 #endif

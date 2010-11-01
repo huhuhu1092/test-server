@@ -1,0 +1,22 @@
+<Element id="" x = "" y = "" >
+    <MountPoint id="p1" x = "10" y = "10" />
+    <MountPoint id="p2" x = "20" y = "20" />
+    <MountPoint id="p3" x = "30" y = "30" />
+    <Element id="c1" x = "40" y = "40" width="32" height = "32" layer="1">
+        <Image name="yanjian.png" x = "2" y = "2" width = "32" height = "32" />
+    </Element>
+    <Element id="c2" pivotx="10" pivoty="20" width="64" height="64" layer="2" mountpointref="p1">
+        <MountPoint id="p1" x = "2" y = "3" />
+        <MountPoint id="p2" x = "5" y = "4">
+        <Element id = "d3" layer = "4" mountpoint = "p1" imagemapref="imagemap2.xml">
+            <Image dataref="ImageMap.xml/E01/c3[r = t01/t03][g = imagemap.xml/t5/c7][b = t2/t8][a = t4/t9]"/>
+        </Element>
+        <Element id = "d4" layer = "5" mountpoint = "p4" pivotx = "2" pivoty = "3" mountpointref="p2">
+            <StateTable dataref = "statetable.xml/c1" >
+        </Element>
+        <Element id = "d1232" layer = "" mountpoint = "" pivotx = "" pivoty = "" mountpoint="">
+            <Action dataref = "actiondefine.xml/g2">
+        </Element>
+        <Sound>        
+    </Element>
+</Element>

@@ -182,7 +182,5 @@ public:
 private:
     SE_ObjectManager<ID, TABLESET> mTableSets;
 };
-typedef SE_Table<SE_StringID, SE_StringID> SE_ImageTable;
-typedef SE_TableSet<SE_StringID, SE_ImageTable> SE_ImageTableSet;
-typedef SE_TableManager<SE_StringID, SE_TableSet<SE_StringID, SE_ImageTable> > SE_ImageTableManager;
+
 #endif

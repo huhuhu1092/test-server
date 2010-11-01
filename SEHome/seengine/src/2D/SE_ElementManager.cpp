@@ -7,6 +7,8 @@
 #include "SE_Spatial.h"
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
+#include "SE_ImageMap.h"
+#include "SE_ImageTable.h"
 #include "SE_IO.h"
 #include <stdlib.h>
 #include <string.h>
@@ -477,6 +479,8 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 SE_ElementManager::SE_ElementManager()
 {
     mRoot = NULL;
+	mImageMapManager = new SE_ImageMapManager;
+	mImageTableManager = new SE_ImageTableManager;
 	addXmlElementHandler("Element", new SE_ElementHandler(this));
     addXmlElementHandler("ElementGroup", new SE_ElementGroupHandler(this));
     addXmlElementHandler("ImageData", new SE_ImageDataHandler(this));
@@ -491,6 +495,10 @@ SE_ElementManager::~SE_ElementManager()
 {
     if(mRoot)
         delete mRoot;
+	if(mImageTableManager)
+		delete mImageTableManager;
+	if(mImageMapManager)
+		delete mImageMapManager;
 }
 void SE_ElementManager::handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent)
 {

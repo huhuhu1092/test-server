@@ -7,6 +7,8 @@
 #include "SE_Element.h"
 class SE_Spatial;
 class SE_ElementManager;
+class SE_ImageMapManager;
+class SE_ImageTableManager;
 class SE_XmlElementHandler
 {
 public:
@@ -118,6 +120,14 @@ public:
 	void handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent);
 	void handleText(SE_Element* parent, TiXmlText* text);
 	void handleDeclaration(TiXmlDeclaration* decl);
+	SE_ImageMapManager* getImageMapManager()
+	{
+		return mImageMapManager;
+	}
+	SE_ImageTableManager* getImageTableManager()
+	{
+		return mImageTableManager;
+	}
 private:
     SE_ElementManager(const SE_ElementManager&);
     SE_ElementManager& operator=(const SE_ElementManager&);
@@ -126,5 +136,7 @@ private:
     typedef std::map<std::string, SE_XmlElementHandler*> _XmlElementHandlerMap;
     _XmlElementHandlerMap mXmlElementHandlerMap;
     std::string mPath;
+	SE_ImageMapManager* mImageMapManager;
+	SE_ImageTableManager* mImageTableManager;
 };
 #endif

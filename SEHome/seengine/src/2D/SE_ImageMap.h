@@ -81,20 +81,6 @@ public:
     {
         mUnitHeight = h;
     }
-	/*
-    void setImageRect(const SE_ImageRectID& imageRectID, SE_ImageRect* rect)
-    {
-        mImageRectSet.set(imageRectID, rect);
-    }
-    SE_ImageRect* getImageRect(const SE_ImageRectID& imageRectID)
-    {
-        return mImageRectSet.get(imageRectID);
-    }
-    void removeImageRect(const SE_ImageRectID& imageRectID)
-    {
-        mImageRectSet.remove(imageRectID);
-    }
-	*/
 private:
     SE_ImageMapID mID;
     SE_ImageDataID mImageDataID;

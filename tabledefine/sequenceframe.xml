@@ -1,0 +1,11 @@
+<SequenceFrame id="s1" imagemapref="" >
+    <Frame key="1" unit="e01" />
+    <Frame key="10" unit="e01" />
+    <Frame key="20" unit="e02" />
+    <Frame key="30" unit="e02" />
+    <Frame key="40" unit="e02" />
+    <Frame key="50" unit="e02" />
+    <Frame key="60" unit="e01" />
+    <Frame key="80" unit="e01" />
+</SequenceFrame>
+

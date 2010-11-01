@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ImageTable id="">
+    <ImageItem name="Eye_01.png" id="E01" /> 
+    <ImageItem name="Eye_02.png" id="E02" />
+    <ImageItem name="Eye_03.png" id="E03" />
+	<ImageItem name="Eye_04.png" id="E04" />
+	<ImageItem name="Eye_05.png" id="E05" />
+	<ImageItem name="Eye_06.png" id="E06" />
+	<ImageItem name="SpecialEye_01.png" id="E07" />
+	<ImageItem name="Nose_01.png" id="N01" />
+	<ImageItem name="Ear_01.png" id="R01" />
+	<ImageItem name="Brow_02.png" id="B01" />
+	<ImageItem name="SpecialBrow_01.png" id="B02" />
+	<ImageItem name="Face_Texture01.png" id="T01" />
+	<ImageItem name="OtherObject.png" id="O01" />
+	<ImageItem name="Brow_01.png" id="403"/>
+</ImageTable>

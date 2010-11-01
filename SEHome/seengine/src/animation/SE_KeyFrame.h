@@ -24,6 +24,23 @@ public:
     T data;
 };
 template <typename T>
+class SE_KeyFrame<T*>
+{
+public:
+	SE_KeyFrame()
+	{
+		key = 0;
+		data = NULL;
+	}
+	~SE_KeyFrame()
+	{
+        if(data)
+			delete data;
+	}
+	unsigned int key;
+	T* data;
+};
+template <typename T>
 class SE_KeyFrameSequence
 {
 public:
@@ -43,6 +60,7 @@ public:
     {
         return mKeyFrameSequence.size();
     }
+	std::vector<unsigned int> getKeys();
 private:
     typedef std::list<SE_KeyFrame<T>*> _KeyFrameSequence;
     _KeyFrameSequence mKeyFrameSequence;
@@ -59,6 +77,18 @@ SE_KeyFrameSequence<T>::~SE_KeyFrameSequence()
         delete *it;
     }
 
+}
+template <typename T>
+std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys()
+{
+	std::vector<unsigned int> keys(mKeyFrameSequence.size());
+    typename _KeyFrameSequence::iterator it ;
+	int i = 0 ;
+    for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
+    {
+        keys[i] = it->key;
+    }	
+	return keys;
 }
 template <typename T>
 SE_KeyFrameSequence<T>::SE_KeyFrameSequence(const SE_KeyFrameSequence<T>& right)

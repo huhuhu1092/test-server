@@ -16,48 +16,69 @@
 #endif
 SE_Element::SE_Element()
 {
-	mLeft = mTop = mWidth = mHeight = 0;
-	mImageX = mImageY = mImageWidth = mImageHeight = 0;
-	mAnimation = NULL;
-	mParent = NULL;
+    mLeft = mTop = mWidth = mHeight = 0;
+    mImageX = mImageY = mImageWidth = mImageHeight = 0;
+    mAnimation = NULL;
+    mParent = NULL;
     mPivotX = mPivotY = 0;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
-	mLeft = left;
-	mTop = top;
-	mWidth = width;
-	mHeight = height;
-	mImageX = 0;
-	mImageY = 0;
-	mImageWidth = 0;
-	mImageHeight = 0;
-	mAnimation = NULL;
-	mParent = NULL;
+    mLeft = left;
+    mTop = top;
+    mWidth = width;
+    mHeight = height;
+    mImageX = 0;
+    mImageY = 0;
+    mImageWidth = 0;
+    mImageHeight = 0;
+    mAnimation = NULL;
+    mParent = NULL;
     mPivotX = mPivotY = 0;
 }
 SE_Element::~SE_Element()
 {
-	if(mAnimation)
-		delete mAnimation;
+
 }
 void SE_Element::addChild(SE_Element* e)
-{}
+{
+	mChildren.push_back(e);
+	e->setParent(this);
+}
 void SE_Element::removeChild(SE_Element* e)
-{}
+{
+	mChildren.remove(e);
+	e->setParent(NULL);
+}
+void SE_Element::removeChild(const SE_ElementID& id)
+{
+	if(mChildren.empty())
+		return;
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        if(e->getID() == id)
+            break;
+    }
+    if(it != mChildren.end())
+    {
+        mChildren.erase(it);
+    }
+}
 static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_ImageDataID& imageDataID)
 {
-	SE_ImageData* imageData = NULL;
+    SE_ImageData* imageData = NULL;
     std::string dataPath = resourceManager->getDataPath();
 #if defined(WIN32)
     std::string filePath = dataPath + "\\" + imageDataID.getStr();
-	const char* str = filePath.c_str();
-	wchar_t wideFilePath[512];
-	MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
-	imageData = SE_ImageCodec::load(wideFilePath);
+    const char* str = filePath.c_str();
+    wchar_t wideFilePath[512];
+    MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
+    imageData = SE_ImageCodec::load(wideFilePath);
 #else
 #endif
-	return imageData;
+    return imageData;
 }
 SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 {
@@ -156,47 +177,67 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 }
 void SE_Element::travel(SE_ElementTravel* travel)
 {
-    travel->visit(this);
+	travel->visit(this);
+	if(!mChildren.empty())
+    {
+        _ElementList::iterator it;
+        for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+        {
+            SE_Element* e = *it;
+            travel->visit(e);
+        }
+    }
 }
 void SE_Element::updateWorldTransform()
 {}
-void SE_Element::addMountPoint(const SE_MountPoint& mountPoint)
+void SE_Element::addMountPoint(const SE_MountPointID& id, const SE_MountPoint& mountPoint)
 {
-    mMountPointList.push_back(mountPoint);
+    mMountPointMap[id] = mountPoint;
 }
-class isIDEqual
-{
-public:
-    bool operator()(const SE_MountPoint& mp)
-    {
-        if(mp.getID() == id)
-            return true;
-        else
-            return false;
-    }
-    SE_MountPointID id;
-};
-
 void SE_Element::removeMountPoint(const SE_MountPointID& mountPointID)
 {
-    isIDEqual e;
-    e.id = mountPointID;
-    mMountPointList.remove_if(e);
+	_MountPointMap::iterator it = mMountPointMap.find(mountPointID);
+    if(it != mMountPointMap.end())
+		mMountPointMap.erase(it);
 }
 
 void SE_Element::clearMountPoint()
 {
-    mMountPointList.clear();
+    mMountPointMap.clear();
 }
 
 SE_MountPoint SE_Element::findMountPoint(const SE_MountPointID& mountPointID)
 {
-    isIDEqual e;
-    e.id = mountPointID;
-    std::list<SE_MountPoint>::iterator it = find_if(mMountPointList.begin(), mMountPointList.end(), e); 
-	if(it != mMountPointList.end())
-		return *it;
+	_MountPointMap::iterator it = mMountPointMap.find(mountPointID);
+	if(it != mMountPointMap.end())
+		return it->second;
 	else
 		return SE_MountPoint();
 }
-
+SE_StringID SE_Element::getWorldImageMapRef()
+{
+	if(mImageMapRef != SE_StringID::INVALID)
+	{
+		return mImageMapRef;
+	}
+	SE_Element* parent = getParent();
+	SE_StringID ref;
+	while(parent)
+	{
+		ref = parent->getImageMapRef();
+		if(ref != SE_StringID::INVALID)
+			return ref;
+	}
+	return ref;
+}
+SE_Spatial* SE_Element::createSpatialFromImageData()
+{
+	SE_StringID imageDataID = mImage.dataID;
+	SE_StringID imagemapref = getWorldImageMapRef();
+	SE_Image image(imageDataID.getStr(), imagemapref.getStr());
+    
+}
+SE_Spatial* SE_Element::createSpatialFromActionData()
+{}
+SE_Spatial* SE_Element::createSpatialFromStateTableData()
+{}

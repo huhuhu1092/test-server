@@ -1,0 +1,27 @@
+<Action id="t1">
+    <AnimationObject key="1" sequenceref="sequenceframe.xml/s1" layer="1">
+    </AnimationObject>
+</Action>
+
+<Action id="c1" imagemapref="imagemap.xml">
+    <AnimationObject id="a1" key="1"  imageunitref="E02" layer="1">
+    <AnimationObject id="a2" key="10" sequenceref="sequenceframe.xml/s1" layer="2" repeatmode="" timemode="REAL_TIME"/>
+    <AnimationObject id="a3" key="10" coloreffectref="controller.xml/c1" layer="3">
+        <ColorEffectInput>
+            <Background> </Background>
+            <Channel>  </Channel>
+            <Alpha>  </Alpha>
+            <MarkR texure=""> <Color> r g b </Color> </MarkR>  
+        </ColorEffectInput>
+    </AnimationObject>
+    <AnimationObject id="a8" key="15" coloreffectref="controller.xml/f1" controllerref = "controller.xml/c3" layer="4" />
+    <AnimationObject id="k3" key="16" texture="action.xml/c2" controllerref="" layer="3" />
+    <AnimationObject id="a4" key="20" imageunitref="E01" layer="4">
+    <Delete key="30" ref="a1" />
+    <MusicObject key="32" ref="" repeatmode="" times="" />
+    <AnimationObject id="a5" key="35" imageunitref="i2/E01" layer="5" />
+    <AnimationObject id="a7" key="40" imageunitref="E01" layer="6" />
+    <End key = "40" />
+    <End key = "35" layer = "4" />
+</Action>
+

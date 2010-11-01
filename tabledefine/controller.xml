@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<GeometryFrameController id = "f1">
+    <Frame key="1"  x="20" y="30" rotation="0"   scalex="1.0" scaley="1.0" scaleaxis="" /> 
+    <Frame key="20" x="100"   y=""   rotation=""   scalex="" scaley="" />  
+    <Frame key="30" x=""  y=""  rotation="50"  scalex="0.05" scaley="" /> 
+    <Frame key="40" x=""  y=""  rotation=" "   scalex="0.1" scaley="" />
+    <Frame key="50" x="60" y="70" rotation="90"  scalex="1" scaley="" />  
+</GeometryFrameController>
+<ColorEffectFrameController id="c1">
+    <Frame key="1" backgroud="image1[r = ""][g = ""][b = ""][a = ""]" channel="" alpha="">
+        <MarkR texture="" fn = "*"> <Color r="" g="" b="" /> </MarkR> 
+        <MarkG texture="" alpha=""> </MarkG> 
+        <MarkB texture=""> </MarkB> 
+        <MarkA texture=""> </MarkA> </Frame>
+    <Reload key="18" mark="r" texture="" />
+    <Frame key = "20" />
+    <Frame key="23" />
+</ColorEffectFrameController>
+

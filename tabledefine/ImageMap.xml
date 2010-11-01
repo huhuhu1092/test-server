@@ -1,0 +1,16 @@
+<ImageMap id = "imagemap1" imageref="E07" >
+    <Image id="E1" x="" y = "" width = "" height = "" pivotx="" pivoty=""/>
+    <Image id="E3" x="" y = "" width = "" height = "" pivotx="" pivoty="" mirror="xy"/>
+    <Image id="E2" x= "" y = "" width = "" height = "" />
+</ImageMap>
+
+<ImageMap id = "imagemap2" imageref="E08">
+    <UnitWidth> 32 </UnitWidth>
+    <UnitHeight> 32 </UnitWidth>
+    <Image id="c1" x = "" y = "" pivotx="" pivoty=""/>
+    <Image id = "c2" x = "" y = "" pivot="" pivoty=""/>
+</ImageMap>
+
+<ImageMap id = "imagemap3" imageref="E09">
+    <Image id = "c1" x = "" y = "" pivotx="" pivoty = "" width = "" height = "" />
+</ImageMap>
