@@ -5,7 +5,7 @@
 
 <Action id="c1" imagemapref="imagemap.xml">
     <AnimationObject id="a1" key="1"  imageunitref="E02" layer="1">
-    <AnimationObject id="a2" key="10" sequenceref="sequenceframe.xml/s1" layer="2" repeatmode="" timemode="REAL_TIME"/>
+    <AnimationObject id="a2" key="10" sequenceref="sequenceframe.xml/s1" layer="2" repeatmode="" />
     <AnimationObject id="a3" key="10" coloreffectref="controller.xml/c1" layer="3">
         <ColorEffectInput>
             <Background> </Background>
