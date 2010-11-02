@@ -4,6 +4,8 @@
 #include "SE_ID.h"
 #include "SE_Command.h"
 #include "SE_Message.h"
+#include "SE_ImageTable.h"
+#include "SE_ImageMap.h"
 #include <list>
 #include <string>
 #include <vector>
@@ -77,6 +79,14 @@ public:
     {
         return mSimObjectManager;
     }
+	SE_ImageMapManager* getImageMapManager()
+	{
+		return mImageMapManager;
+	}
+	SE_ImageTableManager* getImageTableManager()
+	{
+		return mImageTableManager;
+	}
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
 	//index 0 to max camera num
@@ -142,6 +152,8 @@ protected:
 	SE_AnimationManager* mAnimationManager;
 	SE_ElementManager* mElementManager;
     SE_SimObjectManager* mSimObjectManager;
+	SE_ImageMapManager* mImageMapManager;
+	SE_ImageTableManager* mImageTableManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

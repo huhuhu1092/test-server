@@ -5,10 +5,9 @@
 #include <map>
 #include "tinyxml.h"
 #include "SE_Element.h"
+#include "SE_ElementMap.h"
 class SE_Spatial;
 class SE_ElementManager;
-class SE_ImageMapManager;
-class SE_ImageTableManager;
 class SE_XmlElementHandler
 {
 public:
@@ -27,13 +26,36 @@ public:
     {}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ElementGroupHandler : public SE_XmlElementHandler
+class SE_MountPointHandler : public SE_XmlElementHandler
 {
 public:
-    SE_ElementGroupHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
+    SE_MountPointHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
     {}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_ImageHandler : public SE_XmlElementHandler
+{
+public:
+    SE_ImageHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ActionHandler : public SE_XmlElementHandler
+{
+public:
+    SE_ActionHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StateTableHandler : public SE_XmlElementHandler
+{
+public:
+    SE_StateTableHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+/////////////////////////////////////////////////////////////
+/*
 class SE_AnimationHandler : public SE_XmlElementHandler
 {
 public:
@@ -76,19 +98,13 @@ public:
     {}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+*/
 class SE_ShaderHandler : public SE_XmlElementHandler
 {
 public:
 	SE_ShaderHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
 	{}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
-};
-class SE_MountPointHandler : public SE_XmlElementHandler
-{
-public:
-    SE_MountPointHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent); 
 };
 class SE_ElementManager
 {
@@ -113,20 +129,12 @@ public:
     void addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler);
     void removeXmlElementHandler(const char* elementName);
     void handleXmlChild(SE_Element* parent, TiXmlNode* currNode, unsigned int indent = 0);
-    void setPath(const char* path)
-    {
-        mPath = path;
-    }
 	void handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent);
 	void handleText(SE_Element* parent, TiXmlText* text);
 	void handleDeclaration(TiXmlDeclaration* decl);
-	SE_ImageMapManager* getImageMapManager()
+    SE_ElementMap* getCurrElementMap()
 	{
-		return mImageMapManager;
-	}
-	SE_ImageTableManager* getImageTableManager()
-	{
-		return mImageTableManager;
+		return mCurrElementMap;
 	}
 private:
     SE_ElementManager(const SE_ElementManager&);
@@ -135,8 +143,8 @@ private:
     SE_Element* mRoot;
     typedef std::map<std::string, SE_XmlElementHandler*> _XmlElementHandlerMap;
     _XmlElementHandlerMap mXmlElementHandlerMap;
-    std::string mPath;
-	SE_ImageMapManager* mImageMapManager;
-	SE_ImageTableManager* mImageTableManager;
+    SE_ElementMapManager mElementMapManager;
+	SE_ElementMap* mCurrElementMap;
+
 };
 #endif

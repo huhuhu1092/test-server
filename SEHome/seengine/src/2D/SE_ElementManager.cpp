@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
+/////////////////////////////////
+static const std::string ELEMENT_NODE = "Element";
 //////////////////////////////////
 void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -28,9 +30,11 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
     else
     {
         element->setParent(NULL);
-        elementManager->setRoot(element);
     }
     bool hasLayer = false;
+	bool hasPivotx = false;
+	bool hasPivoty = false;
+	bool hasid = false;
     while(pAttribute)
     {
         const char* name = pAttribute->Name();
@@ -38,7 +42,11 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         int ival = -1;
         if(!strcmp(name, "id"))
         {
-            element->setID(value);
+            element->setID(SE_ElementID(value));
+			if(element->getID().isValid())
+			{
+			    hasid = true;
+			}
         }
         else if(!strcmp(name, "x"))
         {
@@ -106,6 +114,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
             {
                 LOGI("... parse pivotx value error\n");
             }
+			hasPivotx = true;
         }
         else if(!strcmp(name, "pivoty"))
         {
@@ -117,20 +126,142 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
             {
                 LOGI("... parse pivoty value error\n");
             }
+			hasPivoty = true;
         }
+		else if(!strcmp(name, "mountpointref"))
+		{
+			element->setMountPointRef(SE_MountPointID(value));
+		}
+		else if(!strcmp(name, "elementref"))
+		{
+			element->setElementRef(SE_StringID(value));
+		}
+		else if(!strcmp(name , "imagemapref"))
+		{
+			element->setImageMapRef(SE_StringID(value));
+		}
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
     {
         element->setLocalLayer(indent);
     }
+	if(parent == NULL)
+	{
+		if(!hasPivotx || !hasPivoty || !hasid)
+		{
+			LOGE("... element error : top element must has id, pivotx, pivoty\n");
+		}
+	}
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
+	int i = 1;
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
-        elementManager->handleXmlChild(element, pChild, indent + 1);
+        elementManager->handleXmlChild(element, pChild, i++);
     }
+	if(parent == NULL)
+	{
+		elementManager->getCurrElementMap()->set(element->getID(), element);
+	}
 }
+void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	SE_MountPoint mp;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name, "id"))
+		{
+			mp.setID(SE_MountPointID(value));
+		}
+		else if(!strcmp(name, "x"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setX(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		else if(!strcmp(name, "y"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setY(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		pAttribute = pAttribute->Next();
+	}
+	if(parent == NULL)
+	{
+		LOGE("... mount point parent can not be NULL\n");
+	}
+	parent->addMountPoint(mp);
+}
+void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setImage(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_ActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setActionID(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_StateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setStateTableID(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+/*
 void SE_ElementGroupHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -220,6 +351,8 @@ void SE_ElementGroupHandler::handle(SE_Element* parent, TiXmlElement* xmlElement
         elementManager->handleXmlChild(element, pChild, i++);
     }
 }
+*/
+/*
 void SE_AnimationHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -436,6 +569,7 @@ void SE_CoordHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
     }
     anim->addCoord(SE_TextureCoordAnimation::Point(coord[0], coord[1]));
 }
+*/
 void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -479,26 +613,26 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 SE_ElementManager::SE_ElementManager()
 {
     mRoot = NULL;
-	mImageMapManager = new SE_ImageMapManager;
-	mImageTableManager = new SE_ImageTableManager;
+    mCurrElementMap = NULL;
 	addXmlElementHandler("Element", new SE_ElementHandler(this));
-    addXmlElementHandler("ElementGroup", new SE_ElementGroupHandler(this));
-    addXmlElementHandler("ImageData", new SE_ImageDataHandler(this));
-    addXmlElementHandler("TextureCoordAnimation", new SE_TextureCoordAnimationHandler(this));
-    addXmlElementHandler("Animation", new SE_AnimationHandler(this));
-    addXmlElementHandler("UnitWidth", new SE_UnitWidthHandler(this));
-    addXmlElementHandler("UnitHeight", new SE_UnitHeightHandler(this));
-    addXmlElementHandler("Coord", new SE_CoordHandler(this));
+	addXmlElementHandler("Image", new SE_ImageHandler(this));
+    addXmlElementHandler("MountPoint", new SE_MountPointHandler(this));
+	addXmlElementHandler("Action", new SE_ActionHandler(this));
+	addXmlElementHandler("StateTable", new SE_StateTableHandler(this));
+    //addXmlElementHandler("ElementGroup", new SE_ElementGroupHandler(this));
+    //addXmlElementHandler("ImageData", new SE_ImageDataHandler(this));
+    //addXmlElementHandler("TextureCoordAnimation", new SE_TextureCoordAnimationHandler(this));
+    //addXmlElementHandler("Animation", new SE_AnimationHandler(this));
+    //addXmlElementHandler("UnitWidth", new SE_UnitWidthHandler(this));
+    //addXmlElementHandler("UnitHeight", new SE_UnitHeightHandler(this));
+    //addXmlElementHandler("Coord", new SE_CoordHandler(this));
 	addXmlElementHandler("Shader", new SE_ShaderHandler(this));
 }
 SE_ElementManager::~SE_ElementManager()
 {
     if(mRoot)
         delete mRoot;
-	if(mImageTableManager)
-		delete mImageTableManager;
-	if(mImageMapManager)
-		delete mImageMapManager;
+
 }
 void SE_ElementManager::handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent)
 {
@@ -546,11 +680,6 @@ void SE_ElementManager::handleXmlChild(SE_Element* parent, TiXmlNode* currNode, 
         break;
     }
 }
-void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
-{
-    SE_ElementGroup* elementGroup = (SE_ElementGroup*)parent;
-
-}
 void SE_ElementManager::handleDeclaration(TiXmlDeclaration* decl)
 {}
 void SE_ElementManager::load(SE_Element* parent, const char* filePath)
@@ -564,8 +693,11 @@ void SE_ElementManager::load(SE_Element* parent, const char* filePath)
         LOGI("can not open xml file: %s\n", filePath);
         return;
     }
+	SE_StringID elementTableSetID(filePath);
+	SE_ElementMap* ets = new SE_ElementMap;
+	mElementMapManager.set(elementTableSetID, ets);
+	mCurrElementMap = ets;
     handleXmlChild(parent, &doc);
-    
 }
 void SE_ElementManager::addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler)
 {

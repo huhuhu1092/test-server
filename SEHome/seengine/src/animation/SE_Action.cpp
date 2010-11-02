@@ -9,37 +9,82 @@ struct _EqualTest
         else
             return false;
     }
-    SE_StringID id    
+    SE_StringID id;
 };
+
 SE_Action::SE_Action()
 {
-	mRenderMode = REENDER_TO_BUFFER;
+	mRenderMode = RENDER_TO_BUFFER;
 }
 SE_Action::~SE_Action()
 {}
-static bool SE_Action::compareActionLayer(_ActionLayer* first, _ActionLayer* second)
+bool SE_Action::compareActionLayer(_ActionLayer* first, _ActionLayer* second)
 {
 	if(first->layer < second->layer)
 		return true;
 	else
 		return false;
 }
+bool SE_Action::compareEndKey(const _EndKey& first, const _EndKey& second)
+{
+    if(first.layer < second.layer)
+        return true;
+    else
+        return false;
+ 
+}
+SE_Action::_EndKey SE_Action::getAllLayerEndKey()
+{
+    if(mEndKeyList.empty())
+        return _EndKey();
+    _EndKeyEqual ekEqual;
+	ekEqual.ek.layer = SE_Layer(0);
+    ekEqual.justCompareLayer = true;
+    _EndKeyList::iterator it = find_if(mEndKeyList.begin(), mEndKeyList.end(), ekEqual);
+    if(it != mEndKeyList.end())
+        return *it;
+    else
+        return _EndKey();
+}
 void SE_Action::sort()
 {
 	mActionLayerList.sort(&SE_Action::compareActionLayer);
-	typename _ActionLayerList::iterator it;
+	_ActionLayerList::iterator it;
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
 		_ActionLayer* al = *it;
-		unsigned int sk, ek;
 		std::vector<unsigned int> keys = al->sequences.getKeys();
-		al->startkey = min_element(keys.begin(), keys.end());
-		al->endkey = max_element(keys.begin(), keys.end());
+		std::vector<unsigned int>::iterator it;
+		it = min_element(keys.begin(), keys.end());
+		if(it != keys.end())
+			al->startkey = *it;
+		it = max_element(keys.begin(), keys.end());
+		if(it != keys.end())
+		    al->endkey = *it;
 	}
+    mEndKeyList.sort(&SE_Action::compareEndKey);
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+		_ActionLayer* al = *it;
+        SE_Layer layer = al->layer;
+        _EndKeyEqual eqEqual;
+        eqEqual.justCompareLayer = true;
+        eqEqual.ek.layer = layer;
+        _EndKeyList::iterator itKey = find_if(mEndKeyList.begin(), mEndKeyList.end(), eqEqual);
+        if(itKey != mEndKeyList.end())
+        {
+            al->endkey = itKey->key;
+        }
+        else
+        {
+            _EndKey ek = getAllLayerEndKey();
+            al->endkey = ek.key;
+        }
+    }    
 }
 void SE_Action::addKeyFrame(SE_KeyFrame<SE_ActionUnit*>* keyframe)
 {
-	typename _ActionLayerList::iterator it;
+	_ActionLayerList::iterator it;
 	_ActionLayer* currLayer = NULL;
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
@@ -69,8 +114,59 @@ void SE_Action::addActionUnit(unsigned int key, SE_ActionUnit* au)
 	keyframe->key = key;
 	addKeyFrame(keyframe);
 }
+template <>
+struct SE_KeyFrameCompare<SE_ActionUnit*>
+{
+    bool operator()(const SE_KeyFrame<SE_ActionUnit*>* keyframe)
+    {
+        if(keyframe->data->getID() == id)
+            return true;
+        else
+            return false;
+    }
+    SE_StringID id;
+};
 void SE_Action::removeActionUnit(const SE_StringID& auID)
-{}
+{
+    _ActionLayerList::iterator it;
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+	    _ActionLayer* currLayer = *it;
+        SE_KeyFrameCompare<SE_ActionUnit*> eq;
+        eq.id = auID;
+        currLayer->sequences.remove_if(eq);
+    }
+}
 SE_ActionUnit* SE_Action::getActionUnit(const SE_StringID& auID)
-{}
+{
+    _ActionLayerList::iterator it;
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+	    _ActionLayer* currLayer = *it;
+        SE_KeyFrameCompare<SE_ActionUnit*> eq;
+        eq.id = auID;
+        SE_KeyFrame<SE_ActionUnit*>* keyframe = currLayer->sequences.find(eq);
+        if(keyframe != NULL)
+        {
+            return keyframe->data;
+        }
+    }    
+    return NULL;
+}
+
+void SE_Action::addEndKey(unsigned int key, const SE_Layer& layer)
+{
+    _EndKey ek;
+    ek.key = key;
+    ek.layer = layer;
+    mEndKeyList.push_back(ek);
+}
+void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
+{
+    _EndKeyEqual ekEqual;
+    ekEqual.ek.key = key;
+    ekEqual.ek.layer = layer;
+    ekEqual.justCompareLayer = false;
+    mEndKeyList.remove_if(ekEqual);
+}
     

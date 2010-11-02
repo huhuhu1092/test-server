@@ -11,6 +11,6 @@ public:
     void remove(const SE_SimObjectID& simObjectiD);
 	SE_SimObject* findByName(const char* name);
 private:
-    SE_ObjectManager<SE_SimObjectID, SE_SimObject> mSimObjectManager;
+    SE_ObjectManager<SE_SimObjectID, SE_SimObject*> mSimObjectManager;
 };
 #endif

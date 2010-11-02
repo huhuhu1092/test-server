@@ -8,7 +8,7 @@ class SE_ActionUnit
 public:
     virtual ~SE_ActionUnit() {}
     virtual void action() {}
-    SE_StringID getID()
+    SE_StringID getID() const
     {
         return mID;
     }
@@ -20,7 +20,7 @@ public:
 	{
 		mLayer = layer;
 	}
-	SE_Layer getLayer()
+	SE_Layer getLayer() const
 	{
 		return mLayer;
 	}
@@ -134,6 +134,8 @@ public:
     void addActionUnit(unsigned int key, SE_ActionUnit* au);
     void removeActionUnit(const SE_StringID& auID);
 	void sort();
+    void addEndKey(unsigned int key, const SE_Layer& layer);
+    void removeEndKey(unsigned int key, const SE_Layer& layer);
     SE_ActionUnit* getActionUnit(const SE_StringID& auID);
     
     void setRenderMode(int renderMode)
@@ -153,6 +155,7 @@ public:
 		return mImageMapRef;
 	}
 	void play();
+
 private:
     struct _ActionLayer
 	{
@@ -166,11 +169,46 @@ private:
 			endkey = 0;
 		}
 	};
+    struct _EndKey
+    {
+        unsigned int key;
+        SE_Layer layer;
+        _EndKey()
+        {
+            key = 0;
+        }
+    };
+	struct _EndKeyEqual
+	{
+		bool operator()(const _EndKey& key)
+		{
+			if(justCompareLayer)
+			{
+				if(key.layer == ek.layer)
+					return true;
+				else
+					return false;
+			}
+			else
+			{
+				if(key.key == ek.key && key.layer == ek.layer)
+					return true;
+				else
+					return false;
+			}
+		}
+		_EndKey ek;
+		bool justCompareLayer;
+	};
 	void addKeyFrame(SE_KeyFrame<SE_ActionUnit*>* keyframe);
 	static bool compareActionLayer(_ActionLayer* first, _ActionLayer* second);
+    static bool compareEndKey(const _EndKey& first, const _EndKey& second);
+    _EndKey getAllLayerEndKey();
 private:
-	typedef std::list<_ActionLayer> _ActionLayerList;
+	typedef std::list<_ActionLayer*> _ActionLayerList;
+    typedef std::list<_EndKey> _EndKeyList;
     _ActionLayerList mActionLayerList;
+    _EndKeyList mEndKeyList;
     SE_StringID mImageMapRef;
     int mRenderMode;
 };

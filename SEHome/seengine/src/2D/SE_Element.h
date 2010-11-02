@@ -18,11 +18,6 @@ public:
     {}
     virtual void visit(SE_Element* e) = 0;
 };
-struct SE_ElementData
-{
-	SE_StringID dataID;
-	SE_MountPointID mountPointID;
-};
 class SE_Element
 {
 public:
@@ -61,27 +56,35 @@ public:
     {
         mTop = top;
     }
-    void setImageDataID(const SE_ImageDataID& imageDataID)
+    void setElementRef(const SE_StringID& elementref)
     {
-        mImageDataID = imageDataID;
+        mElementRef = elementref;
     }
-    SE_ImageDataID getImageDataID()
+    SE_StringID getElementRef()
     {
-        return mImageDataID;
+        return mElementRef;
     }
-	SE_ActionID getActionID()
+    void setImage(const SE_StringID& image)
+    {
+		mImageID = image;
+    }
+    SE_StringID getImage()
+    {
+		return mImageID;
+    }
+	SE_StringID getActionID()
 	{
 		return mActionID;
 	}
-	void setActionID(const SE_ActionID& actionID)
+	void setActionID(const SE_StringID& actionID)
 	{
 		mActionID = actionID;
 	}
-	void setStateTableID(const SE_StateTableID& stID)
+	void setStateTableID(const SE_StringID& stID)
 	{
 		mStateTableID = stID;
 	}
-	SE_StateTableID getStateTableID()
+	SE_StringID getStateTableID()
 	{
 		return mStateTableID;
 	}
@@ -111,7 +114,7 @@ public:
     {
         return mLocalLayer;
     }
-    void setID(const char* id)
+    void setID(const SE_ElementID& id)
     {
         mID = id;
     }
@@ -179,6 +182,26 @@ public:
 	{
 		return mImageMapRef;
 	}
+	void setMountPointRef(const SE_MountPointID& mp)
+	{
+		mMountPointID = mp;
+	}
+	SE_MountPointID getMountPointRef()
+	{
+		return mMountPointID;
+	}
+	SE_Animation* getAnimation()
+	{
+		return mAnimation;
+	}
+	void setAnimation(SE_Animation* animation)
+	{
+		mAnimation = animation;
+	}
+	void addElementRef(const SE_StringID& elementRefID)
+	{
+		mElementRefList.push_back(elementRefID);
+	}
 	SE_StringID getWorldImageMapRef();
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
@@ -209,9 +232,9 @@ private:
     int mImageWidth;
     int mImageHeight;
     SE_Element* mParent;
-    SE_ElementData mImage;
-    SE_ElementData mAction;
-    SE_ElementData mStateTable;
+    SE_StringID mImageID;
+    SE_StringID mActionID;
+    SE_StringID mStateTableID;
 	SE_StringID mImageMapRef;//indicate imagemap file name
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
@@ -221,9 +244,14 @@ private:
     SE_SimObjectID mSimObjectID;
     SE_SpatialID mSpatialID;
     SE_PrimitiveID mPrimitiveID;
+	SE_MountPointID mMountPointID;
+    SE_StringID mElementRef;
+	SE_Animation* mAnimation;
     typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
-    _MountPointList mMountPointMap;
+    _MountPointMap mMountPointMap;
     typedef std::list<SE_Element*> _ElementList;
     _ElementList mChildren;
+	typedef std::list<SE_StringID> _ElementRefList;
+	_ElementRefList mElementRefList;
 };
 #endif

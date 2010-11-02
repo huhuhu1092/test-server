@@ -41,6 +41,14 @@ public:
 	T* data;
 };
 template <typename T>
+struct SE_KeyFrameCompare
+{
+    bool operator()(const SE_KeyFrame<T>* keyframe)
+    {
+        return false;
+    }
+};
+template <typename T>
 class SE_KeyFrameSequence
 {
 public:
@@ -61,10 +69,41 @@ public:
         return mKeyFrameSequence.size();
     }
 	std::vector<unsigned int> getKeys();
+    SE_KeyFrame<T>* find(SE_KeyFrameCompare<T> compare);
+	void remove_if(SE_KeyFrameCompare<T> compare);
 private:
     typedef std::list<SE_KeyFrame<T>*> _KeyFrameSequence;
     _KeyFrameSequence mKeyFrameSequence;
 };
+template <typename T>
+SE_KeyFrame<T>* SE_KeyFrameSequence<T>::find(SE_KeyFrameCompare<T> compare)
+{
+    typename _KeyFrameSequence::iterator it ;
+    for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
+    {
+        if(compare(*it))
+            return *it;
+    }
+    return NULL;
+}
+template <typename T>
+void SE_KeyFrameSequence<T>::remove_if(SE_KeyFrameCompare<T> compare)
+{
+    typename _KeyFrameSequence::iterator it ;
+	typename _KeyFrameSequence::iterator removedIt;
+    for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
+    {
+        if(compare(*it))
+		{
+            removedIt = it;
+			break;
+		}
+    }
+	if(removedIt != mKeyFrameSequence.end())
+	{
+		mKeyFrameSequence.erase(removedIt);
+	}
+}
 template <typename T>
 SE_KeyFrameSequence<T>::SE_KeyFrameSequence()
 {}
@@ -86,7 +125,7 @@ std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys()
 	int i = 0 ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
-        keys[i] = it->key;
+        keys[i] = (*it)->key;
     }	
 	return keys;
 }

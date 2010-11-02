@@ -120,12 +120,12 @@ public:
     SE_Vector3f getColor();
     void getVertexIndex(int*& index, int& indexNum);
 	void getVertex(_Vector3f*& vertex, int & vertexNum);
-	void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-	void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+	//void getTexVertex(_Vector2f*& texVertex, int& texVertexNum);
+	void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
 
     void getFaceVertex(_Vector3f*& vertex, int& vertexNUm);
-    void getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertecNum);
-	void getDecorateFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+    //void getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertecNum);
+	void getFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
     SE_ProgramDataID getProgramDataID();
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
@@ -224,13 +224,16 @@ private:
     int mWrapT;
 	_Vector3f* mVertex;
 	int mVertexNum;
+
 	_Vector2f* mTexVertex;
 	int mTexVertexNum;
 
     _Vector3f* mFaceVertex;
     int mFaceVertexNum;
+
     _Vector2f* mFaceTexVertex;
     int mFaceTexVertexNum;
+
     int* mIndex;
     int mIndexNum; 
     int* mIndexInGeometryData;

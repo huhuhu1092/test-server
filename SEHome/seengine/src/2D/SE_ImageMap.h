@@ -18,14 +18,7 @@ struct SE_ImageRect
         width = height = -1;
     }
 };
-template<>
-struct SE_IDTrait<SE_ImageMapID>
-{
-    static SE_ImageMapID SE_ConvertToID(const char* str)
-    {
-        return SE_ID::createImageMapID(str);
-    }
-}
+
 class SE_ImageMap : public SE_Table<SE_StringID, SE_ImageRect*, SE_IDTrait<SE_StringID> >
 {
 public:
@@ -49,11 +42,11 @@ public:
     {
         return mMirrorType;
     }
-    void setID(const SE_ImageMapID& id)
+    void setID(const SE_StringID& id)
     {
         mID = id;
     }
-    SE_ImageMapID getID()
+    SE_StringID getID()
     {
         return mID;
     }
@@ -82,13 +75,13 @@ public:
         mUnitHeight = h;
     }
 private:
-    SE_ImageMapID mID;
+    SE_StringID mID;
     SE_ImageDataID mImageDataID;
     int mUnitWidth;
     int mUnitHeight;
     int mMirrorType;
-    SE_ObjectManager<SE_ImageRectID, SE_ImageRect> mImageRectSet;
+    SE_ObjectManager<SE_StringID, SE_ImageRect> mImageRectSet;
 };
-typedef SE_TableSet<SE_ImageMapID, SE_ImageMap> SE_ImageMapSet;
-typedef SE_TableManager<SE_ImageMapSetID, SE_ImageMapSet> SE_ImageMapManager;
+typedef SE_TableSet<SE_StringID, SE_ImageMap> SE_ImageMapSet;
+typedef SE_TableManager<SE_StringID, SE_ImageMapSet> SE_ImageMapManager;
 #endif

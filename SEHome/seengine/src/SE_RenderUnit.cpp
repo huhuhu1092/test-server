@@ -164,10 +164,12 @@ SE_RenderUnit::SE_RenderUnit()
 {
 	memset(mHasTexCoord, 0, sizeof(int) * SE_TEXUNIT_NUM);
 	memset(mHasTexture, 0, sizeof(int) * SE_TEXUNIT_NUM);
+	memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
 	mColorBlendMode = SE_TEXTURE0_MODE;
 }
 SE_RenderUnit::~SE_RenderUnit()
 {}
+/*
 void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
 {
 	imageIDArray = NULL;
@@ -178,22 +180,23 @@ void SE_RenderUnit::getBaseColorImage(SE_ImageData**& imageDataArray, int& image
 	imageDataArray = NULL;
 	imageDataNum = 0;
 }
-void SE_RenderUnit::getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
+*/
+void SE_RenderUnit::getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
 {
 }
-void SE_RenderUnit::getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
+void SE_RenderUnit::getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {}
 void SE_RenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
 	vertex = NULL;
 	vertexNum = 0;
 }
-void SE_RenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
+void SE_RenderUnit::getTexVertex(_Vector2f*& texVertex, int& texVertexNum)
 {
 	texVertex = NULL;
 	texVertexNum = 0;
 }
-
+/*
 void SE_RenderUnit::getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
 {
 	texVertex = NULL;
@@ -203,7 +206,7 @@ bool SE_RenderUnit::decorateTexCoordSameAsBaseColor(int texIndex)
 {
     return true;
 }
-
+*/
 SE_MaterialData* SE_RenderUnit::getMaterialData()
 {
     return 0;
@@ -398,28 +401,12 @@ SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
     mTexVertexNum = 0;
     mPrimitiveType = TRIANGLES;
 }
+/*
 void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
 {
 	getImageDataID(SE_TEXTURE0, imageDataIDArray, imageDataIDNum);
-	/*
-    SE_Texture* tex = mSurface->getTexture();
-    if(!tex)
-    {
-        imageIDArray = NULL;
-        imageIDNum = 0;
-        return;
-    }
-    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_TEXTURE0);
-	if(!texUnit)
-	{
-		imageIDArray = NULL;
-		imageIDNum = 0;
-		return;
-	}
-    imageIDNum = texUnit->getImageDataIDNum();
-    imageIDArray = texUnit->getImageDataID();   
-	*/
 }
+*/
 void SE_TriSurfaceRenderUnit::getImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {
     SE_Texture* tex = mSurface->getTexture();
@@ -458,7 +445,7 @@ void SE_TriSurfaceRenderUnit::getImageDataID(int texIndex, SE_ImageDataID*& imag
     imageIDArray = texUnit->getImageDataID();    
 
 }
-void SE_TriSurfaceRenderUnit::getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
+void SE_TriSurfaceRenderUnit::getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
 {
 	if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
 	{
@@ -468,7 +455,7 @@ void SE_TriSurfaceRenderUnit::getDecorateTexImageID(int texIndex, SE_ImageDataID
 	}
     return getImageDataID(texIndex, imageDataIDArray, imageDataIDNum);
 }
-void SE_TriSurfaceRenderUnit::getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
+void SE_TriSurfaceRenderUnit::getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {
 	if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
 	{
@@ -576,27 +563,12 @@ SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
 	if(mTexVertex)
         delete[] mTexVertex;
 }
+/*
 void SE_TriSurfaceRenderUnit::getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum)
 {
 	getImage(SE_TEXTURE0, imageDataArray, imageDataNum);
-	/*
-    SE_Texture* tex = mSurface->getTexture();
-    if(!tex)
-    {
-        imageDataArray = NULL;
-        imageDataNum = 0;
-        return;
-    }
-    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_TEXTURE0);
-	if(!texUnit)
-	{
-		imageDataArray = NULL;
-		imageDataNum = 0;
-		return;
-	}
-	texUnit->getImageData(imageDataArray, imageDataNum);
-	*/
 }
+*/
 void SE_TriSurfaceRenderUnit::setColor(SE_ShaderProgram* shaderProgram)
 {
     SE_MaterialData* md = mSurface->getMaterialData();
@@ -688,15 +660,15 @@ void SE_TriSurfaceRenderUnit::setImageAndColor(SE_ShaderProgram* shaderProgram)
 	}
 	setColor(shaderProgram);
 }
-void SE_TriSurfaceRenderUnit::getDecorateTexVertex(int index, _Vector2f*& texVertex, int& texVertexNum)
+void SE_TriSurfaceRenderUnit::getTexVertex(int index, _Vector2f*& texVertex, int& texVertexNum)
 {
 	if(mPrimitiveType == TRIANGLES)
     {
-        mSurface->getDecorateFaceTexVertex(index, texVertex, texVertexNum);
+        mSurface->getFaceTexVertex(index, texVertex, texVertexNum);
     }
     else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
     {
-        mSurface->getDecorateTexVertex(index, texVertex, texVertexNum);
+        mSurface->getTexVertex(index, texVertex, texVertexNum);
 	}
 }
 void SE_TriSurfaceRenderUnit::setVertex(SE_ShaderProgram* shaderProgram, _Vector3f*& vertex, int& vertexNum, int*& indexArray, int& indexNum)
@@ -723,21 +695,7 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
     int texVertexNum = 0;
 	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-		if(i == 0)
-		{
-            if(mPrimitiveType == TRIANGLES)
-            {
-				mSurface->getBaseColorFaceTexVertex(texVertex, texVertexNum);
-            }
-            else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
-            {
-				mSurface->getBaseColorTexVertex(texVertex, texVertexNum);
-            }
-		}
-		else
-		{
-            getDecorateTexVertex(i, texVertex, texVertexNum);
-		}
+        getTexVertex(i, texVertex, texVertexNum);
 		if(texVertexNum > 0)
 		{
 			SE_ASSERT(vertexNum == texVertexNum);
@@ -751,10 +709,12 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
 			glDisableVertexAttribArray(shaderProgram->getTextureCoordAttributeLoc(i));
 		}
 	}
+	/*
     for(int i = 1 ; i < SE_TEXUNIT_NUM ; i++)
 	{
 		glUniform1i(shaderProgram->getTexCoordSameAsTex0(i), mHasTexCoord[i]);
 	}
+	*/
 }
 void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgram)
 {

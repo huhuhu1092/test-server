@@ -32,6 +32,7 @@ public:
 private:
 	void parse();
 	SE_StringID createImageDataFullPath(const char* inputstr);
+	void calculateDimension();
 private:
 	std::string mUrl;
 	std::string mDefaultImageMapRef;

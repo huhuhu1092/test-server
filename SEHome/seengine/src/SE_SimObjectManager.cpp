@@ -12,7 +12,7 @@ void SE_SimObjectManager::remove(const SE_SimObjectID& simObjectID)
 {
     mSimObjectManager.remove(simObjectID);
 }
-struct _FindSimObj : public SE_FindObjCondition<SE_SimObject>
+struct _FindSimObj : public SE_FindObjCondition<SE_SimObject*>
 {
 	bool isSatisfy(SE_SimObject* obj)
 	{

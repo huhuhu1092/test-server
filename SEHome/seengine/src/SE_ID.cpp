@@ -64,7 +64,7 @@ SE_StringID& SE_StringID::operator=(const SE_StringID& id)
 bool SE_StringID::isValid() const
 {
     SE_StringID invalid("");
-    return *this == invalid;
+    return *this != invalid;
 }
 void SE_StringID::print() const
 {

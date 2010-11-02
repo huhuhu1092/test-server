@@ -1,29 +1,112 @@
 #ifndef SE_OBJECTMANAGER_H
 #define SE_OBJECTMANAGER_H
 #include <map>
-template <class T>
+template <typename T>
 struct SE_FindObjCondition
 {
 	virtual ~SE_FindObjCondition() {}
-	virtual bool isSatisfy(T *) = 0;
+	virtual bool isSatisfy(T data) = 0;
 };
-template <class TID, class T>
+template <typename T>
+struct SE_FindObjCondition<T*>
+{
+	virtual ~SE_FindObjCondition() {}
+	virtual bool isSatisfy(T* data) = 0;
+};
+////////////////////////////////////////////
+template <typename TID, typename T>
 class SE_ObjectManager
 {
 public:
-    typedef std::map<TID, T*> RMap;
-    T* get(const TID& id);
-    void set(const TID& id, T* data);
+    typedef std::map<TID, T> RMap;
+    T get(const TID& id);
+    void set(const TID& id, T data);
     void remove(const TID& id);
-	T* find(SE_FindObjCondition<T>& fc);
+	T find(SE_FindObjCondition<T>& fc);
     bool isContain(const TID& id);
     ~SE_ObjectManager();
 private:
     RMap m;
 };
 
-template <class TID, class T>
+template <typename TID, typename T>
 void SE_ObjectManager<TID, T>::remove(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it != m.end())
+    {
+        m.erase(it);
+    }
+}
+
+template <typename TID, typename T>
+T SE_ObjectManager<TID, T>::get(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+        return T();
+    else
+        return it->second;
+}
+template <typename TID, typename T>
+void SE_ObjectManager<TID, T>::set(const TID& id, T data)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+    {
+        m.insert(std::pair<TID, T>(id, data));
+    }
+    else
+    {
+        it->second = data;
+    }
+}
+template <typename TID, typename T>
+SE_ObjectManager<TID, T>::~SE_ObjectManager()
+{
+
+}
+template <class TID, class T>
+T SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc)
+{
+    typename RMap::iterator it;
+    for(it = m.begin() ; it != m.end() ; it++)
+    {
+		T data = it->second;
+		if(fc.isSatisfy(data))
+		{
+			return data;
+		}
+	}
+	return T();
+}
+template <class TID, class T>
+bool SE_ObjectManager<TID, T>::isContain(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+        return false;
+    else
+        return true;
+}
+////////////////////////////////////////////
+template <typename TID, typename T>
+class SE_ObjectManager<TID, T*>
+{
+public:
+    typedef std::map<TID, T*> RMap;
+    T* get(const TID& id);
+    void set(const TID& id, T* data);
+    void remove(const TID& id);
+	T* find(SE_FindObjCondition<T*>& fc);
+    bool isContain(const TID& id);
+    ~SE_ObjectManager();
+private:
+    RMap m;
+};
+
+template <typename TID, typename T>
+void SE_ObjectManager<TID, T*>::remove(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it != m.end())
@@ -33,8 +116,8 @@ void SE_ObjectManager<TID, T>::remove(const TID& id)
     }
 }
 
-template <class TID, class T>
-T* SE_ObjectManager<TID, T>::get(const TID& id)
+template <typename TID, typename T>
+T* SE_ObjectManager<TID, T*>::get(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())
@@ -42,8 +125,8 @@ T* SE_ObjectManager<TID, T>::get(const TID& id)
     else
         return it->second;
 }
-template <class TID, class T>
-void SE_ObjectManager<TID, T>::set(const TID& id, T* data)
+template <typename TID, typename T>
+void SE_ObjectManager<TID, T*>::set(const TID& id, T* data)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())
@@ -57,8 +140,8 @@ void SE_ObjectManager<TID, T>::set(const TID& id, T* data)
         delete oldData;
     }
 }
-template <class TID, class T>
-SE_ObjectManager<TID, T>::~SE_ObjectManager()
+template <typename TID, typename T>
+SE_ObjectManager<TID, T*>::~SE_ObjectManager()
 {
     typename RMap::iterator it;
     for(it = m.begin() ; it != m.end() ; it++)
@@ -67,8 +150,8 @@ SE_ObjectManager<TID, T>::~SE_ObjectManager()
         delete data;
     }
 }
-template <class TID, class T>
-T* SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc)
+template <typename TID, typename T>
+T* SE_ObjectManager<TID, T*>::find(SE_FindObjCondition<T*>& fc)
 {
     typename RMap::iterator it;
     for(it = m.begin() ; it != m.end() ; it++)
@@ -79,9 +162,10 @@ T* SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc)
 			return data;
 		}
 	}
+	return NULL;
 }
-template <class TID, class T>
-bool SE_ObjectManager<TID, T>::isContain(const TID& id)
+template <typename TID, typename T>
+bool SE_ObjectManager<TID, T*>::isContain(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())

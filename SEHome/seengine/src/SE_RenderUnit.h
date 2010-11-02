@@ -24,22 +24,28 @@ class SE_RenderUnit
 public:
 	SE_RenderUnit();
     virtual ~SE_RenderUnit();
+	/*
 	//base color image use TEXTURE0
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
 	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
     virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-
-	//texIndex start from 1
-    virtual void getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
-	virtual void getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
-    virtual void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+*/
+	//texIndex start from 0
+    virtual void getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
+	virtual void getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
+    virtual void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
 
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
 public:
-    bool decorateTexCoordSameAsBaseColor(int texIndex);
+	//texIndex is tex1, tex2, ...texn
+	//texIndexHasTexCoord is the tex index which has texture coordinate
+    void setTexCoordIndex(int texIndex, int texIndexHasTexCoord)
+	{
+		mTexCoordIndex[texIndex] = texIndexHasTexCoord;
+	}
 
     SE_PRIMITIVE_TYPE getPrimitiveType()
     {
@@ -88,6 +94,7 @@ protected:
 	SE_PointerOwner<SE_RenderState> mRenderState[SE_Spatial::RENDERSTATE_NUM];
 	int mHasTexCoord[SE_TEXUNIT_NUM];
 	int mHasTexture[SE_TEXUNIT_NUM];
+	int mTexCoordIndex[SE_TEXUNIT_NUM];
 	int mColorBlendMode;
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
@@ -95,13 +102,14 @@ class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 public:
     SE_TriSurfaceRenderUnit(SE_Surface* mesh);
     ~SE_TriSurfaceRenderUnit();
+	/*
     virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
 	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
     virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-
-	void getDecorateTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
-    void getDecorateTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
-    void getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+    */
+	void getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
+    void getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
+    void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
 
     virtual void getVertex(_Vector3f*& vertex, int & vertexNum);
     virtual SE_MaterialData* getMaterialData();

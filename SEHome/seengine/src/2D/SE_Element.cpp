@@ -10,6 +10,7 @@
 #include "SE_SimObjectManager.h"
 #include "SE_MountPoint.h"
 #include "SE_Mesh.h"
+#include "SE_Image.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
@@ -82,6 +83,7 @@ static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_Imag
 }
 SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 {
+	/*
     float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
@@ -174,6 +176,8 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
         mAnimation->setSimObjectID(mSimObjectID);
 	}
 	return geom;
+	*/
+	return NULL;
 }
 void SE_Element::travel(SE_ElementTravel* travel)
 {
@@ -190,9 +194,9 @@ void SE_Element::travel(SE_ElementTravel* travel)
 }
 void SE_Element::updateWorldTransform()
 {}
-void SE_Element::addMountPoint(const SE_MountPointID& id, const SE_MountPoint& mountPoint)
+void SE_Element::addMountPoint(const SE_MountPoint& mountPoint)
 {
-    mMountPointMap[id] = mountPoint;
+    mMountPointMap[mountPoint.getID()] = mountPoint;
 }
 void SE_Element::removeMountPoint(const SE_MountPointID& mountPointID)
 {
@@ -232,12 +236,16 @@ SE_StringID SE_Element::getWorldImageMapRef()
 }
 SE_Spatial* SE_Element::createSpatialFromImageData()
 {
-	SE_StringID imageDataID = mImage.dataID;
+	SE_StringID imageDataID = mImageID;
 	SE_StringID imagemapref = getWorldImageMapRef();
 	SE_Image image(imageDataID.getStr(), imagemapref.getStr());
-    
+    return NULL;
 }
 SE_Spatial* SE_Element::createSpatialFromActionData()
-{}
+{
+	return NULL;
+}
 SE_Spatial* SE_Element::createSpatialFromStateTableData()
-{}
+{
+	return NULL;
+}

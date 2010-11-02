@@ -2,19 +2,20 @@
 #include "SE_Mesh.h"
 #include "SE_Utils.h"
 #include "SE_ImageMap.h"
+#include "SE_Log.h"
 enum STR_STATE {START, ERROR, REPLACE, READY_R, READY_G, READY_B, READY_A,R, G, B, A};
 static const char REPLACESTART = '[';
 static const char REPLACEEND = ']';
 static const char RED = 'r';
 static const char GREEN = 'g';
 static const char BLUE = 'b';
-static const char alpha = 'a';
+static const char ALPHA = 'a';
 static bool isDelimit(int c)
 {
 	if(c <= 32)
 		return true;
 	else 
-		return false
+		return false;
 }
 SE_Image::SE_Image(const char* url, const char* imagemapref)
 {
@@ -31,12 +32,16 @@ SE_Image::SE_Image(const char* url, const char* imagemapref)
 }
 void SE_Image::calculateDimension()
 {
-	if(mBaseColor)
+	
 }
 int SE_Image::getWidth()
-{}
+{
+	return 0;
+}
 int SE_Image::getHeight()
-{}
+{
+	return 0;
+}
 void SE_Image::setSurface(SE_Surface* surface)
 {}
 void SE_Image::parse()
@@ -60,13 +65,9 @@ void SE_Image::parse()
 			{
 			    if(!isDelimit(c))
 			    {
-				    currStr = currStr + c;
+				    currStr += c;
 			    }
 			}
-			break;
-		case END:
-			break;
-		case ERROR:
 			break;
 		case REPLACE:
 			if(c == RED || c == GREEN || c == BLUE || c == ALPHA)
