@@ -339,6 +339,7 @@ SE_ElementManager::~SE_ElementManager()
         delete mRoot;
 
 }
+/*
 void SE_ElementManager::handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent)
 {
     if(!pElement)
@@ -387,9 +388,12 @@ void SE_ElementManager::handleXmlChild(SE_Element* parent, TiXmlNode* currNode, 
 }
 void SE_ElementManager::handleDeclaration(TiXmlDeclaration* decl)
 {}
-void SE_ElementManager::load(SE_Element* parent, const char* filePath)
+*/
+void SE_ElementManager::load(const char* filePath)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	mRoot = resourceManager->loadElement(filePath);
+	/*
 	std::string fileFullPath = std::string(resourceManager->getDataPath()) + "\\" + filePath;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
@@ -403,7 +407,9 @@ void SE_ElementManager::load(SE_Element* parent, const char* filePath)
 	mElementMapManager.set(elementTableSetID, ets);
 	mCurrElementMap = ets;
     handleXmlChild(parent, &doc);
+	*/
 }
+/*
 void SE_ElementManager::addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler)
 {
     _XmlElementHandlerMap::iterator it = mXmlElementHandlerMap.find(elementName);
@@ -427,6 +433,7 @@ void SE_ElementManager::removeXmlElementHandler(const char* elementName)
         mXmlElementHandlerMap.erase(it);
     }
 }
+*/
 SE_Spatial* SE_ElementManager::createSpatial()
 {
     if(!mRoot)

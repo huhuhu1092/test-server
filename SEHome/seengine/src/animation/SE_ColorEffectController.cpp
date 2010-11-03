@@ -14,5 +14,5 @@ void SE_ColorEffectController::addKeyFrame(unsigned int key, SE_ColorEffectFrame
 SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key)
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
-    return frame;
+    return frame->data;
 }

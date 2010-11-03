@@ -39,12 +39,7 @@ void getImageWidthHeight(SE_Util::SplitStringList& stringList, int& width, int& 
 	std::string fileName = stringList[0];
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	std::string filePath = std::string(resourceManager->getLayoutPath()) + SE_SEP + fileName;
-	SE_ImageMapManager* imageMapManager = SE_Application::getInstance()->getImageMapManager();
-	SE_ImageMapSet* imageMapSet = imageMapManager->getItem(fileName);
-	if(imageMapSet == NULL)
-	{
 
-	}
 }
 void SE_Image::calculateDimension()
 {
@@ -76,14 +71,14 @@ void SE_Image::parse()
 {
 	std::string::iterator it;
 	std::string base, red, green, blue, alpha;
-	int currState = START;
+	int currState = _START;
 	std::string currStr;
 	for(it = mUrl.begin() ; it != mUrl.end() ; it++)
 	{
         int c = *it;
         switch(currState)
 		{
-		case START:
+		case _START:
 			if(c == REPLACESTART)
 			{
                 currState = REPLACE;
@@ -122,7 +117,7 @@ void SE_Image::parse()
 				{
 					if(c == REPLACEEND)
 					{
-						currState = START;
+						currState = _START;
 					}
 					else
 					{
@@ -143,7 +138,7 @@ void SE_Image::parse()
 				{
 				    if(c == REPLACEEND)
 				    {
-						currState = START;
+						currState = _START;
 				    }
 					else
 					{
@@ -164,7 +159,7 @@ void SE_Image::parse()
 				{
 				    if(c == REPLACEEND)
 				    {
-						currState = START;
+						currState = _START;
 				    }
 					else
 					{
@@ -185,7 +180,7 @@ void SE_Image::parse()
 				{
 				    if(c == REPLACEEND)
 				    {
-						currState = START;
+						currState = _START;
 				    }
 					else
 					{
@@ -206,7 +201,7 @@ void SE_Image::parse()
 				{
 				    if(c == REPLACEEND)
 				    {
-						currState = START;
+						currState = _START;
 				    }
 					else
 					{
@@ -221,7 +216,7 @@ void SE_Image::parse()
 				if(c == REPLACEEND)
 				{
 					red = currStr;
-					currState = START;
+					currState = _START;
 				}
 				else
 				{
@@ -235,7 +230,7 @@ void SE_Image::parse()
 				if(c == REPLACEEND)
 				{
 					green = currStr;
-					currState = START;
+					currState = _START;
 				}
 				else
 				{
@@ -249,7 +244,7 @@ void SE_Image::parse()
 				if(c == REPLACEEND)
 				{
 					blue = currStr;
-					currState = START;
+					currState = _START;
 				}
 				else
 				{
@@ -263,7 +258,7 @@ void SE_Image::parse()
 				if(c == REPLACEEND)
 				{
 					alpha = currStr;
-					currState = START;
+					currState = _START;
 				}
 				else
 				{
@@ -273,7 +268,7 @@ void SE_Image::parse()
 			break;
 		}
 	}
-	if(currState != START)
+	if(currState != _START)
 	{
 		LOGE("... string input has error. please check\n");
 	}

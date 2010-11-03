@@ -20,6 +20,7 @@
 #include "SE_Animation.h"
 #include "SE_Spatial.h"
 #include "SE_RenderManager.h"
+#include "SE_ImageMap.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -33,8 +34,11 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
+	resourceManager->loadImageTable("ImageTable1.xml");
+	SE_ImageUnit iu = resourceManager->getImageUnit("ImageTable1.xml/it1/E01");
+	/*
     SE_ElementManager* elementManager = mApp->getElementManager();
-    elementManager->load(NULL, fileName.c_str());
+    elementManager->load(fileName.c_str());
     SE_SceneManager* sceneManager = mApp->getSceneManager();
     SE_Spatial* root = elementManager->createSpatial();
     SE_DepthTestState* rs = new SE_DepthTestState();
@@ -51,6 +55,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     sceneManager->addSpatial(NULL, root);
 	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
 	renderManager->setBackground(SE_Vector3f(1, 1, 1));
+	*/
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)

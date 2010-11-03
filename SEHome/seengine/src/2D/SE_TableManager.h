@@ -85,9 +85,13 @@ public:
         else
             return false;
     }
-	PROPERTY getProperty()
+	PROPERTY& getProperty()
 	{
 		return mProperty;
+	}
+	int size()
+	{
+		return mItemMap.size();
 	}
 private:
     typedef std::map<ID, VALUE> _TableItemMap;
@@ -116,9 +120,13 @@ public:
     {
         return mTableItems.isContain(id);
     }
-	PROPERTY getProperty()
+	PROPERTY& getProperty()
 	{
 		return mProperty;
+	}
+	int size()
+	{
+		return mTableItems.size();
 	}
 private:
     SE_ObjectManager<ID, VALUE*> mTableItems;

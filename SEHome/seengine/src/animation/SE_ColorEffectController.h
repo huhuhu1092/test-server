@@ -6,7 +6,7 @@
 class SE_ColorEffectFrame
 {
 public:
-    virtual ~SE_ColorEffectFrameFunc()
+    virtual ~SE_ColorEffectFrame()
     {}
     virtual void run() {}
 };
@@ -22,7 +22,7 @@ public:
     };
     void setBackground(const SE_StringID& background)
     {
-        mBackGroundID = background;
+        mBackgroundID = background;
     }
     SE_StringID getBackground()
     {
@@ -56,7 +56,7 @@ public:
     _TextureColor* getTextureColor(int index)
     {
         if(index < MARK_A || index >= MARK_NUM)
-            return;
+            return NULL;
         return mTextureColorData[index];
     }
     void run();

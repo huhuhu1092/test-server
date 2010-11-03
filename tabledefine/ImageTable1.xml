@@ -7,7 +7,13 @@
 	<ImageItem name="È¹×Ó001.png" id="E05" />
 	<ImageItem name="×ì_001.png" id="E06" />
 	<ImageItem name="±Ç×Ó_001.png" id="E07" />
-	<ImageItem name="ÑÛ¾¦_²âÊÔ.png" id="N01" />
+	<ImageItem name="ÑÛ¾¦_²âÊÔ.png" id="N01" >
+            <Image id = "left" startx = "0" starty = "0" endx = "32" endy = "32" />
+            <Image id = "right" startx = "32" starty = "0" endx = "64" endy = "32" />
+	</ImageItem>
 	<ImageItem name="Å®_Áôº£_001.png" id="R01" />
-	<ImageItem name="Ã¼Ã«_001.png" id="B01" />
+	<ImageItem name="Ã¼Ã«_001.png" id="B01" >
+             <Image id = "left" startx = "0" starty = "0" endx = "32" endy = "32" />
+             <Image id = "right" startx = "32" starty = "0" endx = "64" endy = "32" />
+	</ImageItem>
 </ImageTable>

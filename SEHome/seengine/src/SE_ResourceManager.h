@@ -1,6 +1,8 @@
 #ifndef SE_RESOURCEMANAGER_H
 #define SE_RESOURCEMANAGER_H
 #include "SE_ID.h"
+#include "SE_ImageMap.h"
+#include <string>
 class SE_GeometryData;
 class SE_TextureCoordData;
 class SE_ImageData;
@@ -11,6 +13,7 @@ class SE_ShaderProgram;
 class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
+class SE_Element;
 class SE_ResourceManager
 {
 public:
@@ -56,21 +59,24 @@ public:
     void loadBaseData(const char* baseResourceName);
     SE_Spatial* loadScene(const char* sceneName);
 
+	SE_ImageData* loadImage(const char* imageName);
     SE_Element* loadElement(const char* elementResourceName);
+	void loadImageTable(const char* imageTableName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
 
     const char* getDataPath();
     void setDataPath(const char* datapath);
 
-	const char* getLayoutPath();
-	const char* getImagePath();
+	std::string getLayoutPath();
+	std::string getImagePath();
     bool checkHeader(SE_BufferInput& input);
     void releaseHardwareResource();
+public:
+	struct _Impl;
 private:
 //    SE_Mesh* createMesh(SE_MeshTransfer* meshTransfer);
     static SE_Spatial* createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent);
 private:
-    struct _Impl;
     _Impl* mImpl;
 };
 #endif

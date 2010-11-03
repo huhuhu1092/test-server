@@ -33,8 +33,8 @@ SE_Application::SE_Application()
 	mAnimationManager = new SE_AnimationManager;
 	mElementManager = new SE_ElementManager;
     mSimObjectManager = new SE_SimObjectManager;
-	mImageMapManager = new SE_ImageMapManager;
-	mImageTableManager = new SE_ImageTableManager;
+	//mImageMapManager = new SE_ImageMapManager;
+	//mImageTableManager = new SE_ImageTableManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -65,10 +65,12 @@ SE_Application::~SE_Application()
 		delete mElementManager;
     if(mSimObjectManager)
         delete mSimObjectManager;
+	/*
 	if(mImageTableManager)
 		delete mImageTableManager;
 	if(mImageMapManager)
 		delete mImageMapManager;
+	*/
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {

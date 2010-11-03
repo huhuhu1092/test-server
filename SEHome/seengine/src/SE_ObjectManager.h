@@ -25,6 +25,10 @@ public:
 	T find(SE_FindObjCondition<T>& fc);
     bool isContain(const TID& id);
     ~SE_ObjectManager();
+	int size()
+	{
+		return m.size();
+	}
 private:
     RMap m;
 };
@@ -101,6 +105,10 @@ public:
 	T* find(SE_FindObjCondition<T*>& fc);
     bool isContain(const TID& id);
     ~SE_ObjectManager();
+	int size()
+	{
+		return m.size();
+	}
 private:
     RMap m;
 };
