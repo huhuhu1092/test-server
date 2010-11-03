@@ -18,25 +18,27 @@ public:
         return m_a_position_loc;
     }
 	// index start from 0
-	// 0 is the base color texture
     GLint getTextureCoordAttributeLoc(int index);
-    GLint getColorUnifyLoc()
+    GLint getColorUniformLoc()
     {
         return m_u_color_loc;
     }
-    GLint getWorldViewPerspectiveMatrixUnifyLoc()
+    GLint getWorldViewPerspectiveMatrixUniformLoc()
     {
         return m_u_wvp_matrix_loc;
     }
 	//index start from 0
-	// 0 is the base color texture
-    GLint getTextureUnifyLoc(int index);
-    GLint getTexCombineModeUnifyLoc()
+    GLint getTextureUniformLoc(int index);
+    GLint getTexCombineModeUniformLoc()
     {
         return m_u_tex_combine_mode_loc;
     }
+	GLint getColorOpModeUniformLoc()
+	{
+		return m_u_color_op_mode_loc;
+	}
 	// index start from 1
-	GLint getTexCoordSameAsTex0(int index);
+	GLint getTexCoordIndexUniformLoc(int index);
 	GLint getMarkColorUniformLoc(int index);
 protected:
     void link();
@@ -54,15 +56,19 @@ private:
 	GLint m_u_texture2_loc;
 	GLint m_u_texture3_loc;
     GLint m_u_tex_combine_mode_loc;
+	GLint m_u_color_op_mode_loc;
     GLint m_u_color_loc;
 	GLint m_u_wvp_matrix_loc;
-    GLint m_u_tex1_coord_same_as_tex0;
-    GLint m_u_tex2_coord_same_as_tex0;
-	GLint m_u_tex3_coord_same_as_tex0;
-	GLint m_u_colora;
-	GLint m_u_colorr;
-	GLint m_u_colorg;
-	GLint m_u_colorb;
+	//tex_coord_index indicate which texture coordinate will be used in
+	//this texture. for example: m_u_tex0_coord_index is 1 that means texture0 use m_a_tex_coord1
+	GLint m_u_tex0_coord_index_loc;
+    GLint m_u_tex1_coord_index_loc;
+    GLint m_u_tex2_coord_index_loc;
+	GLint m_u_tex3_coord_index_loc;
+	GLint m_u_colora_loc;
+	GLint m_u_colorr_loc;
+	GLint m_u_colorg_loc;
+	GLint m_u_colorb_loc;
     char* mVertexShaderSrc;
     char* mFragmentShaderSrc;
 };

@@ -11,143 +11,6 @@
 #include "SE_Geometry3D.h"
 #include "SE_Spatial.h"
 #include <vector>
-struct _TextureBlendProperty
-{
-    _TextureBlendProperty()
-	{
-		initTextureBlendProperty();
-	}
-    static std::vector<int> textureBlendProperty[SE_BLENDMODE_NUM];
-    static void initTextureBlendProperty()
-    {
-        textureBlendProperty[SE_TEXTURE0_MODE].resize(1);
-		textureBlendProperty[SE_TEXTURE0_MODE][0] = 0;
-
-        textureBlendProperty[SE_TEXTURE1_MODE].resize(1);
-		textureBlendProperty[SE_TEXTURE1_MODE][0] = 1;
-        
-		textureBlendProperty[SE_TEXTURE2_MODE].resize(1);
-		textureBlendProperty[SE_TEXTURE2_MODE][0] = 2;
-        
-		textureBlendProperty[SE_TEXTURE3_MODE].resize(1);
-		textureBlendProperty[SE_TEXTURE3_MODE][0] = 3;
-		
-		textureBlendProperty[SE_COLOR_TEXTURE0_MODE].resize(1);
-		textureBlendProperty[SE_COLOR_TEXTURE0_MODE][0] = 0;
-        
-		textureBlendProperty[SE_COLOR_TEXTURE1_MODE].resize(1);
-		textureBlendProperty[SE_COLOR_TEXTURE1_MODE][0] = 1;
-		
-		textureBlendProperty[SE_COLOR_TEXTURE2_MODE].resize(1);
-		textureBlendProperty[SE_COLOR_TEXTURE2_MODE][0] = 2;
-		
-		textureBlendProperty[SE_COLOR_TEXTURE3_MODE].resize(1);
-		textureBlendProperty[SE_COLOR_TEXTURE3_MODE][0] = 3;
-
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_MODE][1] = 1;
-
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_MODE][1] = 2;
-
-		textureBlendProperty[SE_TEXTURE0_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE0_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE3_MODE][1] = 3;
-
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_MODE][0] = 1;
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_MODE][1] = 2;
-
-		textureBlendProperty[SE_TEXTURE1_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE1_TEXTURE3_MODE][0] = 1;
-		textureBlendProperty[SE_TEXTURE1_TEXTURE3_MODE][1] = 3;
-
-        textureBlendProperty[SE_TEXTURE2_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_TEXTURE2_TEXTURE3_MODE][0] = 2;
-		textureBlendProperty[SE_TEXTURE2_TEXTURE3_MODE][1] = 3;
-
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_MODE][1] = 1;
-
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_MODE][1] = 2;
-
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE3_MODE][1] = 3;
-
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_MODE][0] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_MODE][1] = 2;
-
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE3_MODE][0] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE3_MODE][1] = 3;
-
-        textureBlendProperty[SE_COLOR_TEXTURE2_TEXTURE3_MODE].resize(2);
-		textureBlendProperty[SE_COLOR_TEXTURE2_TEXTURE3_MODE][0] = 2;
-		textureBlendProperty[SE_COLOR_TEXTURE2_TEXTURE3_MODE][1] = 3;
-
-        textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_MODE].resize(3);
-        textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_MODE][1] = 1;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_MODE][2] = 2;
-
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE3_MODE][1] = 1;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE3_MODE][2] = 3;
-
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_TEXTURE0_TEXTURE2_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_TEXTURE3_MODE][1] = 2;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE2_TEXTURE3_MODE][2] = 3;
-
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_TEXTURE1_TEXTURE2_TEXTURE3_MODE][0] = 1;
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_TEXTURE3_MODE][1] = 2;
-		textureBlendProperty[SE_TEXTURE1_TEXTURE2_TEXTURE3_MODE][2] = 3;
-
-
-        textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_MODE].resize(3);
-        textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_MODE][1] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_MODE][2] = 2;
-
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE3_MODE][1] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE3_MODE][2] = 3;
-
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_TEXTURE3_MODE][1] = 2;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE2_TEXTURE3_MODE][2] = 3;
-
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_TEXTURE3_MODE].resize(3);
-        textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_TEXTURE3_MODE][0] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_TEXTURE3_MODE][1] = 2;
-		textureBlendProperty[SE_COLOR_TEXTURE1_TEXTURE2_TEXTURE3_MODE][2] = 3;
-
-        textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE].resize(4);
-        textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][1] = 1;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][2] = 2;
-		textureBlendProperty[SE_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][3] = 3;
-        
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE].resize(4);
-        textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][0] = 0;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][1] = 1;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][2] = 2;
-		textureBlendProperty[SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE][3] = 3;
-    }
-};
-std::vector<int> _TextureBlendProperty::textureBlendProperty[SE_BLENDMODE_NUM];
-static _TextureBlendProperty texBlendProperty;
 static void checkGLError()
 {
 	/*
@@ -164,8 +27,8 @@ SE_RenderUnit::SE_RenderUnit()
 {
 	memset(mHasTexCoord, 0, sizeof(int) * SE_TEXUNIT_NUM);
 	memset(mHasTexture, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	mColorBlendMode = SE_TEXTURE0_MODE;
+	//memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
+	//mColorBlendMode = SE_TEXTURE0_MODE;
 }
 SE_RenderUnit::~SE_RenderUnit()
 {}
@@ -191,7 +54,7 @@ void SE_RenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 	vertex = NULL;
 	vertexNum = 0;
 }
-void SE_RenderUnit::getTexVertex(_Vector2f*& texVertex, int& texVertexNum)
+void SE_RenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
 {
 	texVertex = NULL;
 	texVertexNum = 0;
@@ -501,8 +364,8 @@ void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
-
-void SE_TriSurfaceRenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum)
+/*
+void SE_TriSurfaceRenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
 {
     if(mTexVertex)
     {
@@ -545,7 +408,7 @@ void SE_TriSurfaceRenderUnit::getBaseColorTexVertex(_Vector2f*& texVertex, int& 
     texVertex = mTexVertex;
     texVertexNum = mTexVertexNum;
 }
-
+*/
 
 SE_MaterialData* SE_TriSurfaceRenderUnit::getMaterialData()
 {
@@ -588,7 +451,7 @@ void SE_TriSurfaceRenderUnit::setColor(SE_ShaderProgram* shaderProgram)
         color[2] = c.z;
     }
     //checkGLError();
-	glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
+	glUniform3fv(shaderProgram->getColorUniformLoc(), 1, color);
 	for(int i = 0 ; i < 4 ; i++)
 	{
 	    c = mSurface->getMarkColor(i);
@@ -607,23 +470,15 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 	int imageDataNum;
 	bool hasTexture = false;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    if(index == 0)
-	{
-         getBaseColorImageID(imageDataIDArray, imageDataIDNum);
-		 getBaseColorImage(imageDataArray, imageDataNum);
-	}
-	else
-	{
-		getDecorateTexImageID(index, imageDataIDArray, imageDataIDNum);
-		getDecorateTexImage(index, imageDataArray, imageDataNum);
-	}
+    getTexImageID(index, imageDataIDArray, imageDataIDNum);
+    getTexImage(index, imageDataArray, imageDataNum);
 	if(imageDataIDNum > 0)
 	{
 		if(imageDataIDNum == 1)
 		{
             SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
             loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-            //glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
+            //glUniform1i(shaderProgram->getTextureUniformLoc(index), index);
 			hasTexture = true;
         }
 		else
@@ -639,7 +494,7 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 		    if(imageData)
 		    {
                 loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-                //glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
+                //glUniform1i(shaderProgram->getTextureUniformLoc(index), index);
 				hasTexture = true;
 			}
 
@@ -650,7 +505,7 @@ void SE_TriSurfaceRenderUnit::setImage(int index , SE_ShaderProgram* shaderProgr
 		}
 	}
 	mHasTexture[index] = hasTexture;
-	glUniform1i(shaderProgram->getTextureUnifyLoc(index), index);
+	glUniform1i(shaderProgram->getTextureUniformLoc(index), index);
 }
 void SE_TriSurfaceRenderUnit::setImageAndColor(SE_ShaderProgram* shaderProgram)
 {
@@ -708,7 +563,9 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
             mHasTexCoord[i] = 0;
 			glDisableVertexAttribArray(shaderProgram->getTextureCoordAttributeLoc(i));
 		}
+		glUniform1i(shaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
 	}
+    
 	/*
     for(int i = 1 ; i < SE_TEXUNIT_NUM ; i++)
 	{
@@ -718,6 +575,12 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
 }
 void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgram)
 {
+	int texMode, colorOp;
+	mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
+	glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), texMode);
+	glUniform1i(shaderProgram->getColorOpModeUniformLoc(), colorOp);
+
+	/*
 	bool textureAllFound = true;
 	int index = 0;
 	int blendMode = mSurface->getColorBlendMode();
@@ -733,28 +596,29 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 	}
 	if(textureAllFound)
 	{
-        glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), blendMode);
+        glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), blendMode);
 	}
 	else
 	{
-        glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+        glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 	    LOGI("... error: texture %d has no image\n", index);
 	}
+	*/
 	/*
     switch(mColorBlendMode)
 	{
 	case SE_COLOR_MODE:
-		glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+		glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 		break;
 	case SE_TEXTURE0_MODE:
     case SE_COLOR_TEXTURE0_MODE:
 		if(mHasTexture[SE_TEXTURE0])
 		{
-            glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_TEXTURE0_MODE);
+            glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_TEXTURE0_MODE);
 		} 
 		else
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 			LOGI("... error: texture0 has no image\n");
 		}
 		break;
@@ -762,11 +626,11 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 	case SE_COLOR_TEXTURE1_MODE:
 		if(mHasTexture[SE_TEXTURE1])
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_TEXTURE1_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_TEXTURE1_MODE);
 		}
 		else
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 			LOGI("... error : texture1 has not loaded\n");
 		}
 		break;
@@ -774,11 +638,11 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 	case SE_COLOR_TEXTURE2_MODE:
 		if(mHasTexture[SE_TEXTURE2])
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_TEXTURE2_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_TEXTURE2_MODE);
 		}
 		else
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 			LOGI("... error : texture2 has not loaded\n");
 		}
 		break;	
@@ -786,11 +650,11 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 	case SE_COLOR_TEXTURE3_MODE:
 		if(mHasTexture[SE_TEXTURE1])
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_TEXTURE3_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_TEXTURE3_MODE);
 		}
 		else
 		{
-			glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+			glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 			LOGI("... error : texture3 has not loaded\n");
 		}
     	break;
@@ -843,11 +707,12 @@ void SE_TriSurfaceRenderUnit::draw()
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
     if(!shaderProgram)
 	{
-		shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
+		shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_shader");
 	}
+	shaderProgram->use();
     float matrixData[16];
     m.getColumnSequence(matrixData);
-    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, matrixData); 
+    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
     //checkGLError();
     //shaderProgram->use();
 	_Vector3f* vertex = NULL;
@@ -901,14 +766,14 @@ void SE_LineSegRenderUnit::draw()
 	color[0] = mColor.x;
 	color[1] = mColor.y;
 	color[2] = mColor.z;
-	glUniform3fv(shaderProgram->getColorUnifyLoc(), 1, color);
-	glUniform1i(shaderProgram->getTexCombineModeUnifyLoc(), SE_COLOR_MODE);
+	glUniform3fv(shaderProgram->getColorUniformLoc(), 1, color);
+	glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
 	SE_Matrix4f m;
 	m.identity();
 	m = mViewToPerspective.mul(m);
 	float data[16];
 	m.getColumnSequence(data);
-    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUnifyLoc(), 1, 0, data);
+    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, data);
     _Vector3f* points = new _Vector3f[mSegmentNum * 2];
 	if(!points)
 		return;

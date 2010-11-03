@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ImageTable id="it1">
+    <ImageItem name="女_身体_002.png" id="E01" /> 
+    <ImageItem name="女_后发_001.png" id="E02" />
+    <ImageItem name="女_脸.png" id="E03" />
+	<ImageItem name="衣服001.png" id="E04" />
+	<ImageItem name="裙子001.png" id="E05" />
+	<ImageItem name="嘴_001.png" id="E06" />
+	<ImageItem name="鼻子_001.png" id="E07" />
+	<ImageItem name="眼睛_测试.png" id="N01" />
+	<ImageItem name="女_留海_001.png" id="R01" />
+	<ImageItem name="眉毛_001.png" id="B01" />
+</ImageTable>

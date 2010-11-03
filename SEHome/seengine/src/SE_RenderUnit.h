@@ -40,13 +40,14 @@ public:
     virtual SE_Vector3f getColor();
     virtual void draw();
 public:
+	/*
 	//texIndex is tex1, tex2, ...texn
 	//texIndexHasTexCoord is the tex index which has texture coordinate
     void setTexCoordIndex(int texIndex, int texIndexHasTexCoord)
 	{
 		mTexCoordIndex[texIndex] = texIndexHasTexCoord;
 	}
-
+*/
     SE_PRIMITIVE_TYPE getPrimitiveType()
     {
         return mPrimitiveType;
@@ -79,10 +80,12 @@ public:
 	{
 		return mViewToPerspective;
 	}
+	/*
 	void setColorBlendMode(int mode)
 	{
 		mColorBlendMode = mode;
 	}
+	*/
 	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own);
 	void applyRenderState();
     void loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
@@ -94,8 +97,8 @@ protected:
 	SE_PointerOwner<SE_RenderState> mRenderState[SE_Spatial::RENDERSTATE_NUM];
 	int mHasTexCoord[SE_TEXUNIT_NUM];
 	int mHasTexture[SE_TEXUNIT_NUM];
-	int mTexCoordIndex[SE_TEXUNIT_NUM];
-	int mColorBlendMode;
+	//int mTexCoordIndex[SE_TEXUNIT_NUM];
+	//int mColorBlendMode;
 };
 class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 {

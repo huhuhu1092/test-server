@@ -308,18 +308,20 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
     }
 ///////////////////// write shader program ////
     output.writeShort(SE_SHADERPROGRAMDATA_ID);
-    int spNum = 1;
+	int spNum = mSceneObject->mShaderObjects.size();
     output.writeInt(spNum);// shader program num;
     std::vector<SE_ProgramDataID> programDataVector(spNum);
     for(i = 0 ; i < spNum ; i++)
     {
-        SE_ProgramDataID proID = "main_vertex_shader";
+		SE_ProgramDataID proID = SE_ProgramDataID(mSceneObject->mShaderObjects[i]->shaderID.c_str());//"main_shader";
+		std::string vsn = mSceneObject->mShaderObjects[i]->vertexShaderName;
+		std::string fsn = mSceneObject->mShaderObjects[i]->fragmentShaderName;
         programDataVector[i] = proID;
         //SE_Util::sleep(SLEEP_COUNT);
         proID.write(output);
         std::string str(shaderPath);
-        std::string vertexShaderPath = str + SE_SEP + "main_vertex_shader.glsl";
-        std::string fragmentShaderPath = str + SE_SEP + "main_fragment_shader.glsl";
+        std::string vertexShaderPath = str + SE_SEP + vsn;
+        std::string fragmentShaderPath = str + SE_SEP + fsn;
         char* vertexShader = NULL;
         int vertexShaderLen = 0;
         char* fragmentShader = NULL;
@@ -1513,7 +1515,26 @@ void ASE_Loader::ASE_KeyGEOMOBJECT( const char *token )
 		ASE_SkipRestOfLine();
 	}
 }
-
+void ASE_Loader::ASE_KeySHADER(const char* token)
+{
+	if(!strcmp(token, "*NUM"))
+	{
+		ASE_GetToken(false);
+		int num = atoi(s_token);
+		mSceneObject->mShaderObjects.resize(num);
+	}
+	else if(!strcmp(token, "*SHADER"))
+	{
+		ASE_Shader* shader = new ASE_Shader;
+		ASE_GetToken(false);
+		shader->shaderID = s_token;
+		ASE_GetToken(false);
+		shader->vertexShaderName = s_token;
+		ASE_GetToken(false);
+		shader->fragmentShaderName = s_token;
+		mSceneObject->mShaderObjects.push_back(shader);
+	}
+}
 
 
 /*
@@ -1564,7 +1585,10 @@ void ASE_Loader::ASE_Process(  )
              mCurrSkinJointController = skinJointController;
              ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyBONEINFO);
         }
-
+		else if(!strcmp(s_token, "*SHADERINFO"))
+		{
+			ASE_ParseBracedBlock(&ASE_Loader::ASE_KeySHADER);
+		}
 	}
 #ifdef DEBUG
 	LOGI(".. geomCount = %d \n", geomCount);

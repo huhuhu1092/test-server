@@ -41,13 +41,14 @@ struct SE_IDTrait<SE_CommonID>
         return SE_CommonID::INVALID;
     }
 };
-template <typename ID, typename VALUE, typename IDTRAIT = SE_IDTrait<ID> >
+class SE_TableDefaultProperty
+{};
+template <typename ID, typename VALUE, typename PROPERTY = SE_TableDefaultProperty>
 class SE_Table
 {
 public:
     typedef typename ID TABLE_ITEM_ID;
     typedef typename VALUE TABLE_ITEM_VALUE;
-    typedef typename IDTRAIT TABLE_ITEM_IDTRAIT;
     void setItem(const ID& id, const VALUE& v)
     {
         _TableItemMap::iterator it = mItemMap.find(id);
@@ -84,17 +85,21 @@ public:
         else
             return false;
     }
+	PROPERTY getProperty()
+	{
+		return mProperty;
+	}
 private:
     typedef std::map<ID, VALUE> _TableItemMap;
     _TableItemMap mItemMap;
+	PROPERTY mProperty;
 };
-template <typename ID, typename VALUE, typename IDTRAIT>
-class SE_Table<ID, VALUE*, IDTRAIT>
+template <typename ID, typename VALUE, typename PROPERTY>
+class SE_Table<ID, VALUE*, PROPERTY>
 {
 public:
     typedef typename ID TABLE_ITEM_ID;
     typedef typename VALUE* TABLE_ITEM_VALUE;
-    typedef typename IDTRAIT TABLE_ITEM_IDTRAIT;
     void setItem(const ID& id, VALUE* v)
     {
         mTableItems.set(id, v);
@@ -111,9 +116,15 @@ public:
     {
         return mTableItems.isContain(id);
     }
+	PROPERTY getProperty()
+	{
+		return mProperty;
+	}
 private:
-    SE_ObjectManager<ID, VALUE> mTableItems;
+    SE_ObjectManager<ID, VALUE*> mTableItems;
+	PROPERTY mProperty;
 };
+/*
 template <typename ID, typename TABLE, typename IDTRAIT = SE_IDTrait<ID> >
 class SE_TableSet
 {
@@ -137,7 +148,7 @@ public:
         mTables.remove(id);
     }
 private:
-    SE_ObjectManager<ID, TABLE> mTables;
+    SE_ObjectManager<ID, TABLE*> mTables;
 };
 
 template <typename ID, typename TABLESET, typename IDTRAIT = SE_IDTrait<ID> >
@@ -180,7 +191,7 @@ public:
         return ret;
     }
 private:
-    SE_ObjectManager<ID, TABLESET> mTableSets;
+    SE_ObjectManager<ID, TABLESET*> mTableSets;
 };
-
+*/
 #endif

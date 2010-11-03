@@ -48,15 +48,22 @@ public:
     SE_SkinJointController* getSkinJointController(const SE_SkinJointControllerID& id);
     void setSkinJointController(const SE_SkinJointControllerID& id, SE_SkinJointController* c);
     void removeSkinJointController(const SE_SkinJointControllerID& id);
+
+
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
     void loadBaseData(const char* baseResourceName);
     SE_Spatial* loadScene(const char* sceneName);
 
+    SE_Element* loadElement(const char* elementResourceName);
+	SE_ImageUnit getImageUnit(const char* imageUnitPath);
+
     const char* getDataPath();
     void setDataPath(const char* datapath);
 
+	const char* getLayoutPath();
+	const char* getImagePath();
     bool checkHeader(SE_BufferInput& input);
     void releaseHardwareResource();
 private:

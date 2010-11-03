@@ -45,8 +45,8 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
         return true;
     if(leftLayer > rightLayer)
         return false;
-    left->getBaseColorImageID(leftImageDataArray, leftImageDataArrayNum);
-    right->getBaseColorImageID(rightImageDataArray, rightImageDataArrayNum);
+    left->getTexImageID(SE_TEXTURE0,leftImageDataArray, leftImageDataArrayNum);
+    right->getTexImageID(SE_TEXTURE0,rightImageDataArray, rightImageDataArrayNum);
     if(leftImageDataArray == NULL && rightImageDataArray != NULL)
         return true;
     if(leftImageDataArray != NULL && rightImageDataArray == NULL)
@@ -57,8 +57,8 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
         int leftBaseColorImageNum;
         SE_ImageData** rightBaseColorImage = NULL;
         int rightBaseColorImageNum;
-		left->getBaseColorImage(leftBaseColorImage, leftBaseColorImageNum);
-		right->getBaseColorImage(rightBaseColorImage, rightBaseColorImageNum);
+		left->getTexImage(SE_TEXTURE0, leftBaseColorImage, leftBaseColorImageNum);
+		right->getTexImage(SE_TEXTURE0, rightBaseColorImage, rightBaseColorImageNum);
 		if(leftBaseColorImageNum > 0 && rightBaseColorImageNum == 0)
 			return false;
 		if(leftBaseColorImageNum == 0 && rightBaseColorImageNum > 0)
@@ -109,7 +109,7 @@ void SE_RenderManager::beginDraw()
 	SE_Vector3f location = currCamera->getLocation();
 	LOGI("## location = %f, %f, %f\n", location.x, location.y, location.z);
 #endif
-	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
+	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_shader");
     shaderProgram->use();
 	glClearColor(mBackground.x, mBackground.y, mBackground.z, 1.0);
 	checkGLError();

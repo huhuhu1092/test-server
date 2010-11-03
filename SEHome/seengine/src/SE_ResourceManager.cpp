@@ -15,6 +15,8 @@
 #include "SE_ImageCodec.h"
 #include "SE_SkinJointController.h"
 #include "SE_Bone.h"
+#include "tinyxml.h"
+#include "SE_Element.h"
 #include <map>
 #include <vector>
 struct _MeshData
@@ -420,6 +422,347 @@ ResourceMap<TID, T>::~ResourceMap()
 }
 
 /////////////////////////////////////////
+class SE_XmlElementHandler
+{
+public:
+    virtual ~SE_XmlElementHandler() {}
+	SE_XmlElementHandler(SE_ResourceManager::_Impl* em)
+    {
+        elementManager = em;
+    }
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent) = 0;
+	SE_ResourceManger::_Impl* elementManager;
+};
+class SE_ElementHandler : public SE_XmlElementHandler
+{
+public:
+    SE_ElementHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_MountPointHandler : public SE_XmlElementHandler
+{
+public:
+    SE_MountPointHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ImageHandler : public SE_XmlElementHandler
+{
+public:
+    SE_ImageHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ActionHandler : public SE_XmlElementHandler
+{
+public:
+    SE_ActionHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StateTableHandler : public SE_XmlElementHandler
+{
+public:
+    SE_StateTableHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+    {}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ShaderHandler : public SE_XmlElementHandler
+{
+public:
+	SE_ShaderHandler(SE_ResourceManager::_Impl* em) : SE_XmlElementHandler(em)
+	{}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+////////////////
+void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    SE_Element* element = new SE_Element;
+    if(parent)
+    {
+        parent->addChild(element);
+        element->setParent(parent);
+    }
+    else
+    {
+        element->setParent(NULL);
+		elementManager->mElementRoot = element;
+    }
+    bool hasLayer = false;
+	bool hasPivotx = false;
+	bool hasPivoty = false;
+	bool hasid = false;
+    while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+            element->setID(SE_ElementID(value));
+			if(element->getID().isValid())
+			{
+			    hasid = true;
+			}
+        }
+        else if(!strcmp(name, "x"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setLeft(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "y"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setTop(ival);
+            }
+            else
+            {
+                LOGI("... parse y value error\n");
+            }
+        }
+        else if(!strcmp(name, "width"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setWidth(ival);
+            }
+            else
+            {
+                LOGI("... parse width value error\n");
+            }
+        }
+        else if(!strcmp(name, "height"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setHeight(ival);
+            }
+            else
+            {
+                LOGI("... parse height value error\n");
+            }
+        }
+        else if(!strcmp(name, "layer"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setLocalLayer(ival);
+            }
+            else
+            {
+                LOGI("... parse layer value error\n");
+            }
+            hasLayer = true;
+        }
+        else if(!strcmp(name, "pivotx"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setPivotX(ival);
+            }
+            else
+            {
+                LOGI("... parse pivotx value error\n");
+            }
+			hasPivotx = true;
+        }
+        else if(!strcmp(name, "pivoty"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                element->setPivotY(ival);
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+			hasPivoty = true;
+        }
+		else if(!strcmp(name, "mountpointref"))
+		{
+			element->setMountPointRef(SE_MountPointID(value));
+		}
+		else if(!strcmp(name, "elementref"))
+		{
+			element->setElementRef(SE_StringID(value));
+		}
+		else if(!strcmp(name , "imagemapref"))
+		{
+			element->setImageMapRef(SE_StringID(value));
+		}
+        pAttribute = pAttribute->Next();
+    }
+    if(!hasLayer)
+    {
+        element->setLocalLayer(indent);
+    }
+	if(parent == NULL)
+	{
+		if(!hasPivotx || !hasPivoty || !hasid)
+		{
+			LOGE("... element error : top element must has id, pivotx, pivoty\n");
+		}
+	}
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+        elementManager->handleXmlChild(element, pChild, i++);
+    }
+}
+void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	SE_MountPoint mp;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name, "id"))
+		{
+			mp.setID(SE_MountPointID(value));
+		}
+		else if(!strcmp(name, "x"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setX(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		else if(!strcmp(name, "y"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setY(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		pAttribute = pAttribute->Next();
+	}
+	if(parent == NULL)
+	{
+		LOGE("... mount point parent can not be NULL\n");
+	}
+	parent->addMountPoint(mp);
+}
+void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setImage(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_ActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setActionID(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_StateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+        const char* value = pAttribute->Value();
+        int ival = -1;
+		if(!strcmp(name , "dataref"))
+		{
+			parent->setStateTableID(SE_StringID(value));
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	std::string vertexShaderFilePath;
+	std::string fragmentShaderFilePath;
+	std::string shaderID;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		const char* value = pAttribute->Value();
+		if(!strcmp(name, "id"))
+		{
+            shaderID = value;
+		} 
+        else if(!strcmp(name , "VertexShader"))
+		{
+			vertexShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + value;
+		}
+		else if(!strcmp(name, "FragmentShader"))
+		{
+			fragmentShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	char* vertexShader;
+	char* fragmentShader;
+	int vertexShaderLen =0;
+	int fragmentShaderLen = 0;
+	SE_IO::readFileAll(vertexShaderFilePath.c_str(), vertexShader, vertexShaderLen);
+	SE_IO::readFileAll(fragmentShaderFilePath.c_str(), fragmentShader, fragmentShaderLen);
+	char* vs = new char[vertexShaderLen + 1];
+	char* fs = new char[fragmentShaderLen + 1];
+	memset(vs, 0, vertexShaderLen + 1);
+	memset(fs, 0, fragmentShaderLen + 1);
+	memcpy(vs, vertexShader, vertexShaderLen);
+	memcpy(fs, fragmentShader, fragmentShaderLen);
+	SE_ProgramDataID id(shaderID.c_str());
+	resourceManager->setShaderProgram(id, vs, fs);
+	delete[] vertexShader;
+	delete[] fragmentShader;
+}
+////////////////
 struct SE_ResourceManager::_Impl
 {
     ResourceMap<SE_GeometryDataID, SE_GeometryData> geomDataMap;
@@ -432,13 +775,105 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
+	typedef std::map<std::string, SE_XmlElementHandler*> _XmlElementHandlerMap;
+    _XmlElementHandlerMap mXmlElementHandlerMap;
+	SE_Element* mElementRoot;
+/////////////////////////////////////
+	_Impl();
+	void addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler);
+    void removeXmlElementHandler(const char* elementName);
+    void handleXmlChild(SE_Element* parent, TiXmlNode* currNode, unsigned int indent = 0);
+	void handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent);
+	void handleText(SE_Element* parent, TiXmlText* text);
+	void handleDeclaration(TiXmlDeclaration* decl);
 //////////////////////////////////
     void process(SE_BufferInput& inputBuffer);
 
 };
+SE_ResourceManager::_Impl::_Impl()
+{
+	addXmlElementHandler("Element", new SE_ElementHandler(this));
+	addXmlElementHandler("Image", new SE_ImageHandler(this));
+    addXmlElementHandler("MountPoint", new SE_MountPointHandler(this));
+	addXmlElementHandler("Action", new SE_ActionHandler(this));
+	addXmlElementHandler("StateTable", new SE_StateTableHandler(this));
+	addXmlElementHandler("Shader", new SE_ShaderHandler(this));
+}
+}
 void SE_ResourceManager::_Impl::process(SE_BufferInput& inputBuffer)
 {
 	::process(inputBuffer, resourceManager);
+}
+void SE_ResourceManager::_Impl::handleElement(SE_Element* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent)
+{
+    if(!pElement)
+        return;
+    SE_XmlElementHandler* pXmlElementHandler = mXmlElementHandlerMap[elementName];
+    if(!pXmlElementHandler)
+        return;
+    pXmlElementHandler->handle(parent, pElement, indent);
+}
+void SE_ResourceManager::_Impl::handleText(SE_Element* parent, TiXmlText* text)
+{}
+void SE_ResourceManager::_Impl::handleXmlChild(SE_Element* parent, TiXmlNode* currNode, unsigned int indent)
+{
+    if(!currNode)
+        return;
+    TiXmlNode* pChild;
+    TiXmlText* pText;
+    int t = currNode->Type();
+    int num = 0;
+    switch(t)
+    {
+    case TiXmlNode::TINYXML_DOCUMENT:
+        LOGI("...Document\n");
+		for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+        {
+            handleXmlChild(parent, pChild, indent + 1);
+        }
+        break;
+    case TiXmlNode::TINYXML_ELEMENT:
+        LOGI("...Element[%s]\n", currNode->Value());
+        handleElement(parent, currNode->Value(), currNode->ToElement(), indent + 1);
+        break;
+    case TiXmlNode::TINYXML_COMMENT:
+        LOGI("...Comment:[%s]\n", currNode->Value());
+        break;
+    case TiXmlNode::TINYXML_TEXT:
+        pText = currNode->ToText();
+        LOGI("...Text: [%s]\n", pText->Value());
+        handleText(parent, pText);
+        break;
+    case TiXmlNode::TINYXML_DECLARATION:
+        LOGI("...Declaration\n");
+        handleDeclaration(currNode->ToDeclaration());
+        break;
+    }
+}
+void SE_ResourceManager::_Impl::handleDeclaration(TiXmlDeclaration* decl)
+{}
+void SE_ResourceManager::_Impl::addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler)
+{
+    _XmlElementHandlerMap::iterator it = mXmlElementHandlerMap.find(elementName);
+    if(it == mXmlElementHandlerMap.end())
+    {
+		mXmlElementHandlerMap.insert(make_pair(std::string(elementName), handler));
+    }
+    else
+    {
+        SE_XmlElementHandler* h = it->second;
+        delete it->second;
+        it->second = handler;
+    }
+}
+void SE_ElementManager::removeXmlElementHandler(const char* elementName)
+{
+    _XmlElementHandlerMap::iterator it = mXmlElementHandlerMap.find(elementName);
+    if(it != mXmlElementHandlerMap.end())
+    {
+        delete it->second;
+        mXmlElementHandlerMap.erase(it);
+    }
 }
 //////////////////////
 SE_ResourceManager::SE_ResourceManager()
@@ -600,6 +1035,16 @@ const char* SE_ResourceManager::getDataPath()
 {
 	return mImpl->dataPath.c_str();
 }
+const char* SE_ResourceManager::getLayoutPath()
+{
+	std::string path = mImpl->dataPath + "layout";
+	return path.c_str();
+}
+const char* SE_ResourceManager::getImagePath()
+{
+	std::string path = mImpl->dataPath + "image";
+	return path.c_str();
+}
 void SE_ResourceManager::setDataPath(const char* datapath)
 {
 	mImpl->dataPath = datapath;
@@ -667,4 +1112,21 @@ void SE_ResourceManager::releaseHardwareResource()
         SE_ShaderProgram* shader = itShader->second;
         shader->releaseHardwareResource();
     }
+}
+SE_Element* SE_ResourceManager::loadElement(const char* elementResourceName)
+{
+	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + filePath;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+        LOGI("can not open xml file: %s\n", filePath);
+        return;
+    }
+    handleXmlChild(parent, &doc);
+	return mImpl->mElementRoot;
+}
+SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
+{
+
 }

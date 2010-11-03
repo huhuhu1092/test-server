@@ -184,17 +184,19 @@ void SE_ShaderProgram::link()
 
 
 	checkGLError();
-	m_u_tex1_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex1_coord_same_as_tex0");
-	m_u_tex2_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex2_coord_same_as_tex0");
-	m_u_tex3_coord_same_as_tex0 = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_same_as_tex0");
+	m_u_tex0_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex0_coord_index");
+	m_u_tex1_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex1_coord_index");
+	m_u_tex2_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex2_coord_index");
+	m_u_tex3_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_index");
 	m_u_tex_combine_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_tex_combine_mode");
+	m_u_color_op_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_color_op_mode");
 	checkGLError();
 	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
 	checkGLError();
-	m_u_colora = glGetUniformLocation(mShaderProgramObject, "u_colora");
-	m_u_colorr = glGetUniformLocation(mShaderProgramObject, "u_colorr");
-	m_u_colorg = glGetUniformLocation(mShaderProgramObject, "u_colorg");
-	m_u_colorb = glGetUniformLocation(mShaderProgramObject, "u_colorb");
+	m_u_colora_loc = glGetUniformLocation(mShaderProgramObject, "u_colora");
+	m_u_colorr_loc = glGetUniformLocation(mShaderProgramObject, "u_colorr");
+	m_u_colorg_loc = glGetUniformLocation(mShaderProgramObject, "u_colorg");
+	m_u_colorb_loc = glGetUniformLocation(mShaderProgramObject, "u_colorb");
 	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 	checkGLError();
 #ifdef DEBUG0
@@ -229,7 +231,7 @@ GLint SE_ShaderProgram::getTextureCoordAttributeLoc(int index)
     }
     return ret;
 }
-GLint SE_ShaderProgram::getTextureUnifyLoc(int index)
+GLint SE_ShaderProgram::getTextureUniformLoc(int index)
 {
     GLint ret = -1;
     switch(index)
@@ -251,19 +253,22 @@ GLint SE_ShaderProgram::getTextureUnifyLoc(int index)
     }
     return ret;
 }
-GLint SE_ShaderProgram::getTexCoordSameAsTex0(int index)
+GLint SE_ShaderProgram::getTexCoordIndexUniformLoc(int index)
 {
 	GLint ret = -1;
 	switch(index)
 	{
+	case 0:
+		ret = m_u_tex0_coord_index_loc;
+		break;
 	case 1:
-		ret = m_u_tex1_coord_same_as_tex0;
+		ret = m_u_tex1_coord_index_loc;
 		break;
 	case 2:
-		ret = m_u_tex2_coord_same_as_tex0;
+		ret = m_u_tex2_coord_index_loc;
 		break;
 	case 3:
-		ret = m_u_tex3_coord_same_as_tex0;
+		ret = m_u_tex3_coord_index_loc;
 		break;
 	}
 	return ret;
@@ -274,16 +279,16 @@ GLint SE_ShaderProgram::getMarkColorUniformLoc(int index)
 	switch(index)
 	{
 	case 0:
-		ret = m_u_colora;
+		ret = m_u_colora_loc;
 		break;
 	case 1:
-		ret = m_u_colorr;
+		ret = m_u_colorr_loc;
 		break;
 	case 2:
-		ret = m_u_colorg;
+		ret = m_u_colorg_loc;
 		break;
 	case 3:
-		ret = m_u_colorb;
+		ret = m_u_colorb_loc;
 		break;
 	}
 	return ret;

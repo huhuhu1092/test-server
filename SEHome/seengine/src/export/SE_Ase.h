@@ -198,6 +198,12 @@ struct ASE_Material
             delete[] submaterials;
     }
 };
+struct ASE_Shader
+{
+	std::string shaderID;
+	std::string vertexShaderName;
+	std::string fragmentShaderName;
+};
 struct ASE_HelperObject
 {
     std::string name;
@@ -227,6 +233,7 @@ struct ASE_SceneObject
     std::vector<ASE_Material> mMats;
     std::list<ASE_SkinJointController*> mSkinJointController;
     std::list<ASE_GeometryObjectGroup*> mGeometryObjectGroup;
+	std::vector<ASE_Shader*> mShaderObjects;
     ~ASE_SceneObject()
     {
         std::list<ASE_GeometryObject*>::iterator it;
@@ -279,6 +286,7 @@ private:
     void ASE_KeyCONTROLROTTRACK(const char* token);
     void ASE_KeyCONTROLPOSTRACK(const char* token);
     void ASE_KeyTMANIMATION(const char* token);
+	void ASE_KeySHADER(const char* token);
     void ASE_AdjustSubMtl();
     ASE_GeometryObjectGroup* findGroup(std::string parentname);
 	SE_KeyFrame<SE_Transform>* findKeyFrame(ASE_HelperObject* parent, unsigned int key);
@@ -293,6 +301,7 @@ private:
     ASE_SkinJointController* mCurrSkinJointController;
     ASE_Bone* mCurrBone;
     ASE_GeometryObjectGroup* mCurrGeometryObjectGroup;
+	ASE_Shader* mCurrShader;
 	bool mInSubDiffuse;
 	int mMatStartPos;
 };

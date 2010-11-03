@@ -1,6 +1,7 @@
 #ifndef SE_IMAGE_H
 #define SE_IMAGE_H
 #include "SE_ID.h"
+#include <string>
 class SE_Surface;
 class SE_Image
 {

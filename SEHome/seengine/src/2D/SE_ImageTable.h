@@ -3,8 +3,8 @@
 #include "SE_ID.h"
 #include "SE_TableManager.h"
 typedef SE_Table<SE_StringID, SE_StringID> SE_ImageTable;
-typedef SE_TableSet<SE_StringID, SE_ImageTable> SE_ImageTableSet;
-typedef SE_TableManager<SE_StringID, SE_TableSet<SE_StringID, SE_ImageTable> > SE_ImageTableManager;
+typedef SE_Table<SE_StringID, SE_ImageTable*> SE_ImageTableSet;
+typedef SE_Table<SE_StringID, SE_ImageTableSet> SE_ImageTableManager;
 /*
 class SE_ImageTable
 {

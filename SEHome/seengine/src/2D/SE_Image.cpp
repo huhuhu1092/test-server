@@ -2,8 +2,12 @@
 #include "SE_Mesh.h"
 #include "SE_Utils.h"
 #include "SE_ImageMap.h"
+#include "SE_Application.h"
+#include "SE_ResourceManager.h"
+#include "SE_ImageTable.h"
+#include "SE_ImageMap.h"
 #include "SE_Log.h"
-enum STR_STATE {START, ERROR, REPLACE, READY_R, READY_G, READY_B, READY_A,R, G, B, A};
+enum _STR_STATE {_START, _ERROR, REPLACE, READY_R, READY_G, READY_B, READY_A,R, G, B, A};
 static const char REPLACESTART = '[';
 static const char REPLACEEND = ']';
 static const char RED = 'r';
@@ -30,9 +34,33 @@ SE_Image::SE_Image(const char* url, const char* imagemapref)
 	parse();
 	calculateDimension();
 }
+void getImageWidthHeight(SE_Util::SplitStringList& stringList, int& width, int& height)
+{
+	std::string fileName = stringList[0];
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	std::string filePath = std::string(resourceManager->getLayoutPath()) + SE_SEP + fileName;
+	SE_ImageMapManager* imageMapManager = SE_Application::getInstance()->getImageMapManager();
+	SE_ImageMapSet* imageMapSet = imageMapManager->getItem(fileName);
+	if(imageMapSet == NULL)
+	{
+
+	}
+}
 void SE_Image::calculateDimension()
 {
-	
+	SE_Util::SplitStringList strList = SE_Util::splitString(mBaseColor.getStr(), "/");
+	if(strList.size() == 3)
+	{
+	}
+	else
+	{
+		SE_Util::SplitStringList strList = SE_Util::splitString(mRChannel.getStr(), "/");
+		if(strList.size() != 3)
+		{
+			LOGE("... image string error \n");
+			return;
+		}
+	}
 }
 int SE_Image::getWidth()
 {
@@ -260,7 +288,7 @@ SE_StringID SE_Image::createImageDataFullPath(const char* inputstr)
 	SE_Util::SplitStringList strList = SE_Util::splitString(inputstr, "/");
 	if(strList.size() < 2)
 	{
-		LOGE("... image data ID path error \n");
+		LOGI("... image data ID path error \n");
 		return SE_StringID::INVALID;
 	}
 	if(strList.size() == 2)

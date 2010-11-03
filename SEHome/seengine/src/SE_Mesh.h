@@ -4,6 +4,7 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+#include "SE_ShaderColorOperation.h"
 #include <string.h>
 class SE_TextureCoordData;
 class SE_GeometryData;
@@ -133,13 +134,25 @@ public:
     void setFacets(int* facets, int num);
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
-	void setColorBlendMode(int mode)
+	void setTextureMode(int mode)
 	{
-		mColorBlendMode = mode;
+		mShaderColorOperation.setTextureMode(mode);
 	}
-	int getColorBlendMode()
+	int getTextureMode()
 	{
-		return mColorBlendMode;
+		return mShaderColorOperation.getTextureMode();
+	}
+	void getRealTexModeColorOp(int* hasTexture, int num, int& outTexMode, int& outColorOp)
+	{
+		return mShaderColorOperation.getTextureModeColorOp(hasTexture, num, outTexMode, outColorOp); 
+	}
+	void setColorOperation(int op)
+	{
+		mShaderColorOperation.setColorOperationMode(op);
+	}
+	int getColorOperation()
+	{
+		return mShaderColorOperation.getColorOperationMode();
 	}
 	SE_Vector3f getMarkColor(int index)
 	{
@@ -189,27 +202,45 @@ public:
             delete[] mVertex;
             mVertex = NULL;
         }
-        if(mTexVertex)
-        {
-            delete[] mTexVertex;
-            mTexVertex = NULL;
-        }
+		for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
+		{
+            if(mTexVertex[i])
+            {
+                delete[] mTexVertex[i];
+                mTexVertex[i] = NULL;
+            }
+			mTexVertexNum[i] = 0;
+		}
         if(mFaceVertex)
         {
             delete[] mFaceVertex;
             mFaceVertex = NULL;
         }
-        if(mFaceTexVertex)
-        {
-            delete[] mFaceTexVertex;
-            mFaceTexVertex = NULL;
-        }
+		for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
+		{
+            if(mFaceTexVertex[i])
+            { 
+                delete[] mFaceTexVertex[i];
+                mFaceTexVertex[i] = NULL;
+            }
+            mFaceTexVertexNum[i] = 0;
+		}
         mVertexNum = 0;
-        mTexVertexNum = 0;
         mFaceVertexNum = 0;
-        mFaceTexVertexNum = 0;
     }
     void getVertexIndexInGeometryData(int*& outArray , int& outNum);
+	void setTexCoordIndex(int texIndex, int indexHasTexCoord)
+	{
+		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
+			return;
+		mTexCoordIndex[texIndex] = indexHasTexCoord;
+	}
+	int getTexCoordIndex(int texIndex)
+	{
+		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
+			return SE_TEXTURE0;
+		return mTexCoordIndex[texIndex];
+	}
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -225,21 +256,23 @@ private:
 	_Vector3f* mVertex;
 	int mVertexNum;
 
-	_Vector2f* mTexVertex;
-	int mTexVertexNum;
+	_Vector2f* mTexVertex[SE_TEXUNIT_NUM];
+	int mTexVertexNum[SE_TEXUNIT_NUM];
 
     _Vector3f* mFaceVertex;
     int mFaceVertexNum;
 
-    _Vector2f* mFaceTexVertex;
-    int mFaceTexVertexNum;
+    _Vector2f* mFaceTexVertex[SE_TEXUNIT_NUM];
+    int mFaceTexVertexNum[SE_TEXUNIT_NUM];
 
     int* mIndex;
     int mIndexNum; 
     int* mIndexInGeometryData;
     int mIndexInGeometryDataNum;
-	int mColorBlendMode;
+	//int mTextureMode;
 	SE_Vector3f mMarkColor[4];
+	int mTexCoordIndex[SE_TEXUNIT_NUM];
+	SE_ShaderColorOperation mShaderColorOperation;
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.

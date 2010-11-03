@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Element id="lady" x="0" y="0" width="480" height="800" layer="1">
+    <Element id="body" x="0" y="0" layer="1">
+        <Image dataref="ImageMap1.xml/nvshenti/E1" />
+    </Element>
+    <Element id="haed" x="110" y="0" layer="0">
+        <Image dataref="ImageMap1.xml/nvhoufa/E2" />
+    </Element>
+     <Element id="face" x="171" y="31" layer="2">
+        <Image dataref="ImageMap1.xml/nvnian/E3" />
+    </Element>
+     <Element id="yifu" x="149" y="133" layer="3">
+         <Image dataref="ImageMap1.xml/yifu/E5"/>
+    </Element>
+     <Element id="qunzi" x="130" y="310" layer="2">
+         <ImageData dataref="ImageMap1.xml/qunzi/E5" />
+    </Element>
+     <Element id="zui" x="219" y="106" layer="5">
+         <Image dataref = "ImageMap1.xml/zui/E5"/>
+    </Element>
+     <Element id="bizi" x="220" y="91" layer="5">
+        <Image dataref="ImageMap1.xml/bizi/E5"/>
+    </Element>
+    <Element id="lefteye" x="200" y="80" layer="5">
+        <Image dataref = "ImageMap1.xml/eye/left" />
+    </Element>
+    <Element id="righteye" x="238" y="80" layer="5">
+        <ImageData dataref = "ImageMap1.xml/eye/right" />
+    </Element>
+     <Element id="liuhai" x="110" y="0" layer="4">
+         <Image dataref="ImageMap1.xml/liuhai/E5"/>
+    </Element>
+    <Element id="leftmeimao" x="200" y="70" layer="6">
+        <Image dataref="ImageMap1.xml/meimao/left" />
+    </Element>
+    <Element id="rightmeimao" x="238" y="70" layer="6">
+        <Image dataref="ImageMap1.xml/meimao/right" />
+    </Element>
+</Element>

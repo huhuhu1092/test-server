@@ -3,44 +3,33 @@
 #include "SE_ID.h"
 #include "SE_ObjectManager.h"
 #include "SE_TableManager.h"
-struct SE_ImageRect
+struct SE_ImageUnit
 {
+	enum {NO_MIRROR, MIRROR_X, MIRROR_Y, MIRROR_XY};
     int x;
     int y;
     int pivotx;
     int pivoty;
     int width;
     int height;
-    SE_ImageRect()
+    int mirrorType;
+	SE_ImageDataID imageDataID;
+    SE_ImageUnit()
     {
         x = y = 0;
         pivotx = pivoty = 0;
         width = height = -1;
+		mirrorType = NO_MIRROR;
     }
 };
 
-class SE_ImageMap : public SE_Table<SE_StringID, SE_ImageRect*, SE_IDTrait<SE_StringID> >
+class SE_ImageMapProperty
 {
 public:
-	/*
-    typedef SE_ImageMapID TABLE_ITEM_ID;
-    typedef SE_ImageRect* TABLE_ITEM_VALUE;
-    typedef SE_IDTrait<SE_ImageMapID> TABLE_ITEM_IDTRAIT;
-	*/
-    enum {NO_MIRROR, MIRROR_X, MIRROR_Y, MIRROR_XY};
-    SE_ImageMap()
+    SE_ImageMapProperty()
     {
         mUnitWidth = -1;
         mUnitHeight = -1;
-        mMirrorType = NO_MIRROR;
-    }
-    void setMirrorType(int mt)
-    {
-        mMirrorType = mt;
-    }
-    int getMirrorType()
-    {
-        return mMirrorType;
     }
     void setID(const SE_StringID& id)
     {
@@ -50,13 +39,13 @@ public:
     {
         return mID;
     }
-    SE_ImageDataID getImageDataID()
+    SE_StringID getImageRef()
     {
-        return mImageDataID;
+        return mImageRef;
     }
-    void setImageDataID(const SE_ImageDataID& imageDataID)
+    void setImageRef(const SE_StringID& imageref)
     {
-        mImageDataID = imageDataID;
+        mImageRef = imageref;
     }
     int getUnitWidth()
     {
@@ -76,12 +65,12 @@ public:
     }
 private:
     SE_StringID mID;
-    SE_ImageDataID mImageDataID;
+    SE_StringID mImageRef;
     int mUnitWidth;
     int mUnitHeight;
-    int mMirrorType;
-    SE_ObjectManager<SE_StringID, SE_ImageRect> mImageRectSet;
+    //SE_ObjectManager<SE_StringID, SE_ImageUnit> mImageRectSet;
 };
-typedef SE_TableSet<SE_StringID, SE_ImageMap> SE_ImageMapSet;
-typedef SE_TableManager<SE_StringID, SE_ImageMapSet> SE_ImageMapManager;
+typedef SE_Table<SE_StringID, SE_ImageUnit, SE_ImageMapProperty> SE_ImageMap;
+typedef SE_Table<SE_StringID, SE_ImageMap*> SE_ImageMapSet;
+typedef SE_Table<SE_StringID, SE_ImageMapSet*> SE_ImageMapManager;
 #endif
