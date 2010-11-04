@@ -1,39 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Element id="lady" x="0" y="0" width="480" height="800" layer="1">
-    <Element id="body" x="0" y="0" layer="1">
-        <Image dataref="ImageMap1.xml/nvshenti/E1" />
+<Element id="lady" layer="1">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <MountPoint id = "p2" x = "110" y = "0" />
+    <MountPoint id = "p3" x = "171" y = "31" />
+    <MountPoint id = "p4" x = "149" y = "133" />
+    <MountPoint id = "p5" x = "130" y = "310" />
+    <MountPoint id = "p6" x = "219" y = "106" />
+    <MountPoint id = "p7" x = "220" y = "91" />
+    <MountPoint id = "p8" x = "200" y = "80" />
+    <MountPoint id = "p9" x = "238" y = "80" />
+    <MountPoint id = "p10" x = "110" y = "0" />
+    <MountPoint id = "p11" x = "200" y = "70" />
+    <MountPoint id = "p12" x = "238" y = "70" />
+    <Element id="body" pivotx="0" pivoty="0" layer="1" mountpointref = "p1" >
+        <Image dataref="ImageTable1.xml/it1/E01" />
     </Element>
-    <Element id="haed" x="110" y="0" layer="0">
-        <Image dataref="ImageMap1.xml/nvhoufa/E2" />
+    <Element id="head" pivotx="0" pivoty="0" layer="0" mountpointref = "p2">
+        <Image dataref="ImageTable1.xml/it1/E02" />
     </Element>
-     <Element id="face" x="171" y="31" layer="2">
-        <Image dataref="ImageMap1.xml/nvnian/E3" />
+     <Element id="face" pivotx="0" pivoty="0" layer="2" mountpointref = "p3">
+         <Image dataref="ImageTable1.xml/it1/E03/nian" />
     </Element>
-     <Element id="yifu" x="149" y="133" layer="3">
-         <Image dataref="ImageMap1.xml/yifu/E5"/>
+     <Element id="yifu" pivotx="0" pivoty="0" layer="3" mountpointref = "p4">
+         <Image dataref="ImageTable1.xml/it1/E04"/>
     </Element>
-     <Element id="qunzi" x="130" y="310" layer="2">
-         <ImageData dataref="ImageMap1.xml/qunzi/E5" />
+     <Element id="qunzi" pivotx="0" pivoty="0" layer="2" mountpointref = "p5">
+         <Image dataref="ImageTable1.xml/it1/E05" />
     </Element>
-     <Element id="zui" x="219" y="106" layer="5">
-         <Image dataref = "ImageMap1.xml/zui/E5"/>
+     <Element id="zui" pivotx="0" pivoty="0" layer="5" mountpointref = "p6">
+         <Image dataref = "ImageTable1.xml/it1/E06"/>
     </Element>
-     <Element id="bizi" x="220" y="91" layer="5">
-        <Image dataref="ImageMap1.xml/bizi/E5"/>
+     <Element id="bizi" pivotx="0" pivoty="0" layer="5" mountpointref = "p7">
+        <Image dataref="ImageTable1.xml/it1/E07"/>
     </Element>
-    <Element id="lefteye" x="200" y="80" layer="5">
-        <Image dataref = "ImageMap1.xml/eye/left" />
+    <Element id="lefteye" pivotx="0" pivoty="0" layer="5" mountpointref = "p8">
+        <Image dataref = "ImageTable1.xml/it1/N01/left" />
     </Element>
-    <Element id="righteye" x="238" y="80" layer="5">
-        <ImageData dataref = "ImageMap1.xml/eye/right" />
+    <Element id="righteye" pivotx="0" pivoty="0" layer="5" mountpointref = "p9">
+        <Image dataref = "ImageTable1.xml/it1/N01/right" />
     </Element>
-     <Element id="liuhai" x="110" y="0" layer="4">
-         <Image dataref="ImageMap1.xml/liuhai/E5"/>
+     <Element id="liuhai" pivotx="0" pivoty="0" layer="4" mountpointref = "p10">
+         <Image dataref="ImageTable1.xml/it1/R01"/>
     </Element>
-    <Element id="leftmeimao" x="200" y="70" layer="6">
-        <Image dataref="ImageMap1.xml/meimao/left" />
+    <Element id="leftmeimao" pivotx="0" pivoty="0" layer="6" mountpointref = "p11">
+        <Image dataref="ImageTable1.xml/it1/B01/left" />
     </Element>
-    <Element id="rightmeimao" x="238" y="70" layer="6">
-        <Image dataref="ImageMap1.xml/meimao/right" />
+    <Element id="rightmeimao" pivotx="238" pivoty="0" layer="6" mountpointref = "p12">
+        <Image dataref="ImageTable1.xml/it1/B01/right" />
     </Element>
 </Element>

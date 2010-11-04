@@ -11,17 +11,20 @@
 #include "SE_MountPoint.h"
 #include "SE_Mesh.h"
 #include "SE_Image.h"
+#include "SE_Log.h"
+#include "SE_CommonNode.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
 #endif
+const float SE_Element::INVALID_GEOMINFO = 9999.0;
 SE_Element::SE_Element()
 {
-    mLeft = mTop = mWidth = mHeight = 0;
-    mImageX = mImageY = mImageWidth = mImageHeight = 0;
+    mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
+    //mImageX = mImageY = mImageWidth = mImageHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
-    mPivotX = mPivotY = 0;
+    mPivotX = mPivotY = INVALID_GEOMINFO;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -29,13 +32,13 @@ SE_Element::SE_Element(float left, float top, float width, float height)
     mTop = top;
     mWidth = width;
     mHeight = height;
-    mImageX = 0;
-    mImageY = 0;
-    mImageWidth = 0;
-    mImageHeight = 0;
+    //mImageX = 0;
+    //mImageY = 0;
+    //mImageWidth = 0;
+    //mImageHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
-    mPivotX = mPivotY = 0;
+    mPivotX = mPivotY = INVALID_GEOMINFO;
 }
 SE_Element::~SE_Element()
 {
@@ -83,6 +86,34 @@ static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_Imag
 }
 SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 {
+	if(mChildren.empty())
+	{
+	    if(mImageID.isValid())
+		    return createSpatialFromImageData(parent);
+	    else if(mActionID.isValid())
+	        return createSpatialFromActionData(parent);
+	    else if(mStateTableID.isValid())
+		    return createSpatialFromStateTableData(parent);
+		return NULL;
+	}
+	else
+	{
+		SE_SpatialID spatialID = SE_ID::createSpatialID();
+		SE_CommonNode* commonNode = new SE_CommonNode(spatialID, parent);
+		calculateRect(0, 0);
+		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
+		if(parent)
+			parent->addChild(commonNode);
+		_ElementList::iterator it;
+		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+		{
+			SE_Element* e = *it;
+			SE_Spatial* spatial = e->createSpatial(commonNode);
+			if(spatial)
+			    commonNode->addChild(spatial);
+		}
+		return commonNode;
+	}
 	/*
     float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
@@ -177,7 +208,6 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 	}
 	return geom;
 	*/
-	return NULL;
 }
 void SE_Element::travel(SE_ElementTravel* travel)
 {
@@ -218,6 +248,7 @@ SE_MountPoint SE_Element::findMountPoint(const SE_MountPointID& mountPointID)
 	else
 		return SE_MountPoint();
 }
+/*
 SE_StringID SE_Element::getWorldImageMapRef()
 {
 	if(mImageMapRef != SE_StringID::INVALID)
@@ -234,18 +265,81 @@ SE_StringID SE_Element::getWorldImageMapRef()
 	}
 	return ref;
 }
-SE_Spatial* SE_Element::createSpatialFromImageData()
+*/
+SE_Spatial* SE_Element::createSpatialFromImageData(SE_Spatial* parent)
 {
 	SE_StringID imageDataID = mImageID;
-	SE_StringID imagemapref = getWorldImageMapRef();
-	SE_Image image(imageDataID.getStr(), imagemapref.getStr());
-    return NULL;
+	SE_Image image(imageDataID.getStr());
+	calculateRect(image.getWidth(), image.getHeight());
+	float e[2] = {1, 1};
+    SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
+    SE_RectPrimitive* primitive = NULL;
+    SE_PrimitiveID primitiveID;
+    SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+	image.setImageData(primitive);
+    SE_Mesh** meshArray = NULL;
+    int meshNum = 0;
+    primitive->createMesh(meshArray, meshNum);
+    if(meshNum != 1)
+	{
+		LOGE("... rect primivitve mesh num should be 1\n");
+		return NULL;
+	}
+	for(int i = 0 ; i < meshArray[0]->getSurfaceNum(); i++)
+	{
+		SE_Surface* surface = meshArray[0]->getSurface(i);
+		image.setSurface(surface);
+	    surface->setProgramDataID("color_replace");
+	}
+	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
+    simObject->setName(mID.getStr());
+    SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+    simObjectManager->set(simObjectID, simObject);
+    SE_SpatialID spatialID = SE_ID::createSpatialID();
+    SE_Geometry* geom = new SE_Geometry(spatialID, parent);
+    geom->attachSimObject(simObject);
+    geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+    geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
+    geom->setLocalLayer(mLocalLayer);
+	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
+	geom->setElementID(eid);
+    delete[] meshArray;
+    mSpatialID = spatialID;
+    mPrimitiveID = primitiveID;
+    mSimObjectID = simObjectID;
+    return geom;
 }
-SE_Spatial* SE_Element::createSpatialFromActionData()
+void SE_Element::calculateRect(int imageWidth, int imageHeight)
+{
+    if(mPivotX != INVALID_GEOMINFO && mPivotY != INVALID_GEOMINFO)
+	{
+		SE_MountPointID mpID = mMountPointID;
+		if(mParent)
+		{
+			SE_MountPoint mp = mParent->findMountPoint(mpID);
+			mLeft = mp.getX() - mPivotX;
+			mTop = mp.getY() - mPivotY;
+		}
+	}
+	if(mWidth == INVALID_GEOMINFO && mHeight == INVALID_GEOMINFO)
+	{
+		mWidth = imageWidth;
+		mHeight = imageHeight;
+	}
+	if(mLeft == INVALID_GEOMINFO || mTop == INVALID_GEOMINFO ||
+		mWidth == INVALID_GEOMINFO || mHeight == INVALID_GEOMINFO)
+	{
+		LOGE("... error element geometry not correct\n");
+	}
+
+
+}
+SE_Spatial* SE_Element::createSpatialFromActionData(SE_Spatial* parent)
 {
 	return NULL;
 }
-SE_Spatial* SE_Element::createSpatialFromStateTableData()
+SE_Spatial* SE_Element::createSpatialFromStateTableData(SE_Spatial* parent)
 {
 	return NULL;
 }

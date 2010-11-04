@@ -130,6 +130,7 @@ public:
     {
         return mParent;
     }
+	/*
     void setImageDataX(int x)
     {
         mImageX = x;
@@ -146,6 +147,7 @@ public:
     {
         mImageHeight = h;
     }
+	*/
     SE_SimObjectID getSimObjectID()
     {
         return mSimObjectID;
@@ -174,6 +176,7 @@ public:
     {
         mPivotY = y;
     }
+	/*
 	void setImageMapRef(const SE_StringID& imageMapRef)
 	{
 		mImageMapRef = imageMapRef;
@@ -182,6 +185,7 @@ public:
 	{
 		return mImageMapRef;
 	}
+	*/
 	void setMountPointRef(const SE_MountPointID& mp)
 	{
 		mMountPointID = mp;
@@ -202,7 +206,7 @@ public:
 	{
 		mElementRefList.push_back(elementRefID);
 	}
-	SE_StringID getWorldImageMapRef();
+	//SE_StringID getWorldImageMapRef();
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
@@ -217,25 +221,28 @@ public:
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
-	SE_Spatial* createSpatialFromImageData();
-	SE_Spatial* createSpatialFromActionData();
-	SE_Spatial* createSpatialFromStateTableData();
+	SE_Spatial* createSpatialFromImageData(SE_Spatial* parent);
+	SE_Spatial* createSpatialFromActionData(SE_Spatial* parent);
+	SE_Spatial* createSpatialFromStateTableData(SE_Spatial* parent);
+	void calculateRect(int imageWidth, int imageHeight);
+	static const float INVALID_GEOMINFO;
 private:
     float mTop;
     float mLeft;
     float mWidth;
     float mHeight; 
+
     float mPivotX;
     float mPivotY;
-    int mImageX;
-    int mImageY;
-    int mImageWidth;
-    int mImageHeight;
+    //int mImageX;
+    //int mImageY;
+    //int mImageWidth;
+    //int mImageHeight;
     SE_Element* mParent;
     SE_StringID mImageID;
     SE_StringID mActionID;
     SE_StringID mStateTableID;
-	SE_StringID mImageMapRef;//indicate imagemap file name
+	//SE_StringID mImageMapRef;//indicate imagemap file name
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;

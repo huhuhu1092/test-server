@@ -387,11 +387,13 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     surface->setWrapT(mWrapT);
     for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
     {
+	    surface->setTexCoordIndex(i, 0);// all texunit use tex0's texcoord
         SE_TextureUnit* texUnit = new SE_TextureUnit();
         texUnit->setImageDataNum(1);
 		if(mImageDataArray[i])
 		    texUnit->setImageData(0, mImageDataArray[i]->getPtr()->imageData);
-        texUnit->setTextureCoordData(mTexCoordData->getPtr());
+		if(i == 0)
+            texUnit->setTextureCoordData(mTexCoordData->getPtr());
         texture->setTextureUnit(i, texUnit);
     }
     mesh->setSurface(0, surface.get());

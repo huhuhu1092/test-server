@@ -21,6 +21,14 @@ struct SE_ImageUnit
 {
     SE_ImageRect imageRect;
 	SE_ImageDataID imageDataID;
+	SE_StringID imageURL; // when you get a SE_ImageUnit From SE_ResourceManager, it will 
+	                      // separate your input url to imageURL and ext.
+	SE_StringID ext;
+	bool isValid()
+	{
+		return imageDataID.isValid() && imageRect.width > 0 && imageRect.height > 0;
+	}
+
 };
 
 class SE_ImageItemProperty

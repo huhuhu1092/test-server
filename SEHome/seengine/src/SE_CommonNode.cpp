@@ -50,7 +50,8 @@ void SE_CommonNode::updateRenderState()
     for(; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-		s->updateRenderState();
+		if(s)
+		    s->updateRenderState();
 	}
 }
 void SE_CommonNode::updateWorldTransform()
@@ -60,7 +61,8 @@ void SE_CommonNode::updateWorldTransform()
     for(; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-        s->updateWorldTransform();
+		if(s)
+            s->updateWorldTransform();
     }
 }
 void SE_CommonNode::updateWorldLayer()
@@ -70,7 +72,8 @@ void SE_CommonNode::updateWorldLayer()
     for(; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-        s->updateWorldLayer();
+		if(s)
+            s->updateWorldLayer();
     }
 }
 SE_Spatial::SPATIAL_TYPE SE_CommonNode::getSpatialType()

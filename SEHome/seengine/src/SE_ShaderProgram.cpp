@@ -197,6 +197,10 @@ void SE_ShaderProgram::link()
 	m_u_colorr_loc = glGetUniformLocation(mShaderProgramObject, "u_colorr");
 	m_u_colorg_loc = glGetUniformLocation(mShaderProgramObject, "u_colorg");
 	m_u_colorb_loc = glGetUniformLocation(mShaderProgramObject, "u_colorb");
+	m_u_rchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_rchannelindex");
+    m_u_gchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_gchannelindex");
+	m_u_bchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_bchannelindex");
+	m_u_achannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_achannelindex");
 	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 	checkGLError();
 #ifdef DEBUG0
@@ -289,6 +293,26 @@ GLint SE_ShaderProgram::getMarkColorUniformLoc(int index)
 		break;
 	case 3:
 		ret = m_u_colorb_loc;
+		break;
+	}
+	return ret;
+}
+GLint SE_ShaderProgram::getColorChannelIndexUniformLoc(int index)
+{
+	GLint ret = -1;
+	switch(index)
+	{
+	case 0:
+		ret = m_u_rchannelindex_loc;
+		break;
+	case 1:
+		ret = m_u_gchannelindex_loc;
+		break;
+	case 2:
+		ret = m_u_bchannelindex_loc;
+		break;
+	case 3:
+		ret = m_u_achannelindex_loc;
 		break;
 	}
 	return ret;

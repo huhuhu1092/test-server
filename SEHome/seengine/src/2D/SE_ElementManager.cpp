@@ -393,21 +393,6 @@ void SE_ElementManager::load(const char* filePath)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mRoot = resourceManager->loadElement(filePath);
-	/*
-	std::string fileFullPath = std::string(resourceManager->getDataPath()) + "\\" + filePath;
-    TiXmlDocument doc(fileFullPath.c_str());
-    doc.LoadFile();
-    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
-    {
-        LOGI("can not open xml file: %s\n", filePath);
-        return;
-    }
-	SE_StringID elementTableSetID(filePath);
-	SE_ElementMap* ets = new SE_ElementMap;
-	mElementMapManager.set(elementTableSetID, ets);
-	mCurrElementMap = ets;
-    handleXmlChild(parent, &doc);
-	*/
 }
 /*
 void SE_ElementManager::addXmlElementHandler(const char* elementName, SE_XmlElementHandler* handler)

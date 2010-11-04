@@ -7,52 +7,6 @@
 #include "SE_Element.h"
 #include "SE_ElementMap.h"
 class SE_Spatial;
-class SE_ElementManager;
-/////////////////////////////////////////////////////////////
-/*
-class SE_AnimationHandler : public SE_XmlElementHandler
-{
-public:
-    SE_AnimationHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
-};
-class SE_TextureCoordAnimationHandler : public SE_XmlElementHandler
-{
-public:
-    SE_TextureCoordAnimationHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
-};
-class SE_ImageDataHandler : public SE_XmlElementHandler
-{
-public:
-    SE_ImageDataHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
-};
-class SE_UnitWidthHandler : public SE_XmlElementHandler
-{
-public:
-    SE_UnitWidthHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-   virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent); 
-};
-class SE_UnitHeightHandler : public SE_XmlElementHandler
-{
-public:
-    SE_UnitHeightHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);  
-};
-class SE_CoordHandler : public SE_XmlElementHandler
-{
-public:
-    SE_CoordHandler(SE_ElementManager* em) : SE_XmlElementHandler(em)
-    {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
-};
-*/
 
 class SE_ElementManager
 {

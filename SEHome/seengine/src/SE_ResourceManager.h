@@ -60,6 +60,7 @@ public:
     SE_Spatial* loadScene(const char* sceneName);
 
 	SE_ImageData* loadImage(const char* imageName);
+	void loadShader(const char* shaderFileName);
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);

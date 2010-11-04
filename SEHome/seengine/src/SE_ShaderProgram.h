@@ -37,6 +37,7 @@ public:
 	{
 		return m_u_color_op_mode_loc;
 	}
+	GLint getColorChannelIndexUniformLoc(int index);
 	// index start from 1
 	GLint getTexCoordIndexUniformLoc(int index);
 	GLint getMarkColorUniformLoc(int index);
@@ -69,6 +70,10 @@ private:
 	GLint m_u_colorr_loc;
 	GLint m_u_colorg_loc;
 	GLint m_u_colorb_loc;
+	GLint m_u_rchannelindex_loc;
+    GLint m_u_gchannelindex_loc;
+	GLint m_u_bchannelindex_loc;
+	GLint m_u_achannelindex_loc;
     char* mVertexShaderSrc;
     char* mFragmentShaderSrc;
 };

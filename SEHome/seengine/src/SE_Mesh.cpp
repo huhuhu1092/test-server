@@ -44,6 +44,7 @@ SE_Surface::SE_Surface()
     mIndexInGeometryData = NULL;
     mIndexInGeometryDataNum = 0;
     memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
+	memset(mColorChannelIndex, 0, sizeof(int) * 4);
 }
 SE_Surface::~SE_Surface()
 {

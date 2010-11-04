@@ -241,6 +241,14 @@ public:
 			return SE_TEXTURE0;
 		return mTexCoordIndex[texIndex];
 	}
+	void setColorChannelIndex(int index, int v)
+	{
+		mColorChannelIndex[index] = v;
+	}
+	int getColorChannelIndex(int index)
+	{
+		return mColorChannelIndex[index];
+	}
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -271,6 +279,7 @@ private:
     int mIndexInGeometryDataNum;
 	//int mTextureMode;
 	SE_Vector3f mMarkColor[4];
+	int mColorChannelIndex[4]; // r,g, b,a
 	int mTexCoordIndex[SE_TEXUNIT_NUM];
 	SE_ShaderColorOperation mShaderColorOperation;
 };

@@ -35,11 +35,16 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	resourceManager->loadImageTable("ImageTable1.xml");
+	resourceManager->loadShader("ShaderDefine.xml");
 	SE_ImageUnit iu = resourceManager->getImageUnit("ImageTable1.xml/it1/E01");
-	/*
     SE_ElementManager* elementManager = mApp->getElementManager();
     elementManager->load(fileName.c_str());
     SE_SceneManager* sceneManager = mApp->getSceneManager();
+	SE_Element* elementRoot = elementManager->getRoot();
+	elementRoot->setLeft(0);
+	elementRoot->setTop(0);
+	elementRoot->setWidth(480);
+	elementRoot->setHeight(800);
     SE_Spatial* root = elementManager->createSpatial();
     SE_DepthTestState* rs = new SE_DepthTestState();
 	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
@@ -55,7 +60,6 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     sceneManager->addSpatial(NULL, root);
 	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
 	renderManager->setBackground(SE_Vector3f(1, 1, 1));
-	*/
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)
@@ -69,7 +73,7 @@ void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDel
 {
     SE_Vector3f location(0, 0, 10);
     float ratio = height / (float)width;
-    float angle = 2 * SE_RadianToAngle(atanf(width / 20));
+    float angle = 2 * SE_RadianToAngle(atanf(width / 20.0f));
     SE_Camera* camera = new SE_MotionEventCamera;
 	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
 	camera->setViewport(0, 0, width, height);

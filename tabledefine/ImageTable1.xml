@@ -2,7 +2,9 @@
 <ImageTable id="it1">
     <ImageItem name="女_身体_002.png" id="E01" /> 
     <ImageItem name="女_后发_001.png" id="E02" />
-    <ImageItem name="女_脸.png" id="E03" />
+    <ImageItem name="女_脸.png" id="E03" >
+        <Image id = "nian" startx = "0" starty = "0" endx = "128" endy = "128" />
+    </ImageItem>
 	<ImageItem name="衣服001.png" id="E04" />
 	<ImageItem name="裙子001.png" id="E05" />
 	<ImageItem name="嘴_001.png" id="E06" />

@@ -632,6 +632,10 @@ public:
 		{
 			return new SE_StateTableHandler(elementManager);
 		}
+		else if(!strcmp(name, "Shader"))
+		{
+			return new SE_ShaderHandler(elementManager);
+		}
 		else
 			return NULL;
     }
@@ -970,10 +974,6 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 		{
 			element->setElementRef(SE_StringID(value));
 		}
-		else if(!strcmp(name , "imagemapref"))
-		{
-			element->setImageMapRef(SE_StringID(value));
-		}
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
@@ -982,7 +982,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
     }
 	if(parent == NULL)
 	{
-		if(!hasPivotx || !hasPivoty || !hasid)
+		if(!hasid)
 		{
 			LOGE("... element error : top element must has id, pivotx, pivoty\n");
 		}
@@ -1477,7 +1477,10 @@ SE_Element* SE_ResourceManager::loadElement(const char* elementResourceName)
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName)
 {
-    std::string dataPath = getDataPath();
+	SE_ImageData* imageData = getImageData(SE_ImageDataID(imageName));
+	if(imageData)
+		return imageData;
+    std::string dataPath = getImagePath();
     std::string imageDataPath = dataPath + SE_SEP + imageName;
 	std::string str(imageName);
 	size_t pos = str.find('.');
@@ -1497,7 +1500,7 @@ SE_ImageData* SE_ResourceManager::loadImage(const char* imageName)
     }
 	if(imageType == -1)
 		return NULL;;
-	SE_ImageData* imageData = ::loadImage(imageDataPath.c_str(), imageType);
+	imageData = ::loadImage(imageDataPath.c_str(), imageType);
 	if(imageData)
 	{
 		setImageData(imageName, imageData);
@@ -1523,9 +1526,9 @@ void SE_ResourceManager::loadImageTable(const char* imageTableName)
 SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 {
 	SE_Util::SplitStringList stringList = SE_Util::splitString(imageUnitPath, "/");
-	if(stringList.size() != 3 && stringList.size() != 4)
+	if(stringList.size() < 3)
 	{
-		LOGE("... image unit path must be full path\n");
+		LOGI("... image unit path must be full path\n");
 		return SE_ImageUnit();
 	}
 	SE_ImageMapSet* imageMapSet = mImpl->mImageTable.getItem(stringList[0].c_str());
@@ -1563,6 +1566,12 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 			iu.imageRect.y = 0;
 			iu.imageRect.width = imageData->getWidth();
 			iu.imageRect.height = imageData->getHeight();
+			std::string path = stringList[0] + "/" + stringList[1] + "/" + stringList[2];
+			iu.imageURL = path.c_str();
+			if(stringList.size() > 3)
+			{
+				iu.ext = stringList[3].c_str();  
+			}
 			return iu;
 		}
 	}
@@ -1573,6 +1582,27 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 		SE_ImageUnit iu;
 		iu.imageRect = ir;
 		iu.imageDataID = imageItem->getProperty().getImageDataID();
+		std::string path = stringList[0] + "/" + stringList[1] + "/" + stringList[2] + "/" + stringList[3];
+		iu.imageURL = path.c_str();
+		if(stringList.size() > 4)
+		{
+			iu.ext = stringList[4].c_str();
+		}
 		return iu;
 	}
+}
+void SE_ResourceManager::loadShader(const char* shaderFileName)
+{
+	if(!shaderFileName)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + shaderFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+    SE_XmlElementCalculus<SE_Element> m(mImpl);
+    m.handleXmlChild(NULL, &doc, 0);
 }

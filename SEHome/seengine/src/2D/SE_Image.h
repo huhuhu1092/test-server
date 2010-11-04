@@ -1,47 +1,62 @@
 #ifndef SE_IMAGE_H
 #define SE_IMAGE_H
 #include "SE_ID.h"
+#include "SE_ImageMap.h"
 #include <string>
+class SE_RectPrimitive;
 class SE_Surface;
 class SE_Image
 {
 public:
-	SE_Image(const char* url, const char* imagemapref);
+	SE_Image(const char* url);
 	int getWidth();
 	int getHeight();
-	SE_StringID getBaseColor()
+	SE_ImageUnit getBaseColor()
 	{
 		return mBaseColor;
 	}
-	SE_StringID getRChannel()
+	SE_ImageUnit getRChannel()
 	{
 		return mRChannel;
 	}
-	SE_StringID getGChannel()
+	SE_ImageUnit getGChannel()
 	{
 		return mGChannel;
 	}
-	SE_StringID getBChannel()
+	SE_ImageUnit getBChannel()
 	{
 		return mBChannel;
 	}
-	SE_StringID getAChannel()
+	SE_ImageUnit getAChannel()
 	{
 		return mAChannel;
 	}
+	void setImageData(SE_RectPrimitive* primitive);
 	void setSurface(SE_Surface* surface);
 private:
 	void parse();
-	SE_StringID createImageDataFullPath(const char* inputstr);
+	SE_ImageUnit createImageDataFullPath(const char* inputstr);
 	void calculateDimension();
 private:
+	struct _ImageUnitData
+	{
+		int valid;
+		SE_ImageUnit* imageUnit;
+		_ImageUnitData()
+		{
+			valid = 0;
+			imageUnit = NULL;
+		}
+	};
+	int mWidth;
+	int mHeight;
 	std::string mUrl;
-	std::string mDefaultImageMapRef;
-    SE_StringID mRChannel;
-	SE_StringID mGChannel;
-	SE_StringID mBChannel;
-	SE_StringID mAChannel;
-	SE_StringID mBaseColor;
+    SE_ImageUnit mRChannel;
+	SE_ImageUnit mGChannel;
+	SE_ImageUnit mBChannel;
+	SE_ImageUnit mAChannel;
+	SE_ImageUnit mBaseColor;
+	_ImageUnitData mImageUnits[5];
 
 };
 #endif
