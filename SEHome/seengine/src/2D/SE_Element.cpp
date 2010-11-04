@@ -79,7 +79,7 @@ static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_Imag
     const char* str = filePath.c_str();
     wchar_t wideFilePath[512];
     MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
-    imageData = SE_ImageCodec::load(wideFilePath);
+    imageData = SE_ImageCodec::load(wideFilePath, true);
 #else
 #endif
     return imageData;

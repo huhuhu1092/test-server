@@ -28,10 +28,10 @@
          <Image dataref="ImageTable1.xml/it1/E05" />
     </Element>
      <Element id="zui" pivotx="0" pivoty="0" layer="5" mountpointref = "p6">
-         <Image dataref = "ImageTable1.xml/it1/E06"/>
+         <Image dataref = "ImageTable1.xml/it1/E06/mouse"/>
     </Element>
      <Element id="bizi" pivotx="0" pivoty="0" layer="5" mountpointref = "p7">
-        <Image dataref="ImageTable1.xml/it1/E07"/>
+        <Image dataref="ImageTable1.xml/it1/E07/nose"/>
     </Element>
     <Element id="lefteye" pivotx="0" pivoty="0" layer="5" mountpointref = "p8">
         <Image dataref = "ImageTable1.xml/it1/N01/left" />
@@ -45,7 +45,7 @@
     <Element id="leftmeimao" pivotx="0" pivoty="0" layer="6" mountpointref = "p11">
         <Image dataref="ImageTable1.xml/it1/B01/left" />
     </Element>
-    <Element id="rightmeimao" pivotx="238" pivoty="0" layer="6" mountpointref = "p12">
+    <Element id="rightmeimao" pivotx="0" pivoty="0" layer="6" mountpointref = "p12">
         <Image dataref="ImageTable1.xml/it1/B01/right" />
     </Element>
 </Element>

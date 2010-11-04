@@ -26,9 +26,9 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
-static SE_ImageData* loadCommonCompressImage(const char* imageName)
+static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
-	return SE_ImageCodec::load(imageName);   
+	return SE_ImageCodec::load(imageName, fliped);   
 }
 static SE_ImageData* loadRawImage(const char* imageName)
 {
@@ -60,9 +60,10 @@ static SE_ImageData* loadRawImage(const char* imageName)
     imageData->setBytesPerRow(bytesPerRow);
     imageData->setData(pixelData);
     imageData->setCompressType(SE_ImageData::RAW);
+	imageData->setIsFliped(true);
     return imageData;
 }
-static SE_ImageData* loadImage(const char* imageName, int type)
+static SE_ImageData* loadImage(const char* imageName, int type, bool fliped)
 {
     switch(type)
     {
@@ -72,7 +73,7 @@ static SE_ImageData* loadImage(const char* imageName, int type)
     case SE_ImageData::JPEG:
     case SE_ImageData::PNG:
     case SE_ImageData::TGA:
-		return loadCommonCompressImage(imageName);
+		return loadCommonCompressImage(imageName, fliped);
         break;
     case SE_ImageData::ETC1:
         break;
@@ -185,7 +186,7 @@ static void processImageData(SE_BufferInput& inputBuffer, SE_ResourceManager* re
         std::string str = inputBuffer.readString();
         std::string dataPath = resourceManager->getDataPath();
         std::string imageDataPath = dataPath + SE_SEP + str;
-        SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType);
+        SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType, true);
         resourceManager->setImageData(imageDataid, imageData); 
     }
 }
@@ -1475,7 +1476,7 @@ SE_Element* SE_ResourceManager::loadElement(const char* elementResourceName)
     m.handleXmlChild(NULL, &doc, 0);
 	return mImpl->mElementRoot;
 }
-SE_ImageData* SE_ResourceManager::loadImage(const char* imageName)
+SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {
 	SE_ImageData* imageData = getImageData(SE_ImageDataID(imageName));
 	if(imageData)
@@ -1500,7 +1501,7 @@ SE_ImageData* SE_ResourceManager::loadImage(const char* imageName)
     }
 	if(imageType == -1)
 		return NULL;;
-	imageData = ::loadImage(imageDataPath.c_str(), imageType);
+	imageData = ::loadImage(imageDataPath.c_str(), imageType, fliped);
 	if(imageData)
 	{
 		setImageData(imageName, imageData);
@@ -1552,7 +1553,7 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 	if(imageItem->size() == 0 || stringList.size() == 3)
 	{
 		SE_ImageDataID id = imageItem->getProperty().getImageDataID();
-		SE_ImageData* imageData = loadImage(id.getStr());
+		SE_ImageData* imageData = loadImage(id.getStr(), false);
 		if(!imageData)
 		{
 			LOGI("... can not load image %s\n", id.getStr());

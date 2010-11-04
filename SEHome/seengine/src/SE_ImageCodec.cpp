@@ -16,11 +16,10 @@
 #include <IL/ilut.h>
 #endif
 
-SE_ImageData* SE_ImageCodec::load(const char* filePath)
+SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
 {
 #if defined(WIN32)
     ILuint	imgId;
-	ILenum	error;
     ilInit();
     iluInit();
     ilGenImages(1, &imgId);
@@ -46,13 +45,19 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
     unsigned char* src = ilGetData();
     int pixelSize = bpp / 8;
     unsigned char* dst = new unsigned char[width * height * pixelSize];
-	for(int y = height - 1 ; y >= 0 ; y--)
+	if(fliped)
 	{
-		unsigned char* srcData = src + y * width * pixelSize;
-		unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
-		memcpy(dstData, srcData, width * pixelSize);
+	    for(int y = height - 1 ; y >= 0 ; y--)
+	    {
+		    unsigned char* srcData = src + y * width * pixelSize;
+		    unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
+		    memcpy(dstData, srcData, width * pixelSize);
+		}
 	}
-    //memcpy(dst, src, width * height * pixelSize);
+	else
+	{
+		memcpy(dst, src, width * height * pixelSize);
+	}
     SE_ImageData* imageData = new SE_ImageData;
     imageData->setWidth(width);
     imageData->setHeight(height);
@@ -74,6 +79,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
     imageData->setBytesPerRow(width * pixelSize);
     imageData->setData((char*)dst);
     imageData->setCompressType(SE_ImageData::RAW);
+	imageData->setIsFliped(fliped);
     return imageData;
 #else
     SkFILEStream fileStream(filePath);
@@ -125,7 +131,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath)
     return imageData;
 #endif
 }
-SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath)
+SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath, bool fliped)
 {
 #if defined(WIN32)
     ILuint	imgId;

@@ -59,7 +59,7 @@ public:
     void loadBaseData(const char* baseResourceName);
     SE_Spatial* loadScene(const char* sceneName);
 
-	SE_ImageData* loadImage(const char* imageName);
+	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);

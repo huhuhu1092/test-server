@@ -7,8 +7,12 @@
     </ImageItem>
 	<ImageItem name="ÒÂ·þ001.png" id="E04" />
 	<ImageItem name="È¹×Ó001.png" id="E05" />
-	<ImageItem name="×ì_001.png" id="E06" />
-	<ImageItem name="±Ç×Ó_001.png" id="E07" />
+	<ImageItem name="×ì_001.png" id="E06" >
+	    <Image id = "mouse" startx = "0" starty = "0" endx = "32" endy = "32" />
+	 </ImageItem>
+	 <ImageItem name="±Ç×Ó_001.png" id="E07" >
+            <Image id = "nose" startx = "0" starty = "0" endx = "32" endy = "32" />
+        </ImageItem>
 	<ImageItem name="ÑÛ¾¦_²âÊÔ.png" id="N01" >
             <Image id = "left" startx = "0" starty = "0" endx = "32" endy = "32" />
             <Image id = "right" startx = "32" starty = "0" endx = "64" endy = "32" />

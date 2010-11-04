@@ -6,8 +6,8 @@ class SE_ImageCodec
 {
 public:
     //filePath use UTF-8 encoding
-	static SE_ImageData* load(const char* filePath);
+	static SE_ImageData* load(const char* filePath, bool fliped);
 	//filePath use Unicode encoding
-    static SE_ImageData* load(const wchar_t* filePath);
+    static SE_ImageData* load(const wchar_t* filePath, bool fliped);
 };
 #endif
