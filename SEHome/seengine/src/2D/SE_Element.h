@@ -202,10 +202,12 @@ public:
 	{
 		mAnimation = animation;
 	}
+	/*
 	void addElementRef(const SE_StringID& elementRefID)
 	{
 		mElementRefList.push_back(elementRefID);
 	}
+	*/
 	//SE_StringID getWorldImageMapRef();
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
@@ -224,6 +226,7 @@ private:
 	SE_Spatial* createSpatialFromImageData(SE_Spatial* parent);
 	SE_Spatial* createSpatialFromActionData(SE_Spatial* parent);
 	SE_Spatial* createSpatialFromStateTableData(SE_Spatial* parent);
+	SE_Spatial* createSpatialFromElementRef(SE_Spatial* parent);
 	void calculateRect(int imageWidth, int imageHeight);
 	static const float INVALID_GEOMINFO;
 private:
@@ -258,7 +261,7 @@ private:
     _MountPointMap mMountPointMap;
     typedef std::list<SE_Element*> _ElementList;
     _ElementList mChildren;
-	typedef std::list<SE_StringID> _ElementRefList;
-	_ElementRefList mElementRefList;
+	//typedef std::list<SE_StringID> _ElementRefList;
+	//_ElementRefList mElementRefList;
 };
 #endif

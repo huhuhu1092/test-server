@@ -89,11 +89,21 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 	if(mChildren.empty())
 	{
 	    if(mImageID.isValid())
+		{
 		    return createSpatialFromImageData(parent);
+		}
+		else if(mElementRef.isValid())
+		{
+			return createSpatialFromElementRef(parent);
+		}
 	    else if(mActionID.isValid())
+		{
 	        return createSpatialFromActionData(parent);
+		}
 	    else if(mStateTableID.isValid())
+		{
 		    return createSpatialFromStateTableData(parent);
+		}
 		return NULL;
 	}
 	else
@@ -209,6 +219,7 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 	return geom;
 	*/
 }
+
 void SE_Element::travel(SE_ElementTravel* travel)
 {
 	travel->visit(this);
@@ -266,6 +277,10 @@ SE_StringID SE_Element::getWorldImageMapRef()
 	return ref;
 }
 */
+SE_Spatial* SE_Element::createSpatialFromElementRef(SE_Spatial* parent)
+{
+    return NULL;	
+}
 SE_Spatial* SE_Element::createSpatialFromImageData(SE_Spatial* parent)
 {
 	SE_StringID imageDataID = mImageID;
