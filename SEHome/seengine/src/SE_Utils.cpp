@@ -11,6 +11,9 @@
         #include <netinet/in.h>
     #endif
 #endif
+////////////////
+static const char ws[] = " \t";
+/////////////////
 unsigned int SE_Util::host2NetInt32(unsigned int i)
 {
 	return htonl(i);
@@ -203,4 +206,34 @@ SE_Util::SplitStringList SE_Util::splitString(const char* path, const char* spli
     }
     return ret;
     
+}
+std::string SE_Util::trimLeft(const char* str)
+{
+	std::string inputstr(str);
+	size_t found = inputstr.find_first_not_of(ws);
+	if(found == std::string::npos)
+	{
+		return "";
+	}
+	return inputstr.substr(found);
+}
+
+std::string SE_Util::trimRight(const char* str)
+{
+	std::string inputstr(str);
+	size_t found = inputstr.find_last_not_of(ws);
+	if(found == std::string::npos)
+		return "";
+	else
+	{
+		inputstr.erase(found + 1);
+		return inputstr;
+	}
+}
+std::string SE_Util::trim(const char* str)
+{
+	std::string inputstr(str);
+	std::string newstr = trimLeft(inputstr.c_str());
+	newstr = trimRight(newstr.c_str());
+	return newstr;
 }

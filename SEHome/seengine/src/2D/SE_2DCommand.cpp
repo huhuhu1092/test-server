@@ -34,6 +34,9 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
+	//debug
+	resourceManager->loadImageTable("CharaterImageDefine.xml");
+	//end
 	resourceManager->loadImageTable("ImageTable1.xml");
 	resourceManager->loadShader("ShaderDefine.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();

@@ -722,7 +722,8 @@ void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlE
 	while(pAttribute)
     {
         const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
         if(!strcmp(name, "id"))
         {
@@ -801,8 +802,9 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 	SE_ImageItem* imageItem = new SE_ImageItem;
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
         if(!strcmp(name, "id"))
         {
@@ -835,8 +837,9 @@ void SE_ImageTableHandler::handle(SE_ImageMapSet* parent, TiXmlElement* xmlEleme
 	SE_ImageMap* imageMap = new SE_ImageMap;
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
         if(!strcmp(name, "id"))
         {
@@ -876,8 +879,9 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 	bool hasid = false;
     while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
         if(!strcmp(name, "id"))
         {
@@ -1005,8 +1009,9 @@ void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, 
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
 		if(!strcmp(name, "id"))
 		{
@@ -1049,8 +1054,9 @@ void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
 		if(!strcmp(name , "dataref"))
 		{
@@ -1066,8 +1072,9 @@ void SE_ActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
 		if(!strcmp(name , "dataref"))
 		{
@@ -1083,8 +1090,9 @@ void SE_StateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, 
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	while(pAttribute)
     {
-        const char* name = pAttribute->Name();
-        const char* value = pAttribute->Value();
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
         int ival = -1;
 		if(!strcmp(name , "dataref"))
 		{
@@ -1105,7 +1113,8 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
     while(pAttribute)
     {
 		const char* name = pAttribute->Name();
-		const char* value = pAttribute->Value();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
 		if(!strcmp(name, "id"))
 		{
             shaderID = value;

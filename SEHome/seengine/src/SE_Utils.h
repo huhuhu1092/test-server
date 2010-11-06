@@ -18,6 +18,9 @@ public:
     static wchar_t* utf8ToUnicode(const char* utf8str);
 	typedef std::vector<std::string> SplitStringList;
     static SplitStringList splitString(const char* path, const char* split);
+	static std::string trimLeft(const char* str);
+	static std::string trimRight(const char* str);
+	static std::string trim(const char* str);
 };
 
 #endif /** end SE_UTILS_H*/
