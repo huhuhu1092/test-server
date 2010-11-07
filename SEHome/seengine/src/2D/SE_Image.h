@@ -11,6 +11,14 @@ public:
 	SE_Image(const char* url);
 	int getWidth();
 	int getHeight();
+	int getPivotX()
+	{
+		return mPivotx;
+	}
+	int getPivotY()
+	{
+		return mPivoty;
+	}
 	SE_ImageUnit getBaseColor()
 	{
 		return mBaseColor;
@@ -50,6 +58,8 @@ private:
 	};
 	int mWidth;
 	int mHeight;
+	int mPivotx;
+	int mPivoty;
 	std::string mUrl;
     SE_ImageUnit mRChannel;
 	SE_ImageUnit mGChannel;

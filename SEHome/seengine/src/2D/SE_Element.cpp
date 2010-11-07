@@ -17,7 +17,7 @@
 #if defined(WIN32)
 #include <windows.h>
 #endif
-const float SE_Element::INVALID_GEOMINFO = 9999.0;
+
 SE_Element::SE_Element()
 {
     mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
@@ -110,7 +110,7 @@ SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
 	{
 		SE_SpatialID spatialID = SE_ID::createSpatialID();
 		SE_CommonNode* commonNode = new SE_CommonNode(spatialID, parent);
-		calculateRect(0, 0);
+		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
 		if(parent)
 			parent->addChild(commonNode);
@@ -285,7 +285,7 @@ SE_Spatial* SE_Element::createSpatialFromImageData(SE_Spatial* parent)
 {
 	SE_StringID imageDataID = mImageID;
 	SE_Image image(imageDataID.getStr());
-	calculateRect(image.getWidth(), image.getHeight());
+	calculateRect(image.getPivotX(), image.getPivotY(), image.getWidth(), image.getHeight());
 	float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
     SE_RectPrimitive* primitive = NULL;
@@ -325,17 +325,26 @@ SE_Spatial* SE_Element::createSpatialFromImageData(SE_Spatial* parent)
     mSimObjectID = simObjectID;
     return geom;
 }
-void SE_Element::calculateRect(int imageWidth, int imageHeight)
+void SE_Element::calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight)
 {
-    if(mPivotX != INVALID_GEOMINFO && mPivotY != INVALID_GEOMINFO)
+	int realPivotx = 0;
+	int realPivoty = 0;
+	if(pivotx != INVALID_GEOMINFO && pivoty != INVALID_GEOMINFO)
 	{
-		SE_MountPointID mpID = mMountPointID;
-		if(mParent)
-		{
-			SE_MountPoint mp = mParent->findMountPoint(mpID);
-			mLeft = mp.getX() - mPivotX;
-			mTop = mp.getY() - mPivotY;
-		}
+		realPivotx = pivotx;
+		realPivoty = pivoty;
+	}
+    else if(mPivotX != INVALID_GEOMINFO && mPivotY != INVALID_GEOMINFO)
+	{
+		realPivotx = mPivotX;
+		realPivoty = mPivotY;
+	}
+	SE_MountPointID mpID = mMountPointID;
+	if(mParent)
+	{
+		SE_MountPoint mp = mParent->findMountPoint(mpID);
+		mLeft = mp.getX() - realPivotx;
+		mTop = mp.getY() - realPivoty;
 	}
 	if(mWidth == INVALID_GEOMINFO && mHeight == INVALID_GEOMINFO)
 	{

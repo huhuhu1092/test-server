@@ -227,8 +227,7 @@ private:
 	SE_Spatial* createSpatialFromActionData(SE_Spatial* parent);
 	SE_Spatial* createSpatialFromStateTableData(SE_Spatial* parent);
 	SE_Spatial* createSpatialFromElementRef(SE_Spatial* parent);
-	void calculateRect(int imageWidth, int imageHeight);
-	static const float INVALID_GEOMINFO;
+	void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
 private:
     float mTop;
     float mLeft;

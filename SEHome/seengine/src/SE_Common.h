@@ -56,6 +56,7 @@ enum SE_COLORBLEND_MODE {
     SE_COLOR_TEXTURE0_TEXTURE1_TEXTURE2_TEXTURE3_MODE = 30,
     SE_BLENDMODE_NUM = 31
 };
+extern const float INVALID_GEOMINFO;
 //for pass data to opengl
 struct _Vector3f
 {

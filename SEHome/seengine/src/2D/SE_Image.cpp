@@ -65,12 +65,16 @@ void SE_Image::calculateDimension()
 	{
 		mWidth = iu.imageRect.width;
 		mHeight = iu.imageRect.height;
+		mPivotx = iu.imageRect.pivotx;
+		mPivoty = iu.imageRect.pivoty;
 	}
 	else
 	{
 		iu = mRChannel;//resourceManager->getImageUnit(mRChannel.imageDataID.getStr());
 		mWidth = iu.imageRect.width;
 		mHeight = iu.imageRect.height;
+		mPivotx = iu.imageRect.pivotx;
+		mPivoty = iu.imageRect.pivoty;
 	}
 }
 int SE_Image::getWidth()

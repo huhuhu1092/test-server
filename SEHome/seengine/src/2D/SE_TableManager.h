@@ -89,7 +89,7 @@ public:
 	{
 		return mProperty;
 	}
-	int size()
+	size_t size()
 	{
 		return mItemMap.size();
 	}
@@ -124,7 +124,7 @@ public:
 	{
 		return mProperty;
 	}
-	int size()
+	size_t size()
 	{
 		return mTableItems.size();
 	}

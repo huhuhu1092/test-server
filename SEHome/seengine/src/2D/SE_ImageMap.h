@@ -2,6 +2,7 @@
 #define SE_IMAGEMAP_H
 #include "SE_ID.h"
 #include "SE_TableManager.h"
+#include "SE_Common.h"
 struct SE_ImageRect
 {
 	enum {NO_MIRROR, MIRROR_X, MIRROR_Y, MIRROR_XY};
@@ -10,10 +11,13 @@ struct SE_ImageRect
     int width;
     int height;
     int mirrorType;
+	int pivotx;
+	int pivoty;
 	SE_ImageRect()
     {
         x = y = 0;
-        width = height = -1;
+        width = height = INVALID_GEOMINFO;
+		pivotx = pivoty = INVALID_GEOMINFO;
 		mirrorType = NO_MIRROR;
     }
 };
