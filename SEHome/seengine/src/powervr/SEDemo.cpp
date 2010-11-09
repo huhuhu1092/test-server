@@ -64,14 +64,6 @@ bool SEDemo::InitApplication()
 {
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
-	SE_ImageTableManager tableManager;
-    SE_ImageTableSet* imageSet = new SE_ImageTableSet;
-	tableManager.setTableSet(SE_StringID("test1"), imageSet);
-	SE_ImageTable* imageTable = new SE_ImageTable;
-	imageSet->setTable(SE_StringID("test2"), imageTable);
-	imageTable->setItem(SE_StringID("test3"), SE_StringID("testid.png"));
-	SE_StringID value;
-	bool ret = tableManager.getValue("test1/test2/test3", value);
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
@@ -151,7 +143,7 @@ void SEDemo::handleInput(int width, int height)
     {
 #if defined(WIN32)
 		PCWSTR filePath = L"C:\\model\\test\\我的文件.jpg";
-		SE_ImageData* imgd = SE_ImageCodec::load(filePath);
+		SE_ImageData* imgd = SE_ImageCodec::load(filePath, false);
 #endif
 		float e[2] = {1, 1};
 		SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e);

@@ -263,4 +263,9 @@ private:
 	//typedef std::list<SE_StringID> _ElementRefList;
 	//_ElementRefList mElementRefList;
 };
+class SE_ImageElement : public SE_Element
+{
+public:
+	SE_ImageElement
+};
 #endif

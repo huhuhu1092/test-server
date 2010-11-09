@@ -1527,12 +1527,14 @@ void ASE_Loader::ASE_KeySHADER(const char* token)
 	{
 		ASE_Shader* shader = new ASE_Shader;
 		ASE_GetToken(false);
+		int index = atoi(s_token);
+		ASE_GetToken(false);
 		shader->shaderID = s_token;
 		ASE_GetToken(false);
 		shader->vertexShaderName = s_token;
 		ASE_GetToken(false);
 		shader->fragmentShaderName = s_token;
-		mSceneObject->mShaderObjects.push_back(shader);
+		mSceneObject->mShaderObjects[index] = shader;
 	}
 }
 
