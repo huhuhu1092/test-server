@@ -63,8 +63,9 @@ public:
 	void loadShader(const char* shaderFileName);
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
+    void loadAction(const char* actionTableName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
-
+    SE_Action* getAction(const char* actionPath);
     const char* getDataPath();
     void setDataPath(const char* datapath);
 

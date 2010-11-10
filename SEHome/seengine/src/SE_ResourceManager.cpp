@@ -19,8 +19,10 @@
 #include "SE_Element.h"
 #include "SE_ImageMap.h"
 #include "SE_XmlHandler.h"
+#include "SE_Action.h"
 #include <map>
 #include <vector>
+
 struct _MeshData
 {
     SE_Mesh* mesh;
@@ -435,6 +437,7 @@ struct SE_ResourceManager::_Impl
 	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
 	SE_ImageTable mImageTable;
+    SE_ActionTable mActionTable;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 	SE_Element* mElementRoot;
@@ -1461,4 +1464,164 @@ void SE_ResourceManager::loadShader(const char* shaderFileName)
     }
     SE_XmlElementCalculus<SE_Element, SE_ResourceManager::_Impl> m(mImpl);
     m.handleXmlChild(NULL, &doc, 0);
+}
+class _ActionContainer
+{
+public:
+    _ActionContainer(SE_ActionTable* act)
+    {
+        actionTable = act;
+    }
+    SE_ActionTable* actionTable;
+};
+class SE_ActionHandler : public SE_XmlElementHandler<SE_ActionMapSet, _ActionContainer>
+{
+public:
+    SE_ActionHandler(_ActionContainer* ac) : SE_XmlElementHandler<SE_ActionMapSet, _ActionContainer>(ac)
+    {}
+    virtual void handle(SE_ActionMapSet* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+void SE_ActionHandler::handle(SE_ActionMapSet* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    SE_Action* action = new SE_Action();
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+            SE_StringID id(value);
+            parent->setItem(id, action);
+        }
+        else if(!strcmp(name , "pivotx"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                action->setPivotX(ival);
+            }
+            else
+            {
+                LOGI("... ActionHandler parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "pivoty"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                action->setPivotY(ival);
+            }
+            else
+            {
+                LOGI("... ActionHandler parse y value error\n");
+            }
+        }
+        pAttribute = pAttribute->Next();
+    }
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_Action, _ActionContainer> m(pro);
+        m.handleXmlChild(action, pChild, i++);
+    }      
+}
+class SE_ActionMountPointHandler : public SE_XmlElementHandler<SE_Action, _ActionContainer>
+{
+public:
+    SE_ActionMountPointHandler(_ActionContainer* ac) : SE_XmlElementHanlder<SE_Action, _ActionContainer>(ac)
+    {}
+    virtual void handle(SE_Action* parent,  TiXmlElement* xmlElement, unsigned int indent);
+};
+void SE_ActionMountPointHandler::handle(SE_Action* parent,  TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        
+        pAttribute = pAttribute->Next();
+    }
+}
+template<>
+class SE_XmlElementHandlerManager<SE_ActionMapSet, _ActionContainer>
+{
+public:
+    SE_XmlElementHandlerManager(_ActionContainer* ac)
+    {
+        pro = ac;
+    }
+    SE_XmlElementHandler<SE_ActionMapSet, _ActionContainer>* getHandler(const char* name)
+    {
+        if(!strcmp(name, "Action"))
+        {
+            return new SE_ActionHandler(pro);
+        }
+    }
+    _ActionContainer* pro;
+};
+template<>
+class SE_XmlElementHandlerManager<SE_Action, _ActionContainer>
+{
+public:
+    SE_XmlElementHandlerManager(_ActionContainer* ac)
+    {
+        pro = ac;
+    }
+    SE_XmlElementHandler<SE_Action, _ActionContainer>* getHandler(const char* name)
+    {
+        if(!strcmp(name, "AnimationObject"))
+        {
+            return new SE_AnimationObjectHandler(pro);
+        }
+        else if(!strcmp(name, "Delete"))
+        {
+            return new SE_DeleteHandler(pro);
+        }
+        else if(!strcmp(name, "End"))
+        {
+            return new SE_EndHandler(pro);
+        }
+        else if(!strcmp(name, "MountPoint"))
+        {
+            return new SE_ActionMountPointHandler(pro);
+        }
+    }
+    _ActionContainer* pro;
+};
+void SE_ResourceManager::loadAction(const char* actionTableName)
+{
+	if(!actionTableName)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + actionTableName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", actionTableName.c_str());
+        return;
+    }
+    _ActionContainer actionContainer(mImpl->mActionTable);
+    SE_ActionMapSet* ams = new SE_ActionMapSet;
+    actionContainer->actionTable->setItem(SE_StringID(actionTableName), ams);
+    SE_XmlElementCalculus<SE_ActionMapSet, _ActionContainer> actionElementCalculus(&actionContainer);
+    actionElementCalculus.handleXmlChild(ams, &doc, 0);
+}
+SE_Action* SE_ResourceManager::getAction(const char* actionPath)
+{
+
 }

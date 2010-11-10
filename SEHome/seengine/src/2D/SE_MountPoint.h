@@ -1,6 +1,8 @@
 #ifndef SE_MOUNTPOINT_H
 #define SE_MOUNTPOINT_H
 #include "SE_ID.h"
+#include <map>
+#include <vector>
 //ELementPoint indicate the access point of one element in its element group
 class SE_MountPoint
 {
@@ -50,5 +52,17 @@ private:
     float mX;
     float mY;
     SE_MountPointID mID;
+};
+class SE_MountPointSet
+{
+public:
+    void addMountPoint(const SE_MountPoint& mountPoint);
+    void removeMountPoint(const SE_MountPointID& mountPointID);
+    void clearMountPoint();
+    SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID);
+    std::vector<SE_MountPoint> getMountPoint();
+private:
+    typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
+    _MountPointMap mMountPointMap;
 };
 #endif

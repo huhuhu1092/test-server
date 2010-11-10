@@ -4,13 +4,13 @@
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_ID.h"
-#include "SE_Animation.h"
 #include "SE_MountPoint.h"
 #include <string>
 #include <list>
 #include <map>
 class SE_Spatial;
 class SE_Element;
+class SE_KeyFrameController;
 class SE_ElementTravel
 {
 public:
@@ -26,7 +26,7 @@ public:
     virtual ~SE_Element();
     float getLeft()
     {
-	return mLeft;
+	    return mLeft;
     }
     float getTop()
     {
@@ -64,30 +64,7 @@ public:
     {
         return mElementRef;
     }
-    void setImage(const SE_StringID& image)
-    {
-		mImageID = image;
-    }
-    SE_StringID getImage()
-    {
-		return mImageID;
-    }
-	SE_StringID getActionID()
-	{
-		return mActionID;
-	}
-	void setActionID(const SE_StringID& actionID)
-	{
-		mActionID = actionID;
-	}
-	void setStateTableID(const SE_StringID& stID)
-	{
-		mStateTableID = stID;
-	}
-	SE_StringID getStateTableID()
-	{
-		return mStateTableID;
-	}
+
     //it is rotated around the center
     void setLocalRotate(const SE_Quat& q)
     {
@@ -130,24 +107,6 @@ public:
     {
         return mParent;
     }
-	/*
-    void setImageDataX(int x)
-    {
-        mImageX = x;
-    }
-    void setImageDataY(int y)
-    {
-        mImageY = y;
-    }
-    void setImageDataWidth(int w)
-    {
-        mImageWidth = w;
-    }
-    void setImageDataHeight(int h)
-    {
-        mImageHeight = h;
-    }
-	*/
     SE_SimObjectID getSimObjectID()
     {
         return mSimObjectID;
@@ -176,16 +135,6 @@ public:
     {
         mPivotY = y;
     }
-	/*
-	void setImageMapRef(const SE_StringID& imageMapRef)
-	{
-		mImageMapRef = imageMapRef;
-	}
-	SE_StringID getImageMapRef()
-	{
-		return mImageMapRef;
-	}
-	*/
 	void setMountPointRef(const SE_MountPointID& mp)
 	{
 		mMountPointID = mp;
@@ -194,40 +143,32 @@ public:
 	{
 		return mMountPointID;
 	}
-	SE_Animation* getAnimation()
+	SE_KeyFrameController* getKeyFrameController()
 	{
-		return mAnimation;
+		return mKeyFrameController;
 	}
-	void setAnimation(SE_Animation* animation)
+	void setKeyFrameController(SE_KeyFrameController* kfc)
 	{
-		mAnimation = animation;
+		mKeyFrameController = kfc;
 	}
-	/*
-	void addElementRef(const SE_StringID& elementRefID)
-	{
-		mElementRefList.push_back(elementRefID);
-	}
-	*/
-	//SE_StringID getWorldImageMapRef();
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
     SE_MountPoint findMountPoint(const SE_MountPointID& mountPointID);
 public:
     virtual SE_Spatial* createSpatial(SE_Spatial* parent);
-    virtual void updateWorldTransform();
+    virtual void updateRect();
+	virtual void spawn();
     virtual void addChild(SE_Element* e);
     virtual void removeChild(SE_Element* e);
 	virtual void removeChild(const SE_ElementID& id);
     virtual void travel(SE_ElementTravel* travel);
+	virtual SE_Element* clone();
+	virtual void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
-	SE_Spatial* createSpatialFromImageData(SE_Spatial* parent);
-	SE_Spatial* createSpatialFromActionData(SE_Spatial* parent);
-	SE_Spatial* createSpatialFromStateTableData(SE_Spatial* parent);
 	SE_Spatial* createSpatialFromElementRef(SE_Spatial* parent);
-	void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
 private:
     float mTop;
     float mLeft;
@@ -236,15 +177,7 @@ private:
 
     float mPivotX;
     float mPivotY;
-    //int mImageX;
-    //int mImageY;
-    //int mImageWidth;
-    //int mImageHeight;
     SE_Element* mParent;
-    SE_StringID mImageID;
-    SE_StringID mActionID;
-    SE_StringID mStateTableID;
-	//SE_StringID mImageMapRef;//indicate imagemap file name
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
@@ -255,7 +188,7 @@ private:
     SE_PrimitiveID mPrimitiveID;
 	SE_MountPointID mMountPointID;
     SE_StringID mElementRef;
-	SE_Animation* mAnimation;
+	SE_KeyFrameController* mKeyFrameController;
     typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
     _MountPointMap mMountPointMap;
     typedef std::list<SE_Element*> _ElementList;
@@ -266,6 +199,58 @@ private:
 class SE_ImageElement : public SE_Element
 {
 public:
-	SE_ImageElement
+    void setImage(const SE_StringID& image)
+    {
+		mImageID = image;
+    }
+    SE_StringID getImage()
+    {
+		return mImageID;
+    }
+	void spawn();
+	SE_Spatial* createSpatial();
+	void updateRect();
+private:
+    SE_StringID mImageID;
+};
+class SE_ActionElement : public SE_Element
+{
+public:
+	SE_ActionElement();
+	SE_StringID getActionID()
+	{
+		return mActionID;
+	}
+	void setActionID(const SE_StringID& actionID)
+	{
+		mActionID = actionID;
+	}
+	void spawn();
+	SE_Spatial* createSpatial();
+	void updateRect();
+private:
+	SE_StringID mActionID;
+	SE_Action* mAction;
+};
+class SE_StateTableElement : public SE_ELement
+{
+public:
+	void setStateTableID(const SE_StringID& stID)
+	{
+		mStateTableID = stID;
+	}
+	SE_StringID getStateTableID()
+	{
+		return mStateTableID;
+	}
+private:
+    SE_StringID mStateTableID;
+};
+class SE_SequenceElement : public SE_Element
+{};
+class SE_TextureElement : public SE_Element
+{};
+class SE_ColorEffectElement : public SE_Element
+{
 };
 #endif

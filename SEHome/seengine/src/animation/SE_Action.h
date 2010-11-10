@@ -3,6 +3,7 @@
 #include "SE_ID.h"
 #include "SE_Layer.h"
 #include "SE_KeyFrame.h"
+#include "SE_TableManager.h"
 class SE_ActionUnit
 {
 public:
@@ -154,7 +155,26 @@ public:
 	{
 		return mImageMapRef;
 	}
-	void play();
+	void addMountPoint(const SE_MountPoint& mp)
+    {
+        mMountPointSet.addMountPoint(mp);
+    }
+    void setPivotX(int pivotx)
+    {
+        mPivotX = pivotx;
+    }
+    void setPivotY(int pivoty)
+    {
+        mPivotY = pivoty;
+    }
+    int getPivotX()
+    {
+        return mPivotX;
+    }
+    int getPivotY()
+    {
+        return mPivotY;
+    }
 
 private:
     struct _ActionLayer
@@ -211,5 +231,11 @@ private:
     _EndKeyList mEndKeyList;
     SE_StringID mImageMapRef;
     int mRenderMode;
+    SE_MountPointSet mMountPointSet;
+    int mPivotX;
+    int mPivotY;
 };
+typedef SE_TableManager<SE_StringID, SE_Action*> SE_ActionMap;
+typedef SE_TableManager<SE_StringID, SE_ActionMap*> SE_ActionMapSet;
+typedef SE_TableManager<SE_StringID, SE_ActionMapSet*> SE_ActionTable;
 #endif
