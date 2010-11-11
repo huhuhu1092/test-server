@@ -1,5 +1,7 @@
 #include "SE_Action.h"
+#include "SE_Element.h"
 #include <algorithm>
+
 struct _EqualTest
 {
     bool operator()(const SE_ActionUnit* data)
@@ -11,7 +13,9 @@ struct _EqualTest
     }
     SE_StringID id;
 };
+//////////////////////////////////
 
+//////////////////////////////////
 SE_Action::SE_Action()
 {
 	mRenderMode = RENDER_TO_BUFFER;
@@ -169,4 +173,22 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
     ekEqual.justCompareLayer = false;
     mEndKeyList.remove_if(ekEqual);
 }
-    
+void SE_Action::createElement(SE_Element* parent)
+{
+	_ActionLayerList::iterator it;
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+		_ActionLayer* actionLayer = *it;
+		if(actionLayer->startkey == 0)
+		{
+			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(0);
+			SE_ActionLayerElement* element = 
+		}
+		else
+		{
+            SE_ActionLayerElement* e = new SE_ActionLayerElement(actionLayer);
+			e->setParent(parent);
+			parent->addChild(e);
+		}
+	}
+}

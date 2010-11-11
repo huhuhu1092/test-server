@@ -5,15 +5,17 @@
 #include "SE_Quat.h"
 #include "SE_ID.h"
 #include "SE_MountPoint.h"
+#include "SE_Action.h"
 #include <string>
 #include <list>
 #include <map>
 class SE_Spatial;
 class SE_Element;
 class SE_KeyFrameController;
-class SE_Action;
 class SE_Animation;
 class SE_Image;
+//class SE_Action;
+//class SE_Action::_ActionLayer;
 class SE_ElementTravel
 {
 public:
@@ -256,19 +258,25 @@ public:
 private:
     SE_StringID mStateTableID;
 };
-class SE_SequenceElement : public SE_Element
+class SE_ActionLayerElement : public SE_Element
 {
 public:
-	void spawn();
-	void updateRect();
-	SE_Spatial* createSpatial(SE_Spatial* parent);
-
+	SE_ActionLayerElement(SE_Action::_ActionLayer* actionLayer) : mActionLayer(actionLayer)
+	{}
+	void spawn(){}
+	void updateRect(){}
+	SE_Spatial* createSpatial(SE_Spatial* parent)
+	{
+		return NULL;
+	}
 private:
-
+	SE_Action::_ActionLayer* mActionLayer;
 };
-class SE_TextureElement : public SE_Element
+class SE_SequenceElement : public SE_ActionLayerElement
 {};
-class SE_ColorEffectElement : public SE_Element
+class SE_TextureElement : public SE_ActionLayerElement
+{};
+class SE_ColorEffectElement : public SE_ActionLayerElement
 {
 };
 #endif

@@ -279,10 +279,15 @@ void SE_ActionElement::spawn()
 	mAction = resourceManager->getAction(mActionID.getStr());
 	if(!mAction)
 		return;
-
+	mAction->sort();
+	calculateRect(mAction->getPivotX(), mAction->getPivotY(), 0, 0);
+	mAction->createElement(this);
 }
 SE_Spatial* SE_ActionElement::createSpatial()
 {
+	if(!mAction)
+		return NULL;
+
 	return NULL;
 }
 void SE_ActionElement::updateRect()

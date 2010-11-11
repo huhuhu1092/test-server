@@ -22,6 +22,7 @@
 #include "SE_2DCommand.h"
 #include "SE_ElementManager.h"
 #include "SE_AnimationManager.h"
+#include "SE_Animation.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32

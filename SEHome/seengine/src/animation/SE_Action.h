@@ -5,6 +5,7 @@
 #include "SE_KeyFrame.h"
 #include "SE_TableManager.h"
 #include "SE_MountPoint.h"
+class SE_Element;
 class SE_ActionUnit
 {
 public:
@@ -25,6 +26,10 @@ public:
 	SE_Layer getLayer() const
 	{
 		return mLayer;
+	}
+	virtual SE_Element* createElement()
+	{
+		return NULL;
 	}
 private:
     SE_StringID mID;
@@ -73,6 +78,7 @@ public:
 	{
 		return mImageRef;
 	}
+	SE_Element* createElement();
 private:
 	SE_StringID mImageRef;
 };
@@ -87,6 +93,7 @@ public:
     {
         return mTextureRef;
     }
+	SE_Element* createElement();
 private:
 	SE_StringID mTextureRef;
 };
@@ -101,6 +108,8 @@ public:
     {
         return mSequenceFrameRef;
     }
+	SE_Element* createElement();
+
 private:
 	SE_StringID mSequenceFrameRef;
 };
@@ -115,6 +124,8 @@ public:
     {
         return mColorEffectRef;
     }
+	SE_Element* createElement();
+
 private:
     SE_StringID mColorEffectRef;
 };
@@ -129,6 +140,7 @@ public:
     {
         return mRef;
     }
+	SE_Element* createElement();
 private:
     SE_StringID mRef;
 };
@@ -144,6 +156,8 @@ public:
     {
         return mMusicRef;
     }
+	SE_Element* createElement();
+
 private:
     SE_StringID mMusicRef;
 };
@@ -168,14 +182,6 @@ public:
     {
         return mRenderMode;
     }
-	void setImageMapRef(const SE_StringID& imageMapRef)
-	{
-		mImageMapRef = imageMapRef;
-	}
-	SE_StringID getImageMapRef()
-	{
-		return mImageMapRef;
-	}
 	void addMountPoint(const SE_MountPoint& mp)
     {
         mMountPointSet.addMountPoint(mp);
@@ -200,10 +206,11 @@ public:
     {
         return mPivotY;
     }
-
-private:
-    struct _ActionLayer
+    void createElement(SE_Element* parent);
+public:
+	class _ActionLayer
 	{
+	public:
 		SE_Layer layer;
         SE_KeyFrameSequence<SE_ActionUnit*> sequences;
 		unsigned int startkey;
@@ -214,6 +221,7 @@ private:
 			endkey = 0;
 		}
 	};
+private:
     struct _EndKey
     {
         unsigned int key;
@@ -254,11 +262,11 @@ private:
     typedef std::list<_EndKey> _EndKeyList;
     _ActionLayerList mActionLayerList;
     _EndKeyList mEndKeyList;
-    SE_StringID mImageMapRef;
     int mRenderMode;
     SE_MountPointSet mMountPointSet;
     int mPivotX;
     int mPivotY;
+
 };
 typedef SE_Table<SE_StringID, SE_Action*> SE_ActionMapSet;
 typedef SE_Table<SE_StringID, SE_ActionMapSet*> SE_ActionTable;
