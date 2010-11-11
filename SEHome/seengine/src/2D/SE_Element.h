@@ -262,6 +262,7 @@ public:
 	void spawn();
 	void updateRect();
 	SE_Spatial* createSpatial(SE_Spatial* parent);
+
 private:
 
 };
