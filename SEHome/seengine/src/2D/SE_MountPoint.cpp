@@ -53,9 +53,9 @@ std::vector<SE_MountPoint> SE_MountPointSet::getMountPoint()
     _MountPointMap::iterator it;
     std::vector<SE_MountPoint> ret(mMountPointMap.size());
     int i = 0;
-    for(it = mMountPointMap.begin(); it != mMountPointSet.end(); it++)
+    for(it = mMountPointMap.begin(); it != mMountPointMap.end(); it++)
     {
-        ret[i++] = *it;
+		ret[i++] = it->second;
     } 
     return ret;
 }

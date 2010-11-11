@@ -163,15 +163,18 @@ template <typename T>
 void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
 {
     typename _KeyFrameSequence::iterator it ;
+	SE_KeyFrame<T>* old = NULL;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         if((*it)->key == kf->key)
         {
+			old = *it;
             *it = kf;
+			delete old;
             return;
         }
     }
-    mKeyFrameSequence.push_back(newkf);
+    mKeyFrameSequence.push_back(kf);
 }
 template <typename T>
 SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key)

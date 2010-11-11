@@ -2,43 +2,42 @@
 #define SE_SEQUENCE_H
 #include "SE_TableManager.h"
 #include "SE_ID.h"
+#include "SE_MountPoint.h"
 #include "SE_KeyFrame.h"
 class SE_Sequence
 {
 public:
-    typedef SE_StringID TABLE_ITEM_ID;
-    typedef SE_StringID TABLE_ITEM_VALUE;
-    typedef SE_IDTrait<SE_StringID> TABLE_ITEM_IDTRAIT;
-    SE_StringID getImageMapRef()
+    struct _Frame
     {
-        return mImageMapRef;
+        SE_StringID imageref;
+        SE_MountPointID mpref;
+    };
+    void setFrame(unsigned int key, const _Frame& f);
+	_Frame getFrame(unsigned int);
+    SE_MountPoint getMountPoint(const SE_MountPointID& id);
+	void addMountPoint(const SE_MountPoint& mp);
+    void setPivotX(int pivotx)
+    {
+        mPivotX = pivotx;
     }
-    void setImageMapRef(const SE_StringID& ref)
+    int getPivotX()
     {
-        mImageMapRef = ref;
+        return mPivotX;
     }
-    void setItem(unsigned int key, const SE_StringID& unitID)
+    void setPivotY(int pivoty)
     {
-        mKeyFrames.setKeyFrame(key, new SE_StringID(unitiD));
+        mPivotY = pivoty;
     }
-    bool getItem(unsigned int key, SE_StringID& out)
+    int getPivotY()
     {
-        SE_StringID* frame = mKeyFrames.getKeyFrame(key);
-        if(frame)
-        {
-            out = *frame;
-            return true;
-        }
-        else
-        {
-            out = SE_StringID::INVALID;
-            return false;
-        }
+        return mPivotY;
     }
 private:
-    SE_StringID mImageMapRef;
-    SE_KeyFrameSequence<SE_StringID> mKeyFrames;
+    int mPivotX;
+    int mPivotY;
+    SE_KeyFrameSequence<_Frame> mSequenceFrame;
+    SE_MountPointSet mMountPointSet;
 };
-typedef SE_TableSet<SE_StringID, SE_Sequence> SE_SequenceSet;
-typedef SE_TableManager<SE_StringID, SE_SequenceSet> SE_SequenceManager;
+typedef SE_Table<SE_StringID, SE_Sequence*> SE_SequenceSet;
+typedef SE_Table<SE_StringID, SE_SequenceSet*> SE_SequenceTable;
 #endif

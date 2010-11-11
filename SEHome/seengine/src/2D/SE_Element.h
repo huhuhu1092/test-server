@@ -11,6 +11,9 @@
 class SE_Spatial;
 class SE_Element;
 class SE_KeyFrameController;
+class SE_Action;
+class SE_Animation;
+class SE_Image;
 class SE_ElementTravel
 {
 public:
@@ -151,6 +154,10 @@ public:
 	{
 		mKeyFrameController = kfc;
 	}
+	SE_Animation* getAnimation()
+	{
+		return NULL;
+	}
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
@@ -168,8 +175,7 @@ public:
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
-	SE_Spatial* createSpatialFromElementRef(SE_Spatial* parent);
-private:
+protected:
     float mTop;
     float mLeft;
     float mWidth;
@@ -193,12 +199,15 @@ private:
     _MountPointMap mMountPointMap;
     typedef std::list<SE_Element*> _ElementList;
     _ElementList mChildren;
+	SE_Animation* mAnimation;
 	//typedef std::list<SE_StringID> _ElementRefList;
 	//_ElementRefList mElementRefList;
 };
 class SE_ImageElement : public SE_Element
 {
 public:
+	SE_ImageElement();
+	~SE_ImageElement();
     void setImage(const SE_StringID& image)
     {
 		mImageID = image;
@@ -208,10 +217,11 @@ public:
 		return mImageID;
     }
 	void spawn();
-	SE_Spatial* createSpatial();
+	SE_Spatial* createSpatial(SE_Spatial* parent);
 	void updateRect();
 private:
     SE_StringID mImageID;
+	SE_Image* mImage;
 };
 class SE_ActionElement : public SE_Element
 {
@@ -232,7 +242,7 @@ private:
 	SE_StringID mActionID;
 	SE_Action* mAction;
 };
-class SE_StateTableElement : public SE_ELement
+class SE_StateTableElement : public SE_Element
 {
 public:
 	void setStateTableID(const SE_StringID& stID)
@@ -247,7 +257,14 @@ private:
     SE_StringID mStateTableID;
 };
 class SE_SequenceElement : public SE_Element
-{};
+{
+public:
+	void spawn();
+	void updateRect();
+	SE_Spatial* createSpatial(SE_Spatial* parent);
+private:
+
+};
 class SE_TextureElement : public SE_Element
 {};
 class SE_ColorEffectElement : public SE_Element

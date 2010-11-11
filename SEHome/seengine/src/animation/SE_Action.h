@@ -4,6 +4,7 @@
 #include "SE_Layer.h"
 #include "SE_KeyFrame.h"
 #include "SE_TableManager.h"
+#include "SE_MountPoint.h"
 class SE_ActionUnit
 {
 public:
@@ -32,7 +33,6 @@ private:
 class SE_AnimationObject : public SE_ActionUnit
 {
 public:
-    virtual void action();
     void setControllerRef(const SE_StringID& controllerref)
     {
         mControllerRef = controllerref;
@@ -65,7 +65,6 @@ private:
 class SE_ImageAnimationObject : public SE_AnimationObject
 {
 public:
-	void action();
 	void setImageRef(const SE_StringID& imageRef)
 	{
 		mImageRef = imageRef;
@@ -80,7 +79,6 @@ private:
 class SE_TextureAnimationObject : public SE_AnimationObject
 {
 public:
-	void action();
     void setTextureRef(const SE_StringID& textureRef)
     {
         mTextureRef = textureRef;
@@ -95,35 +93,59 @@ private:
 class SE_SequenceAnimationObject : public SE_AnimationObject
 {
 public:
-    void setSequenceFrameRef(const SE_StringID& sequenceFrameRef)
+    void setSequenceRef(const SE_StringID& sequenceFrameRef)
     {
         mSequenceFrameRef = sequenceFrameRef;
     }
-    SE_StringID getSequenceFrameRef()
+    SE_StringID getSequenceRef()
     {
         return mSequenceFrameRef;
     }
 private:
 	SE_StringID mSequenceFrameRef;
 };
+class SE_ColorEffectAnimationObject : public SE_AnimationObject
+{
+public:
+    void setColorEffectRef(const SE_StringID& id)
+    {
+        mColorEffectRef = id;
+    }
+    SE_StringID getColorEffectRef()
+    {
+        return mColorEffectRef;
+    }
+private:
+    SE_StringID mColorEffectRef;
+};
 class SE_DeleteAction : public SE_ActionUnit
 {
 public:
-    void setRef(const SE_StringID& ref)
+    void setIDRef(const SE_StringID& ref)
     {
         mRef = ref;
     }
-    SE_StringID getRef()
+    SE_StringID getIDRef()
     {
         return mRef;
     }
-    void action();
 private:
     SE_StringID mRef;
 };
 
-class SE_MusicObjectAction : public SE_ActionUnit
+class SE_MusicObjectAction : public SE_AnimationObject
 {
+public:
+    void setMusicRef(const SE_StringID& musicID)
+    {
+        mMusicRef = musicID;
+    }
+    SE_StringID getMusicRef()
+    {
+        return mMusicRef;
+    }
+private:
+    SE_StringID mMusicRef;
 };
 
 class SE_Action
@@ -137,8 +159,7 @@ public:
 	void sort();
     void addEndKey(unsigned int key, const SE_Layer& layer);
     void removeEndKey(unsigned int key, const SE_Layer& layer);
-    SE_ActionUnit* getActionUnit(const SE_StringID& auID);
-    
+    SE_ActionUnit* getActionUnit(const SE_StringID& auID); 
     void setRenderMode(int renderMode)
     {
         mRenderMode = renderMode;
@@ -158,6 +179,10 @@ public:
 	void addMountPoint(const SE_MountPoint& mp)
     {
         mMountPointSet.addMountPoint(mp);
+    }
+    SE_MountPoint getMountPoint(const SE_MountPointID& id)
+    {
+        return mMountPointSet.getMountPoint(id);
     }
     void setPivotX(int pivotx)
     {
@@ -235,7 +260,6 @@ private:
     int mPivotX;
     int mPivotY;
 };
-typedef SE_TableManager<SE_StringID, SE_Action*> SE_ActionMap;
-typedef SE_TableManager<SE_StringID, SE_ActionMap*> SE_ActionMapSet;
-typedef SE_TableManager<SE_StringID, SE_ActionMapSet*> SE_ActionTable;
+typedef SE_Table<SE_StringID, SE_Action*> SE_ActionMapSet;
+typedef SE_Table<SE_StringID, SE_ActionMapSet*> SE_ActionTable;
 #endif

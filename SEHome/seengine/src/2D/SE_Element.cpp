@@ -12,6 +12,7 @@
 #include "SE_Mesh.h"
 #include "SE_Image.h"
 #include "SE_Log.h"
+#include "SE_Action.h"
 #include "SE_CommonNode.h"
 #include <algorithm>
 #if defined(WIN32)
@@ -21,7 +22,6 @@
 SE_Element::SE_Element()
 {
     mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
-    //mImageX = mImageY = mImageWidth = mImageHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
     mPivotX = mPivotY = INVALID_GEOMINFO;
@@ -32,10 +32,6 @@ SE_Element::SE_Element(float left, float top, float width, float height)
     mTop = top;
     mWidth = width;
     mHeight = height;
-    //mImageX = 0;
-    //mImageY = 0;
-    //mImageWidth = 0;
-    //mImageHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
     mPivotX = mPivotY = INVALID_GEOMINFO;
@@ -124,7 +120,16 @@ void SE_Element::travel(SE_ElementTravel* travel)
     }
 }
 void SE_Element::updateRect()
-{}
+{
+	if(!mChildren.empty())
+	{
+        _ElementList::iterator it;
+        for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+        {
+			(*it)->updateRect();
+		}
+	}
+}
 void SE_Element::addMountPoint(const SE_MountPoint& mountPoint)
 {
     mMountPointMap[mountPoint.getID()] = mountPoint;
@@ -149,10 +154,7 @@ SE_MountPoint SE_Element::findMountPoint(const SE_MountPointID& mountPointID)
 	else
 		return SE_MountPoint();
 }
-SE_Spatial* SE_Element::createSpatialFromElementRef(SE_Spatial* parent)
-{
-    return NULL;	
-}
+
 
 void SE_Element::calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight)
 {
@@ -189,22 +191,46 @@ void SE_Element::calculateRect(int pivotx, int pivoty, int imageWidth, int image
 
 }
 void SE_Element::spawn()
-{}
+{
+	if(!mChildren.empty())
+	{
+        _ElementList::iterator it;
+        for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+        {
+			(*it)->spawn();
+		}
+	}
+}
 SE_Element* SE_Element::clone()
 {
-	return NULL:
+	return NULL;
+}
+SE_ImageElement::~SE_ImageElement()
+{
+	if(mImage)
+		delete mImage;
 }
 //////////////////////////////////////////////////////////////////////////
+SE_ImageElement::SE_ImageElement()
+{
+	mImage = NULL;
+}
 void SE_ImageElement::spawn()
-{}
+{
+	SE_StringID imageDataID = mImageID;
+	mImage = new SE_Image(imageDataID.getStr());
+	calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+}
 SE_Spatial* SE_ImageElement::createSpatial(SE_Spatial* parent)
 {
+	if(!mImage)
+		return NULL;
 	float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
     SE_RectPrimitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
     SE_RectPrimitive::create(rect3D, primitive, primitiveID);
-	image.setImageData(primitive);
+	mImage->setImageData(primitive);
     SE_Mesh** meshArray = NULL;
     int meshNum = 0;
     primitive->createMesh(meshArray, meshNum);
@@ -216,21 +242,21 @@ SE_Spatial* SE_ImageElement::createSpatial(SE_Spatial* parent)
 	for(int i = 0 ; i < meshArray[0]->getSurfaceNum(); i++)
 	{
 		SE_Surface* surface = meshArray[0]->getSurface(i);
-		image.setSurface(surface);
+		mImage->setSurface(surface);
 	    surface->setProgramDataID("color_replace");
 	}
 	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
-    simObject->setName(mID.getStr());
+    simObject->setName(getID().getStr());
     SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     simObjectManager->set(simObjectID, simObject);
     SE_SpatialID spatialID = SE_ID::createSpatialID();
     SE_Geometry* geom = new SE_Geometry(spatialID, parent);
     geom->attachSimObject(simObject);
-    geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
-    geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-    geom->setLocalLayer(mLocalLayer);
-	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
+    geom->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
+    geom->setLocalScale(SE_Vector3f(getWidth() / 2, getHeight() / 2, 1));
+    geom->setLocalLayer(getLocalLayer());
+	SE_ElementID eid = SE_ID::createElementID(getID().getStr());
 	geom->setElementID(eid);
     delete[] meshArray;
     mSpatialID = spatialID;
@@ -240,38 +266,24 @@ SE_Spatial* SE_ImageElement::createSpatial(SE_Spatial* parent)
 }
 void SE_ImageElement::updateRect()
 {
-	SE_StringID imageDataID = mImageID;
-	SE_Image image(imageDataID.getStr());
-	calculateRect(image.getPivotX(), image.getPivotY(), image.getWidth(), image.getHeight());
+
 }
 /////////////////////////
-struct _ActionContainer
-{
-	SE_Action* action;
-};
-
-template<>
-class SE_XmlElementHandlerManager<SE_Action, _ActionContainter>
-{
-public:
-	SE_XmlElementHandlerManager(_ActionContainer* ac) 
-	{
-		actionContainer = ac;
-	}
-	SE_XmlElementHandler<SE_Action, _ActionContainer>* getHandler(const char* name)
-    {
-	}
-	_ActionContainer* actionContainer;
-}
 SE_ActionElement::SE_ActionElement()
 {
 	mAction = NULL;
 }
 void SE_ActionElement::spawn()
 {
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	mAction = resourceManager->getAction(mActionID.getStr());
+	if(!mAction)
+		return;
 
 }
 SE_Spatial* SE_ActionElement::createSpatial()
-{}
+{
+	return NULL;
+}
 void SE_ActionElement::updateRect()
 {}

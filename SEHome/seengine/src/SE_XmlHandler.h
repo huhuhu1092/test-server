@@ -40,6 +40,7 @@ public:
     {}
 	void handleElement(PARENTT* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent);
     void handleXmlChild(PARENTT* parent, TiXmlNode* currNode, unsigned int indent);
+	static bool hasChildElement(const char* childElementName, TiXmlElement* pElement);
 private:
    SE_XmlElementHandlerManager<PARENTT, PROPERTY> mXmlElementHandlerManager;
 };
@@ -88,5 +89,26 @@ void SE_XmlElementCalculus<PARENTT, PROPERTY>::handleXmlChild(PARENTT* parent, T
         handleDeclaration(currNode->ToDeclaration());
         break;
     }
+}
+template <typename PARENTT, typename PROPERTY>
+bool SE_XmlElementCalculus<PARENTT, PROPERTY>::hasChildElement(const char* childElementName, TiXmlElement* pElement)
+{
+    TiXmlNode* pChild = NULL;
+	bool ret = false;
+    for(pChild = pElement->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+	    int t = pChild->Type();
+		if(t == TiXmlNode::TINYXML_ELEMENT)
+		{
+			TiXmlElement* childElement = pChild->ToElement();
+			const char* name = childElement->Value();
+			if(!strcmp(name, childElementName))
+			{
+				ret = true;
+				break;
+			}
+		}
+    }
+	return ret;
 }
 #endif

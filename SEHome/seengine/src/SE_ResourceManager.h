@@ -14,6 +14,7 @@ class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
 class SE_Element;
+class SE_Action;
 class SE_ResourceManager
 {
 public:
@@ -64,6 +65,7 @@ public:
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
     void loadAction(const char* actionTableName);
+    void loadSequence(const char* sequenceName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
     const char* getDataPath();

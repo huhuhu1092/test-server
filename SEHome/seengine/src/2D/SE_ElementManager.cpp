@@ -423,6 +423,8 @@ SE_Spatial* SE_ElementManager::createSpatial()
 {
     if(!mRoot)
         return NULL;
+	mRoot->spawn();
+	mRoot->updateRect();
 	SE_Spatial* spatial = mRoot->createSpatial(NULL);
     spatial->setLocalTranslate(SE_Vector3f(0, 0, 0));
     spatial->setLocalScale(SE_Vector3f(1, 1, 1));
