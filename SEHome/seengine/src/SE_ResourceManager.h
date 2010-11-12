@@ -68,6 +68,7 @@ public:
     void loadSequence(const char* sequenceName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
+	SE_Sequence* getSequence(const char* sequencePath);
     const char* getDataPath();
     void setDataPath(const char* datapath);
 

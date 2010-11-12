@@ -18,6 +18,7 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
+	mSpatialID = SE_ID::createSpatialID();
 }
 SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {

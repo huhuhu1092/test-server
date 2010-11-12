@@ -16,6 +16,11 @@ public:
 	_Frame getFrame(unsigned int);
     SE_MountPoint getMountPoint(const SE_MountPointID& id);
 	void addMountPoint(const SE_MountPoint& mp);
+	std::vector<SE_MountPoint> getMountPoint();
+	std::vector<unsigned int> getKeys()
+	{
+		return mSequenceFrame.getKeys();
+	}
     void setPivotX(int pivotx)
     {
         mPivotX = pivotx;

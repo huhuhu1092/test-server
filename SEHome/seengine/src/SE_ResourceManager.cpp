@@ -1332,6 +1332,9 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
     SE_StringID id;
     int layer = 0;
     SE_StringID controllerref;
+	int pivotx = INVALID_GEOMINFO;
+	int pivoty = INVALID_GEOMINFO;
+	SE_MountPointID mountPointRef;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1396,10 +1399,36 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
         {
             controllerref = value;
         }
+		else if(!strcmp(name, "pivotx"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+			{
+				pivotx = ival;
+			}
+			else
+			{}
+		}
+		else if(!strcmp(name, "pivoty"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+			{
+				pivoty = ival;
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "mountpointref"))
+		{
+			mountPointRef = value;
+		}
         pAttribute = pAttribute->Next();
     }
     au->setID(id);
     au->setControllerRef(controllerref);
+	au->setPivotX(pivotx);
+	au->setPivotY(pivoty);
+	au->setMountPointRef(mountPointRef);
     parent->addActionUnit(key, au);
 }
 
@@ -2134,7 +2163,22 @@ SE_Action* SE_ResourceManager::getAction(const char* actionPath)
     return am;
 }
 
-
+SE_Sequence* SE_ResourceManager::getSequence(const char* sequencePath)
+{
+	SE_Util::SplitStringList stringList = SE_Util::splitString(sequencePath, "/");
+	if(stringList.size() < 2)
+		return NULL;
+	SE_SequenceSet* sequenceSet = mImpl->mSequenceTable.getItem(stringList[0].c_str());
+	if(!sequenceSet)
+	{
+		loadSequence(stringList[0].c_str());
+		sequenceSet = mImpl->mSequenceTable.getItem(stringList[0].c_str());
+	}
+	if(!sequenceSet)
+		return NULL;
+	SE_Sequence* sequence = sequenceSet->getItem(stringList[1].c_str());
+	return sequence;
+}
 void SE_ResourceManager::loadSequence(const char* sequenceName)
 {
 	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + sequenceName;

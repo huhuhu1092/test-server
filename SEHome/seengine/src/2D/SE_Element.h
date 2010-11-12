@@ -158,12 +158,46 @@ public:
 	}
 	SE_Animation* getAnimation()
 	{
-		return NULL;
+		return mAnimation;
 	}
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
-    SE_MountPoint findMountPoint(const SE_MountPointID& mountPointID);
+    SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID);
+	SE_Spatial* createSpatialByImage(SE_Image* image);
+	void setActionLayer(SE_Action::_ActionLayer* actionLayer)
+	{
+		mActionLayer = actionLayer;
+	}
+	SE_Action::_ActionLayer getActionLayer()
+	{
+		return mActionLayer;
+	}
+	void setStartKey(unsigned int key)
+	{
+		mStartKey = key;
+	}
+	void setEndKey(unsigned int key)
+	{
+		mEndKey = key;
+	}
+	unsigned int getStartKey()
+	{
+		return mStartKey;
+	}
+	unsigned int getEndKey()
+	{
+		return mEndKey;
+	}
+	void setCurrentKey(unsigned int key)
+	{
+		mCurrentKey = key;
+	}
+	unsigned int getCurrentKey()
+	{
+		return mCurrentKey;
+	}
+	void startAnimation();
 public:
     virtual SE_Spatial* createSpatial(SE_Spatial* parent);
     virtual void updateRect();
@@ -197,13 +231,14 @@ protected:
 	SE_MountPointID mMountPointID;
     SE_StringID mElementRef;
 	SE_KeyFrameController* mKeyFrameController;
-    typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
-    _MountPointMap mMountPointMap;
+    SE_MountPointSet mMountPointSet
     typedef std::list<SE_Element*> _ElementList;
     _ElementList mChildren;
 	SE_Animation* mAnimation;
-	//typedef std::list<SE_StringID> _ElementRefList;
-	//_ElementRefList mElementRefList;
+	SE_Action::_ActionLayer mActionLayer;
+    unsigned int mStartKey;
+	unsigned int mEndKey;
+	unsigned int mCurrentKey;
 };
 class SE_ImageElement : public SE_Element
 {
@@ -258,25 +293,19 @@ public:
 private:
     SE_StringID mStateTableID;
 };
-class SE_ActionLayerElement : public SE_Element
+
+class SE_SequenceElement : public SE_Element
 {
 public:
-	SE_ActionLayerElement(SE_Action::_ActionLayer* actionLayer) : mActionLayer(actionLayer)
-	{}
-	void spawn(){}
-	void updateRect(){}
-	SE_Spatial* createSpatial(SE_Spatial* parent)
-	{
-		return NULL;
-	}
+	SE_SequenceElement(SE_Sequence* sequence);
+    void spawn();
+	SE_Spatial* createSpatial(SE_Spatial* parent);
 private:
-	SE_Action::_ActionLayer* mActionLayer;
+	SE_Sequence* mSequence;
 };
-class SE_SequenceElement : public SE_ActionLayerElement
+class SE_TextureElement : public SE_Element
 {};
-class SE_TextureElement : public SE_ActionLayerElement
-{};
-class SE_ColorEffectElement : public SE_ActionLayerElement
+class SE_ColorEffectElement : public SE_Element
 {
 };
 #endif

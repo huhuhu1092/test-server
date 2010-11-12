@@ -21,3 +21,7 @@ SE_MountPoint SE_Sequence::getMountPoint(const SE_MountPointID& id)
 {
     return mMountPointSet.getMountPoint(id);
 }
+std::vector<SE_MountPoint> SE_Sequence::getMountPoint()
+{
+	return mMountPointSet.getMountPoint();
+}

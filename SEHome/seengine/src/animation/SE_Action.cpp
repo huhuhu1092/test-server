@@ -1,5 +1,7 @@
 #include "SE_Action.h"
 #include "SE_Element.h"
+#include "SE_ResourceManager.h"
+#include "SE_Application.h"
 #include <algorithm>
 
 struct _EqualTest
@@ -14,7 +16,22 @@ struct _EqualTest
     SE_StringID id;
 };
 //////////////////////////////////
-
+SE_Element* SE_ImageAnimationObject::createElement()
+{
+    SE_ImageElement* imageElement = new SE_ImageElement;
+	imageElement->setImage(mImageRef);
+	return imageElement;
+}
+SE_Element* SE_SequenceAnimationObject::createElement()
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_Sequence* sequence = resourceManager->getSequence(mSequenceFrameRef.getStr());
+	if(!sequence)
+		return NULL;
+    SE_SequenceElement* element = new SE_SequenceElement(sequence);
+    return element;
+	
+}
 //////////////////////////////////
 SE_Action::SE_Action()
 {
@@ -175,6 +192,12 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
 }
 void SE_Action::createElement(SE_Element* parent)
 {
+	parent->clearMountPoint();
+	std::vector<SE_MountPoint> mountPoint = mMountPointSet.getMountPoint();
+	for(int i = 0 ; i < mountPoint.size() ; i++)
+	{
+		parent->addMountPoint(mountPoint[i]);
+	}
 	_ActionLayerList::iterator it;
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
@@ -182,11 +205,16 @@ void SE_Action::createElement(SE_Element* parent)
 		if(actionLayer->startkey == 0)
 		{
 			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(0);
-			SE_ActionLayerElement* element = 
+			SE_Element* element = kf->data->createElement();
+            elment->setActionLayer(actionLayer);
+            elment->setLocalLayer(kf->data->getLayer());
+			element->setParent(parent);
+			parent->addChild(element);
 		}
 		else
 		{
-            SE_ActionLayerElement* e = new SE_ActionLayerElement(actionLayer);
+            SE_Element* e = new SE_Element;
+			e->setActionLayer(actionLayer);
 			e->setParent(parent);
 			parent->addChild(e);
 		}

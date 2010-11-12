@@ -1,6 +1,7 @@
 #ifndef SE_ACTION_H
 #define SE_ACTION_H
 #include "SE_ID.h"
+#include "SE_Common.h"
 #include "SE_Layer.h"
 #include "SE_KeyFrame.h"
 #include "SE_TableManager.h"
@@ -9,8 +10,11 @@ class SE_Element;
 class SE_ActionUnit
 {
 public:
+	SE_ActionUnit()
+	{
+		mPivotX = mPivotY = INVALID_GEOMINFO;
+	}
     virtual ~SE_ActionUnit() {}
-    virtual void action() {}
     SE_StringID getID() const
     {
         return mID;
@@ -23,9 +27,33 @@ public:
 	{
 		mLayer = layer;
 	}
+	void setPivotX(int pivotx)
+	{
+		mPivotX = pivotx;
+	}
+	void setPivotY(int pivoty)
+	{
+		mPivotY = pivoty;
+	}
+	int getPivotX()
+	{
+		return mPivotX;
+	}
+	int getPivotY()
+	{
+		return mPivotY;
+	}
 	SE_Layer getLayer() const
 	{
 		return mLayer;
+	}
+    void setMountPiontRef(const SE_MountPointID& mp)
+	{
+		mMountPointRef = mp;
+	}
+	SE_MountPointID getMountPointRef()
+	{
+		return mMountPointRef;
 	}
 	virtual SE_Element* createElement()
 	{
@@ -34,6 +62,9 @@ public:
 private:
     SE_StringID mID;
 	SE_Layer mLayer;
+	SE_MountPointID mMountPointRef;
+	int mPivotX;
+	int mPivotY;
 };
 class SE_AnimationObject : public SE_ActionUnit
 {
