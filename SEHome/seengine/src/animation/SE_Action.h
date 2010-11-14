@@ -7,6 +7,7 @@
 #include "SE_TableManager.h"
 #include "SE_MountPoint.h"
 class SE_Element;
+class SE_ActionElement;
 class SE_ActionUnit
 {
 public:
@@ -47,7 +48,7 @@ public:
 	{
 		return mLayer;
 	}
-    void setMountPiontRef(const SE_MountPointID& mp)
+    void setMountPointRef(const SE_MountPointID& mp)
 	{
 		mMountPointRef = mp;
 	}
@@ -237,7 +238,7 @@ public:
     {
         return mPivotY;
     }
-    void createElement(SE_Element* parent);
+    void createElement(SE_ActionElement* parent);
 public:
 	class _ActionLayer
 	{

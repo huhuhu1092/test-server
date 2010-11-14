@@ -14,6 +14,7 @@ class SE_Element;
 class SE_KeyFrameController;
 class SE_Animation;
 class SE_Image;
+class SE_Sequence;
 //class SE_Action;
 //class SE_Action::_ActionLayer;
 class SE_ElementTravel
@@ -164,12 +165,20 @@ public:
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
     SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID);
-	SE_Spatial* createSpatialByImage(SE_Image* image);
+	void setTimeKey(unsigned int key)
+	{
+		mTimeKey = key;
+	}
+	unsigned int getTimeKey()
+	{
+		return mTimeKey;
+	}
+	void startAnimation();
 	void setActionLayer(SE_Action::_ActionLayer* actionLayer)
 	{
 		mActionLayer = actionLayer;
 	}
-	SE_Action::_ActionLayer getActionLayer()
+	SE_Action::_ActionLayer* getActionLayer()
 	{
 		return mActionLayer;
 	}
@@ -189,25 +198,34 @@ public:
 	{
 		return mEndKey;
 	}
-	void setCurrentKey(unsigned int key)
+    void addChild(SE_Element* e);
+    void removeChild(SE_Element* e);
+	void removeChild(const SE_ElementID& id);
+	void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
+	void setPrev(SE_Element* prev)
 	{
-		mCurrentKey = key;
+		mPrevElement = prev;
 	}
-	unsigned int getCurrentKey()
+	void setNext(SE_Element* next)
 	{
-		return mCurrentKey;
+		mNextElement = next;
 	}
-	void startAnimation();
+	SE_Element* getPrev()
+	{
+		return mPrevElement;
+	}
+	SE_Element* getNext()
+	{
+		return mNextElement;
+	}
 public:
-    virtual SE_Spatial* createSpatial(SE_Spatial* parent);
-    virtual void updateRect();
+    virtual SE_Spatial* createSpatial();
+    virtual void update(unsigned int key);
 	virtual void spawn();
-    virtual void addChild(SE_Element* e);
-    virtual void removeChild(SE_Element* e);
-	virtual void removeChild(const SE_ElementID& id);
     virtual void travel(SE_ElementTravel* travel);
 	virtual SE_Element* clone();
-	virtual void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
+protected:
+	SE_Spatial* createSpatialByImage(SE_Image* image);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -216,7 +234,6 @@ protected:
     float mLeft;
     float mWidth;
     float mHeight; 
-
     float mPivotX;
     float mPivotY;
     SE_Element* mParent;
@@ -231,15 +248,18 @@ protected:
 	SE_MountPointID mMountPointID;
     SE_StringID mElementRef;
 	SE_KeyFrameController* mKeyFrameController;
-    SE_MountPointSet mMountPointSet
+    SE_MountPointSet mMountPointSet;
     typedef std::list<SE_Element*> _ElementList;
     _ElementList mChildren;
 	SE_Animation* mAnimation;
-	SE_Action::_ActionLayer mActionLayer;
-    unsigned int mStartKey;
+    unsigned int mTimeKey;
+	unsigned int mStartKey;
 	unsigned int mEndKey;
-	unsigned int mCurrentKey;
+	SE_Action::_ActionLayer* mActionLayer;
+	SE_Element* mPrevElement;
+	SE_Element* mNextElement;
 };
+
 class SE_ImageElement : public SE_Element
 {
 public:
@@ -254,8 +274,7 @@ public:
 		return mImageID;
     }
 	void spawn();
-	SE_Spatial* createSpatial(SE_Spatial* parent);
-	void updateRect();
+	SE_Spatial* createSpatial();
 private:
     SE_StringID mImageID;
 	SE_Image* mImage;
@@ -274,10 +293,16 @@ public:
 	}
 	void spawn();
 	SE_Spatial* createSpatial();
-	void updateRect();
+	void update(unsigned int key);
+	void addHeadElement(SE_Element* e)
+	{
+		mHeadElement.push_back(e);
+	}
 private:
 	SE_StringID mActionID;
 	SE_Action* mAction;
+	typedef std::list<SE_Element*> _HeadElementList;
+	_HeadElementList mHeadElement;
 };
 class SE_StateTableElement : public SE_Element
 {
@@ -290,18 +315,27 @@ public:
 	{
 		return mStateTableID;
 	}
+	void update(unsigned int key);
 private:
     SE_StringID mStateTableID;
 };
-
+class SE_NullElement : public SE_Element
+{
+public:
+	SE_NullElement()
+	{}
+	SE_Spatial* createSpatial();
+};
 class SE_SequenceElement : public SE_Element
 {
 public:
 	SE_SequenceElement(SE_Sequence* sequence);
     void spawn();
-	SE_Spatial* createSpatial(SE_Spatial* parent);
+	SE_Spatial* createSpatial();
+	void update(unsigned int key);
 private:
 	SE_Sequence* mSequence;
+	SE_Element* mCurrentElement;
 };
 class SE_TextureElement : public SE_Element
 {};

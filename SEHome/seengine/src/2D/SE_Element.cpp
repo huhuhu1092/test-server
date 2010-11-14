@@ -8,12 +8,16 @@
 #include "SE_MeshSimObject.h"
 #include "SE_Geometry.h"
 #include "SE_SimObjectManager.h"
+#include "SE_SceneManager.h"
+#include "SE_Animation.h"
+#include "SE_AnimationManager.h"
 #include "SE_MountPoint.h"
 #include "SE_Mesh.h"
 #include "SE_Image.h"
 #include "SE_Log.h"
 #include "SE_Action.h"
 #include "SE_CommonNode.h"
+#include "SE_Sequence.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
@@ -27,7 +31,9 @@ SE_Element::SE_Element()
     mPivotX = mPivotY = INVALID_GEOMINFO;
 	mActionLayer = NULL;
 	mStartKey = mEndKey = 0;
-	mCurrentKey = 0;
+	mTimeKey = 0;
+	mPrevElement = NULL;
+	mNextElement = NULL;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -40,7 +46,9 @@ SE_Element::SE_Element(float left, float top, float width, float height)
     mPivotX = mPivotY = INVALID_GEOMINFO;
 	mActionLayer = NULL;
 	mStartKey = mEndKey = 0;
-	mCurrentKey = 0;
+	mTimeKey = 0;
+	mPrevElement = NULL;
+	mNextElement = NULL;
 }
 SE_Element::~SE_Element()
 {
@@ -72,47 +80,22 @@ void SE_Element::removeChild(const SE_ElementID& id)
         mChildren.erase(it);
     }
 }
-/*
-static SE_ImageData* getImage(SE_ResourceManager* resourceManager, const SE_ImageDataID& imageDataID)
-{
-    SE_ImageData* imageData = NULL;
-    std::string dataPath = resourceManager->getDataPath();
-#if defined(WIN32)
-    std::string filePath = dataPath + "\\" + imageDataID.getStr();
-    const char* str = filePath.c_str();
-    wchar_t wideFilePath[512];
-    MultiByteToWideChar(CP_ACP, 0, str, -1, wideFilePath, 512);
-    imageData = SE_ImageCodec::load(wideFilePath, true);
-#else
-#endif
-    return imageData;
-}
-*/
-SE_Spatial* SE_Element::createSpatial(SE_Spatial* parent)
+SE_Spatial* SE_Element::createSpatial()
 {
 	if(mChildren.empty())
 	{
-		SE_Spatial* spatial = new SE_Spatial;
-		spatial->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
-        spatial->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-        spatial->setLocalLayer(mLocalLayer);
-		parent->addChild(spatial);
-		spatial->setParent(parent);
-		return spatial;
+		return NULL;
 	}
 	else
 	{
-		SE_SpatialID spatialID = SE_ID::createSpatialID();
-		SE_CommonNode* commonNode = new SE_CommonNode(spatialID, parent);
+		SE_CommonNode* commonNode = new SE_CommonNode;
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
-		if(parent)
-			parent->addChild(commonNode);
 		_ElementList::iterator it;
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 		{
 			SE_Element* e = *it;
-			SE_Spatial* spatial = e->createSpatial(commonNode);
+			SE_Spatial* spatial = e->createSpatial();
 			if(spatial)
 			    commonNode->addChild(spatial);
 		}
@@ -133,14 +116,14 @@ void SE_Element::travel(SE_ElementTravel* travel)
         }
     }
 }
-void SE_Element::updateRect()
+void SE_Element::update(unsigned int key)
 {
 	if(!mChildren.empty())
 	{
         _ElementList::iterator it;
         for(it = mChildren.begin() ; it != mChildren.end() ; it++)
         {
-			(*it)->updateRect();
+			(*it)->update(key);
 		}
 	}
 }
@@ -160,7 +143,7 @@ void SE_Element::clearMountPoint()
 
 SE_MountPoint SE_Element::getMountPoint(const SE_MountPointID& mountPointID)
 {
-	mMountPointSet.getMountPoint(mountPointID);
+	return mMountPointSet.getMountPoint(mountPointID);
 }
 
 
@@ -179,11 +162,14 @@ void SE_Element::calculateRect(int pivotx, int pivoty, int imageWidth, int image
 		realPivoty = mPivotY;
 	}
 	SE_MountPointID mpID = mMountPointID;
-	if(mParent)
+	if(mParent && mLeft == INVALID_GEOMINFO && mTop == INVALID_GEOMINFO)
 	{
-		SE_MountPoint mp = mParent->findMountPoint(mpID);
-		mLeft = mp.getX() - realPivotx;
-		mTop = mp.getY() - realPivoty;
+		if(mpID.isValid())
+		{
+		    SE_MountPoint mp = mParent->getMountPoint(mpID);
+		    mLeft = mp.getX() - realPivotx;
+		    mTop = mp.getY() - realPivoty;
+		}
 	}
 	if(mWidth == INVALID_GEOMINFO && mHeight == INVALID_GEOMINFO)
 	{
@@ -225,8 +211,8 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_Image* image)
     SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     simObjectManager->set(simObjectID, simObject);
-    SE_SpatialID spatialID = SE_ID::createSpatialID();
-    SE_Geometry* geom = new SE_Geometry(spatialID, parent);
+    SE_Geometry* geom = new SE_Geometry;
+	SE_SpatialID spatialID = geom->getSpatialID();
     geom->attachSimObject(simObject);
     geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
@@ -254,15 +240,10 @@ SE_Element* SE_Element::clone()
 {
 	return NULL;
 }
-SE_ImageElement::~SE_ImageElement()
-{
-	if(mImage)
-		delete mImage;
-}
 void SE_Element::startAnimation()
 {
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getResourceManager();
-    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
 	if(mChildren.empty())
 	{
 		if(mAnimation)
@@ -289,10 +270,25 @@ void SE_Element::startAnimation()
         }
 	}
 }
+////////////
+SE_Spatial* SE_NullElement::createSpatial()
+{
+	SE_Spatial* spatial = new SE_Spatial;
+	spatial->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+    spatial->setLocalLayer(mLocalLayer);
+	spatial->setVisible(false);
+	spatial->setCollisionable(false);
+	return spatial;
+}
 //////////////////////////////////////////////////////////////////////////
 SE_ImageElement::SE_ImageElement()
 {
 	mImage = NULL;
+}
+SE_ImageElement::~SE_ImageElement()
+{
+	if(mImage)
+		delete mImage;
 }
 void SE_ImageElement::spawn()
 {
@@ -300,15 +296,11 @@ void SE_ImageElement::spawn()
 	mImage = new SE_Image(imageDataID.getStr());
 	calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 }
-SE_Spatial* SE_ImageElement::createSpatial(SE_Spatial* parent)
+SE_Spatial* SE_ImageElement::createSpatial()
 {
 	if(!mImage)
 		return NULL;
 	return createSpatialByImage(mImage);
-
-}
-void SE_ImageElement::updateRect()
-{
 
 }
 /////////////////////////
@@ -325,20 +317,62 @@ void SE_ActionElement::spawn()
 	mAction->sort();
 	calculateRect(mAction->getPivotX(), mAction->getPivotY(), 0, 0);
 	mAction->createElement(this);
-	SE_Element::spawn();
 }
 SE_Spatial* SE_ActionElement::createSpatial()
 {
 	if(!mAction)
-		return new SE_Spatial;
-	return NULL;
+		return NULL;
+    SE_CommonNode* node = new SE_CommonNode;
+	node->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+    node->setLocalLayer(mLocalLayer);
+	return node;
 }
-void SE_ActionElement::updateRect()
-{}
+void SE_ActionElement::update(unsigned int key)
+{
+	_HeadElementList::iterator it;
+    for(it = mHeadElementList.begin() ; it != mHeadElementList.end() ; it++)
+	{
+		SE_Element* e = *it;
+		SE_Element* first = NULL;
+		SE_Element* second = NULL;
+		while(e->getTimeKey() < key)
+		{
+			e = e->getNext();
+		}
+		if(e != NULL)
+		{
+			if(e->getTimeKey() == key)
+			{
+				first = second = e;
+			}
+			else
+			{
+			    first = e->getPrev();
+			    second = e;
+			}
+		}
+		else
+		{
+			LOGI("... element's key are less than input key\n");
+			first = e;
+			second = NULL;
+		}
+		if(first == NULL)
+		{
+			LOGI("... input key is less than first element's key");
+		}
+		else
+		{
+            //calculate current element by controller
+			first->update(key - first->getTimeKey());
+		}
+	}
+}
 //////////////
 SE_SequenceElement::SE_SequenceElement(SE_Sequence* sequence)
 {
 	mSequence = sequence;
+	mCurrentElement = NULL;
 }
 void SE_SequenceElement::spawn()
 {
@@ -349,13 +383,82 @@ void SE_SequenceElement::spawn()
 	{
 		mMountPointSet.addMountPoint(mountPoints[i]);
 	}
-    SE_Element* e = new SE_Element();
-	e->setParent(this);
-	addChild(e);
-	e->setStartKey(mStartKey);
-	e->setEndKey(mEndKey);
+	std::vector<unsigned int> keys = mSequence->getKeys();
+	for(int i = 0 ; i < keys.size() ; i++)
+	{
+		SE_Sequence::_Frame f = mSequence->getFrame(keys[i]);
+		SE_ImageElement* e = new SE_ImageElement;
+		e->setMountPointRef(f.mpref);
+		e->setImage(f.imageref);
+		e->setTimeKey(keys[i]);
+		e->setParent(this);
+		this->addChild(e);
+		e->spawn();
+	}
 }
-SE_Spatial* SE_SequenceElement::createSpatial(SE_Spatial* parent)
+SE_Spatial* SE_SequenceElement::createSpatial()
 {
-	return SE_Element::createSpatial(parent);
+	if(!mSequence)
+		return NULL;
+    SE_CommonNode* node = new SE_CommonNode;
+	node->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+    node->setLocalLayer(mLocalLayer);
+	return node;
+}
+void SE_SequenceElement::update(unsigned int key)
+{
+	if(mChildren.empty())
+		return;
+	_ElementList::iterator it;
+	SE_Element* first = NULL;
+	SE_Element* second = NULL;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	_ElementList::iterator currIt = mChildren.end();
+	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	{
+		SE_Element* e = *it;
+		if(e->getTimeKey() >= key)
+		{
+            currIt = it;
+			break;
+		}
+	}
+	if(currIt == mChildren.end())
+	{
+		currIt--;
+		first = *currIt;
+		second = NULL;
+	}
+	else
+	{
+		if(currIt == mChildren.begin())
+		{
+			first = NULL;
+			second = *currIt;
+		}
+		else
+		{
+			second = *currIt;
+			currIt--;
+			first = second;
+		}
+	}
+	if(first == NULL)
+	{
+		LOGI("... current key is less than element key");
+	}
+	else
+	{
+		if(mCurrentElement)
+		{
+			simObjectManager->remove(mCurrentElement->getSimObjectID());
+			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
+			sceneManager->removeSpatial(mCurrentElement->getSpatialID());
+		}
+		SE_Spatial* spatial = first->createSpatial();
+		SE_Spatial* parentSpatial = sceneManager->find(getSpatialID());
+		sceneManager->addSpatial(parentSpatial, spatial);
+	}
 }

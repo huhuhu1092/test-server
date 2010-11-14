@@ -190,7 +190,7 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
     ekEqual.justCompareLayer = false;
     mEndKeyList.remove_if(ekEqual);
 }
-void SE_Action::createElement(SE_Element* parent)
+void SE_Action::createElement(SE_ActionElement* parent)
 {
 	parent->clearMountPoint();
 	std::vector<SE_MountPoint> mountPoint = mMountPointSet.getMountPoint();
@@ -202,21 +202,53 @@ void SE_Action::createElement(SE_Element* parent)
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
 		_ActionLayer* actionLayer = *it;
+		std::vector<unsigned int> keys = actionLayer->sequences.getKeys();
+		SE_Element* prev = NULL;
+		SE_Element* next = NULL;
+		SE_Element* first = NULL;
+		for(int i = 0 ; i < keys.size() ; i++)
+		{
+			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[i]);
+			SE_Element* e = kf->data->createElement();
+			e->setLocalLayer(actionLayer->layer);
+			e->setTimeKey(keys[i]);
+			e->setStartKey(actionLayer->startkey);
+			e->setEndKey(actionLayer->endkey);
+			parent->addChild(e);
+			e->setParent(parent);
+			e->spawn();
+			if(prev)
+			{
+				prev->setNext(e);
+			}
+			e->setPrev(prev);
+			e->setNext(next);
+			prev = e;
+            if(i == 0)
+				first = e;
+		}
+		parent->addHeadElement(first);
+		/*
 		if(actionLayer->startkey == 0)
 		{
 			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(0);
 			SE_Element* element = kf->data->createElement();
-            elment->setActionLayer(actionLayer);
-            elment->setLocalLayer(kf->data->getLayer());
+			element->setStartKey(actionLayer->startkey);
+			element->setEndKey(actionLayer->endkey);
+            element->setActionLayer(actionLayer);
+            element->setLocalLayer(kf->data->getLayer());
 			element->setParent(parent);
 			parent->addChild(element);
 		}
 		else
 		{
-            SE_Element* e = new SE_Element;
+            SE_NullElement* e = new SE_NullElement;
 			e->setActionLayer(actionLayer);
 			e->setParent(parent);
 			parent->addChild(e);
+			e->setStartKey(actionLayer->startkey);
+			e->setEndKey(actionLayer->endkey);
 		}
+		*/
 	}
 }

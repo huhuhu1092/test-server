@@ -15,6 +15,7 @@ class SE_Primitive;
 class SE_SkinJointController;
 class SE_Element;
 class SE_Action;
+class SE_Sequence;
 class SE_ResourceManager
 {
 public:

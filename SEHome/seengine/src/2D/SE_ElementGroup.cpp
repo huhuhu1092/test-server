@@ -42,7 +42,7 @@ SE_Spatial* SE_ElementGroup::createSpatial(SE_Spatial* parent)
     for(it = mChildren.begin() ; it != mChildren.end() ; it++)
     {
         SE_Element* e = *it;
-        SE_Spatial* spatial = e->createSpatial(commonNode);
+        SE_Spatial* spatial = e->createSpatial();
         commonNode->addChild(spatial);
     }
 	return commonNode;
