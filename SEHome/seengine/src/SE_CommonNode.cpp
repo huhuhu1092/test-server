@@ -38,6 +38,7 @@ void SE_CommonNode::addChild(SE_Spatial* child)
 			return;
 	}
     mImpl->children.push_back(child);
+	child->setParent(this);
 }
 void SE_CommonNode::removeChild(SE_Spatial* child)
 {

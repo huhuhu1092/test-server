@@ -463,8 +463,15 @@ void SE_SequenceElement::update(unsigned int key)
 	{
 		if(currIt == mChildren.begin())
 		{
-			first = NULL;
-			second = *currIt;
+			if((*currIt)->getTimeKey() == key)
+			{
+				first = second = *currIt;
+			}
+			else
+			{
+			    first = NULL;
+			    second = *currIt;
+			}
 		}
 		else
 		{

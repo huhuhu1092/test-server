@@ -761,6 +761,7 @@ public:
         {
             return new SE_SequenceSetHandler(pro);
         }
+		return NULL;
     }
     _SequenceContainer* pro;
 };
@@ -782,6 +783,7 @@ public:
         {
             return new SE_SequenceMountPointHandler(pro);
         }
+		return NULL;
     }
     _SequenceContainer* pro;
 };
