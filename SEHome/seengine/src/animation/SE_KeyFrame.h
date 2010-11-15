@@ -125,7 +125,7 @@ std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys()
 	int i = 0 ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
-        keys[i] = (*it)->key;
+        keys[i++] = (*it)->key;
     }	
 	return keys;
 }

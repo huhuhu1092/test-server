@@ -188,6 +188,7 @@ void SEDemo::handleInput(int width, int height)
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
     {
+		/*
 		if(mSelectedSpatial)
 		{
             SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
@@ -214,6 +215,10 @@ void SEDemo::handleInput(int width, int height)
 	        SE_RunAllAnimationTravel rat;
 	        root->travel(&rat, true);
 		}
+		*/
+		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		SE_Element* root = elementManager->getRoot();
+		root->startAnimation();
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))

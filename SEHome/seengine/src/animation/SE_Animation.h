@@ -126,6 +126,7 @@ public:
     virtual void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex);
 	virtual SE_Animation* clone();
 protected:
+	void clone(SE_Animation* dst);
     void setAnimState(ANIM_STATE as)
     {
         mAnimState = as;

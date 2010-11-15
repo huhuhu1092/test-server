@@ -18,6 +18,7 @@
 #include "SE_Action.h"
 #include "SE_CommonNode.h"
 #include "SE_Sequence.h"
+#include "SE_ElementKeyFrameAnimation.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
@@ -52,7 +53,18 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 }
 SE_Element::~SE_Element()
 {
-
+    if(mAnimation)
+		delete mAnimation;
+}
+int SE_Element::getKeyFrameNum()
+{
+	return 0;
+}
+void SE_Element::setAnimation(SE_Animation* anim)
+{
+	if(mAnimation)
+		delete mAnimation;
+	mAnimation = anim;
 }
 void SE_Element::addChild(SE_Element* e)
 {
@@ -242,33 +254,27 @@ SE_Element* SE_Element::clone()
 }
 void SE_Element::startAnimation()
 {
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
-	if(mChildren.empty())
+	if(mAnimation)
 	{
-		if(mAnimation)
-		{
-            SE_Spatial* spatial = sceneManager->find(mSpatialID);
-            SE_Animation* newAnim = mAnimation->clone();
-            if(spatial)
-            {
-                SE_AnimationID animID = spatial->getAnimationID();
-                animationManager->removeAnimation(animID);
-                animID = animationManager->addAnimation(newAnim);
-                spatial->setAnimationID(animID);
-                newAnim->run();
-            }
-		}
-	}
-	else
-	{
-        _ElementList::iterator it;
-        for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+        SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+        SE_Spatial* spatial = sceneManager->find(mSpatialID);
+        SE_Animation* newAnim = mAnimation->clone();
+        if(spatial)
         {
-            SE_Element* e = *it;
-            e->startAnimation();
+            SE_AnimationID animID = spatial->getAnimationID();
+            animationManager->removeAnimation(animID);
+            animID = animationManager->addAnimation(newAnim);
+            spatial->setAnimationID(animID);
+            newAnim->run();
         }
 	}
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        e->startAnimation();
+    }
 }
 ////////////
 SE_Spatial* SE_NullElement::createSpatial()
@@ -276,8 +282,7 @@ SE_Spatial* SE_NullElement::createSpatial()
 	SE_Spatial* spatial = new SE_Spatial;
 	spatial->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     spatial->setLocalLayer(mLocalLayer);
-	spatial->setVisible(false);
-	spatial->setCollisionable(false);
+	setSpatialID(spatial->getSpatialID());
 	return spatial;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -325,6 +330,15 @@ SE_Spatial* SE_ActionElement::createSpatial()
     SE_CommonNode* node = new SE_CommonNode;
 	node->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     node->setLocalLayer(mLocalLayer);
+	setSpatialID(node->getSpatialID());
+	_ElementList::iterator it;
+	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	{
+		SE_Element* e = *it;
+		SE_Spatial* spatial = e->createSpatial();
+		if(spatial)
+		    node->addChild(spatial);
+	}
 	return node;
 }
 void SE_ActionElement::update(unsigned int key)
@@ -374,6 +388,13 @@ SE_SequenceElement::SE_SequenceElement(SE_Sequence* sequence)
 	mSequence = sequence;
 	mCurrentElement = NULL;
 }
+int SE_SequenceElement::getKeyFrameNum()
+{
+	if(!mSequence)
+		return 0;
+    std::vector<unsigned int> keys = mSequence->getKeys();
+    return keys.size();
+}
 void SE_SequenceElement::spawn()
 {
 	calculateRect(mSequence->getPivotX(), mSequence->getPivotY(), 0, 0);
@@ -395,6 +416,12 @@ void SE_SequenceElement::spawn()
 		this->addChild(e);
 		e->spawn();
 	}
+	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
+	anim->setElement(this);
+	int frameRate = SE_Application::getInstance()->getFrameRate();
+	SE_TimeMS duration = (this->getEndKey() - this->getStartKey()) * frameRate;
+	anim->setDuration(duration);
+	this->setAnimation(anim);
 }
 SE_Spatial* SE_SequenceElement::createSpatial()
 {
@@ -403,6 +430,7 @@ SE_Spatial* SE_SequenceElement::createSpatial()
     SE_CommonNode* node = new SE_CommonNode;
 	node->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     node->setLocalLayer(mLocalLayer);
+	setSpatialID(node->getSpatialID());
 	return node;
 }
 void SE_SequenceElement::update(unsigned int key)
@@ -455,10 +483,19 @@ void SE_SequenceElement::update(unsigned int key)
 		{
 			simObjectManager->remove(mCurrentElement->getSimObjectID());
 			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			sceneManager->removeSpatial(mCurrentElement->getSpatialID());
+			SE_Spatial* spatial = sceneManager->removeSpatial(mCurrentElement->getSpatialID());
+			if(spatial)
+				delete spatial;
 		}
 		SE_Spatial* spatial = first->createSpatial();
 		SE_Spatial* parentSpatial = sceneManager->find(getSpatialID());
 		sceneManager->addSpatial(parentSpatial, spatial);
+		spatial->updateRenderState();
+		spatial->updateWorldLayer();
+		spatial->updateWorldTransform();
+		mCurrentElement = first;
 	}
 }
+////////////////
+void SE_StateTableElement::update(unsigned int key)
+{}

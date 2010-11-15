@@ -1,0 +1,8 @@
+<SequenceFrame id="s1" pivotx = "0" pivoty = "0" >
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <Frame key="1" imageref = "ImageTable1.xml/it1/N01/left" mountpointref = "p1" />
+    <Frame key="10" imageref = "ImageTable1.xml/it1/N01/left1"  mountpointref = "p1" />
+    <Frame key="20" imageref = "ImageTable1.xml/it1/N01/left2"  mountpointref = "p1" />
+    <Frame key="30" imageref = "ImageTable1.xml/it1/N01/left3"  mountpointref = "p1" />
+</SequenceFrame>
+

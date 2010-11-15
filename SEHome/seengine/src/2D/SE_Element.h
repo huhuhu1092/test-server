@@ -113,14 +113,26 @@ public:
     {
         return mParent;
     }
+	void setSimObjectID(const SE_SimObjectID& simObj)
+	{
+		mSimObjectID = simObj;
+	}
     SE_SimObjectID getSimObjectID()
     {
         return mSimObjectID;
     }
+	void setSpatialID(const SE_SpatialID& spatialID)
+	{
+		mSpatialID = spatialID;
+	}
     SE_SpatialID getSpatialID()
     {
         return mSpatialID;
     }
+	void setPrimitiveID(const SE_PrimitiveID& id)
+	{
+		mPrimitiveID = id;
+	}
     SE_PrimitiveID getPrimitiveID()
     {
         return mPrimitiveID;
@@ -161,6 +173,7 @@ public:
 	{
 		return mAnimation;
 	}
+	void setAnimation(SE_Animation* anim);
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
@@ -218,12 +231,14 @@ public:
 	{
 		return mNextElement;
 	}
+	
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
 	virtual void spawn();
     virtual void travel(SE_ElementTravel* travel);
 	virtual SE_Element* clone();
+	virtual int getKeyFrameNum();
 protected:
 	SE_Spatial* createSpatialByImage(SE_Image* image);
 private:
@@ -258,6 +273,7 @@ protected:
 	SE_Action::_ActionLayer* mActionLayer;
 	SE_Element* mPrevElement;
 	SE_Element* mNextElement;
+	int mKeyFrameNum;
 };
 
 class SE_ImageElement : public SE_Element
@@ -296,13 +312,13 @@ public:
 	void update(unsigned int key);
 	void addHeadElement(SE_Element* e)
 	{
-		mHeadElement.push_back(e);
+		mHeadElementList.push_back(e);
 	}
 private:
 	SE_StringID mActionID;
 	SE_Action* mAction;
 	typedef std::list<SE_Element*> _HeadElementList;
-	_HeadElementList mHeadElement;
+	_HeadElementList mHeadElementList;
 };
 class SE_StateTableElement : public SE_Element
 {
@@ -333,6 +349,7 @@ public:
     void spawn();
 	SE_Spatial* createSpatial();
 	void update(unsigned int key);
+	int getKeyFrameNum();
 private:
 	SE_Sequence* mSequence;
 	SE_Element* mCurrentElement;

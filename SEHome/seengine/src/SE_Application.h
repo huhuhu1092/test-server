@@ -48,6 +48,14 @@ public:
     {
         return mAppID;
     }
+	void setFrameRate(int frameRate)
+	{
+		mFrameRate = frameRate;
+	}
+	int getFrameRate()
+	{
+		return mFrameRate;
+	}
     SE_CommonID createCommonID();
     SE_ResourceManager* getResourceManager()
 	{

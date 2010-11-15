@@ -60,6 +60,10 @@ public:
 	{
 		return NULL;
 	}
+    virtual std::vector<unsigned int> getKeys()
+    {
+        return std::vector<unsigned int>();
+    }
 private:
     SE_StringID mID;
 	SE_Layer mLayer;
@@ -141,7 +145,7 @@ public:
         return mSequenceFrameRef;
     }
 	SE_Element* createElement();
-
+    std::vector<unsigned int> getKeys();
 private:
 	SE_StringID mSequenceFrameRef;
 };

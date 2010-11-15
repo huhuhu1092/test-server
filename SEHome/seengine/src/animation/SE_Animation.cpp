@@ -134,3 +134,22 @@ SE_Animation* SE_Animation::clone()
 {
 	return NULL;
 }
+void SE_Animation::clone(SE_Animation* dst)
+{
+	if(!dst)
+		return;
+    dst->setAnimState(getAnimState());
+    dst->setRunMode(getRunMode());
+    dst->setTimeMode(getTimeMode());
+    dst->setDuration(getDuration());
+    dst->setPassedTime(getPassedTime());
+    SE_Interpolate* interpolate = getInterpolate();
+    if(interpolate)
+        dst->setInterpolate(interpolate->clone());
+    dst->setSpatialID(getSpatialID());
+    dst->setPrimitiveID(getPrimitiveID());
+    dst->setSimObjectID(getSimObjectID());
+    dst->setFrameNum(getFrameNum());
+    dst->setCurrentFrame(getCurrentFrame());
+    dst->setTimePerFrame(getTimePerFrame());
+}

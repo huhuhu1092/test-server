@@ -2,6 +2,7 @@
 #include "SE_Element.h"
 #include "SE_ResourceManager.h"
 #include "SE_Application.h"
+#include "SE_Sequence.h"
 #include <algorithm>
 
 struct _EqualTest
@@ -20,6 +21,10 @@ SE_Element* SE_ImageAnimationObject::createElement()
 {
     SE_ImageElement* imageElement = new SE_ImageElement;
 	imageElement->setImage(mImageRef);
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_ImageUnit imageUnit = resourceManager->getImageUnit(mImageRef.getStr());
+	imageElement->setPivotX(imageUnit.imageRect.pivotx);
+	imageElement->setPivotY(imageUnit.imageRect.pivoty);
 	return imageElement;
 }
 SE_Element* SE_SequenceAnimationObject::createElement()
@@ -29,8 +34,36 @@ SE_Element* SE_SequenceAnimationObject::createElement()
 	if(!sequence)
 		return NULL;
     SE_SequenceElement* element = new SE_SequenceElement(sequence);
+	element->setPivotX(sequence->getPivotX());
+    element->setPivotY(sequence->getPivotY());
+	element->setMountPointRef(getMountPointRef());
     return element;
 	
+}
+std::vector<unsigned int> SE_SequenceAnimationObject::getKeys()
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_Sequence* sequence = resourceManager->getSequence(mSequenceFrameRef.getStr());
+	if(!sequence)
+        return std::vector<unsigned int>();
+    return sequence->getKeys();
+}
+/////////
+SE_Element* SE_ColorEffectAnimationObject::createElement()
+{
+	return NULL;
+}
+SE_Element* SE_TextureAnimationObject::createElement()
+{
+	return NULL;
+}
+SE_Element* SE_DeleteAction::createElement()
+{
+	return NULL;
+}
+SE_Element* SE_MusicObjectAction::createElement()
+{
+	return NULL;
 }
 //////////////////////////////////
 SE_Action::SE_Action()
@@ -82,6 +115,17 @@ void SE_Action::sort()
 		it = max_element(keys.begin(), keys.end());
 		if(it != keys.end())
 		    al->endkey = *it;
+		if(al->startkey == al->endkey)
+		{
+			SE_KeyFrame<SE_ActionUnit*>* kf = al->sequences.getKeyFrame(al->endkey);;
+			SE_ActionUnit* au = kf->data;
+			std::vector<unsigned int> keys = au->getKeys();
+			std::sort(keys.begin(), keys.end());
+			if(!keys.empty())
+			{
+				al->endkey += keys[keys.size() - 1];
+			}
+		}
 	}
     mEndKeyList.sort(&SE_Action::compareEndKey);
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
@@ -99,7 +143,8 @@ void SE_Action::sort()
         else
         {
             _EndKey ek = getAllLayerEndKey();
-            al->endkey = ek.key;
+			if(ek.key != 0)
+                al->endkey = ek.key;
         }
     }    
 }
