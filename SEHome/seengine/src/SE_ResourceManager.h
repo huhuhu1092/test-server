@@ -16,6 +16,7 @@ class SE_SkinJointController;
 class SE_Element;
 class SE_Action;
 class SE_Sequence;
+class SE_ColorEffectController;
 class SE_ResourceManager
 {
 public:
@@ -67,9 +68,11 @@ public:
 	void loadImageTable(const char* imageTableName);
     void loadAction(const char* actionTableName);
     void loadSequence(const char* sequenceName);
+	void loadColorEffectController(const char* colorEffectName);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
 	SE_Sequence* getSequence(const char* sequencePath);
+	SE_ColorEffectController* getColorEffectController(const char* colorEffectPath);
     const char* getDataPath();
     void setDataPath(const char* datapath);
 

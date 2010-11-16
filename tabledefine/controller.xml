@@ -7,11 +7,12 @@
     <Frame key="50" x="60" y="70" rotation="90"  scalex="1" scaley="" />  
 </GeometryFrameController>
 <ColorEffectFrameController id="c1">
-    <Frame key="1" backgroud="image1[r = ""][g = ""][b = ""][a = ""]" channel="" alpha="">
-        <MarkR texture="" fn = "*"> <Color r="" g="" b="" /> </MarkR> 
+    <Frame key="1" backgroud="image1[r = ][g = ][b = ][a = ]" channel="" alpha="">
+        <MarkR texture="" fn = "*" alpha = "" color="+5 +7 +9" /> 
         <MarkG texture="" alpha=""> </MarkG> 
         <MarkB texture=""> </MarkB> 
-        <MarkA texture=""> </MarkA> </Frame>
+        <MarkA texture=""> </MarkA> 
+    </Frame>
     <Reload key="18" mark="r" texture="" />
     <Frame key = "20" />
     <Frame key="23" />

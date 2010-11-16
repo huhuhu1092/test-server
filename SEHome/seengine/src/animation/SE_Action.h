@@ -6,6 +6,7 @@
 #include "SE_KeyFrame.h"
 #include "SE_TableManager.h"
 #include "SE_MountPoint.h"
+//#include "SE_ColorEffectController.h"
 class SE_Element;
 class SE_ActionElement;
 class SE_ActionUnit
@@ -152,6 +153,34 @@ private:
 class SE_ColorEffectAnimationObject : public SE_AnimationObject
 {
 public:
+	struct _ChannelInput
+	{
+		SE_StringID texture;
+		int fn;
+		int alpha;
+		SE_Vector3i color;
+		bool valid;
+		_ChannelInput()
+		{
+			fn = 0;
+			alpha = 0;
+			valid = false;
+		}
+	};
+	struct _ColorEffectInput
+	{
+        SE_StringID background;
+		SE_StringID channel;
+		int alpha;
+		bool valid;
+        _ChannelInput channelInput[4];
+		_ColorEffectInput()
+		{
+			alpha = 0;
+			valid = false;
+		}
+	};
+public:
     void setColorEffectRef(const SE_StringID& id)
     {
         mColorEffectRef = id;
@@ -161,9 +190,46 @@ public:
         return mColorEffectRef;
     }
 	SE_Element* createElement();
-
+    const _ColorEffectInput& getColorEffectInput()
+	{
+		return mColorEffectInput;
+	}
+	void setValid(bool valid)
+	{
+		mColorEffectInput.valid = valid;
+	}
+	void setBackground(const SE_StringID& background)
+	{
+		mColorEffectInput.background = background;
+	}
+	void setChannel(const SE_StringID& channel)
+	{
+		mColorEffectInput.channel = channel;
+	}
+	void setAlpha(int alpha)
+	{
+		mColorEffectInput.alpha = alpha;
+	}
+	//index 0, 1, 2, 3 : r g b a
+	void setTexture(int index , const SE_StringID& str)
+	{
+		mColorEffectInput.channelInput[index].texture = str;
+	}
+	void setFunction(int index, int fn)
+	{
+		mColorEffectInput.channelInput[index].fn = fn;
+	}
+	void setAlpha(int index, int alpha)
+	{
+		mColorEffectInput.channelInput[index].alpha = alpha;
+	}
+	void setColor(int index, const SE_Vector3i& color)
+	{
+		mColorEffectInput.channelInput[index].color = color;
+	}
 private:
     SE_StringID mColorEffectRef;
+    _ColorEffectInput mColorEffectInput;
 };
 class SE_DeleteAction : public SE_ActionUnit
 {

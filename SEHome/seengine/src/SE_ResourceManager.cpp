@@ -21,6 +21,7 @@
 #include "SE_XmlHandler.h"
 #include "SE_Action.h"
 #include "SE_Sequence.h"
+#include "SE_ColorEffectController.h"
 #include <map>
 #include <vector>
 
@@ -440,6 +441,7 @@ struct SE_ResourceManager::_Impl
 	SE_ImageTable mImageTable;
     SE_ActionTable mActionTable;
 	SE_SequenceTable mSequenceTable;
+	SE_ColorEffectControllerTable mColorEffectControllerTable;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 	SE_Element* mElementRoot;
@@ -465,6 +467,11 @@ public:
         actionTable = act;
     }
     SE_ActionTable* actionTable;
+};
+class _ColorEffectControllerContainer
+{
+public:
+	
 };
 class SE_ElementHandler : public SE_XmlElementHandler<SE_Element, SE_ResourceManager::_Impl>
 {
@@ -592,6 +599,52 @@ public:
     {}
     virtual void handle(SE_ActionMapSet* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_ColorEffectInputHandler : public SE_XmlElementHandler<SE_ColorEffectAnimationObject, _ActionContainer>
+{
+public:
+	SE_ColorEffectInputHandler(_ActionContainer* ac) : SE_XmlElementHandler<SE_ColorEffectAnimationObject, _ActionContainer>(ac)
+	{}
+	virtual void handle(SE_ColorEffectAnimationObject* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ColorEffectInputMarkHandler : public SE_XmlElementHandler<SE_ColorEffectAnimationObject, _ActionContainer>
+{
+public:
+	SE_ColorEffectInputMarkHandler(_ActionContainer* ac) : SE_XmlElementHandler<SE_ColorEffectAnimationObject, _ActionContainer>(ac)
+	{}
+    virtual void handle(SE_ColorEffectAnimationObject* parent, TiXmlElement* xmlElement, unsigned int indent);
+	int markIndex;
+};
+/*
+class SE_ColorEffectControllerHandler : public SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>
+{
+public:
+	SE_ColorEffectControllerHandler(_ColorEffectControllerContainer* cc) : SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>
+	{}
+	virtual void handle(SE_ColorEffectController* parent , TiXmlElement* xmlElement, unsigned int indent);
+};
+*/
+class SE_ColorEffectControllerHandler : public SE_XmlElementHandler<SE_ColorEffectControllerSet, _ColorEffectControllerContainer>
+{
+public:
+	SE_ColorEffectControllerHandler(_ColorEffectControllerContainer* cc) : SE_XmlElementHandler<SE_ColorEffectControllerSet, _ColorEffectControllerContainer>(cc)
+	{}
+	virtual void handle(SE_ColorEffectControllerSet* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ColorEffectHandler : public SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>
+{
+public:
+	SE_ColorEffectHandler(_ColorEffectControllerContainer* cc) : SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>(cc)
+	{}
+	virtual void handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ColorEffectMarkHandler : public SE_XmlElementHandler<SE_ColorEffect, _ColorEffectControllerContainer>
+{
+public:
+	SE_ColorEffectMarkHandler(_ColorEffectControllerContainer* cc) : SE_XmlElementHandler<SE_ColorEffect, _ColorEffectControllerContainer>(cc)
+	{}
+	virtual void handle(SE_ColorEffect* parent, TiXmlElement* xmlElement, unsigned int indent);
+	int markIndex;
+};
 ////////////////
 template <>
 class SE_XmlElementHandlerManager<SE_Element, SE_ResourceManager::_Impl>
@@ -713,6 +766,119 @@ public:
     }
     _ActionContainer* pro;
 };
+
+template<>
+class SE_XmlElementHandlerManager<SE_ColorEffectControllerSet, _ColorEffectControllerContainer>
+{
+public:
+	SE_XmlElementHandlerManager(_ColorEffectControllerContainer* cc)
+	{
+		pro = cc;
+	}
+	SE_XmlElementHandler<SE_ColorEffectControllerSet, _ColorEffectControllerContainer>*  getHandler(const char* name)
+	{
+		if(!strcmp(name, "ColorEffectFrameController"))
+		{
+			return new SE_ColorEffectControllerHandler(pro);
+		}
+		return NULL;
+	}
+	_ColorEffectControllerContainer* pro;
+};
+template<>
+class SE_XmlElementHandlerManager<SE_ColorEffectController, _ColorEffectControllerContainer>
+{
+public:
+	SE_XmlElementHandlerManager(_ColorEffectControllerContainer* cc)
+	{
+		pro = cc;
+	}
+	SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>* getHandler(const char* name)
+	{
+		if(!strcmp(name, "Frame"))
+		{
+			return new SE_ColorEffectHandler(pro);
+		}
+		else if(!strcmp(name, "Reload"))
+		{
+			return NULL;
+		}
+		return NULL;
+	}
+	_ColorEffectControllerContainer* pro;
+};
+template<>
+class SE_XmlElementHandlerManager<SE_ColorEffect, _ColorEffectControllerContainer>
+{
+public:
+	SE_XmlElementHandlerManager(_ColorEffectControllerContainer* cc)
+	{
+		pro = cc;
+	}
+	SE_XmlElementHandler<SE_ColorEffect, _ColorEffectControllerContainer>* getHandler(const char* name)
+	{
+		if(!strcmp(name, "MarkR"))
+		{
+			SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
+			h->markIndex = 0;
+		}
+		else if(!strcmp(name, "MarkG"))
+		{
+            SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
+			h->markIndex = 1;
+		}
+		else if(!strcmp(name, "MarkB"))
+		{
+            SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
+			h->markIndex = 2;
+		}
+		else if(!strcmp(name, "MarkA"))
+		{
+            SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
+			h->markIndex = 3;
+		}
+		return NULL;
+	}
+	_ColorEffectControllerContainer* pro;
+};
+template<>
+class SE_XmlElementHandlerManager<SE_ColorEffectAnimationObject, _ActionContainer>
+{
+public:
+    SE_XmlElementHandlerManager(_ActionContainer* ac)
+    {
+        pro = ac;
+    }
+    SE_XmlElementHandler<SE_ColorEffectAnimationObject, _ActionContainer>* getHandler(const char* name)
+    {
+		if(!strcmp(name, "ColorEffectInput"))
+		{
+			return new SE_ColorEffectInputHandler(pro);
+		}
+		else if(!strcmp(name, "MarkR"))
+		{
+			SE_ColorEffectInputMarkHandler* p = new SE_ColorEffectInputMarkHandler(pro);
+			p->markIndex = 0;
+		}
+		else if(!strcmp(name, "MarkG"))
+		{
+			SE_ColorEffectInputMarkHandler* p = new SE_ColorEffectInputMarkHandler(pro);
+			p->markIndex = 1;
+		}
+		else if(!strcmp(name, "MarkB"))
+		{
+			SE_ColorEffectInputMarkHandler* p = new SE_ColorEffectInputMarkHandler(pro);
+			p->markIndex = 2;
+		}
+		else if(!strcmp(name, "MarkA"))
+		{
+			SE_ColorEffectInputMarkHandler* p = new SE_ColorEffectInputMarkHandler(pro);
+			p->markIndex = 3;
+		}
+		return NULL;
+	}
+	_ActionContainer* pro;
+};
 template<>
 class SE_XmlElementHandlerManager<SE_Action, _ActionContainer>
 {
@@ -787,6 +953,7 @@ public:
     }
     _SequenceContainer* pro;
 };
+
 ///////////////////////////////////////////
 void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -1337,6 +1504,7 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
 	int pivotx = INVALID_GEOMINFO;
 	int pivoty = INVALID_GEOMINFO;
 	SE_MountPointID mountPointRef;
+	bool isColorEffect = false;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1382,6 +1550,7 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
             au = ceao;
             SE_StringID str(value);
             ceao->setColorEffectRef(str);
+			isColorEffect = true;
         }
         else if(!strcmp(name, "sequenceref"))
         {
@@ -1432,6 +1601,17 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
 	au->setPivotY(pivoty);
 	au->setMountPointRef(mountPointRef);
     parent->addActionUnit(key, au);
+	if(isColorEffect)
+	{
+		TiXmlNode* currNode = xmlElement;
+		TiXmlNode* pChild = NULL;
+		int i = 1;
+		for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+		{
+			SE_XmlElementCalculus<SE_AnimationObject, _ActionContainer> m(pro);
+			m.handleXmlChild((SE_ColorEffectAnimationObject*)au, pChild, i++);
+		}      
+	}
 }
 
 void SE_DeleteHandler::handle(SE_Action* parent,  TiXmlElement* xmlElement, unsigned int indent)
@@ -1728,7 +1908,247 @@ void SE_SequenceSetHandler::handle(SE_SequenceSet* parent, TiXmlElement* xmlElem
         m.handleXmlChild(seq, pChild, i++);
     }   
 }
+void SE_ColorEffectInputHandler::handle(SE_ColorEffectAnimationObject* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+		if(!strcmp(name, "background"))
+		{
+			parent->setBackground(SE_StringID(value));
+		}
+		else if(!strcmp(name, "channel"))
+		{
+			parent->setChannel(SE_StringID(value));
+		}
+		else if(!strcmp(name, "alpha"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    parent->setAlpha(ival);
+			}
+			else
+			{
+			}
+		}
+		pAttribute = pAttribute->Next();
+	}
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_ColorEffectAnimationObject, _ActionContainer> m(pro);
+        m.handleXmlChild(parent, pChild, i++);
+    }   
+}
+void SE_ColorEffectInputMarkHandler::handle(SE_ColorEffectAnimationObject* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+		if(!strcmp(name, "texture"))
+		{
+			parent->setTexture(markIndex, SE_StringID(value));
+		}
+		else if(!strcmp(name, "fn"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    parent->setFunction(markIndex, ival);
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "alpha"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    parent->setAlpha(markIndex, ival);
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "color"))
+		{
+			SE_Util::SplitStringList strList = SE_Util::splitString(value, " ");
+			SE_ASSERT(strList.size() == 3);
+			SE_Vector3i color;
+			color.x = atoi(strList[0].c_str());
+			color.y = atoi(strList[1].c_str());
+			color.z = atoi(strList[2].c_str());
+			parent->setColor(markIndex, color);
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent , TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+		if(!strcmp(name , "id"))
+		{
+  	        SE_ColorEffectController* colorEffectController = new SE_ColorEffectController;
+	        SE_StringID str = value;
+            parent->setItem(str, colorEffectController);
+		}
+		pAttribute = pAttribute->Next();
+	}
+}
+void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+	SE_ColorEffect* ce = new SE_ColorEffect;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+		if(!strcmp(name, "key"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+				parent->addKeyFrame(ival, ce);
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "background"))
+		{
+			ce->setBackground(SE_StringID(value));
+		}
+		else if(!strcmp(name, "channel"))
+		{
+			ce->setChannel(SE_StringID(value));
+		}
+		else if(!strcmp(name, "alpha"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    ce->setAlpha(ival);
+			}
+			else
+			{
+			}
+		}
+		pAttribute = pAttribute->Next();
+	}
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_ColorEffect, _ColorEffectControllerContainer> m(pro);
+        m.handleXmlChild(ce, pChild, i++);
+    }   
+}
+void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_ColorEffect::_TextureColor* tc = new SE_ColorEffect::_TextureColor;
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+		if(!strcmp(name, "texture"))
+		{
+			tc->mTextureID = SE_StringID(value);
+		}
+		else if(!strcmp(name, "fn"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    tc->fn = ival;
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "alpha"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+			    tc->alpha = ival;
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "color"))
+		{
+			SE_Util::SplitStringList strList = SE_Util::splitString(value, " ");
+			SE_ASSERT(strList.size() == 3);
+            std::string signstr = "+-";
+			for(int i = 0 ; i < strList.size() ; i++)
+            {
+                std::string str = strList[i];
+                std::string::size_type n = str.find_first_of(signstr, 0);
+                std::string numstr;
+				if(n == std::string::npos)
+                {
+					tc->mColorSign[i] = SE_ColorEffect::SIGN_NO;
+                    numstr = str;
+                }
+                else if(str[n] == '+')
+                {
+                    tc->mColorSign[i] = SE_ColorEffect::SIGN_PLUS;
+                    numstr = str.substr(1);
+                }
+                else if(str[n] == '-')
+                {
+                    tc->mColorSign[i] = SE_ColorEffect::SIGN_MINUS;
+                    numstr = str.substr(1);
+                }
+                if(!numstr.empty())
+                {
+                    tc->mColor.d[i] = atoi(numstr.c_str());
+                }
+            }
+		}
+		pAttribute = pAttribute->Next();
+	}
+	parent->setTextureColor(markIndex, tc);
+}
 ////////////////
 
 /////////////////////
@@ -2123,6 +2543,9 @@ void SE_ResourceManager::loadAction(const char* actionTableName)
 {
 	if(!actionTableName)
 		return;
+	SE_ActionMapSet* ams = mImpl->mActionTable.getItem(SE_StringID(actionTableName));
+	if(ams)
+		return;
 	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + actionTableName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
@@ -2132,7 +2555,7 @@ void SE_ResourceManager::loadAction(const char* actionTableName)
         return;
     }
     _ActionContainer actionContainer(&mImpl->mActionTable);
-    SE_ActionMapSet* ams = new SE_ActionMapSet;
+    ams = new SE_ActionMapSet;
     actionContainer.actionTable->setItem(SE_StringID(actionTableName), ams);
     SE_XmlElementCalculus<SE_ActionMapSet, _ActionContainer> actionElementCalculus(&actionContainer);
     actionElementCalculus.handleXmlChild(ams, &doc, 0);
@@ -2183,6 +2606,9 @@ SE_Sequence* SE_ResourceManager::getSequence(const char* sequencePath)
 }
 void SE_ResourceManager::loadSequence(const char* sequenceName)
 {
+	SE_SequenceSet* ss = mImpl->mSequenceTable.getItem(SE_StringID(sequenceName));
+	if(ss)
+		return;
 	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + sequenceName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
@@ -2191,12 +2617,45 @@ void SE_ResourceManager::loadSequence(const char* sequenceName)
 		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
         return;
     }
-	SE_SequenceSet* ss = mImpl->mSequenceTable.getItem(SE_StringID(sequenceName));
-	if(ss)
-		return;
+
 	ss = new SE_SequenceSet;
 	mImpl->mSequenceTable.setItem(SE_StringID(sequenceName), ss);
 	_SequenceContainer sc(&mImpl->mSequenceTable);
     SE_XmlElementCalculus<SE_SequenceSet, _SequenceContainer> m(&sc);
     m.handleXmlChild(ss, &doc, 0);
+}
+void SE_ResourceManager::loadColorEffectController(const char* colorEffectName)
+{
+	SE_ColorEffectControllerSet* cs = mImpl->mColorEffectControllerTable.getItem(SE_StringID(colorEffectName));
+	if(cs)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + colorEffectName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	cs = new SE_ColorEffectControllerSet;
+	mImpl->mColorEffectControllerTable.setItem(SE_StringID(colorEffectName), cs);
+	_ColorEffectControllerContainer ccContainer;
+    SE_XmlElementCalculus<SE_ColorEffectControllerSet, _ColorEffectControllerContainer> m(&ccContainer);
+    m.handleXmlChild(cs, &doc, 0);
+}
+SE_ColorEffectController* SE_ResourceManager::getColorEffectController(const char* colorEffectPath)
+{
+	SE_Util::SplitStringList stringList = SE_Util::splitString(colorEffectPath, "/");
+	if(stringList.size() < 2)
+		return NULL;
+	SE_ColorEffectControllerSet* colorEffectSet = mImpl->mColorEffectControllerTable.getItem(stringList[0].c_str());
+	if(!colorEffectSet)
+	{
+		loadColorEffectController(stringList[0].c_str());
+		colorEffectSet = mImpl->mColorEffectControllerTable.getItem(stringList[0].c_str());
+	}
+	if(!colorEffectSet)
+		return NULL;
+	SE_ColorEffectController* c = colorEffectSet->getItem(stringList[1].c_str());
+	return c;
 }

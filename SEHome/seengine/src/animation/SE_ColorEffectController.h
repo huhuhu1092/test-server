@@ -3,6 +3,7 @@
 #include "SE_KeyFrame.h"
 #include "SE_ID.h"
 #include "SE_Vector.h"
+#include "SE_TableManager.h"
 class SE_ColorEffectFrame
 {
 public:
@@ -14,12 +15,26 @@ class SE_ColorEffect : public SE_ColorEffectFrame
 {
 public:
     enum {MARK_A, MARK_R, MARK_G, MARK_B, MARK_NUM};
+    enum {FN_ADD, FN_MULTIPLY, FN_NUM};
+	enum {SIGN_NO, SIGN_PLUS, SIGN_MINUS, SIGN_NUM};
     struct _TextureColor
     {
         SE_StringID mTextureID;
         SE_Vector3i mColor;
+		int mColorSign[SIGN_NUM];
         SE_StringID mMark;
+        int fn;
+		int alpha;
+		_TextureColor()
+		{
+			for(int i = 0 ; i < SIGN_NUM ; i++)
+				mColorSign[i] = SIGN_NO;
+			fn = FN_MULTIPLY;
+            alpha = 255;
+		}
     };
+    SE_ColorEffect();
+    ~SE_ColorEffect();
     void setBackground(const SE_StringID& background)
     {
         mBackgroundID = background;
@@ -95,7 +110,11 @@ class SE_ColorEffectController
 public:
     void addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame);
     SE_ColorEffectFrame* getKeyFrame(unsigned int key);
+    std::vector<unsigned int> getKeys();
+	int getKeyFrameNum();
 private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;
 };
+typedef SE_Table<SE_StringID, SE_ColorEffectController*> SE_ColorEffectControllerSet;
+typedef SE_Table<SE_StringID, SE_ColorEffectControllerSet*> SE_ColorEffectControllerTable;
 #endif
