@@ -32,18 +32,6 @@ SE_RenderUnit::SE_RenderUnit()
 }
 SE_RenderUnit::~SE_RenderUnit()
 {}
-/*
-void SE_RenderUnit::getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum)
-{
-	imageIDArray = NULL;
-	imageIDNum = 0;
-}
-void SE_RenderUnit::getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum)
-{
-	imageDataArray = NULL;
-	imageDataNum = 0;
-}
-*/
 void SE_RenderUnit::getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
 {
 }
@@ -59,17 +47,6 @@ void SE_RenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVe
 	texVertex = NULL;
 	texVertexNum = 0;
 }
-/*
-void SE_RenderUnit::getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
-{
-	texVertex = NULL;
-	texVertexNum = 0;
-}
-bool SE_RenderUnit::decorateTexCoordSameAsBaseColor(int texIndex)
-{
-    return true;
-}
-*/
 SE_MaterialData* SE_RenderUnit::getMaterialData()
 {
     return 0;

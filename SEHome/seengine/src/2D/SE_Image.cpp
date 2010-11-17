@@ -146,6 +146,17 @@ void SE_Image::setSurface(SE_Surface* surface)
 	}
 	surface->setColorOperation(op);
 }
+int SE_Image::getValidImageNum()
+{
+	int count = 0;
+	for(int i = 0 ; i < IMG_SIZE ; i++)
+	{
+		_ImageUnitData* iuData = &mImageUnits[i];
+		if(iuData->imageUnit->imageDataID.isValid())
+			count++;
+	}
+	return count;
+}
 void SE_Image::parse()
 {
 	std::string::iterator it;
@@ -368,3 +379,92 @@ SE_ImageUnit SE_Image::createImageDataFullPath(const char* inputstr)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	return resourceManager->getImageUnit(inputstr);
 }
+////////////////////////////
+SE_ComposeImage::SE_ComposeImage()
+{
+	mBackground = NULL;
+	mChannel = NULL;
+	for(int i = 0 ; i < TEX_SIZE ; i++)
+	{
+		mTexture[i] = NULL;
+		mFunction[i] = -1;
+		mAlpha[i] = -1;
+		mColor[i].x = -1;
+		mColor[i].y = -1;
+		mColor[i].z = -1;
+	}
+}
+SE_ComposeImage::~SE_ComposeImage()
+{
+	if(mBackground)
+		delete mBackground;
+	if(mChannel)
+		delete mChannel;
+	for(int i = 0 ; i < TEX_SIZE ; i++)
+	{
+		if(mTexture[i])
+			delete mTexture[i];
+	}
+}
+void SE_ComposeImage::setBackground(const SE_StringID& background)
+{
+	if(mBackground)
+	{
+		delete mBackground;
+		mBackground = NULL;
+	}
+	mBackground = new SE_Image(background.getStr());
+}
+void SE_ComposeImage::setChannel(const SE_StringID& channel)
+{
+	if(mChannel)
+	{
+		delete mChannel;
+		mChannel = NULL;
+	}
+	mChannel = new SE_Image(channel.getStr());
+}
+void SE_ComposeImage::setTexture(int index, const SE_StringID& texture)
+{
+	SE_Util::SplitStringList strList = SE_Util::splitString(texture.getStr(), "/");
+	if(strList.size() == 2)// this is an action
+	{
+	}
+	else if(strList.size() >= 3) // this is an ordinary image
+	{
+		mTexture[index] = new SE_Image(texture.getStr());
+	}
+}
+int SE_ComposeImage::getValidImageNum()
+{
+    int count = 0;
+	if(mBackground)
+	{
+	    count += mBackground->getValidImageNum();
+	}
+	if(mChannel)
+	{
+		count += mChannel->getValidImageNum();
+	}
+	for(int i = 0 ; i < TEX_SIZE ; i++)
+	{
+		if(mTexture[i])
+		{
+			count += mTexture[i]->getValidImageNum();
+		}
+	}
+	return count;
+}
+void SE_ComposeImage::setImageData(SE_RectPrimitive* primivite)
+{
+    if(getValidImageNum() >= SE_TEXUNIT_NUM)
+	{
+		//TODO: image exceed the max image num supported by GPU
+		// we need to use render buffer to render some image first
+		return;
+ 	}
+	SE_Image* imageArray[] = {mBackground, mChannel, mTexture[0], mTexture[1], mTexture[2], mTexture[3]};
+
+}
+void SE_ComposeImage::setSurface(SE_Surface* surface)
+{}

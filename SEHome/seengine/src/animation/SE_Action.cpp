@@ -51,7 +51,15 @@ std::vector<unsigned int> SE_SequenceAnimationObject::getKeys()
 /////////
 SE_Element* SE_ColorEffectAnimationObject::createElement()
 {
-	return NULL;
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();	
+	SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(mColorEffectRef);
+	if(!colorEffectController)
+		return NULL;
+	SE_ColorEffectElement* element = new SE_ColorEffectElement(colorEffectController, mColorEffectInput);
+	element->setPivotX(colorEffectController->getPivotX());
+	element->setPivotY(colorEffectController->getPivotY());
+	element->setMountPointRef(this->getMountPointRef());
+	return element;
 }
 SE_Element* SE_TextureAnimationObject::createElement()
 {

@@ -19,6 +19,7 @@
 #include "SE_CommonNode.h"
 #include "SE_Sequence.h"
 #include "SE_ElementKeyFrameAnimation.h"
+#include "SE_ColorEffectController.h"
 #include <algorithm>
 #if defined(WIN32)
 #include <windows.h>
@@ -506,3 +507,22 @@ void SE_SequenceElement::update(unsigned int key)
 ////////////////
 void SE_StateTableElement::update(unsigned int key)
 {}
+//////////////
+void SE_ColorEffectElement::update(unsigned int key)
+{
+}
+SE_Spatial* SE_ColorEffectElement::createSpatial()
+{
+}
+void SE_ColorEffectElement::spawn()
+{
+	if(!mColorEffectController)
+		return;
+	calculateRect(mColorEffectControler->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
+	std::vector<unsigned int> keys = mColorEffectController->getKeys();
+	for(int i = 0 ; i < keys.size() ; i++)
+	{
+		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
+        
+	}
+}

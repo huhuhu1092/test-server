@@ -645,6 +645,13 @@ public:
 	virtual void handle(SE_ColorEffect* parent, TiXmlElement* xmlElement, unsigned int indent);
 	int markIndex;
 };
+class SE_ColorEffectMountPoint : public SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>
+{
+public:
+	SE_ColorEffectMountPoint(_ColorEffectControllerContainer* cc) : SE_XmlElementHandler<SE_ColorEffectController, _ColorEffectControllerContainer>(cc)
+	{}
+	virtual void handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
 ////////////////
 template <>
 class SE_XmlElementHandlerManager<SE_Element, SE_ResourceManager::_Impl>
@@ -798,6 +805,10 @@ public:
 		if(!strcmp(name, "Frame"))
 		{
 			return new SE_ColorEffectHandler(pro);
+		}
+		else if(!strcmp(name, "MountPoint"))
+		{
+			return new SE_ColorEffectMountPoint(pro);
 		}
 		else if(!strcmp(name, "Reload"))
 		{
@@ -2148,6 +2159,51 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
 		pAttribute = pAttribute->Next();
 	}
 	parent->setTextureColor(markIndex, tc);
+}
+void SE_ColorEffectMountPoint::handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    SE_MountPoint mp;
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+            SE_StringID id(value);
+            mp.setID(id);
+        }
+        else if(!strcmp(name, "x"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setX(ival);
+            }
+            else
+            {
+                LOGI("... parse mount point x error\n");
+            }
+        }
+        else if(!strcmp(name, "y"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                mp.setY(ival);
+            }
+            else
+            {
+                LOGI("... parse mount point y error\n");
+            }
+        }
+        pAttribute = pAttribute->Next();
+    }
+    parent->addMountPoint(mp);
 }
 ////////////////
 

@@ -3,6 +3,7 @@
 #include "SE_KeyFrame.h"
 #include "SE_ID.h"
 #include "SE_Vector.h"
+#include "SE_MountPoint.h"
 #include "SE_TableManager.h"
 class SE_ColorEffectFrame
 {
@@ -108,12 +109,39 @@ private:
 class SE_ColorEffectController
 {
 public:
+	void setPivotX(int pivotx)
+	{
+		mPivotX = pivotx;
+	}
+	void setPivotY(int pivoty)
+	{
+		mPivotY = pivoty;
+	}
+	int getPivotX()
+	{
+		return mPivotX;
+	}
+	int getPivotY()
+	{
+		return mPivotY;
+	}
+	void addMountPoint(const SE_MountPoint& mp)
+	{
+		mMountPointSet.addMountPoint(mp);
+	}
+	SE_MountPoint getMountPoint(const SE_MountPointID& id)
+	{
+		return mMountPointSet.getMountPoint(id);
+	}
     void addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame);
     SE_ColorEffectFrame* getKeyFrame(unsigned int key);
     std::vector<unsigned int> getKeys();
 	int getKeyFrameNum();
 private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;
+	int mPivotX;
+	int mPivotY;
+	SE_MountPointSet mMountPointSet;
 };
 typedef SE_Table<SE_StringID, SE_ColorEffectController*> SE_ColorEffectControllerSet;
 typedef SE_Table<SE_StringID, SE_ColorEffectControllerSet*> SE_ColorEffectControllerTable;

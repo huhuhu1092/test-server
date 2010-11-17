@@ -358,5 +358,14 @@ class SE_TextureElement : public SE_Element
 {};
 class SE_ColorEffectElement : public SE_Element
 {
+public:
+	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectAnimationObject& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
+	{}
+	void update(unsigned int key);
+	SE_Spatial* createSpatial();
+	void spawn();
+private:
+	SE_ColorEffectController* mColorEffectController;
+	SE_ColorEffectAnimationObject::_ColorEffectInput mColorEffectInput;
 };
 #endif

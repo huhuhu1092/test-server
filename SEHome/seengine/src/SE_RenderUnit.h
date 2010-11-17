@@ -24,12 +24,6 @@ class SE_RenderUnit
 public:
 	SE_RenderUnit();
     virtual ~SE_RenderUnit();
-	/*
-	//base color image use TEXTURE0
-    virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
-	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
-    virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-*/
 	//texIndex start from 0
     virtual void getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
 	virtual void getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
@@ -39,15 +33,8 @@ public:
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
+	virtual SE_Surface* getSurface();
 public:
-	/*
-	//texIndex is tex1, tex2, ...texn
-	//texIndexHasTexCoord is the tex index which has texture coordinate
-    void setTexCoordIndex(int texIndex, int texIndexHasTexCoord)
-	{
-		mTexCoordIndex[texIndex] = texIndexHasTexCoord;
-	}
-*/
     SE_PRIMITIVE_TYPE getPrimitiveType()
     {
         return mPrimitiveType;
@@ -105,11 +92,6 @@ class SE_TriSurfaceRenderUnit : public SE_RenderUnit
 public:
     SE_TriSurfaceRenderUnit(SE_Surface* mesh);
     ~SE_TriSurfaceRenderUnit();
-	/*
-    virtual void getBaseColorImageID(SE_ImageDataID*& imageIDArray, int& imageIDNum);
-	virtual void getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum);
-    virtual void getBaseColorTexVertex(_Vector2f*& texVertex, int& texVertexNum);
-    */
 	void getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
     void getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
     void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
@@ -118,6 +100,7 @@ public:
     virtual SE_MaterialData* getMaterialData();
     virtual SE_Vector3f getColor();
     virtual void draw();
+	virtual SE_Surface* getSurface();
 private:
 	void setColorAndMaterial(SE_ShaderProgram* shaderProgram);
 	void setColor(SE_ShaderProgram* shaderProgram);
