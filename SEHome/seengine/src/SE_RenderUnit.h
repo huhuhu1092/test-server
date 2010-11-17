@@ -67,12 +67,6 @@ public:
 	{
 		return mViewToPerspective;
 	}
-	/*
-	void setColorBlendMode(int mode)
-	{
-		mColorBlendMode = mode;
-	}
-	*/
 	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own);
 	void applyRenderState();
     void loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);

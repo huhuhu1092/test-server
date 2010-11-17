@@ -341,51 +341,6 @@ void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
-/*
-void SE_TriSurfaceRenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
-{
-    if(mTexVertex)
-    {
-        texVertex = mTexVertex;
-        texVertexNum = mTexVertexNum;
-        return;
-    }
-    SE_Texture* tex = mSurface->getTexture();
-    if(!tex)
-    {
-        texVertex = NULL;
-        texVertexNum = 0;
-        return;
-    }
-    SE_TextureUnit* texUnit = tex->getTextureUnit(SE_TEXTURE0);
-    SE_ASSERT(texUnit != NULL);
-    SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
-    SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
-    SE_Vector2f* texVertexArray = texCoordData->getTexVertexArray();
-    int texFaceNum = texCoordData->getTexFaceNum();
-    int facetNum = mSurface->getFacetNum();
-    int* facets = mSurface->getFacetArray();
-    mTexVertex = new _Vector2f[facetNum * 3];
-    mTexVertexNum = facetNum * 3;
-    int k = 0 ;
-    for(int i = 0 ; i < facetNum ; i++)
-    {
-        SE_ASSERT(facets[i] < texFaceNum);
-        SE_Vector3i f = texFaceArray[facets[i]];
-        mTexVertex[k].d[0] = texVertexArray[f.x].x;
-        mTexVertex[k].d[1] = texVertexArray[f.x].y;
-        k++;
-        mTexVertex[k].d[0] = texVertexArray[f.y].x;
-        mTexVertex[k].d[1] = texVertexArray[f.y].y;
-        k++;
-        mTexVertex[k].d[0] = texVertexArray[f.z].x;
-        mTexVertex[k].d[1] = texVertexArray[f.z].y;
-        k++;
-    }
-    texVertex = mTexVertex;
-    texVertexNum = mTexVertexNum;
-}
-*/
 
 SE_MaterialData* SE_TriSurfaceRenderUnit::getMaterialData()
 {
