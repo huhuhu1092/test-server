@@ -121,13 +121,13 @@ public:
     SE_Vector3f getColor();
     void getVertexIndex(int*& index, int& indexNum);
 	void getVertex(_Vector3f*& vertex, int & vertexNum);
-	//void getTexVertex(_Vector2f*& texVertex, int& texVertexNum);
 	void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
 
     void getFaceVertex(_Vector3f*& vertex, int& vertexNUm);
-    //void getBaseColorFaceTexVertex(_Vector2f*& texVertex, int& texVertecNum);
 	void getFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
     SE_ProgramDataID getProgramDataID();
+	SE_RendererID getRendererID();
+	void setRendererID(const SE_RendererID& id);
     void setGeometryData(SE_GeometryData* geomData);
     void setMaterialData(SE_MaterialData* materialData);
     void setTexture(SE_Texture* texture);
@@ -257,6 +257,7 @@ private:
     SE_GeometryData* mGeometryData;
     SE_Vector3f mColor;
     SE_ProgramDataID mProgramDataID;
+	SE_RendererID mRendererID;
 	int mSampleMin;
     int mSampleMag;
     int mWrapS;

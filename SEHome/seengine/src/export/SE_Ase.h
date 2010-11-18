@@ -203,6 +203,12 @@ struct ASE_Shader
 	std::string shaderID;
 	std::string vertexShaderName;
 	std::string fragmentShaderName;
+	std::string shaderClassName;
+};
+struct ASE_Renderer
+{
+	std::string rendererID;
+	std::string rendererClassName;
 };
 struct ASE_HelperObject
 {
@@ -234,6 +240,7 @@ struct ASE_SceneObject
     std::list<ASE_SkinJointController*> mSkinJointController;
     std::list<ASE_GeometryObjectGroup*> mGeometryObjectGroup;
 	std::vector<ASE_Shader*> mShaderObjects;
+	std::vector<ASE_Renderer*> mRendererObjects;
     ~ASE_SceneObject()
     {
         std::list<ASE_GeometryObject*>::iterator it;
@@ -287,6 +294,7 @@ private:
     void ASE_KeyCONTROLPOSTRACK(const char* token);
     void ASE_KeyTMANIMATION(const char* token);
 	void ASE_KeySHADER(const char* token);
+	void ASE_KeyRENDERER(const char* token);
     void ASE_AdjustSubMtl();
     ASE_GeometryObjectGroup* findGroup(std::string parentname);
 	SE_KeyFrame<SE_Transform>* findKeyFrame(ASE_HelperObject* parent, unsigned int key);

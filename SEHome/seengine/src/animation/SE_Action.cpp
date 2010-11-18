@@ -3,6 +3,7 @@
 #include "SE_ResourceManager.h"
 #include "SE_Application.h"
 #include "SE_Sequence.h"
+#include "SE_ColorEffectController.h"
 #include <algorithm>
 
 struct _EqualTest
@@ -52,7 +53,7 @@ std::vector<unsigned int> SE_SequenceAnimationObject::getKeys()
 SE_Element* SE_ColorEffectAnimationObject::createElement()
 {
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();	
-	SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(mColorEffectRef);
+	SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(mColorEffectRef.getStr());
 	if(!colorEffectController)
 		return NULL;
 	SE_ColorEffectElement* element = new SE_ColorEffectElement(colorEffectController, mColorEffectInput);

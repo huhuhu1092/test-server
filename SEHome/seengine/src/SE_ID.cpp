@@ -239,6 +239,10 @@ SE_MountPointID SE_ID::createMountPointID(const char* str)
 {
 	return SE_StringID(str);
 }
+SE_RendererID SE_ID::createRendererID(const char* str)
+{
+	return SE_StringID(str);
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

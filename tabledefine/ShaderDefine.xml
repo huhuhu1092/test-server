@@ -1,2 +1,2 @@
-<Shader id = "main_shader" VertexShader = "main_vertex_shader.glsl" FragmentShader = "main_fragment_shader.glsl" />
-<Shader id = "color_replace" VertexShader = "main_vertex_shader.glsl" FragmentShader = "color_replace_fragment.glsl" />
+<Shader id = "default_shader" VertexShader = "default_vertex_shader.glsl" FragmentShader = "default_fragment_shader.glsl" ShaderClassName = "SE_SimpleSurfaceShaderProgram"/>
+<Shader id = "color_replace" VertexShader = "main_vertex_shader.glsl" FragmentShader = "color_replace_fragment.glsl" ShaderClassName = "SE_SurfaceShaderProgram"/>

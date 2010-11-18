@@ -1,10 +1,5 @@
 #ifndef SE_RENDERUNIT_H
 #define SE_RENDERUNIT_H
-#ifdef GLES_20
-    #include <GLES2/gl2.h>
-#else
-    #include <GLES/gl.h>
-#endif
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_Matrix.h"
@@ -69,7 +64,7 @@ public:
 	}
 	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own);
 	void applyRenderState();
-    void loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
+    //void loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag);
 protected:
     SE_PRIMITIVE_TYPE mPrimitiveType;
     SE_Matrix4f mWorldTransform;
@@ -96,12 +91,12 @@ public:
     virtual void draw();
 	virtual SE_Surface* getSurface();
 private:
-	void setColorAndMaterial(SE_ShaderProgram* shaderProgram);
-	void setColor(SE_ShaderProgram* shaderProgram);
-    void setImage(int index , SE_ShaderProgram* shaderProgram);
-	void setImageAndColor(SE_ShaderProgram* shaderProgram);
-	void setVertex(SE_ShaderProgram* shaderProgram, _Vector3f*& vertex, int& vertexNum, int*& indexArray, int& indexNum);
-	void setTexVertex(SE_ShaderProgram* shaderProgram, int vertexNum);
+	//void setColorAndMaterial(SE_ShaderProgram* shaderProgram);
+	//void setColor(SE_ShaderProgram* shaderProgram);
+    //void setImage(int index , SE_ShaderProgram* shaderProgram);
+	//void setImageAndColor(SE_ShaderProgram* shaderProgram);
+	//void setVertex(SE_ShaderProgram* shaderProgram, _Vector3f*& vertex, int& vertexNum, int*& indexArray, int& indexNum);
+	//void setTexVertex(SE_ShaderProgram* shaderProgram, int vertexNum);
 	void setTexColorBlendMode(SE_ShaderProgram* shaderProgram);
 	void getImageDataID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum);
 	void getImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum);
@@ -116,7 +111,20 @@ class SE_LineSegRenderUnit : public SE_RenderUnit
 {
 public:
     SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Vector3f& color);
+	~SE_LineSegRenderUnit();
 	virtual void draw();
+	SE_Vector3f getColor()
+	{
+		return mColor;
+	}
+	SE_Segment* getSegments()
+	{
+		return mSegments;
+	}
+	int getSegmentsNum()
+	{
+		return mSegmentNum;
+	}
 private:
 	SE_Vector3f mColor;
 	SE_Segment* mSegments;

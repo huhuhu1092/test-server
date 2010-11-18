@@ -10,18 +10,9 @@
 #include "SE_ShaderProgram.h"
 #include "SE_Geometry3D.h"
 #include "SE_Spatial.h"
+#include "SE_Renderer.h"
+#include "SE_DataValueDefine.h"
 #include <vector>
-static void checkGLError()
-{
-	/*
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR)
-    {
-        LOGI("### gl error = %d ####\n", error);
-        //SE_ASSERT(0);
-    }
-	*/
-}
 /////////////////////////////////
 SE_RenderUnit::SE_RenderUnit()
 {
@@ -46,6 +37,10 @@ void SE_RenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVe
 {
 	texVertex = NULL;
 	texVertexNum = 0;
+}
+SE_Surface* SE_RenderUnit::getSurface()
+{
+	return NULL;
 }
 SE_MaterialData* SE_RenderUnit::getMaterialData()
 {
@@ -81,155 +76,6 @@ void SE_RenderUnit::draw()
 #ifdef DEBUG0
 static int texSize = 0;
 #endif
-void SE_RenderUnit::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
-{
-    if(imageData == NULL)
-    {
-        LOGI("### can not load texture: ###\n");
-        return;
-    }
-    glEnable(GL_TEXTURE_2D);
-    //checkGLError();
-	GLenum texType = GL_TEXTURE0;
-	switch(index)
-	{
-	case 0:
-		texType = GL_TEXTURE0;
-		break;
-	case 1:
-		texType = GL_TEXTURE1;
-	    break;
-	case 2:
-		texType = GL_TEXTURE2;
-		break;
-	case 3:
-		texType = GL_TEXTURE3;
-		break;
-	default:
-		break;
-	}
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    checkGLError();
-	glActiveTexture(texType);
-    checkGLError();
-    GLuint texid = imageData->getTexID();
-#ifdef DEBUG0
-	LOGI("## texid = %d ##\n", texid);
-#endif
-    if(texid == 0)
-    {
-        glGenTextures(1, &texid);
-        checkGLError();
-        imageData->setTexID(texid);
-#ifdef DEBUG0
-		LOGI("### texSize = %d ###\n", texSize);
-		texSize++;
-#endif
-    }
-    else
-    {
-		if(glIsTexture(texid) == GL_TRUE)
-		{
-			LOGI("### is texture ####\n");
-		}
-        glBindTexture(GL_TEXTURE_2D, texid);
-		return;
-		/*
-		GLenum error = glGetError();
-		if(error == GL_NO_ERROR)
-		{
-			return;
-		}
-		else if(error == GL_INVALID_ENUM)
-		{
-			LOGI("### bindtexture error ###\n");
-            glGenTextures(1, &texid);
-            checkGLError();
-            imageData->setTexID(texid);
-		}
-		*/
-    }
-    glBindTexture(GL_TEXTURE_2D, texid);
-    checkGLError();
-    if(!imageData->isCompressTypeByHardware())
-    {
-        GLint internalFormat = GL_RGB;
-        GLenum format = GL_RGB;
-        GLenum type = GL_UNSIGNED_BYTE;
-        if(imageData->getPixelFormat() == SE_ImageData::RGBA)
-        {
-            internalFormat = GL_RGBA;
-            format = GL_RGBA;
-        }
-        if(imageData->getPixelFormat() == SE_ImageData::RGB_565)
-        {
-            type = GL_UNSIGNED_SHORT_5_6_5;
-        }
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
-        checkGLError();
-    }
-    else
-    {
-    }
-	GLint wraps , wrapt;
-    switch(wrapS)
-    {
-    case REPEAT:
-        wraps = GL_REPEAT;
-        break;
-    case CLAMP:
-        wraps = GL_CLAMP_TO_EDGE;
-		break;
-    default:
-        wraps = GL_REPEAT;
-    }
-    switch(wrapT)
-    {
-    case REPEAT:
-        wrapt = GL_REPEAT;
-		break;
-    case CLAMP:
-        wrapt = GL_CLAMP_TO_EDGE;
-        break;
-    default:
-        wrapt = GL_REPEAT;
-        break;
-    }
-	GLint sampleMin, sampleMag;
-    switch(min)
-    {
-    case NEAREST:
-        sampleMin = GL_NEAREST;
-        break;
-    case LINEAR:
-        sampleMin = GL_LINEAR;
-        break;
-    default:
-        sampleMin = GL_LINEAR;
-    }
-    switch(mag)
-    {
-    case NEAREST:
-        sampleMag = GL_NEAREST;
-        break;
-    case LINEAR:
-        sampleMag = GL_LINEAR;
-        break;
-    default:
-        sampleMag = GL_LINEAR;
-    }
-            
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
-    checkGLError();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
-    checkGLError();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampleMin );
-    checkGLError();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampleMag ); 
-    checkGLError();
-	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    return;
-}
 
 ////////////////////////////////
 SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
@@ -241,12 +87,10 @@ SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
     mTexVertexNum = 0;
     mPrimitiveType = TRIANGLES;
 }
-/*
-void SE_TriSurfaceRenderUnit::getBaseColorImageID(SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
+SE_Surface* SE_TriSurfaceRenderUnit::getSurface()
 {
-	getImageDataID(SE_TEXTURE0, imageDataIDArray, imageDataIDNum);
+	return mSurface;
 }
-*/
 void SE_TriSurfaceRenderUnit::getImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {
     SE_Texture* tex = mSurface->getTexture();
@@ -359,11 +203,6 @@ SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
         delete[] mTexVertex;
 }
 /*
-void SE_TriSurfaceRenderUnit::getBaseColorImage(SE_ImageData**& imageDataArray, int& imageDataNum)
-{
-	getImage(SE_TEXTURE0, imageDataArray, imageDataNum);
-}
-*/
 void SE_TriSurfaceRenderUnit::setColor(SE_ShaderProgram* shaderProgram)
 {
     SE_MaterialData* md = mSurface->getMaterialData();
@@ -447,6 +286,7 @@ void SE_TriSurfaceRenderUnit::setImageAndColor(SE_ShaderProgram* shaderProgram)
 	}
 	setColor(shaderProgram);
 }
+*/
 void SE_TriSurfaceRenderUnit::getTexVertex(int index, _Vector2f*& texVertex, int& texVertexNum)
 {
 	if(mPrimitiveType == TRIANGLES)
@@ -458,6 +298,7 @@ void SE_TriSurfaceRenderUnit::getTexVertex(int index, _Vector2f*& texVertex, int
         mSurface->getTexVertex(index, texVertex, texVertexNum);
 	}
 }
+/*
 void SE_TriSurfaceRenderUnit::setVertex(SE_ShaderProgram* shaderProgram, _Vector3f*& vertex, int& vertexNum, int*& indexArray, int& indexNum)
 {
     vertex = NULL;
@@ -497,20 +338,14 @@ void SE_TriSurfaceRenderUnit::setTexVertex(SE_ShaderProgram* shaderProgram, int 
 		}
 		glUniform1i(shaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
 	}
-    
-	/*
-    for(int i = 1 ; i < SE_TEXUNIT_NUM ; i++)
-	{
-		glUniform1i(shaderProgram->getTexCoordSameAsTex0(i), mHasTexCoord[i]);
-	}
-	*/
 }
+*/
 void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgram)
 {
-	int texMode, colorOp;
-	mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
-	glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), texMode);
-	glUniform1i(shaderProgram->getColorOpModeUniformLoc(), colorOp);
+	//int texMode, colorOp;
+	//mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
+	//glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), texMode);
+	//glUniform1i(shaderProgram->getColorOpModeUniformLoc(), colorOp);
 
 	/*
 	bool textureAllFound = true;
@@ -634,19 +469,32 @@ void SE_TriSurfaceRenderUnit::draw()
     {
         return;
     }
-    SE_Matrix4f m = mViewToPerspective.mul(mWorldTransform);
 	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
-    if(!shaderProgram)
-	{
-		shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_shader");
-	}
+	if(!shaderProgram)
+		return;
 	shaderProgram->use();
-    float matrixData[16];
-    m.getColumnSequence(matrixData);
-    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
+	const SE_RendererID rendererID = mSurface->getRendererID();
+	SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer(rendererID);
+	if(!renderer)
+		return;
+	renderer->begin(shaderProgram);
+	renderer->setMatrix(this);
+	renderer->setPrimitiveType(mPrimitiveType);
+	renderer->setSurface(mSurface);
+	renderer->setImage(this);
+	renderer->setColor(this);
+	renderer->setVertex(this);
+	renderer->setTexVertex(this);
+	renderer->setDrawMode(this);
+	renderer->draw();
+	renderer->end();
+    //float matrixData[16];
+    //m.getColumnSequence(matrixData);
+    //glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
     //checkGLError();
     //shaderProgram->use();
+	/*
 	_Vector3f* vertex = NULL;
 	int vertexNum = 0;
 	int* indexArray = NULL;
@@ -675,12 +523,14 @@ void SE_TriSurfaceRenderUnit::draw()
         glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, indexArray);
     }
     //checkGLError();
+	*/
 
 }
 //////////////////////////////////
 SE_LineSegRenderUnit::SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Vector3f& color)
 {
 	mSegmentNum = num;
+	mSegments = NULL;
 	if(num > 0)
 	{
 		mSegments = new SE_Segment[num];
@@ -691,40 +541,27 @@ SE_LineSegRenderUnit::SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Ve
 	}
 	mColor = color;
 }
+SE_LineSegRenderUnit::~SE_LineSegRenderUnit()
+{
+    if(mSegments)
+		delete[] mSegments;
+}
 void SE_LineSegRenderUnit::draw()
 {
-	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_vertex_shader");
-	float color[3];
-	color[0] = mColor.x;
-	color[1] = mColor.y;
-	color[2] = mColor.z;
-	glUniform3fv(shaderProgram->getColorUniformLoc(), 1, color);
-	glUniform1i(shaderProgram->getTexCombineModeUniformLoc(), SE_COLOR_MODE);
-	SE_Matrix4f m;
-	m.identity();
-	m = mViewToPerspective.mul(m);
-	float data[16];
-	m.getColumnSequence(data);
-    glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, data);
-    _Vector3f* points = new _Vector3f[mSegmentNum * 2];
-	if(!points)
+	if(!mSegments)
 		return;
-	int k = 0;
-	for(int i = 0 ; i < mSegmentNum ; i++)
-	{
-		const SE_Segment& se = mSegments[i];
-		const SE_Vector3f& start = se.getStart();
-		const SE_Vector3f& end = se.getEnd();
-		for(int i = 0 ; i < 3 ; i++)
-		    points[k].d[i] = start.d[i];
-		k++;
-		for(int i = 0 ; i < 3 ; i++)
-		    points[k].d[i] = end.d[i];
-		k++;
-	}
-	glVertexAttribPointer(shaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT,
-		                  GL_FALSE, 0, points);
-	glEnableVertexAttribArray(shaderProgram->getPositionAttributeLoc());
-	glDrawArrays(GL_LINES, 0, mSegmentNum * 2);
-    delete[] points;
+	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(DEFAULT_SHADER);
+    if(!shaderProgram)
+		return;
+	shaderProgram->use();
+	SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer("lineseg_renderer");
+	if(!renderer)
+		return;
+	renderer->begin(shaderProgram);
+	renderer->setMatrix(this);
+	renderer->setColor(this);
+	renderer->setVertex(this);
+	renderer->setDrawMode(this);
+	renderer->draw();
+	renderer->end();
 }

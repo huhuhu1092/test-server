@@ -7,18 +7,9 @@
 #include "SE_ShaderProgram.h"
 #include "SE_ResourceManager.h"
 #include "SE_Layer.h"
+#include "SE_Renderer.h"
 #include <string.h>
-static void checkGLError()
-{
-	/*
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR)
-    {
-        LOGI("### gl error = %d ####\n", error);
-        SE_ASSERT(0);
-    }
-	*/
-}
+
 SE_RenderManager::SE_RenderManager()
 {
     
@@ -102,24 +93,20 @@ void SE_RenderManager::beginDraw()
 {
      SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
     SE_Rect<int> rect = currCamera->getViewport();
-    glViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-    checkGLError();
+	SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
 #ifdef DEBUG0
     LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
 	SE_Vector3f location = currCamera->getLocation();
 	LOGI("## location = %f, %f, %f\n", location.x, location.y, location.z);
 #endif
-	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_shader");
-    shaderProgram->use();
-	glClearColor(mBackground.x, mBackground.y, mBackground.z, 1.0);
-	checkGLError();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	checkGLError();
+	//SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram("main_shader");
+    //shaderProgram->use();
+	SE_Renderer::setClearColor(SE_Vector4f(mBackground.x, mBackground.y, mBackground.z, 1.0));
+	SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
     //glEnable(GL_DEPTH_TEST);
 	//glDisable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	checkGLError();
     for(int i = 0 ; i  < RQ_NUM ; i++)
     {
         RenderUnitList* ruList = mRenderQueue[i];

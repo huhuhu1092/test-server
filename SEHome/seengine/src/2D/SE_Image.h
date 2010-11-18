@@ -2,6 +2,7 @@
 #define SE_IMAGE_H
 #include "SE_ID.h"
 #include "SE_ImageMap.h"
+#include "SE_Vector.h"
 #include <string>
 class SE_RectPrimitive;
 class SE_Surface;
@@ -74,7 +75,7 @@ private:
 class SE_ComposeImage
 {
 public:
-    enum {TEX_SIZE = 4}
+    enum {TEX_SIZE = 4};
     SE_ComposeImage();
     ~SE_ComposeImage();
     void setBackground(const SE_StringID& background);

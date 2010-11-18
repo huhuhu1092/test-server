@@ -513,12 +513,13 @@ void SE_ColorEffectElement::update(unsigned int key)
 }
 SE_Spatial* SE_ColorEffectElement::createSpatial()
 {
+	return NULL;
 }
 void SE_ColorEffectElement::spawn()
 {
 	if(!mColorEffectController)
 		return;
-	calculateRect(mColorEffectControler->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
+	calculateRect(mColorEffectController->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
 	std::vector<unsigned int> keys = mColorEffectController->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
 	{

@@ -116,6 +116,10 @@ SE_ProgramDataID SE_Surface::getProgramDataID()
 {
     return mProgramDataID;
 }
+SE_RendererID SE_Surface::getRendererID()
+{
+	return mRendererID;
+}
 void SE_Surface::getVertexIndexInGeometryData(int*& outArray, int& outNum)
 {
     if(mIndexInGeometryData)
@@ -403,6 +407,10 @@ void SE_Surface::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVerte
 void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {
     mProgramDataID = programID;
+}
+void SE_Surface::setRendererID(const SE_RendererID& id)
+{
+	mRendererID = id;
 }
 ///////
 SE_Texture::SE_Texture()

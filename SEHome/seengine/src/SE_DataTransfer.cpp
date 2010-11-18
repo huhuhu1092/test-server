@@ -44,6 +44,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
         SE_Surface* surface = new SE_Surface;
         surface->setMaterialData(resourceManager->getMaterialData(surfaceTransfer->getMaterialDataID()));
         surface->setProgramDataID(surfaceTransfer->getProgramDataID());
+		surface->setRendererID(surfaceTransfer->getRendererID());
         int*  facetArray= new int[surfaceTransfer->getFacetNum()];
         memmove(facetArray, surfaceTransfer->getFacetArray(), sizeof(int) * surfaceTransfer->getFacetNum());
         surface->setGeometryData(mesh->getGeometryData());
@@ -111,6 +112,9 @@ void SE_MeshTransfer::read(SE_BufferInput& inputBuffer)
         SE_ProgramDataID pid;
         pid.read(inputBuffer);
         surfaceTransfer->setProgramDataID(pid);
+		SE_RendererID renderid;
+		renderid.read(inputBuffer);
+		surfaceTransfer->setRendererID(renderid);
 		int texIndex = inputBuffer.readInt();
         surfaceTransfer->setTextureIndex(texIndex);
     }

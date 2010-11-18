@@ -15,6 +15,7 @@ class SE_KeyFrameController;
 class SE_Animation;
 class SE_Image;
 class SE_Sequence;
+class SE_ColorEffectController;
 //class SE_Action;
 //class SE_Action::_ActionLayer;
 class SE_ElementTravel
@@ -359,7 +360,7 @@ class SE_TextureElement : public SE_Element
 class SE_ColorEffectElement : public SE_Element
 {
 public:
-	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectAnimationObject& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
+	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectAnimationObject::_ColorEffectInput& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
 	{}
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();

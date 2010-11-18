@@ -17,6 +17,7 @@
 #include "SE_ImageData.h"
 #include "SE_IO.h"
 #include "SE_KeyFrame.h"
+#include "SE_DataValueDefine.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -317,7 +318,6 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
 		std::string vsn = mSceneObject->mShaderObjects[i]->vertexShaderName;
 		std::string fsn = mSceneObject->mShaderObjects[i]->fragmentShaderName;
         programDataVector[i] = proID;
-        //SE_Util::sleep(SLEEP_COUNT);
         proID.write(output);
         std::string str(shaderPath);
         std::string vertexShaderPath = str + SE_SEP + vsn;
@@ -328,6 +328,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         int fragmentShaderLen = 0;
         SE_IO::readFileAll(vertexShaderPath.c_str(), vertexShader, vertexShaderLen);
         SE_IO::readFileAll(fragmentShaderPath.c_str(), fragmentShader, fragmentShaderLen);
+		output.writeString(mSceneObject->mShaderObjects[i]->shaderClassName.c_str());
         output.writeInt(vertexShaderLen);
         output.writeInt(fragmentShaderLen);
         output.writeBytes(vertexShader, vertexShaderLen);
@@ -335,6 +336,18 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         delete[] vertexShader;
         delete[] fragmentShader;
     }
+	/////////////// write renderer ///////
+	output.writeShort(SE_RENDERERINFO_ID);
+	int rendererNum = mSceneObject->mRendererObjects.size();
+	output.writeInt(rendererNum);
+	std::vector<SE_RendererID> rendererIDVector(rendererNum);
+	for(i = 0 ; i < rendererNum ; i++)
+	{
+		ASE_Renderer* renderer = mSceneObject->mRendererObjects[i];
+		rendererIDVector[i] = renderer->rendererID.c_str();
+		output.writeString(renderer->rendererID.c_str());
+		output.writeString(renderer->rendererClassName.c_str());
+	}
 ///////////////////// write mesh //////////////// 
     std::vector<SE_MeshID> meshIDVector(geomDataNum);
     output.writeShort(SE_MESHDATA_ID);
@@ -459,6 +472,7 @@ WRIET_SURFACE:
                     output.writeInt(*itFace);
                 }
                 programDataVector[0].write(output);
+				output.writeString(DEFAULT_RENDERER);
                 if(texStr != "")
                 {
                     output.writeInt(texIndex);
@@ -480,6 +494,7 @@ WRIET_SURFACE:
             for(int f = 0 ; f < mesh->numFaces ; f++)
                 output.writeInt(f);
             programDataVector[0].write(output);
+			output.writeString(DEFAULT_RENDERER);
             if(texStr != "")
             {
                 output.writeInt(0); // the texture index is 0;
@@ -1534,10 +1549,33 @@ void ASE_Loader::ASE_KeySHADER(const char* token)
 		shader->vertexShaderName = s_token;
 		ASE_GetToken(false);
 		shader->fragmentShaderName = s_token;
+		ASE_GetToken(false);
+		shader->shaderClassName = s_token;
 		mSceneObject->mShaderObjects[index] = shader;
 	}
 }
-
+void ASE_Loader::ASE_KeyRENDERER(const char* token)
+{
+	if(!strcmp(token, "*NUM"))
+	{
+		ASE_GetToken(false);
+		int num = atoi(s_token);
+		mSceneObject->mRendererObjects.resize(num);
+	}
+	else if(!strcmp(token, "*RENDERER"))
+	{
+		ASE_GetToken(false);
+		int index = atoi(s_token);
+		ASE_GetToken(false);
+		std::string renderID = s_token;
+		ASE_GetToken(false);
+		std::string rendererClassName = s_token;
+		ASE_Renderer* renderer = new ASE_Renderer;
+		renderer->rendererID = renderID;
+		renderer->rendererClassName = rendererClassName;
+		mSceneObject->mRendererObjects[index] = renderer;
+	}
+}
 
 /*
 ** ASE_Process
@@ -1590,6 +1628,10 @@ void ASE_Loader::ASE_Process(  )
 		else if(!strcmp(s_token, "*SHADERINFO"))
 		{
 			ASE_ParseBracedBlock(&ASE_Loader::ASE_KeySHADER);
+		}
+		else if(!strcmp(s_token, "*RENDERERINFO"))
+		{
+			ASE_ParseBracedBlock(&ASE_Loader::ASE_KeyRENDERER);
 		}
 	}
 #ifdef DEBUG

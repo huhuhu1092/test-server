@@ -22,6 +22,7 @@
 #include "SE_Action.h"
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
+#include "SE_Renderer.h"
 #include <map>
 #include <vector>
 
@@ -194,6 +195,24 @@ static void processImageData(SE_BufferInput& inputBuffer, SE_ResourceManager* re
         resourceManager->setImageData(imageDataid, imageData); 
     }
 }
+static void processRendererData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+	int rendererNum = inputBuffer.readInt();
+	for(int i = 0 ; i < rendererNum ; i++)
+	{
+		std::string rendererID = inputBuffer.readString();
+		std::string rendererClassName = inputBuffer.readString();
+		SE_Renderer* renderer = (SE_Renderer*)SE_Object::create(rendererClassName.c_str());
+		if(!renderer)
+		{
+			LOGI("... error renderer %s is not define\n", rendererClassName.c_str());
+		}
+		else
+		{
+			resourceManager->setRenderer(rendererID.c_str(), renderer);
+		}
+	}
+}
 static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
     int meshNum = inputBuffer.readInt();
@@ -302,6 +321,7 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
     {
 		SE_ProgramDataID programDataID;
 		programDataID.read(inputBuffer);
+		std::string shaderClassName = inputBuffer.readString();
 		int vertexShaderLen = inputBuffer.readInt();
 		int fragmentShaderLen = inputBuffer.readInt();
 		char* vertexShaderBytes = new char[vertexShaderLen + 1];
@@ -310,7 +330,7 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
 		inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
 		vertexShaderBytes[vertexShaderLen] = '\0';
 		fragmentShaderBytes[fragmentShaderLen] = '\0';
-		resourceManager->setShaderProgram(programDataID, vertexShaderBytes, fragmentShaderBytes);
+		resourceManager->setShaderProgram(programDataID, shaderClassName.c_str(),vertexShaderBytes, fragmentShaderBytes);
 		delete[] vertexShaderBytes;
 		delete[] fragmentShaderBytes;
     }
@@ -360,6 +380,9 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
 			case SE_SKINJOINTCONTROLLER_ID:
 				processSkinJointController(inputBuffer, resourceManager);
                 break;
+			case SE_RENDERERINFO_ID:
+				processRendererData(inputBuffer, resourceManager);
+				break;
         }
     }
 }
@@ -438,6 +461,7 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram> shaderMap;
 	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
+	ResourceMap<SE_RendererID, SE_Renderer> rendererMap;
 	SE_ImageTable mImageTable;
     SE_ActionTable mActionTable;
 	SE_SequenceTable mSequenceTable;
@@ -1411,6 +1435,7 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 	std::string vertexShaderFilePath;
 	std::string fragmentShaderFilePath;
 	std::string shaderID;
+	std::string shaderClassName;
     while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1428,6 +1453,10 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 		{
 			fragmentShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + value;
 		}
+		else if(!strcmp(name, "ShaderClassName"))
+		{
+            shaderClassName = value;
+		}
 		pAttribute = pAttribute->Next();
 	}
 	char* vertexShader;
@@ -1443,7 +1472,7 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 	memcpy(vs, vertexShader, vertexShaderLen);
 	memcpy(fs, fragmentShader, fragmentShaderLen);
 	SE_ProgramDataID id(shaderID.c_str());
-	resourceManager->setShaderProgram(id, vs, fs);
+	resourceManager->setShaderProgram(id, shaderClassName.c_str(), vs, fs);
 	delete[] vertexShader;
 	delete[] fragmentShader;
 }
@@ -2349,14 +2378,16 @@ SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& p
     if(shader && shader->initOK())
         return shader;
 	if(shader)
-        shader->init();
+		shader->recreate();
     return shader;
 }
-void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader)
+void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID, const char* shaderClassName,char* vertexShader, char* fragmentShader)
 {
     if(vertexShader == NULL || fragmentShader == NULL)
         return;
-    SE_ShaderProgram* shaderProgram = new SE_ShaderProgram(vertexShader, fragmentShader);
+	SE_ShaderProgram* shaderProgram = (SE_ShaderProgram*)SE_Object::create(shaderClassName);
+	shaderProgram->create(vertexShader, fragmentShader);
+	//new SE_ShaderProgram(vertexShader, fragmentShader);
     mImpl->shaderMap.set(programDataID, shaderProgram);
 
 }
@@ -2364,7 +2395,18 @@ void SE_ResourceManager::removeShaderProgram(const SE_ProgramDataID& programData
 {
     mImpl->shaderMap.remove(programDataID);
 }
-    
+SE_Renderer* SE_ResourceManager::getRenderer(const SE_RendererID& rendererID)
+{
+	return mImpl->rendererMap.get(rendererID);
+}
+void SE_ResourceManager::setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer)
+{
+	mImpl->rendererMap.set(rendererID, renderer);
+}
+void SE_ResourceManager::removeRenderer(const SE_RendererID& rendererID)
+{
+	mImpl->rendererMap.remove(rendererID);
+}
 const char* SE_ResourceManager::getDataPath()
 {
 	return mImpl->dataPath.c_str();

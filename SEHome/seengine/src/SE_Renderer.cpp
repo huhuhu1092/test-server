@@ -4,14 +4,27 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_Mesh.h"
+#include "SE_Geometry3D.h"
+#include "SE_Log.h"
 #ifdef GLES_20
     #include <GLES2/gl2.h>
 #else
     #include <GLES/gl.h>
 #endif
+static void checkGLError()
+{
+	/*
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR)
+    {
+        LOGI("### gl error = %d ####\n", error);
+        SE_ASSERT(0);
+    }
+	*/
+}
+IMPLEMENT_OBJECT(SE_Renderer)
 SE_Renderer::SE_Renderer()
 {
-    reset();
 }
 SE_Renderer::~SE_Renderer()
 {}
@@ -20,7 +33,7 @@ void SE_Renderer::setMatrix(SE_RenderUnit* renderUnit)
 	SE_Matrix4f m = renderUnit->getViewToPerspectiveMatrix().mul(renderUnit->getWorldTransform());
 	float matrixData[16];
     m.getColumnSequence(matrixData);
-    glUniformMatrix4fv(mShaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
+    glUniformMatrix4fv(mBaseShaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
 }
 void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
 {
@@ -173,6 +186,8 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
 void SE_Renderer::setImage(SE_RenderUnit* renderUnit)
 {
 }
+void SE_Renderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
+{}
 void SE_Renderer::setColor(SE_RenderUnit* renderUnit)
 {}
 void SE_Renderer::setVertex(SE_RenderUnit* renderUnit)
@@ -181,23 +196,26 @@ void SE_Renderer::setTexVertex(SE_RenderUnit* renderUnit)
 {}
 void SE_Renderer::setDrawMode(SE_RenderUnit* renderUnit)
 {}
+void SE_Renderer::setTexVertex(int index, SE_RenderUnit* renderUnit)
+{}
 void SE_Renderer::begin(SE_ShaderProgram* shaderProgram)
 {
-	mShaderProgram = shaderProgram;
-	mVertex = NULL;
-	mVertexNum = 0;
-	mIndexArray = NULL;
-	mIndexNum = 0;
+	reset();
+	mBaseShaderProgram = shaderProgram;
 }
 void SE_Renderer::reset()
 {
-	mShaderProgram = NULL;
+	mBaseShaderProgram = NULL;
 	mVertex = NULL;
 	mVertexNum = 0;
 	mIndexArray = NULL;
 	mIndexNum = 0;
+	mSurface = NULL;
+	mTexVertexNum = 0;
+	mTexVertex = NULL;
+	mPrimitiveType = TRIANGLES;
 }
-void SE_Renderer::draw(int primitiveType)
+void SE_Renderer::draw()
 {
     if(mPrimitiveType == TRIANGLES)
     {
@@ -219,59 +237,105 @@ void SE_Renderer::draw(int primitiveType)
 void SE_Renderer::end()
 {
 }
+void SE_Renderer::setClearColor(const SE_Vector4f& color)
+{
+	glClearColor(color.x, color.y, color.z, color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+void SE_Renderer::clear(int pattern)
+{
+	switch(pattern)
+	{
+	case SE_DEPTH_BUFFER:
+		glClear(GL_DEPTH_BUFFER_BIT);
+		break;
+	case SE_COLOR_BUFFER:
+		glClear(GL_COLOR_BUFFER_BIT);
+		break;
+	case SE_DEPTH_BUFFER|SE_COLOR_BUFFER:
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		break;
+	default:
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+}
+void SE_Renderer::setViewport(int x, int y, int w, int h)
+{
+	glViewport(x, y, w, h);
+}
 //////////////////////////////
+IMPLEMENT_OBJECT(SE_SurfaceRenderer)
 SE_SurfaceRenderer::SE_SurfaceRenderer()
 {
-	mSurface = NULL;
+
 }
 SE_SurfaceRenderer::~SE_SurfaceRenderer()
 {}
-void SE_SurfaceRenderer::setImage(SE_RenderUnit* renderUnit)
+void SE_SurfaceRenderer::reset()
 {
-    for(int index = 0 ; index < SE_TEXUNIT_NUM ; index++)
+	SE_Renderer::reset();
+	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-		SE_ImageDataID* imageDataIDArray = NULL;
-		int imageDataIDNum = 0;
-		SE_ImageData** imageDataArray;
-		int imageDataNum;
-		bool hasTexture = false;
-		SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-		renderUnit->getTexImageID(index, imageDataIDArray, imageDataIDNum);
-		renderUnit->getTexImage(index, imageDataArray, imageDataNum);
-		if(imageDataIDNum > 0)
+		mHasTexture[i] = 0;
+		mHasTexCoord[i] = 0;
+	}
+}
+void SE_SurfaceRenderer::begin(SE_ShaderProgram* shaderProgram)
+{
+	SE_Renderer::begin(shaderProgram);
+	mShaderProgram = (SE_SurfaceShaderProgram*)shaderProgram;
+}
+void SE_SurfaceRenderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
+{
+	SE_ImageDataID* imageDataIDArray = NULL;
+	int imageDataIDNum = 0;
+	SE_ImageData** imageDataArray;
+	int imageDataNum;
+	bool hasTexture = false;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	renderUnit->getTexImageID(texIndex, imageDataIDArray, imageDataIDNum);
+	renderUnit->getTexImage(texIndex, imageDataArray, imageDataNum);
+	if(imageDataIDNum > 0)
+	{
+		if(imageDataIDNum == 1)
 		{
-			if(imageDataIDNum == 1)
+			SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
+			loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+			hasTexture = true;
+		}
+		else
+		{
+			//load multimap
+		}
+	}
+	else if(imageDataNum > 0)
+	{
+		if(imageDataNum == 1)
+		{
+			SE_ImageData* imageData = imageDataArray[0];
+			if(imageData)
 			{
-				SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
-				loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-				glUniform1i(shaderProgram->getTextureUniformLoc(index), index);
+				loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
 				hasTexture = true;
 			}
-			else
-			{
-				//load multimap
-			}
-		}
-		else if(imageDataNum > 0)
-		{
-			if(imageDataNum == 1)
-			{
-				SE_ImageData* imageData = imageDataArray[0];
-				if(imageData)
-				{
-					loadTexture2D(index, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-					glUniform1i(shaderProgram->getTextureUniformLoc(index), index);
-					hasTexture = true;
-				}
 
-			}
-			else
-			{
-				//load multimap
-			}
 		}
-		mHasTexture[index] = hasTexture;
-		//glUniform1i(mShaderProgram->getTextureUniformLoc(index), index);
+		else
+		{
+			//load multimap
+		}
+	}
+	mHasTexture[texIndex] = hasTexture;
+}
+void SE_SurfaceRenderer::setImage(SE_RenderUnit* renderUnit)
+{
+	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
+	{
+		setImage(i, renderUnit);
+		if(mHasTexture[i])
+		{
+			glUniform1i(mShaderProgram->getTextureUniformLoc(i), i);
+		}
 	}
 }
 void SE_SurfaceRenderer::setColor(SE_RenderUnit* renderUnit)
@@ -317,26 +381,33 @@ void SE_SurfaceRenderer::setVertex(SE_RenderUnit* renderUnit)
     glVertexAttribPointer(mShaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, mVertex);
     glEnableVertexAttribArray(mShaderProgram->getPositionAttributeLoc());
 }
+void SE_SurfaceRenderer::setTexVertex(int index, SE_RenderUnit* renderUnit)
+{
+    renderUnit->getTexVertex(index, mTexVertex, mTexVertexNum);
+	if(mTexVertexNum > 0)
+	{
+		mHasTexCoord[index] = 1;
+	}
+	else
+	{
+        mHasTexCoord[index] = 0;
+	}
+}
 void SE_SurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 {
-    _Vector2f* texVertex = NULL;
-    int texVertexNum = 0;
 	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-        renderUnit->getTexVertex(i, texVertex, texVertexNum);
-		if(texVertexNum > 0)
+		setTexVertex(i, renderUnit);
+		if(mHasTexCoord[i])
 		{
-			SE_ASSERT(mVertexNum == texVertexNum);
-			mHasTexCoord[i] = 1;
-			glVertexAttribPointer(mShaderProgram->getTextureCoordAttributeLoc(i), 2, GL_FLOAT, 0, 0, texVertex);
-	        glEnableVertexAttribArray(mShaderProgram->getTextureCoordAttributeLoc(i));
+		    glVertexAttribPointer(mShaderProgram->getTextureCoordAttributeLoc(i), 2, GL_FLOAT, 0, 0, mTexVertex);
+            glEnableVertexAttribArray(mShaderProgram->getTextureCoordAttributeLoc(i));
 		}
 		else
 		{
-            mHasTexCoord[i] = 0;
-			glDisableVertexAttribArray(mShaderProgram->getTextureCoordAttributeLoc(i));
+		    glDisableVertexAttribArray(mShaderProgram->getTextureCoordAttributeLoc(i));
 		}
-		glUniform1i(mShaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
+	    glUniform1i(mShaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
 	}
 }
 void SE_SurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
@@ -345,4 +416,132 @@ void SE_SurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 	mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
 	glUniform1i(mShaderProgram->getTexCombineModeUniformLoc(), texMode);
 	glUniform1i(mShaderProgram->getColorOpModeUniformLoc(), colorOp);
+}
+////////////////////////////
+IMPLEMENT_OBJECT(SE_SimpleSurfaceRenderer)
+void SE_SimpleSurfaceRenderer::setImage(SE_RenderUnit* renderUnit)
+{
+	SE_SurfaceRenderer::setImage(0, renderUnit);
+	if(mHasTexture[0])
+	{
+		glUniform1i(mShaderProgram->getTextureUniformLoc(), 0);
+		glUniform1i(mShaderProgram->getShadingModeUniformLoc(), 1);
+	}
+	else
+	{
+		glUniform1i(mShaderProgram->getShadingModeUniformLoc(), 0);
+	}
+}
+void SE_SimpleSurfaceRenderer::begin(SE_ShaderProgram* shaderProgram)
+{
+	SE_Renderer::begin(shaderProgram);
+	mShaderProgram = (SE_SimpleSurfaceShaderProgram*)shaderProgram;
+}
+void SE_SimpleSurfaceRenderer::setColor(SE_RenderUnit* renderUnit)
+{
+    SE_MaterialData* md = mSurface->getMaterialData();
+    float color[3];
+	SE_Vector3f c = mSurface->getColor();
+    if(md)
+    {
+		color[0] = md->ambient.x;
+		color[1] = md->ambient.y;
+		color[2] = md->ambient.z;
+
+    }
+    else
+    {
+        color[0] = c.x;
+        color[1] = c.y;
+        color[2] = c.z;
+    }
+    //checkGLError();
+	glUniform3fv(mShaderProgram->getColorUniformLoc(), 1, color);
+}
+void SE_SimpleSurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
+{
+	SE_SurfaceRenderer::setTexVertex(0, renderUnit);
+	if(mHasTexCoord[0])
+	{
+        glVertexAttribPointer(mShaderProgram->getTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, mTexVertex);
+		glEnableVertexAttribArray(mShaderProgram->getTexCoordAttributeLoc());
+	}
+	else
+	{
+        glDisableVertexAttribArray(mShaderProgram->getTexCoordAttributeLoc());
+	}
+}
+void SE_SimpleSurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
+{}
+///////////////////////////////////////
+IMPLEMENT_OBJECT(SE_LineSegRenderer)
+SE_LineSegRenderer::SE_LineSegRenderer()
+{
+	mPoints = NULL;
+	mPointNum = 0;
+}
+SE_LineSegRenderer::~SE_LineSegRenderer()
+{}
+void SE_LineSegRenderer::begin(SE_ShaderProgram* shaderProgram)
+{
+	SE_Renderer::begin(shaderProgram);
+	mPoints = NULL;
+	mPointNum = 0;
+	mShaderProgram = (SE_SimpleSurfaceShaderProgram*)shaderProgram;
+}
+void SE_LineSegRenderer::setColor(SE_RenderUnit* renderUnit)
+{
+	SE_LineSegRenderUnit* ru = (SE_LineSegRenderUnit*)renderUnit;
+	SE_Vector3f colorv = ru->getColor();
+	float color[3];
+	color[0] = colorv.x;
+	color[1] = colorv.y;
+	color[2] = colorv.z;
+	glUniform3fv(mShaderProgram->getColorUniformLoc(), 1, color);
+}
+void SE_LineSegRenderer::setMatrix(SE_RenderUnit* renderUnit)
+{
+	SE_Matrix4f m;
+	m.identity();
+	m = renderUnit->getViewToPerspectiveMatrix().mul(m);
+	float data[16];
+	m.getColumnSequence(data);
+    glUniformMatrix4fv(mShaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, data);
+}
+void SE_LineSegRenderer::setVertex(SE_RenderUnit* renderUnit)
+{
+	SE_LineSegRenderUnit* ru  = (SE_LineSegRenderUnit*)renderUnit;
+	int segmentNum = ru->getSegmentsNum();
+	SE_Segment* segments = ru->getSegments();
+	mPoints = new _Vector3f[segmentNum * 2];
+	if(!mPoints)
+		return;
+	mPointNum = segmentNum * 2;
+	int k = 0;
+	for(int i = 0 ; i < segmentNum ; i++)
+	{
+		const SE_Segment& se = segments[i];
+		const SE_Vector3f& start = se.getStart();
+		const SE_Vector3f& end = se.getEnd();
+		for(int i = 0 ; i < 3 ; i++)
+		    mPoints[k].d[i] = start.d[i];
+		k++;
+		for(int i = 0 ; i < 3 ; i++)
+		    mPoints[k].d[i] = end.d[i];
+		k++;
+	}
+	glVertexAttribPointer(mShaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT,
+		                  GL_FALSE, 0, mPoints);
+	glEnableVertexAttribArray(mShaderProgram->getPositionAttributeLoc());
+}
+void SE_LineSegRenderer::draw()
+{
+	if(!mPoints)
+		return;
+	glDrawArrays(GL_LINES, 0, mPointNum);
+}
+void SE_LineSegRenderer::end()
+{
+	if(mPoints)
+		delete[] mPoints;
 }

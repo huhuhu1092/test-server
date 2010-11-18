@@ -1,0 +1,7 @@
+*RENDERERINFO {
+    *NUM 3
+    *RENDERER 0 default_renderer SE_SimpleSurfaceRenderer
+    *RENDERER 1 colorreplace_renderer SE_SurfaceRenderer
+    *RENDERER 2 colorcalculus_renderer SE_SurfaceRenderer
+    *RENDERER 3 lineseg_renderer SE_LineSegRenderer
+}

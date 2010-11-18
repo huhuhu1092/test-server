@@ -17,6 +17,7 @@ class SE_Element;
 class SE_Action;
 class SE_Sequence;
 class SE_ColorEffectController;
+class SE_Renderer;
 class SE_ResourceManager
 {
 public:
@@ -44,7 +45,7 @@ public:
     void removeMeshTransfer(const SE_MeshID& meshID); 
 
     SE_ShaderProgram* getShaderProgram(const SE_ProgramDataID& programDataID);
-    void setShaderProgram(const SE_ProgramDataID& programDataID, char* vertexShader, char* fragmentShader);
+    void setShaderProgram(const SE_ProgramDataID& programDataID, const char* shaderClassName, char* vertexShader, char* fragmentShader);
     void removeShaderProgram(const SE_ProgramDataID& programDataID);
     
 	SE_Primitive* getPrimitive(const SE_PrimitiveID& primitveID);
@@ -55,7 +56,9 @@ public:
     void setSkinJointController(const SE_SkinJointControllerID& id, SE_SkinJointController* c);
     void removeSkinJointController(const SE_SkinJointControllerID& id);
 
-
+    SE_Renderer* getRenderer(const SE_RendererID& rendererID);
+	void setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer);
+	void removeRenderer(const SE_RendererID& rendererID);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
