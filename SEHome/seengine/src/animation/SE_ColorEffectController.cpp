@@ -29,3 +29,7 @@ SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key)
     SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
     return frame->data;
 }
+std::vector<unsigned int> SE_ColorEffectController::getKeys()
+{
+	return mKeySequence.getKeys();
+}

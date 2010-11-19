@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ImageTable id="it1">
+    <ImageItem name="女_身体_002.png" id="E01" pivotx="0" pivoty = "0"/> 
+    <ImageItem name="女_后发_001.png" id="E02" pivotx="0" pivoty = "0"/>
+    <ImageItem name="女_脸.png" id="E03" >
+        <Image id = "nian" startx = "0" starty = "0" endx = "128" endy = "128" pivotx="0" pivoty = "0"/>
+    </ImageItem>
+	<ImageItem name="衣服001.png" id="E04" pivotx="0" pivoty = "0"/>
+	<ImageItem name="裙子001.png" id="E05" pivotx="0" pivoty = "0"/>
+	<ImageItem name="嘴_001.png" id="E06" pivotx="0" pivoty = "0"/>
+	<ImageItem name="鼻子_001.png" id="E07" pivotx="0" pivoty = "0"/>
+	<ImageItem name="眼睛_测试.png" id="N01" >
+            <Image id = "left" startx = "0" starty = "0" endx = "32" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "right" startx = "32" starty = "0" endx = "64" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "left1" startx = "64" starty = "0" endx = "96" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "right1" startx = "96" starty = "0" endx = "128" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "left2" startx = "128" starty = "0" endx = "160" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "right2" startx = "160" starty = "0" endx = "192" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "left3" startx = "192" starty = "0" endx = "224" endy = "32" pivotx="0" pivoty = "0" />
+            <Image id = "right3" startx = "224" starty = "0" endx = "256" endy = "32" pivotx="0" pivoty = "0" />
+    </ImageItem>
+	<ImageItem name="女_留海_001.png" id="R01" pivotx="0" pivoty = "0"/>
+	<ImageItem name="眉毛_001.png" id="B01" >
+             <Image id = "left" startx = "0" starty = "0" endx = "32" endy = "32" pivotx="0" pivoty = "0"/>
+             <Image id = "right" startx = "32" starty = "0" endx = "64" endy = "32" pivotx="0" pivoty = "0"/>
+            <Image id = "left1" startx = "64" starty = "0" endx = "96" endy = "32" pivotx="0" pivoty = "0"/>
+            <Image id = "right1" startx = "96" starty = "0" endx = "128" endy = "32" pivotx="0" pivoty = "0"/>
+            <Image id = "left2" startx = "128" starty = "0" endx = "160" endy = "32" pivotx="0" pivoty = "0"/>
+            <Image id = "right2" startx = "160" starty = "0" endx = "192" endy = "32" pivotx="0" pivoty = "0" />
+    </ImageItem>
+    <ImageItem name = "Female dress_001_C.png" id = "lifu_c" pivotx = "0" pivoty = "0" />
+    <ImageItem name = "Female dress_001_M.png" id = "lifu_m" pivotx = "0" pivoty = "0" />
+</ImageTable>

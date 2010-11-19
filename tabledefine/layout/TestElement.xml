@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Element id="lady" layer="1">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <MountPoint id = "p2" x = "110" y = "0" />
+    <MountPoint id = "p3" x = "171" y = "31" />
+    <MountPoint id = "p4" x = "149" y = "133" />
+    <MountPoint id = "p5" x = "130" y = "310" />
+    <MountPoint id = "p6" x = "219" y = "106" />
+    <MountPoint id = "p7" x = "220" y = "91" />
+    <MountPoint id = "p8" x = "200" y = "80" />
+    <MountPoint id = "p9" x = "238" y = "80" />
+    <MountPoint id = "p10" x = "110" y = "0" />
+    <MountPoint id = "p11" x = "200" y = "70" />
+    <MountPoint id = "p12" x = "238" y = "70" />
+    <MountPoint id = "p13" x = "278" y = "270" />
+    <Element id="body" pivotx="0" pivoty="0" layer="1" mountpointref = "p1" >
+        <Image dataref="ImageTable1.xml/it1/E01" />
+    </Element>
+</Element>

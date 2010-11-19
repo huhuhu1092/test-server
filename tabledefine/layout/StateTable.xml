@@ -1,0 +1,10 @@
+<StateTable id="ÑÛ¾¦" statechange="statechange.xml">
+    <State id="1">
+        <Property id="" actionref="" />
+        <Property id="" imageref="" />
+        <Trigger id="" actioinref="" animationref="" imageref="" musicref="" />
+    </State>
+    <State id="2">
+    </State>
+</StateTable>
+

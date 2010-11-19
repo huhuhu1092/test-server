@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ImageMap id = "nvshenti" imageref="ImageTable1.xml/it1/E01" >
+    <Image id="E1" x="0" y = "0" width = "480" height = "800" pivotx="0" pivoty="0"/>
+</ImageMap>
+
+<ImageMap id = "nvhoufa" imageref="ImageTable1.xml/it1/E02">
+    <Image id = "E2" x = "0" y = "0" width = "256" height = "512" />
+</ImageMap>
+
+<ImageMap id = "nvnian" imageref="ImageTable1.xml/it1/E03">
+    <Image id = "E3" x = "0" y = "0" width = "128" height = "128" />
+</ImageMap>
+
+<ImageMap id = "yifu" imageref="ImageTable1.xml/it1/E04">
+    <Image id = "E5" x = "0" y = "0" width = "159" height = "225" />
+</ImageMap>
+
+<ImageMap id = "qunzi" imageref="ImageTable1.xml/it1/E05">
+    <Image id = "E5" x = "0" y = "0" width = "164" height = "156" />
+</ImageMap>
+
+<ImageMap id = "zui" imageref="ImageTable1.xml/it1/E06">
+    <Image id = "E5" x = "0" y = "0" width = "32" height = "32" />
+</ImageMap>
+
+<ImageMap id = "bizi" imageref="ImageTable1.xml/it1/E07">
+    <Image id = "E5" x = "0" y = "0" width = "32" height = "32" />
+</ImageMap>
+
+<ImageMap id = "eye" imageref="ImageTable1.xml/it1/N01">
+    <Image id = "left" x = "0" y = "0" width = "32" height = "32" />
+     <Image id = "right" x = "32" y = "0" width = "32" height = "32" />
+ </ImageMap>
+<ImageMap id = "liuhai" imageref="ImageTable1.xml/it1/R01">
+    <Image id = "E5" x = "0" y = "0" width = "256" height = "512" />
+</ImageMap>
+<ImageMap id = "meimao" imageref="ImageTable1.xml/it1/B01">
+    <Image id = "left" x = "0" y = "0" width = "32" height = "32" />
+    <Image id = "right" x = "32" y = "0" width = "32" height = "32" />
+</ImageMap>

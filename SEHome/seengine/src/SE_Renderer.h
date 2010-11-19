@@ -6,7 +6,7 @@
 class SE_ImageData;
 class SE_ShaderProgram;
 class SE_Surface;
-class SE_SurfaceShaderProgram;
+class SE_ColorExtractShaderProgram;
 class SE_SimpleSurfaceShaderProgram;
 class SE_RenderUnit;
 /*
@@ -58,29 +58,24 @@ protected:
 	SE_Surface* mSurface;
 	int mTexVertexNum;
 	_Vector2f* mTexVertex;
+	int mHasTexCoord[SE_TEXUNIT_NUM];
+	int mHasTexture[SE_TEXUNIT_NUM];
 };
-class SE_SurfaceRenderer : public SE_Renderer
+class SE_ColorExtractRenderer : public SE_Renderer
 {
-	DECLARE_OBJECT(SE_SurfaceRenderer)
+	DECLARE_OBJECT(SE_ColorExtractRenderer)
 public:
-	SE_SurfaceRenderer();
-	~SE_SurfaceRenderer();
+	SE_ColorExtractRenderer();
+	~SE_ColorExtractRenderer();
 	virtual void setImage(SE_RenderUnit* renderUnit);
     virtual void setColor(SE_RenderUnit* renderUnit);
-    virtual void setVertex(SE_RenderUnit* renderUnit);
     virtual void setTexVertex(SE_RenderUnit* renderUnit);
     virtual void setDrawMode(SE_RenderUnit* renderUnit);
 	virtual void begin(SE_ShaderProgram* shaderProgram);
 protected:
-	virtual void reset();
-    virtual void setImage(int texIndex, SE_RenderUnit* renderUnit);
-	virtual void setTexVertex(int index, SE_RenderUnit* renderUnit);
-protected:
-	int mHasTexCoord[SE_TEXUNIT_NUM];
-	int mHasTexture[SE_TEXUNIT_NUM];
-	SE_SurfaceShaderProgram* mShaderProgram;
+	SE_ColorExtractShaderProgram* mShaderProgram;
 };
-class SE_SimpleSurfaceRenderer : public SE_SurfaceRenderer
+class SE_SimpleSurfaceRenderer : public SE_Renderer
 {
     DECLARE_OBJECT(SE_SimpleSurfaceRenderer)
 public:

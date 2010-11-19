@@ -1,0 +1,2 @@
+<Shader id = "default_shader" VertexShader = "default_vertex_shader.glsl" FragmentShader = "default_fragment_shader.glsl" ShaderClassName = "SE_SimpleSurfaceShaderProgram" />
+<Shader id = "colorextract_shader" VertexShader = "colorextract_vertex_shader.glsl" FragmentShader = "colorextract_fragment_shader.glsl" ShaderClassName = "SE_ColorExtractShaderProgram" />

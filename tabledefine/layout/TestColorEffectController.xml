@@ -1,0 +1,16 @@
+<ColorEffectFrameController id="c1" pivotx = "0" pivoty = "0">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <Frame key="1" backgroud="" channel="" alpha="" pivotx = "0" pivoty = "0" mountpointref = "p1">
+        <MarkR texture="" fn = "0" alpha = "" color="+5 +7 +9" /> 
+        <MarkG texture="" alpha=""> </MarkG> 
+        <MarkB texture=""> </MarkB> 
+        <MarkA texture=""> </MarkA> 
+    </Frame>
+    <Frame key = "20" pivotx = "0" pivoty = "0" mountpointref="p1">
+        <MarkR texture = "" fn = "0" alpha = "" color = "+9 +7 -2" />
+    </Frame>
+    <Frame key="30" pivotx = "0" pivoty = "0" mountpointref="p1">
+        <MarkR texture = "" fn = "0" alpha = "" color = "234 23 55" />
+    </Frame>
+</ColorEffectFrameController>
+

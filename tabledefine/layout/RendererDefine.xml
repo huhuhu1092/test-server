@@ -1,0 +1,3 @@
+<Renderer id = "default_renderer" classname = "SE_SimpleSurfaceRenderer" />
+<Renderer id = "lineseg_renderer" classname = "SE_LineSegRenderer" />
+<Renderer id = "colorextract_renderer" classname = "SE_ColorExtractRenderer" />

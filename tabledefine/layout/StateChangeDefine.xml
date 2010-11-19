@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StateChanging  change="1:2">
+</StateChanging>
+
+<StateChanging  change="1:3" animationref="animation.xml/t1" musicref="">
+</StateChanging>
+
+<StateChanging change="1:4" >
+    <Coord>0 0 </Coord>
+</StateChanging>
+
+<StateChanging change="1:5" actionref="animation.xml/c1" >
+</StateChanging>
+
+<StateChaning change="1:1" actionref="" >

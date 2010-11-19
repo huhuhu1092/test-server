@@ -67,6 +67,7 @@ public:
 
 	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);
+	void loadRenderer(const char* rendererFileName);
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
     void loadAction(const char* actionTableName);

@@ -20,11 +20,8 @@
 #include "SE_Sequence.h"
 #include "SE_ElementKeyFrameAnimation.h"
 #include "SE_ColorEffectController.h"
+#include "SE_DataValueDefine.h"
 #include <algorithm>
-#if defined(WIN32)
-#include <windows.h>
-#endif
-
 SE_Element::SE_Element()
 {
     mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
@@ -217,7 +214,8 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_Image* image)
 	{
 		SE_Surface* surface = meshArray[0]->getSurface(i);
 		image->setSurface(surface);
-	    surface->setProgramDataID("color_replace");
+	    surface->setProgramDataID(COLOREXTRACT_SHADER);
+		surface->setRendererID(COLOREXTRACT_RENDERER);
 	}
 	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
 	simObject->setName(mID.getStr());

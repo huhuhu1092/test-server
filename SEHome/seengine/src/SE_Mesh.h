@@ -108,6 +108,11 @@ public:
 private:
     SE_TextureUnit** mTexUnitArray;
 };
+class SE_SurfaceProperty
+{
+public:
+
+};
 class SE_Surface
 {
 public:

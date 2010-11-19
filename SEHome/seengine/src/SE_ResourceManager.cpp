@@ -539,6 +539,13 @@ public:
 	{}
     virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_RendererHandler : public SE_XmlElementHandler<SE_Element, SE_ResourceManager::_Impl>
+{
+public:
+	SE_RendererHandler(SE_ResourceManager::_Impl * em) : SE_XmlElementHandler<SE_Element, SE_ResourceManager::_Impl>(em)
+	{}
+	virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
 class SE_ImageTableHandler : public SE_XmlElementHandler<SE_ImageMapSet, SE_ResourceManager::_Impl>
 {
 public:
@@ -710,6 +717,10 @@ public:
 		else if(!strcmp(name, "Shader"))
 		{
 			return new SE_ShaderHandler(elementManager);
+		}
+		else if(!strcmp(name, "Renderer"))
+		{
+			return new SE_RendererHandler(elementManager);
 		}
 		else
 			return NULL;
@@ -1426,6 +1437,33 @@ void SE_ElementStateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlEl
 		pAttribute = pAttribute->Next();
 	}
 }
+void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_ResourceManager* resourceManager = pro->resourceManager;
+	std::string rendererID;
+	std::string rendererClassName;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+		if(!strcmp(name, "id"))
+		{
+			rendererID = value;
+		}
+		else if(!strcmp(name, "classname"))
+		{
+			rendererClassName = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	SE_Renderer* renderer = (SE_Renderer*)SE_Object::create(rendererClassName.c_str());
+	SE_RendererID rid = SE_ID::createRendererID(rendererID.c_str());
+	resourceManager->setRenderer(rid, renderer);
+}
 void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -1447,11 +1485,11 @@ void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsi
 		} 
         else if(!strcmp(name , "VertexShader"))
 		{
-			vertexShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + value;
+			vertexShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + "shader" + SE_SEP + value;
 		}
 		else if(!strcmp(name, "FragmentShader"))
 		{
-			fragmentShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + value;
+			fragmentShaderFilePath = std::string(resourceManager->getDataPath()) + SE_SEP + "shader" + SE_SEP + value;
 		}
 		else if(!strcmp(name, "ShaderClassName"))
 		{
@@ -2634,7 +2672,21 @@ void SE_ResourceManager::loadShader(const char* shaderFileName)
     SE_XmlElementCalculus<SE_Element, SE_ResourceManager::_Impl> m(mImpl);
     m.handleXmlChild(NULL, &doc, 0);
 }
-
+void SE_ResourceManager::loadRenderer(const char* rendererFileName)
+{
+	if(!rendererFileName)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + rendererFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+    SE_XmlElementCalculus<SE_Element, SE_ResourceManager::_Impl> m(mImpl);
+    m.handleXmlChild(NULL, &doc, 0);
+}
 
 
 void SE_ResourceManager::loadAction(const char* actionTableName)

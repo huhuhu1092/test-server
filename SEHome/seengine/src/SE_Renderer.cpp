@@ -187,17 +187,80 @@ void SE_Renderer::setImage(SE_RenderUnit* renderUnit)
 {
 }
 void SE_Renderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
-{}
+{
+	SE_ImageDataID* imageDataIDArray = NULL;
+	int imageDataIDNum = 0;
+	SE_ImageData** imageDataArray;
+	int imageDataNum;
+	bool hasTexture = false;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	renderUnit->getTexImageID(texIndex, imageDataIDArray, imageDataIDNum);
+	renderUnit->getTexImage(texIndex, imageDataArray, imageDataNum);
+	if(imageDataIDNum > 0)
+	{
+		if(imageDataIDNum == 1)
+		{
+			SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
+			loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+			hasTexture = true;
+		}
+		else
+		{
+			//load multimap
+		}
+	}
+	else if(imageDataNum > 0)
+	{
+		if(imageDataNum == 1)
+		{
+			SE_ImageData* imageData = imageDataArray[0];
+			if(imageData)
+			{
+				loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+				hasTexture = true;
+			}
+
+		}
+		else
+		{
+			//load multimap
+		}
+	}
+	mHasTexture[texIndex] = hasTexture;
+}
 void SE_Renderer::setColor(SE_RenderUnit* renderUnit)
 {}
 void SE_Renderer::setVertex(SE_RenderUnit* renderUnit)
-{}
+{
+	if(mPrimitiveType == TRIANGLES)
+    {
+        mSurface->getFaceVertex(mVertex, mVertexNum);
+    }
+    else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
+    {
+        mSurface->getVertex(mVertex, mVertexNum);
+        mSurface->getVertexIndex(mIndexArray, mIndexNum);
+    }
+    glVertexAttribPointer(mBaseShaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, mVertex);
+    glEnableVertexAttribArray(mBaseShaderProgram->getPositionAttributeLoc());
+}
 void SE_Renderer::setTexVertex(SE_RenderUnit* renderUnit)
 {}
 void SE_Renderer::setDrawMode(SE_RenderUnit* renderUnit)
 {}
 void SE_Renderer::setTexVertex(int index, SE_RenderUnit* renderUnit)
-{}
+{
+    renderUnit->getTexVertex(index, mTexVertex, mTexVertexNum);
+	if(mTexVertexNum > 0)
+	{
+		SE_ASSERT(mVertexNum == mTexVertexNum);
+		mHasTexCoord[index] = 1;
+	}
+	else
+	{
+        mHasTexCoord[index] = 0;
+	}
+}
 void SE_Renderer::begin(SE_ShaderProgram* shaderProgram)
 {
 	reset();
@@ -214,6 +277,11 @@ void SE_Renderer::reset()
 	mTexVertexNum = 0;
 	mTexVertex = NULL;
 	mPrimitiveType = TRIANGLES;
+	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
+	{
+		mHasTexture[i] = 0;
+		mHasTexCoord[i] = 0;
+	}
 }
 void SE_Renderer::draw()
 {
@@ -264,82 +332,30 @@ void SE_Renderer::setViewport(int x, int y, int w, int h)
 	glViewport(x, y, w, h);
 }
 //////////////////////////////
-IMPLEMENT_OBJECT(SE_SurfaceRenderer)
-SE_SurfaceRenderer::SE_SurfaceRenderer()
+IMPLEMENT_OBJECT(SE_ColorExtractRenderer)
+SE_ColorExtractRenderer::SE_ColorExtractRenderer()
 {
-
 }
-SE_SurfaceRenderer::~SE_SurfaceRenderer()
+SE_ColorExtractRenderer::~SE_ColorExtractRenderer()
 {}
-void SE_SurfaceRenderer::reset()
-{
-	SE_Renderer::reset();
-	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
-	{
-		mHasTexture[i] = 0;
-		mHasTexCoord[i] = 0;
-	}
-}
-void SE_SurfaceRenderer::begin(SE_ShaderProgram* shaderProgram)
+void SE_ColorExtractRenderer::begin(SE_ShaderProgram* shaderProgram)
 {
 	SE_Renderer::begin(shaderProgram);
-	mShaderProgram = (SE_SurfaceShaderProgram*)shaderProgram;
+	mShaderProgram = (SE_ColorExtractShaderProgram*)shaderProgram;
 }
-void SE_SurfaceRenderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
-{
-	SE_ImageDataID* imageDataIDArray = NULL;
-	int imageDataIDNum = 0;
-	SE_ImageData** imageDataArray;
-	int imageDataNum;
-	bool hasTexture = false;
-	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	renderUnit->getTexImageID(texIndex, imageDataIDArray, imageDataIDNum);
-	renderUnit->getTexImage(texIndex, imageDataArray, imageDataNum);
-	if(imageDataIDNum > 0)
-	{
-		if(imageDataIDNum == 1)
-		{
-			SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
-			loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-			hasTexture = true;
-		}
-		else
-		{
-			//load multimap
-		}
-	}
-	else if(imageDataNum > 0)
-	{
-		if(imageDataNum == 1)
-		{
-			SE_ImageData* imageData = imageDataArray[0];
-			if(imageData)
-			{
-				loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
-				hasTexture = true;
-			}
-
-		}
-		else
-		{
-			//load multimap
-		}
-	}
-	mHasTexture[texIndex] = hasTexture;
-}
-void SE_SurfaceRenderer::setImage(SE_RenderUnit* renderUnit)
+void SE_ColorExtractRenderer::setImage(SE_RenderUnit* renderUnit)
 {
 	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-		setImage(i, renderUnit);
-		if(mHasTexture[i])
+		SE_Renderer::setImage(i, renderUnit);
 		{
 			glUniform1i(mShaderProgram->getTextureUniformLoc(i), i);
 		}
 	}
 }
-void SE_SurfaceRenderer::setColor(SE_RenderUnit* renderUnit)
+void SE_ColorExtractRenderer::setColor(SE_RenderUnit* renderUnit)
 {
+	/*
     SE_MaterialData* md = mSurface->getMaterialData();
     float color[3];
 	SE_Vector3f c = mSurface->getColor();
@@ -366,38 +382,14 @@ void SE_SurfaceRenderer::setColor(SE_RenderUnit* renderUnit)
 	    color[2] = c.z;
 	    glUniform3fv(mShaderProgram->getMarkColorUniformLoc(i), 1, color);
 	}
+	*/
 }
-void SE_SurfaceRenderer::setVertex(SE_RenderUnit* renderUnit)
-{
-	if(mPrimitiveType == TRIANGLES)
-    {
-        mSurface->getFaceVertex(mVertex, mVertexNum);
-    }
-    else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
-    {
-        mSurface->getVertex(mVertex, mVertexNum);
-        mSurface->getVertexIndex(mIndexArray, mIndexNum);
-    }
-    glVertexAttribPointer(mShaderProgram->getPositionAttributeLoc(), 3, GL_FLOAT, GL_FALSE, 0, mVertex);
-    glEnableVertexAttribArray(mShaderProgram->getPositionAttributeLoc());
-}
-void SE_SurfaceRenderer::setTexVertex(int index, SE_RenderUnit* renderUnit)
-{
-    renderUnit->getTexVertex(index, mTexVertex, mTexVertexNum);
-	if(mTexVertexNum > 0)
-	{
-		mHasTexCoord[index] = 1;
-	}
-	else
-	{
-        mHasTexCoord[index] = 0;
-	}
-}
-void SE_SurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
+
+void SE_ColorExtractRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 {
 	for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
 	{
-		setTexVertex(i, renderUnit);
+		SE_Renderer::setTexVertex(i, renderUnit);
 		if(mHasTexCoord[i])
 		{
 		    glVertexAttribPointer(mShaderProgram->getTextureCoordAttributeLoc(i), 2, GL_FLOAT, 0, 0, mTexVertex);
@@ -410,18 +402,17 @@ void SE_SurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 	    glUniform1i(mShaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
 	}
 }
-void SE_SurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
+void SE_ColorExtractRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 {
 	int texMode, colorOp;
 	mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
-	glUniform1i(mShaderProgram->getTexCombineModeUniformLoc(), texMode);
 	glUniform1i(mShaderProgram->getColorOpModeUniformLoc(), colorOp);
 }
 ////////////////////////////
 IMPLEMENT_OBJECT(SE_SimpleSurfaceRenderer)
 void SE_SimpleSurfaceRenderer::setImage(SE_RenderUnit* renderUnit)
 {
-	SE_SurfaceRenderer::setImage(0, renderUnit);
+	SE_Renderer::setImage(0, renderUnit);
 	if(mHasTexture[0])
 	{
 		glUniform1i(mShaderProgram->getTextureUniformLoc(), 0);
@@ -460,7 +451,7 @@ void SE_SimpleSurfaceRenderer::setColor(SE_RenderUnit* renderUnit)
 }
 void SE_SimpleSurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 {
-	SE_SurfaceRenderer::setTexVertex(0, renderUnit);
+	SE_Renderer::setTexVertex(0, renderUnit);
 	if(mHasTexCoord[0])
 	{
         glVertexAttribPointer(mShaderProgram->getTexCoordAttributeLoc(), 2, GL_FLOAT, 0, 0, mTexVertex);

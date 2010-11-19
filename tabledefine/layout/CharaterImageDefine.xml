@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>																																																	
+<ImageTable 		id= "	Ceye	" >																																													
+	<ImageItem 	name= "	Female Eye_001.png	" id= "	F001	" >																																											
+		<Image		id= "	1	" startx= "	0	" starty = "	0	" endx = "	32	" endy = "	32	" />																																			
+		<Image		id= "	2	" startx= "	32	" starty = "	0	" endx = "	64	" endy = "	32	" />																																			
+		<Image		id= "	3	" startx= "	64	" starty = "	0	" endx = "	96	" endy = "	32	" />																																			
+		<Image		id= "	4	" startx= "	96	" starty = "	0	" endx = "	128	" endy = "	32	" />																																			
+		<Image		id= "	5	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" />																																			
+		<Image		id= "	6	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" />																																			
+		<Image		id= "	7	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" />																																			
+		<Image		id= "	8	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" />																																			
+		<Image		id= "	9	" startx= "	0	" starty = "	32	" endx = "	32	" endy = "	64	" />																																			
+		<Image		id= "	10	" startx= "	32	" starty = "	32	" endx = "	64	" endy = "	64	" />																																			
+		<Image		id= "	11	" startx= "	64	" starty = "	32	" endx = "	96	" endy = "	64	" />																																			
+		<Image		id= "	12	" startx= "	96	" starty = "	32	" endx = "	128	" endy = "	64	" />																																			
+		<Image		id= "	13	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" />																																			
+		<Image		id= "	14	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" />																																			
+		<Image		id= "	15	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" />																																			
+		<Image		id= "	16	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" />																																			
+		<Image		id= "	17	" startx= "	0	" starty = "	64	" endx = "	32	" endy = "	96	" />																																			
+		<Image		id= "	18	" startx= "	32	" starty = "	64	" endx = "	64	" endy = "	96	" />																																			
+		<Image		id= "	19	" startx= "	64	" starty = "	64	" endx = "	96	" endy = "	96	" />																																			
+		<Image		id= "	20	" startx= "	96	" starty = "	64	" endx = "	128	" endy = "	96	" />																																			
+		<Image		id= "	21	" startx= "	128	" starty = "	64	" endx = "	160	" endy = "	96	" />																																			
+		<Image		id= "	22	" startx= "	160	" starty = "	64	" endx = "	192	" endy = "	96	" />																																			
+		<Image		id= "	23	" startx= "	192	" starty = "	64	" endx = "	224	" endy = "	96	" />																																			
+		<Image		id= "	24	" startx= "	224	" starty = "	64	" endx = "	256	" endy = "	96	" />																																			
+		<Image		id= "	25	" startx= "	0	" starty = "	96	" endx = "	32	" endy = "	128	" />																																			
+		<Image		id= "	26	" startx= "	32	" starty = "	96	" endx = "	64	" endy = "	128	" />																																			
+		<Image		id= "	27	" startx= "	64	" starty = "	96	" endx = "	96	" endy = "	128	" />																																			
+		<Image		id= "	28	" startx= "	96	" starty = "	96	" endx = "	128	" endy = "	128	" />																																			
+		<Image		id= "	29	" startx= "	128	" starty = "	96	" endx = "	160	" endy = "	128	" />																																			
+		<Image		id= "	30	" startx= "	160	" starty = "	96	" endx = "	192	" endy = "	128	" />																																			
+		<Image		id= "	31	" startx= "	192	" starty = "	96	" endx = "	224	" endy = "	128	" />																																			
+		<Image		id= "	32	" startx= "	224	" starty = "	96	" endx = "	256	" endy = "	128	" />																																			
+		<Image		id= "	33	" startx= "	0	" starty = "	128	" endx = "	32	" endy = "	160	" />																																			
+		<Image		id= "	34	" startx= "	32	" starty = "	128	" endx = "	64	" endy = "	160	" />																																			
+		<Image		id= "	35	" startx= "	64	" starty = "	128	" endx = "	96	" endy = "	160	" />																																			
+		<Image		id= "	36	" startx= "	96	" starty = "	128	" endx = "	128	" endy = "	160	" />																																			
+		<Image		id= "	37	" startx= "	128	" starty = "	128	" endx = "	160	" endy = "	160	" />																																			
+		<Image		id= "	38	" startx= "	160	" starty = "	128	" endx = "	192	" endy = "	160	" />																																			
+		<Image		id= "	39	" startx= "	192	" starty = "	128	" endx = "	224	" endy = "	160	" />																																			
+		<Image		id= "	40	" startx= "	224	" starty = "	128	" endx = "	256	" endy = "	160	" />																																			
+		<Image		id= "	41	" startx= "	0	" starty = "	160	" endx = "	32	" endy = "	192	" />																																			
+		<Image		id= "	42	" startx= "	32	" starty = "	160	" endx = "	64	" endy = "	192	" />																																			
+		<Image		id= "	43	" startx= "	64	" starty = "	160	" endx = "	96	" endy = "	192	" />																																			
+		<Image		id= "	44	" startx= "	96	" starty = "	160	" endx = "	128	" endy = "	192	" />																																			
+		<Image		id= "	45	" startx= "	128	" starty = "	160	" endx = "	160	" endy = "	192	" />																																			
+		<Image		id= "	46	" startx= "	160	" starty = "	160	" endx = "	192	" endy = "	192	" />																																			
+		<Image		id= "	47	" startx= "	192	" starty = "	160	" endx = "	224	" endy = "	192	" />																																			
+		<Image		id= "	48	" startx= "	224	" starty = "	160	" endx = "	256	" endy = "	192	" />																																			
+		<Image		id= "	49	" startx= "	0	" starty = "	192	" endx = "	32	" endy = "	224	" />																																			
+		<Image		id= "	50	" startx= "	32	" starty = "	192	" endx = "	64	" endy = "	224	" />																																			
+		<Image		id= "	51	" startx= "	64	" starty = "	192	" endx = "	96	" endy = "	224	" />																																			
+		<Image		id= "	52	" startx= "	96	" starty = "	192	" endx = "	128	" endy = "	224	" />																																			
+		<Image		id= "	53	" startx= "	128	" starty = "	192	" endx = "	160	" endy = "	224	" />																																			
+		<Image		id= "	54	" startx= "	160	" starty = "	192	" endx = "	192	" endy = "	224	" />																																			
+		<Image		id= "	55	" startx= "	192	" starty = "	192	" endx = "	224	" endy = "	224	" />																																			
+		<Image		id= "	56	" startx= "	224	" starty = "	192	" endx = "	256	" endy = "	224	" />																																			
+		<Image		id= "	57	" startx= "	0	" starty = "	224	" endx = "	32	" endy = "	256	" />																																			
+		<Image		id= "	58	" startx= "	32	" starty = "	224	" endx = "	64	" endy = "	256	" />																																			
+		<Image		id= "	59	" startx= "	64	" starty = "	224	" endx = "	96	" endy = "	256	" />																																			
+		<Image		id= "	60	" startx= "	96	" starty = "	224	" endx = "	128	" endy = "	256	" />																																			
+		<Image		id= "	61	" startx= "	128	" starty = "	224	" endx = "	160	" endy = "	256	" />																																			
+		<Image		id= "	62	" startx= "	160	" starty = "	224	" endx = "	192	" endy = "	256	" />																																			
+		<Image		id= "	63	" startx= "	192	" starty = "	224	" endx = "	224	" endy = "	256	" />																																			
+		<Image		id= "	64	" startx= "	224	" starty = "	224	" endx = "	256	" endy = "	256	" />																																			
+	</ImageItem>																																																
+</ImageTable>																																																	
+<ImageTable 		id= "	Seye	" >																																													
+	<ImageItem 	name= "	Female EyeSpecial_001.png	" id= "	001	" >																																											
+		<Image		id= "	1	" startx= "	0	" starty = "	0	" endx = "	32	" endy = "	32	" />																																			
+		<Image		id= "	2	" startx= "	0	" starty = "	0	" endx = "	32	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	3	" startx= "	32	" starty = "	0	" endx = "	96	" endy = "	32	" />																																			
+		<Image		id= "	4	" startx= "	32	" starty = "	0	" endx = "	96	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	5	" startx= "	96	" starty = "	0	" endx = "	128	" endy = "	32	" />																																			
+		<Image		id= "	6	" startx= "	96	" starty = "	0	" endx = "	128	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	7	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" />																																			
+		<Image		id= "	8	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	9	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" />																																			
+		<Image		id= "	10	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	11	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" />																																			
+		<Image		id= "	12	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	13	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" />																																			
+		<Image		id= "	14	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" mirror= "	2	" />																																	
+		<Image		id= "	15	" startx= "	0	" starty = "	32	" endx = "	32	" endy = "	64	" />																																			
+		<Image		id= "	16	" startx= "	0	" starty = "	32	" endx = "	32	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	17	" startx= "	32	" starty = "	32	" endx = "	64	" endy = "	64	" />																																			
+		<Image		id= "	18	" startx= "	32	" starty = "	32	" endx = "	64	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	19	" startx= "	64	" starty = "	32	" endx = "	96	" endy = "	64	" />																																			
+		<Image		id= "	20	" startx= "	64	" starty = "	32	" endx = "	96	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	21	" startx= "	96	" starty = "	32	" endx = "	128	" endy = "	64	" />																																			
+		<Image		id= "	22	" startx= "	96	" starty = "	32	" endx = "	128	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	23	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" />																																			
+		<Image		id= "	24	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	25	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" />																																			
+		<Image		id= "	26	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	27	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" />																																			
+		<Image		id= "	28	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" mirror= "	2	" />																																	
+		<Image		id= "	29	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" />																																			
+		<Image		id= "	30	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" mirror= "	2	" />																																	
+	</ImageItem>																																																
+																																																	
+</ImageTable>																																																	
+<ImageTable 		id= "	Cmouth	" >																																													
+	<ImageItem 	name= "	FemaleMouth_001.png	" id= "	F001	" >																																											
+		<Image		id= "	1	" startx= "	0	" starty = "	0	" endx = "	32	" endy = "	32	" />																																			
+		<Image		id= "	2	" startx= "	32	" starty = "	0	" endx = "	64	" endy = "	32	" />																																			
+		<Image		id= "	3	" startx= "	64	" starty = "	0	" endx = "	96	" endy = "	32	" />																																			
+		<Image		id= "	4	" startx= "	96	" starty = "	0	" endx = "	128	" endy = "	32	" />																																			
+		<Image		id= "	5	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" />																																			
+		<Image		id= "	6	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" />																																			
+		<Image		id= "	7	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" />																																			
+		<Image		id= "	8	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" />																																			
+		<Image		id= "	9	" startx= "	0	" starty = "	32	" endx = "	32	" endy = "	64	" />																																			
+		<Image		id= "	10	" startx= "	32	" starty = "	32	" endx = "	64	" endy = "	64	" />																																			
+		<Image		id= "	11	" startx= "	64	" starty = "	32	" endx = "	96	" endy = "	64	" />																																			
+		<Image		id= "	12	" startx= "	96	" starty = "	32	" endx = "	128	" endy = "	64	" />																																			
+		<Image		id= "	13	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" />																																			
+		<Image		id= "	14	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" />																																			
+		<Image		id= "	15	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" />																																			
+		<Image		id= "	16	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" />																																			
+		<Image		id= "	17	" startx= "	0	" starty = "	64	" endx = "	32	" endy = "	96	" />																																			
+		<Image		id= "	18	" startx= "	32	" starty = "	64	" endx = "	64	" endy = "	96	" />																																			
+		<Image		id= "	19	" startx= "	64	" starty = "	64	" endx = "	96	" endy = "	96	" />																																			
+		<Image		id= "	20	" startx= "	96	" starty = "	64	" endx = "	128	" endy = "	96	" />																																			
+		<Image		id= "	21	" startx= "	128	" starty = "	64	" endx = "	160	" endy = "	96	" />																																			
+		<Image		id= "	22	" startx= "	160	" starty = "	64	" endx = "	192	" endy = "	96	" />																																			
+		<Image		id= "	23	" startx= "	192	" starty = "	64	" endx = "	224	" endy = "	96	" />																																			
+		<Image		id= "	24	" startx= "	224	" starty = "	64	" endx = "	256	" endy = "	96	" />																																			
+		<Image		id= "	25	" startx= "	0	" starty = "	96	" endx = "	32	" endy = "	128	" />																																			
+		<Image		id= "	26	" startx= "	32	" starty = "	96	" endx = "	64	" endy = "	128	" />																																			
+		<Image		id= "	27	" startx= "	64	" starty = "	96	" endx = "	96	" endy = "	128	" />																																			
+		<Image		id= "	28	" startx= "	96	" starty = "	96	" endx = "	128	" endy = "	128	" />																																			
+		<Image		id= "	29	" startx= "	128	" starty = "	96	" endx = "	160	" endy = "	128	" />																																			
+		<Image		id= "	30	" startx= "	160	" starty = "	96	" endx = "	192	" endy = "	128	" />																																			
+		<Image		id= "	31	" startx= "	192	" starty = "	96	" endx = "	224	" endy = "	128	" />																																			
+		<Image		id= "	32	" startx= "	224	" starty = "	96	" endx = "	256	" endy = "	128	" />																																			
+		<Image		id= "	33	" startx= "	0	" starty = "	128	" endx = "	32	" endy = "	160	" />																																			
+		<Image		id= "	34	" startx= "	32	" starty = "	128	" endx = "	64	" endy = "	160	" />																																			
+		<Image		id= "	35	" startx= "	64	" starty = "	128	" endx = "	96	" endy = "	160	" />																																			
+		<Image		id= "	36	" startx= "	96	" starty = "	128	" endx = "	128	" endy = "	160	" />																																			
+		<Image		id= "	37	" startx= "	128	" starty = "	128	" endx = "	160	" endy = "	160	" />																																			
+		<Image		id= "	38	" startx= "	160	" starty = "	128	" endx = "	192	" endy = "	160	" />																																			
+		<Image		id= "	39	" startx= "	192	" starty = "	128	" endx = "	224	" endy = "	160	" />																																			
+		<Image		id= "	40	" startx= "	224	" starty = "	128	" endx = "	256	" endy = "	160	" />																																			
+		<Image		id= "	41	" startx= "	0	" starty = "	160	" endx = "	32	" endy = "	192	" />																																			
+		<Image		id= "	42	" startx= "	32	" starty = "	160	" endx = "	64	" endy = "	192	" />																																			
+		<Image		id= "	43	" startx= "	64	" starty = "	160	" endx = "	96	" endy = "	192	" />																																			
+		<Image		id= "	44	" startx= "	96	" starty = "	160	" endx = "	128	" endy = "	192	" />																																			
+		<Image		id= "	45	" startx= "	128	" starty = "	160	" endx = "	160	" endy = "	192	" />																																			
+		<Image		id= "	46	" startx= "	160	" starty = "	160	" endx = "	192	" endy = "	192	" />																																			
+		<Image		id= "	47	" startx= "	192	" starty = "	160	" endx = "	224	" endy = "	192	" />																																			
+		<Image		id= "	48	" startx= "	224	" starty = "	160	" endx = "	256	" endy = "	192	" />																																			
+		<Image		id= "	49	" startx= "	0	" starty = "	192	" endx = "	32	" endy = "	224	" />																																			
+		<Image		id= "	50	" startx= "	32	" starty = "	192	" endx = "	64	" endy = "	224	" />																																			
+		<Image		id= "	51	" startx= "	64	" starty = "	192	" endx = "	96	" endy = "	224	" />																																			
+		<Image		id= "	52	" startx= "	96	" starty = "	192	" endx = "	128	" endy = "	224	" />																																			
+		<Image		id= "	53	" startx= "	128	" starty = "	192	" endx = "	160	" endy = "	224	" />																																			
+		<Image		id= "	54	" startx= "	160	" starty = "	192	" endx = "	192	" endy = "	224	" />																																			
+		<Image		id= "	55	" startx= "	192	" starty = "	192	" endx = "	224	" endy = "	224	" />																																			
+		<Image		id= "	56	" startx= "	224	" starty = "	192	" endx = "	256	" endy = "	224	" />																																			
+		<Image		id= "	57	" startx= "	0	" starty = "	224	" endx = "	32	" endy = "	256	" />																																			
+		<Image		id= "	58	" startx= "	32	" starty = "	224	" endx = "	64	" endy = "	256	" />																																			
+		<Image		id= "	59	" startx= "	64	" starty = "	224	" endx = "	96	" endy = "	256	" />																																			
+		<Image		id= "	60	" startx= "	96	" starty = "	224	" endx = "	128	" endy = "	256	" />																																			
+		<Image		id= "	61	" startx= "	128	" starty = "	224	" endx = "	160	" endy = "	256	" />																																			
+		<Image		id= "	62	" startx= "	160	" starty = "	224	" endx = "	192	" endy = "	256	" />																																			
+		<Image		id= "	63	" startx= "	192	" starty = "	224	" endx = "	224	" endy = "	256	" />																																			
+		<Image		id= "	64	" startx= "	224	" starty = "	224	" endx = "	256	" endy = "	256	" />																																			
+																																																	
+</ImageTable>																																																	
+<ImageTable 		id= "	Smouth	" >																																													
+	<ImageItem 	name= "	FemaleMouthSpecial_001.png	" id= "	F001	" >																																											
+		<Image		id= "	1	" startx= "	0	" starty = "	0	" endx = "	64	" endy = "	32	" />																																			
+		<Image		id= "	2	" startx= "	64	" starty = "	0	" endx = "	128	" endy = "	32	" />																																			
+		<Image		id= "	3	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" />																																			
+		<Image		id= "	4	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" />																																			
+		<Image		id= "	5	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" />																																			
+		<Image		id= "	6	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" />																																			
+		<Image		id= "	7	" startx= "	0	" starty = "	32	" endx = "	64	" endy = "	96	" />																																			
+		<Image		id= "	8	" startx= "	64	" starty = "	32	" endx = "	128	" endy = "	64	" />																																			
+		<Image		id= "	9	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" />																																			
+		<Image		id= "	10	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" />																																			
+		<Image		id= "	11	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" />																																			
+		<Image		id= "	12	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" />																																			
+		<Image		id= "	13	" startx= "	64	" starty = "	64	" endx = "	128	" endy = "	96	" />																																			
+		<Image		id= "	14	" startx= "	128	" starty = "	64	" endx = "	192	" endy = "	96	" />																																			
+																																																	
+																																																	
+</ImageTable>																																																	
+<ImageTable 		id= "	Cbrow	" >																																													
+	<ImageItem 	name= "	FemaleBrow_001.png	" id= "	B001	" >																																											
+		<Image		id= "	1	" startx= "	0	" starty = "	0	" endx = "	32	" endy = "	32	" />																																			
+		<Image		id= "	2	" startx= "	32	" starty = "	0	" endx = "	64	" endy = "	32	" />																																			
+		<Image		id= "	3	" startx= "	64	" starty = "	0	" endx = "	96	" endy = "	32	" />																																			
+		<Image		id= "	4	" startx= "	96	" starty = "	0	" endx = "	128	" endy = "	32	" />																																			
+		<Image		id= "	5	" startx= "	128	" starty = "	0	" endx = "	160	" endy = "	32	" />																																			
+		<Image		id= "	6	" startx= "	160	" starty = "	0	" endx = "	192	" endy = "	32	" />																																			
+		<Image		id= "	7	" startx= "	192	" starty = "	0	" endx = "	224	" endy = "	32	" />																																			
+		<Image		id= "	8	" startx= "	224	" starty = "	0	" endx = "	256	" endy = "	32	" />																																			
+		<Image		id= "	9	" startx= "	0	" starty = "	32	" endx = "	32	" endy = "	64	" />																																			
+		<Image		id= "	10	" startx= "	32	" starty = "	32	" endx = "	64	" endy = "	64	" />																																			
+		<Image		id= "	11	" startx= "	64	" starty = "	32	" endx = "	96	" endy = "	64	" />																																			
+		<Image		id= "	12	" startx= "	96	" starty = "	32	" endx = "	128	" endy = "	64	" />																																			
+		<Image		id= "	13	" startx= "	128	" starty = "	32	" endx = "	160	" endy = "	64	" />																																			
+		<Image		id= "	14	" startx= "	160	" starty = "	32	" endx = "	192	" endy = "	64	" />																																			
+		<Image		id= "	15	" startx= "	192	" starty = "	32	" endx = "	224	" endy = "	64	" />																																			
+		<Image		id= "	16	" startx= "	224	" starty = "	32	" endx = "	256	" endy = "	64	" />																																			
+		<Image		id= "	17	" startx= "	0	" starty = "	64	" endx = "	32	" endy = "	96	" />																																			
+		<Image		id= "	18	" startx= "	32	" starty = "	64	" endx = "	64	" endy = "	96	" />																																			
+		<Image		id= "	19	" startx= "	64	" starty = "	64	" endx = "	96	" endy = "	96	" />																																			
+		<Image		id= "	20	" startx= "	96	" starty = "	64	" endx = "	128	" endy = "	96	" />																																			
+		<Image		id= "	21	" startx= "	128	" starty = "	64	" endx = "	160	" endy = "	96	" />																																			
+		<Image		id= "	22	" startx= "	160	" starty = "	64	" endx = "	192	" endy = "	96	" />																																			
+		<Image		id= "	23	" startx= "	192	" starty = "	64	" endx = "	224	" endy = "	96	" />																																			
+		<Image		id= "	24	" startx= "	224	" starty = "	64	" endx = "	256	" endy = "	96	" />																																			
+		<Image		id= "	25	" startx= "	0	" starty = "	96	" endx = "	32	" endy = "	128	" />																																			
+		<Image		id= "	26	" startx= "	32	" starty = "	96	" endx = "	64	" endy = "	128	" />																																			
+		<Image		id= "	27	" startx= "	64	" starty = "	96	" endx = "	96	" endy = "	128	" />																																			
+		<Image		id= "	28	" startx= "	96	" starty = "	96	" endx = "	128	" endy = "	128	" />																																			
+		<Image		id= "	29	" startx= "	128	" starty = "	96	" endx = "	160	" endy = "	128	" />																																			
+		<Image		id= "	30	" startx= "	160	" starty = "	96	" endx = "	192	" endy = "	128	" />																																			
+		<Image		id= "	31	" startx= "	192	" starty = "	96	" endx = "	224	" endy = "	128	" />																																			
+		<Image		id= "	32	" startx= "	224	" starty = "	96	" endx = "	256	" endy = "	128	" />																																			
+		<Image		id= "	33	" startx= "	0	" starty = "	128	" endx = "	32	" endy = "	160	" />																																			
+		<Image		id= "	34	" startx= "	32	" starty = "	128	" endx = "	64	" endy = "	160	" />																																			
+		<Image		id= "	35	" startx= "	64	" starty = "	128	" endx = "	96	" endy = "	160	" />																																			
+		<Image		id= "	36	" startx= "	96	" starty = "	128	" endx = "	128	" endy = "	160	" />																																			
+		<Image		id= "	37	" startx= "	128	" starty = "	128	" endx = "	160	" endy = "	160	" />																																			
+		<Image		id= "	38	" startx= "	160	" starty = "	128	" endx = "	192	" endy = "	160	" />																																			
+		<Image		id= "	39	" startx= "	192	" starty = "	128	" endx = "	224	" endy = "	160	" />																																			
+		<Image		id= "	40	" startx= "	224	" starty = "	128	" endx = "	256	" endy = "	160	" />																																			
+		<Image		id= "	41	" startx= "	0	" starty = "	160	" endx = "	32	" endy = "	192	" />																																			
+		<Image		id= "	42	" startx= "	32	" starty = "	160	" endx = "	64	" endy = "	192	" />																																			
+		<Image		id= "	43	" startx= "	64	" starty = "	160	" endx = "	96	" endy = "	192	" />																																			
+		<Image		id= "	44	" startx= "	96	" starty = "	160	" endx = "	128	" endy = "	192	" />																																			
+		<Image		id= "	45	" startx= "	128	" starty = "	160	" endx = "	160	" endy = "	192	" />																																			
+		<Image		id= "	46	" startx= "	160	" starty = "	160	" endx = "	192	" endy = "	192	" />																																			
+		<Image		id= "	47	" startx= "	192	" starty = "	160	" endx = "	224	" endy = "	192	" />																																			
+		<Image		id= "	48	" startx= "	224	" starty = "	160	" endx = "	256	" endy = "	192	" />																																			
+		<Image		id= "	49	" startx= "	0	" starty = "	192	" endx = "	32	" endy = "	224	" />																																			
+		<Image		id= "	50	" startx= "	32	" starty = "	192	" endx = "	64	" endy = "	224	" />																																			
+		<Image		id= "	51	" startx= "	64	" starty = "	192	" endx = "	96	" endy = "	224	" />																																			
+		<Image		id= "	52	" startx= "	96	" starty = "	192	" endx = "	128	" endy = "	224	" />																																			
+		<Image		id= "	53	" startx= "	128	" starty = "	192	" endx = "	160	" endy = "	224	" />																																			
+		<Image		id= "	54	" startx= "	160	" starty = "	192	" endx = "	192	" endy = "	224	" />																																			
+		<Image		id= "	55	" startx= "	192	" starty = "	192	" endx = "	224	" endy = "	224	" />																																			
+		<Image		id= "	56	" startx= "	224	" starty = "	192	" endx = "	256	" endy = "	224	" />																																			
+		<Image		id= "	57	" startx= "	0	" starty = "	224	" endx = "	32	" endy = "	256	" />																																			
+		<Image		id= "	58	" startx= "	32	" starty = "	224	" endx = "	64	" endy = "	256	" />																																			
+		<Image		id= "	59	" startx= "	64	" starty = "	224	" endx = "	96	" endy = "	256	" />																																			
+		<Image		id= "	60	" startx= "	96	" starty = "	224	" endx = "	128	" endy = "	256	" />																																			
+		<Image		id= "	61	" startx= "	128	" starty = "	224	" endx = "	160	" endy = "	256	" />																																			
+		<Image		id= "	62	" startx= "	160	" starty = "	224	" endx = "	192	" endy = "	256	" />																																			
+		<Image		id= "	63	" startx= "	192	" starty = "	224	" endx = "	224	" endy = "	256	" />																																			
+		<Image		id= "	64	" startx= "	224	" starty = "	224	" endx = "	256	" endy = "	256	" />																																			

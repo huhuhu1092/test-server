@@ -1,0 +1,14 @@
+<Action id="t1" pivotx = "0" pivoty = "0">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <AnimationObject key="1" sequenceref="TestSeq.xml/s1" layer="1" mountpointref = "p1"/>
+</Action>
+<Action id="t2" pivotx="0" pivoty="0">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <AnimationObject key = "2" coloreffectref="TestColorEffectController/c1" layer = "1" mountpointref = "p1" >
+        <ColorEffectInput background="ImageTable1.xml/t1/lifu_c" channel = "ImageTable1.xml/t1/lifu_m">
+            <MarkR texture = "" fn = "0" alpha = "" color = "123 34 23"/>
+            <MarkG texture = "" fn = "0" alpha = "" color = "23 123 34" />
+            <MarkB texture = "" fn = "0" alpha = "" color = "12 23 123" />
+        </ColorEffectInput>
+    </AnimationObject>
+</Action>
