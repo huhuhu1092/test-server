@@ -1,6 +1,7 @@
 #include "SE_Mesh.h"
 #include "SE_GeometryData.h"
 #include "SE_TextureCoordData.h"
+#include "SE_ShaderProperty.h"
 #include <string.h>
 #include <set>
 SE_TextureUnit::SE_TextureUnit()
@@ -43,8 +44,9 @@ SE_Surface::SE_Surface()
     mIndexNum = 0; 
     mIndexInGeometryData = NULL;
     mIndexInGeometryDataNum = 0;
-    memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	memset(mColorChannelIndex, 0, sizeof(int) * 4);
+	mShaderProperty = NULL;
+    //memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
+	//memset(mColorChannelIndex, 0, sizeof(int) * 4);
 }
 SE_Surface::~SE_Surface()
 {
@@ -65,6 +67,14 @@ SE_Surface::~SE_Surface()
         delete[] mIndex;
 	if(mIndexInGeometryData)
         delete[] mIndexInGeometryData;
+	if(mShaderProperty)
+		delete mShaderProperty;
+}
+void SE_Surface::setShaderProperty(SE_ShaderProperty* sp)
+{
+	if(mShaderProperty)
+		delete mShaderProperty;
+	mShaderProperty = sp;
 }
 SE_GeometryData* SE_Surface::getGeometryData()
 {
@@ -257,18 +267,6 @@ void SE_Surface::getFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texV
     texVertex = mFaceTexVertex[texIndex];
     texVertexNum = mFaceTexVertexNum[texIndex];
 }
-/*
-void SE_Surface::getDecorateTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
-{
-	texVertex = NULL;
-	texVertexNum = 0;
-}
-void SE_Surface::getDecorateFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
-{
-	texVertex = NULL;
-	texVertexNum = 0;
-}
-*/
 void SE_Surface::getVertexIndex(int*& index, int& indexNum)
 {
     if(mIndex)

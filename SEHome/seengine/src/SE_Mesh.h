@@ -4,11 +4,11 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
-#include "SE_ShaderColorOperation.h"
 #include <string.h>
 class SE_TextureCoordData;
 class SE_GeometryData;
 class SE_MaterialData;
+class SE_ShaderProperty;
 class SE_TextureUnit
 {
 public:
@@ -108,11 +108,6 @@ public:
 private:
     SE_TextureUnit** mTexUnitArray;
 };
-class SE_SurfaceProperty
-{
-public:
-
-};
 class SE_Surface
 {
 public:
@@ -139,6 +134,12 @@ public:
     void setFacets(int* facets, int num);
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
+	void setShaderProperty(SE_ShaderProperty* sp);
+	SE_ShaderProperty* getShaderProperty()
+	{
+		return mShaderProperty;
+	}
+	/*
 	void setTextureMode(int mode)
 	{
 		mShaderColorOperation.setTextureMode(mode);
@@ -167,6 +168,7 @@ public:
 	{
 		mMarkColor[index] = c;
 	}
+	*/
 	int getSampleMin()
     {
         return mSampleMin;
@@ -234,6 +236,7 @@ public:
         mFaceVertexNum = 0;
     }
     void getVertexIndexInGeometryData(int*& outArray , int& outNum);
+	/*
 	void setTexCoordIndex(int texIndex, int indexHasTexCoord)
 	{
 		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
@@ -246,14 +249,8 @@ public:
 			return SE_TEXTURE0;
 		return mTexCoordIndex[texIndex];
 	}
-	void setColorChannelIndex(int index, int v)
-	{
-		mColorChannelIndex[index] = v;
-	}
-	int getColorChannelIndex(int index)
-	{
-		return mColorChannelIndex[index];
-	}
+
+	*/
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -283,11 +280,11 @@ private:
     int mIndexNum; 
     int* mIndexInGeometryData;
     int mIndexInGeometryDataNum;
+	SE_ShaderProperty* mShaderProperty;
 	//int mTextureMode;
-	SE_Vector3f mMarkColor[4];
-	int mColorChannelIndex[4]; // r,g, b,a
-	int mTexCoordIndex[SE_TEXUNIT_NUM];
-	SE_ShaderColorOperation mShaderColorOperation;
+	//SE_Vector3f mMarkColor[4];
+	//int mTexCoordIndex[SE_TEXUNIT_NUM];
+	//SE_ShaderColorOperation mShaderColorOperation;
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.

@@ -368,3 +368,62 @@ GLint SE_ColorExtractShaderProgram::getColorChannelIndexUniformLoc(int index)
 	}
 	return ret;
 }
+/////////////////////////////////////////////
+IMPLEMENT_OBJECT(SE_ColorEffectShaderProgram)
+SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
+{
+	m_a_tex_coord0 = -1;
+    m_u_texture_background = -1;
+    m_u_texture_channel = -1;
+    m_u_texture_texr = -1;
+    m_u_texture_texg = -1;
+    m_u_texture_texb = -1;
+    m_u_texture_texa = -1;
+    m_u_has_texr = -1;
+    m_u_has_texg = -1;
+    m_u_has_texb = -1;
+    m_u_has_texa = -1;
+    m_u_markr_alpha = -1;
+    m_u_markg_alpha = -1;
+    m_u_markb_alpha = -1;
+    m_u_marka_alpha = -1;
+    m_u_background_alpha = -1;
+    m_u_markr_fn = -1;
+    m_u_markg_fn = -1;
+    m_u_markb_fn = -1;
+    m_u_marka_fn = -1;
+    m_u_colorr = -1;
+    m_u_colorg = -1;
+    m_u_colorb = -1;
+    m_u_colora = -1;
+}
+void SE_ColorEffectShaderProgram::link()
+{
+#ifdef GLES_20
+	SE_ShaderProgram::link();
+	m_a_tex_coord0 = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
+    m_u_texture_background = glGetUniformLocation(mShaderProgramObject, "u_texture_background");
+    m_u_texture_channel = glGetUniformLocation(mShaderProgramObject, "u_texture_channel");
+    m_u_texture_texr = glGetUniformLocation(mShaderProgramObject, "u_texture_texr");
+    m_u_texture_texg = glGetUniformLocation(mShaderProgramObject, "u_texture_texg");
+    m_u_texture_texb = glGetUniformLocation(mShaderProgramObject, "u_texture_texb");
+    m_u_texture_texa = glGetUniformLocation(mShaderProgramObject, "u_texture_texa");
+    m_u_has_texr = glGetUniformLocation(mShaderProgramObject, "u_has_texr");
+    m_u_has_texg = glGetUniformLocation(mShaderProgramObject, "u_has_texg");
+    m_u_has_texb = glGetUniformLocation(mShaderProgramObject, "u_has_texb");
+    m_u_has_texa = glGetUniformLocation(mShaderProgramObject, "u_has_texa");
+    m_u_markr_alpha = glGetUniformLocation(mShaderProgramObject, "u_markr_alpha");
+    m_u_markg_alpha = glGetUniformLocation(mShaderProgramObject, "u_markg_alpha");
+    m_u_markb_alpha = glGetUniformLocation(mShaderProgramObject, "u_markb_alpha");
+    m_u_marka_alpha = glGetUniformLocation(mShaderProgramObject, "u_marka_alpha");
+    m_u_background_alpha = glGetUniformLocation(mShaderProgramObject, "u_background_alpha");
+    m_u_markr_fn = glGetUniformLocation(mShaderProgramObject, "u_markr_fn");
+    m_u_markg_fn = glGetUniformLocation(mShaderProgramObject, "u_markg_fn");
+    m_u_markb_fn = glGetUniformLocation(mShaderProgramObject, "u_markb_fn");
+    m_u_marka_fn = glGetUniformLocation(mShaderProgramObject, "u_marka_fn");
+    m_u_colorr = glGetUniformLocation(mShaderProgramObject, "u_colorr");
+    m_u_colorg = glGetUniformLocation(mShaderProgramObject, "u_colorg");
+    m_u_colorb = glGetUniformLocation(mShaderProgramObject, "u_colorb");
+    m_u_colora = glGetUniformLocation(mShaderProgramObject, "u_colora");
+#endif
+}

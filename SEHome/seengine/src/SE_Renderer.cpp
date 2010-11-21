@@ -5,6 +5,7 @@
 #include "SE_ResourceManager.h"
 #include "SE_Mesh.h"
 #include "SE_Geometry3D.h"
+#include "SE_ShaderProperty.h"
 #include "SE_Log.h"
 #ifdef GLES_20
     #include <GLES2/gl2.h>
@@ -399,13 +400,13 @@ void SE_ColorExtractRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 		{
 		    glDisableVertexAttribArray(mShaderProgram->getTextureCoordAttributeLoc(i));
 		}
-	    glUniform1i(mShaderProgram->getTexCoordIndexUniformLoc(i), mSurface->getTexCoordIndex(i));
 	}
 }
 void SE_ColorExtractRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 {
-	int texMode, colorOp;
-	mSurface->getRealTexModeColorOp(mHasTexture, SE_TEXUNIT_NUM, texMode, colorOp);
+	int colorOp;
+	SE_ColorExtractShaderProperty* sp = (SE_ColorExtractShaderProperty*)mSurface->getShaderProperty();
+	colorOp = sp->getColorOperationMode();
 	glUniform1i(mShaderProgram->getColorOpModeUniformLoc(), colorOp);
 }
 ////////////////////////////

@@ -8,6 +8,7 @@
 #include "SE_Primitive.h"
 #include "SE_Log.h"
 #include "SE_Common.h"
+#include "SE_ShaderProperty.h"
 static const int DEFAULT_COLOR = 0;
 static const int REPLACE_R = 1;
 static const int REPLACE_G = 2;
@@ -129,6 +130,7 @@ void SE_Image::setSurface(SE_Surface* surface)
 	                 REPLACE_GB, REPLACE_GBA, REPLACE_R, REPLACE_RA, REPLACE_RB, REPLACE_RBA,
 	                 REPLACE_RG, REPLACE_RGA, REPLACE_RGB, REPLACE_RGBA, NO_REPLACE};
 	int index = 0;
+	SE_ColorExtractShaderProperty* sp = new SE_ColorExtractShaderProperty;
 	for(int i = 1 ; i < 5 ; i++)
 	{
         index |= (mImageUnits[i].valid << (4 - i));
@@ -136,7 +138,7 @@ void SE_Image::setSurface(SE_Surface* surface)
 		{
 			std::string ext = mImageUnits[i].imageUnit->ext.getStr();
 			int c = getColorIndex(ext);
-			surface->setColorChannelIndex(i - 1, c);
+			sp->setColorChannelIndex(i - 1, c);
 		}
 	}
 	int op = pattern[index];
@@ -144,7 +146,8 @@ void SE_Image::setSurface(SE_Surface* surface)
 	{
 		op = NO_REPLACE;
 	}
-	surface->setColorOperation(op);
+	sp->setColorOperationMode(op);
+	surface->setShaderProperty(sp);
 }
 int SE_Image::getValidImageNum()
 {
@@ -380,7 +383,7 @@ SE_ImageUnit SE_Image::createImageDataFullPath(const char* inputstr)
 	return resourceManager->getImageUnit(inputstr);
 }
 ////////////////////////////
-SE_ComposeImage::SE_ComposeImage()
+SE_ColorEffectImage::SE_ColorEffectImage()
 {
 	mBackground = NULL;
 	mChannel = NULL;
@@ -394,7 +397,7 @@ SE_ComposeImage::SE_ComposeImage()
 		mColor[i].z = -1;
 	}
 }
-SE_ComposeImage::~SE_ComposeImage()
+SE_ColorEffectImage::~SE_ColorEffectImage()
 {
 	if(mBackground)
 		delete mBackground;
@@ -406,7 +409,7 @@ SE_ComposeImage::~SE_ComposeImage()
 			delete mTexture[i];
 	}
 }
-void SE_ComposeImage::setBackground(const SE_StringID& background)
+void SE_ColorEffectImage::setBackground(const SE_StringID& background)
 {
 	if(mBackground)
 	{
@@ -415,7 +418,7 @@ void SE_ComposeImage::setBackground(const SE_StringID& background)
 	}
 	mBackground = new SE_Image(background.getStr());
 }
-void SE_ComposeImage::setChannel(const SE_StringID& channel)
+void SE_ColorEffectImage::setChannel(const SE_StringID& channel)
 {
 	if(mChannel)
 	{
@@ -424,7 +427,7 @@ void SE_ComposeImage::setChannel(const SE_StringID& channel)
 	}
 	mChannel = new SE_Image(channel.getStr());
 }
-void SE_ComposeImage::setTexture(int index, const SE_StringID& texture)
+void SE_ColorEffectImage::setTexture(int index, const SE_StringID& texture)
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(texture.getStr(), "/");
 	if(strList.size() == 2)// this is an action
@@ -435,7 +438,7 @@ void SE_ComposeImage::setTexture(int index, const SE_StringID& texture)
 		mTexture[index] = new SE_Image(texture.getStr());
 	}
 }
-int SE_ComposeImage::getValidImageNum()
+int SE_ColorEffectImage::getValidImageNum()
 {
     int count = 0;
 	if(mBackground)
@@ -455,7 +458,7 @@ int SE_ComposeImage::getValidImageNum()
 	}
 	return count;
 }
-void SE_ComposeImage::setImageData(SE_RectPrimitive* primivite)
+void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primivite)
 {
     if(getValidImageNum() >= SE_TEXUNIT_NUM)
 	{
@@ -466,5 +469,7 @@ void SE_ComposeImage::setImageData(SE_RectPrimitive* primivite)
 	SE_Image* imageArray[] = {mBackground, mChannel, mTexture[0], mTexture[1], mTexture[2], mTexture[3]};
 
 }
-void SE_ComposeImage::setSurface(SE_Surface* surface)
-{}
+void SE_ColorEffectImage::setSurface(SE_Surface* surface)
+{
+
+}

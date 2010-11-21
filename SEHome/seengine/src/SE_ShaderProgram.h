@@ -130,15 +130,110 @@ public:
     // 0 : background
     // 1 : channel
     // 2 - 5 : texr, texg, texb, texa
-    GLint getTextureUniformLoc(int index);
+    GLint getTextureUniformLoc(int index)
+	{
+		GLint ret = -1;
+		switch(index)
+		{
+		case 0:
+			ret = m_u_texture_background;
+			break;
+		case 1:
+			ret = m_u_texture_channel;
+			break;
+		case 2:
+			ret = m_u_texture_texr;
+			break;
+		case 3:
+			ret = m_u_texture_texg;
+			break;
+		case 4:
+			ret = m_u_texture_texb;
+			break;
+		case 5:
+			ret = m_u_texture_texa;
+			break;
+		default:
+			break;
+		}
+		return ret;
+	}
     // 0, 1, 2, 3 | r g b a
-    GLint getHasTextureUniformLoc(int index);
+    GLint getHasTextureUniformLoc(int index)
+	{
+		GLint ret = -1;
+		switch(index)
+		{
+		case 0:
+			ret = m_u_has_texr;
+			break;
+		case 1:
+			ret = m_u_has_texg;
+			break;
+		case 2:
+			ret = m_u_has_texb;
+			break;
+		case 3:
+			ret = m_u_has_texa;
+			break;
+		default:
+			break;
+		}
+		return ret;
+	}
     // 0, 1, 2, 3, 4 | markr markg markb marka backgroudnalpha
-    GLint getMarkAlphaUniformLoc(int index);
+    GLint getMarkAlphaUniformLoc(int index)
+	{
+		switch(index)
+		{
+		case 0:
+			return m_u_markr_alpha;
+		case 1:
+			return m_u_markg_alpha;
+		case 2:
+			return m_u_markb_alpha;
+		case 3:
+			return m_u_marka_alpha;
+		case 4:
+			return m_u_background_alpha;
+		default:
+			return -1;
+		}
+	}
     // 0, 1, 2, 3 | r g b a
-    GLint getMarkFunctionUniformLoc(int index);
+    GLint getMarkFunctionUniformLoc(int index)
+	{
+		switch(index)
+		{
+		case 0:
+			return m_u_markr_fn;
+		case 1:
+			return m_u_markg_fn;
+		case 2:
+			return m_u_markb_fn;
+		case 3:
+			return m_u_marka_fn;
+		default:
+			return -1;
+		}
+	}
     // 0, 1, 2, 3 | r g b a
-    GLint getMarkColorUniformLoc(int index);
+    GLint getMarkColorUniformLoc(int index)
+	{
+		switch(index)
+		{
+		case 0:
+			return m_u_colorr;
+		case 1:
+			return m_u_colorg;
+		case 2:
+			return m_u_colorb;
+		case 3:
+			return m_u_colora;
+		default:
+			return -1;
+		}
+	}
 protected:
     virtual void link();
 private:

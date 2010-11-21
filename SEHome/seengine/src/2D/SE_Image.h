@@ -11,6 +11,7 @@ class SE_Image
 public:
 	enum {IMG_SIZE = 5};
 	SE_Image(const char* url);
+	virtual ~SE_Image() {}
 	int getWidth();
 	int getHeight();
 	int getPivotX()
@@ -43,7 +44,7 @@ public:
 	}
 	int getValidImageNum();
 	void setImageData(SE_RectPrimitive* primitive);
-	void setSurface(SE_Surface* surface);
+	virtual void setSurface(SE_Surface* surface);
 private:
 	void parse();
 	SE_ImageUnit createImageDataFullPath(const char* inputstr);
@@ -72,12 +73,12 @@ private:
 	_ImageUnitData mImageUnits[IMG_SIZE];
 
 };
-class SE_ComposeImage
+class SE_ColorEffectImage
 {
 public:
     enum {TEX_SIZE = 4};
-    SE_ComposeImage();
-    ~SE_ComposeImage();
+    SE_ColorEffectImage();
+    ~SE_ColorEffectImage();
     void setBackground(const SE_StringID& background);
     void setChannel(const SE_StringID& channel);
     void setTexture(int index, const SE_StringID& texture);
