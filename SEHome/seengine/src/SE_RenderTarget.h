@@ -4,16 +4,16 @@
 class SE_Camera;
 class SE_RenderTarget
 {
-public;
+public:
     enum RENDER_TARGET_TYPE {TEXTURE, RENDERBUFFER, FRAMEBUFFER};
     enum RENDERABLE_TYPE {RENDERABLE, NO_RENDERABLE};
     SE_RenderTarget();
-    virtual ~SE_RenderTarget() {}
+    virtual ~SE_RenderTarget();
     SE_RenderTargetID getRenderTarget()
     {
         return mID;
     }
-    void setRenderTarget(const SE_RenderTarget& id)
+    void setRenderTarget(const SE_RenderTargetID& id)
     {
         mID = id;
     }
@@ -31,7 +31,7 @@ public;
     }
     int getHeight()
     {
-        return getHeight;
+        return mHeight;
     }
     /*
     void setRenderTargetType(RENDER_TARGET_TYPE t)
@@ -72,8 +72,9 @@ private:
 };
 class SE_FrameBufferTarget : public SE_RenderTarget
 {
-public;
+public:
     SE_FrameBufferTarget();
+	~SE_FrameBufferTarget();
     void create();
     bool prepare();
 private:
@@ -83,6 +84,7 @@ class SE_TextureTarget : public SE_RenderTarget
 {
 public:
     SE_TextureTarget();
+	~SE_TextureTarget();
     void create();
     bool prepare();
 };
@@ -90,6 +92,7 @@ class SE_RenderBufferTarget : public SE_RenderTarget
 {
 public:
     SE_RenderBufferTarget();
+	~SE_RenderBufferTarget();
     void create();
     bool prepare();
 };

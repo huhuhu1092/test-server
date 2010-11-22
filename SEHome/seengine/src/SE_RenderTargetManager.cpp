@@ -1,13 +1,14 @@
 #include "SE_RenderTargetManager.h"
 #include "SE_RenderTarget.h"
-SE_RenderTargetID SE_RenderTargetManager::SE_FRAMEBUFFER_ID = 0;
+#include "SE_Log.h"
+SE_RenderTargetID SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET = 0;
 SE_RenderTargetID SE_RenderTargetManager::SE_INVALID_RENDERTARGET = -1;
 SE_RenderTargetManager::SE_RenderTargetManager()
 {
     mRenderTargets.resize(RENDERTARGET_SIZE, NULL);
     mCurrentIndex = 0;
     SE_FrameBufferTarget* r = new SE_FrameBufferTarget;
-    mRenderTarget[mCurrentIndex] = r;
+    mRenderTargets[mCurrentIndex] = r;
     mCurrentIndex++;
 }
 SE_RenderTargetManager::~SE_RenderTargetManager()

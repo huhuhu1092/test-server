@@ -36,10 +36,26 @@ private:
 	{
         RenderUnitList* mRenderQueue[RQ_NUM];
         SE_RenderTargetID mRenderTargetID;
+		_RenderTargetUnit()
+		{
+			for(int i = 0 ; i < RQ_NUM ; i++)
+            {
+                mRenderQueue[i] = new RenderUnitList;
+            }
+			mRenderTargetID = 0;
+		}
 	};
 	std::list<_RenderTargetUnit*> mRenderTargetList;
 private:
 	_RenderTargetUnit* findTarget(const SE_RenderTargetID& id);
+	friend bool CompareRenderTarget(_RenderTargetUnit* first, _RenderTargetUnit* second)
+	{
+		if(first->mRenderTargetID < second->mRenderTargetID)
+		    return true;
+	    else
+		    return false;
+	}
+	void clear();
 private:
     SE_Matrix4f mWorldToViewMatrix;
     SE_Matrix4f mPerspectiveMatrix;

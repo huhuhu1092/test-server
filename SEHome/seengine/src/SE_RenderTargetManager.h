@@ -6,7 +6,7 @@ class SE_RenderTarget;
 class SE_RenderTargetManager
 {
 public:
-    static SE_RenderTargetID SE_FRAMEBUFFER_ID;
+    static SE_RenderTargetID SE_FRAMEBUFFER_TARGET;
     static SE_RenderTargetID SE_INVALID_RENDERTARGET;
     enum {RENDERTARGET_SIZE = 512};
     SE_RenderTargetManager();

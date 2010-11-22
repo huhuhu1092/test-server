@@ -1,6 +1,8 @@
 #include "SE_Spatial.h"
 #include "SE_Buffer.h"
 #include "SE_BoundingVolume.h"
+#include "SE_RenderTargetManager.h"
+#include "SE_RenderManager.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_Spatial)
 SE_Spatial::SE_Spatial(SE_Spatial* parent)
@@ -19,6 +21,8 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
     setVisible(true);
     setCollisionable(true);
 	mSpatialID = SE_ID::createSpatialID();
+	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
+	mRQ = SE_RenderManager::RQ0;
 }
 SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {
@@ -36,6 +40,8 @@ SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
+	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
+	mRQ = SE_RenderManager::RQ0;
 }
 SE_Spatial::~SE_Spatial() 
 {

@@ -522,6 +522,6 @@ void SE_ColorEffectElement::spawn()
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
-        SE_
+        //SE_
 	}
 }

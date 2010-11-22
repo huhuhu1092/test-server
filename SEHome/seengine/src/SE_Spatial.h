@@ -150,6 +150,22 @@ public:
 	{
 		return (mState & SELECTED_MASK) == SELECTED; 
 	}
+	void setRenderTarget(const SE_RenderTargetID& renderTargetID)
+	{
+		mRenderTargetID = renderTargetID;
+	}
+	SE_RenderTargetID getRenderTarget()
+	{
+		return mRenderTargetID;
+	}
+	void setRenderQueue(int rq)
+	{
+		mRQ = rq;
+	}
+	int getRenderQueue()
+	{
+		return mRQ;
+	}
     void setLocalLayer(const SE_Layer& layer)
     {
         mLocalLayer = layer;
@@ -250,5 +266,7 @@ private:
     SE_Matrix4f mPostMatrix;
 	SE_AnimationID mAnimationID;
 	SE_ElementID mElementID;
+	SE_RenderTargetID mRenderTargetID;
+	int mRQ;
 };
 #endif

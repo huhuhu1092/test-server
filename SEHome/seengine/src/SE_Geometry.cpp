@@ -202,7 +202,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
 			if(*itRU)
 			{
 				//(*itRU)->setWorldTransform(getWorldTransform().mul(so->getLocalMatrix()));
-                renderManager->addRenderUnit(*itRU);
+				renderManager->addRenderUnit(*itRU, getRenderTarget(), (SE_RenderManager::RENDER_QUEUE)getRenderQueue());
 			}
         }
     }
