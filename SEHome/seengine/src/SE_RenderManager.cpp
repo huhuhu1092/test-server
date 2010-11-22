@@ -17,12 +17,7 @@ SE_RenderManager::SE_RenderManager()
     {
         mRenderQueue[i] = new RenderUnitList;
     }
-    /*
-    for(int i = 0 ; i < RQ_NUM ; i++)
-    {
-        mRenderQueue[i] = NULL;
-    }
-    */
+    mRenderTargetList.resize(RENDERTARGET_SIZE);
 }
 static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
 {
@@ -148,8 +143,28 @@ void SE_RenderManager::draw()
 	LOGI("### draw %d ###\n", j);
 #endif
 }
-void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq)
+_RenderTargetUnit* SE_RenderManager::findTarget(const SE_RenderTargetID& id)
 {
-    mRenderQueue[rq]->push_back(ru);
+	std::list<_RenderTargetUnit*>::iterator it;
+	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
+	{
+        _RenderTargetUnit* rt = *it;
+		if(rt->mRenderTargetID == id)
+		{
+			return rt;
+		}
+	}
+	return NULL;
+}
+void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq)
+{
+    _RenderTargetUnit* rt = findTarget(renderTarget);
+	if(rt == NULL)
+	{
+	    rt = new _RenderTargetUnit;
+	    rt->mRenderTargetID = id;
+	    mRenderTargetList.push_back(rt);
+	}
+    rt->mRenderQueue[rq]->push_back(ru);
 }
 

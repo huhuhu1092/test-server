@@ -64,6 +64,7 @@ typedef SE_StringID SE_ElementID;
 typedef SE_StringID SE_SkinJointControllerID;
 typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
+typedef int SE_RenderTargetID;
 class SE_ID
 {
 public:

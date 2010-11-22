@@ -43,7 +43,7 @@ public:
 		return mAChannel;
 	}
 	int getValidImageNum();
-	void setImageData(SE_RectPrimitive* primitive);
+	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 private:
 	void parse();

@@ -10,6 +10,7 @@
 #include "SE_AnimationManager.h"
 #include "SE_ElementManager.h"
 #include "SE_SimObjectManager.h"
+#include "SE_RenderTargetManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -33,6 +34,7 @@ SE_Application::SE_Application()
 	mAnimationManager = new SE_AnimationManager;
 	mElementManager = new SE_ElementManager;
     mSimObjectManager = new SE_SimObjectManager;
+	mRenderTargetManager = new SE_RenderTargetManager;
 	//mImageMapManager = new SE_ImageMapManager;
 	//mImageTableManager = new SE_ImageTableManager;
     mFrameNum = 0;
@@ -65,12 +67,8 @@ SE_Application::~SE_Application()
 		delete mElementManager;
     if(mSimObjectManager)
         delete mSimObjectManager;
-	/*
-	if(mImageTableManager)
-		delete mImageTableManager;
-	if(mImageMapManager)
-		delete mImageMapManager;
-	*/
+	if(mRenderTargetManager)
+		delete mRenderTargetManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {
