@@ -121,12 +121,7 @@ public:
 	}
     //void getColorOpMode(int* hasTexture, int num, int& outTexMode, int& outColorOp);
 private:
-    //void initTextureModeProperty();
-    //static std::vector<int> textureModeProperty[SE_BLENDMODE_NUM];
-    //static bool textureModeInited;
     int mColorOp;
 	int mColorChannelIndex[4]; // r,g, b,a
-
-	//int mTextureMode;
 };
 #endif

@@ -442,7 +442,11 @@ SE_ColorEffectImage::SE_ColorEffectImage()
 		mColor[i].x = -1;
 		mColor[i].y = -1;
 		mColor[i].z = -1;
+		mTextureImageData[i] = NULL;
 	}
+	mBackgroundAlpha = -1;
+    mBackgroundImageData = NULL;
+	mChannelImageData = NULL;
 }
 SE_ColorEffectImage::~SE_ColorEffectImage()
 {
@@ -588,5 +592,5 @@ void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primivite)
 }
 void SE_ColorEffectImage::setSurface(SE_Surface* surface)
 {
-
+    
 }

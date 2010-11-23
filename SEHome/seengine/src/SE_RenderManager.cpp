@@ -103,7 +103,7 @@ SE_RenderManager::~SE_RenderManager()
 }
 void SE_RenderManager::beginDraw()
 {
-     SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+    SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
     SE_Rect<int> rect = currCamera->getViewport();
 	SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
 #ifdef DEBUG0
@@ -119,22 +119,37 @@ void SE_RenderManager::endDraw()
 {}
 void SE_RenderManager::draw()
 {
-    SE_Matrix4f m;//mPerspectiveMatrix.mul(mWorldToViewMatrix);
-	std::list<_RenderTargetUnit*>::reverse_iterator it;
+    SE_Matrix4f m;
+	std::list<_RenderTargetUnit*>::iterator it = mRenderTargetList.begin();
+	std::list<_RenderTargetUnit*>::iterator startIt = mRenderTargetList.begin();
+	it++;
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-	for(it = mRenderTargetList.rbegin() ; it != mRenderTargetList.rend() ; it++)
+	for(; it != mRenderTargetList.end() ; it++)
 	{
 		_RenderTargetUnit* rt = *it;
 		SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
 		SE_Camera* camera = renderTarget->getCamera();
-		if(rt->mRenderTargetID == SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET)
-		{
-			m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
-		}
-		else
+        if(camera)
 		{
 			m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
 		}
+		for(int i = 0 ; i < RQ_NUM ; i++)
+		{
+			RenderUnitList* ruList = rt->mRenderQueue[i];
+			RenderUnitList::iterator it;
+			for(it = ruList->begin() ; it != ruList->end() ;it++)
+			{
+				SE_RenderUnit* ru = *it;
+				ru->setViewToPerspectiveMatrix(m);
+				ru->applyRenderState();
+				ru->draw();
+			}
+		}
+	}
+	if(startIt != mRenderTargetList.end())
+	{
+        _RenderTargetUnit* rt = *startIt;
+		m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
 		for(int i = 0 ; i < RQ_NUM ; i++)
 		{
 			RenderUnitList* ruList = rt->mRenderQueue[i];
