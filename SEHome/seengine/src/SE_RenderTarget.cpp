@@ -1,5 +1,6 @@
 #include "SE_RenderTarget.h"
 #include "SE_Camera.h"
+#include "SE_ImageData.h"
 SE_RenderTarget::SE_RenderTarget()
 {
     mWidth = 10;
@@ -24,7 +25,7 @@ bool SE_FrameBufferTarget::prepare()
 	return true;
 }
 //////////////
-SE_TextureTarget::SE_TextureTarget()
+SE_TextureTarget::SE_TextureTarget(SE_ImageData* imageData) : mImageData(imageData)
 {}
 SE_TextureTarget::~SE_TextureTarget()
 {}

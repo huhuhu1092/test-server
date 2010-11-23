@@ -21,6 +21,7 @@
 #include "SE_ElementKeyFrameAnimation.h"
 #include "SE_ColorEffectController.h"
 #include "SE_DataValueDefine.h"
+#include "SE_RenderTargetManager.h"
 #include <algorithm>
 SE_Element::SE_Element()
 {
@@ -33,6 +34,7 @@ SE_Element::SE_Element()
 	mTimeKey = 0;
 	mPrevElement = NULL;
 	mNextElement = NULL;
+	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -48,6 +50,7 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mTimeKey = 0;
 	mPrevElement = NULL;
 	mNextElement = NULL;
+	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 }
 SE_Element::~SE_Element()
 {
@@ -297,7 +300,10 @@ SE_ImageElement::~SE_ImageElement()
 void SE_ImageElement::spawn()
 {
 	SE_StringID imageDataID = mImageID;
-	mImage = new SE_Image(imageDataID.getStr());
+	if(!mImage)
+	{
+	    mImage = new SE_Image(imageDataID.getStr());
+	}
 	calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 }
 SE_Spatial* SE_ImageElement::createSpatial()
@@ -506,6 +512,26 @@ void SE_SequenceElement::update(unsigned int key)
 void SE_StateTableElement::update(unsigned int key)
 {}
 //////////////
+SE_ColorEffectImageElement::SE_ColorEffectImageElement(SE_ColorEffectImage* image) : mColorEffectImage(image)
+{}
+SE_ColorEffectImageElement::~SE_ColorEffectImageElement()
+{
+	if(mColorEffectImage)
+		delete mColorEffectImage;
+}
+void SE_ColorEffectImageElement::spawn()
+{
+    if(!mColorEffectImage)
+		return;
+    
+}
+SE_Spatial* SE_ColorEffectImageElement::createSpatial()
+{
+	return NULL;
+}
+void SE_ColorEffectImageElement::update(unsigned int key)
+{}
+///////////////////
 void SE_ColorEffectElement::update(unsigned int key)
 {
 }
@@ -522,6 +548,11 @@ void SE_ColorEffectElement::spawn()
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
-        //SE_
+        SE_Element* e = f->createElement(mColorEffectInput);
+		e->setPivotX(f->getPivotX());
+		e->setPivotY(f->getPivotY());
+		e->setMountPointRef(f->getMountPointRef());
+		this->addChild(e);
+		e->spawn();
 	}
 }

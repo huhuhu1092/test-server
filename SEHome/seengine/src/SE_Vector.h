@@ -469,6 +469,16 @@ public:
         return true;
 
     }
+    friend bool operator!=(const SE_Vector3i& v1, const SE_Vector3i& v2)
+    {
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] == v2.d[i])
+                return false;
+        }
+        return true;
+
+    }
 
 public:
     union

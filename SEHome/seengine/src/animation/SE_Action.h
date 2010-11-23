@@ -6,7 +6,7 @@
 #include "SE_KeyFrame.h"
 #include "SE_TableManager.h"
 #include "SE_MountPoint.h"
-//#include "SE_ColorEffectController.h"
+#include "SE_ColorEffectController.h"
 class SE_Element;
 class SE_ActionElement;
 class SE_ActionUnit
@@ -153,6 +153,7 @@ private:
 class SE_ColorEffectAnimationObject : public SE_AnimationObject
 {
 public:
+	/*
 	struct _ChannelInput
 	{
 		SE_StringID texture;
@@ -180,6 +181,7 @@ public:
 			valid = false;
 		}
 	};
+	*/
 public:
     void setColorEffectRef(const SE_StringID& id)
     {
@@ -190,7 +192,7 @@ public:
         return mColorEffectRef;
     }
 	SE_Element* createElement();
-    const _ColorEffectInput& getColorEffectInput()
+    const SE_ColorEffectInput& getColorEffectInput()
 	{
 		return mColorEffectInput;
 	}
@@ -229,7 +231,7 @@ public:
 	}
 private:
     SE_StringID mColorEffectRef;
-    _ColorEffectInput mColorEffectInput;
+    SE_ColorEffectInput mColorEffectInput;
 };
 class SE_DeleteAction : public SE_ActionUnit
 {

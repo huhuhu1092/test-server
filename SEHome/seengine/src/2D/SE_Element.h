@@ -15,6 +15,7 @@ class SE_KeyFrameController;
 class SE_Animation;
 class SE_Image;
 class SE_Sequence;
+class SE_ColorEffectImage;
 class SE_ColorEffectController;
 //class SE_Action;
 //class SE_Action::_ActionLayer;
@@ -138,6 +139,14 @@ public:
     {
         return mPrimitiveID;
     }
+	void setRenderTarget(const SE_RenderTargetID& id)
+	{
+		mRenderTarget = id;
+	}
+	SE_RenderTargetID getRenderTarget()
+	{
+		return mRenderTarget;
+	}
     float getPivotX()
     {
         return mPivotX;
@@ -275,21 +284,26 @@ protected:
 	SE_Element* mPrevElement;
 	SE_Element* mNextElement;
 	int mKeyFrameNum;
+	SE_RenderTargetID mRenderTarget;
 };
 
 class SE_ImageElement : public SE_Element
 {
 public:
 	SE_ImageElement();
+	SE_ImageElement(SE_Image* img) : mImage(img)
+	{}
 	~SE_ImageElement();
     void setImage(const SE_StringID& image)
     {
 		mImageID = image;
     }
+	/*
     SE_StringID getImage()
     {
 		return mImageID;
     }
+	*/
 	void spawn();
 	SE_Spatial* createSpatial();
 private:
@@ -357,16 +371,28 @@ private:
 };
 class SE_TextureElement : public SE_Element
 {};
+class SE_ColorEffectImageElement : public SE_Element
+{
+public:
+	SE_ColorEffectImageElement(SE_ColorEffectImage* image);
+	// it will delete mColorEffectImage
+	~SE_ColorEffectImageElement();
+    void spawn();
+	SE_Spatial* createSpatial();
+	void update(unsigned int key);
+private:
+	SE_ColorEffectImage* mColorEffectImage;
+};
 class SE_ColorEffectElement : public SE_Element
 {
 public:
-	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectAnimationObject::_ColorEffectInput& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
+	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectInput& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
 	{}
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();
 	void spawn();
 private:
 	SE_ColorEffectController* mColorEffectController;
-	SE_ColorEffectAnimationObject::_ColorEffectInput mColorEffectInput;
+	SE_ColorEffectInput mColorEffectInput;
 };
 #endif

@@ -2,6 +2,7 @@
 #define SE_RENDERTARGET_H
 #include "SE_ID.h"
 class SE_Camera;
+class SE_ImageData;
 class SE_RenderTarget
 {
 public:
@@ -83,10 +84,12 @@ private:
 class SE_TextureTarget : public SE_RenderTarget
 {
 public:
-    SE_TextureTarget();
+    SE_TextureTarget(SE_ImageData* imageData);
 	~SE_TextureTarget();
     void create();
     bool prepare();
+private:
+	SE_ImageData* mImageData;
 };
 class SE_RenderBufferTarget : public SE_RenderTarget
 {

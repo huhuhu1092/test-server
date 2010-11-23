@@ -5,12 +5,74 @@
 #include "SE_Vector.h"
 #include "SE_MountPoint.h"
 #include "SE_TableManager.h"
+#include "SE_Vector.h"
+class SE_Element;
+class SE_ChannelInput
+{
+public:
+	enum {FN_INVALID = -1, ALPHA_INVALID = -1};
+	static SE_Vector3i COLOR_INVALID;
+	SE_StringID texture;
+	int fn;
+	int alpha;
+	SE_Vector3i color;
+	bool valid;
+	SE_ChannelInput()
+	{
+		fn = FN_INVALID;
+		alpha = ALPHA_INVALID;
+		color = COLOR_INVALID;
+		valid = false;
+	}
+};
+class SE_ColorEffectInput
+{
+public:
+	SE_StringID background;
+	SE_StringID channel;
+	int alpha;
+	bool valid;
+    SE_ChannelInput channelInput[4];
+	SE_ColorEffectInput()
+	{
+		alpha = SE_ChannelInput::ALPHA_INVALID;
+		valid = false;
+	}
+};
 class SE_ColorEffectFrame
 {
 public:
     virtual ~SE_ColorEffectFrame()
     {}
-    virtual void run() {}
+    virtual SE_Element* createElement(const SE_ColorEffectInput& input) {return NULL;}
+	void setPivotX(int pivotx)
+	{
+		mPivotX = pivotx;
+	}
+	int getPivotX()
+	{
+		return mPivotX;
+	}
+	void setPivotY(int pivoty)
+	{
+		mPivotY = pivoty;
+	}
+	int getPivotY()
+	{
+		return mPivotY;
+	}
+	void setMountPointRef(const SE_MountPointID& id)
+	{
+		mMountPointRef = id;
+	}
+	SE_MountPointID getMountPointRef()
+	{
+		return mMountPointRef;
+	}
+private:
+	SE_MountPointID mMountPointRef;
+	int mPivotX;
+	int mPivotY;
 };
 class SE_ColorEffect : public SE_ColorEffectFrame
 {
@@ -23,7 +85,6 @@ public:
         SE_StringID mTextureID;
         SE_Vector3i mColor;
 		int mColorSign[SIGN_NUM];
-        SE_StringID mMark;
         int fn;
 		int alpha;
 		_TextureColor()
@@ -75,7 +136,7 @@ public:
             return NULL;
         return mTextureColorData[index];
     }
-    void run();
+    SE_Element* createElement(const SE_ColorEffectInput& input);
 private:
     SE_StringID mBackgroundID;
     SE_StringID mChannelID;
@@ -85,7 +146,7 @@ private:
 class SE_ColorEffectReload : public SE_ColorEffectFrame
 {
 public:
-    void run();
+    SE_Element* createElement(const SE_ColorEffectInput& input);
     void setMark(int mark)
     {
         mMark = mark;

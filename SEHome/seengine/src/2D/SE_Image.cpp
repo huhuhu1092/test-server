@@ -8,7 +8,11 @@
 #include "SE_Primitive.h"
 #include "SE_Log.h"
 #include "SE_Common.h"
+#include "SE_ImageData.h"
 #include "SE_ShaderProperty.h"
+#include "SE_Element.h"
+#include "SE_RenderTarget.h"
+#include "SE_RenderTargetManager.h"
 static const int DEFAULT_COLOR = 0;
 static const int REPLACE_R = 1;
 static const int REPLACE_G = 2;
@@ -41,6 +45,9 @@ static bool isDelimit(int c)
 		return true;
 	else 
 		return false;
+}
+SE_Image::SE_Image()
+{
 }
 SE_Image::SE_Image(const char* url)
 {
@@ -85,6 +92,46 @@ int SE_Image::getWidth()
 int SE_Image::getHeight()
 {
 	return mHeight;
+}
+SE_Image* SE_Image::clone()
+{
+	SE_Image* img = new SE_Image;
+	img->mUrl = mUrl;
+	img->mAChannel = mAChannel;
+	img->mBaseColor = mBaseColor;
+	img->mBChannel = mBChannel;
+	img->mGChannel = mGChannel;
+	img->mRChannel = mRChannel;
+	img->mImageUnits[0].imageUnit = &img->mBaseColor;
+	img->mImageUnits[1].imageUnit = &img->mRChannel;
+    img->mImageUnits[2].imageUnit = &img->mGChannel;
+	img->mImageUnits[3].imageUnit = &img->mBChannel;
+    img->mImageUnits[4].imageUnit = &img->mAChannel;
+	for(int i = 0 ; i < IMG_SIZE ; i++)
+	{
+	    img->mImageUnits[i].valid = mImageUnits[i].valid;
+	}
+	img->mWidth = mWidth;
+	img->mHeight = mHeight;
+	img->mPivotx = mPivotx;
+	img->mPivoty = mPivoty;
+	return img;
+
+
+}
+SE_ImageData* SE_Image::getImageData(const SE_ImageUnit& imageUnit)
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_ImageData* imageData = NULL;
+	if(imageUnit.isValid())
+	{
+		imageData = resourceManager->getImageData(imageUnit.imageDataID.getStr());
+		if(!imageData)
+		{
+			imageData = resourceManager->loadImage(imageUnit.imageDataID.getStr());
+		}
+	}
+	return imageData;
 }
 void SE_Image::setImageData(SE_RectPrimitive* primitive)
 {
@@ -458,16 +505,86 @@ int SE_ColorEffectImage::getValidImageNum()
 	}
 	return count;
 }
+SE_ImageData* SE_ColorEffectImage::createTextureElement(SE_Element* parent, SE_Image* img)
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_ImageData* imgData = resourceManager->getImageData(img->getUrl().c_str());
+	if(!imgData)
+	{
+		SE_ImageElement* e = new SE_ImageElement(img);
+	    parent->addChild(e);
+	    e->spawn();
+		imgData = new SE_ImageData;
+		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+	    resourceManager->setImageData(img->getUrl().c_str(), imgData);
+		SE_RenderTarget* renderTarget = new SE_TextureTarget(imgData);
+	    SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(renderTarget);
+	    e->setRenderTarget(renderTargetID);
+	}
+	return imgData;
+}
+void SE_ColorEffectImage::createTextureElement(SE_Element* parent)
+{
+	int backgroundValidImage = mBackground->getValidImageNum();
+	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+	if(backgroundValidImage > 1)
+	{
+        SE_Image* img = mBackground->clone();
+        mBackgroundImageData = createTextureElement(parent, img);
+	}
+	int channelValidImage = mChannel->getValidImageNum();
+	if(channelValidImage > 1)
+	{
+		SE_Image* img = mChannel->clone();
+		mChannelImageData = createTextureElement(parent, img);
+	}
+	for(int i = 0 ; i < TEX_SIZE ; i++)
+	{
+		SE_Image* img = mTexture[i];
+		if(img && img->getValidImageNum() > 1)
+		{
+			mTextureImageData[i] = createTextureElement(parent, img);
+		}
+	}
+}
+void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive, SE_TEXUNIT_TYPE texType, SE_ImageData* imageData, SE_Image* image)
+{
+    if(imageData)
+	{
+		SE_ImageDataPortion dp;
+		dp.setX(0);
+		dp.setY(0);
+		dp.setWidth(imageData->getWidth());
+		dp.setHeight(imageData->getHeight());
+        primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, dp);
+	}
+	else
+	{
+		SE_ImageData* imageDataTmp = getImageData(img->getBaseColor());
+		SE_ImageDataPortion dp;
+		dp.setX(img->getBaseColor().imageRect.x);
+		dp.setY(img->getBaseColor().imageRect.y);
+		dp.setWidth(img->getBaseColor().imageRect.width);
+		dp.setHeight(img->getBaseColor().imageRect.height);
+		primitive->setImageData(imageDataTmp, SE_TEXTURE0, NOT_OWN, dp);
+	}
+}
 void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primivite)
 {
-    if(getValidImageNum() >= SE_TEXUNIT_NUM)
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    setImageData(primitive, SE_TEXTURE0, mBackgroundImageData, mBackground);
+	setImageData(primitive, SE_TEXTURE1, mChannelImageData, mChannelImage);
+	SE_TEXUNIT_TYPE start = SE_TEXTURE2;
+    for(int i = 0 ; i < TEX_SIZE ; i++)
 	{
-		//TODO: image exceed the max image num supported by GPU
-		// we need to use render buffer to render some image first
-		return;
- 	}
-	SE_Image* imageArray[] = {mBackground, mChannel, mTexture[0], mTexture[1], mTexture[2], mTexture[3]};
-
+		SE_Image* image = mTexture[i];
+		SE_ImageData* imageData = mTextureImageData[i];
+		if(image)
+		{
+            setImageData(primitive, start, imageData, image);
+			start = (SE_TEXUNIT_TYPE)((int)start + 1);
+		}
+	}
 }
 void SE_ColorEffectImage::setSurface(SE_Surface* surface)
 {

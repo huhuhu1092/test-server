@@ -6,11 +6,14 @@
 #include <string>
 class SE_RectPrimitive;
 class SE_Surface;
+class SE_Element;
+class SE_ImageData;
 class SE_Image
 {
 public:
 	enum {IMG_SIZE = 5};
 	SE_Image(const char* url);
+	SE_Image();
 	virtual ~SE_Image() {}
 	int getWidth();
 	int getHeight();
@@ -43,8 +46,14 @@ public:
 		return mAChannel;
 	}
 	int getValidImageNum();
+	std::string getUrl()
+	{
+		return mUrl;
+	}
+	SE_ImageData* getImageData(const SE_ImageUnit& imageUnit);
 	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
+	SE_Image* clone();
 private:
 	void parse();
 	SE_ImageUnit createImageDataFullPath(const char* inputstr);
@@ -82,6 +91,10 @@ public:
     void setBackground(const SE_StringID& background);
     void setChannel(const SE_StringID& channel);
     void setTexture(int index, const SE_StringID& texture);
+	void setAlpha(int alpha)
+	{
+		mBackgroundAlpha = alpha;
+	}
     void setColor(int index, const SE_Vector3i& color)
 	{
 		mColor[index] = color;
@@ -96,14 +109,20 @@ public:
 	}
     void setImageData(SE_RectPrimitive* primivite);
     void setSurface(SE_Surface* surface);
+	void createTextureElement(SE_Element* parent);
 private:
+	SE_ImageData* createTextureElement(SE_Element* parent, SE_Image* img);
 	int getValidImageNum();
 private:
     SE_Image* mBackground;
+	SE_ImageData* mBackgroundImageData;
     SE_Image* mChannel;
+	SE_ImageData* mChannelImageData;
     SE_Image* mTexture[TEX_SIZE];
+	SE_ImageData* mTextureImageData[TEX_SIZE];
     int mFunction[TEX_SIZE];
     int mAlpha[TEX_SIZE];
     SE_Vector3i mColor[TEX_SIZE];
+	int mBackgroundAlpha;
 };
 #endif
