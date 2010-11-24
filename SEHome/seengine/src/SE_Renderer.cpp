@@ -537,3 +537,7 @@ void SE_LineSegRenderer::end()
 	if(mPoints)
 		delete[] mPoints;
 }
+void SE_LineSegRenderer::setDrawMode(SE_RenderUnit* renderUnit)
+{
+	glUniform1i(mShaderProgram->getShadingModeUniformLoc(), 0);
+}

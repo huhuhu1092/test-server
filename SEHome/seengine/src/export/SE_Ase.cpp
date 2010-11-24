@@ -320,8 +320,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         programDataVector[i] = proID;
         proID.write(output);
         std::string str(shaderPath);
-        std::string vertexShaderPath = str + SE_SEP + vsn;
-        std::string fragmentShaderPath = str + SE_SEP + fsn;
+        std::string vertexShaderPath = str + SE_SEP + "shader" + SE_SEP + vsn;
+        std::string fragmentShaderPath = str + SE_SEP + "shader" + SE_SEP + fsn;
         char* vertexShader = NULL;
         int vertexShaderLen = 0;
         char* fragmentShader = NULL;

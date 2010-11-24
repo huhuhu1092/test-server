@@ -17,7 +17,7 @@ public:
     void endDraw();
     void draw();
     void sort();
-    void addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq = RQ0 );
+    void addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{
 		mWorldToViewMatrix = m;

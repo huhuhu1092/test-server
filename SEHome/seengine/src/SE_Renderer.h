@@ -96,6 +96,7 @@ public:
 	virtual void setColor(SE_RenderUnit* renderUnit);
 	virtual void setMatrix(SE_RenderUnit* renderUnit);
 	virtual void setVertex(SE_RenderUnit* renderUnit);
+	virtual void setDrawMode(SE_RenderUnit* renderUnit);
 	virtual void end();
 	virtual void begin(SE_ShaderProgram* shaderProgram);
 	virtual void draw();

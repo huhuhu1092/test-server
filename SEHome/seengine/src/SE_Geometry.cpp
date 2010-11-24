@@ -8,6 +8,7 @@
 #include "SE_BoundingVolume.h"
 #include "SE_SimObjectManager.h"
 #include "SE_Application.h"
+#include "SE_RenderTargetManager.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_Geometry)
 struct SE_Geometry::_Impl
@@ -210,7 +211,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
 	{
 		SE_RenderUnit* ru = createSelectedFrame(this);
 		if(ru != NULL)
-		    renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+			renderManager->addRenderUnit(ru, SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET,SE_RenderManager::RQ1);
 		else
 		{
             SE_Geometry::_Impl::SimObjectList::iterator it;
@@ -218,7 +219,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
             {
                 SE_SimObject* so = *it;
 				SE_RenderUnit* ru = so->createWireRenderUnit();
-				renderManager->addRenderUnit(ru, SE_RenderManager::RQ1);
+				renderManager->addRenderUnit(ru, SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET,SE_RenderManager::RQ1);
 			}
 		}
 	}

@@ -560,24 +560,24 @@ void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive, SE_TEXUNIT_T
 		dp.setY(0);
 		dp.setWidth(imageData->getWidth());
 		dp.setHeight(imageData->getHeight());
-        primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, dp);
+        primitive->setImageData(imageData, texType, NOT_OWN, dp);
 	}
 	else
 	{
-		SE_ImageData* imageDataTmp = getImageData(img->getBaseColor());
+		SE_ImageData* imageDataTmp = SE_Image::getImageData(image->getBaseColor());
 		SE_ImageDataPortion dp;
-		dp.setX(img->getBaseColor().imageRect.x);
-		dp.setY(img->getBaseColor().imageRect.y);
-		dp.setWidth(img->getBaseColor().imageRect.width);
-		dp.setHeight(img->getBaseColor().imageRect.height);
-		primitive->setImageData(imageDataTmp, SE_TEXTURE0, NOT_OWN, dp);
+		dp.setX(image->getBaseColor().imageRect.x);
+		dp.setY(image->getBaseColor().imageRect.y);
+		dp.setWidth(image->getBaseColor().imageRect.width);
+		dp.setHeight(image->getBaseColor().imageRect.height);
+		primitive->setImageData(imageDataTmp, texType, NOT_OWN, dp);
 	}
 }
-void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primivite)
+void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     setImageData(primitive, SE_TEXTURE0, mBackgroundImageData, mBackground);
-	setImageData(primitive, SE_TEXTURE1, mChannelImageData, mChannelImage);
+	setImageData(primitive, SE_TEXTURE1, mChannelImageData, mChannel);
 	SE_TEXUNIT_TYPE start = SE_TEXTURE2;
     for(int i = 0 ; i < TEX_SIZE ; i++)
 	{

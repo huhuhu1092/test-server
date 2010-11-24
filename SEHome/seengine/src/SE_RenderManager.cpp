@@ -14,7 +14,6 @@
 
 SE_RenderManager::SE_RenderManager()
 {
-    //mRenderTargetList.resize(RENDERTARGET_SIZE);
 }
 static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
 {
@@ -103,22 +102,14 @@ SE_RenderManager::~SE_RenderManager()
 }
 void SE_RenderManager::beginDraw()
 {
-    SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
-    SE_Rect<int> rect = currCamera->getViewport();
-	SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-#ifdef DEBUG0
-    LOGI("## view port = %d, %d\n", rect.right - rect.left, rect.bottom - rect.top);
-	SE_Vector3f location = currCamera->getLocation();
-	LOGI("## location = %f, %f, %f\n", location.x, location.y, location.z);
-#endif
-	SE_Renderer::setClearColor(SE_Vector4f(mBackground.x, mBackground.y, mBackground.z, 1.0));
-	SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
     clear();
 }
 void SE_RenderManager::endDraw()
 {}
 void SE_RenderManager::draw()
 {
+	if(mRenderTargetList.empty())
+		return;
     SE_Matrix4f m;
 	std::list<_RenderTargetUnit*>::iterator it = mRenderTargetList.begin();
 	std::list<_RenderTargetUnit*>::iterator startIt = mRenderTargetList.begin();
@@ -149,6 +140,11 @@ void SE_RenderManager::draw()
 	if(startIt != mRenderTargetList.end())
 	{
         _RenderTargetUnit* rt = *startIt;
+		SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+        SE_Rect<int> rect = currCamera->getViewport();
+	    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+	    SE_Renderer::setClearColor(SE_Vector4f(mBackground.x, mBackground.y, mBackground.z, 1.0));
+	    SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
 		m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
 		for(int i = 0 ; i < RQ_NUM ; i++)
 		{

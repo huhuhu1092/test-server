@@ -50,7 +50,7 @@ public:
 	{
 		return mUrl;
 	}
-	SE_ImageData* getImageData(const SE_ImageUnit& imageUnit);
+	static SE_ImageData* getImageData(const SE_ImageUnit& imageUnit);
 	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 	SE_Image* clone();
@@ -112,6 +112,7 @@ public:
 	void createTextureElement(SE_Element* parent);
 private:
 	SE_ImageData* createTextureElement(SE_Element* parent, SE_Image* img);
+	void setImageData(SE_RectPrimitive* primitive, SE_TEXUNIT_TYPE texType, SE_ImageData* imageData, SE_Image* image);
 	int getValidImageNum();
 private:
     SE_Image* mBackground;

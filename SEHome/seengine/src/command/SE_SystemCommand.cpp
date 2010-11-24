@@ -28,6 +28,8 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	loader.Load(inPath.c_str(), 0);
 	inPath = dataPath + SE_SEP + "shaderdefine.ASE";
 	loader.Load(inPath.c_str(), 0);
+	inPath = dataPath + SE_SEP + "rendererdefine.ASE";
+	loader.Load(inPath.c_str(), 0);
 	//inPath = dataPath + SE_SEP + "bone.txt";
 	//loader.Load(inPath.c_str(), 0);
 	//inPath = dataPath + SE_SEP + "ttt.ASE";
