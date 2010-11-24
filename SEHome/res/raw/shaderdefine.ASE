@@ -1,0 +1,5 @@
+*SHADERINFO {
+    *NUM 2
+    *SHADER 0 default_shader default_vertex_shader.glsl default_fragment_shader.glsl SE_SimpleSurfaceShaderProgram
+    *SHADER 1 colorextract_shader  colorextract_vertex_shader.glsl colorextract_fragment_shader.glsl SE_ColorExtractShaderProgram
+}
