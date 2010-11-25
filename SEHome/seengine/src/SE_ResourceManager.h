@@ -18,6 +18,7 @@ class SE_Action;
 class SE_Sequence;
 class SE_ColorEffectController;
 class SE_Renderer;
+
 class SE_ResourceManager
 {
 public:
@@ -70,6 +71,9 @@ public:
 	void loadRenderer(const char* rendererFileName);
     SE_Element* loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
+	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
+		                  SE_ImageMapSetVisitor* imageMapSetTravel,
+						  SE_ImageMapVisitor* imageMapTravel);
     void loadAction(const char* actionTableName);
     void loadSequence(const char* sequenceName);
 	void loadColorEffectController(const char* colorEffectName);

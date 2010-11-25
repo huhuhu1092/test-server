@@ -13,12 +13,14 @@ struct SE_ImageRect
     int mirrorType;
 	int pivotx;
 	int pivoty;
+	int index;
 	SE_ImageRect()
     {
         x = y = 0;
         width = height = INVALID_GEOMINFO;
 		pivotx = pivoty = INVALID_GEOMINFO;
 		mirrorType = NO_MIRROR;
+		index = 0;
     }
 };
 struct SE_ImageUnit
@@ -38,6 +40,12 @@ struct SE_ImageUnit
 class SE_ImageItemProperty
 {
 public:
+	SE_ImageItemProperty()
+	{
+		mPivotX = INVALID_GEOMINFO;
+		mPivotY = INVALID_GEOMINFO;
+		mIndex = 0;
+	}
     void setImageDataID(const SE_ImageDataID& id)
     {
         mImageDataID = id;
@@ -46,12 +54,51 @@ public:
     {
         return mImageDataID;
     }
+	void setIndex(int index)
+	{
+		mIndex = index;
+	}
+	int getIndex()
+	{
+		return mIndex;
+	}
+	int getPivotX()
+	{
+		return mPivotX;
+	}
+	void setPivotX(int pivotx)
+	{
+		mPivotX = pivotx;
+	}
+	int getPivotY()
+	{
+		return mPivotY;
+	}
+	void setPivotY(int pivoty)
+	{
+		mPivotY = pivoty;
+	}
 private:
     SE_ImageDataID mImageDataID;
+	int mIndex;
+	int mPivotX;
+	int mPivotY;
     //SE_ObjectManager<SE_StringID, SE_ImageRect> mImageRectSet;
 };
 typedef SE_Table<SE_StringID, SE_ImageRect, SE_ImageItemProperty> SE_ImageItem;
 typedef SE_Table<SE_StringID, SE_ImageItem*> SE_ImageMap;
 typedef SE_Table<SE_StringID, SE_ImageMap*> SE_ImageMapSet;
 typedef SE_Table<SE_StringID, SE_ImageMapSet*> SE_ImageTable;
+struct SE_ImageTableVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ImageMapSet*>
+{
+};
+struct SE_ImageMapSetVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ImageMap*>
+{
+	SE_StringID imageMapSetID;
+};
+struct SE_ImageMapVisitor : public SE_ObjectManagerVisitor<SE_StringID , SE_ImageItem*>
+{
+	SE_StringID imageMapSetID;
+	SE_StringID imageMapID;
+};
 #endif

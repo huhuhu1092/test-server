@@ -51,39 +51,25 @@ public:
     typedef typename VALUE TABLE_ITEM_VALUE;
     void setItem(const ID& id, const VALUE& v)
     {
-        _TableItemMap::iterator it = mItemMap.find(id);
-        if(it != mItemMap.end())
-        {
-            LOGI("... warning: id has value\n");
-            it->second = v;
-        }
-        else
-        {
-			mItemMap.insert(mItemMap.end(), std::make_pair(id, v));
-        }
+        mTableItems.set(id, v);
     }
+	/*
     bool getItem(const ID& id, VALUE& outValue)
     {
-        _TableItemMap::iterator it = mItemMap.find(id);
-        if(it != mItemMap.end())
-        {
-            outValue = it->second;
-            return true;
-        }
-        else
-            return false;
+		return mTableItems.get(id, outValue);
     }
+	*/
+	VALUE getItem(const ID& id)
+	{
+		return mTableItems.get(id);
+	}
     void removeItem(const ID& id)
     {
-        mItemMap.erase(id);
+		mTableItems.remove(id);
     }
     bool isContain(const ID& id)
     {
-        _TableItemMap::iterator it = mItemMap.find(id);
-        if(it != mItemMap.end())
-            return true;
-        else
-            return false;
+		mTableItems.isContain(id);
     }
 	PROPERTY& getProperty()
 	{
@@ -91,11 +77,14 @@ public:
 	}
 	size_t size()
 	{
-		return mItemMap.size();
+		return mTableItems.size();
+	}
+	void traverse(SE_ObjectManagerVisitor<ID, VALUE>& visitor)
+	{
+		mTableItems.traverse(visitor);
 	}
 private:
-    typedef std::map<ID, VALUE> _TableItemMap;
-    _TableItemMap mItemMap;
+    SE_ObjectManager<ID, VALUE> mTableItems;
 	PROPERTY mProperty;
 };
 template <typename ID, typename VALUE, typename PROPERTY>
@@ -127,6 +116,10 @@ public:
 	size_t size()
 	{
 		return mTableItems.size();
+	}
+	void traverse(SE_ObjectManagerVisitor<ID, VALUE*>& visitor)
+	{
+		mTableItems.traverse(visitor);
 	}
 private:
     SE_ObjectManager<ID, VALUE*> mTableItems;

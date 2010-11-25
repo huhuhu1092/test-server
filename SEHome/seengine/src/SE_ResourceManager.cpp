@@ -1107,6 +1107,7 @@ void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlE
 	imageRect.y = starty;
 	imageRect.width = endx - startx;
 	imageRect.height = endy - starty;
+	imageRect.index = indent;
 	parent->setItem(id, imageRect);
 }
 void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* xmlElement, unsigned int indent)
@@ -1133,8 +1134,31 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 			SE_ImageDataID id(value);
 			imageItem->getProperty().setImageDataID(id);
 		}
+		else if(!strcmp(name, "pivotx"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+				imageItem->getProperty().setPivotX(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		else if(!strcmp(name, "pivoty"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+				imageItem->getProperty().setPivotY(ival);
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
 		pAttribute = pAttribute->Next();
 	}
+	imageItem->getProperty().setIndex(indent);
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
 	int i = 1;
@@ -2632,6 +2656,7 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 			iu.imageRect.y = 0;
 			iu.imageRect.width = imageData->getWidth();
 			iu.imageRect.height = imageData->getHeight();
+			iu.imageRect.index = imageItem->getProperty().getIndex();
 			std::string path = stringList[0] + "/" + stringList[1] + "/" + stringList[2];
 			iu.imageURL = path.c_str();
 			if(stringList.size() > 3)
@@ -2644,7 +2669,7 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 	else
 	{
 		SE_ImageRect ir;
-		bool ret = imageItem->getItem(SE_StringID(stringList[3].c_str()), ir);
+		ir = imageItem->getItem(SE_StringID(stringList[3].c_str()));
 		SE_ImageUnit iu;
 		iu.imageRect = ir;
 		iu.imageDataID = imageItem->getProperty().getImageDataID();
@@ -2809,3 +2834,53 @@ SE_ColorEffectController* SE_ResourceManager::getColorEffectController(const cha
 	SE_ColorEffectController* c = colorEffectSet->getItem(stringList[1].c_str());
 	return c;
 }
+void SE_ResourceManager::travelImageTable(SE_ImageTableVisitor* imageTableTravel,
+		                  SE_ImageMapSetVisitor* imageMapSetTravel,
+						  SE_ImageMapVisitor* imageMapTravel)
+{
+	if(imageTableTravel)
+	{
+		mImpl->mImageTable.traverse(*imageTableTravel);
+	}
+	if(imageMapSetTravel)
+	{
+		SE_ImageMapSet* ims = mImpl->mImageTable.getItem(imageMapSetTravel->imageMapSetID);
+		if(ims)
+		{
+			ims->traverse(*imageMapSetTravel);
+		}
+	}
+	if(imageMapTravel)
+	{
+		SE_ImageMapSet* ims = mImpl->mImageTable.getItem(imageMapTravel->imageMapSetID);
+		if(ims)
+		{
+			SE_ImageMap* im = ims->getItem(imageMapTravel->imageMapID);
+			if(im)
+			{
+				im->traverse(*imageMapTravel);
+			}
+		}
+	}
+}
+/*
+void SE_ResourceManager::travelImageTable(SE_ImageTableTravelFunc* imageTableTravel)
+{
+	if(!imageTableTravel)
+		return;
+	if(imageTableTravel->mImageMapSetID.isValid())
+	{
+		SE_ImageMapSet* im = mImpl->mImageTable.get(imageTableTravel->mImageMapSetID);
+		if(!im)
+		{
+			imageTableTravel->traverseImageMapSet(imageTableTravel->mImageMapSetID, false);
+			return;
+		}
+		else
+		{
+            if()
+		}
+
+	}
+}
+*/

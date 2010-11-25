@@ -20,6 +20,7 @@ public:
     std::string dataPath;
     std::string fileName;
 };
+
 class SE_2DUpdateCameraCommand : public SE_Command
 {
 public:

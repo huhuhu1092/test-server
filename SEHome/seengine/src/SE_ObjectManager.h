@@ -13,6 +13,13 @@ struct SE_FindObjCondition<T*>
 	virtual ~SE_FindObjCondition() {}
 	virtual bool isSatisfy(T* data) = 0;
 };
+template <typename TID, typename T>
+struct SE_ObjectManagerVisitor
+{
+	virtual ~SE_ObjectManagerVisitor()
+	{}
+	virtual void visit(const TID& id, const T& v) = 0;
+};
 ////////////////////////////////////////////
 template <typename TID, typename T>
 class SE_ObjectManager
@@ -25,14 +32,23 @@ public:
 	T find(SE_FindObjCondition<T>& fc);
     bool isContain(const TID& id);
     ~SE_ObjectManager();
-	int size()
+	size_t size()
 	{
 		return m.size();
 	}
+	void traverse(SE_ObjectManagerVisitor<TID, T>& visitor);
 private:
     RMap m;
 };
-
+template <typename TID, typename T>
+void SE_ObjectManager<TID, T>::traverse(SE_ObjectManagerVisitor<TID, T>& visitor)
+{
+	typename RMap::iterator it;
+	for(it = m.begin() ; it != m.end() ; it++)
+	{
+		visitor.visit(it->first, it->second);
+	}
+}
 template <typename TID, typename T>
 void SE_ObjectManager<TID, T>::remove(const TID& id)
 {
@@ -109,10 +125,19 @@ public:
 	{
 		return m.size();
 	}
+	void traverse(SE_ObjectManagerVisitor<TID, T*>& visitor);
 private:
     RMap m;
 };
-
+template <typename TID, typename T>
+void SE_ObjectManager<TID, T*>::traverse(SE_ObjectManagerVisitor<TID, T*>& visitor)
+{
+	typename RMap::iterator it;
+	for(it = m.begin() ; it != m.end() ; it++)
+	{
+		visitor.visit(it->first, it->second);
+	}
+}
 template <typename TID, typename T>
 void SE_ObjectManager<TID, T*>::remove(const TID& id)
 {
