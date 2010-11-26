@@ -1118,6 +1118,7 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 		return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ImageItem* imageItem = new SE_ImageItem;
+	SE_ImageItemProperty prop;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1132,13 +1133,13 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 		else if(!strcmp(name, "name"))
 		{
 			SE_ImageDataID id(value);
-			imageItem->getProperty().setImageDataID(id);
+			prop.setImageDataID(id);
 		}
 		else if(!strcmp(name, "pivotx"))
 		{
 			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-				imageItem->getProperty().setPivotX(ival);
+				prop.setPivotX(ival);
             }
             else
             {
@@ -1149,7 +1150,7 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 		{
 			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-				imageItem->getProperty().setPivotY(ival);
+				prop.setPivotY(ival);
             }
             else
             {
@@ -1158,7 +1159,8 @@ void SE_ImageTable_ImageItemHandler::handle(SE_ImageMap* parent, TiXmlElement* x
 		}
 		pAttribute = pAttribute->Next();
 	}
-	imageItem->getProperty().setIndex(indent);
+	prop.setIndex(indent);
+	imageItem->setProperty(prop);
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
 	int i = 1;

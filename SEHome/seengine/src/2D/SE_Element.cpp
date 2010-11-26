@@ -74,8 +74,21 @@ void SE_Element::addChild(SE_Element* e)
 }
 void SE_Element::removeChild(SE_Element* e)
 {
-	mChildren.remove(e);
-	e->setParent(NULL);
+	if(e == NULL)
+	{
+		_ElementList::iterator it;
+		for(it = mChildren.begin() ; it != mChildren.end() ;it++)
+		{
+			if(*it)
+				delete *it;
+		}
+		mChildren.clear();
+	}
+	else
+	{
+	    mChildren.remove(e);
+	    e->setParent(NULL);
+	}
 }
 void SE_Element::removeChild(const SE_ElementID& id)
 {
@@ -300,11 +313,26 @@ SE_ImageElement::~SE_ImageElement()
 void SE_ImageElement::spawn()
 {
 	SE_StringID imageDataID = mImageID;
-	if(!mImage)
+	if(mImage)
+	{
+	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+		return;
+	}
+	if(imageDataID.isValid())
 	{
 	    mImage = new SE_Image(imageDataID.getStr());
 	}
-	calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+	if(mImage)
+	{
+	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+	}
+	else
+	{
+		setLeft(0);
+		setTop(0);
+		setWidth(0);
+		setHeight(0);
+	}
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {

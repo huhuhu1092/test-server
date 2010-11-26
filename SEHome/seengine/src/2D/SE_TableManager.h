@@ -59,7 +59,7 @@ public:
 		return mTableItems.get(id, outValue);
     }
 	*/
-	VALUE getItem(const ID& id)
+	VALUE getItem(const ID& id) const
 	{
 		return mTableItems.get(id);
 	}
@@ -67,19 +67,23 @@ public:
     {
 		mTableItems.remove(id);
     }
-    bool isContain(const ID& id)
+    bool isContain(const ID& id) const
     {
 		mTableItems.isContain(id);
     }
-	PROPERTY& getProperty()
+	const PROPERTY& getProperty() const
 	{
 		return mProperty;
 	}
-	size_t size()
+	void setProperty(const PROPERTY& pro)
+	{
+		mProperty = pro;
+	}
+	size_t size() const
 	{
 		return mTableItems.size();
 	}
-	void traverse(SE_ObjectManagerVisitor<ID, VALUE>& visitor)
+	void traverse(SE_ObjectManagerVisitor<ID, VALUE>& visitor) const
 	{
 		mTableItems.traverse(visitor);
 	}
@@ -97,7 +101,7 @@ public:
     {
         mTableItems.set(id, v);
     }
-    VALUE* getItem(const ID& id)
+    VALUE* getItem(const ID& id) const
     {
         return mTableItems.get(id);
     }
@@ -105,19 +109,23 @@ public:
     {
         mTableItems.get(id);
     }
-    bool isContain(const ID& id)
+    bool isContain(const ID& id) const
     {
         return mTableItems.isContain(id);
     }
-	PROPERTY& getProperty()
+	const PROPERTY& getProperty() const
 	{
 		return mProperty;
 	}
-	size_t size()
+	void setProperty(const PROPERTY& pro)
+	{
+		mProperty = pro;
+	}
+	size_t size() const
 	{
 		return mTableItems.size();
 	}
-	void traverse(SE_ObjectManagerVisitor<ID, VALUE*>& visitor)
+	void traverse(SE_ObjectManagerVisitor<ID, VALUE*>& visitor) const
 	{
 		mTableItems.traverse(visitor);
 	}

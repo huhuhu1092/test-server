@@ -1,5 +1,8 @@
 #ifndef SE_TESTCOMMAND_H
 #define SE_TESTCOMMAND_H
+#include "SE_Command.h"
+#include "SE_Time.h"
+#include <string>
 class SE_TestInitCommand : public SE_Command
 {
 public:

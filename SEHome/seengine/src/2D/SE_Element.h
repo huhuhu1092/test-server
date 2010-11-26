@@ -17,8 +17,6 @@ class SE_Image;
 class SE_Sequence;
 class SE_ColorEffectImage;
 class SE_ColorEffectController;
-//class SE_Action;
-//class SE_Action::_ActionLayer;
 class SE_ElementTravel
 {
 public:
@@ -222,7 +220,7 @@ public:
 		return mEndKey;
 	}
     void addChild(SE_Element* e);
-    void removeChild(SE_Element* e);
+    void removeChild(SE_Element* e = NULL);
 	void removeChild(const SE_ElementID& id);
 	void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
 	void setPrev(SE_Element* prev)

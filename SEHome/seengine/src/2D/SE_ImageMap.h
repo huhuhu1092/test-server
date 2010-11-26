@@ -50,7 +50,7 @@ public:
     {
         mImageDataID = id;
     }
-    SE_ImageDataID getImageDataID()
+    SE_ImageDataID getImageDataID() const
     {
         return mImageDataID;
     }
@@ -58,11 +58,11 @@ public:
 	{
 		mIndex = index;
 	}
-	int getIndex()
+	int getIndex() const
 	{
 		return mIndex;
 	}
-	int getPivotX()
+	int getPivotX() const
 	{
 		return mPivotX;
 	}
@@ -70,7 +70,7 @@ public:
 	{
 		mPivotX = pivotx;
 	}
-	int getPivotY()
+	int getPivotY() const
 	{
 		return mPivotY;
 	}
@@ -100,5 +100,11 @@ struct SE_ImageMapVisitor : public SE_ObjectManagerVisitor<SE_StringID , SE_Imag
 {
 	SE_StringID imageMapSetID;
 	SE_StringID imageMapID;
+};
+struct SE_ImageItemVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ImageRect>
+{
+	SE_StringID imageMapSetID;
+	SE_StringID imageMapID;
+	SE_StringID imageItemID;
 };
 #endif

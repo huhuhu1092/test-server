@@ -25,10 +25,10 @@
 #include <wchar.h>
 #include <string.h>
 ///////////////
-SE_TestInitCommand::SE_TestCommand(SE_Application* app) : SE_Command(app)
+SE_TestInitCommand::SE_TestInitCommand(SE_Application* app) : SE_Command(app)
 {
 }
-SE_TestInitCommand::~SE_TestCommand()
+SE_TestInitCommand::~SE_TestInitCommand()
 {}
 
 void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
@@ -39,14 +39,23 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();
-    SE_Element* root = new SE_Element;
-	elementManager->setRoot(root);
+    SE_Element* rootElement = new SE_Element;
+	elementManager->setRoot(rootElement);
     SE_SceneManager* sceneManager = mApp->getSceneManager();
 	SE_Element* elementRoot = elementManager->getRoot();
+	elementRoot->setID("TestElementRoot");
 	elementRoot->setLeft(0);
 	elementRoot->setTop(0);
 	elementRoot->setWidth(480);
 	elementRoot->setHeight(800);
+	SE_MountPoint mp;
+	mp.setX(240);
+	mp.setY(400);
+	mp.setID("p1");
+	elementRoot->addMountPoint(mp);
+	SE_ImageElement* imageElement = new SE_ImageElement;
+	imageElement->setMountPointRef("p1");
+	elementRoot->addChild(imageElement);
     SE_Spatial* root = elementManager->createSpatial();
     SE_DepthTestState* rs = new SE_DepthTestState();
 	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
