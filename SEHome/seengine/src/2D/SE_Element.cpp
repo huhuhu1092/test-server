@@ -115,6 +115,7 @@ SE_Spatial* SE_Element::createSpatial()
 	else
 	{
 		SE_CommonNode* commonNode = new SE_CommonNode;
+		mSpatialID = commonNode->getSpatialID();
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
 		_ElementList::iterator it;
@@ -271,18 +272,13 @@ void SE_Element::startAnimation()
 {
 	if(mAnimation)
 	{
-		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
         SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
-        SE_Spatial* spatial = sceneManager->find(mSpatialID);
         SE_Animation* newAnim = mAnimation->clone();
-        if(spatial)
-        {
-            SE_AnimationID animID = spatial->getAnimationID();
-            animationManager->removeAnimation(animID);
-            animID = animationManager->addAnimation(newAnim);
-            spatial->setAnimationID(animID);
-            newAnim->run();
-        }
+        SE_AnimationID animID = getAnimationID();
+        animationManager->removeAnimation(animID);
+        animID = animationManager->addAnimation(newAnim);
+        setAnimationID(animID);
+        newAnim->run();
 	}
     _ElementList::iterator it;
     for(it = mChildren.begin() ; it != mChildren.end() ; it++)

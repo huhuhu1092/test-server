@@ -21,6 +21,7 @@
 #include "SE_Spatial.h"
 #include "SE_RenderManager.h"
 #include "SE_ImageMap.h"
+#include "SE_TestAnimation.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -54,8 +55,12 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	mp.setID("p1");
 	elementRoot->addMountPoint(mp);
 	SE_ImageElement* imageElement = new SE_ImageElement;
+	imageElement->setID("ImageElement");
 	imageElement->setMountPointRef("p1");
 	elementRoot->addChild(imageElement);
+	SE_TestAnimation* testAnim = new SE_TestAnimation("ImageTable1.xml");
+	imageElement->setAnimation(testAnim);
+	testAnim->setElementID("ImageElement");
     SE_Spatial* root = elementManager->createSpatial();
     SE_DepthTestState* rs = new SE_DepthTestState();
 	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);

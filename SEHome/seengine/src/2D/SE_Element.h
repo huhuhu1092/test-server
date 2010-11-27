@@ -137,6 +137,14 @@ public:
     {
         return mPrimitiveID;
     }
+	void setAnimationID(const SE_AnimationID& animID)
+	{
+		mAnimationID = animID;
+	}
+	SE_AnimationID getAnimationID()
+	{
+		return mAnimationID;
+	}
 	void setRenderTarget(const SE_RenderTargetID& id)
 	{
 		mRenderTarget = id;
@@ -283,6 +291,7 @@ protected:
 	SE_Element* mNextElement;
 	int mKeyFrameNum;
 	SE_RenderTargetID mRenderTarget;
+	SE_AnimationID mAnimationID;
 };
 
 class SE_ImageElement : public SE_Element

@@ -42,6 +42,8 @@ void SE_CommonNode::addChild(SE_Spatial* child)
 }
 void SE_CommonNode::removeChild(SE_Spatial* child)
 {
+	if(child == NULL)
+		return;
     mImpl->children.remove(child);
 }
 void SE_CommonNode::updateRenderState()

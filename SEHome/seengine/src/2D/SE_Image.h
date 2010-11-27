@@ -25,6 +25,14 @@ public:
 	{
 		return mPivoty;
 	}
+	void setPivotX(int pivotx)
+	{
+		mPivotx = pivotx;
+	}
+	void setPivotY(int pivoty)
+	{
+		mPivoty = pivoty;
+	}
 	SE_ImageUnit getBaseColor()
 	{
 		return mBaseColor;

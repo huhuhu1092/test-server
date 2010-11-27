@@ -23,6 +23,7 @@
 #include "SE_ElementManager.h"
 #include "SE_AnimationManager.h"
 #include "SE_Animation.h"
+#include "test/SE_TestCommand.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -69,7 +70,8 @@ bool SEDemo::InitApplication()
 	SE_Application::getInstance()->setAppID(appid);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
-	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
+	//SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
+	SE_TestInitCommand* c = new SE_TestInitCommand(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
 	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";

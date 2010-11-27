@@ -6,6 +6,7 @@
 #include "SE_ImageMap.h"
 #include "SE_Spatial.h"
 #include "SE_ElementManager.h"
+#include "SE_SceneManager.h"
 #include <string>
 struct _ImageMapSetVisitor : public SE_ImageMapSetVisitor
 {
@@ -71,7 +72,6 @@ static bool compare2(const _ImageItemVisitor::Data& first, const _ImageItemVisit
 }
 SE_TestAnimation::SE_TestAnimation(const char* imageTableName)
 {
-	it1 = mImageSet.end();
     _ImageMapSetVisitor v;
 	v.imageMapSetID = imageTableName;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
@@ -109,63 +109,111 @@ SE_TestAnimation::SE_TestAnimation(const char* imageTableName)
 		}
 		mImageSet.push_back(iuList);
 	}
+	bIt1End = true;
+	bIt2End = true;
 }
 void SE_TestAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex)
 {
 	if(frameIndex == getCurrentFrame())
         return;
-    if(!mSpatial)
+    if(!mElement)
 		return;
 	inc();
-	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	SE_Spatial* parent = mSpatial->getParent();
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_SpatialID spatialID = mElement->getSpatialID();
+	SE_Spatial* spatial = sceneManager->find(spatialID);
+	SE_Spatial* parent = NULL;
+	if(spatial)
+	{
+	    parent = spatial->getParent();
+	}
+	SE_Element* parentElement = mElement->getParent();
+	if(parent == NULL)
+	{
+		parent = sceneManager->find(parentElement->getSpatialID());
+	}
 	if(parent)
 	{
-	    parent->removeChild(mSpatial);
+	    parent->removeChild(spatial);
 	}
-	SE_ElementID elementID = mSpatial->getElementID();
-	SE_Element* element = elementManager->findByName(elementID.getStr());
-	SE_Element* parentElement = element->getParent();
+	if(spatial)
+	    delete spatial;
+
 	if(parentElement)
-		parentElement->removeChild(element);
+		parentElement->removeChild(mElement);
+	if(bIt2End)
+		return;
 	SE_StringID str = *it2;
 	SE_Image* image = new SE_Image(str.getStr());
+	int width = image->getWidth();
+	int height = image->getHeight();
+	image->setPivotX(width / 2);
+	image->setPivotY(height / 2);
     SE_ImageElement* imageElement = new SE_ImageElement(image);
-	imageElement->setID(element->getID());
+	imageElement->setID(mElement->getID());
 	imageElement->setLocalLayer(1);
-	imageElement->setMountPointRef(element->getMountPointRef());
+	imageElement->setMountPointRef(mElement->getMountPointRef());
+	imageElement->setAnimation(mElement->getAnimation()->clone());
 	parentElement->addChild(imageElement);
 	imageElement->spawn();
 	SE_Spatial* newSpatial = imageElement->createSpatial();
-	parent->addChild(newSpatial);
+    sceneManager->addSpatial(parent, newSpatial);
 	newSpatial->updateWorldTransform();
 	newSpatial->updateWorldLayer();
 	newSpatial->updateRenderState();
+	delete mElement;
+	mElement = imageElement;
 }
 void SE_TestAnimation::inc()
 {
-	if(it1 == mImageSet.end())
+	if(bIt1End)
 	{
 	    it1 = mImageSet.begin();
 		if(it1 != mImageSet.end())
 		{
 		    _ImageUnitList::iterator it = it1->begin();
 			it2  = it;
+			if(it2 != it1->end())
+			    bIt2End = false;
+			else
+				bIt2End = true;
+		    bIt1End = false;
+		}
+		else
+		{
+			bIt2End = true;
+			bIt1End = true;
 		}
 	}
 	else
 	{
-		if(it2 == it1->end())
+		if(bIt2End)
 		{
 			it1++;
 			if(it1 != mImageSet.end())
 			{
 				it2 = it1->begin();
+				if(it2 == it1->end())
+					bIt2End = true;
+				else 
+					bIt2End = false;
+				bIt1End = false;
+			}
+			else
+			{
+				bIt2End = true;
+				bIt1End = true;
 			}
 		}
 		else
 		{
 			it2++;
+			if(it2 == it1->end())
+			{
+				bIt2End = true;
+			}
+			else
+				bIt2End = false;
 		}
 	}
 }
@@ -181,14 +229,21 @@ void SE_TestAnimation::onRun()
             num++;
 		}
 	}
-	setTimePerFrame(SE_Application::getInstance()->getFrameRate());
+	setTimePerFrame(SE_Application::getInstance()->getFrameRate() * 30);
 	setFrameNum(num);
+	SE_TimeMS duration = num * SE_Application::getInstance()->getFrameRate() * 30;
+	setDuration(duration);
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	mElement = elementManager->findByName(mElementID.getStr());
 }
 SE_TestAnimation::SE_TestAnimation()
-{}
+{
+	mElement = NULL;
+}
 SE_Animation* SE_TestAnimation::clone()
 {
 	SE_TestAnimation* newAnim = new SE_TestAnimation;
     newAnim->mImageSet = mImageSet;
+	newAnim->mElementID = mElementID;
 	return newAnim;
 }
