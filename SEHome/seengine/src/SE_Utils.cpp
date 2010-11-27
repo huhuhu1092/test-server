@@ -237,3 +237,14 @@ std::string SE_Util::trim(const char* str)
 	newstr = trimRight(newstr.c_str());
 	return newstr;
 }
+std::string SE_Util::stringReplace(std::string& src, const std::string& beReplacedStr, const std::string& replaceStr)
+{
+	std::string::size_type index = 0; 
+	std::string::size_type beginIndex = 0;
+	while((index = src.find_first_of(beReplacedStr, beginIndex)) != std::string::npos)
+	{
+		src.replace(index, beReplacedStr.size(), replaceStr);
+		beginIndex = index + 1;
+	}
+	return src;
+}

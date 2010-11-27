@@ -119,6 +119,8 @@ void SE_TestAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, fl
     if(!mElement)
 		return;
 	inc();
+	if(bIt2End)
+		return;
 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_SpatialID spatialID = mElement->getSpatialID();
 	SE_Spatial* spatial = sceneManager->find(spatialID);
@@ -132,17 +134,13 @@ void SE_TestAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, fl
 	{
 		parent = sceneManager->find(parentElement->getSpatialID());
 	}
-	if(parent)
-	{
-	    parent->removeChild(spatial);
-	}
+	sceneManager->removeSpatial(spatialID);
 	if(spatial)
 	    delete spatial;
 
 	if(parentElement)
 		parentElement->removeChild(mElement);
-	if(bIt2End)
-		return;
+
 	SE_StringID str = *it2;
 	SE_Image* image = new SE_Image(str.getStr());
 	int width = image->getWidth();
@@ -229,9 +227,10 @@ void SE_TestAnimation::onRun()
             num++;
 		}
 	}
-	setTimePerFrame(SE_Application::getInstance()->getFrameRate() * 30);
+	SE_TimeMS timePerFrame = SE_Application::getInstance()->getFrameRate() * 30;
+	setTimePerFrame(timePerFrame);
 	setFrameNum(num);
-	SE_TimeMS duration = num * SE_Application::getInstance()->getFrameRate() * 30;
+	SE_TimeMS duration = num * timePerFrame;
 	setDuration(duration);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	mElement = elementManager->findByName(mElementID.getStr());

@@ -2574,6 +2574,9 @@ SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 		return imageData;
     std::string dataPath = getImagePath();
     std::string imageDataPath = dataPath + SE_SEP + imageName;
+#if defined(WIN32)
+	SE_Util::stringReplace(imageDataPath, "/", "\\");
+#endif
 	std::string str(imageName);
 	size_t pos = str.find('.');
     std::string ext = str.substr(pos + 1);

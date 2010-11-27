@@ -36,7 +36,8 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
-	resourceManager->loadImageTable("ImageTable1.xml");
+	//resourceManager->loadImageTable("ImageTable1.xml");
+    resourceManager->loadImageTable("CharacterColthesImageDefine.xml");
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();
@@ -58,7 +59,7 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	imageElement->setID("ImageElement");
 	imageElement->setMountPointRef("p1");
 	elementRoot->addChild(imageElement);
-	SE_TestAnimation* testAnim = new SE_TestAnimation("ImageTable1.xml");
+	SE_TestAnimation* testAnim = new SE_TestAnimation("CharacterColthesImageDefine.xml");
 	imageElement->setAnimation(testAnim);
 	testAnim->setElementID("ImageElement");
     SE_Spatial* root = elementManager->createSpatial();

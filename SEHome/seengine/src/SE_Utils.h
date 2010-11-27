@@ -21,6 +21,7 @@ public:
 	static std::string trimLeft(const char* str);
 	static std::string trimRight(const char* str);
 	static std::string trim(const char* str);
+	static std::string stringReplace(std::string& src, const std::string& beReplacedStr, const std::string& replaceStr);
 };
 
 #endif /** end SE_UTILS_H*/
