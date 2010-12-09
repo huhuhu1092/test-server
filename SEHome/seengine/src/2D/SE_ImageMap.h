@@ -24,12 +24,17 @@ struct SE_ImageRect
     }
 };
 struct SE_ImageUnit
-{
+{  
+    enum COLOR_CHANNEL {ALL, R, G, B, A, CHANNEL_NUM};
     SE_ImageRect imageRect;
 	SE_ImageDataID imageDataID;
 	SE_StringID imageURL; // when you get a SE_ImageUnit From SE_ResourceManager, it will 
 	                      // separate your input url to imageURL and ext.
 	SE_StringID ext;
+	COLOR_CHANNEL c;
+	SE_ImageUnit() : c(ALL)
+	{
+	}
 	bool isValid() const
 	{
 		return imageDataID.isValid() && imageRect.width > 0 && imageRect.height > 0;
