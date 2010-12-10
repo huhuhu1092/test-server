@@ -5,6 +5,7 @@
 #include <string>
 #include <string.h>
 #include "SE_KeyFrame.h"
+#include "SE_ID.h"
 #define ASE_OK 1
 #define ASE_ERROR 0
 class SE_BufferOutput;
@@ -296,6 +297,7 @@ private:
 	void ASE_KeySHADER(const char* token);
 	void ASE_KeyRENDERER(const char* token);
     void ASE_AdjustSubMtl();
+	void writeSpatialScene(SE_BufferOutput& outScene, std::vector<SE_MeshID>& meshIDVector);
     ASE_GeometryObjectGroup* findGroup(std::string parentname);
 	SE_KeyFrame<SE_Transform>* findKeyFrame(ASE_HelperObject* parent, unsigned int key);
 private:

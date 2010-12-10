@@ -24,7 +24,7 @@ public:
 	SE_Spatial* removeSpatial(const SE_SpatialID& spatialID);
     void checkSpatialIDMap();
 	SE_ERROR getError();
-    void createScene(const char* sceneFileName);
+    void createScene(const SE_SceneID& sceneFileName);
     void updateSpatialIDMap();
 	void setSelectedSpatial(SE_Spatial* spatial);
 	SE_Spatial* getSelectedSpatial()

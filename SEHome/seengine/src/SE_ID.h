@@ -53,7 +53,7 @@ typedef SE_CommonID SE_SpatialID;
 typedef SE_CommonID SE_GeometryDataID;
 typedef SE_CommonID SE_TextureCoordDataID;
 typedef SE_CommonID SE_MaterialDataID;
-typedef SE_CommonID SE_SceneID;
+typedef SE_StringID SE_SceneID;
 typedef SE_StringID SE_ProgramDataID;
 typedef SE_StringID SE_CommandID;
 typedef SE_StringID SE_CommandFactoryID;
@@ -74,7 +74,7 @@ public:
 	static SE_GeometryDataID createGeometryDataID();
 	static SE_TextureCoordDataID createTextureCoordDataID();
 	static SE_MaterialDataID createMaterialDataID();
-	static SE_SceneID createSceneID();
+	static SE_SceneID createSceneID(const char* str);
 	static SE_ProgramDataID createProgramDataID(const char* str);
 	static SE_CommandID createCommandID(const char* str);
 	static SE_CommandFactoryID createCommandFactoryID(const char* str);

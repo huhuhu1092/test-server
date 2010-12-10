@@ -211,6 +211,10 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
             {
                 output.writeInt(SE_ImageData::PNG);
             }
+			else if(ext == "tga")
+			{
+				output.writeInt(SE_ImageData::TGA);
+			}
             else if(ext == "jpg" || ext == "jpeg")
             {
                 output.writeInt(SE_ImageData::JPEG);
@@ -375,6 +379,8 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
         int startpos = 0;
         int subMaterialStartPos = 0;
         _MaterialData mdData;
+		std::vector<int> subMaterialHasTexV;
+		std::list<int> subMaterialHasTex;
         if(materialref == -1)
         {
             output.writeInt(texNum);
@@ -398,6 +404,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
                 if(texStr != "")
                 {
                     texNum++;
+					subMaterialHasTex.push_back(k);
                 }
             }
         }
@@ -409,58 +416,58 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
                 texNum = 1;
             }
         }
+		subMaterialHasTexV.resize(subMaterialHasTex.size());
+		copy(subMaterialHasTex.begin(), subMaterialHasTex.end(), subMaterialHasTexV.begin());
         output.writeInt(texNum);
-        for(i = 0 ; i < texNum ; i++)
+        if(mdData.subMaterialNum > 0)
         {
-            if(mdData.subMaterialNum > 0)
+            int j;
+            //for(j = 0 ; j < (materialref - 1) ; j++)
+            //{
+             //   _MaterialData d = materialVector[j];
+             //   subMaterialStartPos += d.subMaterialNum;
+            //}
+            for(int j = 0 ; j < subMaterialHasTexV.size() ; j++)
             {
-                int j;
-                for(j = 0 ; j < (materialref - 1) ; j++)
-                {
-                    _MaterialData d = materialVector[j];
-                    subMaterialStartPos += d.subMaterialNum;
-                }
-                for(int j = 0 ; j < mdData.subMaterialNum ; j++)
-                {
-                    _MaterialData subMaterialData = materialVector[materialNum + subMaterialStartPos];
-                    subMaterialStartPos++;
-                    std::string texStr(subMaterialData.md.texName);
-                    if(texStr != "")
-                    {
-                        output.writeInt(1);//current we just has one texture unit;
-                        output.writeInt(0);//texture unit type is TEXTURE0
-                        texCoordID.write(output);
-                        output.writeInt(1);//image num use in the texture unit. current it is not mipmap. so the num is 1
-                        subMaterialData.tid.write(output);
-
-                    }
-                }
-            }
-            else
-            {
-                std::string texStr(mdData.md.texName);
+                _MaterialData subMaterialData = materialVector[materialNum + subMaterialHasTexV[j]];
+                //subMaterialStartPos++;
+                std::string texStr(subMaterialData.md.texName);
                 if(texStr != "")
                 {
                     output.writeInt(1);//current we just has one texture unit;
                     output.writeInt(0);//texture unit type is TEXTURE0
                     texCoordID.write(output);
                     output.writeInt(1);//image num use in the texture unit. current it is not mipmap. so the num is 1
-                    mdData.tid.write(output);
+                    subMaterialData.tid.write(output);
+
                 }
             }
-            
+        }
+        else
+        {
+            std::string texStr(mdData.md.texName);
+            if(texStr != "")
+            {
+                output.writeInt(1);//current we just has one texture unit;
+                output.writeInt(0);//texture unit type is TEXTURE0
+                texCoordID.write(output);
+                output.writeInt(1);//image num use in the texture unit. current it is not mipmap. so the num is 1
+                mdData.tid.write(output);
+            }
         }
         ///write surface
 WRIET_SURFACE:
         if(mesh->numFaceGroup > 0)
         {
-            SE_ASSERT(mesh->numFaceGroup == mesh->faceGroup.size());
+            SE_ASSERT(mesh->numFaceGroup <= mesh->faceGroup.size());
             output.writeInt(mesh->numFaceGroup);
             std::vector<std::list<int> >::iterator itFaceGroup;
             int indexM = startpos;
             int texIndex = 0;
             for(itFaceGroup = mesh->faceGroup.begin() ; itFaceGroup != mesh->faceGroup.end(); itFaceGroup++)
             {
+				if(itFaceGroup->size() == 0)
+					continue;
                 _MaterialData md = materialVector[materialNum + indexM];
                 std::string texStr(md.md.texName);
                 md.mid.write(output);
@@ -569,15 +576,20 @@ WRIET_SURFACE:
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
+	rootNode->setCollisionable(false);
     rootNode->setBVType(SE_BoundingVolume::AABB);
     n = 0;
     for(itGeomObj = mSceneObject->mGeomObjects.begin();
     itGeomObj != mSceneObject->mGeomObjects.end();
-    itGeomObj++)
+    itGeomObj++, n++)
     {
         ASE_GeometryObject* go = *itGeomObj;
+		if(!strcmp(go->name, "wood1.bmp"))
+			continue;
+		if(!strcmp(go->name, "upper.bmp"))
+			continue;
         ASE_Mesh* mesh = go->mesh;
-        SE_MeshID meshID = meshIDVector[n++];
+        SE_MeshID meshID = meshIDVector[n];
         SE_SpatialID childID = SE_ID::createSpatialID();
         SE_Geometry* child = new SE_Geometry(childID, rootNode);
 		std::string mname = go->name;
@@ -661,12 +673,122 @@ WRIET_SURFACE:
 		meshObj->setName(go->name);
         child->attachSimObject(meshObj);
     }
-    SE_SceneID sceneID = SE_Application::getInstance()->createCommonID();
-    //SE_Util::sleep(SLEEP_COUNT);
+	outScene.writeInt(2);//two scene;
+    SE_SceneID sceneID = "root";
     sceneID.write(outScene);
 	_WriteSceneTravel wst(outScene);
 	rootNode->travel(&wst, true);
+	//write spatial scene
+    writeSpatialScene(outScene, meshIDVector);
     LOGI("write end\n");
+}
+void ASE_Loader::writeSpatialScene(SE_BufferOutput& outScene, std::vector<SE_MeshID>& meshIDVector)
+{
+    /////// create scene //////////
+    SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
+    SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
+    rootNode->setBVType(SE_BoundingVolume::AABB);
+    int n = 0;
+	std::list<ASE_GeometryObject*>::iterator itGeomObj;
+    for(itGeomObj = mSceneObject->mGeomObjects.begin();
+    itGeomObj != mSceneObject->mGeomObjects.end();
+    itGeomObj++, n++)
+    {
+        ASE_GeometryObject* go = *itGeomObj;
+		if(strcmp(go->name, "wood1.bmp") && strcmp(go->name, "upper.bmp"))
+		{
+			continue;
+		}
+        ASE_Mesh* mesh = go->mesh;
+        SE_MeshID meshID = meshIDVector[n];
+        SE_SpatialID childID = SE_ID::createSpatialID();
+        SE_Geometry* child = new SE_Geometry(childID, rootNode);
+		std::string mname = go->name;
+        SE_Vector3f translate, scale, rotateAxis;
+        translate.x = go->translate[0];
+        translate.y = go->translate[1];
+        translate.z = go->translate[2];
+        scale.x = go->scale[0];
+        scale.y = go->scale[1];
+        scale.z = go->scale[2];
+        rotateAxis.x = go->rotateAxis[0];
+        rotateAxis.y = go->rotateAxis[1];
+        rotateAxis.z = go->rotateAxis[2];
+        SE_Quat q;
+        q.set(go->rotateAngle, rotateAxis);
+        SE_Matrix4f childMatrix;
+        childMatrix.set(q.toMatrix3f(), scale, translate);
+		if(mname == "Bone01" || mname == "Bone02" || mname == "Bone03" || 
+		   mname == "Bone04")
+		{
+			child->setVisible(false);
+		}
+        std::list<ASE_GeometryObjectGroup*>::iterator itGroup;
+        bool childAdded = false;
+        for(itGroup = mSceneObject->mGeometryObjectGroup.begin() ;
+            itGroup != mSceneObject->mGeometryObjectGroup.end();
+            itGroup++)
+        {
+            ASE_GeometryObjectGroup* group = *itGroup;
+            std::string::size_type pos = group->parent.name.find("Dummy");
+			if(go->parentName == "Dummy01")
+			{
+				LOGI("### obj parent Dummy01\n");
+			}
+            if(pos != std::string::npos && group->parent.name == go->parentName)
+            {
+                SE_Spatial* parentSpatial = group->parent.spatial;
+                if(!parentSpatial)
+                {
+                    SE_SpatialID parentid = SE_ID::createSpatialID();
+                    parentSpatial = new SE_CommonNode(parentid, rootNode);
+                    parentSpatial->setBVType(SE_BoundingVolume::AABB);
+                    rootNode->addChild(parentSpatial);
+					group->parent.spatial = parentSpatial;
+                }
+                parentSpatial->addChild(child);
+                child->setParent(parentSpatial);
+                SE_Vector3f translate, scale, rotateaxis;
+                float angle;
+                translate.x = group->parent.baseTranslate[0];
+                translate.y = group->parent.baseTranslate[1];
+                translate.z = group->parent.baseTranslate[2];
+                scale.x = group->parent.baseScale[0];
+                scale.y = group->parent.baseScale[1];
+                scale.z = group->parent.baseScale[2];
+                rotateaxis.x = group->parent.baseRotate[0];
+                rotateaxis.y = group->parent.baseRotate[1];
+                rotateaxis.z = group->parent.baseRotate[2];
+                angle = group->parent.baseRotate[3];
+                SE_Quat q;
+                q.set(angle, rotateaxis);
+                SE_Matrix4f parentMatrix;
+                parentMatrix.set(q.toMatrix3f(), scale, translate);
+                parentSpatial->setPrevMatrix(parentMatrix);
+                SE_Matrix4f parentMatrixInverse = parentMatrix.inverse();
+                childMatrix = parentMatrixInverse.mul(childMatrix);
+                child->setPrevMatrix(childMatrix);
+				child->setBVType(SE_BoundingVolume::AABB);
+                childAdded = true;
+            }
+        }
+        if(!childAdded)
+        {
+            rootNode->addChild(child);
+            child->setLocalTranslate(translate);
+            child->setLocalScale(scale);
+            child->setLocalRotate(q);
+            child->setBVType(SE_BoundingVolume::AABB);
+        }
+        SE_MeshSimObject* meshObj = new SE_MeshSimObject(meshID);
+		meshObj->setName(go->name);
+        child->attachSimObject(meshObj);
+    }
+	SE_SceneID sceneID = "ak47";
+    sceneID.write(outScene);
+	_WriteSceneTravel wst(outScene);
+	rootNode->travel(&wst, true);
+
 }
 void ASE_Loader::Write(const char* dataPath, const char* outFileName)
 {
@@ -1664,19 +1786,20 @@ void ASE_Loader::ASE_AdjustSubMtl()
             {
                 faceGroupSet[obj->mesh->faces[i].materialID]++;
             }
-			obj->mesh->faceGroup.clear();
-            obj->mesh->faceGroup.resize(subMatlNum);
-            for(int i = 0 ; i < obj->mesh->numFaces; i++)
-            {
-                std::list<int>* l = &(obj->mesh->faceGroup[obj->mesh->faces[i].materialID]);
-                l->push_back(i);
-            } 
 			obj->mesh->numFaceGroup = 0;
             for(int i = 0 ; i < subMatlNum ; i++)
             {
                 if(faceGroupSet[i] > 0)
                     obj->mesh->numFaceGroup++;
             }
+			obj->mesh->faceGroup.clear();
+			obj->mesh->faceGroup.resize(subMatlNum);
+            for(int i = 0 ; i < obj->mesh->numFaces; i++)
+            {
+                std::list<int>* l = &(obj->mesh->faceGroup[obj->mesh->faces[i].materialID]);
+                l->push_back(i);
+            } 
+
         }
     }
 }

@@ -78,7 +78,8 @@ bool SEDemo::InitApplication()
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
-	c->fileName = "home";
+	//c->fileName = "home_new";
+	c->fileName = "dust";
 	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
@@ -244,6 +245,20 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
+		SE_Spatial* spatial = SE_Application::getInstance()->getResourceManager()->getScene("ak47");
+		SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+		SE_Vector3f v = currCamera->getLocation();
+		v = v + SE_Vector3f(0, 25, -10);
+		spatial->setLocalTranslate(v);
+		SE_Quat q(180, SE_Vector3f(0, 0, 1));
+		spatial->setLocalRotate(q);
+		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
+		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+		sceneManager->addSpatial(root, spatial);
+		spatial->updateWorldTransform();
+		spatial->updateWorldLayer();
+		spatial->updateBoundingVolume();
+		spatial->updateRenderState();
 	    LOGI("## down ##\n");
     }
 }

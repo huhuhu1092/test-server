@@ -191,8 +191,12 @@ static void processImageData(SE_BufferInput& inputBuffer, SE_ResourceManager* re
         std::string str = inputBuffer.readString();
         std::string dataPath = resourceManager->getDataPath();
         std::string imageDataPath = dataPath + SE_SEP + str;
-        SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType, true);
-        resourceManager->setImageData(imageDataid, imageData); 
+		SE_ImageData* imageData = resourceManager->getImageData(imageDataid);
+		if(!imageData)
+		{
+		    imageData = loadImage(imageDataPath.c_str(), imageType, true);
+            resourceManager->setImageData(imageDataid, imageData); 
+		}
     }
 }
 static void processRendererData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
@@ -462,6 +466,7 @@ struct SE_ResourceManager::_Impl
 	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
 	ResourceMap<SE_RendererID, SE_Renderer> rendererMap;
+	ResourceMap<SE_SceneID, SE_Spatial> sceneMap;
 	SE_ImageTable mImageTable;
     SE_ActionTable mActionTable;
 	SE_SequenceTable mSequenceTable;
@@ -2341,6 +2346,18 @@ void SE_ResourceManager::removeGeometryData(const SE_GeometryDataID& geomID)
 {
     mImpl->geomDataMap.remove(geomID);
 } 
+SE_Spatial* SE_ResourceManager::getScene(const SE_SceneID& sceneID)
+{
+	return mImpl->sceneMap.get(sceneID);
+}
+void SE_ResourceManager::setScene(const SE_SceneID& id, SE_Spatial* spatial)
+{
+	mImpl->sceneMap.set(id, spatial);
+}
+void SE_ResourceManager::removeScene(const SE_SceneID& id)
+{
+	mImpl->sceneMap.remove(id);
+}
 SE_Primitive* SE_ResourceManager::getPrimitive(const SE_PrimitiveID& primitiveID)
 {
 	return mImpl->primitiveMap.get(primitiveID);
@@ -2489,7 +2506,7 @@ void SE_ResourceManager::setDataPath(const char* datapath)
 {
 	mImpl->dataPath = datapath;
 }
-SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
+void SE_ResourceManager::loadScene(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
     char* data = NULL;
@@ -2499,16 +2516,16 @@ SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName)
     {
         SE_BufferInput inputBuffer(data , len);
         if(!checkHeader(inputBuffer))
-            return NULL;
-        SE_SceneID sceneID;
-        sceneID.read(inputBuffer);
-        SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);    
-        //SE_CommonNode* root = new SE_CommonNode;
-        //root->read(inputBuffer);
-        return spatial;
+            return;
+		int sceneNum = inputBuffer.readInt();
+		for(int i = 0 ; i < sceneNum ; i++)
+		{
+            SE_SceneID sceneID;
+            sceneID.read(inputBuffer);
+            SE_Spatial* spatial = createSceneNode(inputBuffer, NULL);
+			setScene(sceneID, spatial);
+		}
     }
-    else
-        return NULL;
 }
 SE_MeshTransfer* SE_ResourceManager::getMeshTransfer(const SE_MeshID& meshID)
 {

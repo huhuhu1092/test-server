@@ -115,6 +115,8 @@ SE_MovingSpatialIntersect::SE_MovingSpatialIntersect(SE_Spatial* s)
 
 int SE_MovingSpatialIntersect::visit(SE_Spatial* spatial)
 {
+	if(!spatial->canDoCollision())
+		return 1;
 	SE_BoundingVolume* bv = spatial->getWorldBoundingVolume();
 	if(!bv)
 	{

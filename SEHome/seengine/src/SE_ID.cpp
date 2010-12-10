@@ -199,9 +199,9 @@ SE_MaterialDataID SE_ID::createMaterialDataID()
 {
 	return SE_Application::getInstance()->createCommonID();
 }
-SE_SceneID SE_ID::createSceneID()
+SE_SceneID SE_ID::createSceneID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+	return SE_SceneID(str);
 }
 SE_ProgramDataID SE_ID::createProgramDataID(const char* str)
 {

@@ -30,6 +30,8 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	loader.Load(inPath.c_str(), 0);
 	inPath = dataPath + SE_SEP + "rendererdefine.ASE";
 	loader.Load(inPath.c_str(), 0);
+	inPath = dataPath + SE_SEP + "ak1.ASE";
+	loader.Load(inPath.c_str(), 0);
 	//inPath = dataPath + SE_SEP + "bone.txt";
 	//loader.Load(inPath.c_str(), 0);
 	//inPath = dataPath + SE_SEP + "ttt.ASE";
@@ -42,9 +44,10 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     resourceManager->setDataPath(dataPath.c_str());
     if(dataPath != "")
     {
-	    resourceManager->loadBaseData(fileName.c_str()); 
+	    resourceManager->loadBaseData(fileName.c_str());
+		resourceManager->loadScene(fileName.c_str());
         SE_SceneManager* sceneManager = mApp->getSceneManager();
-	    sceneManager->createScene(fileName.c_str());
+	    sceneManager->createScene("root");
         SE_Spatial* rootScene = sceneManager->getRoot();
         rootScene->updateWorldTransform();
 	    rootScene->updateBoundingVolume();
@@ -66,7 +69,8 @@ SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
 {}
 void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	SE_Vector3f location(45.4441,	-234.7624,	93.7012);
+	//SE_Vector3f location(45.4441,	-234.7624,	93.7012);
+	SE_Vector3f location(-42.2706,	-75.5129,	9.1142);
 	SE_Vector3f zAxis(0, -1, 0);
 	SE_Vector3f up(0, 0, 1);
 	SE_Camera* c = mApp->getCurrentCamera();

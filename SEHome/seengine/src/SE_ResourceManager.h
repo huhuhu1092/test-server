@@ -60,11 +60,15 @@ public:
     SE_Renderer* getRenderer(const SE_RendererID& rendererID);
 	void setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer);
 	void removeRenderer(const SE_RendererID& rendererID);
+
+	SE_Spatial* getScene(const SE_SceneID& sceneID);
+	void setScene(const SE_SceneID& id, SE_Spatial* spatial);
+	void removeScene(const SE_SceneID& id);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
     void loadBaseData(const char* baseResourceName);
-    SE_Spatial* loadScene(const char* sceneName);
+    void loadScene(const char* sceneName);
 
 	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);

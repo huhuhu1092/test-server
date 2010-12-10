@@ -104,20 +104,14 @@ SE_Spatial* SE_SceneManager::find(const SE_SpatialID& spatialID)
 	else
 		return NULL;
 }
-void SE_SceneManager::createScene(const char* sceneFileName)
+void SE_SceneManager::createScene(const SE_SceneID& sceneID)
 {
 	if(mSceneRoot != NULL)
 	{
 		delete mSceneRoot;
 	}
-	mSceneRoot = SE_Application::getInstance()->getResourceManager()->loadScene(sceneFileName);
+	mSceneRoot = SE_Application::getInstance()->getResourceManager()->getScene(sceneID);
 	updateSpatialIDMap();
-	/*
-    mSceneRoot = new SE_CommonNode(SE_Application::getInstance()->createCommonID(), NULL);
-	SE_Spatial* scene = SE_Application::getInstance()->getResourceManager()->loadScene(sceneFileName);
-	scene->setParent(mSceneRoot);
-	mSceneRoot->addChild(scene);
-	*/
 }
 void SE_SceneManager::updateSpatialIDMap()
 {
