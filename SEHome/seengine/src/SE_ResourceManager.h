@@ -73,7 +73,7 @@ public:
 	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);
 	void loadRenderer(const char* rendererFileName);
-    SE_Element* loadElement(const char* elementResourceName);
+    void loadElement(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
 	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,
@@ -81,6 +81,8 @@ public:
     void loadAction(const char* actionTableName);
     void loadSequence(const char* sequenceName);
 	void loadColorEffectController(const char* colorEffectName);
+	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
+	SE_Element* getElement(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
 	SE_Sequence* getSequence(const char* sequencePath);

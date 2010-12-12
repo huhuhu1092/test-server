@@ -233,7 +233,7 @@ void SE_TestAnimation::onRun()
 	SE_TimeMS duration = num * timePerFrame;
 	setDuration(duration);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	mElement = elementManager->findByName(mElementID.getStr());
+	mElement = elementManager->findByID(mElementID);
 }
 SE_TestAnimation::SE_TestAnimation()
 {

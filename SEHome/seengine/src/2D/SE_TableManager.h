@@ -42,7 +42,15 @@ struct SE_IDTrait<SE_CommonID>
     }
 };
 class SE_TableDefaultProperty
-{};
+{
+public:
+	enum {INVALID_TABLEITEM_INDEX = -1};
+	SE_TableDefaultProperty()
+	{
+		tableItemIndex = INVALID_TABLEITEM_INDEX;
+	}
+	int tableItemIndex;
+};
 template <typename ID, typename VALUE, typename PROPERTY = SE_TableDefaultProperty>
 class SE_Table
 {
@@ -53,12 +61,6 @@ public:
     {
         mTableItems.set(id, v);
     }
-	/*
-    bool getItem(const ID& id, VALUE& outValue)
-    {
-		return mTableItems.get(id, outValue);
-    }
-	*/
 	VALUE getItem(const ID& id) const
 	{
 		return mTableItems.get(id);

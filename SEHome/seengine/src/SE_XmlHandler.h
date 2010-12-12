@@ -1,6 +1,6 @@
 #ifndef SE_XMLHANDLER_H
 #define SE_XMLHANDLER_H
-
+#include "tinyxml.h"
 /////////////////////////////////
 template <typename T, typename PROPERTY>
 class SE_XmlElementHandler
@@ -26,7 +26,6 @@ public:
         return NULL;
     }
     PROPERTY* pro;
-    //std::map<std::string, SE_XmlElementHandler<T>* > mElementHandlerManager;
 };
 template <typename PARENTT, typename PROPERTY>
 class SE_XmlElementCalculus
@@ -42,7 +41,7 @@ public:
     void handleXmlChild(PARENTT* parent, TiXmlNode* currNode, unsigned int indent);
 	static bool hasChildElement(const char* childElementName, TiXmlElement* pElement);
 private:
-   SE_XmlElementHandlerManager<PARENTT, PROPERTY> mXmlElementHandlerManager;
+    SE_XmlElementHandlerManager<PARENTT, PROPERTY> mXmlElementHandlerManager;
 };
 template <typename PARENTT, typename PROPERTY>
 void SE_XmlElementCalculus<PARENTT, PROPERTY>::handleElement(PARENTT* parent, const char* elementName, TiXmlElement* pElement, unsigned int indent)
@@ -63,13 +62,15 @@ void SE_XmlElementCalculus<PARENTT, PROPERTY>::handleXmlChild(PARENTT* parent, T
     TiXmlText* pText;
     int t = currNode->Type();
     int num = 0;
+	int i = 0;
     switch(t)
     {
     case TiXmlNode::TINYXML_DOCUMENT:
         LOGI("...Document\n");
 		for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
         {
-            handleXmlChild(parent, pChild, indent + 1);
+            handleXmlChild(parent, pChild, indent + i);
+			i++;
         }
         break;
     case TiXmlNode::TINYXML_ELEMENT:

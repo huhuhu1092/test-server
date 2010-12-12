@@ -6,6 +6,8 @@
 #include "SE_ID.h"
 #include "SE_MountPoint.h"
 #include "SE_Action.h"
+#include "SE_TableManager.h"
+#include "SE_Geometry3D.h"
 #include <string>
 #include <list>
 #include <map>
@@ -17,6 +19,7 @@ class SE_Image;
 class SE_Sequence;
 class SE_ColorEffectImage;
 class SE_ColorEffectController;
+class SE_ElementContent;
 class SE_ElementTravel
 {
 public:
@@ -121,6 +124,9 @@ public:
     {
         return mSimObjectID;
     }
+	void addContent(SE_ElementContent* ec);
+	SE_ElementContent* getContent(int index);
+	void clearContent();
 	void setSpatialID(const SE_SpatialID& spatialID)
 	{
 		mSpatialID = spatialID;
@@ -145,10 +151,7 @@ public:
 	{
 		return mAnimationID;
 	}
-	void setRenderTarget(const SE_RenderTargetID& id)
-	{
-		mRenderTarget = id;
-	}
+	void setRenderTarget(const SE_RenderTargetID& id);
 	SE_RenderTargetID getRenderTarget()
 	{
 		return mRenderTarget;
@@ -219,6 +222,19 @@ public:
 	{
 		mEndKey = key;
 	}
+	void setMountPoint(float x, float y)
+	{
+		mMountPointX = x;
+		mMountPointY = y;
+	}
+	float getMountPointX()
+	{
+		return mMountPointX;
+	}
+	float getMountPointY()
+	{
+		return mMountPointY;
+	}
 	unsigned int getStartKey()
 	{
 		return mStartKey;
@@ -247,7 +263,19 @@ public:
 	{
 		return mNextElement;
 	}
-	
+	int getSeqNum() const
+	{
+		return mSeqNum;
+	}
+	void setSeqNum(int i) 
+	{
+		mSeqNum = i;
+	}
+	SE_ElementContent* getCurrentContent()
+	{
+		return mCurrentContent;
+	}
+	void measure();
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
@@ -257,6 +285,7 @@ public:
 	virtual int getKeyFrameNum();
 protected:
 	SE_Spatial* createSpatialByImage(SE_Image* image);
+	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -267,6 +296,8 @@ protected:
     float mHeight; 
     float mPivotX;
     float mPivotY;
+	float mMountPointX;
+	float mMountPointY;
     SE_Element* mParent;
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
@@ -292,8 +323,43 @@ protected:
 	int mKeyFrameNum;
 	SE_RenderTargetID mRenderTarget;
 	SE_AnimationID mAnimationID;
+	typedef std::list<SE_ElementContent*> _ElementContentList;
+	_ElementContentList mElementContentList;
+	int mSeqNum;// the sequence number in its parent element
+	SE_ElementContent* mCurrentContent;
+};
+class SE_ElementContent
+{
+public:
+	virtual SE_Element* createElement(float mpx, float mpy) = 0;
+	virtual ~SE_ElementContent() {}
+};
+class SE_ImageContent : public SE_ElementContent
+{
+public:
+	SE_ImageContent(const SE_StringID& imageURI);
+	SE_Element* createElement(float mpx, float mpy);
+private:
+	SE_StringID mImageURI;
 };
 
+class SE_ActionContent : public SE_ElementContent
+{
+public:
+	SE_ActionContent(const SE_StringID& actionURI);
+	SE_Element* createElement(float mpx, float mpy);
+private:
+	SE_StringID mActionURI;
+};
+class SE_StateTableContent : public SE_ElementContent
+{
+public:
+	SE_StateTableContent(const SE_StringID& stateTableURI);
+	SE_Element* createElement(float mpx, float mpy);
+private:
+	SE_StringID mStateTableURI;
+};
+///////////////////////
 class SE_ImageElement : public SE_Element
 {
 public:
@@ -305,17 +371,16 @@ public:
     {
 		mImageID = image;
     }
-	/*
-    SE_StringID getImage()
-    {
-		return mImageID;
-    }
-	*/
+	void setImage(SE_ImageData* imageData)
+	{
+		mImageData = imageData;
+	}
 	void spawn();
 	SE_Spatial* createSpatial();
 private:
     SE_StringID mImageID;
 	SE_Image* mImage;
+	SE_ImageData* mImageData;
 };
 class SE_ActionElement : public SE_Element
 {
@@ -402,4 +467,7 @@ private:
 	SE_ColorEffectController* mColorEffectController;
 	SE_ColorEffectInput mColorEffectInput;
 };
+typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
+typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;
+
 #endif

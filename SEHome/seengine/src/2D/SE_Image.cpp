@@ -430,6 +430,18 @@ SE_ImageUnit SE_Image::createImageDataFullPath(const char* inputstr)
 	return resourceManager->getImageUnit(inputstr);
 }
 ////////////////////////////
+SE_ElementImage::SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData)
+{
+	mImageDataID = imageDataID;
+	mImageData = imageData;
+}
+void SE_ElementImage::setImageData(SE_RectPrimitive* primitive)
+{
+
+}
+void SE_ElementImage::setSurface(SE_Surface* surface)
+{}
+/////////////////////////////////////
 SE_ColorEffectImage::SE_ColorEffectImage()
 {
 	mBackground = NULL;

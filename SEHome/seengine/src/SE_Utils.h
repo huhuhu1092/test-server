@@ -3,6 +3,24 @@
 #include <wchar.h>
 #include <string>
 #include <vector>
+#include <list>
+template <typename T>
+typename std::list<T>::iterator listElementRef(std::list<T>& data, int index)
+{
+	typename std::list<T>::iterator it = data.begin();
+	int i = 0;
+	while(it != data.end() && i < index)
+		it++;
+	return it;
+}
+struct SE_DeleteObject
+{
+	template <typename T>
+	void operator()(T* ptr) const
+	{
+		delete ptr;
+	}
+};
 class SE_Util
 {
 public:

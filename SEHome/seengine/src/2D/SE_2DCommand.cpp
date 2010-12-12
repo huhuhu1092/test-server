@@ -98,7 +98,7 @@ public:
 		SE_ElementID elementID = spatial->getElementID();
 		SE_AnimationID animID = spatial->getAnimationID();
 		animManager->removeAnimation(animID);
-		SE_Element* element = elementManager->findByName(elementID.getStr());
+		SE_Element* element = elementManager->findByID(elementID);
 		if(element)
 		{
 			SE_Animation* anim = element->getAnimation();

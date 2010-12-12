@@ -8,6 +8,13 @@ class SE_RectPrimitive;
 class SE_Surface;
 class SE_Element;
 class SE_ImageData;
+class SE_ImageBase
+{
+public:
+	virtual ~SE_ImageBase() {}
+	virtual void setImageData(SE_RectPrimitive* primitive) {}
+	virtual void setSurface(SE_Surface* surface) {}
+};
 class SE_Image
 {
 public:
@@ -89,6 +96,16 @@ private:
 	SE_ImageUnit mBaseColor;
 	_ImageUnitData mImageUnits[IMG_SIZE];
 
+};
+class SE_ElementImage : public SE_ImageBase
+{
+public:
+	SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
+	virtual void setImageData(SE_RectPrimitive* primitive);
+	virtual void setSurface(SE_Surface* surface);
+private:
+	SE_ImageDataID mImageDataID;
+	SE_ImageData* mImageData;
 };
 class SE_ColorEffectImage
 {

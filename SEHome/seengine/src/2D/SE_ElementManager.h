@@ -27,13 +27,13 @@ public:
             delete mRoot;
         mRoot = root;
     }
-    SE_Element* findByName(const char* name);
+    SE_Element* findByID(const SE_ElementID& id);
 private:
     SE_ElementManager(const SE_ElementManager&);
     SE_ElementManager& operator=(const SE_ElementManager&);
 private:
     SE_Element* mRoot;
-    SE_ElementMapManager mElementMapManager;
-	SE_ElementMap* mCurrElementMap;
+    //SE_ElementMapManager mElementMapManager;
+	//SE_ElementMap* mCurrElementMap;
 };
 #endif
