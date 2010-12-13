@@ -2817,7 +2817,7 @@ static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent 
 	TiXmlNode* pChild = pParent->FirstChild();
 	if(!pChild)
 		return SE_INVALID_TABLE;
-    t = pParent->Type();
+    t = pChild->Type();
 	if(t == TiXmlNode::TINYXML_DECLARATION)
 	{
 		pChild = pChild->NextSibling();
@@ -2828,8 +2828,17 @@ static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent 
 		return SE_INVALID_TABLE;
 	}
 	const char* elementName = pChild->Value();
-	if(strcmp(elementName, "Declare"))
+	if(!strcmp(elementName, "Element"))
+	{
+		return SE_ELEMENT_TABLE;
+	}
+	else if(!strcmp(elementName, "ImageTable"))
+	{
+		return SE_IMAGE_TABLE;
+	}
+	else
 		return SE_INVALID_TABLE;
+	/*
 	TiXmlElement* pElement = (TiXmlElement*)pChild;
 	TiXmlAttribute* pAttribute = pElement->FirstAttribute();
 	int type = SE_INVALID_TABLE;
@@ -2849,6 +2858,7 @@ static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent 
 		pAttribute = pAttribute->Next();
 	}
     return (SE_XMLTABLE_TYPE)type;
+	*/
 }
 SE_XMLTABLE_TYPE SE_ResourceManager::getXmlType(const char* xmlName)
 {

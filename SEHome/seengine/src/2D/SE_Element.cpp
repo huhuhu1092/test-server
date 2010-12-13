@@ -124,6 +124,7 @@ SE_Spatial* SE_Element::createSpatial()
 	else
 	{
 		SE_CommonNode* commonNode = new SE_CommonNode;
+		commonNode->setRenderTarget(mRenderTarget);
 		mSpatialID = commonNode->getSpatialID();
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
@@ -212,7 +213,7 @@ void SE_Element::calculateRect(int pivotx, int pivoty, int imageWidth, int image
 			mTop = mMountPointY - realPivoty;
 		}
 	}
-	if(mWidth == INVALID_GEOMINFO && mHeight == INVALID_GEOMINFO)
+	if(imageWidth != INVALID_GEOMINFO && imageHeight != INVALID_GEOMINFO)
 	{
 		mWidth = imageWidth;
 		mHeight = imageHeight;
@@ -290,6 +291,10 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_ImageBase* image)
 }
 void SE_Element::spawn()
 {
+	this->setLeft(0);
+	this->setTop(0);
+	this->setWidth(0);
+	this->setHeight(0);
 	if(!mChildren.empty())
 	{
         _ElementList::iterator it;
@@ -308,7 +313,6 @@ void SE_Element::spawn()
 				mp = mParent->getMountPoint(mMountPointID);
 			SE_Element* e = ec->createElement(mp.getX(), mp.getY());
 			this->addChild(e);
-			e->spawn();
 		}
 	}
 }
@@ -345,6 +349,7 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 SE_Element* SE_Element::clone()
 {
 	SE_Element* e = new SE_Element;
+	clone(this, e);
 	if(!mChildren.empty())
 	{
 		_ElementList::iterator it;
@@ -354,11 +359,8 @@ SE_Element* SE_Element::clone()
 			e->addChild(child);
 		}
 	}
-	else
-	{
-	    clone(this, e);
-	    return e;
-	}
+	return e;
+
 }
 void SE_Element::merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect)
 {
@@ -472,6 +474,7 @@ SE_ImageContent::SE_ImageContent(const SE_StringID& imageURI) : mImageURI(imageU
 SE_ElementContent* SE_ImageContent::clone()
 {
 	SE_ImageContent* e = new SE_ImageContent(mImageURI);
+	e->setID(getID());
 	return e;
 }
 SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
@@ -491,7 +494,9 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	else if(t == SE_ELEMENT_TABLE)
 	{
 		resourceManager->loadElement(strList[0].c_str());
-		SE_Element* e = resourceManager->getElement(mImageURI.getStr());
+		std::string ename = strList[0] + "/" + strList[1];
+		SE_Element* e = resourceManager->getElement(ename.c_str());
+		e->setCurrentContent(strList[2].c_str());
 		imageElement->addChild(e);
 		imageElement->setPivotX(e->getPivotX());
 		imageElement->setPivotY(e->getPivotY());
@@ -531,6 +536,7 @@ SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI) : mActionURI(ac
 SE_ElementContent* SE_ActionContent::clone()
 {
 	SE_ActionContent* e = new SE_ActionContent(mActionURI);
+	e->setID(getID());
 	return e;
 }
 SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
@@ -542,6 +548,7 @@ SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI) : m
 SE_ElementContent* SE_StateTableContent::clone()
 {
 	SE_StateTableContent* e = new SE_StateTableContent(mStateTableURI);
+	e->setID(getID());
 	return e;
 }
 SE_Element* SE_StateTableContent::createElement(float mpx, float mpy)
@@ -561,6 +568,7 @@ SE_Spatial* SE_NullElement::createSpatial()
 SE_ImageElement::SE_ImageElement()
 {
 	mImage = NULL;
+	mElementImage = NULL;
 }
 SE_ImageElement::~SE_ImageElement()
 {
@@ -624,13 +632,24 @@ void SE_ImageElement::measure()
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {
-	if(!mImage)
-		return NULL;
 	if(mImage)
+	{
 	    return createSpatialByImage(mImage);
+	}
 	else if(mElementImage)
 	{
-        return createSpatialByImage(mElementImage);
+		SE_CommonNode* node = new SE_CommonNode;
+        SE_Spatial* spatial = createSpatialByImage(mElementImage);
+		node->addChild(spatial);
+		_ElementList::iterator it;
+		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+		{
+			SE_Element* e = *it;
+			SE_Spatial* s = e->createSpatial();
+			if(s)
+			    node->addChild(s);
+		}
+		return node;
 	}
 	else
 		return NULL;
