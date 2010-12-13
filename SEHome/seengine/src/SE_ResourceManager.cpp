@@ -1233,16 +1233,18 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         int ival = -1;
         if(!strcmp(name, "id"))
         {
-			std::string id;
+			std::string id = value;
+            /*
 			if(parent)
 			{
-				id = parent->getID() + "/" + value;
+				id = std::string(parent->getID().getStr()) + "/" + value;
 			}
 			else
 			{
 				id = pro->xmlName + "/" + value;
 			}
-            element->setID(id);
+			*/
+			element->setID(id.c_str());
 			if(element->getID().isValid())
 			{
 			    hasid = true;
@@ -1422,6 +1424,7 @@ void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ImageContent* imageContent = NULL;
+	SE_StringID id;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1432,8 +1435,13 @@ void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
 		{
 	        imageContent = new SE_ImageContent(value);
 		}
+		else if(!strcmp(name, "id"))
+		{
+			id = value;
+		}
 		pAttribute = pAttribute->Next();
 	}
+	imageContent->setID(id);
 	parent->addContent(imageContent);
 }
 void SE_ElementActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)

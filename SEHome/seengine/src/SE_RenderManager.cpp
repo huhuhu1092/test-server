@@ -120,42 +120,49 @@ void SE_RenderManager::draw()
 		_RenderTargetUnit* rt = *it;
 		SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
 		SE_Camera* camera = renderTarget->getCamera();
-        if(camera)
+		if(renderTarget->prepare())
 		{
-			m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
-		}
-		for(int i = 0 ; i < RQ_NUM ; i++)
-		{
-			RenderUnitList* ruList = rt->mRenderQueue[i];
-			RenderUnitList::iterator it;
-			for(it = ruList->begin() ; it != ruList->end() ;it++)
+			if(camera)
 			{
-				SE_RenderUnit* ru = *it;
-				ru->setViewToPerspectiveMatrix(m);
-				ru->applyRenderState();
-				ru->draw();
+				m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
+			}
+			for(int i = 0 ; i < RQ_NUM ; i++)
+			{
+				RenderUnitList* ruList = rt->mRenderQueue[i];
+				RenderUnitList::iterator it;
+				for(it = ruList->begin() ; it != ruList->end() ;it++)
+				{
+					SE_RenderUnit* ru = *it;
+					ru->setViewToPerspectiveMatrix(m);
+					ru->applyRenderState();
+					ru->draw();
+				}
 			}
 		}
 	}
 	if(startIt != mRenderTargetList.end())
 	{
         _RenderTargetUnit* rt = *startIt;
-		SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
-        SE_Rect<int> rect = currCamera->getViewport();
-	    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-	    SE_Renderer::setClearColor(SE_Vector4f(mBackground.x, mBackground.y, mBackground.z, 1.0));
-	    SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
-		m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
-		for(int i = 0 ; i < RQ_NUM ; i++)
+		SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
+		if(renderTarget->prepare())
 		{
-			RenderUnitList* ruList = rt->mRenderQueue[i];
-			RenderUnitList::iterator it;
-			for(it = ruList->begin() ; it != ruList->end() ;it++)
+			SE_Camera* currCamera = SE_Application::getInstance()->getCurrentCamera();
+			SE_Rect<int> rect = currCamera->getViewport();
+			SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+			SE_Renderer::setClearColor(SE_Vector4f(mBackground.x, mBackground.y, mBackground.z, 1.0));
+			SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
+			m = mPerspectiveMatrix.mul(mWorldToViewMatrix);
+			for(int i = 0 ; i < RQ_NUM ; i++)
 			{
-				SE_RenderUnit* ru = *it;
-				ru->setViewToPerspectiveMatrix(m);
-				ru->applyRenderState();
-				ru->draw();
+				RenderUnitList* ruList = rt->mRenderQueue[i];
+				RenderUnitList::iterator it;
+				for(it = ruList->begin() ; it != ruList->end() ;it++)
+				{
+					SE_RenderUnit* ru = *it;
+					ru->setViewToPerspectiveMatrix(m);
+					ru->applyRenderState();
+					ru->draw();
+				}
 			}
 		}
 	}

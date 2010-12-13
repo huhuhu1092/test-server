@@ -25,7 +25,9 @@
 #include "SE_Camera.h"
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
+#include "SE_Math.h"
 #include <algorithm>
+#include <math.h>
 SE_Element::SE_Element()
 {
     mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
@@ -38,6 +40,8 @@ SE_Element::SE_Element()
 	mPrevElement = NULL;
 	mNextElement = NULL;
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
+	mSeqNum = -1;
+	mCurrentContent = NULL;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -54,6 +58,8 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mPrevElement = NULL;
 	mNextElement = NULL;
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
+	mSeqNum = -1;
+	mCurrentContent = NULL;
 }
 SE_Element::~SE_Element()
 {
@@ -239,7 +245,7 @@ void SE_Element::clearContent()
 	for_each(mElementContentList.begin(), mElementContentList.end(), SE_DeleteObject());
 	mElementContentList.clear();
 }
-SE_Spatial* SE_Element::createSpatialByImage(SE_Image* image)
+SE_Spatial* SE_Element::createSpatialByImage(SE_ImageBase* image)
 {
 	float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
@@ -275,6 +281,7 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_Image* image)
     geom->setLocalLayer(mLocalLayer);
 	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
 	geom->setElementID(eid);
+	geom->setRenderTarget(mRenderTarget);
     delete[] meshArray;
     mSpatialID = spatialID;
     mPrimitiveID = primitiveID;
@@ -305,10 +312,53 @@ void SE_Element::spawn()
 		}
 	}
 }
-
+void SE_Element::clone(SE_Element *src, SE_Element* dst)
+{
+	dst->mLeft = src->mLeft;
+	dst->mTop = src->mTop;
+	dst->mWidth = src->mWidth;
+	dst->mHeight = src->mHeight;
+	dst->mPivotX = src->mPivotX;
+	dst->mPivotY = src->mPivotY;
+	dst->mMountPointX = src->mMountPointY;
+	dst->mMountPointY = src->mMountPointY;
+	dst->mLocalLayer = src->mLocalLayer;
+	dst->mLocalTranslate = src->mLocalTranslate;
+	dst->mLocalScale = src->mLocalScale;
+	dst->mLocalRotate = src->mLocalRotate;
+	dst->mID = src->mID;
+	dst->mMountPointID = src->mMountPointID;
+	dst->mElementRef = src->mElementRef;
+	dst->mTimeKey = src->mTimeKey;
+	dst->mStartKey = src->mStartKey;
+	dst->mEndKey = src->mEndKey;
+	dst->mKeyFrameNum = src->mKeyFrameNum;
+	dst->mRenderTarget = src->mRenderTarget;
+	dst->mSeqNum = src->mSeqNum;
+	_ElementContentList::iterator it;
+	for(it = mElementContentList.begin() ; it != mElementContentList.end() ; it++)
+	{
+		SE_ElementContent* e = (*it)->clone();
+		dst->mElementContentList.push_back(e);
+	}
+}
 SE_Element* SE_Element::clone()
 {
-	return NULL;
+	SE_Element* e = new SE_Element;
+	if(!mChildren.empty())
+	{
+		_ElementList::iterator it;
+		for(it = mChildren.begin(); it != mChildren.end(); it++)
+		{
+			SE_Element* child = (*it)->clone();
+			e->addChild(child);
+		}
+	}
+	else
+	{
+	    clone(this, e);
+	    return e;
+	}
 }
 void SE_Element::merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect)
 {
@@ -364,6 +414,32 @@ void SE_Element::setRenderTarget(const SE_RenderTargetID& id)
 		}
 	}
 }
+void SE_Element::setCurrentContent(const SE_StringID& id)
+{
+	if(!mChildren.empty())
+	{
+		_ElementList::iterator it;
+		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+		{
+			SE_Element* e = *it;
+			e->setCurrentContent(id);
+		}
+	}
+	else
+	{
+		_ElementContentList::iterator it;
+		for(it = mElementContentList.begin() ; it != mElementContentList.end() ; it++)
+		{
+			SE_ElementContent* e = *it;
+			if(e->getID() == id)
+				break;
+		}
+		if(it != mElementContentList.end())
+		{
+			mCurrentContent = *it;
+		}
+	}
+}
 void SE_Element::startAnimation()
 {
 	if(mAnimation)
@@ -383,10 +459,20 @@ void SE_Element::startAnimation()
         e->startAnimation();
     }
 }
+///////////////
+SE_ElementContent* SE_ElementContent::clone()
+{
+	return NULL;
+}
 ///////////////////////////////////////
 SE_ImageContent::SE_ImageContent(const SE_StringID& imageURI) : mImageURI(imageURI)
 {
 
+}
+SE_ElementContent* SE_ImageContent::clone()
+{
+	SE_ImageContent* e = new SE_ImageContent(mImageURI);
+	return e;
 }
 SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 {
@@ -409,10 +495,11 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		imageElement->addChild(e);
 		imageElement->setPivotX(e->getPivotX());
 		imageElement->setPivotY(e->getPivotY());
-		SE_ImageData* imageData = resourceManager->getImageData(e->getID().getStr());
+		SE_ImageDataID imageDataID = e->getID().getStr();
+		SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 		if(!imageData)
 			imageData = new SE_ImageData;
-		imageElement->setImage(imageData);
+		imageElement->setImage(imageDataID, imageData);
 		e->setMountPoint(0, 0);
 		e->setPivotX(0);
 		e->setPivotX(0);
@@ -431,6 +518,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		textureTarget->setWidth(imageElement->getWidth());
 		textureTarget->setHeight(imageElement->getHeight());
 		textureTarget->setCamera(camera);
+		textureTarget->create();
 		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 		SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
 		e->setRenderTarget(renderTargetID);
@@ -440,12 +528,22 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI) : mActionURI(actionURI)
 {}
+SE_ElementContent* SE_ActionContent::clone()
+{
+	SE_ActionContent* e = new SE_ActionContent(mActionURI);
+	return e;
+}
 SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 {
 	return NULL;
 }
 SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI) : mStateTableURI(stateTableURI)
 {}
+SE_ElementContent* SE_StateTableContent::clone()
+{
+	SE_StateTableContent* e = new SE_StateTableContent(mStateTableURI);
+	return e;
+}
 SE_Element* SE_StateTableContent::createElement(float mpx, float mpy)
 {
 	return NULL;
@@ -469,7 +567,13 @@ SE_ImageElement::~SE_ImageElement()
 	if(mImage)
 		delete mImage;
 }
+void SE_ImageElement::setImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData)
+{
+	if(mElementImage)
+		delete mElementImage;
+	mElementImage = new SE_ElementImage(imageDataID, imageData);
 
+}
 void SE_ImageElement::spawn()
 {
 	SE_StringID imageDataID = mImageID;
@@ -486,7 +590,7 @@ void SE_ImageElement::spawn()
 	{
 	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 	}
-	else if(mImageData)
+	else if(mElementImage)
 	{
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		if(!mChildren.empty())
@@ -507,11 +611,29 @@ void SE_ImageElement::spawn()
 		setHeight(0);
 	}
 }
+void SE_ImageElement::measure()
+{
+	if(mChildren.empty())
+	{
+
+	}
+	else
+	{
+		SE_Element::measure();
+	}
+}
 SE_Spatial* SE_ImageElement::createSpatial()
 {
 	if(!mImage)
 		return NULL;
-	return createSpatialByImage(mImage);
+	if(mImage)
+	    return createSpatialByImage(mImage);
+	else if(mElementImage)
+	{
+        return createSpatialByImage(mElementImage);
+	}
+	else
+		return NULL;
 
 }
 /////////////////////////

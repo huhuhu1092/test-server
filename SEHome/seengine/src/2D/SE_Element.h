@@ -15,7 +15,10 @@ class SE_Spatial;
 class SE_Element;
 class SE_KeyFrameController;
 class SE_Animation;
+class SE_ImageBase;
 class SE_Image;
+class SE_ElementImage;
+class SE_ImageData;
 class SE_Sequence;
 class SE_ColorEffectImage;
 class SE_ColorEffectController;
@@ -271,6 +274,7 @@ public:
 	{
 		mSeqNum = i;
 	}
+	void setCurrentContent(const SE_StringID& id);
 	SE_ElementContent* getCurrentContent()
 	{
 		return mCurrentContent;
@@ -284,8 +288,9 @@ public:
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum();
 protected:
-	SE_Spatial* createSpatialByImage(SE_Image* image);
+	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
+	void clone(SE_Element *src, SE_Element* dst);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -333,12 +338,25 @@ class SE_ElementContent
 public:
 	virtual SE_Element* createElement(float mpx, float mpy) = 0;
 	virtual ~SE_ElementContent() {}
+	virtual SE_ElementContent* clone();
+public:
+	void setID(const SE_StringID& id)
+	{
+		mID = id;
+	}
+	SE_StringID getID()
+	{
+		return mID;
+	}
+private:
+	SE_StringID mID;
 };
 class SE_ImageContent : public SE_ElementContent
 {
 public:
 	SE_ImageContent(const SE_StringID& imageURI);
 	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
 private:
 	SE_StringID mImageURI;
 };
@@ -348,6 +366,7 @@ class SE_ActionContent : public SE_ElementContent
 public:
 	SE_ActionContent(const SE_StringID& actionURI);
 	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
 private:
 	SE_StringID mActionURI;
 };
@@ -356,6 +375,7 @@ class SE_StateTableContent : public SE_ElementContent
 public:
 	SE_StateTableContent(const SE_StringID& stateTableURI);
 	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
 private:
 	SE_StringID mStateTableURI;
 };
@@ -371,16 +391,14 @@ public:
     {
 		mImageID = image;
     }
-	void setImage(SE_ImageData* imageData)
-	{
-		mImageData = imageData;
-	}
+	void setImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
 	void spawn();
+	void measure();
 	SE_Spatial* createSpatial();
 private:
     SE_StringID mImageID;
 	SE_Image* mImage;
-	SE_ImageData* mImageData;
+	SE_ElementImage* mElementImage;
 };
 class SE_ActionElement : public SE_Element
 {

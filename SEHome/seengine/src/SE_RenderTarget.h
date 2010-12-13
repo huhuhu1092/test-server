@@ -90,6 +90,8 @@ public:
     bool prepare();
 private:
 	SE_ImageData* mImageData;
+	struct Impl;
+	Impl* mImpl;
 };
 class SE_RenderBufferTarget : public SE_RenderTarget
 {

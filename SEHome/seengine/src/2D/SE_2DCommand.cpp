@@ -37,10 +37,12 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadImageTable("ImageTable1.xml");
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
+	resourceManager->loadElement("TestElement.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();
-    elementManager->load(fileName.c_str());
+    elementManager->load("TestElement.xml/lady");
     SE_SceneManager* sceneManager = mApp->getSceneManager();
 	SE_Element* elementRoot = elementManager->getRoot();
+	elementRoot->setCurrentContent("0");
 	elementRoot->setLeft(0);
 	elementRoot->setTop(0);
 	elementRoot->setWidth(480);

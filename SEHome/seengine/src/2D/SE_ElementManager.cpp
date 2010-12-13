@@ -21,7 +21,6 @@ static const std::string ELEMENT_NODE = "Element";
 SE_ElementManager::SE_ElementManager()
 {
     mRoot = NULL;
-   // mCurrElementMap = NULL;
 }
 SE_ElementManager::~SE_ElementManager()
 {
@@ -29,10 +28,12 @@ SE_ElementManager::~SE_ElementManager()
         delete mRoot;
 }
 
-void SE_ElementManager::load(const char* filePath)
+void SE_ElementManager::load(const char* elementURI)
 {
+	if(mRoot)
+		delete mRoot;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	mRoot = resourceManager->getElement(filePath);
+	mRoot = resourceManager->getElement(elementURI);
 }
 
 SE_Spatial* SE_ElementManager::createSpatial()

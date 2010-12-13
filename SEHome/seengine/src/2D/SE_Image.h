@@ -15,7 +15,7 @@ public:
 	virtual void setImageData(SE_RectPrimitive* primitive) {}
 	virtual void setSurface(SE_Surface* surface) {}
 };
-class SE_Image
+class SE_Image : public SE_ImageBase
 {
 public:
 	enum {IMG_SIZE = 5};

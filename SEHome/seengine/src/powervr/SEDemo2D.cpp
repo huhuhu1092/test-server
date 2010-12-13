@@ -72,7 +72,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
@@ -110,7 +110,7 @@ public:
 		SE_ElementID elementID = spatial->getElementID();
 		SE_AnimationID animID = spatial->getAnimationID();
 		animManager->removeAnimation(animID);
-		SE_Element* element = elementManager->findByName(elementID.getStr());
+		SE_Element* element = elementManager->findByID(elementID);
 		if(element)
 		{
 			SE_Animation* anim = element->getAnimation();

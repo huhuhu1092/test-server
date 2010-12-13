@@ -13,7 +13,7 @@ class SE_ElementManager
 public:
     SE_ElementManager();
     ~SE_ElementManager();
-    void load(const char* filePath);
+    void load(const char* elementURI);
     SE_Spatial* createSpatial();
     void addElement(SE_Element* parent, SE_Element* child);
     void removeElement(SE_Element* e);
