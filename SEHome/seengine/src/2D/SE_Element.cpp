@@ -42,6 +42,7 @@ SE_Element::SE_Element()
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
 	mCurrentContent = NULL;
+	mNeedUpdateTransform = true;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -60,6 +61,7 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
 	mCurrentContent = NULL;
+	mNeedUpdateTransform = true;
 }
 SE_Element::~SE_Element()
 {
@@ -127,6 +129,8 @@ SE_Spatial* SE_Element::createSpatial()
 		commonNode->setRenderTarget(mRenderTarget);
 		mSpatialID = commonNode->getSpatialID();
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
+		//setWidth(0);
+		//setHeight(0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
 		_ElementList::iterator it;
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
@@ -266,8 +270,6 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_ImageBase* image)
 	{
 		SE_Surface* surface = meshArray[0]->getSurface(i);
 		image->setSurface(surface);
-	    surface->setProgramDataID(COLOREXTRACT_SHADER);
-		surface->setRendererID(COLOREXTRACT_RENDERER);
 	}
 	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
 	simObject->setName(mID.getStr());
@@ -514,9 +516,10 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		float angle = 2 * SE_RadianToAngle(atanf(imageElement->getWidth() / 20.0f));
         SE_Camera* camera = new SE_Camera;
 		SE_Vector3f v(imageElement->getLeft() + imageElement->getWidth() / 2, 
-			          imageElement->getTop() + imageElement->getHeight() / 2, 100);
+			          imageElement->getTop() + imageElement->getHeight() / 2, 10);
 		camera->setLocation(v);
 		camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
+		camera->setViewport(0, 0, imageElement->getWidth(), imageElement->getHeight());
 		imageData->setWidth(imageElement->getWidth());
 		imageData->setHeight(imageElement->getHeight());
         SE_TextureTarget* textureTarget = new SE_TextureTarget(imageData);
@@ -527,6 +530,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 		SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
 		e->setRenderTarget(renderTargetID);
+		e->setNeedUpdateTransform(false);
 	}
 	return imageElement;
 }

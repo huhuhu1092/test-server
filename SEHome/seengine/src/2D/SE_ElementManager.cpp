@@ -46,7 +46,8 @@ SE_Spatial* SE_ElementManager::createSpatial()
     spatial->setLocalTranslate(SE_Vector3f(0, 0, 0));
     spatial->setLocalScale(SE_Vector3f(1, 1, 1));
     SE_Vector4f c1(1, 0, 0, 0);
-    SE_Vector4f c2(0, -1, 0, 0);
+    //SE_Vector4f c2(0, -1, 0, 0);
+	SE_Vector4f c2(0, 1, 0, 0);
     SE_Vector4f c3(0, 0, 1, 0);
     SE_Vector4f c4(-mRoot->getWidth() / 2, mRoot->getHeight() / 2, 0, 1);
     SE_Matrix4f localM;

@@ -280,6 +280,10 @@ public:
 		return mCurrentContent;
 	}
 	void measure();
+	void setNeedUpdateTransform(bool b)
+	{
+		mNeedUpdateTransform = b;
+	}
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
@@ -332,6 +336,7 @@ protected:
 	_ElementContentList mElementContentList;
 	int mSeqNum;// the sequence number in its parent element
 	SE_ElementContent* mCurrentContent;
+	bool mNeedUpdateTransform;
 };
 class SE_ElementContent
 {

@@ -13,6 +13,8 @@
 #include "SE_Element.h"
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
+#include "SE_DataValueDefine.h"
+
 static const int DEFAULT_COLOR = 0;
 static const int REPLACE_R = 1;
 static const int REPLACE_G = 2;
@@ -195,6 +197,8 @@ void SE_Image::setSurface(SE_Surface* surface)
 	}
 	sp->setColorOperationMode(op);
 	surface->setShaderProperty(sp);
+    surface->setProgramDataID(COLOREXTRACT_SHADER);
+	surface->setRendererID(COLOREXTRACT_RENDERER);
 }
 int SE_Image::getValidImageNum()
 {
@@ -437,10 +441,13 @@ SE_ElementImage::SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData
 }
 void SE_ElementImage::setImageData(SE_RectPrimitive* primitive)
 {
-
+	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
 }
 void SE_ElementImage::setSurface(SE_Surface* surface)
-{}
+{
+	surface->setProgramDataID(DEFAULT_SHADER);
+	surface->setRendererID(DEFAULT_RENDERER);
+}
 /////////////////////////////////////
 SE_ColorEffectImage::SE_ColorEffectImage()
 {

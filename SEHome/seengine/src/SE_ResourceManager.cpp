@@ -2789,7 +2789,9 @@ void SE_ResourceManager::loadShader(const char* shaderFileName)
 		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
         return;
     }
-    SE_XmlElementCalculus<SE_Element, SE_ResourceManager::_Impl> m(mImpl);
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
 }
 void SE_ResourceManager::loadRenderer(const char* rendererFileName)
@@ -2804,7 +2806,9 @@ void SE_ResourceManager::loadRenderer(const char* rendererFileName)
 		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
         return;
     }
-    SE_XmlElementCalculus<SE_Element, SE_ResourceManager::_Impl> m(mImpl);
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
 }
 static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent = 0)

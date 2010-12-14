@@ -23,6 +23,7 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
 	mSpatialID = SE_ID::createSpatialID();
 	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
+	mNeedUpdateTransform = true;
 }
 SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {
@@ -42,6 +43,7 @@ SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
     setCollisionable(true);
 	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
+	mNeedUpdateTransform = true;
 }
 SE_Spatial::~SE_Spatial() 
 {
@@ -67,7 +69,7 @@ void SE_Spatial::updateWorldTransform()
     //updateWorldScale();
     //updateWorldRotate();
     //updateWorldTranslate();
-    if(mParent)
+    if(mParent && mNeedUpdateTransform)
     {
         SE_Matrix4f parentM = mParent->getWorldTransform();
         SE_Matrix4f localM;

@@ -125,6 +125,10 @@ void SE_RenderManager::draw()
 			if(camera)
 			{
 				m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
+				SE_Rect<int> rect = camera->getViewport();
+			    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+			    SE_Renderer::setClearColor(SE_Vector4f(0, 0, 0, 0.0));
+			    SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
 			}
 			for(int i = 0 ; i < RQ_NUM ; i++)
 			{

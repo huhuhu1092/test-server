@@ -199,6 +199,10 @@ public:
 	// set it to the other spatial;
 	SE_RenderState* getRenderState(RENDER_STATE_TYPE type);
 	void setRenderStateSource(RENDER_STATE_TYPE type, RENDER_STATE_SOURCE rsSource);
+	void setNeedUpdateTransform(bool b)
+	{
+		mNeedUpdateTransform = b;
+	}
 public:
     virtual void addChild(SE_Spatial* child);
     virtual void removeChild(SE_Spatial* child);
@@ -268,5 +272,6 @@ private:
 	SE_ElementID mElementID;
 	SE_RenderTargetID mRenderTargetID;
 	int mRQ;
+	bool mNeedUpdateTransform;
 };
 #endif
