@@ -348,6 +348,10 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 		dst->mElementContentList.push_back(e);
 	}
 }
+bool SE_Element::hasCurrentContent()
+{
+	return mCurrentContent != NULL;
+}
 SE_Element* SE_Element::clone()
 {
 	SE_Element* e = new SE_Element;

@@ -295,6 +295,7 @@ protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
 	void clone(SE_Element *src, SE_Element* dst);
+	bool hasCurrentContent();
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
