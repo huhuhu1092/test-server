@@ -43,10 +43,12 @@ static void drawScene(int width, int height)
 class SEDemo : public PVRShell
 {
 public:
+	enum {S_STOP, S_RUN};
 	SEDemo()
 	{
 		//mPhysics = NULL;
 		mSelectedSpatial = NULL;
+		mState = S_STOP;
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -58,6 +60,7 @@ private:
 private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
+	int mState;
 };
 bool SEDemo::InitApplication()
 {
@@ -72,7 +75,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
@@ -218,11 +221,15 @@ void SEDemo::handleInput(int width, int height)
 		*/
 		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 		SE_Element* root = elementManager->getRoot();
-		root->startAnimation();
+		if(mState == S_STOP)
+		{
+		    root->prevFrame();
+		}
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
+		/*
 		if(mSelectedSpatial)
 		{
 		    SE_AnimationID animID = mSelectedSpatial->getAnimationID();
@@ -231,10 +238,18 @@ void SEDemo::handleInput(int width, int height)
 			if(anim)
 		        anim->nextFrame(30, 30);
 		}
+		*/
+		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		SE_Element* root = elementManager->getRoot();
+		if(mState == S_STOP)
+		{
+            root->nextFrame();
+		}
         LOGI("## right ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+		/*
 		if(mSelectedSpatial)
 		{
 			SE_PauseAllAnimationTravel rat;
@@ -246,6 +261,19 @@ void SEDemo::handleInput(int width, int height)
 	        SE_Spatial* root = sceneManager->getRoot();
 	        SE_PauseAllAnimationTravel rat;
 	        root->travel(&rat, true);
+		}
+		*/
+		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		SE_Element* root = elementManager->getRoot();
+		if(mState == S_STOP || root->isAnimationEnd())
+		{
+		    root->startAnimation();
+			mState = S_RUN;
+		}
+		else if(mState == S_RUN)
+		{
+			root->stopAnimation();
+			mState = S_STOP;
 		}
   	    LOGI("## up ##\n");
     }

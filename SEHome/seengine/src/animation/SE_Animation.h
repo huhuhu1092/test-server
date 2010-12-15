@@ -2,6 +2,7 @@
 #define SE_ANIMATION_H
 #include "SE_Time.h"
 #include "SE_ID.h"
+#include <vector>
 class SE_Interpolate;
 class SE_Animation
 {
@@ -112,10 +113,22 @@ public:
 	{
 		return mCurrFrame;
 	}
+	void setCurrentFrame(int currFrame)
+	{
+        mCurrFrame = currFrame;
+	}
 	void reset()
 	{
 		mPassedTime = 0;
 		mCurrFrame = -1;
+	}
+	void setKeys(std::vector<unsigned int> keys)
+	{
+		mKeys = keys;
+	}
+	std::vector<unsigned int> getKeys()
+	{
+		return mKeys;
 	}
 public:
     virtual void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
@@ -135,10 +148,6 @@ protected:
     {
         mPassedTime = passt;
     }
-    void setCurrentFrame(int f)
-    {
-        mCurrFrame = f;
-    }
 private:
     void oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 private:
@@ -154,5 +163,6 @@ private:
 	int mFrameNum;
 	int mCurrFrame;
 	SE_TimeMS mTimePerFrame;
+	std::vector<unsigned int> mKeys;
 };
 #endif

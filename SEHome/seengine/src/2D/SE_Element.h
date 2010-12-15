@@ -203,6 +203,10 @@ public:
 		return mTimeKey;
 	}
 	void startAnimation();
+	void stopAnimation();
+	void nextFrame();
+	void prevFrame();
+	bool isAnimationEnd();
 	void setActionLayer(SE_Action::_ActionLayer* actionLayer)
 	{
 		mActionLayer = actionLayer;

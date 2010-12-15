@@ -269,6 +269,125 @@ SE_Element* SE_Element::clone()
 {
 	return NULL;
 }
+void SE_Element::stopAnimation()
+{
+	if(mAnimation)
+	{
+        SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+		SE_Animation* runAnim = animationManager->getAnimation(mAnimationID);
+		if(runAnim)
+		{
+			runAnim->pause();
+		}
+	}
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        e->stopAnimation();
+    }
+}
+void SE_Element::nextFrame()
+{
+	if(mAnimation)
+	{
+        SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+		SE_Animation* runAnim = animationManager->getAnimation(mAnimationID);
+		if(runAnim)
+		{
+			int frame = runAnim->getCurrentFrame();
+			std::vector<unsigned int> keys = runAnim->getKeys();
+			std::vector<unsigned int>::iterator it;
+			for(it = keys.begin() ; it != keys.end(); it++)
+			{
+                if(*it > frame)
+					break;
+			}
+			if(it != keys.end())
+			{
+				runAnim->setCurrentFrame(*it);
+                this->update(*it);
+			}
+			else
+			{
+				it = keys.begin();
+                runAnim->setCurrentFrame(*it);
+                this->update(*it);
+			}
+		}
+	}
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        e->nextFrame();
+    }
+}
+void SE_Element::prevFrame()
+{
+	if(mAnimation)
+	{
+        SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+		SE_Animation* runAnim = animationManager->getAnimation(mAnimationID);
+		if(runAnim)
+		{
+			int frame = runAnim->getCurrentFrame();
+			std::vector<unsigned int> keys = runAnim->getKeys();
+			std::vector<unsigned int>::reverse_iterator it;
+			for(it = keys.rbegin() ; it != keys.rend(); it++)
+			{
+                if(*it <= frame)
+					break;
+			}
+			if(it != keys.rend())
+			{
+				it++;
+			}
+			if(it != keys.rend())
+			{
+				runAnim->setCurrentFrame(*it);
+                this->update(*it);
+			}
+			else
+			{
+				it = keys.rbegin();
+				runAnim->setCurrentFrame(*it);
+                this->update(*it);
+			}
+		}
+	}
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        e->prevFrame();
+    }
+}
+bool SE_Element::isAnimationEnd()
+{
+	bool end = true;
+	if(mAnimation)
+	{
+        SE_AnimationManager* animationManager = SE_Application::getInstance()->getAnimationManager();
+		SE_Animation* runAnim = animationManager->getAnimation(mAnimationID);
+		if(runAnim)
+		{
+			if(runAnim->isEnd())
+				end = true;
+			else
+				end = false;
+		}
+	}
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        bool el = e->isAnimationEnd();
+		if(el == false && end == true)
+			end = false;
+    }
+	return end;
+}
 void SE_Element::startAnimation()
 {
 	if(mAnimation)
@@ -448,6 +567,7 @@ void SE_SequenceElement::spawn()
 	}
 	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
 	anim->setElement(this);
+	anim->setKeys(keys);
 	int frameRate = SE_Application::getInstance()->getFrameRate();
 	SE_TimeMS duration = (this->getEndKey() - this->getStartKey()) * frameRate;
 	anim->setDuration(duration);

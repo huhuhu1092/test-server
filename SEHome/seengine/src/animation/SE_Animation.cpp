@@ -152,4 +152,5 @@ void SE_Animation::clone(SE_Animation* dst)
     dst->setFrameNum(getFrameNum());
     dst->setCurrentFrame(getCurrentFrame());
     dst->setTimePerFrame(getTimePerFrame());
+	dst->mKeys = mKeys;
 }
