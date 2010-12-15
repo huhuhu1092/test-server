@@ -38,6 +38,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();
+
     elementManager->load(fileName.c_str());
     SE_SceneManager* sceneManager = mApp->getSceneManager();
 	SE_Element* elementRoot = elementManager->getRoot();
