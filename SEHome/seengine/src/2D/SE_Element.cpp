@@ -119,6 +119,7 @@ SE_Spatial* SE_Element::createSpatial()
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
 		_ElementList::iterator it;
+
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 		{
 			SE_Element* e = *it;
