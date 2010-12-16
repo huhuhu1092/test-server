@@ -175,6 +175,22 @@ public:
     {
         mPivotY = y;
     }
+	float getDeltaLeft()
+	{
+		return mDeltaLeft;
+	}
+	float getDeltaTop()
+	{
+		return mDeltaTop;
+	}
+	void setDeltaLeft(float f)
+	{
+		mDeltaLeft = f;
+	}
+	void setDeltaTop(float f)
+	{
+		mDeltaTop = f;
+	}
 	void setMountPointRef(const SE_MountPointID& mp)
 	{
 		mMountPointID = mp;
@@ -249,7 +265,7 @@ public:
     void addChild(SE_Element* e);
     void removeChild(SE_Element* e = NULL);
 	void removeChild(const SE_ElementID& id);
-	void calculateRect(int pivotx, int pivoty, int imageWidth, int imageHeight);
+	void calculateRect(float pivotx, float pivoty, float width, float height);
 	void setPrev(SE_Element* prev)
 	{
 		mPrevElement = prev;
@@ -274,11 +290,6 @@ public:
 	{
 		mSeqNum = i;
 	}
-	void setCurrentContent(const SE_StringID& id);
-	SE_ElementContent* getCurrentContent()
-	{
-		return mCurrentContent;
-	}
 	void measure();
 	void setNeedUpdateTransform(bool b)
 	{
@@ -295,7 +306,7 @@ protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
 	void clone(SE_Element *src, SE_Element* dst);
-	bool hasCurrentContent();
+	void updateMountPoint();
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -308,6 +319,8 @@ protected:
     float mPivotY;
 	float mMountPointX;
 	float mMountPointY;
+	float mDeltaLeft;
+	float mDeltaTop;
     SE_Element* mParent;
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
@@ -336,7 +349,6 @@ protected:
 	typedef std::list<SE_ElementContent*> _ElementContentList;
 	_ElementContentList mElementContentList;
 	int mSeqNum;// the sequence number in its parent element
-	SE_ElementContent* mCurrentContent;
 	bool mNeedUpdateTransform;
 };
 class SE_ElementContent
@@ -406,6 +418,18 @@ private:
 	SE_Image* mImage;
 	SE_ElementImage* mElementImage;
 };
+class SE_TextureElement : public SE_Element
+{
+public:
+	SE_TextureElement(SE_ElementImage* image);
+	void setElementImage(SE_ElementImage* image);
+	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);
+	void spawn();
+	void measure();
+	SE_Spatial* createSpatial();
+private:
+	SE_ElementImage* mElementImage;
+};
 class SE_ActionElement : public SE_Element
 {
 public:
@@ -465,8 +489,7 @@ private:
 	SE_Sequence* mSequence;
 	SE_Element* mCurrentElement;
 };
-class SE_TextureElement : public SE_Element
-{};
+
 class SE_ColorEffectImageElement : public SE_Element
 {
 public:
