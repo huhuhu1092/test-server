@@ -97,10 +97,18 @@ private:
 	_ImageUnitData mImageUnits[IMG_SIZE];
 
 };
-class SE_ElementImage : public SE_ImageBase
+//SE_RawImage is the image which data is SE_ImageData , 
+// SE_ImageData is stored in resource manager
+// SE_RawImage will to use mImageDataID to remove imageData
+class SE_RawImage : public SE_ImageBase
 {
 public:
 	SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
+	~SE_ElementImage();
+	SE_ImageData* getImageData() const
+	{
+		return mImageData;
+	}
 	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 private:
