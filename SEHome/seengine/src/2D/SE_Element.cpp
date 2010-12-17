@@ -30,7 +30,7 @@
 #include <math.h>
 SE_Element::SE_Element()
 {
-    mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
+    mLeft = mTop = mWidth = mHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
     mPivotX = mPivotY = INVALID_GEOMINFO;
@@ -63,7 +63,6 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mNextElement = NULL;
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
-	mCurrentContent = NULL;
 	mNeedUpdateTransform = true;
 }
 SE_Element::~SE_Element()
@@ -146,13 +145,14 @@ SE_Spatial* SE_Element::createSpatial()
 		SE_CommonNode* commonNode = new SE_CommonNode;
 		commonNode->setRenderTarget(mRenderTarget);
 		mSpatialID = commonNode->getSpatialID();
-		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
-		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
+		commonNode->setLocalTranslate(SE_Vector3f(getLeft(), getTop(), 0));
+		commonNode->setNeedUpdateTransform(mNeedUpdateTransform);
 		_ElementList::iterator it;
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 		{
 			SE_Element* e = *it;
 			SE_Spatial* spatial = e->createSpatial();
+			spatial->setNeedUpdateTransform(e->mNeedUpdateTransform);
 			if(spatial)
 			    commonNode->addChild(spatial);
 		}
@@ -208,13 +208,19 @@ void SE_Element::calculateRect(float pivotx, float pivoty, float width, float he
 {
 	if(width == INVALID_GEOMINFO || height == INVALID_GEOMINFO)
 	{
-		LOGI("... error width and height can not be INVALID_GEOMINFO\n");
+		LOGE("... error width and height can not be INVALID_GEOMINFO\n");
 		return;
 	}
-    mPivotX = pivotx;
-	mPivotY = pivoty;
+	if(pivotx != INVALID_GEOMINFO)
+	{
+        mPivotX = pivotx;
+	}
+	if(pivoty != INVALID_GEOMINFO)
+	{
+	    mPivotY = pivoty;
+	}
 	updateMountPoint();
-	if(realPivotX == INVALID_GEOMINFO || realPivotY == INVALID_GEOMINFO ||
+	if(mPivotX == INVALID_GEOMINFO || mPivotY == INVALID_GEOMINFO ||
 	   mMountPointX == INVALID_GEOMINFO || mMountPointY == INVALID_GEOMINFO)
 	{
 	}
@@ -314,6 +320,7 @@ void SE_Element::spawn()
 			if(mParent)
 				mp = mParent->getMountPoint(mMountPointID);
 			SE_Element* e = ec->createElement(mp.getX(), mp.getY());
+			e->setLocalLayer(mLocalLayer);
 			this->addChild(e);
 			e->spawn();
 		}
@@ -348,6 +355,7 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 		SE_ElementContent* e = (*it)->clone();
 		dst->mElementContentList.push_back(e);
 	}
+	dst->mMountPointSet = mMountPointSet;
 }
 SE_Element* SE_Element::clone()
 {
@@ -397,7 +405,7 @@ void SE_Element::measure()
 			srcRect.bottom = e->getTop() + e->getDeltaTop() + e->getHeight();
 			merge(mergedRect, srcRect);
 		}
-		float left = 0, right = 0;
+		float left = 0, top = 0;
 		if(left < mergedRect.left)
 			mergedRect.left = left;
 		if(top < mergedRect.top)
@@ -494,13 +502,14 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance() ->getResourceManager();
 	SE_Util::SplitStringList strList = SE_Util::splitString(mImageURI.getStr(), "/");
 	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
+	SE_Element* rete = NULL;
 	if(t == SE_IMAGE_TABLE)
 	{
 	    SE_ImageElement* imageElement = new SE_ImageElement;
 	    imageElement->setMountPoint(mpx, mpy);
 	    imageElement->setImage(mImageURI);
-	    imageElement->spawn();
-		imageElement->measure();
+		imageElement->setMountPoint(mpx, mpy);
+		rete = imageElement;
 	}
 	else if(t == SE_ELEMENT_TABLE)
 	{
@@ -511,55 +520,101 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		textureElement->addChild(e);
 		textureElement->setPivotX(e->getPivotX());
 		textureElement->setPivotY(e->getPivotY());
+		textureElement->setMountPoint(mpx, mpy);
 		SE_ImageDataID imageDataID = e->getID().getStr();
 		SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 		if(!imageData)
+		{
 			imageData = new SE_ImageData;
+			resourceManager->setImageData(imageDataID, imageData);
+		}
 		textureElement->setImage(imageDataID, imageData);
 		e->setMountPoint(0, 0);
 		e->setPivotX(0);
 		e->setPivotX(0);
-
+		SE_TextureTarget* textureTarget = new SE_TextureTarget(imageData);
+		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+	    SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
+		textureElement->saveRenderTargetID(renderTargetID);
+		e->setRenderTarget(renderTargetID);
+	    e->setNeedUpdateTransform(false);
+		rete = textureElement;
 	}
-	return imageElement;
+	return rete;
 }
-SE_TextureElement::SE_TextureElement(SE_ElementImage* image)
+SE_TextureElement::SE_TextureElement(SE_RawImage* image)
 {
 	mElementImage = image;
 }
-void SE_TextureElement::setElementImage(SE_ElementImage* image)
+SE_TextureElement::~SE_TextureElement()
+{
+	if(mElementImage)
+		delete mElementImage;
+}
+void SE_TextureElement::setElementImage(SE_RawImage* image)
 {
 	if(mElementImage)
 		delete mElementImage;
 	mElementImage = image;
 }
 void SE_TextureElement::spawn()
-{}
+{
+	if(mElementImage)
+	{
+		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
+		if(!mChildren.empty())
+		{
+			_ElementList::iterator it;
+			for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+			{
+				SE_Element* e = *it;
+				e->spawn();
+			}
+		}
+	}
+}
+void SE_TextureElement::setImage(const SE_ImageDataID& id, SE_ImageData* imageData)
+{
+	if(mElementImage)
+		delete mElementImage;
+	mElementImage = new SE_RawImage(id, imageData);
+}
 void SE_TextureElement::measure()
 {
-		float ratio = imageElement->getHeight() / (float)imageElement->getWidth();
-		float angle = 2 * SE_RadianToAngle(atanf(imageElement->getWidth() / 20.0f));
-        SE_Camera* camera = new SE_Camera;
-		SE_Vector3f v(imageElement->getLeft() + imageElement->getWidth() / 2, 
-			          imageElement->getTop() + imageElement->getHeight() / 2, 10);
-		camera->setLocation(v);
-		camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
-		camera->setViewport(0, 0, imageElement->getWidth(), imageElement->getHeight());
-		imageData->setWidth(imageElement->getWidth());
-		imageData->setHeight(imageElement->getHeight());
-        SE_TextureTarget* textureTarget = new SE_TextureTarget(imageData);
-		textureTarget->setWidth(imageElement->getWidth());
-		textureTarget->setHeight(imageElement->getHeight());
-		textureTarget->setCamera(camera);
-		textureTarget->create();
-		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-		SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
-		e->setRenderTarget(renderTargetID);
-		e->setNeedUpdateTransform(false);
+	SE_Element::measure();
+	float ratio = mHeight / mWidth;
+	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
+    SE_Camera* camera = new SE_Camera;
+	float left = mLeft + mDeltaLeft + mWidth / 2;
+	float top = mTop + mDeltaTop + mHeight / 2;
+	SE_Vector3f v(left , top , 10);
+	camera->setLocation(v);
+	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
+	camera->setViewport(0, 0, mWidth, mHeight);
+	mElementImage->getImageData()->setWidth(mWidth);
+	mElementImage->getImageData()->setHeight(mHeight);
+	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+	SE_RenderTarget* textureTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
+	textureTarget->setWidth(mWidth);
+	textureTarget->setHeight(mHeight);
+	textureTarget->setCamera(camera);
+	textureTarget->create();
 }
 SE_Spatial* SE_TextureElement::createSpatial()
 {
-	return NULL;
+    SE_CommonNode* node = new SE_CommonNode;
+    SE_Spatial* spatial = createSpatialByImage(mElementImage);
+	if(spatial)
+	    node->addChild(spatial);
+	_ElementList::iterator it;
+	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	{
+		SE_Element* e = *it;
+		SE_Spatial* s = e->createSpatial();
+		if(s)
+	        node->addChild(s);
+	}
+	return node;
 }
 /////////
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI) : mActionURI(actionURI)
@@ -572,7 +627,10 @@ SE_ElementContent* SE_ActionContent::clone()
 }
 SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 {
-	return NULL;
+	SE_ActionElement* e = new SE_ActionElement;
+	e->setActionID(mActionURI);
+	e->setMountPoint(mpx, mpy);
+	return e;
 }
 SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI) : mStateTableURI(stateTableURI)
 {}
@@ -599,19 +657,11 @@ SE_Spatial* SE_NullElement::createSpatial()
 SE_ImageElement::SE_ImageElement()
 {
 	mImage = NULL;
-	mElementImage = NULL;
 }
 SE_ImageElement::~SE_ImageElement()
 {
 	if(mImage)
 		delete mImage;
-}
-void SE_ImageElement::setImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData)
-{
-	if(mElementImage)
-		delete mElementImage;
-	mElementImage = new SE_ElementImage(imageDataID, imageData);
-
 }
 void SE_ImageElement::spawn()
 {
@@ -629,19 +679,6 @@ void SE_ImageElement::spawn()
 	{
 	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 	}
-	else if(mElementImage)
-	{
-		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
-		if(!mChildren.empty())
-		{
-			_ElementList::iterator it;
-			for(it = mChildren.begin() ; it != mChildren.end() ; it++)
-			{
-				SE_Element* e = *it;
-				e->spawn();
-			}
-		}
-	}
 	else
 	{
 		setLeft(0);
@@ -652,35 +689,12 @@ void SE_ImageElement::spawn()
 }
 void SE_ImageElement::measure()
 {
-	if(mChildren.empty())
-	{
-
-	}
-	else
-	{
-		SE_Element::measure();
-	}
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {
 	if(mImage)
 	{
 	    return createSpatialByImage(mImage);
-	}
-	else if(mElementImage)
-	{
-		SE_CommonNode* node = new SE_CommonNode;
-        SE_Spatial* spatial = createSpatialByImage(mElementImage);
-		node->addChild(spatial);
-		_ElementList::iterator it;
-		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
-		{
-			SE_Element* e = *it;
-			SE_Spatial* s = e->createSpatial();
-			if(s)
-			    node->addChild(s);
-		}
-		return node;
 	}
 	else
 		return NULL;

@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<Element id = "texturetest" layer = "1" pivotx = "0" pivoty = "0">
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <Element id = "ttt" layer = "1" mountpointref = "p1">
+        <Image dataref = "ImageTable1.xml/it1/E03/nian" />
+    </Element>
+</Element>
 <Element id="lady" layer="1">
     <MountPoint id = "p1" x = "0" y = "0" />
     <MountPoint id = "p2" x = "110" y = "0" />
@@ -13,6 +19,7 @@
     <MountPoint id = "p11" x = "200" y = "70" />
     <MountPoint id = "p12" x = "238" y = "70" />
     <MountPoint id = "p13" x = "278" y = "70" />
+    <!--
     <Element id="body" pivotx="0" pivoty="0" layer="1" mountpointref = "p1" >
         <Image dataref="ImageTable1.xml/it1/E01" />
     </Element>
@@ -27,10 +34,10 @@
     </Element>
      <Element id="qunzi" pivotx="0" pivoty="0" layer="2" mountpointref = "p5">
          <Image dataref="ImageTable1.xml/it1/E05" />
-    </Element>
+     </Element>
      <Element id="zui" pivotx="0" pivoty="0" layer="5" mountpointref = "p6">
          <Image dataref = "ImageTable1.xml/it1/E06"/>
-    </Element>
+     </Element>
      <Element id="bizi" pivotx="0" pivoty="0" layer="5" mountpointref = "p7">
         <Image dataref="ImageTable1.xml/it1/E07"/>
     </Element>
@@ -49,7 +56,11 @@
     <Element id="rightmeimao" pivotx="238" pivoty="0" layer="6" mountpointref = "p12">
         <Image dataref="ImageTable1.xml/it1/B01/right" />
     </Element>
-    <Element id = "testAction" mountpointref = "p13">
+    <Element id = "testAction" mountpointref = "p13" layer = "6">
         <Action dataref="TestAction.xml/t1" />
+    </Element>
+    -->
+    <Element id = "testTexture" mountpointref = "p13" layer = "5">
+        <Image dataref = "TestElement.xml/texturetest" />
     </Element>
 </Element>

@@ -13,7 +13,8 @@
 #else
 #include <IL/il.h>
 #include <IL/ilu.h>
-#include <IL/ilut.h>
+#include <windows.h>
+//#include <IL/ilut.h>
 #endif
 
 SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)

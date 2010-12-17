@@ -26,6 +26,7 @@
 #include <string.h>
 SE_Init2D::SE_Init2D(SE_Application* app) : SE_Command(app)
 {
+	left = top = width = height = 0;
 }
 SE_Init2D::~SE_Init2D()
 {}
@@ -41,12 +42,10 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     SE_ElementManager* elementManager = mApp->getElementManager();
     elementManager->load("TestElement.xml/lady");
     SE_SceneManager* sceneManager = mApp->getSceneManager();
-	SE_Element* elementRoot = elementManager->getRoot();
-	elementRoot->setCurrentContent("0");
-	elementRoot->setLeft(0);
-	elementRoot->setTop(0);
-	elementRoot->setWidth(480);
-	elementRoot->setHeight(800);
+    elementManager->setViewport(left, top, width, height);
+	elementManager->spawn();
+	elementManager->measure();
+	elementManager->update(0);
     SE_Spatial* root = elementManager->createSpatial();
     SE_DepthTestState* rs = new SE_DepthTestState();
 	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
@@ -74,11 +73,14 @@ SE_2DUpdateCameraCommand::~SE_2DUpdateCameraCommand()
 void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_Vector3f location(0, 0, 10);
-    float ratio = height / (float)width;
-    float angle = 2 * SE_RadianToAngle(atanf(width / 20.0f));
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	SE_Rect<int> viewport = elementManager->getViewport();
+    float ratio = (viewport.bottom - viewport.top) / (float)(viewport.right - viewport.left);
+	float angle = 2 * SE_RadianToAngle(atanf((viewport.right - viewport.left) / 20.0f));
     SE_Camera* camera = new SE_MotionEventCamera;
 	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
-	camera->setViewport(0, 0, width, height);
+	camera->setViewport(0, 0, viewport.right - viewport.left, viewport.bottom - viewport.top);
+	//camera->setViewport(0, 0, width, height);
     mApp->setCamera(SE_Application::MAIN_CAMERA, camera);
     mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
 	SE_InputManager* inputManager = mApp->getInputManager();

@@ -434,16 +434,21 @@ SE_ImageUnit SE_Image::createImageDataFullPath(const char* inputstr)
 	return resourceManager->getImageUnit(inputstr);
 }
 ////////////////////////////
-SE_ElementImage::SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData)
+SE_RawImage::SE_RawImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData)
 {
 	mImageDataID = imageDataID;
 	mImageData = imageData;
 }
-void SE_ElementImage::setImageData(SE_RectPrimitive* primitive)
+SE_RawImage::~SE_RawImage()
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->removeImageData(mImageDataID);
+}
+void SE_RawImage::setImageData(SE_RectPrimitive* primitive)
 {
 	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
 }
-void SE_ElementImage::setSurface(SE_Surface* surface)
+void SE_RawImage::setSurface(SE_Surface* surface)
 {
 	surface->setProgramDataID(DEFAULT_SHADER);
 	surface->setRendererID(DEFAULT_RENDERER);

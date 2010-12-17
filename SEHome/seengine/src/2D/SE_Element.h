@@ -17,7 +17,7 @@ class SE_KeyFrameController;
 class SE_Animation;
 class SE_ImageBase;
 class SE_Image;
-class SE_ElementImage;
+class SE_RawImage;
 class SE_ImageData;
 class SE_Sequence;
 class SE_ColorEffectImage;
@@ -264,7 +264,10 @@ public:
 	}
     void addChild(SE_Element* e);
     void removeChild(SE_Element* e = NULL);
-	void removeChild(const SE_ElementID& id);
+	SE_Element* removeChild(const SE_ElementID& id);
+	//if pivotx == INVALID_GEOMINFO mPivotX will not be changed
+	// if pivoty == INVALID_GEOMINFO mPivotY will not be changed
+	//if width == INVALID_GEOMINFO || height == INVALID_GEOMINFO , error will be raised
 	void calculateRect(float pivotx, float pivoty, float width, float height);
 	void setPrev(SE_Element* prev)
 	{
@@ -409,26 +412,30 @@ public:
     {
 		mImageID = image;
     }
-	void setImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
 	void spawn();
 	void measure();
 	SE_Spatial* createSpatial();
 private:
     SE_StringID mImageID;
 	SE_Image* mImage;
-	SE_ElementImage* mElementImage;
 };
 class SE_TextureElement : public SE_Element
 {
 public:
-	SE_TextureElement(SE_ElementImage* image);
-	void setElementImage(SE_ElementImage* image);
+	SE_TextureElement(SE_RawImage* image = NULL);
+	~SE_TextureElement();
+	void setElementImage(SE_RawImage* image);
 	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);
 	void spawn();
 	void measure();
+	void saveRenderTargetID(const SE_RenderTargetID& id)
+	{
+		mRenderTargetID = id;
+	}
 	SE_Spatial* createSpatial();
 private:
-	SE_ElementImage* mElementImage;
+	SE_RawImage* mElementImage;
+	SE_RenderTargetID mRenderTargetID;
 };
 class SE_ActionElement : public SE_Element
 {
