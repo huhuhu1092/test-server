@@ -146,11 +146,13 @@ SE_Spatial* SE_Element::createSpatial()
 		commonNode->setRenderTarget(mRenderTarget);
 		mSpatialID = commonNode->getSpatialID();
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft(), getTop(), 0));
+		commonNode->setNeedUpdateTransform(mNeedUpdateTransform);
 		_ElementList::iterator it;
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 		{
 			SE_Element* e = *it;
 			SE_Spatial* spatial = e->createSpatial();
+			spatial->setNeedUpdateTransform(e->mNeedUpdateTransform);
 			if(spatial)
 			    commonNode->addChild(spatial);
 		}
@@ -318,6 +320,7 @@ void SE_Element::spawn()
 			if(mParent)
 				mp = mParent->getMountPoint(mMountPointID);
 			SE_Element* e = ec->createElement(mp.getX(), mp.getY());
+			e->setLocalLayer(mLocalLayer);
 			this->addChild(e);
 			e->spawn();
 		}
@@ -352,6 +355,7 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 		SE_ElementContent* e = (*it)->clone();
 		dst->mElementContentList.push_back(e);
 	}
+	dst->mMountPointSet = mMountPointSet;
 }
 SE_Element* SE_Element::clone()
 {
@@ -504,6 +508,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	    SE_ImageElement* imageElement = new SE_ImageElement;
 	    imageElement->setMountPoint(mpx, mpy);
 	    imageElement->setImage(mImageURI);
+		imageElement->setMountPoint(mpx, mpy);
 		rete = imageElement;
 	}
 	else if(t == SE_ELEMENT_TABLE)

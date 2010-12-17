@@ -79,7 +79,8 @@ void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDel
 	float angle = 2 * SE_RadianToAngle(atanf((viewport.right - viewport.left) / 20.0f));
     SE_Camera* camera = new SE_MotionEventCamera;
 	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
-	camera->setViewport(0, 0, width, height);
+	camera->setViewport(0, 0, viewport.right - viewport.left, viewport.bottom - viewport.top);
+	//camera->setViewport(0, 0, width, height);
     mApp->setCamera(SE_Application::MAIN_CAMERA, camera);
     mApp->setCurrentCamera(SE_Application::MAIN_CAMERA);
 	SE_InputManager* inputManager = mApp->getInputManager();
