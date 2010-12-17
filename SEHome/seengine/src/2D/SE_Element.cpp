@@ -30,7 +30,7 @@
 #include <math.h>
 SE_Element::SE_Element()
 {
-    mLeft = mTop = mWidth = mHeight = INVALID_GEOMINFO;
+    mLeft = mTop = mWidth = mHeight = 0;
     mAnimation = NULL;
     mParent = NULL;
     mPivotX = mPivotY = INVALID_GEOMINFO;
@@ -63,7 +63,6 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mNextElement = NULL;
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
-	mCurrentContent = NULL;
 	mNeedUpdateTransform = true;
 }
 SE_Element::~SE_Element()
@@ -146,8 +145,7 @@ SE_Spatial* SE_Element::createSpatial()
 		SE_CommonNode* commonNode = new SE_CommonNode;
 		commonNode->setRenderTarget(mRenderTarget);
 		mSpatialID = commonNode->getSpatialID();
-		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
-		commonNode->setLocalTranslate(SE_Vector3f(getLeft() + getWidth() / 2, getTop() + getHeight() / 2, 0));
+		commonNode->setLocalTranslate(SE_Vector3f(getLeft(), getTop(), 0));
 		_ElementList::iterator it;
 		for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 		{
@@ -403,7 +401,7 @@ void SE_Element::measure()
 			srcRect.bottom = e->getTop() + e->getDeltaTop() + e->getHeight();
 			merge(mergedRect, srcRect);
 		}
-		float left = 0, right = 0;
+		float left = 0, top = 0;
 		if(left < mergedRect.left)
 			mergedRect.left = left;
 		if(top < mergedRect.top)
@@ -532,14 +530,14 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		SE_TextureTarget* textureTarget = new SE_TextureTarget(imageData);
 		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 	    SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
-		mRenderTargetID = renderTargetID;
+		textureElement->saveRenderTargetID(renderTargetID);
 		e->setRenderTarget(renderTargetID);
 	    e->setNeedUpdateTransform(false);
-		rete = textureElement
+		rete = textureElement;
 	}
 	return rete;
 }
-SE_TextureElement::SE_TextureElement(SE_ElementImage* image)
+SE_TextureElement::SE_TextureElement(SE_RawImage* image)
 {
 	mElementImage = image;
 }
@@ -548,7 +546,7 @@ SE_TextureElement::~SE_TextureElement()
 	if(mElementImage)
 		delete mElementImage;
 }
-void SE_TextureElement::setElementImage(SE_ElementImage* image)
+void SE_TextureElement::setElementImage(SE_RawImage* image)
 {
 	if(mElementImage)
 		delete mElementImage;
@@ -574,12 +572,12 @@ void SE_TextureElement::setImage(const SE_ImageDataID& id, SE_ImageData* imageDa
 {
 	if(mElementImage)
 		delete mElementImage;
-	mElementImage = new SE_ElementImage(id, imageData);
+	mElementImage = new SE_RawImage(id, imageData);
 }
 void SE_TextureElement::measure()
 {
 	SE_Element::measure();
-	float ratio = mHeight / mWidth
+	float ratio = mHeight / mWidth;
 	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
     SE_Camera* camera = new SE_Camera;
 	float left = mLeft + mDeltaLeft + mWidth / 2;
@@ -591,7 +589,7 @@ void SE_TextureElement::measure()
 	mElementImage->getImageData()->setWidth(mWidth);
 	mElementImage->getImageData()->setHeight(mHeight);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-	SE_TextureTarget* textureTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
+	SE_RenderTarget* textureTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
 	textureTarget->setWidth(mWidth);
 	textureTarget->setHeight(mHeight);
 	textureTarget->setCamera(camera);
@@ -624,7 +622,10 @@ SE_ElementContent* SE_ActionContent::clone()
 }
 SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 {
-	return NULL;
+	SE_ActionElement* e = new SE_ActionElement;
+	e->setActionID(mActionURI);
+	e->setMountPoint(mpx, mpy);
+	return e;
 }
 SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI) : mStateTableURI(stateTableURI)
 {}
@@ -662,7 +663,7 @@ void SE_ImageElement::spawn()
 	SE_StringID imageDataID = mImageID;
 	if(mImage)
 	{
-	    setRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 		return;
 	}
 	if(imageDataID.isValid())
@@ -671,7 +672,7 @@ void SE_ImageElement::spawn()
 	}
 	if(mImage)
 	{
-	    setRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
+	    calculateRect(mImage->getPivotX(), mImage->getPivotY(), mImage->getWidth(), mImage->getHeight());
 	}
 	else
 	{

@@ -448,7 +448,7 @@ void SE_RawImage::setImageData(SE_RectPrimitive* primitive)
 {
 	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
 }
-void SE_ElementImage::setSurface(SE_Surface* surface)
+void SE_RawImage::setSurface(SE_Surface* surface)
 {
 	surface->setProgramDataID(DEFAULT_SHADER);
 	surface->setRendererID(DEFAULT_RENDERER);

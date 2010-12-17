@@ -33,21 +33,54 @@ void SE_ElementManager::load(const char* elementURI)
 	if(mRoot)
 		delete mRoot;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	mRoot = resourceManager->getElement(elementURI);
+	SE_Element* c = resourceManager->getElement(elementURI);
+	mRoot = new SE_Element;
+	mRoot->setLeft(0);
+	mRoot->setTop(0);
+	mRoot->setWidth(0);
+	mRoot->setHeight(0);
+	mRoot->setID("ROOT");
+	mRoot->addChild(c);
 }
-
+void SE_ElementManager::spawn()
+{
+	if(mRoot)
+	{
+		mRoot->spawn();
+	}
+}
+void SE_ElementManager::measure()
+{
+	if(mRoot)
+	{
+		mRoot->measure();
+	}
+}
+void SE_ElementManager::update(unsigned int key)
+{
+	if(mRoot)
+		mRoot->update(key);
+}
+void SE_ElementManager::setViewport(int left, int top, int width ,int height)
+{
+	mViewport.left = left;
+	mViewport.top = top;
+	mViewport.right = left + width;
+	mViewport.bottom = top + height;
+}
 SE_Spatial* SE_ElementManager::createSpatial()
 {
     if(!mRoot)
         return NULL;
-	mRoot->spawn();
-	mRoot->update(0);
+	mRoot->setLeft(mViewport.left);
+	mRoot->setTop(mViewport.top);
+	mRoot->setWidth(mViewport.right - mViewport.left);
+	mRoot->setHeight(mViewport.bottom - mViewport.top);
 	SE_Spatial* spatial = mRoot->createSpatial();
     spatial->setLocalTranslate(SE_Vector3f(0, 0, 0));
     spatial->setLocalScale(SE_Vector3f(1, 1, 1));
     SE_Vector4f c1(1, 0, 0, 0);
-    //SE_Vector4f c2(0, -1, 0, 0);
-	SE_Vector4f c2(0, 1, 0, 0);
+    SE_Vector4f c2(0, -1, 0, 0);
     SE_Vector4f c3(0, 0, 1, 0);
     SE_Vector4f c4(-mRoot->getWidth() / 2, mRoot->getHeight() / 2, 0, 1);
     SE_Matrix4f localM;

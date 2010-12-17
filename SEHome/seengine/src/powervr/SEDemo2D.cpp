@@ -77,6 +77,10 @@ bool SEDemo::InitApplication()
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
 	c->fileName = "TestElement.xml";
+	c->left = 0;
+	c->top = 0;
+	c->width = 480;
+	c->height = 800;
 	SE_Application::getInstance()->postCommand(c);
 	return true;
 }

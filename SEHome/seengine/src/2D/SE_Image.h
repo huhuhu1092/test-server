@@ -103,8 +103,8 @@ private:
 class SE_RawImage : public SE_ImageBase
 {
 public:
-	SE_ElementImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
-	~SE_ElementImage();
+	SE_RawImage(const SE_ImageDataID& imageDataID, SE_ImageData* imageData);
+	~SE_RawImage();
 	SE_ImageData* getImageData() const
 	{
 		return mImageData;
