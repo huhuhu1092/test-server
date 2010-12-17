@@ -2659,6 +2659,8 @@ SE_ImageUnit SE_ResourceManager::getImageUnit(const char* imageUnitPath)
 			iu.imageRect.width = imageData->getWidth();
 			iu.imageRect.height = imageData->getHeight();
 			iu.imageRect.index = imageItem->getProperty().getIndex();
+			iu.imageRect.pivotx = imageItem->getProperty().getPivotX();
+			iu.imageRect.pivoty = imageItem->getProperty().getPivotY();
 			std::string path = stringList[0] + "/" + stringList[1] + "/" + stringList[2];
 			iu.imageURL = path.c_str();
 			if(stringList.size() > 3)

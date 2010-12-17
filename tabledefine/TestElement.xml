@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<Element id = "texturetest" layer = "1" >
+    <MountPoint id = "p1" x = "0" y = "0" />
+    <Element id = "ttt" layer = "1" mountpointref = "p1">
+        <Image dateref = "ImageTable1.xml/it1/E03/nian" />
+    </Element>
+</Element>
 <Element id="lady" layer="1">
     <MountPoint id = "p1" x = "0" y = "0" />
     <MountPoint id = "p2" x = "110" y = "0" />
@@ -51,5 +57,8 @@
     </Element>
     <Element id = "testAction" mountpointref = "p13">
         <Action dataref="TestAction.xml/t1" />
+    </Element>
+    <Element id = "testTexture" mountpointref = "p13">
+        <Image dataref = "TestElement.xml/texturetest" />
     </Element>
 </Element>
