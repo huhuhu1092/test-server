@@ -65,6 +65,7 @@ typedef SE_StringID SE_SkinJointControllerID;
 typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
 typedef int SE_RenderTargetID;
+typedef SE_CommonID SE_CameraID;
 class SE_ID
 {
 public:
@@ -85,6 +86,7 @@ public:
     static SE_SkinJointControllerID createSkinJointControllerID(const char* str);
 	static SE_MountPointID createMountPointID(const char* str);
 	static SE_RendererID createRendererID(const char* str);
+    static SE_CameraID createCameraID();
 };
 ///////////////////////////
 /*

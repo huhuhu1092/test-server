@@ -115,7 +115,8 @@ void SE_RenderManager::draw()
 	std::list<_RenderTargetUnit*>::iterator startIt = mRenderTargetList.begin();
 	it++;
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-	for(; it != mRenderTargetList.end() ; it++)
+	//for(; it != mRenderTargetList.end() ; it++)
+	while(it != mRenderTargetList.end())
 	{
 		_RenderTargetUnit* rt = *it;
 		SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
@@ -127,7 +128,7 @@ void SE_RenderManager::draw()
 				m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
 				SE_Rect<int> rect = camera->getViewport();
 			    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-			    SE_Renderer::setClearColor(SE_Vector4f(0, 0, 0, 0.0));
+				SE_Renderer::setClearColor(renderTarget->getBackground());
 			    SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
 			}
 			for(int i = 0 ; i < RQ_NUM ; i++)
@@ -143,6 +144,7 @@ void SE_RenderManager::draw()
 				}
 			}
 		}
+		it++;
 	}
 	if(startIt != mRenderTargetList.end())
 	{

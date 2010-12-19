@@ -243,6 +243,10 @@ SE_RendererID SE_ID::createRendererID(const char* str)
 {
 	return SE_StringID(str);
 }
+SE_CameraID SE_ID::createCameraID()
+{
+    return SE_Application::getInstance()->createCommonID();
+}
 ////////////////////////////////////////////
 /*
 SE_GeometryDataID::SE_GeometryDataID()

@@ -17,6 +17,7 @@ class SE_AnimationManager;
 class SE_ElementManager;
 class SE_SimObjectManager;
 class SE_RenderTargetManager;
+class SE_CameraManager;
 class SE_Application
 {
 public:
@@ -90,6 +91,10 @@ public:
 	{
 		return mRenderTargetManager;
 	}
+	SE_CameraManager* getCameraManager()
+	{
+		return mCameraManager;
+	}
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
 	//index 0 to max camera num
@@ -156,6 +161,7 @@ protected:
 	SE_ElementManager* mElementManager;
     SE_SimObjectManager* mSimObjectManager;
 	SE_RenderTargetManager* mRenderTargetManager;
+	SE_CameraManager* mCameraManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

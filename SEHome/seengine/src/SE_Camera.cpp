@@ -63,6 +63,11 @@ SE_Matrix4f SE_Camera::getWorldToViewMatrix() const
     SE_Matrix4f vtow = getViewToWorldMatrix();
     return vtow.inverse(); 
 }
+void SE_Camera::transformLocation(const SE_Matrix4f& m)
+{
+	SE_Vector4f newLocation = SE_Vector4f(mLocation, 1.0);
+	mLocation = m.map(newLocation).xyz();
+}
 SE_Matrix4f SE_Camera::getViewToWorldMatrix() const
 {
     SE_Matrix3f rm;

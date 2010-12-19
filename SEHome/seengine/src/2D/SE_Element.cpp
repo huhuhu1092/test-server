@@ -25,6 +25,7 @@
 #include "SE_Camera.h"
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
+#include "SE_CameraManager.h"
 #include "SE_Math.h"
 #include <algorithm>
 #include <math.h>
@@ -44,6 +45,7 @@ SE_Element::SE_Element()
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
 	mNeedUpdateTransform = true;
+	mOwnRenderTargetCamera = false;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -64,6 +66,7 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mSeqNum = -1;
 	mNeedUpdateTransform = true;
+	mOwnRenderTargetCamera = false;
 }
 SE_Element::~SE_Element()
 {
@@ -144,6 +147,7 @@ SE_Spatial* SE_Element::createSpatial()
 	{
 		SE_CommonNode* commonNode = new SE_CommonNode;
 		commonNode->setRenderTarget(mRenderTarget);
+		commonNode->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 		mSpatialID = commonNode->getSpatialID();
 		commonNode->setLocalTranslate(SE_Vector3f(getLeft(), getTop(), 0));
 		commonNode->setNeedUpdateTransform(mNeedUpdateTransform);
@@ -294,6 +298,7 @@ SE_Spatial* SE_Element::createSpatialByImage(SE_ImageBase* image)
 	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
 	geom->setElementID(eid);
 	geom->setRenderTarget(mRenderTarget);
+	geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
     delete[] meshArray;
     mSpatialID = spatialID;
     mPrimitiveID = primitiveID;
@@ -536,8 +541,10 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 	    SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(textureTarget);
 		textureElement->saveRenderTargetID(renderTargetID);
-		e->setRenderTarget(renderTargetID);
-	    e->setNeedUpdateTransform(false);
+		textureTarget->setBackground(SE_Vector4f(0, 0, 0, 0));
+        e->setOwnRenderTargetCamera(true);
+		//e->setRenderTarget(renderTargetID);
+	    //e->setNeedUpdateTransform(false);
 		rete = textureElement;
 	}
 	return rete;
@@ -550,6 +557,8 @@ SE_TextureElement::~SE_TextureElement()
 {
 	if(mElementImage)
 		delete mElementImage;
+	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
+	rm->removeRenderTarget(mRenderTargetID);
 }
 void SE_TextureElement::setElementImage(SE_RawImage* image)
 {
@@ -582,22 +591,31 @@ void SE_TextureElement::setImage(const SE_ImageDataID& id, SE_ImageData* imageDa
 void SE_TextureElement::measure()
 {
 	SE_Element::measure();
+	_ElementList::iterator it;
+	for(it = mChildren.begin() ; it != mChildren.end() ;it++)
+	{
+		SE_Element* e = *it;
+		e->setRenderTarget(mRenderTargetID);
+	}
 	float ratio = mHeight / mWidth;
 	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
     SE_Camera* camera = new SE_Camera;
-	float left = mLeft + mDeltaLeft + mWidth / 2;
-	float top = mTop + mDeltaTop + mHeight / 2;
+	float left = mDeltaLeft + mWidth / 2;
+	float top = mDeltaTop + mHeight / 2;
 	SE_Vector3f v(left , top , 10);
 	camera->setLocation(v);
-	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
+	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 	camera->setViewport(0, 0, mWidth, mHeight);
 	mElementImage->getImageData()->setWidth(mWidth);
 	mElementImage->getImageData()->setHeight(mHeight);
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+	SE_CameraID cameraID = SE_ID::createCameraID();
+	cameraManager->setCamera(cameraID, camera);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 	SE_RenderTarget* textureTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
 	textureTarget->setWidth(mWidth);
 	textureTarget->setHeight(mHeight);
-	textureTarget->setCamera(camera);
+	textureTarget->setCamera(cameraID);
 	textureTarget->create();
 }
 SE_Spatial* SE_TextureElement::createSpatial()
@@ -610,7 +628,13 @@ SE_Spatial* SE_TextureElement::createSpatial()
 	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
 	{
 		SE_Element* e = *it;
+		e->setLeft(mLeft);
+		e->setTop(mTop);
 		SE_Spatial* s = e->createSpatial();
+		//SE_Vector3f translate = s->getLocalTranslate();
+		//SE_Vector3f texTranslate = spatial->getLocalTranslate();
+		//translate = SE_Vector3f(translate.x + texTranslate.x - mWidth / 2, translate.y + texTranslate.y - mHeight / 2, translate.z) ;
+		//s->setLocalTranslate(translate);
 		if(s)
 	        node->addChild(s);
 	}

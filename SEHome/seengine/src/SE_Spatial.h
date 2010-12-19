@@ -194,6 +194,14 @@ public:
 	{
 		return mElementID;
 	}
+	void setOwnRenderTargetCamera(bool own)
+	{
+		mOwnRenderTargetCamera = own;
+	}
+	bool isOwnRenderTargetCamera()
+	{
+		return mOwnRenderTargetCamera;
+	}
 	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
 	//dont use getRenderState to get some spatial's renderstate and then 
 	// set it to the other spatial;
@@ -273,5 +281,6 @@ private:
 	SE_RenderTargetID mRenderTargetID;
 	int mRQ;
 	bool mNeedUpdateTransform;
+	bool mOwnRenderTargetCamera;
 };
 #endif

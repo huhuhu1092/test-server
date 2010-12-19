@@ -1,6 +1,7 @@
 #ifndef SE_RENDERTARGET_H
 #define SE_RENDERTARGET_H
 #include "SE_ID.h"
+#include "SE_Vector.h"
 class SE_Camera;
 class SE_ImageData;
 class SE_RenderTarget
@@ -8,6 +9,7 @@ class SE_RenderTarget
 public:
     enum RENDER_TARGET_TYPE {TEXTURE, RENDERBUFFER, FRAMEBUFFER};
     enum RENDERABLE_TYPE {RENDERABLE, NO_RENDERABLE};
+	enum CAMERA_TYPE {LOCAL_CAMERA, GLOBAL_CAMERA};
     SE_RenderTarget();
     virtual ~SE_RenderTarget();
     SE_RenderTargetID getRenderTarget()
@@ -44,14 +46,19 @@ public:
     {
         return mRenderTargetType;
     }
-    SE_Camera* getCamera()
+    SE_Camera* getCamera();
+    void setCamera(const SE_CameraID& camera)
     {
-        return mCamera;
+        mCameraID = camera;
     }
-    void setCamera(SE_Camera* camera)
-    {
-        mCamera = camera;
-    }
+	void setCameraType(CAMERA_TYPE ct)
+	{
+		mCameraType = ct;
+	}
+	CAMERA_TYPE getCameraType()
+	{
+		return mCameraType;
+	}
     void setRenderableType(RENDERABLE_TYPE t)
     {
         mRenderableType = t;
@@ -60,6 +67,14 @@ public:
     {
         return mRenderableType;
     }
+	SE_Vector4f getBackground()
+	{
+		return mBackground;
+	}
+	void setBackground(const SE_Vector4f& bg)
+	{
+		mBackground = bg;
+	}
     virtual void create() = 0;
     virtual bool prepare() = 0;
 protected:
@@ -69,7 +84,9 @@ private:
     RENDERABLE_TYPE mRenderableType;
     int mWidth;
     int mHeight;
-    SE_Camera* mCamera;
+    SE_CameraID mCameraID;
+	CAMERA_TYPE mCameraType;
+	SE_Vector4f mBackground;
 };
 class SE_FrameBufferTarget : public SE_RenderTarget
 {

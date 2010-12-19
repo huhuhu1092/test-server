@@ -1,6 +1,8 @@
 #include "SE_RenderTarget.h"
 #include "SE_Camera.h"
 #include "SE_ImageData.h"
+#include "SE_Application.h"
+#include "SE_CameraManager.h"
 #ifdef GLES_20
     #include <GLES2/gl2.h>
 #else
@@ -10,14 +12,19 @@ SE_RenderTarget::SE_RenderTarget()
 {
     mWidth = 10;
     mHeight = 10;
-    mCamera = NULL;
     mRenderableType = RENDERABLE;
     mRenderTargetType = FRAMEBUFFER;
+	mCameraType = LOCAL_CAMERA;
 }
 SE_RenderTarget::~SE_RenderTarget()
 {
-	if(mCamera)
-		delete mCamera;
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+	cameraManager->removeCamera(mCameraID);
+}
+SE_Camera* SE_RenderTarget::getCamera()
+{
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+	return cameraManager->getCamera(mCameraID);
 }
 /////////////////
 SE_FrameBufferTarget::SE_FrameBufferTarget()

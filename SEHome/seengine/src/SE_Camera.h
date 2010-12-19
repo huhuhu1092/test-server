@@ -23,9 +23,11 @@ public:
     SE_Matrix4f getViewToWorldMatrix() const;
     void setFrustum(float fov, float ratio, float near, float far);
     void translateLocal(const SE_Vector3f& translate);
+	void transformLocation(const SE_Matrix4f& m);
     SE_Ray screenCoordinateToRay(int x, int y);
     void getFrustumPlanes(SE_Plane planes[6]) const;
     void setLocation(const SE_Vector3f& loc);
+	//void setViewToWorldPrefixMatrix(const SE_Matrix4f& m);
 	SE_Vector3f getLocation()
 	{
 		return mLocation;

@@ -3,6 +3,9 @@
 #include "SE_BoundingVolume.h"
 #include "SE_RenderTargetManager.h"
 #include "SE_RenderManager.h"
+#include "SE_Camera.h"
+#include "SE_Application.h"
+#include "SE_RenderTarget.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_Spatial)
 SE_Spatial::SE_Spatial(SE_Spatial* parent)
@@ -24,6 +27,7 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
 	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
 	mNeedUpdateTransform = true;
+	mOwnRenderTargetCamera = false;
 }
 SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 {
@@ -44,6 +48,7 @@ SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
 	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
 	mNeedUpdateTransform = true;
+	mOwnRenderTargetCamera = false;
 }
 SE_Spatial::~SE_Spatial() 
 {
@@ -84,6 +89,20 @@ void SE_Spatial::updateWorldTransform()
         mWorldTransform = mPrevMatrix.mul(localM).mul(mPostMatrix);
         //mWorldTransform.set(mWorldRotate.toMatrix3f(), mWorldScale, mWorldTranslate);
     }
+	if(mOwnRenderTargetCamera)
+	{
+		SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
+		SE_RenderTarget* rt = rm->getRenderTarget(mRenderTargetID);
+		if(rt)
+		{
+			SE_Camera* camera = rt->getCamera();
+			SE_RenderTarget::CAMERA_TYPE ct = rt->getCameraType();
+			if(ct == SE_RenderTarget::LOCAL_CAMERA)
+			{
+				camera->transformLocation(mWorldTransform);
+			}
+		}
+	}
 }
 void SE_Spatial::updateBoundingVolume()
 {

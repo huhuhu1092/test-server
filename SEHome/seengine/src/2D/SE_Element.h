@@ -293,15 +293,19 @@ public:
 	{
 		mSeqNum = i;
 	}
-	void measure();
 	void setNeedUpdateTransform(bool b)
 	{
 		mNeedUpdateTransform = b;
+	}
+	void setOwnRenderTargetCamera(bool own)
+	{
+		mOwnRenderTargetCamera = own;
 	}
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
 	virtual void spawn();
+	virtual void measure();
     virtual void travel(SE_ElementTravel* travel);
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum();
@@ -353,6 +357,7 @@ protected:
 	_ElementContentList mElementContentList;
 	int mSeqNum;// the sequence number in its parent element
 	bool mNeedUpdateTransform;
+	bool mOwnRenderTargetCamera;
 };
 class SE_ElementContent
 {
