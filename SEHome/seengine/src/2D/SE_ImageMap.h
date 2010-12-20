@@ -6,6 +6,7 @@
 struct SE_ImageRect
 {
 	enum {NO_MIRROR, MIRROR_X, MIRROR_Y, MIRROR_XY};
+    enum COLOR_CHANNEL {ALL, R, G, B, A, CHANNEL_NUM};
     int x;
     int y;
     int width;
@@ -14,6 +15,7 @@ struct SE_ImageRect
 	int pivotx;
 	int pivoty;
 	int index;
+	COLOR_CHANNEL c;
 	SE_ImageRect()
     {
         x = y = 0;
@@ -21,18 +23,17 @@ struct SE_ImageRect
 		pivotx = pivoty = INVALID_GEOMINFO;
 		mirrorType = NO_MIRROR;
 		index = 0;
+		c = ALL;
     }
 };
 struct SE_ImageUnit
 {  
-    enum COLOR_CHANNEL {ALL, R, G, B, A, CHANNEL_NUM};
     SE_ImageRect imageRect;
 	SE_ImageDataID imageDataID;
 	SE_StringID imageURL; // when you get a SE_ImageUnit From SE_ResourceManager, it will 
 	                      // separate your input url to imageURL and ext.
 	SE_StringID ext;
-	COLOR_CHANNEL c;
-	SE_ImageUnit() : c(ALL)
+	SE_ImageUnit()
 	{
 	}
 	bool isValid() const

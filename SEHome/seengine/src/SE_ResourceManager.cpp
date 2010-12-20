@@ -1114,6 +1114,26 @@ void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlE
                 LOGI("... parse x value error\n");
             }
 		}
+		else if(!strcmp(name, "channel"))
+		{
+			std::string c = value;
+			if(c == "r")
+			{
+				imageRect.c = SE_ImageRect::R;
+			}
+			else if(c == "g")
+			{
+				imageRect.c = SE_ImageRect::G;
+			}
+			else if(c == "b")
+			{
+				imageRect.c = SE_ImageRect::B;
+			}
+			else if(c == "a")
+			{
+				imageRect.c = SE_ImageRect::A;
+			}
+		}
 		pAttribute = pAttribute->Next();
 	}
 	imageRect.x = startx;
