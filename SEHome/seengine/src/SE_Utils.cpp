@@ -1,4 +1,6 @@
 #include "SE_Utils.h"
+#include "SE_Common.h"
+#include "SE_Log.h"
 #include <string.h>
 #include <list>
 #if defined(WIN32)
@@ -13,6 +15,20 @@
 #endif
 ////////////////
 static const char ws[] = " \t";
+enum _STR_STATE {_START, _ERROR, REPLACE, READY_R, READY_G, READY_B, READY_A,R, G, B, A};
+static const char REPLACESTART = '[';
+static const char REPLACEEND = ']';
+static const char RED = 'r';
+static const char GREEN = 'g';
+static const char BLUE = 'b';
+static const char ALPHA = 'a';
+static bool isDelimit(int c)
+{
+	if(c <= 32)
+		return true;
+	else 
+		return false;
+}
 /////////////////
 unsigned int SE_Util::host2NetInt32(unsigned int i)
 {
@@ -247,4 +263,254 @@ std::string SE_Util::stringReplace(std::string& src, const std::string& beReplac
 		beginIndex = index + 1;
 	}
 	return src;
+}
+SE_SignColor SE_Util::stringToSignColor(const std::string& str)
+{
+	SE_SignColor color;
+	SE_Util::SplitStringList strList = SE_Util::splitString(str.c_str(), " ");
+	SE_ASSERT(strList.size() == 3);
+    std::string signstr = "+-";
+	for(int i = 0 ; i < strList.size() ; i++)
+    {
+        std::string str = strList[i];
+        std::string::size_type n = str.find_first_of(signstr, 0);
+        std::string numstr;
+		if(n == std::string::npos)
+        {
+			color.data[i].sign = SE_SignColor::SIGN_NO;
+			color.data[i].value = atoi(str.c_str());
+        }
+        else if(str[n] == '+')
+        {
+            color.data[i].sign = SE_SignColor::SIGN_PLUS;
+            numstr = str.substr(1);
+		    color.data[i].value = atoi(numstr.c_str());
+        }
+        else if(str[n] == '-')
+        {
+            color.data[i].sign = SE_SignColor::SIGN_MINUS;
+            numstr = str.substr(1);
+			color.data[i].value = atoi(numstr.c_str());
+        }
+    }
+	return color;
+}
+SE_ExtractImageStr SE_Util::stringToExtractImage(const std::string& url)
+{
+	std::string::const_iterator it;
+	std::string base, red, green, blue, alpha;
+	int currState = _START;
+	std::string currStr;
+	bool hasReplace = false;
+	for(it = url.begin() ; it != url.end() ; it++)
+	{
+        int c = *it;
+        switch(currState)
+		{
+		case _START:
+			if(c == REPLACESTART)
+			{
+                currState = REPLACE;
+				base = currStr;
+				hasReplace = true;
+			}
+			else
+			{
+			    if(!isDelimit(c))
+			    {
+				    currStr += c;
+			    }
+			}
+			break;
+		case REPLACE:
+			if(c == RED || c == GREEN || c == BLUE || c == ALPHA)
+			{
+			    switch(c)
+				{
+				case RED:
+					currState = R;
+					break;
+				case GREEN:
+					currState = G;
+					break;
+				case BLUE:
+					currState = B;
+					break;
+				case ALPHA:
+					currState = A;
+					break;
+				}
+			}
+			else
+			{
+				if(!isDelimit(c))
+				{
+					if(c == REPLACEEND)
+					{
+						currState = _START;
+					}
+					else
+					{
+						LOGE("... error : first replace should be : r, g, b, a\n");
+					}
+				}
+			}
+			break;
+		case R:
+			if(c == '=')
+			{
+				currState = READY_R;
+				currStr = "";
+			}
+			else
+			{
+				if(!isDelimit(c))
+				{
+				    if(c == REPLACEEND)
+				    {
+						currState = _START;
+				    }
+					else
+					{
+						LOGE("... error : in [] it should has = \n");
+					}
+				}
+			}
+			break;
+		case G:
+			if(c == '=')
+			{
+				currState = READY_G;
+				currStr = "";
+			}
+			else
+			{
+				if(!isDelimit(c))
+				{
+				    if(c == REPLACEEND)
+				    {
+						currState = _START;
+				    }
+					else
+					{
+						LOGE("... error : in [] it should has = \n");
+					}
+				}
+			}
+			break;
+		case B:
+			if(c == '=')
+			{
+				currState = READY_B;
+				currStr = "";
+			}
+			else
+			{
+				if(!isDelimit(c))
+				{
+				    if(c == REPLACEEND)
+				    {
+						currState = _START;
+				    }
+					else
+					{
+						LOGE("... error : in [] it should has = \n");
+					}
+				}
+			}
+			break;
+		case A:
+			if(c == '=')
+			{
+				currState = READY_A;
+				currStr = "";
+			}
+			else
+			{
+				if(!isDelimit(c))
+				{
+				    if(c == REPLACEEND)
+				    {
+						currState = _START;
+				    }
+					else
+					{
+						LOGE("... error : in [] it should has = \n");
+					}
+				}
+			}
+			break;
+		case READY_R:
+			if(!isDelimit(c))
+			{
+				if(c == REPLACEEND)
+				{
+					red = currStr;
+					currState = _START;
+				}
+				else
+				{
+					currStr += c;
+				}
+			}
+			break;
+		case READY_G:
+			if(!isDelimit(c))
+			{
+				if(c == REPLACEEND)
+				{
+					green = currStr;
+					currState = _START;
+				}
+				else
+				{
+					currStr += c;
+				}
+			}
+			break;
+		case READY_B:
+			if(!isDelimit(c))
+			{
+				if(c == REPLACEEND)
+				{
+					blue = currStr;
+					currState = _START;
+				}
+				else
+				{
+					currStr += c;
+				}
+			}
+			break;
+		case READY_A:
+			if(!isDelimit(c))
+			{
+				if(c == REPLACEEND)
+				{
+					alpha = currStr;
+					currState = _START;
+				}
+				else
+				{
+					currStr += c;
+				}
+			}
+			break;
+		}
+	}
+	if(currState != _START)
+	{
+		LOGE("... string input has error. please check\n");
+	}
+	if(!hasReplace)
+	{
+		base = currStr;
+	}
+	SE_ExtractImageStr image;
+	image.base = base;
+	image.red = red;
+	image.green = green;
+	image.blue = blue;
+	image.alpha = alpha;
+	return image;
 }

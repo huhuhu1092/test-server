@@ -12,6 +12,7 @@
 #include "SE_SimObjectManager.h"
 #include "SE_RenderTargetManager.h"
 #include "SE_CameraManager.h"
+#include "SE_ParamManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -37,8 +38,7 @@ SE_Application::SE_Application()
     mSimObjectManager = new SE_SimObjectManager;
 	mRenderTargetManager = new SE_RenderTargetManager;
 	mCameraManager = new SE_CameraManager;
-	//mImageMapManager = new SE_ImageMapManager;
-	//mImageTableManager = new SE_ImageTableManager;
+	mParamManager = new SE_ParamManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -73,6 +73,8 @@ SE_Application::~SE_Application()
 		delete mRenderTargetManager;
 	if(mCameraManager)
 		delete mCameraManager;
+	if(mParamManager)
+		delete mParamManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {

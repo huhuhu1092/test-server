@@ -1254,17 +1254,17 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         if(!strcmp(name, "id"))
         {
 			std::string id = value;
-            /*
+			std::string fullpathID;
 			if(parent)
 			{
-				id = std::string(parent->getID().getStr()) + "/" + value;
+				fullpathID = std::string(parent->getID().getStr()) + "/" + value;
 			}
 			else
 			{
-				id = pro->xmlName + "/" + value;
+				fullpathID = pro->xmlName + "/" + value;
 			}
-			*/
 			element->setID(id.c_str());
+			element->setFullPathID(fullpathID.c_str());
 			if(element->getID().isValid())
 			{
 			    hasid = true;
@@ -2870,6 +2870,10 @@ void SE_ResourceManager::loadRenderer(const char* rendererFileName)
 	ec.resourceManager = this;
     SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
+}
+void SE_ResourceManager::loadParam(const char* paramTable)
+{
+
 }
 static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent = 0)
 {

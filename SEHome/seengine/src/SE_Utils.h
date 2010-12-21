@@ -21,6 +21,23 @@ struct SE_DeleteObject
 		delete ptr;
 	}
 };
+struct SE_SignColor
+{
+	enum {SIGN_NO, SIGN_PLUS, SIGN_MINUS};
+	struct 
+	{
+	    int sign;
+	    int value;
+	} data[3];
+};
+struct SE_ExtractImageStr
+{
+	std::string base;
+	std::string red;
+	std::string green;
+	std::string blue;
+	std::string alpha;
+};
 class SE_Util
 {
 public:
@@ -40,6 +57,8 @@ public:
 	static std::string trimRight(const char* str);
 	static std::string trim(const char* str);
 	static std::string stringReplace(std::string& src, const std::string& beReplacedStr, const std::string& replaceStr);
+	static SE_SignColor stringToSignColor(const std::string& str); 
+	static SE_ExtractImageStr stringToExtractImage(const std::string& url);
 };
 
 #endif /** end SE_UTILS_H*/

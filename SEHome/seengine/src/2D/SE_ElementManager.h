@@ -11,6 +11,11 @@ class SE_Spatial;
 class SE_ElementManager
 {
 public:
+	struct TextureProperty
+	{
+		SE_ImageDataID imageDataID;
+		SE_ImageData* imageData;
+	};
     SE_ElementManager();
     ~SE_ElementManager();
 	void setViewport(int left, int top, int width ,int height);
@@ -23,8 +28,8 @@ public:
 	void spawn();
 	void measure();
 	void update(unsigned int key);
-    void addElement(SE_Element* parent, SE_Element* child);
-    void removeElement(SE_Element* e);
+    bool addRenderTargetElement(SE_Element* child);
+    void removeRenderTargetElement(SE_Element* e);
     SE_Element* getRoot() const
     {
         return mRoot;

@@ -8,6 +8,7 @@
 #include "SE_Action.h"
 #include "SE_TableManager.h"
 #include "SE_Geometry3D.h"
+#include "SE_Utils.h"
 #include <string>
 #include <list>
 #include <map>
@@ -111,6 +112,14 @@ public:
     {
         return mID;
     }
+	void setFullPathID(const SE_ElementID& id)
+	{
+		mFullPathID = id;
+	}
+	SE_ElementID getFullPathID()
+	{
+		return mFullPathID;
+	}
     void setParent(SE_Element* parent)
     {
         mParent = parent;
@@ -334,6 +343,7 @@ protected:
     SE_Quat mLocalRotate;
     SE_Layer mLocalLayer;
     SE_ElementID mID;
+	SE_ElementID mFullPathID;
     SE_SimObjectID mSimObjectID;
     SE_SpatialID mSpatialID;
     SE_PrimitiveID mPrimitiveID;
@@ -532,17 +542,6 @@ class SE_ColorEffectElement : public SE_Element
 public:
 	enum {MARK_A, MARK_R, MARK_G, MARK_B, MARK_NUM};
     enum {FN_ADD, FN_MULTIPLY, FN_NUM};
-	enum {SIGN_NO, SIGN_PLUS, SIGN_MINUS, SIGN_NUM};
-	struct _ColorWithSign
-	{
-        int sign;
-		int value;
-		_ColorWithSign()
-		{
-			sign = SIGN_NO;
-			value = 255;
-		}
-	};
 	struct _TextureMark
 	{
 		SE_StringID mTextureAddress;
@@ -554,7 +553,7 @@ public:
 		SE_StringID mTextureFnAddress;
 		int mTextureFnValue;
 		SE_StringID mColorAddress;
-        _ColorWithSign mColorValue[3];
+        SE_SignColor mColorValue;
 		_TextureMark()
 		{
 			mColorAlphaValue = 255;
@@ -595,6 +594,8 @@ public:
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();
 	void spawn();
+private:
+	void calculateValue();
 private:
 	SE_StringID mBackgroundAddress;
 	SE_StringID mBackgroundValue;

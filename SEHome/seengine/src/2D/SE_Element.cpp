@@ -26,7 +26,9 @@
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
 #include "SE_CameraManager.h"
+#include "SE_ParamManager.h"
 #include "SE_Math.h"
+#include "SE_Utils.h"
 #include <algorithm>
 #include <math.h>
 SE_Element::SE_Element()
@@ -526,7 +528,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		textureElement->setPivotX(e->getPivotX());
 		textureElement->setPivotY(e->getPivotY());
 		textureElement->setMountPoint(mpx, mpy);
-		SE_ImageDataID imageDataID = e->getID().getStr();
+		SE_ImageDataID imageDataID = e->getFullPathID().getStr();
 		SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 		if(!imageData)
 		{
@@ -969,13 +971,101 @@ void SE_ColorEffectControllerElement::spawn()
 		e->spawn();
 	}
 }
+SE_ColorEffectControllerElement::~SE_ColorEffectControllerElement()
+{}
+///////////////
 SE_ColorEffectElement::SE_ColorEffectElement()
 {}
 void SE_ColorEffectElement::update(unsigned int key)
 {}
 SE_Spatial* SE_ColorEffectElement::createSpatial()
-{}
+{
+	return NULL;
+}
+void SE_ColorEffectElement::calculateValue()
+{
+	SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+	if(mBackgroundAddress.isValid())
+	{
+		bool ok = false;
+		std::string str = paramManager->getString(mBackgroundAddress, ok);
+		if(ok)
+		{
+			mBackgroundValue = str.c_str();
+		}
+	}
+	if(mChannelAddress.isValid())
+	{
+        bool ok = false;
+		std::string str = paramManager->getString(mChannelAddress, ok);
+		if(ok)
+		{
+			mChannelValue = str.c_str();
+		}
+	}
+	if(mBackgroundAlphaAddress.isValid())
+	{
+		bool ok = false;
+		int a = paramManager->getInt(mBackgroundAlphaAddress, ok);
+		if(ok)
+		{
+			mBackgroundAlphaValue = a;
+		}
+	}
+	for(int i = 0 ; i < MARK_NUM ; i++)
+	{
+		_TextureMark& tm = mTextureMark[i];
+		if(tm.mColorAddress.isValid())
+		{
+			bool ok = false;
+			std::string str = paramManager->getString(tm.mColorAddress.getStr(), ok);
+			if(ok)
+			{
+				tm.mColorValue = SE_Util::stringToSignColor(str.c_str());
+			}
+		}
+		if(tm.mColorAlphaAddress.isValid())
+		{
+			bool ok = false;
+			int v = paramManager->getInt(tm.mColorAlphaAddress, ok);
+			if(ok)
+			{
+				tm.mColorAlphaValue = v;
+			}
+		}
+		if(tm.mFnAddress.isValid())
+		{
+			bool ok = false;
+			int v = paramManager->getInt(tm.mFnAddress, ok);
+            if(ok)
+			{
+				tm.mFnValue = v;
+			}
+		}
+		if(tm.mTextureFnAddress.isValid())
+		{
+			bool ok = false;
+			int v = paramManager->getInt(tm.mTextureFnAddress, ok);
+			if(ok)
+			{
+				tm.mTextureFnValue = v;
+			}
+		}
+		if(tm.mTextureAddress.isValid())
+		{
+			bool ok = false;
+			std::string str = paramManager->getString(tm.mTextureAddress, ok);
+			if(ok)
+			{
+				tm.mTextureValue = str.c_str();
+			}
+		}
+	}
+
+}
 void SE_ColorEffectElement::spawn()
 {
-    
+	calculateValue();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+        
 }

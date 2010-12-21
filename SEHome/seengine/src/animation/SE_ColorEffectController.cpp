@@ -1,6 +1,7 @@
 #include "SE_ColorEffectController.h"
 #include "SE_Element.h"
 #include "SE_Image.h"
+#include "SE_Utils.h"
 bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 {
 	std::string str = content.getStr();
@@ -56,32 +57,7 @@ SE_Element* SE_ColorEffect::createElement()
 			m.mColorAddress = getAddress(tc->mColor);
 		else
 		{
-			SE_Util::SplitStringList strList = SE_Util::splitString(tc->mColor.getStr(), " ");
-			SE_ASSERT(strList.size() == 3);
-            std::string signstr = "+-";
-			for(int i = 0 ; i < strList.size() ; i++)
-            {
-                std::string str = strList[i];
-                std::string::size_type n = str.find_first_of(signstr, 0);
-                std::string numstr;
-				if(n == std::string::npos)
-                {
-					m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_NO;
-					m.mColorValue[i].value = atoi(str.c_str());
-                }
-                else if(str[n] == '+')
-                {
-                    m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_PLUS;
-                    numstr = str.substr(1);
-					m.mColorValue[i].value = atoi(numstr.c_str());
-                }
-                else if(str[n] == '-')
-                {
-                    m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_MINUS;
-                    numstr = str.substr(1);
-					m.mColorValue[i].value = atoi(numstr.c_str());
-                }
-            }
+			m.mColorValue = SE_Util::stringToSignColor(tc->mColor.getStr());
 		}
 		if(isAddress(tc->mTextureID))
 			m.mTextureAddress = getAddress(tc->mTextureID);
