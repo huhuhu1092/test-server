@@ -56,7 +56,7 @@ SE_Element* SE_ColorEffectAnimationObject::createElement()
 	SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(mColorEffectRef.getStr());
 	if(!colorEffectController)
 		return NULL;
-	SE_ColorEffectElement* element = new SE_ColorEffectElement(colorEffectController, mColorEffectInput);
+	SE_ColorEffectControllerElement* element = new SE_ColorEffectControllerElement(colorEffectController);
 	element->setPivotX(colorEffectController->getPivotX());
 	element->setPivotY(colorEffectController->getPivotY());
 	element->setMountPointRef(this->getMountPointRef());

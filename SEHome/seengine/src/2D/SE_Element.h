@@ -501,7 +501,7 @@ private:
 	SE_Sequence* mSequence;
 	SE_Element* mCurrentElement;
 };
-
+/*
 class SE_ColorEffectImageElement : public SE_Element
 {
 public:
@@ -514,17 +514,95 @@ public:
 private:
 	SE_ColorEffectImage* mColorEffectImage;
 };
-class SE_ColorEffectElement : public SE_Element
+*/
+class SE_ColorEffectControllerElement : public SE_Element
 {
 public:
-	SE_ColorEffectElement(SE_ColorEffectController* colorEffectController, const SE_ColorEffectInput& input) : mColorEffectController(colorEffectController), mColorEffectInput(input)
+	SE_ColorEffectControllerElement(SE_ColorEffectController* colorEffectController) : mColorEffectController(colorEffectController)
 	{}
+	~SE_ColorEffectControllerElement();
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();
 	void spawn();
 private:
 	SE_ColorEffectController* mColorEffectController;
-	SE_ColorEffectInput mColorEffectInput;
+};
+class SE_ColorEffectElement : public SE_Element
+{
+public:
+	enum {MARK_A, MARK_R, MARK_G, MARK_B, MARK_NUM};
+    enum {FN_ADD, FN_MULTIPLY, FN_NUM};
+	enum {SIGN_NO, SIGN_PLUS, SIGN_MINUS, SIGN_NUM};
+	struct _ColorWithSign
+	{
+        int sign;
+		int value;
+		_ColorWithSign()
+		{
+			sign = SIGN_NO;
+			value = 255;
+		}
+	};
+	struct _TextureMark
+	{
+		SE_StringID mTextureAddress;
+		SE_StringID mTextureValue;
+		SE_StringID mColorAlphaAddress;
+        int mColorAlphaValue;
+		SE_StringID mFnAddress;
+		int mFnValue;
+		SE_StringID mTextureFnAddress;
+		int mTextureFnValue;
+		SE_StringID mColorAddress;
+        _ColorWithSign mColorValue[3];
+		_TextureMark()
+		{
+			mColorAlphaValue = 255;
+			mFnValue = FN_ADD;
+			mTextureFnValue = FN_ADD;
+		}
+	};
+	void setBackgroundAddress(const SE_StringID& address)
+	{
+		mBackgroundAddress = address;
+	}
+	void setBackgroundValue(const SE_StringID& v)
+	{
+		mBackgroundAddress = v;
+	}
+	void setChannelAddress(const SE_StringID& address)
+	{
+		mChannelAddress = address;
+	}
+	void setChannelValue(const SE_StringID& v)
+	{
+		mChannelValue = v;
+	}
+	void setBackgroundAlphaAddress(const SE_StringID& address)
+	{
+		mBackgroundAlphaAddress = address;
+	}
+	void setBackgroundAlphaValue(int a)
+	{
+		mBackgroundAlphaValue = a;
+	}
+	void setTextureMark(int index, const _TextureMark& tm)
+	{
+		if(index >= MARK_A && index < MARK_NUM)
+		    mTextureMark[index] = tm;
+	}
+	SE_ColorEffectElement();
+	void update(unsigned int key);
+	SE_Spatial* createSpatial();
+	void spawn();
+private:
+	SE_StringID mBackgroundAddress;
+	SE_StringID mBackgroundValue;
+	SE_StringID mChannelAddress;
+	SE_StringID mChannelValue;
+	SE_StringID mBackgroundAlphaAddress;
+    int mBackgroundAlphaValue;
+	_TextureMark mTextureMark[MARK_NUM];
 };
 typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
 typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;

@@ -2060,7 +2060,7 @@ void SE_ColorEffectInputHandler::handle(SE_ColorEffectAnimationObject* parent, T
 	if(!parent)
 		return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-
+    /*
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2095,6 +2095,7 @@ void SE_ColorEffectInputHandler::handle(SE_ColorEffectAnimationObject* parent, T
 		SE_XmlElementCalculus<SE_ColorEffectAnimationObject, _ActionContainer> m(pro);
         m.handleXmlChild(parent, pChild, i++);
     }   
+	*/
 }
 void SE_ColorEffectInputMarkHandler::handle(SE_ColorEffectAnimationObject* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2102,6 +2103,7 @@ void SE_ColorEffectInputMarkHandler::handle(SE_ColorEffectAnimationObject* paren
         return;
 	if(!parent)
 		return;
+	/*
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	while(pAttribute)
     {
@@ -2145,6 +2147,7 @@ void SE_ColorEffectInputMarkHandler::handle(SE_ColorEffectAnimationObject* paren
 		}
 		pAttribute = pAttribute->Next();
 	}
+	*/
 }
 void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent , TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2153,6 +2156,9 @@ void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent
 	if(!parent)
 		return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	float pivotx = INVALID_GEOMINFO;
+	float pivoty = INVALID_GEOMINFO;
+	SE_ColorEffectController* colorEffectController = NULL;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2161,12 +2167,28 @@ void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent
         int ival = -1;
 		if(!strcmp(name , "id"))
 		{
-  	        SE_ColorEffectController* colorEffectController = new SE_ColorEffectController;
+  	        colorEffectController = new SE_ColorEffectController;
 	        SE_StringID str = value;
             parent->setItem(str, colorEffectController);
 		}
+		else if(!strcmp(name, "pivotx"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+			{
+				pivotx = (float)atoi(value);
+			}
+		}
+		else if(!strcmp(name, "pivoty"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+			{
+				pivoty = (float)atoi(value);
+			}
+		}
 		pAttribute = pAttribute->Next();
 	}
+	colorEffectController->setPivotX(pivotx);
+	colorEffectController->setPivotY(pivoty);
 }
 void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2202,6 +2224,8 @@ void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElemen
 		}
 		else if(!strcmp(name, "alpha"))
 		{
+			ce->setBackgroundAlpha(SE_StringID(value));
+			/*
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
 			{
 			    ce->setAlpha(ival);
@@ -2209,6 +2233,7 @@ void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElemen
 			else
 			{
 			}
+			*/
 		}
 		pAttribute = pAttribute->Next();
 	}
@@ -2241,6 +2266,8 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
 		}
 		else if(!strcmp(name, "fn"))
 		{
+			tc->fn = SE_StringID(value);
+			/*
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
 			{
 			    tc->fn = ival;
@@ -2248,9 +2275,16 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
 			else
 			{
 			}
+			*/
 		}
-		else if(!strcmp(name, "alpha"))
+		else if(!strcmp(name, "texturefn"))
 		{
+			tc->texturefn = SE_StringID(value);
+		}
+		else if(!strcmp(name, "coloralpha"))
+		{
+			tc->colorAlpha = SE_StringID(value);
+			/*
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
 			{
 			    tc->alpha = ival;
@@ -2258,9 +2292,12 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
 			else
 			{
 			}
+			*/
 		}
 		else if(!strcmp(name, "color"))
 		{
+			tc->mColor = SE_StringID(value);
+			/*
 			SE_Util::SplitStringList strList = SE_Util::splitString(value, " ");
 			SE_ASSERT(strList.size() == 3);
             std::string signstr = "+-";
@@ -2289,6 +2326,7 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
                     tc->mColor.d[i] = atoi(numstr.c_str());
                 }
             }
+			*/
 		}
 		pAttribute = pAttribute->Next();
 	}

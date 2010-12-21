@@ -111,7 +111,7 @@ T SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc) const
 template <class TID, class T>
 bool SE_ObjectManager<TID, T>::isContain(const TID& id) const
 {
-    typename RMap::iterator it = m.find(id);
+    typename RMap::const_iterator it = m.find(id);
     if(it == m.end())
         return false;
     else
@@ -208,7 +208,7 @@ T* SE_ObjectManager<TID, T*>::find(SE_FindObjCondition<T*>& fc) const
 template <typename TID, typename T>
 bool SE_ObjectManager<TID, T*>::isContain(const TID& id) const
 {
-    typename RMap::iterator it = m.find(id);
+    typename RMap::const_iterator it = m.find(id);
     if(it == m.end())
         return false;
     else

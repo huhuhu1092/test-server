@@ -124,7 +124,7 @@ public:
     void setBackground(const SE_StringID& background);
     void setChannel(const SE_StringID& channel);
     void setTexture(int index, const SE_StringID& texture);
-	void setAlpha(int alpha)
+	void setBackgroundAlpha(int alpha)
 	{
 		mBackgroundAlpha = alpha;
 	}

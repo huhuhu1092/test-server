@@ -44,20 +44,20 @@ class SE_ColorEffectFrame
 public:
     virtual ~SE_ColorEffectFrame()
     {}
-    virtual SE_Element* createElement(const SE_ColorEffectInput& input) {return NULL;}
-	void setPivotX(int pivotx)
+    virtual SE_Element* createElement() {return NULL;}
+	void setPivotX(float pivotx)
 	{
 		mPivotX = pivotx;
 	}
-	int getPivotX()
+	float getPivotX()
 	{
 		return mPivotX;
 	}
-	void setPivotY(int pivoty)
+	void setPivotY(float pivoty)
 	{
 		mPivotY = pivoty;
 	}
-	int getPivotY()
+	float getPivotY()
 	{
 		return mPivotY;
 	}
@@ -69,10 +69,12 @@ public:
 	{
 		return mMountPointRef;
 	}
+	static bool isAddress(const SE_StringID& content);
+	static SE_StringID getAddress(const SE_StringID& content);
 private:
 	SE_MountPointID mMountPointRef;
-	int mPivotX;
-	int mPivotY;
+	float mPivotX;
+	float mPivotY;
 };
 class SE_ColorEffect : public SE_ColorEffectFrame
 {
@@ -83,16 +85,13 @@ public:
     struct _TextureColor
     {
         SE_StringID mTextureID;
-        SE_Vector3i mColor;
-		int mColorSign[SIGN_NUM];
-        int fn;
-		int alpha;
+        SE_StringID mColor;
+		//SE_StringID mColorSign[SIGN_NUM];
+        SE_StringID fn;
+		SE_StringID colorAlpha;
+		SE_StringID texturefn;
 		_TextureColor()
 		{
-			for(int i = 0 ; i < SIGN_NUM ; i++)
-				mColorSign[i] = SIGN_NO;
-			fn = FN_MULTIPLY;
-            alpha = 255;
 		}
     };
     SE_ColorEffect();
@@ -113,13 +112,13 @@ public:
     {
         return mChannelID;
     }
-    void setAlpha(int alpha)
+    void setBackgroundAlpha(const SE_StringID& alpha)
     {
-        mAlpha = alpha;
+        mBackgroundAlpha = alpha;
     }
-    int getAlpha()
+    SE_StringID getBackgroundAlpha()
     {
-        return mAlpha;
+        return mBackgroundAlpha;
     }
     void setTextureColor(int index, _TextureColor* tc)
     {
@@ -136,11 +135,12 @@ public:
             return NULL;
         return mTextureColorData[index];
     }
-    SE_Element* createElement(const SE_ColorEffectInput& input);
+
+    SE_Element* createElement();
 private:
     SE_StringID mBackgroundID;
     SE_StringID mChannelID;
-    int mAlpha;
+    SE_StringID mBackgroundAlpha;
     std::vector<_TextureColor*> mTextureColorData;
 };
 class SE_ColorEffectReload : public SE_ColorEffectFrame

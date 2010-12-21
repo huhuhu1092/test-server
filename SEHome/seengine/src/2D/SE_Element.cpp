@@ -923,6 +923,7 @@ void SE_SequenceElement::update(unsigned int key)
 void SE_StateTableElement::update(unsigned int key)
 {}
 //////////////
+/*
 SE_ColorEffectImageElement::SE_ColorEffectImageElement(SE_ColorEffectImage* image) : mColorEffectImage(image)
 {}
 SE_ColorEffectImageElement::~SE_ColorEffectImageElement()
@@ -942,15 +943,16 @@ SE_Spatial* SE_ColorEffectImageElement::createSpatial()
 }
 void SE_ColorEffectImageElement::update(unsigned int key)
 {}
+*/
 ///////////////////
-void SE_ColorEffectElement::update(unsigned int key)
+void SE_ColorEffectControllerElement::update(unsigned int key)
 {
 }
-SE_Spatial* SE_ColorEffectElement::createSpatial()
+SE_Spatial* SE_ColorEffectControllerElement::createSpatial()
 {
 	return NULL;
 }
-void SE_ColorEffectElement::spawn()
+void SE_ColorEffectControllerElement::spawn()
 {
 	if(!mColorEffectController)
 		return;
@@ -959,11 +961,21 @@ void SE_ColorEffectElement::spawn()
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
-        SE_Element* e = f->createElement(mColorEffectInput);
+        SE_Element* e = f->createElement();
 		e->setPivotX(f->getPivotX());
 		e->setPivotY(f->getPivotY());
 		e->setMountPointRef(f->getMountPointRef());
 		this->addChild(e);
 		e->spawn();
 	}
+}
+SE_ColorEffectElement::SE_ColorEffectElement()
+{}
+void SE_ColorEffectElement::update(unsigned int key)
+{}
+SE_Spatial* SE_ColorEffectElement::createSpatial()
+{}
+void SE_ColorEffectElement::spawn()
+{
+    
 }

@@ -1,58 +1,99 @@
 #include "SE_ColorEffectController.h"
 #include "SE_Element.h"
 #include "SE_Image.h"
-SE_Vector3i SE_ChannelInput::COLOR_INVALID = SE_Vector3i(-1, -1, -1);
-SE_Element* SE_ColorEffect::createElement(const SE_ColorEffectInput& input)
+bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 {
-    SE_ColorEffectInput val;
-	val.background = mBackgroundID;
-	val.channel = mChannelID;
-	val.alpha = mAlpha;
+	std::string str = content.getStr();
+	if(str.empty())
+		return false;
+	int c = str[0];
+	if(c == '&')
+		return true;
+	else 
+		return false;
+}
+SE_StringID SE_ColorEffectFrame::getAddress(const SE_StringID& content)
+{
+	std::string str = content.getStr();
+	std::string::size_type pos = str.find("&");
+	SE_ASSERT(pos != std::string::npos);
+	std::string address = str.substr(pos + 1);
+	return SE_StringID(address.c_str());
+}
+///////////////////////////
+SE_Element* SE_ColorEffect::createElement()
+{
+    SE_ColorEffectElement* e = new SE_ColorEffectElement;
+	if(isAddress(mBackgroundID))
+		e->setBackgroundAddress(getAddress(mBackgroundID));
+	else
+		e->setBackgroundValue(mBackgroundID);
+	if(isAddress(mChannelID))
+		e->setChannelAddress(getAddress(mChannelID));
+	else
+		e->setChannelValue(mChannelID);
+	if(isAddress(mBackgroundAlpha))
+		e->setBackgroundAlphaAddress(getAddress(mBackgroundAlpha));
+	else
+		e->setBackgroundAlphaValue(atoi(mBackgroundAlpha.getStr()));
 	for(int i = 0 ; i < MARK_NUM ; i++)
 	{
+		SE_ColorEffectElement::_TextureMark m;
 		_TextureColor* tc = mTextureColorData[i];
-		if(tc)
+		if(isAddress(tc->colorAlpha))
+			m.mColorAlphaAddress = getAddress(tc->colorAlpha);
+		else
+			m.mColorAlphaValue = atoi(tc->colorAlpha.getStr());
+		if(isAddress(tc->fn))
+			m.mFnAddress = getAddress(tc->fn.getStr());
+		else
+			m.mFnValue = atoi(tc->fn.getStr());
+		if(isAddress(tc->texturefn))
+			m.mTextureFnAddress = getAddress(tc->texturefn);
+		else
+			m.mTextureFnValue = atoi(tc->texturefn.getStr());
+		if(isAddress(tc->mColor))
+			m.mColorAddress = getAddress(tc->mColor);
+		else
 		{
-			val.channelInput[i].alpha = tc->alpha;
-			val.channelInput[i].fn = tc->fn;
-			val.channelInput[i].color = tc->mColor;
-			val.channelInput[i].texture = tc->mTextureID;
-			val.valid = true;
+			SE_Util::SplitStringList strList = SE_Util::splitString(tc->mColor.getStr(), " ");
+			SE_ASSERT(strList.size() == 3);
+            std::string signstr = "+-";
+			for(int i = 0 ; i < strList.size() ; i++)
+            {
+                std::string str = strList[i];
+                std::string::size_type n = str.find_first_of(signstr, 0);
+                std::string numstr;
+				if(n == std::string::npos)
+                {
+					m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_NO;
+					m.mColorValue[i].value = atoi(str.c_str());
+                }
+                else if(str[n] == '+')
+                {
+                    m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_PLUS;
+                    numstr = str.substr(1);
+					m.mColorValue[i].value = atoi(numstr.c_str());
+                }
+                else if(str[n] == '-')
+                {
+                    m.mColorValue[i].sign = SE_ColorEffectElement::SIGN_MINUS;
+                    numstr = str.substr(1);
+					m.mColorValue[i].value = atoi(numstr.c_str());
+                }
+            }
 		}
+		if(isAddress(tc->mTextureID))
+			m.mTextureAddress = getAddress(tc->mTextureID);
+		else
+			m.mTextureValue = tc->mTextureID;
+		e->setTextureMark(i, m);
 	}
-	if(input.background.isValid())
-		val.background = input.background;
-	if(input.channel.isValid())
-		val.channel = input.channel;
-	for(int i = 0 ; i < MARK_NUM ; i++)
-	{
-		const SE_ChannelInput* ci = &input.channelInput[i];
-		if(ci->valid)
-		{
-			val.channelInput[i].alpha = ci->alpha != SE_ChannelInput::ALPHA_INVALID ? ci->alpha : val.channelInput[i].alpha;
-			val.channelInput[i].fn = ci->fn != SE_ChannelInput::FN_INVALID ? ci->fn : val.channelInput[i].fn;
-			val.channelInput[i].color = ci->color != SE_ChannelInput::COLOR_INVALID ? ci->color : val.channelInput[i].color;
-			val.channelInput[i].texture = ci->texture.isValid() ? ci->texture : val.channelInput[i].texture;
-		}
-	}
-	SE_ColorEffectImage* image = new SE_ColorEffectImage;
-	image->setBackground(val.background);
-	image->setChannel(val.channel);
-	image->setAlpha(val.alpha);
-	for(int i = 0 ; i < MARK_NUM ; i++)
-	{
-		image->setAlpha(i, val.channelInput[i].alpha);
-		image->setFunction(i, val.channelInput[i].fn);
-		image->setColor(i, val.channelInput[i].color);
-		image->setTexture(i, val.channelInput[i].texture);
-	}
-    SE_ColorEffectImageElement* e = new SE_ColorEffectImageElement(image);
 	return e;
 }
 SE_ColorEffect::SE_ColorEffect()
 {
     mTextureColorData.resize(MARK_NUM, NULL);
-    mAlpha = 255;
 }
 SE_ColorEffect::~SE_ColorEffect()
 {

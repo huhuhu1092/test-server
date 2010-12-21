@@ -153,36 +153,6 @@ private:
 class SE_ColorEffectAnimationObject : public SE_AnimationObject
 {
 public:
-	/*
-	struct _ChannelInput
-	{
-		SE_StringID texture;
-		int fn;
-		int alpha;
-		SE_Vector3i color;
-		bool valid;
-		_ChannelInput()
-		{
-			fn = 0;
-			alpha = 0;
-			valid = false;
-		}
-	};
-	struct _ColorEffectInput
-	{
-        SE_StringID background;
-		SE_StringID channel;
-		int alpha;
-		bool valid;
-        _ChannelInput channelInput[4];
-		_ColorEffectInput()
-		{
-			alpha = 0;
-			valid = false;
-		}
-	};
-	*/
-public:
     void setColorEffectRef(const SE_StringID& id)
     {
         mColorEffectRef = id;
@@ -192,6 +162,7 @@ public:
         return mColorEffectRef;
     }
 	SE_Element* createElement();
+	/*
     const SE_ColorEffectInput& getColorEffectInput()
 	{
 		return mColorEffectInput;
@@ -229,9 +200,10 @@ public:
 	{
 		mColorEffectInput.channelInput[index].color = color;
 	}
+	*/
 private:
     SE_StringID mColorEffectRef;
-    SE_ColorEffectInput mColorEffectInput;
+    //SE_ColorEffectInput mColorEffectInput;
 };
 class SE_DeleteAction : public SE_ActionUnit
 {
