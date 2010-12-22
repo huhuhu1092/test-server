@@ -9,6 +9,7 @@
 #include "SE_TableManager.h"
 #include "SE_Geometry3D.h"
 #include "SE_Utils.h"
+#include "SE_Common.h"
 #include <string>
 #include <list>
 #include <map>
@@ -24,6 +25,8 @@ class SE_Sequence;
 class SE_ColorEffectImage;
 class SE_ColorEffectController;
 class SE_ElementContent;
+class SE_RectPrimitive;
+class SE_Surface;
 class SE_ElementTravel
 {
 public:
@@ -69,6 +72,13 @@ public:
     {
         mTop = top;
     }
+	void setRect(float left, float top, float width, float height)
+	{
+		mLeft = left;
+		mTop = top;
+		mWidth = width;
+		mHeight = height;
+	}
     void setElementRef(const SE_StringID& elementref)
     {
         mElementRef = elementref;
@@ -323,6 +333,9 @@ protected:
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
 	void clone(SE_Element *src, SE_Element* dst);
 	void updateMountPoint();
+	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
+	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
+	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -546,6 +559,7 @@ public:
 	{
 		SE_StringID mTextureAddress;
 		SE_StringID mTextureValue;
+		int mTextureArity;
 		SE_StringID mColorAlphaAddress;
         int mColorAlphaValue;
 		SE_StringID mFnAddress;
@@ -559,6 +573,7 @@ public:
 			mColorAlphaValue = 255;
 			mFnValue = FN_ADD;
 			mTextureFnValue = FN_ADD;
+			mTextureArity = 0;
 		}
 	};
 	void setBackgroundAddress(const SE_StringID& address)
@@ -591,19 +606,41 @@ public:
 		    mTextureMark[index] = tm;
 	}
 	SE_ColorEffectElement();
+	~SE_ColorEffectElement();
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();
 	void spawn();
+	void measure();
 private:
+	void setImageData(SE_RectPrimitive* primitive);
+	void setSurface(SE_Surface* surface);
 	void calculateValue();
+	SE_XMLTABLE_TYPE getBackgroundType();
+	void getBackgroundBound(int& width, int& height);
+	void getExtractImageProperty(SE_XMLTABLE_TYPE& t, int& width, int& height);
 private:
+	SE_XMLTABLE_TYPE mBackgroundType;
 	SE_StringID mBackgroundAddress;
 	SE_StringID mBackgroundValue;
+	SE_ImageData* mBackgroundImageData;
+	SE_ImageDataID mBackgroundImageDataID;
+	SE_ImageElement* mBackgroundImageElement;
+	int mBackgroundArity;
 	SE_StringID mChannelAddress;
 	SE_StringID mChannelValue;
+	int mChannelArity;
+	SE_ImageData* mChannelImageData;
+	SE_ImageDataID mChannelImageDataID;
+	SE_ImageElement* mChannelImageElement;
 	SE_StringID mBackgroundAlphaAddress;
     int mBackgroundAlphaValue;
 	_TextureMark mTextureMark[MARK_NUM];
+	SE_Element* mBackgroundElement;
+	SE_Element* mChannelElement;
+	SE_Element* mTextureElement[MARK_NUM];
+	SE_ImageData* mTextureImageData[MARK_NUM];
+	SE_ImageDataID mTextureImageDataID[MARK_NUM];
+	SE_ImageElement* mTextureImageElement[MARK_NUM];
 };
 typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
 typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;

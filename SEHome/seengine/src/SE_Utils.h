@@ -37,6 +37,17 @@ struct SE_ExtractImageStr
 	std::string green;
 	std::string blue;
 	std::string alpha;
+	int getImageNum()
+	{
+		int num = 0;
+		std::string pStr[5] = {&base, &red, &green, &blue, &alpha};
+		for(int i = 0 ; i < 5 ; i++)
+		{
+			if(!pStr[i]->empty())
+				num++;
+		}
+		return num;
+	}
 };
 class SE_Util
 {
