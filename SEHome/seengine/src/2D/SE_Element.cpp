@@ -1058,11 +1058,22 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	renderTarget->create();
 	return imageElement
 }
+SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Element* channel, 
+												SE_Element* texturer, SE_Element* textureg,
+												SE_Element* textureb, SE_Element* texturea)
+{
+	SE_Element* element = NULL;
+    if(!background->mChildren.empty() && !channel->mChildren.empty())
+	{
+		element = background->clone();
+
+	}
+}
 void SE_ColorEffectElement::mergeElement()
 {
     if(!mBackgroundElement)
 		return;
-
+       
 }
 void SE_ColorEffectElement::measure()
 {
