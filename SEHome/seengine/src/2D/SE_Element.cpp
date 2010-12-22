@@ -1058,6 +1058,12 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	renderTarget->create();
 	return imageElement
 }
+void SE_ColorEffectElement::mergeElement()
+{
+    if(!mBackgroundElement)
+		return;
+
+}
 void SE_ColorEffectElement::measure()
 {
 	if(mBackgroundElement)
