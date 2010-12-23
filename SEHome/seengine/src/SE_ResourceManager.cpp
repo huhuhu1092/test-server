@@ -3027,6 +3027,10 @@ void SE_ResourceManager::loadSequence(const char* sequenceName)
     SE_XmlElementCalculus<SE_SequenceSet, _SequenceContainer> m(&sc);
     m.handleXmlChild(ss, &doc, 0);
 }
+void SE_ResourceManager::loadStateTable(const char* stateTableURI)
+{
+
+}
 void SE_ResourceManager::loadColorEffectController(const char* colorEffectName)
 {
 	SE_ColorEffectControllerSet* cs = mImpl->mColorEffectControllerTable.getItem(SE_StringID(colorEffectName));

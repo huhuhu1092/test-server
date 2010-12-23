@@ -1058,22 +1058,110 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	renderTarget->create();
 	return imageElement
 }
+bool SE_ColorEffectElement::isTextureEnd(_ElementList::iterator textureIt[4], SE_Element* texture[4])
+{
+	bool ret = false;
+	for(int i = 0 ; i < 4 ; i++)
+	{
+		if(texture[i])
+		{
+			ret = textureIt[i] == texture[i]->mChildren.end();
+			if(ret)
+				break;
+		}
+	}
+	return ret;
+}
 SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Element* channel, 
-												SE_Element* texturer, SE_Element* textureg,
-												SE_Element* textureb, SE_Element* texturea)
+												SE_Element* texture[4])
 {
 	SE_Element* element = NULL;
     if(!background->mChildren.empty() && !channel->mChildren.empty())
 	{
 		element = background->clone();
-
+		_ElementList::iterator backgroundIt = background->mChildren.begin();
+		_ElementList::iterator channelIt = channel->mChildren.begin();
+		_ElementList::iterator textureIt[4];
+		for(int i = 0 ; i < 4 ; i++)
+		{
+			if(texture[i])
+				textureIt[i] = texture[i]->mChildren.begin();
+		}
+		while(backgroundIt != background->mChildren.end() &&
+			channelIt != channel->mChildren.end() && !isTextureEnd(textureIt, texture))
+		{
+			SE_Element* bc = *backgroundIt;
+			SE_Element* cc = *channelIt;
+			SE_Element* tc[4] = {NULL, NULL, NULL, NULL};
+			for(int i = 0 ; i < 4 ; i++)
+			{
+				if(texture[i])
+					tc[i] = *textureIt;
+			}
+			SE_Element* child = mergeElement(bc, cc, tc[4]);
+			element->addChild(child);
+			backgroundIt++;
+			channelIt++;
+			for(int i = 0 ; i < 4 ; i++)
+			{
+				if(texture[i])
+					textureIt[i]++;
+			}
+		}
+		SE_ASSERT(backgroundIt == background->mChildren.end() && channelIt == channel->mChildren.end());
+		for(int i = 0 ; i < 4 ; i++)
+		{
+			if(texture[i])
+				SE_ASSERT(textureIt[i] == texture[i]->mChildren.end());
+		}
+		return element;
+ 	}
+	else // has no child it must be SE_ImageElement
+	{
+		SE_ASSERT(background->mChildren.empty() && channel->mChildren.empty());
+		for(int i = 0 ; i < 4 ; i++)
+		{
+			if(texture[i])
+				SE_ASSERT(texture[i]->mChildren.empty());
+		}
+        SE_StringID backgroundImageURI = background->getImageURI();
+		SE_StringID channelImageURI = channel->getImageURI();
+		SE_StringID textureURI[4];
+		for(int i = 0 ; i < 4 ; i++)
+		{
+			if(texture[i])
+				textureURI[i] = texture[i]->getImageURI();
+		}
+		SE_ColorEffectElement* retElement = new SE_ColorEffectElement;
+		clone(background, retElement);
+		retElement->setBackgroundValue(backgroundImageURI);
+		retElement->setChannelValue(channelImageURI);
+		retElement->setBackgroundAlphaValue(mBackgroundAlphaValue);
+		retElement->setBackgroundAlphaAddress(mBackgroundAlphaAddress);
+		for(int i = 0 ; i < 4 ; i++)
+		{
+		    _TextureMark tm;
+		    tm.mTextureValue[i] = textureURI[i];
+			tm.mColorAlphaAddress = mTextureMark[i].mColorAlphaAddress;
+			tm.mColorAlphaValue = mTextureMark[i].mColorAlphaValue;
+			tm.mFnAddress = mTextureMark[i].mFnAddress;
+			tm.mFnValue = mTextureMark[i].mFnValue;
+			tm.mTextureFnAddress = mTextureMark[i].mTextureFnAddress;
+			tm.mTextureFnValue = mTextureMark[i].mTextureFnValue;
+			tm.mColorAddress = mTextureMark[i].mColorAddress;
+			tm.mColorValue= mTextureMark[i].mColorValue;
+			retElement->setTextureMark(i, tm);
+		}
+		return retElement;
 	}
 }
+
 void SE_ColorEffectElement::mergeElement()
 {
     if(!mBackgroundElement)
 		return;
-       
+    mMergedElement = mergeElement(mBackgroundImageElement, mChannelImageElement, mTextureImageElement);       
+	//addChild(element);
 }
 void SE_ColorEffectElement::measure()
 {
@@ -1117,7 +1205,8 @@ SE_Spatial* SE_ColorEffectElement::createSpatial()
 {
 	if(mBackgroundElement)
 	{
-            
+        SE_Spatial* spatial = mMergedElement->createSpatial();
+		return spatial;
 	}
 	else
 	{
@@ -1376,6 +1465,6 @@ void SE_ColorEffectElement::spawn()
 				mTextureElement[i]->spawn();
 			}
 		}
-
+        mergeElement();
 	}
 }

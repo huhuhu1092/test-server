@@ -34,6 +34,11 @@ public:
     {}
     virtual void visit(SE_Element* e) = 0;
 };
+/*
+    SE_Element is a tree structure. SE_Element is the node , it can has child.
+	An element which has content can not has child, it responsibility is just to create
+	a real spatial for display.
+*/
 class SE_Element
 {
 public:
@@ -641,6 +646,7 @@ private:
 	SE_ImageData* mTextureImageData[MARK_NUM];
 	SE_ImageDataID mTextureImageDataID[MARK_NUM];
 	SE_ImageElement* mTextureImageElement[MARK_NUM];
+	SE_Element* mMergedElement;
 };
 typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
 typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;

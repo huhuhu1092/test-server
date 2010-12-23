@@ -82,6 +82,7 @@ public:
     void loadSequence(const char* sequenceName);
 	void loadColorEffectController(const char* colorEffectName);
 	void loadParam(const char* paramTable);
+	void loadStateTable(const char* stateTableURI);
 	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
 	SE_Element* getElement(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
