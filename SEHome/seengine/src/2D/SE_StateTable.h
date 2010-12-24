@@ -1,6 +1,7 @@
 #ifndef SE_STATETABLE_H
 #define SE_STATETABLE_H
 #include "SE_ID.h"
+#include "SE_PropertySet.h"
 #include <list>
 class SE_State;
 class SE_StateAction
@@ -9,6 +10,7 @@ public:
 	virtual ~SE_StateAction() {}
 	virtual void action(SE_State* enterState, SE_State* exitState, SE_State* trigerState) = 0;
 };
+
 class SE_State
 {
 public:
@@ -16,41 +18,86 @@ public:
 	~SE_State();
     void setID(const SE_StateID& id);
 	SE_StateID getID();
-	void enter();
-	void exit();
-	void trigger();
-	void setEnterAction(SE_StateAction* );
-	void setExitAction(SE_StateAction* );
-	void setTriggerAction(SE_StateAction* );
+	void trigger(const SE_TriggerID& id);
+	void addTriggerAction(const SE_TriggerID& id, SE_StateAction* action);
+	SE_PropertySet& getPropertySet()
+	{
+		return mPropertySet;
+	}
 private:
+	struct _Data
+	{
+		SE_StateAction* action;
+		SE_TriggerID triggerID;
+		_Data()
+		{
+			action = 0;
+		}
+	};
 	SE_StateID mStateID;
-	SE_StateAction* mEnterAction;
-	SE_StateAction* mExitAction;
-	SE_StateAction* mTriggerAction;
+	typedef std::list<_Data> _TriggerActionList;
+	_TriggerActionList mTriggerActionList;
+	SE_PropertySet mPropertySet;
 };
 class SE_StateTranslation
 {
 public:
-	SE_StateTranslation();
-	~SE_StateTranslation();
-	void setFrom(const SE_StateID& from);
-	void setTo(const SE_StateID& to);
-	void set(const SE_StateID& from, const SE_StateID& to);
-};
-class SE_StateStimulateCondition
-{
+	SE_StateTranslation()
+	{}
+	~SE_StateTranslation()
+	{}
+	void setFrom(const SE_StateID& from)
+	{
+		mFrom = from;
+	}
+	void setTo(const SE_StateID& to)
+	{
+		mTo = to;
+	}
+	void setStimulate(const SE_StimulateID& stimulate)
+	{
+		mStimulate = stimulate;
+	}
+	void setAction(SE_StateAction* action)
+	{
+		mStateAction = action;
+	}
+	void set(const SE_StateID& from, const SE_StateID& to, const SE_StimulateID& stimulate, SE_StateAction* action)
+	{
+		mFrom = from;
+		mTo = to;
+		mStimulate = stimulate;
+		mStateAction = action;
+	}
+	SE_StateID getFrom()
+	{
+		return mFrom;
+	}
+	SE_StateID getTo()
+	{
+		return mTo;
+	}
+	SE_StimulateID getStimulate()
+	{
+		return mStimulate;
+	}
+	SE_StateAction* getAction()
+	{
+		return mStateAction;
+	}
+	bool operator==(const SE_Translation& t)
+	{
+		return t.mFrom == mFrom && t.mTo == mTo && t.mStimulate == mStimulate;
+	}
+	bool operator != (const SE_Translation& t)
+	{
+		return !this->operator==(t);
+	}
 public:
-	virtual ~SE_StateStimulateCondition() {}
-	virtual bool 
-};
-class SE_StateStimulate
-{
-public:
-	SE_StateStimulate();
-	~SE_StateStimulate();
-	void setID();
-	void getID();
-	bool canTranslate(SE_State* currState);
+	SE_StateID mFrom;
+	SE_StateID mTo;
+	SE_StimulateID mStimulate;
+	SE_StateAction* mStateAction;
 };
 class SE_StateTable
 {
@@ -62,18 +109,54 @@ public:
     void addState(SE_State* state);
 	void removeState(const SE_StateID& stateid);
 	SE_State* getState(const SE_StateID& stateid);
-	void addTranslation(const SE_StimulateID& stimulate, const SE_StateID& from, const SE_StateID& to);
+	void addTranslation(const SE_StimulateID& stimulate, const SE_StateID& from, 
+		                const SE_StateID& to, SE_StateAction* action);
 	void removeTranslation(const SE_StimulateID& stimulate, const SE_StateID& from, const SE_StateID& to);
-	void addStimulate(SE_StateStimulate* stimulate);
-	void removeStimulate(const SE_StimulateID& stimulateID);
-	SE_StateStimulate* getStimulate(const SE_StimulateID& stimulateID);
-	void trigger(const SE_TriggerID& id);
 	void stimulate(const SE_StimulateID& id);
+	void trigger(const SE_TriggerID& id);
+private:
+	class _StateEqual
+	{
+	public:
+		_StateEqual(const SE_StateID& sid) : id(sid)
+		{}
+		bool operator==(SE_State* s)
+		{
+			if(s->getID() == id)
+				return true;
+			else
+				return false;
+		}
+		SE_StateID id;
+	};
+	class _TranslationEqual
+	{
+	public;
+	     bool operator==(SE_Translation& t)
+		 {
+			 st.set(stimulate, from, to);
+			 return st == t;
+		 }
+		 SE_Translation st;
+	};
+	class _SimulateEqual
+	{
+	public:
+		bool operator==(SE_Translation& t)
+		{
+			if(stimulateID == t.getStimulate() && fromID = t.getFrom();)
+				return true;
+			else 
+				return false;
+		}
+		SE_StimulateID stimulateID;
+		SE_StateID fromID;
+	};
 private:
 	SE_StateTableID mStateTableID;
 	typedef std::list<SE_State*> _StateList;
 	_StateList mStateList;
-	typedef std::list<SE_StateTranslation*> _TranslationList;
+	typedef std::list<SE_StateTranslation> _TranslationList;
 	_TranslationList mTranslationList;
 	SE_State* mCurrentState;
 };
