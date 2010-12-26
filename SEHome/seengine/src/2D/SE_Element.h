@@ -27,6 +27,7 @@ class SE_ColorEffectController;
 class SE_ElementContent;
 class SE_RectPrimitive;
 class SE_Surface;
+class SE_RectPrimitive;
 class SE_ElementTravel
 {
 public:
@@ -325,6 +326,12 @@ public:
 	{
 		mOwnRenderTargetCamera = own;
 	}
+	//this function is used by inherited class
+	//user can not use it
+	std::list<SE_Element*> getChildren()
+	{
+		return mChildren;
+	}
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
@@ -333,6 +340,7 @@ public:
     virtual void travel(SE_ElementTravel* travel);
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum();
+	virtual SE_StringID getImageURI() {return "";}
 protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
@@ -448,6 +456,10 @@ public:
 	void spawn();
 	void measure();
 	SE_Spatial* createSpatial();
+	SE_StringID getImageURI()
+	{
+		return mImageID;
+	}
 private:
     SE_StringID mImageID;
 	SE_Image* mImage;
@@ -618,11 +630,17 @@ public:
 	void measure();
 private:
 	void setImageData(SE_RectPrimitive* primitive);
+	void setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType);
+	void setImageData(SE_RectPrimitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType);
 	void setSurface(SE_Surface* surface);
 	void calculateValue();
 	SE_XMLTABLE_TYPE getBackgroundType();
-	void getBackgroundBound(int& width, int& height);
+	//void getBackgroundBound(int& width, int& height);
 	void getExtractImageProperty(SE_XMLTABLE_TYPE& t, int& width, int& height);
+	SE_ImageElement* createImageElement(const SE_StringID& textureURL, SE_ImageData*& imageData);
+	bool isTextureEnd(_ElementList::iterator textureIt[4], SE_Element* texture[4]);
+	SE_Element* mergeElement(SE_Element* background, SE_Element* channel, SE_Element* texture[4]);
+	void mergeElement();
 private:
 	SE_XMLTABLE_TYPE mBackgroundType;
 	SE_StringID mBackgroundAddress;

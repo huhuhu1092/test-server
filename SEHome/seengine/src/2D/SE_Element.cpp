@@ -27,6 +27,7 @@
 #include "SE_RenderTargetManager.h"
 #include "SE_CameraManager.h"
 #include "SE_ParamManager.h"
+#include "SE_ElementManager.h"
 #include "SE_Math.h"
 #include "SE_Utils.h"
 #include <algorithm>
@@ -498,14 +499,14 @@ void SE_Element::startAnimation()
         e->startAnimation();
     }
 }
-SE_Camera* SE_Element::createRenderTargetCamera(float left, float top, float width, float height)
+SE_CameraID SE_Element::createRenderTargetCamera(float left, float top, float width, float height)
 {
     float ratio = height / width;
 	float angle = 2 * SE_RadianToAngle(atanf(width / 20.0f));
     SE_Camera* camera = new SE_Camera;
-	float left = left + width / 2;
-	float top = top + height / 2;
-	SE_Vector3f v(left , top , 10);
+	float cameraLeft = left + width / 2;
+	float cameraTop = top + height / 2;
+	SE_Vector3f v(cameraLeft , cameraTop , 10);
 	camera->setLocation(v);
 	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 	camera->setViewport(0, 0, width, height);
@@ -523,6 +524,7 @@ SE_ImageData* SE_Element::createImageData(const SE_ImageDataID& imageDataID)
 		imageData = new SE_ImageData;
 		resourceManager->setImageData(imageDataID, imageData);
 	}
+	return imageData;
 }
 ///////////////
 SE_ElementContent* SE_ElementContent::clone()
@@ -1016,7 +1018,7 @@ SE_ColorEffectElement::SE_ColorEffectElement()
 	mChannelElement = NULL;
 	for(int i = 0 ; i < MARK_NUM ; i++)
 		mTextureElement[i] = NULL;
-	mBackgroudnArity = 0;
+	mBackgroundArity = 0;
 	mChannelArity = 0;
 }
 SE_ColorEffectElement::~SE_ColorEffectElement()
@@ -1048,15 +1050,15 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(renderTarget);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	elementManager->addRenderTargetElement(imageElement);
-	backgroundImageElement->setRenderTarget(renderTargetID);
-    SE_CameraID cameraID = createRenderTargetCamera(imageElement->getDeltaX(), 
-		                                            imageElement->getDeltaY(), 
+	imageElement->setRenderTarget(renderTargetID);
+    SE_CameraID cameraID = createRenderTargetCamera(imageElement->getDeltaLeft(), 
+		                                            imageElement->getDeltaTop(), 
 												    imageElement->getWidth(),
 												    imageElement->getHeight());
 	renderTarget->setCamera(cameraID);
 	renderTarget->setCameraType(SE_RenderTarget::GLOBAL_CAMERA);
 	renderTarget->create();
-	return imageElement
+	return imageElement;
 }
 bool SE_ColorEffectElement::isTextureEnd(_ElementList::iterator textureIt[4], SE_Element* texture[4])
 {
@@ -1065,7 +1067,7 @@ bool SE_ColorEffectElement::isTextureEnd(_ElementList::iterator textureIt[4], SE
 	{
 		if(texture[i])
 		{
-			ret = textureIt[i] == texture[i]->mChildren.end();
+			ret = textureIt[i] == texture[i]->getChildren().end();
 			if(ret)
 				break;
 		}
@@ -1076,19 +1078,19 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 												SE_Element* texture[4])
 {
 	SE_Element* element = NULL;
-    if(!background->mChildren.empty() && !channel->mChildren.empty())
+    if(!background->getChildren().empty() && !channel->getChildren().empty())
 	{
 		element = background->clone();
-		_ElementList::iterator backgroundIt = background->mChildren.begin();
-		_ElementList::iterator channelIt = channel->mChildren.begin();
+		_ElementList::iterator backgroundIt = background->getChildren().begin();
+		_ElementList::iterator channelIt = channel->getChildren().begin();
 		_ElementList::iterator textureIt[4];
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])
-				textureIt[i] = texture[i]->mChildren.begin();
+				textureIt[i] = texture[i]->getChildren().begin();
 		}
-		while(backgroundIt != background->mChildren.end() &&
-			channelIt != channel->mChildren.end() && !isTextureEnd(textureIt, texture))
+		while(backgroundIt != background->getChildren().end() &&
+			channelIt != channel->getChildren().end() && !isTextureEnd(textureIt, texture))
 		{
 			SE_Element* bc = *backgroundIt;
 			SE_Element* cc = *channelIt;
@@ -1096,9 +1098,9 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 			for(int i = 0 ; i < 4 ; i++)
 			{
 				if(texture[i])
-					tc[i] = *textureIt;
+					tc[i] = *textureIt[i];
 			}
-			SE_Element* child = mergeElement(bc, cc, tc[4]);
+			SE_Element* child = mergeElement(bc, cc, tc);
 			element->addChild(child);
 			backgroundIt++;
 			channelIt++;
@@ -1108,21 +1110,21 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 					textureIt[i]++;
 			}
 		}
-		SE_ASSERT(backgroundIt == background->mChildren.end() && channelIt == channel->mChildren.end());
+		SE_ASSERT(backgroundIt == background->getChildren().end() && channelIt == channel->getChildren().end());
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])
-				SE_ASSERT(textureIt[i] == texture[i]->mChildren.end());
+				SE_ASSERT(textureIt[i] == texture[i]->getChildren().end());
 		}
 		return element;
  	}
 	else // has no child it must be SE_ImageElement
 	{
-		SE_ASSERT(background->mChildren.empty() && channel->mChildren.empty());
+		SE_ASSERT(background->getChildren().empty() && channel->getChildren().empty());
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])
-				SE_ASSERT(texture[i]->mChildren.empty());
+				SE_ASSERT(texture[i]->getChildren().empty());
 		}
         SE_StringID backgroundImageURI = background->getImageURI();
 		SE_StringID channelImageURI = channel->getImageURI();
@@ -1141,7 +1143,7 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 		for(int i = 0 ; i < 4 ; i++)
 		{
 		    _TextureMark tm;
-		    tm.mTextureValue[i] = textureURI[i];
+		    tm.mTextureValue = textureURI[i];
 			tm.mColorAlphaAddress = mTextureMark[i].mColorAlphaAddress;
 			tm.mColorAlphaValue = mTextureMark[i].mColorAlphaValue;
 			tm.mFnAddress = mTextureMark[i].mFnAddress;
@@ -1160,7 +1162,9 @@ void SE_ColorEffectElement::mergeElement()
 {
     if(!mBackgroundElement)
 		return;
-    mMergedElement = mergeElement(mBackgroundImageElement, mChannelImageElement, mTextureImageElement);       
+	SE_Element* textureElement[4] = {mTextureImageElement[0], mTextureImageElement[1], mTextureImageElement[2],
+	                                 mTextureImageElement[3]};
+    mMergedElement = mergeElement(mBackgroundImageElement, mChannelImageElement, textureElement);       
 	//addChild(element);
 }
 void SE_ColorEffectElement::measure()
@@ -1169,7 +1173,7 @@ void SE_ColorEffectElement::measure()
 	{
 		mBackgroundElement->measure();
 		int width = mBackgroundElement->getWidth();
-		int height = mBackgroudnElement->getHeight();
+		int height = mBackgroundElement->getHeight();
 		setWidth(width);
 		setHeight(height);
 	}
@@ -1213,7 +1217,7 @@ SE_Spatial* SE_ColorEffectElement::createSpatial()
         SE_PrimitiveID primitiveID;
 		SE_RectPrimitive* primitive;
 		createPrimitive(primitiveID, primitive);
-        setImageData(primitve);
+        setImageData(primitive);
         SE_Mesh** meshArray = NULL;
 		int meshNum = 0;
 		primitive->createMesh(meshArray, meshNum);
@@ -1259,7 +1263,7 @@ void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, SE_ImageDa
 	dp.setHeight(imageData->getHeight());
     primitive->setImageData(imageData, texType, NOT_OWN, dp);
 }
-void setColorEffectElement::setImageData(SE_RectPrimitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType)
+void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_ImageUnit iu = resourceManager->getImageUnit(imageID.getStr());
@@ -1300,7 +1304,7 @@ void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive)
 		{
 			setImageData(primitive, mTextureMark[i].mTextureValue, (SE_TEXUNIT_TYPE)start);
 		}
-		start++ 
+		start++;
 	}
 }
 void SE_ColorEffectElement::calculateValue()
@@ -1434,15 +1438,14 @@ void SE_ColorEffectElement::spawn()
 	int width = 0, height = 0;
 	getExtractImageProperty(t, width, height);
 	mBackgroundType = t;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     if(t == SE_IMAGE_TABLE)
 	{
-	    int width, height;
-		getBackgroundBound(width, height);
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, width, height);
 	}
 	else if(t == SE_ELEMENT_TABLE)
 	{
-		calculateRect(INVALID_GEOMINFO, INVLALID_GEOMINFO, 0, 0);
+		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		if(mBackgroundElement)
 			delete mBackgroundElement;
 		mBackgroundElement = resourceManager->getElement(mBackgroundValue.getStr());

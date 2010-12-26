@@ -40,7 +40,7 @@ struct SE_ExtractImageStr
 	int getImageNum()
 	{
 		int num = 0;
-		std::string pStr[5] = {&base, &red, &green, &blue, &alpha};
+		std::string* pStr[5] = {&base, &red, &green, &blue, &alpha};
 		for(int i = 0 ; i < 5 ; i++)
 		{
 			if(!pStr[i]->empty())

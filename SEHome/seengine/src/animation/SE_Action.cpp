@@ -270,7 +270,6 @@ void SE_Action::createElement(SE_ActionElement* parent)
 			e->setEndKey(actionLayer->endkey);
 			parent->addChild(e);
 			e->setParent(parent);
-			e->spawn();
 			if(prev)
 			{
 				prev->setNext(e);
@@ -282,27 +281,5 @@ void SE_Action::createElement(SE_ActionElement* parent)
 				first = e;
 		}
 		parent->addHeadElement(first);
-		/*
-		if(actionLayer->startkey == 0)
-		{
-			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(0);
-			SE_Element* element = kf->data->createElement();
-			element->setStartKey(actionLayer->startkey);
-			element->setEndKey(actionLayer->endkey);
-            element->setActionLayer(actionLayer);
-            element->setLocalLayer(kf->data->getLayer());
-			element->setParent(parent);
-			parent->addChild(element);
-		}
-		else
-		{
-            SE_NullElement* e = new SE_NullElement;
-			e->setActionLayer(actionLayer);
-			e->setParent(parent);
-			parent->addChild(e);
-			e->setStartKey(actionLayer->startkey);
-			e->setEndKey(actionLayer->endkey);
-		}
-		*/
 	}
 }

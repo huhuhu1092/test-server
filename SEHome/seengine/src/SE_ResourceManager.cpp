@@ -1741,6 +1741,7 @@ void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElem
         pAttribute = pAttribute->Next();
     }
     au->setID(id);
+	au->setLayer(SE_Layer(layer));
     au->setControllerRef(controllerref);
 	au->setPivotX(pivotx);
 	au->setPivotY(pivoty);
