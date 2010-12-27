@@ -37,7 +37,7 @@ public:
 	{
 		mMarkAlpha[index] = a;
 	}
-	float getMarkAlphs(int index)
+	float getMarkAlpha(int index)
 	{
 		return mMarkAlpha[index];
 	}

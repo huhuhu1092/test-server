@@ -64,7 +64,32 @@ SE_Element* SE_ColorEffectAnimationObject::createElement()
 }
 SE_Element* SE_TextureAnimationObject::createElement()
 {
-	return NULL;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(mTextureRef);
+	switch(t)
+	{
+	case SE_ELEMENT_TABLE:
+		{
+			SE_Element* element = resourceManager->loadElement(mTextureRef.getStr());
+			element->setPivotX(getPivotX());
+			element->setPivotY(getPivotY());
+			element->setMountPointRef(getMountPointRef());
+			return element;
+		}
+	    break;
+	case SE_ACTION_TABLE:
+		{
+			SE_ActionElement* actionElement = resourceManager->loadAction(mTextureRef.getStr());
+			actionElement->setPivotX(getPivotX());
+			actionElement->setPivotY(getPivotY());
+			
+			actionElement->setMountPointRef(getMountPointRef());
+			return actionElement;
+		}
+		break;
+	default:
+		return NULL;
+	}
 }
 SE_Element* SE_DeleteAction::createElement()
 {

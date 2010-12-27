@@ -2905,35 +2905,31 @@ static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent 
 	{
 		return SE_IMAGE_TABLE;
 	}
+	else if(!strcmp(elementName, "Action"))
+	{
+		return SE_ACTION_TABLE;
+	}
+	else if(!strcmp(elementName, "SequenceFrame"))
+	{
+		return SE_SEQUENCE_TABLE;
+	}
+	else if(!strcmp(elementName, "ColorEffectFrameController"))
+	{
+		return SE_COLOREFFECT_TABLE;
+	}
+	else if(!strcmp(elementName, "State"))
+	{
+		return SE_STATE_TABLE;
+	}
 	else
 		return SE_INVALID_TABLE;
-	/*
-	TiXmlElement* pElement = (TiXmlElement*)pChild;
-	TiXmlAttribute* pAttribute = pElement->FirstAttribute();
-	int type = SE_INVALID_TABLE;
-	while(pAttribute)
-	{
-		const char* name = pAttribute->Name();
-		std::string strvalue = SE_Util::trim(pAttribute->Value());
-		const char* value = strvalue.c_str();
-        int ival = -1;
-		if(!strcmp(name , "type"))
-		{
-			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
-            {
-                type = ival;
-			}
-		}
-		pAttribute = pAttribute->Next();
-	}
-    return (SE_XMLTABLE_TYPE)type;
-	*/
 }
 SE_XMLTABLE_TYPE SE_ResourceManager::getXmlType(const char* xmlName)
 {
 	if(!xmlName)
 		return SE_INVALID_TABLE;
-	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + xmlName;
+	SE_Util::SplitStringList strList = SE_Util::splitString(xmlName, "/");
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + strList[0];
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)

@@ -85,11 +85,11 @@ public:
 	{
 		return mStateAction;
 	}
-	bool operator==(const SE_Translation& t)
+	bool operator==(const SE_StateTranslation& t)
 	{
 		return t.mFrom == mFrom && t.mTo == mTo && t.mStimulate == mStimulate;
 	}
-	bool operator != (const SE_Translation& t)
+	bool operator != (const SE_StateTranslation& t)
 	{
 		return !this->operator==(t);
 	}
@@ -120,7 +120,7 @@ private:
 	public:
 		_StateEqual(const SE_StateID& sid) : id(sid)
 		{}
-		bool operator==(SE_State* s)
+		bool operator()(SE_State* s)
 		{
 			if(s->getID() == id)
 				return true;
@@ -131,20 +131,19 @@ private:
 	};
 	class _TranslationEqual
 	{
-	public;
-	     bool operator==(SE_Translation& t)
+	public:
+	     bool operator()(SE_StateTranslation& t)
 		 {
-			 st.set(stimulate, from, to);
 			 return st == t;
 		 }
-		 SE_Translation st;
+		 SE_StateTranslation st;
 	};
-	class _SimulateEqual
+	class _StimulateEqual
 	{
 	public:
-		bool operator==(SE_Translation& t)
+		bool operator()(SE_StateTranslation& t)
 		{
-			if(stimulateID == t.getStimulate() && fromID = t.getFrom();)
+			if(stimulateID == t.getStimulate() && fromID == t.getFrom())
 				return true;
 			else 
 				return false;

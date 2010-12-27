@@ -19,16 +19,21 @@
     <MountPoint id = "p11" x = "200" y = "70" />
     <MountPoint id = "p12" x = "238" y = "70" />
     <MountPoint id = "p13" x = "278" y = "70" />
-    <!--
     <Element id="body" pivotx="0" pivoty="0" layer="1" mountpointref = "p1" >
         <Image dataref="ImageTable1.xml/it1/E01" />
     </Element>
     <Element id="head" pivotx="0" pivoty="0" layer="0" mountpointref = "p2">
         <Image dataref="ImageTable1.xml/it1/E02" />
+</Element>
+
+    <Element id = "face" pivotx = "0" pivoty = "0" mountpointref = "p3" layer = "2">
+        <Image dataref = "TestElement.xml/texturetest" />
     </Element>
+    <!--
      <Element id="face" pivotx="0" pivoty="0" layer="2" mountpointref = "p3">
          <Image dataref="ImageTable1.xml/it1/E03/nian" />
-    </Element>
+ </Element>
+ -->
      <Element id="yifu" pivotx="0" pivoty="0" layer="3" mountpointref = "p4">
          <Image dataref="ImageTable1.xml/it1/E04"/>
     </Element>
@@ -59,8 +64,7 @@
     <Element id = "testAction" mountpointref = "p13" layer = "6">
         <Action dataref="TestAction.xml/t1" />
     </Element>
-    -->
     <Element id = "testTexture" mountpointref = "p13" layer = "5">
-        <Image dataref = "ImageTable1.xml/it1/R02[r = ImageTable1.xml/it1/R03/g]" />
+        <Image dataref = "TestElement.xml/texturetest" />
     </Element>
 </Element>

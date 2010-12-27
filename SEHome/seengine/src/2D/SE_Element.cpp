@@ -778,6 +778,12 @@ void SE_ActionElement::spawn()
 	mAction->sort();
 	calculateRect(mAction->getPivotX(), mAction->getPivotY(), 0, 0);
 	mAction->createElement(this);
+	_ElementList::iterator it;
+	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	{
+		SE_Element* e = *it;
+		e->spawn();
+	}
 }
 SE_Spatial* SE_ActionElement::createSpatial()
 {
@@ -884,7 +890,7 @@ SE_Spatial* SE_SequenceElement::createSpatial()
 	if(!mSequence)
 		return NULL;
     SE_CommonNode* node = new SE_CommonNode;
-	node->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+	node->setLocalTranslate(SE_Vector3f(mLeft , mTop , 0));
     node->setLocalLayer(mLocalLayer);
 	setSpatialID(node->getSpatialID());
 	return node;

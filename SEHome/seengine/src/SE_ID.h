@@ -66,6 +66,10 @@ typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
 typedef int SE_RenderTargetID;
 typedef SE_CommonID SE_CameraID;
+typedef SE_StringID SE_StateTableID;
+typedef SE_StringID SE_StateID;
+typedef SE_StringID SE_StimulateID;
+typedef SE_StringID SE_TriggerID;
 class SE_ID
 {
 public:
