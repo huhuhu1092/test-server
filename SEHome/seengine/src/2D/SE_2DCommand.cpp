@@ -40,7 +40,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadElement("TestElement.xml");
     SE_ElementManager* elementManager = mApp->getElementManager();
-    elementManager->load("TestElement.xml/PFemaleBase");
+    elementManager->load("ElementCharacterGroup.xml/PFemaleBase");
     SE_SceneManager* sceneManager = mApp->getSceneManager();
     elementManager->setViewport(left, top, width, height);
 	elementManager->spawn();
