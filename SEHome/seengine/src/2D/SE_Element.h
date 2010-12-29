@@ -341,6 +341,7 @@ public:
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum();
 	virtual SE_StringID getImageURI() {return "";}
+	virtual void getImageData(SE_ImageDataID& imageDataID, SE_ImageData* imageData) {}
 protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
