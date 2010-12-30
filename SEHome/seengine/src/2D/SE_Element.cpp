@@ -526,6 +526,46 @@ SE_ImageData* SE_Element::createImageData(const SE_ImageDataID& imageDataID)
 	}
 	return imageData;
 }
+SE_StringID SE_Element::resolveParamString(const char* str)
+{
+	SE_Util::SplitStringList strList = SE_Util::splitString(str, "/");
+	SE_Util::SplitStringList::iterator it;
+	for(it = strList.begin() ; it != strList.end() ; it++)
+	{
+		std::string s = *it;
+        std::string::size_type posStart = s.find("[");
+		if(posStart != std::string::npos)
+		{
+            std::string::size_type posEnd = s.find("]");
+			if(posEnd == std::string::npos)
+			{
+				LOGE("... [ has no ]\n");
+				return "";
+			}
+			else
+			{
+                std::string::size_type n = posEnd - posStart - 1;
+	            std::string subString = s.substr(posStart + 1, n);
+                SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+	            bool ok = false;
+				std::string value = paramManager->getString(subString.c_str(), ok);
+	            if(ok)
+				{
+					*it = value;
+				}
+			}
+		}
+	}
+	it = strList.begin();
+	std::string retStr = *it;
+	it++;
+	for(; it != strList.end() ; it++)
+	{
+		retStr += "/";
+		retStr += *it;
+	}
+	return retStr.c_str();
+}
 ///////////////
 SE_ElementContent* SE_ElementContent::clone()
 {

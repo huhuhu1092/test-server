@@ -350,6 +350,7 @@ protected:
 	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
 	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
 	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
+	SE_StringID resolveParamString(const char* str);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
