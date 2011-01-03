@@ -92,12 +92,12 @@ void SE_ColorEffectController::addKeyFrame(unsigned int key, SE_ColorEffectFrame
     keyframe->key = key;
     mKeySequence.addKeyFrame(keyframe);
 }
-SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key)
+SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key) const
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
     return frame->data;
 }
-std::vector<unsigned int> SE_ColorEffectController::getKeys()
+std::vector<unsigned int> SE_ColorEffectController::getKeys() const
 {
 	return mKeySequence.getKeys();
 }

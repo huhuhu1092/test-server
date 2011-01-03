@@ -21,6 +21,8 @@
 #include "SE_Action.h"
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
+#include "SE_Application.h"
+#include "SE_ParamManager.h"
 #include "SE_Renderer.h"
 #include "tinyxml.h"
 #include <map>
@@ -472,6 +474,7 @@ struct SE_ResourceManager::_Impl
 	SE_SequenceTable mSequenceTable;
 	SE_ElementTable mElementTable;
 	SE_ColorEffectControllerTable mColorEffectControllerTable;
+	SE_ObjectManager<SE_StringID, SE_XMLTABLE_TYPE> mXmlTypeTable;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 	SE_Element* mElementRoot;
@@ -488,6 +491,7 @@ public:
 	SE_ElementMap* elementMap;
 	SE_ResourceManager* resourceManager;
 	std::string xmlName;
+	std::string structid;
 };
 class _SequenceContainer
 {
@@ -558,6 +562,20 @@ public:
 	SE_RendererHandler(_ElementContainer * em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
 	{}
 	virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ParamStructHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+{
+public:
+	SE_ParamStructHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+	{}
+	virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ParamHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+{
+public:
+	SE_ParamHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+	{}
+    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
 class SE_ImageTableHandler : public SE_XmlElementHandler<SE_ImageMapSet, SE_ResourceManager::_Impl>
 {
@@ -734,6 +752,14 @@ public:
 		else if(!strcmp(name, "Renderer"))
 		{
 			return new SE_RendererHandler(elementManager);
+		}
+		else if(!strcmp(name , "Struct"))
+		{
+			return new SE_ParamStructHandler(elementManager);
+		}
+		else if(!strcmp(name, "Param"))
+		{
+			return new SE_ParamHandler(elementManager);
 		}
 		else
 			return NULL;
@@ -1138,8 +1164,8 @@ void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlE
 	}
 	imageRect.x = startx;
 	imageRect.y = starty;
-	imageRect.width = endx - startx;
-	imageRect.height = endy - starty;
+	imageRect.width = endx - startx + 1;
+	imageRect.height = endy - starty + 1;
 	imageRect.index = indent;
 	parent->setItem(id, imageRect);
 }
@@ -1530,6 +1556,66 @@ void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, un
 	SE_Renderer* renderer = (SE_Renderer*)SE_Object::create(rendererClassName.c_str());
 	SE_RendererID rid = SE_ID::createRendererID(rendererID.c_str());
 	resourceManager->setRenderer(rid, renderer);
+}
+void SE_ParamStructHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        if(!strcmp(name, "id"))
+		{
+			pro->structid = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_Element, _ElementContainer> m(pro);
+        m.handleXmlChild(parent, pChild, i++);
+    }
+}
+void SE_ParamHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+	std::string paramID;
+	std::string paramValue;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+		if(!strcmp(name, "id"))
+		{
+			paramID = value;
+		}
+		else if(!strcmp(name, "value"))
+		{
+			paramValue = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	std::string id = pro->xmlName + "/" + pro->structid + "/" + paramID;
+	bool isDigit = SE_Util::isDigit(paramValue.c_str());
+	if(isDigit)
+	{
+		int v = atoi(paramValue.c_str());
+		paramManager->setInt(id.c_str(), v);
+    }
+	else
+	{
+		paramManager->setString(id.c_str(), paramValue.c_str());
+	}
 }
 void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2190,6 +2276,14 @@ void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent
 	}
 	colorEffectController->setPivotX(pivotx);
 	colorEffectController->setPivotY(pivoty);
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_ColorEffectController, _ColorEffectControllerContainer> m(pro);
+        m.handleXmlChild(colorEffectController, pChild, i++);
+    } 
 }
 void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2738,6 +2832,10 @@ SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
     {
         imageType = SE_ImageData::PNG;
     }
+	else if(ext == "tga")
+	{
+		imageType = SE_ImageData::TGA;
+	}
     else if(ext == "jpg" || ext == "jpeg")
     {
         imageType = SE_ImageData::JPEG;
@@ -2874,7 +2972,21 @@ void SE_ResourceManager::loadRenderer(const char* rendererFileName)
 }
 void SE_ResourceManager::loadParam(const char* paramTable)
 {
-
+	if(!paramTable)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + paramTable;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	_ElementContainer ec;
+	ec.resourceManager = this;
+	ec.xmlName = paramTable;
+    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
+    m.handleXmlChild(NULL, &doc, 0);
 }
 static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent = 0)
 {
@@ -2887,10 +2999,13 @@ static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent 
 	if(!pChild)
 		return SE_INVALID_TABLE;
     t = pChild->Type();
-	if(t == TiXmlNode::TINYXML_DECLARATION)
+	while(t != TiXmlNode::TINYXML_ELEMENT)
 	{
 		pChild = pChild->NextSibling();
-		t = pChild->Type();
+		if(pChild)
+		    t = pChild->Type();
+		else
+			break;
 	}
 	if(t != TiXmlNode::TINYXML_ELEMENT)
 	{
@@ -2928,6 +3043,11 @@ SE_XMLTABLE_TYPE SE_ResourceManager::getXmlType(const char* xmlName)
 {
 	if(!xmlName)
 		return SE_INVALID_TABLE;
+    SE_XMLTABLE_TYPE t = mImpl->mXmlTypeTable.get(xmlName);
+	if(t != SE_INVALID_TABLE)
+	{
+		return t;
+	}
 	SE_Util::SplitStringList strList = SE_Util::splitString(xmlName, "/");
 	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + strList[0];
     TiXmlDocument doc(fileFullPath.c_str());
@@ -2937,7 +3057,9 @@ SE_XMLTABLE_TYPE SE_ResourceManager::getXmlType(const char* xmlName)
 		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
         return SE_INVALID_TABLE;
     }
-	return getXmlTableType(&doc, 0);
+	t = getXmlTableType(&doc, 0);
+	mImpl->mXmlTypeTable.set(xmlName, t);
+	return t;
 }
 void SE_ResourceManager::loadAction(const char* actionTableName)
 {
@@ -3062,6 +3184,26 @@ SE_ColorEffectController* SE_ResourceManager::getColorEffectController(const cha
 		return NULL;
 	SE_ColorEffectController* c = colorEffectSet->getItem(stringList[1].c_str());
 	return c;
+}
+const SE_ElementTable& SE_ResourceManager::getElementTable() const
+{
+	return mImpl->mElementTable;
+}
+const SE_ImageTable& SE_ResourceManager::getImageTable() const
+{
+	return mImpl->mImageTable;
+}
+const SE_ActionTable& SE_ResourceManager::getActionTable() const
+{
+	return mImpl->mActionTable;
+}
+const SE_ColorEffectControllerTable& SE_ResourceManager::getColorEffectControllerTable() const
+{
+	return mImpl->mColorEffectControllerTable;
+}
+const SE_SequenceTable& SE_ResourceManager::getSequenceTable() const
+{
+	return mImpl->mSequenceTable;
 }
 void SE_ResourceManager::travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,

@@ -6,7 +6,7 @@ void SE_Sequence::setFrame(unsigned int key, const SE_Sequence::_Frame& frame)
     kf->data = frame;
     mSequenceFrame.setKeyFrame(kf);
 }
-SE_Sequence::_Frame SE_Sequence::getFrame(unsigned int key)
+SE_Sequence::_Frame SE_Sequence::getFrame(unsigned int key) const
 {
     SE_KeyFrame<_Frame>* kf = mSequenceFrame.getKeyFrame(key);
     if(!kf)
@@ -17,11 +17,11 @@ void SE_Sequence::addMountPoint(const SE_MountPoint& mp)
 {
     mMountPointSet.addMountPoint(mp);
 }
-SE_MountPoint SE_Sequence::getMountPoint(const SE_MountPointID& id)
+SE_MountPoint SE_Sequence::getMountPoint(const SE_MountPointID& id) const
 {
     return mMountPointSet.getMountPoint(id);
 }
-std::vector<SE_MountPoint> SE_Sequence::getMountPoint()
+std::vector<SE_MountPoint> SE_Sequence::getMountPoint() const
 {
 	return mMountPointSet.getMountPoint();
 }

@@ -41,7 +41,7 @@ SE_Element* SE_SequenceAnimationObject::createElement()
     return element;
 	
 }
-std::vector<unsigned int> SE_SequenceAnimationObject::getKeys()
+std::vector<unsigned int> SE_SequenceAnimationObject::getKeys() const
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_Sequence* sequence = resourceManager->getSequence(mSequenceFrameRef.getStr());

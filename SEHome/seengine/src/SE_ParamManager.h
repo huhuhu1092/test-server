@@ -29,6 +29,8 @@ public:
 	void setString(const SE_StringID& address, const std::string& v);
 	bool hasAddress(const SE_StringID& address) const;
 private:
+	void load(const std::string& id) const;
+private:
 	SE_ParamManager(const SE_ParamManager&);
 	SE_ParamManager& operator=(const SE_ParamManager);
 private:
@@ -41,14 +43,6 @@ private:
 			float f;
 			std::string* str;
 		};
-		~_Param()
-		{
-			if(paramType.type == SE_ParamType::STRING)
-			{
-				if(str)
-					delete str;
-			}
-		}
 	};
     SE_ObjectManager<SE_StringID, _Param> mDataMap;
 };

@@ -71,6 +71,18 @@ public:
 	}
 	static bool isAddress(const SE_StringID& content);
 	static SE_StringID getAddress(const SE_StringID& content);
+	virtual SE_StringID getBackground() const
+	{
+		return "";
+	}
+    virtual SE_StringID getChannel() const
+	{
+		return "";
+	}
+	virtual SE_StringID getTexture(int i) const
+	{
+		return "";
+	}
 private:
 	SE_MountPointID mMountPointRef;
 	float mPivotX;
@@ -100,7 +112,7 @@ public:
     {
         mBackgroundID = background;
     }
-    SE_StringID getBackground()
+    SE_StringID getBackground() const
     {
         return mBackgroundID;
     }
@@ -108,7 +120,7 @@ public:
     {
         mChannelID = channel;
     }
-    SE_StringID getChannel()
+    SE_StringID getChannel() const
     {
         return mChannelID;
     }
@@ -135,7 +147,10 @@ public:
             return NULL;
         return mTextureColorData[index];
     }
-
+    SE_StringID getTexture(int i) const
+	{
+		return mTextureColorData[i]->mTextureID;
+	}
     SE_Element* createElement();
 private:
     SE_StringID mBackgroundID;
@@ -195,8 +210,8 @@ public:
 		return mMountPointSet.getMountPoint(id);
 	}
     void addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame);
-    SE_ColorEffectFrame* getKeyFrame(unsigned int key);
-    std::vector<unsigned int> getKeys();
+    SE_ColorEffectFrame* getKeyFrame(unsigned int key) const;
+    std::vector<unsigned int> getKeys() const;
 	int getKeyFrameNum();
 private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;

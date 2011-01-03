@@ -13,6 +13,8 @@
         #include <netinet/in.h>
     #endif
 #endif
+#include "SE_Application.h"
+#include "SE_ParamManager.h"
 ////////////////
 static const char ws[] = " \t";
 enum _STR_STATE {_START, _ERROR, REPLACE, READY_R, READY_G, READY_B, READY_A,R, G, B, A};
@@ -513,4 +515,169 @@ SE_ExtractImageStr SE_Util::stringToExtractImage(const std::string& url)
 	image.blue = blue;
 	image.alpha = alpha;
 	return image;
+}
+bool SE_Util::isDigit(const char* str)
+{
+	std::string value = str;
+	std::string::iterator it;
+	bool bDigit = true;
+	for(it = value.begin() ; it != value.end() ; it++)
+	{
+		switch(*it)
+		{
+		case '0':
+			break;
+		case '1':
+			break;
+		case '2':
+			break;
+		case '3':
+			break;
+		case '4':
+			break;
+		case '5':
+			break;
+		case '6':
+			break;
+		case '7':
+			break;
+		case '8':
+			break;
+		case '9':
+			break;
+		case '.':
+			break;
+		default:
+			bDigit = false;
+			break;
+		}
+	}
+	return bDigit;
+}
+SE_Util::SplitStringList SE_Util::extractParamString(const char* str)
+{
+	const int START_PARAM = 0;
+	const int END_PARAM = 1;
+	const int ERROR_PARAM = 2;
+	int state = END_PARAM;
+	std::string paramString = str;
+	std::string::size_type pos;
+	std::string::size_type startParam = std::string::npos;
+	std::string::size_type endParam = std::string::npos;
+	std::list<std::string> paramList;
+	std::vector<std::string> paramVector;
+	for(pos = 0 ; pos < paramString.size() ; pos++)
+	{
+		if(paramString[pos] == '[')
+		{
+			if(state != END_PARAM)
+			{
+				state = ERROR_PARAM;
+			}
+			else
+			{
+                state = START_PARAM;
+			    startParam = pos;
+			}
+		}
+		else if(paramString[pos] == ']')
+		{
+			if(state == START_PARAM)
+			{
+				endParam = pos;
+				state = END_PARAM;
+				std::string::size_type n = endParam - (startParam + 1);
+		        std::string subString = paramString.substr(startParam + 1, n);
+				paramList.push_back(subString);
+			}
+			else
+			{
+				LOGI("... has no [ before ]\n");
+				state = ERROR_PARAM;
+			}
+		}
+		else
+		{
+		}
+		if(state == ERROR_PARAM)
+		{
+			break;
+		}
+	}
+	if(state == END_PARAM)
+	{
+		paramVector.resize(paramList.size());
+		copy(paramList.begin(), paramList.end(), paramVector.begin());
+	}
+	return paramVector;
+}
+static std::string getParamValue(const std::string& str, std::string::size_type startpos, std::string::size_type endpos)
+{
+	if(startpos != std::string::npos && endpos != std::string::npos)
+	{
+		std::string::size_type n = endpos - (startpos + 1);
+		std::string subString = str.substr(startpos + 1, n);
+		SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+	    bool ok = false;
+		std::string value = paramManager->getString(subString.c_str(), ok);
+	    if(ok)
+	    {
+			return value;
+	    }
+		else
+			return BAD_STR;
+	}
+	else if(startpos == std::string::npos && endpos == std::string::npos)
+	{
+		return str;
+	}
+	else
+	{
+		return BAD_STR;
+	}
+}
+std::string SE_Util::resolveParamString(const char* str)
+{
+	//SE_Util::SplitStringList strList = SE_Util::splitString(str, "/");
+	//SE_Util::SplitStringList::iterator it;
+	const int START_PARAM = 0;
+	const int END_PARAM = 1;
+	const int ERROR_PARAM = 2;
+	int state = END_PARAM;
+	std::string paramString = str;
+	std::string::size_type pos;
+	std::string::size_type startParam = std::string::npos;
+	std::string::size_type endParam = std::string::npos;
+	for(pos = 0 ; pos < paramString.size() ; pos++)
+	{
+		if(paramString[pos] == '[')
+		{
+            state = START_PARAM;
+			startParam = pos;
+		}
+		else if(paramString[pos] == ']')
+		{
+			if(state == START_PARAM)
+			{
+				endParam = pos;
+				state = END_PARAM;
+				std::string value = getParamValue(paramString, startParam, endParam);
+				std::string::size_type n = endParam - startParam + 1;
+				paramString.replace(startParam, n, value);
+			}
+			else
+			{
+				LOGI("... has no [ before ]\n");
+				state = ERROR_PARAM;
+				break;
+			}
+		}
+		else
+		{
+		}
+	}
+    if(state != END_PARAM)
+		return BAD_STR;
+	else
+		return paramString;
 }

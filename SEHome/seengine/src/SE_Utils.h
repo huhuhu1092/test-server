@@ -5,9 +5,9 @@
 #include <vector>
 #include <list>
 template <typename T>
-typename std::list<T>::iterator listElementRef(std::list<T>& data, int index)
+typename std::list<T>::const_iterator listElementRef(const std::list<T>& data, int index)
 {
-	typename std::list<T>::iterator it = data.begin();
+	typename std::list<T>::const_iterator it = data.begin();
 	int i = 0;
 	while(it != data.end() && i < index)
 		it++;
@@ -70,6 +70,9 @@ public:
 	static std::string stringReplace(std::string& src, const std::string& beReplacedStr, const std::string& replaceStr);
 	static SE_SignColor stringToSignColor(const std::string& str); 
 	static SE_ExtractImageStr stringToExtractImage(const std::string& url);
+	static SplitStringList extractParamString(const char* str);
+	static std::string resolveParamString(const char* str);
+	static bool isDigit(const char* str);
 };
 
 #endif /** end SE_UTILS_H*/

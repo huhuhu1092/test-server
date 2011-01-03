@@ -1,11 +1,23 @@
 #include "SE_ParamManager.h"
+#include "SE_Application.h"
+#include "SE_ResourceManager.h"
 #include "SE_Math.h"
 SE_ParamManager::SE_ParamManager()
 {}
 SE_ParamManager::~SE_ParamManager()
 {}
+void SE_ParamManager::load(const std::string& id) const
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->loadParam(id.c_str());
+}
 int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const 
 {
+	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
+	if(!mDataMap.isContain(strList[0].c_str()))
+	{
+		load(strList[0]);
+	}
 	_Param retv = mDataMap.get(address);
 	if(retv.paramType.type != SE_ParamType::INT)
 	{
@@ -20,6 +32,11 @@ int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const
 }
 float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const
 {
+	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
+	if(!mDataMap.isContain(strList[0].c_str()))
+	{
+		load(strList[0]);
+	}
 	_Param retv = mDataMap.get(address);
 	if(retv.paramType.type != SE_ParamType::FLOAT)
 	{
@@ -34,6 +51,11 @@ float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const
 }
 std::string SE_ParamManager::getString(const SE_StringID& address, bool& ok) const
 {
+	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
+	if(!mDataMap.isContain(strList[0].c_str()))
+	{
+		load(strList[0]);
+	}
     _Param retv = mDataMap.get(address);
 	if(retv.paramType.type != SE_ParamType::STRING)
 	{

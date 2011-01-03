@@ -21,6 +21,7 @@
 #include "SE_Spatial.h"
 #include "SE_RenderManager.h"
 #include "SE_ImageMap.h"
+#include "SE_CheckXml.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -36,6 +37,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	//resourceManager->loadImageTable("ImageTable1.xml");
+	checkXml();
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadElement("TestElement.xml");

@@ -2,6 +2,10 @@
 #define SE_RESOURCEMANAGER_H
 #include "SE_ID.h"
 #include "SE_ImageMap.h"
+#include "SE_Action.h"
+#include "SE_Sequence.h"
+#include "SE_ColorEffectController.h"
+#include "SE_Element.h"
 #include <string>
 class SE_GeometryData;
 class SE_TextureCoordData;
@@ -13,10 +17,6 @@ class SE_ShaderProgram;
 class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
-class SE_Element;
-class SE_Action;
-class SE_Sequence;
-class SE_ColorEffectController;
 class SE_Renderer;
 
 class SE_ResourceManager
@@ -96,6 +96,13 @@ public:
 	std::string getImagePath();
     bool checkHeader(SE_BufferInput& input);
     void releaseHardwareResource();
+public:
+	// used to test xml
+	const SE_ElementTable& getElementTable() const;
+	const SE_ImageTable& getImageTable() const;
+	const SE_ActionTable& getActionTable() const;
+	const SE_ColorEffectControllerTable& getColorEffectControllerTable() const;
+	const SE_SequenceTable& getSequenceTable() const;
 public:
 	struct _Impl;
 private:

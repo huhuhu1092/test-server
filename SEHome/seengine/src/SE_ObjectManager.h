@@ -1,5 +1,6 @@
 #ifndef SE_OBJECTMANAGER_H
 #define SE_OBJECTMANAGER_H
+#include "SE_Common.h"
 #include <map>
 template <typename T>
 struct SE_FindObjCondition
@@ -27,9 +28,37 @@ struct SE_ObjectManagerVisitor<TID, T*>
 	{}
 	virtual void visit(const TID& id, const T* v) = 0;
 };
-
+template <typename T>
+struct SE_ObjectManagerTrait
+{
+	static T defaultValue()
+	{
+		return T();
+	}
+};
+/*
+template <typename T>
+T SE_ObjectManagerTrait<T>::defaultValue()
+{
+	return T();
+}
+*/
+template <>
+struct SE_ObjectManagerTrait<SE_XMLTABLE_TYPE>
+{
+	static SE_XMLTABLE_TYPE defaultValue()
+	{
+		return SE_INVALID_TABLE;
+	}
+};
+/*
+SE_XMLTABLE_TYPE SE_ObjectManagerTrait<SE_XMLTABLE_TYPE>::defaultValue()
+{
+	return SE_INVALID_TABLE;
+}
+*/
 ////////////////////////////////////////////
-template <typename TID, typename T>
+template <typename TID, typename T, typename TRAIT = SE_ObjectManagerTrait<T> >
 class SE_ObjectManager
 {
 public:
@@ -48,8 +77,8 @@ public:
 private:
     RMap m;
 };
-template <typename TID, typename T>
-void SE_ObjectManager<TID, T>::traverse(SE_ObjectManagerVisitor<TID, T>& visitor) const
+template <typename TID, typename T, typename TRAIT>
+void SE_ObjectManager<TID, T, TRAIT>::traverse(SE_ObjectManagerVisitor<TID, T>& visitor) const
 {
 	typename RMap::const_iterator it;
 	for(it = m.begin() ; it != m.end() ; it++)
@@ -57,8 +86,8 @@ void SE_ObjectManager<TID, T>::traverse(SE_ObjectManagerVisitor<TID, T>& visitor
 		visitor.visit(it->first, it->second);
 	}
 }
-template <typename TID, typename T>
-void SE_ObjectManager<TID, T>::remove(const TID& id)
+template <typename TID, typename T, typename TRAIT>
+void SE_ObjectManager<TID, T, TRAIT>::remove(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it != m.end())
@@ -67,17 +96,17 @@ void SE_ObjectManager<TID, T>::remove(const TID& id)
     }
 }
 
-template <typename TID, typename T>
-T SE_ObjectManager<TID, T>::get(const TID& id) const
+template <typename TID, typename T, typename TRAIT>
+T SE_ObjectManager<TID, T, TRAIT>::get(const TID& id) const
 {
     typename RMap::const_iterator it = m.find(id);
     if(it == m.end())
-        return T();
+		return TRAIT::defaultValue();
     else
         return it->second;
 }
-template <typename TID, typename T>
-void SE_ObjectManager<TID, T>::set(const TID& id, T data)
+template <typename TID, typename T, typename TRAIT>
+void SE_ObjectManager<TID, T, TRAIT>::set(const TID& id, T data)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())
@@ -89,13 +118,13 @@ void SE_ObjectManager<TID, T>::set(const TID& id, T data)
         it->second = data;
     }
 }
-template <typename TID, typename T>
-SE_ObjectManager<TID, T>::~SE_ObjectManager()
+template <typename TID, typename T, typename TRAIT>
+SE_ObjectManager<TID, T, TRAIT>::~SE_ObjectManager()
 {
 
 }
-template <class TID, class T>
-T SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc) const
+template <class TID, class T, typename TRAIT>
+T SE_ObjectManager<TID, T, TRAIT>::find(SE_FindObjCondition<T>& fc) const
 {
     typename RMap::iterator it;
     for(it = m.begin() ; it != m.end() ; it++)
@@ -106,10 +135,10 @@ T SE_ObjectManager<TID, T>::find(SE_FindObjCondition<T>& fc) const
 			return data;
 		}
 	}
-	return T();
+	return TRAIT::defaultValue();
 }
-template <class TID, class T>
-bool SE_ObjectManager<TID, T>::isContain(const TID& id) const
+template <class TID, class T, typename TRAIT>
+bool SE_ObjectManager<TID, T, TRAIT>::isContain(const TID& id) const
 {
     typename RMap::const_iterator it = m.find(id);
     if(it == m.end())

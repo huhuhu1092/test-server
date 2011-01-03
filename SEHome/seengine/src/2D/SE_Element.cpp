@@ -70,13 +70,14 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mSeqNum = -1;
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
+	//mChecker = NULL;
 }
 SE_Element::~SE_Element()
 {
     if(mAnimation)
 		delete mAnimation;
 }
-int SE_Element::getKeyFrameNum()
+int SE_Element::getKeyFrameNum() const
 {
 	return 0;
 }
@@ -167,12 +168,12 @@ SE_Spatial* SE_Element::createSpatial()
 	}
 }
 
-void SE_Element::travel(SE_ElementTravel* travel)
+void SE_Element::travel(SE_ElementTravel* travel) const
 {
-	travel->visit(this);
+	travel->visit(const_cast<SE_Element*>(this));
 	if(!mChildren.empty())
     {
-        _ElementList::iterator it;
+        _ElementList::const_iterator it;
         for(it = mChildren.begin() ; it != mChildren.end() ; it++)
         {
             SE_Element* e = *it;
@@ -205,7 +206,7 @@ void SE_Element::clearMountPoint()
 	mMountPointSet.clearMountPoint();
 }
 
-SE_MountPoint SE_Element::getMountPoint(const SE_MountPointID& mountPointID)
+SE_MountPoint SE_Element::getMountPoint(const SE_MountPointID& mountPointID) const
 {
 	return mMountPointSet.getMountPoint(mountPointID);
 }
@@ -250,9 +251,9 @@ void SE_Element::addContent(SE_ElementContent* ec)
 {
 	mElementContentList.push_back(ec);
 }
-SE_ElementContent* SE_Element::getContent(int index)
+SE_ElementContent* SE_Element::getContent(int index) const
 {
-	_ElementContentList::iterator it = listElementRef(mElementContentList, index);
+	_ElementContentList::const_iterator it = listElementRef(mElementContentList, index);
 	if(it != mElementContentList.end())
 	{
 		return *it;
@@ -334,6 +335,7 @@ void SE_Element::spawn()
 		for(it = mElementContentList.begin() ; it != mElementContentList.end(); it++)
 		{
 			SE_ElementContent* ec = *it;
+			ec->setParent(this);
 			SE_MountPoint mp(INVALID_GEOMINFO, INVALID_GEOMINFO);
 			if(mParent)
 				mp = mParent->getMountPoint(mMountPointID);
@@ -343,6 +345,10 @@ void SE_Element::spawn()
 			e->spawn();
 		}
 	}
+}
+int SE_Element::getContentNum() const
+{
+	return mElementContentList.size();
 }
 void SE_Element::clone(SE_Element *src, SE_Element* dst)
 {
@@ -526,46 +532,7 @@ SE_ImageData* SE_Element::createImageData(const SE_ImageDataID& imageDataID)
 	}
 	return imageData;
 }
-SE_StringID SE_Element::resolveParamString(const char* str)
-{
-	SE_Util::SplitStringList strList = SE_Util::splitString(str, "/");
-	SE_Util::SplitStringList::iterator it;
-	for(it = strList.begin() ; it != strList.end() ; it++)
-	{
-		std::string s = *it;
-        std::string::size_type posStart = s.find("[");
-		if(posStart != std::string::npos)
-		{
-            std::string::size_type posEnd = s.find("]");
-			if(posEnd == std::string::npos)
-			{
-				LOGE("... [ has no ]\n");
-				return "";
-			}
-			else
-			{
-                std::string::size_type n = posEnd - posStart - 1;
-	            std::string subString = s.substr(posStart + 1, n);
-                SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
-	            bool ok = false;
-				std::string value = paramManager->getString(subString.c_str(), ok);
-	            if(ok)
-				{
-					*it = value;
-				}
-			}
-		}
-	}
-	it = strList.begin();
-	std::string retStr = *it;
-	it++;
-	for(; it != strList.end() ; it++)
-	{
-		retStr += "/";
-		retStr += *it;
-	}
-	return retStr.c_str();
-}
+
 ///////////////
 SE_ElementContent* SE_ElementContent::clone()
 {
@@ -585,14 +552,15 @@ SE_ElementContent* SE_ImageContent::clone()
 SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance() ->getResourceManager();
-	SE_Util::SplitStringList strList = SE_Util::splitString(mImageURI.getStr(), "/");
+	SE_StringID strURI = SE_Util::resolveParamString(mImageURI.getStr()).c_str();
+	SE_Util::SplitStringList strList = SE_Util::splitString(strURI.getStr(), "/");
 	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
 	SE_Element* rete = NULL;
 	if(t == SE_IMAGE_TABLE)
 	{
 	    SE_ImageElement* imageElement = new SE_ImageElement;
 	    imageElement->setMountPoint(mpx, mpy);
-	    imageElement->setImage(mImageURI);
+	    imageElement->setImage(strURI);
 		imageElement->setMountPoint(mpx, mpy);
 		rete = imageElement;
 	}
@@ -626,6 +594,13 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		//e->setRenderTarget(renderTargetID);
 	    //e->setNeedUpdateTransform(false);
 		rete = textureElement;
+	}
+	else if(t == SE_COLOREFFECT_TABLE)
+	{
+		SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(strURI.getStr());
+		SE_ColorEffectControllerElement* colorEffectControllerElement = new SE_ColorEffectControllerElement(colorEffectController);
+		colorEffectControllerElement->setMountPoint(mpx, mpy);
+		rete = colorEffectControllerElement;
 	}
 	return rete;
 }
@@ -732,7 +707,8 @@ SE_ElementContent* SE_ActionContent::clone()
 SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 {
 	SE_ActionElement* e = new SE_ActionElement;
-	e->setActionID(mActionURI);
+	SE_StringID strURI = SE_Util::resolveParamString(mActionURI.getStr()).c_str();
+	e->setActionID(strURI);
 	e->setMountPoint(mpx, mpy);
 	return e;
 }
@@ -740,7 +716,8 @@ SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI) : m
 {}
 SE_ElementContent* SE_StateTableContent::clone()
 {
-	SE_StateTableContent* e = new SE_StateTableContent(mStateTableURI);
+	SE_StringID strURI = SE_Util::resolveParamString(mStateTableURI.getStr()).c_str();
+	SE_StateTableContent* e = new SE_StateTableContent(strURI);
 	e->setID(getID());
 	return e;
 }
@@ -804,6 +781,22 @@ SE_Spatial* SE_ImageElement::createSpatial()
 		return NULL;
 
 }
+//////////////////////////
+/*
+SE_ColorEffectImage::SE_ColorEffectImage(const SE_StringID& id)
+{
+	mColorEffectID = id;
+}
+SE_ColorEffectImage::~SE_ColorEffectImage()
+{
+}
+void SE_ColorEffectImage::spawn()
+{}
+void SE_ColorEffectImage::measure()
+{}
+SE_Spatial* SE_ColorEffectImage::createSpatial()
+{}
+*/
 /////////////////////////
 SE_ActionElement::SE_ActionElement()
 {
@@ -1106,7 +1099,7 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	renderTarget->create();
 	return imageElement;
 }
-bool SE_ColorEffectElement::isTextureEnd(_ElementList::iterator textureIt[4], SE_Element* texture[4])
+bool SE_ColorEffectElement::isTextureEnd(_ElementList::const_iterator textureIt[4], SE_Element* texture[4])
 {
 	bool ret = false;
 	for(int i = 0 ; i < 4 ; i++)
@@ -1127,9 +1120,9 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
     if(!background->getChildren().empty() && !channel->getChildren().empty())
 	{
 		element = background->clone();
-		_ElementList::iterator backgroundIt = background->getChildren().begin();
-		_ElementList::iterator channelIt = channel->getChildren().begin();
-		_ElementList::iterator textureIt[4];
+		_ElementList::const_iterator backgroundIt = background->getChildren().begin();
+		_ElementList::const_iterator channelIt = channel->getChildren().begin();
+		_ElementList::const_iterator textureIt[4];
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])

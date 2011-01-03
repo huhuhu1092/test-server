@@ -13,11 +13,11 @@ public:
         SE_MountPointID mpref;
     };
     void setFrame(unsigned int key, const _Frame& f);
-	_Frame getFrame(unsigned int);
-    SE_MountPoint getMountPoint(const SE_MountPointID& id);
+	_Frame getFrame(unsigned int) const;
+    SE_MountPoint getMountPoint(const SE_MountPointID& id) const;
 	void addMountPoint(const SE_MountPoint& mp);
-	std::vector<SE_MountPoint> getMountPoint();
-	std::vector<unsigned int> getKeys()
+	std::vector<SE_MountPoint> getMountPoint() const;
+	std::vector<unsigned int> getKeys() const
 	{
 		return mSequenceFrame.getKeys();
 	}
@@ -25,7 +25,7 @@ public:
     {
         mPivotX = pivotx;
     }
-    int getPivotX()
+    int getPivotX() const
     {
         return mPivotX;
     }
@@ -33,7 +33,7 @@ public:
     {
         mPivotY = pivoty;
     }
-    int getPivotY()
+    int getPivotY() const
     {
         return mPivotY;
     }

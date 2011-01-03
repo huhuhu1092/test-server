@@ -61,10 +61,14 @@ public:
 	{
 		return NULL;
 	}
-    virtual std::vector<unsigned int> getKeys()
+    virtual std::vector<unsigned int> getKeys() const
     {
         return std::vector<unsigned int>();
     }
+	virtual SE_StringID getURI() const
+	{
+		return "";
+	}
 private:
     SE_StringID mID;
 	SE_Layer mLayer;
@@ -115,6 +119,10 @@ public:
 	{
 		return mImageRef;
 	}
+	SE_StringID getURI() const
+	{
+		return mImageRef;
+	}
 	SE_Element* createElement();
 private:
 	SE_StringID mImageRef;
@@ -126,11 +134,15 @@ public:
     {
         mTextureRef = textureRef;
     }
-    SE_StringID getTextureRef()
+    SE_StringID getTextureRef() const
     {
         return mTextureRef;
     }
-	SE_Element* createElement();
+	SE_Element* createElement(); 
+	SE_StringID getURI() const
+	{
+		return mTextureRef;
+	}
 private:
 	SE_StringID mTextureRef;
 };
@@ -141,12 +153,16 @@ public:
     {
         mSequenceFrameRef = sequenceFrameRef;
     }
-    SE_StringID getSequenceRef()
+    SE_StringID getSequenceRef() const
     {
         return mSequenceFrameRef;
     }
 	SE_Element* createElement();
-    std::vector<unsigned int> getKeys();
+    std::vector<unsigned int> getKeys() const;
+	SE_StringID getURI() const
+	{
+		return mSequenceFrameRef;
+	}
 private:
 	SE_StringID mSequenceFrameRef;
 };
@@ -157,50 +173,15 @@ public:
     {
         mColorEffectRef = id;
     }
-    SE_StringID getColorEffectRef()
+    SE_StringID getColorEffectRef() const
     {
         return mColorEffectRef;
     }
 	SE_Element* createElement();
-	/*
-    const SE_ColorEffectInput& getColorEffectInput()
+	SE_StringID getURI() const
 	{
-		return mColorEffectInput;
+		return mColorEffectRef;
 	}
-	void setValid(bool valid)
-	{
-		mColorEffectInput.valid = valid;
-	}
-	void setBackground(const SE_StringID& background)
-	{
-		mColorEffectInput.background = background;
-	}
-	void setChannel(const SE_StringID& channel)
-	{
-		mColorEffectInput.channel = channel;
-	}
-	void setAlpha(int alpha)
-	{
-		mColorEffectInput.alpha = alpha;
-	}
-	//index 0, 1, 2, 3 : r g b a
-	void setTexture(int index , const SE_StringID& str)
-	{
-		mColorEffectInput.channelInput[index].texture = str;
-	}
-	void setFunction(int index, int fn)
-	{
-		mColorEffectInput.channelInput[index].fn = fn;
-	}
-	void setAlpha(int index, int alpha)
-	{
-		mColorEffectInput.channelInput[index].alpha = alpha;
-	}
-	void setColor(int index, const SE_Vector3i& color)
-	{
-		mColorEffectInput.channelInput[index].color = color;
-	}
-	*/
 private:
     SE_StringID mColorEffectRef;
     //SE_ColorEffectInput mColorEffectInput;
@@ -297,6 +278,10 @@ public:
 			endkey = 0;
 		}
 	};
+	const std::list<_ActionLayer*>& getActionLayerList() const
+	{
+		return mActionLayerList;
+	}
 private:
     struct _EndKey
     {

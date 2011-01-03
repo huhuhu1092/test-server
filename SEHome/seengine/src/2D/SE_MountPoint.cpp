@@ -40,17 +40,17 @@ void SE_MountPointSet::clearMountPoint()
     mMountPointMap.clear();
 }
 
-SE_MountPoint SE_MountPointSet::getMountPoint(const SE_MountPointID& mountPointID)
+SE_MountPoint SE_MountPointSet::getMountPoint(const SE_MountPointID& mountPointID) const
 {
-	_MountPointMap::iterator it = mMountPointMap.find(mountPointID);
+	_MountPointMap::const_iterator it = mMountPointMap.find(mountPointID);
 	if(it != mMountPointMap.end())
 		return it->second;
 	else
 		return SE_MountPoint();
 }
-std::vector<SE_MountPoint> SE_MountPointSet::getMountPoint()
+std::vector<SE_MountPoint> SE_MountPointSet::getMountPoint() const
 {
-    _MountPointMap::iterator it;
+    _MountPointMap::const_iterator it;
     std::vector<SE_MountPoint> ret(mMountPointMap.size());
     int i = 0;
     for(it = mMountPointMap.begin(); it != mMountPointMap.end(); it++)

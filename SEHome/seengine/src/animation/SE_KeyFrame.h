@@ -63,22 +63,22 @@ public:
     void setKeyFrame(SE_KeyFrame<T>* kf);
     //if key is not in key frame sequnce , it will return the 
     //first key frame
-    SE_KeyFrame<T>* getKeyFrame(unsigned int key);
-    int getKeyFrameNum()
+    SE_KeyFrame<T>* getKeyFrame(unsigned int key) const;
+    int getKeyFrameNum() const
     {
         return mKeyFrameSequence.size();
     }
-	std::vector<unsigned int> getKeys();
-    SE_KeyFrame<T>* find(SE_KeyFrameCompare<T> compare);
+	std::vector<unsigned int> getKeys() const;
+    SE_KeyFrame<T>* find(SE_KeyFrameCompare<T> compare) const;
 	void remove_if(SE_KeyFrameCompare<T> compare);
 private:
     typedef std::list<SE_KeyFrame<T>*> _KeyFrameSequence;
     _KeyFrameSequence mKeyFrameSequence;
 };
 template <typename T>
-SE_KeyFrame<T>* SE_KeyFrameSequence<T>::find(SE_KeyFrameCompare<T> compare)
+SE_KeyFrame<T>* SE_KeyFrameSequence<T>::find(SE_KeyFrameCompare<T> compare) const
 {
-    typename _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::const_iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         if(compare(*it))
@@ -118,10 +118,10 @@ SE_KeyFrameSequence<T>::~SE_KeyFrameSequence()
 
 }
 template <typename T>
-std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys()
+std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys() const
 {
 	std::vector<unsigned int> keys(mKeyFrameSequence.size());
-    typename _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::const_iterator it ;
 	int i = 0 ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
@@ -177,9 +177,9 @@ void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
     mKeyFrameSequence.push_back(kf);
 }
 template <typename T>
-SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key)
+SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key) const
 {
-    typename _KeyFrameSequence::iterator it ;
+    typename _KeyFrameSequence::const_iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
     {
         if((*it)->key == key)

@@ -46,19 +46,19 @@ public:
     SE_Element();
     SE_Element(float left, float top, float width, float height);
     virtual ~SE_Element();
-    float getLeft()
+    float getLeft() const
     {
 	    return mLeft;
     }
-    float getTop()
+    float getTop() const
     {
         return mTop;
     }
-    float getWidth()
+    float getWidth() const
     {
         return mWidth;
     }
-    float getHeight()
+    float getHeight() const
     {
         return mHeight;
     }
@@ -89,7 +89,7 @@ public:
     {
         mElementRef = elementref;
     }
-    SE_StringID getElementRef()
+    SE_StringID getElementRef() const
     {
         return mElementRef;
     }
@@ -99,7 +99,7 @@ public:
     {
         mLocalRotate = q;
     }
-    SE_Quat getLocalRotate()
+    SE_Quat getLocalRotate() const
     {
         return mLocalRotate;
     }
@@ -108,7 +108,7 @@ public:
     {
         mLocalScale = scale;
     }
-    SE_Vector3f getLocalScale()
+    SE_Vector3f getLocalScale() const
     {
         return mLocalScale;
     }
@@ -116,7 +116,7 @@ public:
     {
         mLocalLayer = layer;
     }
-    SE_Layer getLocalLayer()
+    SE_Layer getLocalLayer() const
     {
         return mLocalLayer;
     }
@@ -124,7 +124,7 @@ public:
     {
         mID = id;
     }
-    SE_ElementID getID()
+    SE_ElementID getID() const
     {
         return mID;
     }
@@ -132,7 +132,7 @@ public:
 	{
 		mFullPathID = id;
 	}
-	SE_ElementID getFullPathID()
+	SE_ElementID getFullPathID() const
 	{
 		return mFullPathID;
 	}
@@ -140,7 +140,7 @@ public:
     {
         mParent = parent;
     }
-    SE_Element* getParent()
+    SE_Element* getParent() const
     {
         return mParent;
     }
@@ -153,13 +153,14 @@ public:
         return mSimObjectID;
     }
 	void addContent(SE_ElementContent* ec);
-	SE_ElementContent* getContent(int index);
+	int getContentNum() const;
+	SE_ElementContent* getContent(int index) const;
 	void clearContent();
 	void setSpatialID(const SE_SpatialID& spatialID)
 	{
 		mSpatialID = spatialID;
 	}
-    SE_SpatialID getSpatialID()
+    SE_SpatialID getSpatialID() const
     {
         return mSpatialID;
     }
@@ -167,7 +168,7 @@ public:
 	{
 		mPrimitiveID = id;
 	}
-    SE_PrimitiveID getPrimitiveID()
+    SE_PrimitiveID getPrimitiveID() const
     {
         return mPrimitiveID;
     }
@@ -175,20 +176,20 @@ public:
 	{
 		mAnimationID = animID;
 	}
-	SE_AnimationID getAnimationID()
+	SE_AnimationID getAnimationID() const
 	{
 		return mAnimationID;
 	}
 	void setRenderTarget(const SE_RenderTargetID& id);
-	SE_RenderTargetID getRenderTarget()
+	SE_RenderTargetID getRenderTarget() const
 	{
 		return mRenderTarget;
 	}
-    float getPivotX()
-    {
+    float getPivotX() const
+    { 
         return mPivotX;
     }
-    float getPivotY()
+    float getPivotY() const
     {
         return mPivotY;
     }
@@ -200,11 +201,11 @@ public:
     {
         mPivotY = y;
     }
-	float getDeltaLeft()
+	float getDeltaLeft() const
 	{
 		return mDeltaLeft;
 	}
-	float getDeltaTop()
+	float getDeltaTop() const
 	{
 		return mDeltaTop;
 	}
@@ -220,11 +221,11 @@ public:
 	{
 		mMountPointID = mp;
 	}
-	SE_MountPointID getMountPointRef()
+	SE_MountPointID getMountPointRef() const
 	{
 		return mMountPointID;
 	}
-	SE_KeyFrameController* getKeyFrameController()
+	SE_KeyFrameController* getKeyFrameController() const
 	{
 		return mKeyFrameController;
 	}
@@ -232,7 +233,7 @@ public:
 	{
 		mKeyFrameController = kfc;
 	}
-	SE_Animation* getAnimation()
+	SE_Animation* getAnimation() const
 	{
 		return mAnimation;
 	}
@@ -240,12 +241,12 @@ public:
     void addMountPoint(const SE_MountPoint& mountPoint);
     void removeMountPoint(const SE_MountPointID& mountPointID);
     void clearMountPoint();
-    SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID);
+    SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID) const;
 	void setTimeKey(unsigned int key)
 	{
 		mTimeKey = key;
 	}
-	unsigned int getTimeKey()
+	unsigned int getTimeKey() const
 	{
 		return mTimeKey;
 	}
@@ -254,7 +255,7 @@ public:
 	{
 		mActionLayer = actionLayer;
 	}
-	SE_Action::_ActionLayer* getActionLayer()
+	SE_Action::_ActionLayer* getActionLayer() const
 	{
 		return mActionLayer;
 	}
@@ -271,19 +272,19 @@ public:
 		mMountPointX = x;
 		mMountPointY = y;
 	}
-	float getMountPointX()
+	float getMountPointX() const
 	{
 		return mMountPointX;
 	}
-	float getMountPointY()
+	float getMountPointY() const
 	{
 		return mMountPointY;
 	}
-	unsigned int getStartKey()
+	unsigned int getStartKey() const
 	{
 		return mStartKey;
 	}
-	unsigned int getEndKey()
+	unsigned int getEndKey() const
 	{
 		return mEndKey;
 	}
@@ -302,11 +303,11 @@ public:
 	{
 		mNextElement = next;
 	}
-	SE_Element* getPrev()
+	SE_Element* getPrev() const
 	{
 		return mPrevElement;
 	}
-	SE_Element* getNext()
+	SE_Element* getNext() const
 	{
 		return mNextElement;
 	}
@@ -328,20 +329,32 @@ public:
 	}
 	//this function is used by inherited class
 	//user can not use it
-	std::list<SE_Element*> getChildren()
+	const std::list<SE_Element*>& getChildren() const
 	{
 		return mChildren;
 	}
+	/*
+	void setChecker(SE_ElementChecker* checker)
+	{
+		mChecker = checker;
+	}
+    SE_ElementChecker* getChecker()
+	{
+		return mChecker;
+	}
+	*/
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
 	virtual void spawn();
 	virtual void measure();
-    virtual void travel(SE_ElementTravel* travel);
+    virtual void travel(SE_ElementTravel* travel) const;
 	virtual SE_Element* clone();
-	virtual int getKeyFrameNum();
-	virtual SE_StringID getImageURI() {return "";}
-	virtual void getImageData(SE_ImageDataID& imageDataID, SE_ImageData* imageData) {}
+	virtual int getKeyFrameNum() const;
+	virtual SE_StringID getImageURI() const
+	{return "";}
+	virtual void getImageData(SE_ImageDataID& imageDataID, SE_ImageData* imageData) const
+	{}
 protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
@@ -350,7 +363,6 @@ protected:
 	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
 	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
 	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
-	SE_StringID resolveParamString(const char* str);
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -396,10 +408,27 @@ protected:
 	int mSeqNum;// the sequence number in its parent element
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
+	//SE_ElementChecker* mChecker;
 };
 class SE_ElementContent
 {
 public:
+	SE_ElementContent()
+	{
+		mParent = NULL;
+	}
+	void setParent(SE_Element* parent)
+	{
+		mParent = parent;
+	}
+	void setURI(const SE_StringID& uri)
+	{
+		mContentURI = uri;
+	}
+	SE_StringID getURI()
+	{
+		return mContentURI;
+	}
 	virtual SE_Element* createElement(float mpx, float mpy) = 0;
 	virtual ~SE_ElementContent() {}
 	virtual SE_ElementContent* clone();
@@ -414,6 +443,8 @@ public:
 	}
 private:
 	SE_StringID mID;
+	SE_Element* mParent;
+	SE_StringID mContentURI;
 };
 class SE_ImageContent : public SE_ElementContent
 {
@@ -466,6 +497,19 @@ private:
     SE_StringID mImageID;
 	SE_Image* mImage;
 };
+/*
+class SE_ColorEffectImage : public SE_Element
+{
+public:
+	SE_ColorEffectImage(SE_ColorEffectController* colorEffectController);
+	~SE_ColorEffectImage();
+	void spawn();
+	void measure();
+	SE_Spatial* createSpatial();
+private:
+	SE_ColorEffectController* mColorEffectController;
+};
+*/
 class SE_TextureElement : public SE_Element
 {
 public:
@@ -640,7 +684,7 @@ private:
 	//void getBackgroundBound(int& width, int& height);
 	void getExtractImageProperty(SE_XMLTABLE_TYPE& t, int& width, int& height);
 	SE_ImageElement* createImageElement(const SE_StringID& textureURL, SE_ImageData*& imageData);
-	bool isTextureEnd(_ElementList::iterator textureIt[4], SE_Element* texture[4]);
+	bool isTextureEnd(_ElementList::const_iterator textureIt[4], SE_Element* texture[4]);
 	SE_Element* mergeElement(SE_Element* background, SE_Element* channel, SE_Element* texture[4]);
 	void mergeElement();
 private:
