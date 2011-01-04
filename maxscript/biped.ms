@@ -22,6 +22,8 @@ struct seKeyFrame (time, jointpose)
 struct seSkeleton (bindpose, keyframes = #())
 
 global seRootBipeNode = #() -- root bipe will not be one
+global seKeys = #()
+	
 seSceneChildren = rootNode.children
 /*
    parent is seBipedNode and child is type Node
@@ -68,10 +70,13 @@ fn seSetKeyFrame bipedNode =
     animate on
     (
         for i = 1 to bipController.keys.count do
+		--for i = 1 to seKeys.count do
         (
             key = biped.getKey bipController i
+			--keyTime = seKeys[i]
             local pos = undefined, scale = undefined, rotation = undefined
             at time key.time (pos = biped.getTransform bn #pos ; scale = biped.getTransform bn #scale ; rotation = biped.getTransform bn #rotation)
+			--at time key.time (pos = bn.transform.pos ; scale = bn.transform.scale ; rotation = bn.transform.rotation)
             lkeyframe = seKeyFrame()
             lkeyframe.time = key.time
             lkeyframe.jointpose = seJointPose()
@@ -83,6 +88,21 @@ fn seSetKeyFrame bipedNode =
     )
 	format "%,   %\n" bipedNode.name lSkeleton
 	bipedNode.skeleton = lSkeleton
+)
+fn seSetTotalKeys bipedNode = 
+(
+	bn = getNodeByName bipedNode.name
+	bipController = bn.transform.controller
+	keys = bipController.keys
+	for i = 1 to keys.count do
+	(
+		appendIfUnique seKeys keys[i].time
+	)
+	for i = 1 to bipedNode.children.count do
+	(
+	    child = bipedNode.children[i]
+		seSetTotalKeys child
+	)
 )
 fn seSetKeyFrameToBipe bipedRoot =
 (
@@ -115,13 +135,15 @@ fn outputBipeTransform outstream bipedNode =
 	format "                *NODE_NAME : \"%\"\n" bipedNode.name
     format "                *NODE_NAME : \"%\"\n" bipedNode.name to:outstream
 	format "                *BIND_POS : %\n" bipedNode.skeleton
-    format "                *BIND_POS : %\n" bipedNode.skeleton.bindpose to:outstream
+    format "                *BIND_POS : % % % %\n" bipedNode.skeleton.bindpose.row1 bipedNode.skeleton.bindpose.row2 bipedNode.skeleton.bindpose.row3 bipedNode.skeleton.bindpose.row4 to:outstream
     format "                *KEY_FRAME {\n" to:outstream
     for i = 1 to bipedNode.skeleton.keyframes.count do
     (
         local keyframe = bipedNode.skeleton.keyframes[i]
         format "                *FRAME % : " keyframe.time to:outstream
-        format "% % %\n" keyframe.jointpose.rotation keyframe.jointpose.translate keyframe.jointpose.scale to:outstream
+        format "% % % %, % % % , % % %\n" keyframe.jointpose.rotation.x keyframe.jointpose.rotation.y keyframe.jointpose.rotation.z \  
+		                            keyframe.jointpose.rotation.w keyframe.jointpose.translate.x keyframe.jointpose.translate.y keyframe.jointpose.translate.z \
+		                            keyframe.jointpose.scale.x  keyframe.jointpose.scale.y keyframe.jointpose.scale.z to:outstream
     )
     format "\n                }\n" to:outstream
     format "\n            }\n" to:outstream
@@ -157,14 +179,23 @@ for i = 1 to seSceneChildren.count do
     then
         seSetBipedNode undefined seChild
 )
-format "%\n" seRootBipeNode
-
+format "###############start ##############\n"
+for i = 1 to seRootBipeNode.count do
+(
+    child = seRootBipeNode[i]
+	seSetTotalKeys child
+)
+seKeys = sort seKeys
+for i = 1 to seKeys.count do
+(
+    format "key: %\n" seKeys[i]
+)
+format "########end ####################\n"
 for i = 1 to seRootBipeNode.count do
 (
     child = seRootBipeNode[i]
     seSetKeyFrameToBipe child
 )
-
 
 fs = createFile "C:\\model\\newhome3\\skeletoninfo.ASE"
 format "*SKELETON_INFO {\n" to:fs
