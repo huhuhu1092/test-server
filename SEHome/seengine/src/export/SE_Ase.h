@@ -296,6 +296,7 @@ private:
     void ASE_KeyTMANIMATION(const char* token);
 	void ASE_KeySHADER(const char* token);
 	void ASE_KeyRENDERER(const char* token);
+	void ASE_KeySKELETONINFO(const char* token);
     void ASE_AdjustSubMtl();
 	void writeSpatialScene(SE_BufferOutput& outScene, std::vector<SE_MeshID>& meshIDVector);
     ASE_GeometryObjectGroup* findGroup(std::string parentname);

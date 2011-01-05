@@ -42,9 +42,9 @@ struct ase_t
     char* curpos;
     int len;
 };
-
+#define BUF_SIZE 1024
 static ase_t ase; 
-static char s_token[1024];
+static char s_token[BUF_SIZE];
 static char meshFileName[256];
 static bool _verbose = false;
 static const int MAGIC = 0xCFCFCFCF;
@@ -848,6 +848,9 @@ int ASE_Loader::CharIsTokenDelimiter( int ch )
 
 int ASE_Loader::ASE_GetToken( bool restOfLine )
 {
+	const int ENTER_QUAT = 0;
+	const int EXIT_QUAT = 1;
+	int state = EXIT_QUAT;
 	int i = 0;
 
 	if ( ase.buffer == 0 )
@@ -862,23 +865,30 @@ int ASE_Loader::ASE_GetToken( bool restOfLine )
 	{
 		ase.curpos++;
 	}
-
+    
 	while ( ( ase.curpos - ase.buffer ) < ase.len )
 	{
 		s_token[i] = *ase.curpos;
+        if(state == EXIT_QUAT && s_token[i] == '\"')
+			state = ENTER_QUAT;
+		else if(state == ENTER_QUAT && s_token[i] == '\"')
+			state = EXIT_QUAT;
 
 		ase.curpos++;
 		i++;
 
-		if ( ( CharIsTokenDelimiter( s_token[i-1] ) && !restOfLine ) ||
-			 ( ( s_token[i-1] == '\n' ) || ( s_token[i-1] == '\r' ) ) )
+		if ( ( CharIsTokenDelimiter( s_token[i-1] ) && !restOfLine && (state != ENTER_QUAT)) ||
+			 ( ( s_token[i-1] == '\n' ) || ( s_token[i-1] == '\r' ) ) ||
+			 i == BUF_SIZE)
 		{
 			s_token[i-1] = 0;
 			break;
 		}
 	}
-
-	s_token[i] = 0;
+    if(i == BUF_SIZE)
+	    s_token[i - 1] = 0;
+	else
+		s_token[i] = 0;
 
 	return 1;
 }
