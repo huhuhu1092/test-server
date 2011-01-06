@@ -38,12 +38,71 @@ private:
 	SE_ParamManager(const SE_ParamManager&);
 	SE_ParamManager& operator=(const SE_ParamManager);
 private:
+    typedef std::list<SE_ParamObserver*> _ObserverList;
 	struct _Param
 	{
-        PARAM_TYPE type;
         SE_Value data;
-        std::list<SE_ParamObserver*> observers
+		mutable _ObserverList observers;
 	};
+	void update(const SE_StringID& id, const _Param* param);
+	enum {UPDATE, UNREGISTER_ALL, UNREGISTER_BY_ID, UNREGISTER_BY_OBSERVER};
+	class ParamVisitor : public SE_ObserverManager<SE_StringID, _Param*>
+	{
+	public:
+		void visit(const SE_StringID& id, const _Param* param)
+		{
+			if(op == UPDATE)
+			{
+			    paramManager->update(id, param);
+			}
+			else if(op == UNREGISTER_ALL)
+			{
+				param->observers.clear();
+			}
+			else if(op == UNREGISTER_BY_ID)
+			{
+				if(id == this->id)
+				{
+					if(ob == NULL)
+					{
+						param->observers.clear();
+					}
+					else
+					{
+						_ObserverList::const_iterator it;
+						for(it = param->observer.begin() ; it != param->observers.end() ; it++)
+						{
+							SE_ParamObserver* po = *it;
+							if(po == ob)
+							{
+								break;
+							}
+						}
+						if(it != param->observers.end())
+						    param->observers.erase(it);
+					}
+				}
+			}
+			else if(op == UNREGISTER_BY_OBSERVER)
+			{
+				_ObserverList::const_iterator it;
+				for(it = param->observers.begin() ; it != param->observers.end() ; it++)
+				{
+                    SE_ParamObserver* po = *it;
+					if(po == ob)
+						break;
+				}
+				if(it != param->observers.end())
+					param->observers.erase(it);
+			}
+		}
+        SE_ParamManager* paramManager;    
+		int op;
+		SE_StringID id;
+		SE_ParamObserver* ob;
+	};
+
+private:
     SE_ObjectManager<SE_StringID, _Param*> mDataMap;
 };
 #endif

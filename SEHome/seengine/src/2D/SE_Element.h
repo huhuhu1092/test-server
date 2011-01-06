@@ -40,7 +40,7 @@ public:
 	An element which has content can not has child, it responsibility is just to create
 	a real spatial for display.
 */
-class SE_Element
+class SE_Element : public SE_ParamObserver
 {
 public:
     SE_Element();
@@ -346,7 +346,6 @@ public:
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
-	virtual void update(const SE_StringID& id) {}
 	// spawn has different function for element node and element leaf
 	// for element node it will calculate the origin point in its parent coordinate system
 	// for element leaf it must calculate the origin point and its boudary in its parent coordinate system

@@ -24,6 +24,10 @@ public:
     SE_Valuem& operator=(const SE_Value&);
     bool operator==(const SE_Value& right);
     bool operator!=(const SE_Value& right);
+	TYPE getType()
+	{
+		return type;
+	}
     int getInt() const
     {
         return data.i;
