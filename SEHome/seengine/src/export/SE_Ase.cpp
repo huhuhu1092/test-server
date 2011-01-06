@@ -1057,6 +1057,8 @@ void ASE_Loader::ASE_KeyBONEMATRIXINFO(const char* token)
         }
     }
 }
+void ASE_Loader::ASE_KeySKELETONINFO(const char* token)
+{}
 void ASE_Loader::ASE_KeyBONEMATRIX(const char* token)
 {
     if(!strcmp(token, "*BONENUM"))

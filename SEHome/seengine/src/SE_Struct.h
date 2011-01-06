@@ -6,13 +6,9 @@
 #include "SE_Vector.h"
 #include "SE_Quat.h"
 #include "SE_Matrix.h"
+#include "SE_Value.h"
 class SE_Spatial;
-class SE_VirtualData
-{
-public:
-	virtual ~SE_VirtualData() {};
-    virtual SE_VirtualData* clone() = 0;
-};
+
 class SE_StdString : public SE_VirtualData
 {
 public:
@@ -22,6 +18,16 @@ public:
 		SE_StdString* str = new SE_StdString;
 		str->data = data;
 		return str;
+	}
+	bool eq(const SE_VirtualData& right)
+	{
+		const SE_StdString& v = right;
+		return data == v.data;
+	}
+	bool neq(const SE_VirtualData& right)
+	{
+		const SE_StdString& v = right;
+		return data != v.data;
 	}
 	std::string data;
 };
@@ -34,49 +40,28 @@ public:
 		s->spatial = spatial;
 		return s;
 	}
+	bool eq(const SE_VirtualData& right)
+	{
+		const SE_SpatialData& v = right;
+		return v.spatial == spatial;
+	}
+	bool neq(const SE_VirtualData& right)
+	{
+		const SE_SpatialData& v = right;
+		return v.spatial != spatial;
+	}
 	SE_Spatial* spatial;
 };
-struct SE_DataItem
-{
-    enum DATA_ITEM_TYPE {INVALID, CHAR_ITEM, UCHAR_ITEM, SHORT_ITEM, USHORT_ITEM, INT_ITEM, UINT_ITEM, FLOAT_ITEM,ASCII_ITEM, UTF8_ITEM, UNICODE_ITEM,
-          VECTOR3F_ITEM, VECTOR4F_ITEM, VECTOR2F_ITEM, VECTOR3I_ITEM, QUAT_ITEM, MATRIX3F_ITEM, MATRIX2F_ITEM, MATRIX4F_ITEM, VIRTUALDATA_ITEM};
-    DATA_ITEM_TYPE type;
-    union _DataType
-    {
-        char c;
-        unsigned char uc;
-        short s;
-        unsigned short us;
-        int i;
-        unsigned int ui;
-        float f;
-        char* ascii;
-        char* utf8;
-        wchar_t* unicode;
-        SE_Vector3f* vec3f;
-        SE_Vector2f* vec2f;
-        SE_Vector4f* vec4f;
-        SE_Vector3i* vec3i;
-        SE_Quat* quat;
-        SE_Matrix2f* mat2f;
-        SE_Matrix3f* mat3f;
-        SE_Matrix4f* mat4f;
-        SE_VirtualData* virtualData;
-    } data;
-    SE_DataItem(DATA_ITEM_TYPE type = INVALID);
-    ~SE_DataItem();
-    SE_DataItem(const SE_DataItem&);
-    SE_DataItem& operator=(const SE_DataItem&);
-};
+
 class SE_DataItemGroup
 {
 public:
     SE_DataItemGroup(int size);
     int getDataItemCount();
-    SE_DataItem getDataItem(int i);
-    void setDataItem(int i , const SE_DataItem& di);
+    SE_Value getDataItem(int i);
+    void setDataItem(int i , const SE_Value& di);
 private:
-    std::vector<SE_DataItem> mDataItems;
+    std::vector<SE_Value> mDataItems;
 };
 class  SE_StructItem
 {

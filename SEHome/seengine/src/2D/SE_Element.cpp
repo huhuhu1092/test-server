@@ -1165,13 +1165,13 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 			if(texture[i])
 				SE_ASSERT(texture[i]->getChildren().empty());
 		}
-        SE_StringID backgroundImageURI = background->getImageURI();
-		SE_StringID channelImageURI = channel->getImageURI();
+        SE_StringID backgroundImageURI = background->getURI();
+		SE_StringID channelImageURI = channel->getURI();
 		SE_StringID textureURI[4];
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])
-				textureURI[i] = texture[i]->getImageURI();
+				textureURI[i] = texture[i]->getURI();
 		}
 		SE_ColorEffectElement* retElement = new SE_ColorEffectElement;
 		clone(background, retElement);

@@ -18,8 +18,13 @@ int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const
 	{
 		load(strList[0]);
 	}
-	_Param retv = mDataMap.get(address);
-	if(retv.paramType.type != SE_ParamType::INT)
+	_Param* retv = mDataMap.get(address);
+    if(retv == NULL)
+    {
+        ok = false;
+        return 0x7ffffffff;
+    }
+	if(retv->data.type != SE_DataItem::)
 	{
 		ok = false;
 		return 0x7fffffff;
@@ -27,7 +32,7 @@ int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const
 	else
 	{
 		ok = true;
-		return retv.i;
+		return retv->i;
 	}
 }
 float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const

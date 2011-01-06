@@ -346,14 +346,22 @@ public:
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
+	virtual void update(const SE_StringID& id) {}
+	// spawn has different function for element node and element leaf
+	// for element node it will calculate the origin point in its parent coordinate system
+	// for element leaf it must calculate the origin point and its boudary in its parent coordinate system
+    // for element node it will also make the content URI become element node or leaf, and then 
+	// continue to spawn the element created by content URI
 	virtual void spawn();
+	// measure will invoke after spawn
+	// it will use element leaf's boundary to calculate element node boundary
 	virtual void measure();
     virtual void travel(SE_ElementTravel* travel) const;
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum() const;
-	virtual SE_StringID getImageURI() const
+	virtual SE_StringID getURI() const
 	{return "";}
-	virtual void getImageData(SE_ImageDataID& imageDataID, SE_ImageData* imageData) const
+	virtual void getImageData(SE_ImageDataID& imageDataID, const SE_ImageData*& imageData) const
 	{}
 protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
@@ -489,7 +497,7 @@ public:
 	void spawn();
 	void measure();
 	SE_Spatial* createSpatial();
-	SE_StringID getImageURI()
+	SE_StringID getURI()
 	{
 		return mImageID;
 	}
