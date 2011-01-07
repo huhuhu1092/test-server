@@ -106,6 +106,15 @@ public:
         return true;
 
     }
+	friend bool operator !=(const SE_Vector2f& v1, const SE_Vector2f& v2)
+	{
+        for(int i = 0 ; i < 2 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return true;
+        }
+        return false;
+	}
     union
     {
         float d[2];
@@ -165,7 +174,16 @@ public:
         return true;
 
     }
+    friend bool operator!=(const SE_Vector3f& v1, const SE_Vector3f& v2)
+    {
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return true;
+        }
+        return false;
 
+    }
     inline float operator[](int i)
     {
 	    return d[i];
@@ -341,7 +359,16 @@ public:
         return true;
 
     }
+    friend bool operator!=(const SE_Vector4f& v1, const SE_Vector4f& v2)
+    {
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+                return true;
+        }
+        return false;
 
+    }
     SE_Vector3f xyz() const
     {
         return SE_Vector3f(x, y, z);

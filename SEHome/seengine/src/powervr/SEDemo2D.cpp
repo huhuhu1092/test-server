@@ -36,6 +36,9 @@
 #include <vector>
 #define SCREEN_WIDTH  480
 #define SCREEN_HEIGHT 800
+////////////////////////////////////////////
+
+///////////////////////////////////
 static void drawScene(int width, int height)
 {
 }
@@ -301,8 +304,8 @@ bool SEDemo::RenderScene()
 			int structItemSize = structData->getCount();
 			LOGI("### struct item size = %d ####\n", structItemSize);
 			SE_StructItem* item = structData->getStructItem(0);
-			SE_DataItem di = item->getDataItem(0);
-			SE_StdString* strData = (SE_StdString*)di.data.virtualData;
+			SE_Value di = item->getDataItem(0);
+			SE_StdString* strData = (SE_StdString*)di.getVirtualData();
 			LOGI("#### obj name = %s #### \n", strData->data.c_str());
 		}
 		SE_Application::getInstance()->releaseMessage();

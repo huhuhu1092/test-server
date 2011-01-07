@@ -21,12 +21,12 @@ public:
 	}
 	bool eq(const SE_VirtualData& right)
 	{
-		const SE_StdString& v = right;
+		const SE_StdString& v = (const SE_StdString&)right;
 		return data == v.data;
 	}
 	bool neq(const SE_VirtualData& right)
 	{
-		const SE_StdString& v = right;
+		const SE_StdString& v = (const SE_StdString&)right;
 		return data != v.data;
 	}
 	std::string data;
@@ -42,12 +42,12 @@ public:
 	}
 	bool eq(const SE_VirtualData& right)
 	{
-		const SE_SpatialData& v = right;
+		const SE_SpatialData& v = (const SE_SpatialData&)right;
 		return v.spatial == spatial;
 	}
 	bool neq(const SE_VirtualData& right)
 	{
-		const SE_SpatialData& v = right;
+		const SE_SpatialData& v = (const SE_SpatialData&)right;
 		return v.spatial != spatial;
 	}
 	SE_Spatial* spatial;
@@ -91,7 +91,7 @@ public:
     void setDataItem(const SE_Matrix3f& v, int index = 0);
     void setDataItem(const SE_Matrix4f& v, int index = 0);
 	void setDataItem(SE_VirtualData* data, int index = 0);
-	SE_DataItem getDataItem(int index)
+	SE_Value getDataItem(int index)
 	{
 		return mDataItemGroup.getDataItem(index);
 	}

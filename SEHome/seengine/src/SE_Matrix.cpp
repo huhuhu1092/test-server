@@ -28,6 +28,15 @@ SE_Matrix2f::SE_Matrix2f(const SE_Vector2f& r0, const SE_Vector2f& r1)
     this->m10 = r1.x;
     this->m11 = r1.y;
 }
+bool SE_Matrix2f::operator ==(const SE_Matrix2f& right) const
+{
+	for(int i = 0 ; i < 4 ; i++)
+	{
+		if(this->d[i] != right.d[i])
+			return false;
+	}
+	return true;
+}
 float SE_Matrix2f::operator()(int row, int column)
 {
     return d[row * 2 + column];
@@ -382,6 +391,15 @@ void SE_Matrix3f::setScale(float x, float y, float z)
     m12 = 0.0f;
     m22 = z;
 }
+bool SE_Matrix3f::operator ==(const SE_Matrix3f& right) const
+{
+	for(int i = 0 ; i < 9 ; i++)
+	{
+		if(this->d[i] != right.d[i])
+			return false;
+	}
+	return true;
+}
 void SE_Matrix3f::setRotateFromAxis(float angle, const SE_Vector3f& axis)
 {
     if(axis.isZero())
@@ -685,6 +703,15 @@ void SE_Matrix4f::getSequence(float* out, int size) const
     {
         out[i] = d[i];
     }
+}
+bool SE_Matrix4f::operator ==(const SE_Matrix4f& right) const
+{
+	for(int i = 0 ; i < 16 ; i++)
+	{
+		if(this->d[i] != right.d[i])
+			return false;
+	}
+	return true;
 }
 void SE_Matrix4f::getColumnSequence(float out[16]) const
 {

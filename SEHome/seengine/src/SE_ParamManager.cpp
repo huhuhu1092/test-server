@@ -2,6 +2,8 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_Math.h"
+#include <algorithm>
+const SE_AddressID SE_ParamManager::ANY_ADDRESS = "*#*#08*#*#";
 SE_ParamManager::SE_ParamManager()
 {}
 SE_ParamManager::~SE_ParamManager()
@@ -11,7 +13,7 @@ void SE_ParamManager::load(const std::string& id) const
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	resourceManager->loadParam(id.c_str());
 }
-int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const 
+int SE_ParamManager::getInt(const SE_AddressID& address, bool& ok) const 
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
 	if(!mDataMap.isContain(strList[0].c_str()))
@@ -19,12 +21,7 @@ int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const
 		load(strList[0]);
 	}
 	_Param* retv = mDataMap.get(address);
-    if(retv == NULL)
-    {
-        ok = false;
-        return 0x7ffffffff;
-    }
-	if(retv->data.type != SE_Value::INT)
+	if(!retv || retv->data.getType() != SE_Value::INT_T)
 	{
 		ok = false;
 		return 0x7fffffff;
@@ -35,7 +32,7 @@ int SE_ParamManager::getInt(const SE_StringID& address, bool& ok) const
 		return retv->data.getInt();
 	}
 }
-float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const
+float SE_ParamManager::getFloat(const SE_AddressID& address, bool& ok) const
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
 	if(!mDataMap.isContain(strList[0].c_str()))
@@ -43,7 +40,7 @@ float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const
 		load(strList[0]);
 	}
 	_Param* retv = mDataMap.get(address);
-	if(!rev || retv->data.getType() != SE_Value::FLOAT)
+	if(!retv || retv->data.getType() != SE_Value::FLOAT_T)
 	{
 		ok = false;
 		return 0.0f;
@@ -51,18 +48,18 @@ float SE_ParamManager::getFloat(const SE_StringID& address, bool& ok) const
 	else
 	{
 		ok = true;
-		return retv.f;
+		return retv->data.getFloat();
 	}
 }
-std::string SE_ParamManager::getString(const SE_StringID& address, bool& ok) const
+std::string SE_ParamManager::getString(const SE_AddressID& address, bool& ok) const
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
 	if(!mDataMap.isContain(strList[0].c_str()))
 	{
 		load(strList[0]);
 	}
-    _Param retv = mDataMap.get(address);
-	if(!retv || retv->data.getType() != SE_Value::ASCII)
+    _Param* retv = mDataMap.get(address);
+	if(!retv || retv->data.getType() != SE_Value::ASCII_T)
 	{
 		ok = false;
 		return "";
@@ -70,10 +67,10 @@ std::string SE_ParamManager::getString(const SE_StringID& address, bool& ok) con
 	else
 	{
 		ok = true;
-		return retv->getAscii();
+		return retv->data.getAscii();
 	}
 }
-void SE_ParamManager::setInt(const SE_StringID& address, int v, bool bUpdate)
+void SE_ParamManager::setInt(const SE_AddressID& address, int v, bool bUpdate)
 {
 	_Param* p = mDataMap.get(address);
 	if(!p)
@@ -85,7 +82,7 @@ void SE_ParamManager::setInt(const SE_StringID& address, int v, bool bUpdate)
 	if(bUpdate)
 		update(address, p);
 }
-void SE_ParamManager::setFloat(const SE_StringID& address, float v, bool bUpdate)
+void SE_ParamManager::setFloat(const SE_AddressID& address, float v, bool bUpdate)
 {
 	_Param* p = mDataMap.get(address);
 	if(!p)
@@ -97,16 +94,16 @@ void SE_ParamManager::setFloat(const SE_StringID& address, float v, bool bUpdate
 	if(bUpdate)
 		update(address, p);
 }
-void SE_ParamManager::update(const SE_StringID& address, const _Param* param)
+void SE_ParamManager::update(const SE_AddressID& address, const _Param* param)
 {
 	_ObserverList::const_iterator it;
-	for(it = observers.begin() ; it != observers.end() ; it++)
+	for(it = param->observers.begin() ; it != param->observers.end() ; it++)
 	{
 		SE_ParamObserver* po = *it;
-		po->update(address, p->data);
+		po->update(address, param->data);
 	}
 }
-void SE_ParamManager::setString(const SE_StringID& address, const std::string& v, bool bUpdate)
+void SE_ParamManager::setString(const SE_AddressID& address, const std::string& v, bool bUpdate)
 {
 	_Param* p = mDataMap.get(address);
 	if(!p)
@@ -116,13 +113,13 @@ void SE_ParamManager::setString(const SE_StringID& address, const std::string& v
 	p->data.setAscii(v.c_str());
 	mDataMap.set(address, p);
 	if(bUpdate)
-		updateObserver(address, p);
+		update(address, p);
 }
-bool SE_ParamManager::hasAddress(const SE_StringID& address) const
+bool SE_ParamManager::hasAddress(const SE_AddressID& address) const
 {
 	return mDataMap.isContain(address);
 }
-void SE_ParamManager::registerObserver(const SE_StringID& address, SE_ParamObserver* paramObserver)
+void SE_ParamManager::registerObserver(const SE_AddressID& address, SE_ParamObserver* paramObserver)
 {
     _Param* p = mDataMap.get(address);
 	if(p)
@@ -138,7 +135,7 @@ void SE_ParamManager::registerObserver(const SE_StringID& address, SE_ParamObser
 		}
 	}
 }
-void SE_ParamManager::unregisterObserver(const SE_StringID& address, SE_ParamObserver* paramObserver)
+void SE_ParamManager::unregisterObserver(const SE_AddressID& address, SE_ParamObserver* paramObserver)
 {
     if(address == ANY_ADDRESS && paramObserver == NULL)
 	{
@@ -160,13 +157,13 @@ void SE_ParamManager::unregisterObserver(const SE_StringID& address, SE_ParamObs
 		ParamVisitor pv;
 		pv.op = UNREGISTER_BY_ID;
 		pv.id = address;
-		pv.ob = paramObserver
+		pv.ob = paramObserver;
 		pv.paramManager = this;
 		mDataMap.traverse(pv);
 	}
 }
 
-void SE_ParamManager::update(const SE_StringID& address)
+void SE_ParamManager::update(const SE_AddressID& address)
 {
 	if(address != ANY_ADDRESS)
 	{

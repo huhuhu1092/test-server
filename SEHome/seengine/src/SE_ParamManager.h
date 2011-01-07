@@ -4,6 +4,8 @@
 #include "SE_ID.h"
 #include "SE_Value.h"
 #include <string>
+#include <list>
+#include "SE_ParamObserver.h"
 //param is defined in struct, struct is contained by xml
 //for example: use param.xml/structid/paramid to get a param
 // param.xml/structid/paramid is the address of the value
@@ -11,27 +13,27 @@ class SE_ParamManager
 {
 public:
     //enum PARAM_TYPE {INVALID, INT, FLOAT, STRING, TYPE_NUM};
-    static const SE_StringID ANY_ADDRESS;
+    static const SE_AddressID ANY_ADDRESS;
 	SE_ParamManager();
 	~SE_ParamManager();
-	int getInt(const SE_StringID& address, bool& ok) const;
-	float getFloat(const SE_StringID& address, bool& ok) const;
-	std::string getString(const SE_StringID& address, bool& ok) const;
-	void setInt(const SE_StringID& address, int v);
-    void setFloat(const SE_StringID& address, float v);
-	void setString(const SE_StringID& address, const std::string& v);
-	bool hasAddress(const SE_StringID& address) const;
+	int getInt(const SE_AddressID& address, bool& ok) const;
+	float getFloat(const SE_AddressID& address, bool& ok) const;
+	std::string getString(const SE_AddressID& address, bool& ok) const;
+	void setInt(const SE_AddressID& address, int v, bool bUpdate = false);
+    void setFloat(const SE_AddressID& address, float v, bool bUpdate = false);
+	void setString(const SE_AddressID& address, const std::string& v, bool bUpdate = false);
+	bool hasAddress(const SE_AddressID& address) const;
     // add paramObserver to the address observer list
     // if paramObserver has been added , paramObserver will not been added
-    void registerObserver(const SE_StringID& address, SE_ParamObserver* paramObserver);
+    void registerObserver(const SE_AddressID& address, SE_ParamObserver* paramObserver);
     // if address is null string and paramObserver is not NULL, it will unregister this paramObserver in all address
     // if address is not null string and paramObserver is NULL, it will unregister all paramObserver in this address
     // if address is null string and paramObserver is NULL, it will unregister all paramObserver in all address
     // if address is not null string and paramObserver is not NULL, it will unregister this paramObserver in this address 
-    void unregisterObserver(const SE_StringID& address, SE_ParamObserver* paramObserver);
+    void unregisterObserver(const SE_AddressID& address, SE_ParamObserver* paramObserver);
     // if address is ANYADDRESS it will update all address
     // if address is a specific address it will update this address
-    void update(const SE_StringID& address);
+    void update(const SE_AddressID& address);
 private:
 	void load(const std::string& id) const;
 private:
@@ -44,12 +46,12 @@ private:
         SE_Value data;
 		mutable _ObserverList observers;
 	};
-	void update(const SE_StringID& id, const _Param* param);
+	void update(const SE_AddressID& address, const _Param* param);
 	enum {UPDATE, UNREGISTER_ALL, UNREGISTER_BY_ID, UNREGISTER_BY_OBSERVER};
-	class ParamVisitor : public SE_ObserverManager<SE_StringID, _Param*>
+	class ParamVisitor : public SE_ObjectManagerVisitor<SE_AddressID, _Param*>
 	{
 	public:
-		void visit(const SE_StringID& id, const _Param* param)
+		void visit(const SE_AddressID& id, const _Param* param)
 		{
 			if(op == UPDATE)
 			{
@@ -70,7 +72,7 @@ private:
 					else
 					{
 						_ObserverList::const_iterator it;
-						for(it = param->observer.begin() ; it != param->observers.end() ; it++)
+						for(it = param->observers.begin() ; it != param->observers.end() ; it++)
 						{
 							SE_ParamObserver* po = *it;
 							if(po == ob)
@@ -98,11 +100,11 @@ private:
 		}
         SE_ParamManager* paramManager;    
 		int op;
-		SE_StringID id;
+		SE_AddressID id;
 		SE_ParamObserver* ob;
 	};
 
 private:
-    SE_ObjectManager<SE_StringID, _Param*> mDataMap;
+    SE_ObjectManager<SE_AddressID, _Param*> mDataMap;
 };
 #endif

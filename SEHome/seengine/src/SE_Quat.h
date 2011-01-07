@@ -52,6 +52,14 @@ public:
 	    }
 	    return *this;
     }
+	bool operator==(const SE_Quat& right) const
+	{
+		return x == right.x && y == right.y && z == right.z && w == right.w;
+	}
+	bool operator !=(const SE_Quat& right) const
+	{
+		return !this->operator==(right);
+	}
     void identity()
     {
         x = 0;

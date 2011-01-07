@@ -12,16 +12,15 @@ public:
     virtual bool eq(const SE_VirtualData& right) = 0;
     virtual bool neq(const SE_VirtualData& right) = 0;
 };
-
 class SE_Value
 {
 public:
-    enum TYPE {INVALID, CHAR, UCHAR, SHORT, USHORT, INT, UINT, FLOAT,ASCII, UTF8, UNICODE,
-         VECTOR3F, VECTOR4F, VECTOR2F, VECTOR3I, QUAT, MATRIX3F, MATRIX2F, MATRIX4F, VIRTUALDATA};
-    SE_Value(TYPE type = INVALID);
+    enum TYPE {INVALID, CHAR_T, UCHAR_T, SHORT_T, USHORT_T, INT_T, UINT_T, FLOAT_T, ASCII_T, UTF8_T, UNICODE_T, \
+         VECTOR3F_T, VECTOR4F_T, VECTOR2F_T, VECTOR3I_T, QUAT_T, MATRIX3F_T, MATRIX2F_T, MATRIX4F_T, VIRTUALDATA_T};
+	SE_Value(SE_Value::TYPE type = SE_Value::INVALID);
     ~SE_Value();
     SE_Value(const SE_Value&);
-    SE_Valuem& operator=(const SE_Value&);
+    SE_Value& operator=(const SE_Value&);
     bool operator==(const SE_Value& right);
     bool operator!=(const SE_Value& right);
 	TYPE getType()
@@ -34,7 +33,7 @@ public:
     }
     void setInt(int v)
     {
-        type = INT;
+        type = INT_T;
         data.i = v;
     }
     unsigned int getUint() const
@@ -43,7 +42,7 @@ public:
     }
     void setUint(unsigned int v)
     {
-        type = UINT;
+        type = UINT_T;
         data.ui = v;
     }
     char getChar() const
@@ -52,7 +51,7 @@ public:
     }
     void setChar(char v)
     {
-        type = CHAR;
+        type = CHAR_T;
         data.c = v;
     }
     unsigned char getUchar() const
@@ -61,7 +60,7 @@ public:
     }
     void setUchar(unsigned char v)
     {
-        type = UCHAR;
+        type = UCHAR_T;
         data.uc = v;
     }
     float getFloat() const
@@ -70,7 +69,7 @@ public:
     }
     void setFloat(float v)
     {
-        type = FLOAT;
+        type = FLOAT_T;
         data.f = v;
     }
     const char* getAscii() const
@@ -84,7 +83,7 @@ public:
     }
     void setUtf8(const char* v)
     {
-        type = UTF8;
+        type = UTF8_T;
         setAscii(v);
     }
     const wchar_t* getUnicode() const
@@ -93,7 +92,7 @@ public:
     }
     void setUnicode(const wchar_t* v)
     {
-        type = UNICODE;
+        type = UNICODE_T;
         setAscii((const char*)v);
     }
     const SE_Vector3f& getVector3f() const
@@ -102,7 +101,7 @@ public:
     }
     void setVector3f(const SE_Vector3f& v)
     {
-        type = VECTOR3F;
+        type = VECTOR3F_T;
         if(data.vec3f)
             delete data.vec3f;
         data.vec3f = new SE_Vector3f(v);
@@ -113,7 +112,7 @@ public:
     }
     void setVector2f(const SE_Vector2f& v)
     {
-        type = VECTOR2F;
+        type = VECTOR2F_T;
         if(data.vec2f)
             delete data.vec2f;
         data.vec2f = new SE_Vector2f(v);
@@ -124,7 +123,7 @@ public:
     }
     void setVector4f(const SE_Vector4f& v)
     {
-        type = VECTOR4F;
+        type = VECTOR4F_T;
         if(data.vec4f)
             delete data.vec4f;
         data.vec4f = new SE_Vector4f(v);
@@ -135,7 +134,7 @@ public:
     }
     void setVector3i(const SE_Vector3i& v)
     {
-        type = VECTOR3I;
+        type = VECTOR3I_T;
         if(data.vec3i)
             delete data.vec3i;
         data.vec3i = new SE_Vector3i(v);
@@ -146,7 +145,7 @@ public:
     }
     void setMatrix2f(const SE_Matrix2f& v)
     {
-        type = MATRIX2F;
+        type = MATRIX2F_T;
         if(data.mat2f)
             delete data.mat2f;
         data.mat2f = new SE_Matrix2f(v);
@@ -157,7 +156,7 @@ public:
     }
     void setMatrix3f(const SE_Matrix3f& v)
     {
-        type = MATRIX3F;
+        type = MATRIX3F_T;
         if(data.mat3f)
             delete data.mat3f;
         data.mat3f = new SE_Matrix3f(v);
@@ -168,14 +167,14 @@ public:
     }
     void setMatrix4f(const SE_Matrix4f& v)
     {
-        type = MATRIX4F;
+        type = MATRIX4F_T;
         if(data.mat4f)
             delete data.mat4f;
         data.mat4f = new SE_Matrix4f(v);
     }
     void setVirtualData(SE_VirtualData* d)
     {
-        type = VIRTUAL_DATA;
+        type = VIRTUALDATA_T;
         if(data.virtualData)
             delete data.virtualData;
         data.virtualData = d;
@@ -208,6 +207,7 @@ private:
         SE_VirtualData* virtualData;
     } data;
     TYPE type;
+	friend class SE_StructItem;
 };
 
 #endif

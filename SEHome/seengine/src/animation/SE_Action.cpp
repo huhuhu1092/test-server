@@ -20,23 +20,13 @@ struct _EqualTest
 //////////////////////////////////
 SE_Element* SE_ImageAnimationObject::createElement()
 {
-    SE_ImageElement* imageElement = new SE_ImageElement;
-	imageElement->setImage(mImageRef);
-	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	SE_ImageUnit imageUnit = resourceManager->getImageUnit(mImageRef.getStr());
-	imageElement->setPivotX(imageUnit.imageRect.pivotx);
-	imageElement->setPivotY(imageUnit.imageRect.pivoty);
+    SE_ImageElement* imageElement = new SE_ImageElement(mImageRef);
+	imageElement->setMountPointRef(getMountPointRef());
 	return imageElement;
 }
 SE_Element* SE_SequenceAnimationObject::createElement()
 {
-	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	SE_Sequence* sequence = resourceManager->getSequence(mSequenceFrameRef.getStr());
-	if(!sequence)
-		return NULL;
-    SE_SequenceElement* element = new SE_SequenceElement(sequence);
-	element->setPivotX(sequence->getPivotX());
-    element->setPivotY(sequence->getPivotY());
+    SE_SequenceElement* element = new SE_SequenceElement(mSequenceFrameRef);
 	element->setMountPointRef(getMountPointRef());
     return element;
 	
@@ -52,39 +42,30 @@ std::vector<unsigned int> SE_SequenceAnimationObject::getKeys() const
 /////////
 SE_Element* SE_ColorEffectAnimationObject::createElement()
 {
-    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();	
-	SE_ColorEffectController* colorEffectController = resourceManager->getColorEffectController(mColorEffectRef.getStr());
-	if(!colorEffectController)
-		return NULL;
-	SE_ColorEffectControllerElement* element = new SE_ColorEffectControllerElement(colorEffectController);
-	element->setPivotX(colorEffectController->getPivotX());
-	element->setPivotY(colorEffectController->getPivotY());
+	SE_ColorEffectControllerElement* element = new SE_ColorEffectControllerElement(mColorEffectRef);
 	element->setMountPointRef(this->getMountPointRef());
 	return element;
 }
 SE_Element* SE_TextureAnimationObject::createElement()
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(mTextureRef.getStr());
+	SE_URI uri(mTextureRef.getStr());
+	SE_StringID strURL = uri.getURL();
+	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strURL.getStr());
 	switch(t)
 	{
 	case SE_ELEMENT_TABLE:
 		{
-	        resourceManager->loadElement(mTextureRef.getStr());
-			SE_Element* element = resourceManager->getElement(mTextureRef.getStr());
-			element->setPivotX(getPivotX());
-			element->setPivotY(getPivotY());
+			resourceManager->loadElement(strURL.getStr());
+			SE_Element* element = resourceManager->getElement(strURL.getStr());
 			element->setMountPointRef(getMountPointRef());
 			return element;
 		}
 	    break;
 	case SE_ACTION_TABLE:
 		{
-			resourceManager->loadAction(mTextureRef.getStr());
-			SE_ActionElement* actionElement = (SE_ActionElement*)resourceManager->getElement(mTextureRef.getStr());
-			actionElement->setPivotX(getPivotX());
-			actionElement->setPivotY(getPivotY());
-			
+			//resourceManager->loadAction(mTextureRef.getStr());
+			SE_ActionElement* actionElement = new SE_ActionElement(mTextureRef);//(SE_ActionElement*)resourceManager->getElement(mTextureRef.getStr());
 			actionElement->setMountPointRef(getMountPointRef());
 			return actionElement;
 		}

@@ -10,6 +10,7 @@
 #include "SE_Geometry3D.h"
 #include "SE_Utils.h"
 #include "SE_Common.h"
+#include "SE_ParamObserver.h"
 #include <string>
 #include <list>
 #include <map>
@@ -34,6 +35,33 @@ public:
     virtual ~SE_ElementTravel()
     {}
     virtual void visit(SE_Element* e) = 0;
+};
+class SE_URI
+{
+public:
+	SE_URI(const char* str = NULL);
+	void setURI(const SE_StringID& uri);
+	SE_StringID getURI() const
+	{
+		return mURI;
+	}
+	SE_StringID getURL() const;
+	bool isContainAddress(const SE_AddressID& address) const;
+	std::vector<SE_AddressID> getAddress() const;
+private:
+	void parse();
+private:
+	enum {START_PARAM, END_PARAM, ERROR_PARAM};
+	struct _AddressLocation
+	{
+		SE_AddressID address;
+		std::string::size_type start;
+		std::string::size_type size;
+	};
+	typedef std::list<_AddressLocation> _AddressLocationList;
+	SE_StringID mURI;
+	_AddressLocationList mAddressLocationList;
+	int mState;
 };
 /*
     SE_Element is a tree structure. SE_Element is the node , it can has child.
@@ -333,19 +361,22 @@ public:
 	{
 		return mChildren;
 	}
-	/*
-	void setChecker(SE_ElementChecker* checker)
+	void setURI(const SE_StringID& uri)
 	{
-		mChecker = checker;
+        mURI.setURI(uri);
 	}
-    SE_ElementChecker* getChecker()
+	SE_StringID getURI() const
 	{
-		return mChecker;
+		return mURI.getURI();
 	}
-	*/
+    SE_StringID getURL() const
+	{
+		return mURI.getURL();
+	}
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
+	virtual void update(const SE_AddressID& address, const SE_Value& value);
 	// spawn has different function for element node and element leaf
 	// for element node it will calculate the origin point in its parent coordinate system
 	// for element leaf it must calculate the origin point and its boudary in its parent coordinate system
@@ -358,10 +389,11 @@ public:
     virtual void travel(SE_ElementTravel* travel) const;
 	virtual SE_Element* clone();
 	virtual int getKeyFrameNum() const;
-	virtual SE_StringID getURI() const
-	{return "";}
 	virtual void getImageData(SE_ImageDataID& imageDataID, const SE_ImageData*& imageData) const
 	{}
+protected:
+	virtual void setImageData(SE_RectPrimitive* primitive);
+	virtual void setSurface(SE_Surface* surface);
 protected:
 	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
@@ -370,6 +402,7 @@ protected:
 	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
 	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
 	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
+
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);
@@ -415,7 +448,7 @@ protected:
 	int mSeqNum;// the sequence number in its parent element
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
-	//SE_ElementChecker* mChecker;
+	SE_URI mURI;
 };
 class SE_ElementContent
 {
@@ -439,6 +472,8 @@ public:
 	virtual SE_Element* createElement(float mpx, float mpy) = 0;
 	virtual ~SE_ElementContent() {}
 	virtual SE_ElementContent* clone();
+protected:
+	void clone(SE_ElementContent* src, SE_ElementContent* dst);
 public:
 	void setID(const SE_StringID& id)
 	{
@@ -459,8 +494,6 @@ public:
 	SE_ImageContent(const SE_StringID& imageURI);
 	SE_Element* createElement(float mpx, float mpy);
 	SE_ElementContent* clone();
-private:
-	SE_StringID mImageURI;
 };
 
 class SE_ActionContent : public SE_ElementContent
@@ -469,8 +502,6 @@ public:
 	SE_ActionContent(const SE_StringID& actionURI);
 	SE_Element* createElement(float mpx, float mpy);
 	SE_ElementContent* clone();
-private:
-	SE_StringID mActionURI;
 };
 class SE_StateTableContent : public SE_ElementContent
 {
@@ -478,45 +509,41 @@ public:
 	SE_StateTableContent(const SE_StringID& stateTableURI);
 	SE_Element* createElement(float mpx, float mpy);
 	SE_ElementContent* clone();
-private:
-	SE_StringID mStateTableURI;
 };
 ///////////////////////
 class SE_ImageElement : public SE_Element
 {
 public:
-	SE_ImageElement();
-	SE_ImageElement(SE_Image* img) : mImage(img)
-	{}
+	SE_ImageElement(const SE_StringID& uri);
 	~SE_ImageElement();
-    void setImage(const SE_StringID& image)
-    {
-		mImageID = image;
-    }
 	void spawn();
 	void measure();
 	SE_Spatial* createSpatial();
-	SE_StringID getURI()
+	void update(unsigned int);
+protected:
+	bool isValid();
+	virtual void setImageData(SE_RectPrimitive* primitive);
+	virtual void setSurface(SE_Surface* surface);
+private:
+	enum {IMG_SIZE = 5};
+	struct _ImageUnitData
 	{
-		return mImageID;
-	}
-private:
-    SE_StringID mImageID;
-	SE_Image* mImage;
+		int valid;
+		SE_ImageUnit* imageUnit;
+		_ImageUnitData()
+		{
+			valid = 0;
+			imageUnit = NULL;
+		}
+	};
+	SE_ImageUnit mRChannel;
+	SE_ImageUnit mGChannel;
+	SE_ImageUnit mBChannel;
+	SE_ImageUnit mAChannel;
+	SE_ImageUnit mBaseColor;
+	_ImageUnitData mImageUnits[IMG_SIZE]
 };
-/*
-class SE_ColorEffectImage : public SE_Element
-{
-public:
-	SE_ColorEffectImage(SE_ColorEffectController* colorEffectController);
-	~SE_ColorEffectImage();
-	void spawn();
-	void measure();
-	SE_Spatial* createSpatial();
-private:
-	SE_ColorEffectController* mColorEffectController;
-};
-*/
+
 class SE_TextureElement : public SE_Element
 {
 public:
@@ -538,15 +565,7 @@ private:
 class SE_ActionElement : public SE_Element
 {
 public:
-	SE_ActionElement();
-	SE_StringID getActionID()
-	{
-		return mActionID;
-	}
-	void setActionID(const SE_StringID& actionID)
-	{
-		mActionID = actionID;
-	}
+	SE_ActionElement(const SE_StringID& uri);
 	void spawn();
 	SE_Spatial* createSpatial();
 	void update(unsigned int key);
@@ -555,7 +574,6 @@ public:
 		mHeadElementList.push_back(e);
 	}
 private:
-	SE_StringID mActionID;
 	SE_Action* mAction;
 	typedef std::list<SE_Element*> _HeadElementList;
 	_HeadElementList mHeadElementList;
@@ -563,17 +581,10 @@ private:
 class SE_StateTableElement : public SE_Element
 {
 public:
-	void setStateTableID(const SE_StringID& stID)
-	{
-		mStateTableID = stID;
-	}
-	SE_StringID getStateTableID()
-	{
-		return mStateTableID;
-	}
+	SE_StateTableElement(const SE_StringID& uri);
 	void update(unsigned int key);
 private:
-    SE_StringID mStateTableID;
+	SE_StateTable* mStateTable;
 };
 class SE_NullElement : public SE_Element
 {
@@ -585,7 +596,7 @@ public:
 class SE_SequenceElement : public SE_Element
 {
 public:
-	SE_SequenceElement(SE_Sequence* sequence);
+	SE_SequenceElement(const SE_StringID& uri);
     void spawn();
 	SE_Spatial* createSpatial();
 	void update(unsigned int key);
@@ -594,29 +605,15 @@ private:
 	SE_Sequence* mSequence;
 	SE_Element* mCurrentElement;
 };
-/*
-class SE_ColorEffectImageElement : public SE_Element
-{
-public:
-	SE_ColorEffectImageElement(SE_ColorEffectImage* image);
-	// it will delete mColorEffectImage
-	~SE_ColorEffectImageElement();
-    void spawn();
-	SE_Spatial* createSpatial();
-	void update(unsigned int key);
-private:
-	SE_ColorEffectImage* mColorEffectImage;
-};
-*/
 class SE_ColorEffectControllerElement : public SE_Element
 {
 public:
-	SE_ColorEffectControllerElement(SE_ColorEffectController* colorEffectController) : mColorEffectController(colorEffectController)
-	{}
+	SE_ColorEffectControllerElement(const SE_StringID& uri);
 	~SE_ColorEffectControllerElement();
 	void update(unsigned int key);
 	SE_Spatial* createSpatial();
 	void spawn();
+	void measure();
 private:
 	SE_ColorEffectController* mColorEffectController;
 };

@@ -70,6 +70,7 @@ typedef SE_StringID SE_StateTableID;
 typedef SE_StringID SE_StateID;
 typedef SE_StringID SE_StimulateID;
 typedef SE_StringID SE_TriggerID;
+typedef SE_StringID SE_AddressID;
 class SE_ID
 {
 public:

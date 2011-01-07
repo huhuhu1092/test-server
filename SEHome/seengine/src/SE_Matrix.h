@@ -31,7 +31,11 @@ public:
     {
 	    return det() != 0;
     }
-
+    bool operator ==(const SE_Matrix2f& right) const;
+	bool operator !=(const SE_Matrix2f& right) const
+	{
+		return !this->operator==(right);
+	}
 private:
     union
     {
@@ -86,6 +90,11 @@ public:
     {
 	    return det() != 0;
     }
+	bool operator ==(const SE_Matrix3f& right) const;
+	bool operator !=(const SE_Matrix3f& right) const
+	{
+		return !this->operator==(right);
+	}
 private:
     union
     {
@@ -152,6 +161,11 @@ public:
     }
     void getColumnSequence(float out[16]) const;
     void getSequence(float* out, int size) const;
+	bool operator ==(const SE_Matrix4f& right) const;
+    bool operator !=(const SE_Matrix4f& right) const
+	{
+		return !this->operator==(right);
+	}
 private:
     union
     {
