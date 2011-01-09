@@ -52,6 +52,7 @@ void SE_XmlElementCalculus<PARENTT, PROPERTY>::handleElement(PARENTT* parent, co
     if(!pXmlElementHandler)
         return;
     pXmlElementHandler->handle(parent, pElement, indent);
+	delete pXmlElementHandler;
 }
 template <typename PARENTT, typename PROPERTY>
 void SE_XmlElementCalculus<PARENTT, PROPERTY>::handleXmlChild(PARENTT* parent, TiXmlNode* currNode, unsigned int indent)

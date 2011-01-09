@@ -11,6 +11,8 @@
 #include "SE_Utils.h"
 #include "SE_Common.h"
 #include "SE_ParamObserver.h"
+#include "SE_ImageMap.h"
+#include "SE_URI.h"
 #include <string>
 #include <list>
 #include <map>
@@ -29,6 +31,7 @@ class SE_ElementContent;
 class SE_RectPrimitive;
 class SE_Surface;
 class SE_RectPrimitive;
+class SE_StateMachine;
 class SE_ElementTravel
 {
 public:
@@ -36,33 +39,7 @@ public:
     {}
     virtual void visit(SE_Element* e) = 0;
 };
-class SE_URI
-{
-public:
-	SE_URI(const char* str = NULL);
-	void setURI(const SE_StringID& uri);
-	SE_StringID getURI() const
-	{
-		return mURI;
-	}
-	SE_StringID getURL() const;
-	bool isContainAddress(const SE_AddressID& address) const;
-	std::vector<SE_AddressID> getAddress() const;
-private:
-	void parse();
-private:
-	enum {START_PARAM, END_PARAM, ERROR_PARAM};
-	struct _AddressLocation
-	{
-		SE_AddressID address;
-		std::string::size_type start;
-		std::string::size_type size;
-	};
-	typedef std::list<_AddressLocation> _AddressLocationList;
-	SE_StringID mURI;
-	_AddressLocationList mAddressLocationList;
-	int mState;
-};
+
 /*
     SE_Element is a tree structure. SE_Element is the node , it can has child.
 	An element which has content can not has child, it responsibility is just to create
@@ -373,6 +350,7 @@ public:
 	{
 		return mURI.getURL();
 	}
+	static SE_Element* getElement(const SE_StringID& url);
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
@@ -395,7 +373,8 @@ protected:
 	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 protected:
-	SE_Spatial* createSpatialByImage(SE_ImageBase* image);
+	SE_Spatial* createNode();
+	SE_Spatial* createSpatialByImage();
 	void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect);
 	void clone(SE_Element *src, SE_Element* dst);
 	void updateMountPoint();
@@ -541,13 +520,13 @@ private:
 	SE_ImageUnit mBChannel;
 	SE_ImageUnit mAChannel;
 	SE_ImageUnit mBaseColor;
-	_ImageUnitData mImageUnits[IMG_SIZE]
+	_ImageUnitData mImageUnits[IMG_SIZE];
 };
 
 class SE_TextureElement : public SE_Element
 {
 public:
-	SE_TextureElement(SE_RawImage* image = NULL);
+	SE_TextureElement();
 	~SE_TextureElement();
 	void setElementImage(SE_RawImage* image);
 	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);
@@ -558,8 +537,12 @@ public:
 		mRenderTargetID = id;
 	}
 	SE_Spatial* createSpatial();
+protected:
+	void setImageData(SE_RectPrimitive* primitive);
+	void setSurface(SE_Surface* surface);
 private:
-	SE_RawImage* mElementImage;
+	SE_ImageDataID mImageDataID;
+	SE_ImageData* mImageData;
 	SE_RenderTargetID mRenderTargetID;
 };
 class SE_ActionElement : public SE_Element
@@ -583,8 +566,11 @@ class SE_StateTableElement : public SE_Element
 public:
 	SE_StateTableElement(const SE_StringID& uri);
 	void update(unsigned int key);
+	void spawn();
+	void measure();
+	SE_Spatial* createSpatial();
 private:
-	SE_StateTable* mStateTable;
+	SE_StateMachine* mStateTable;
 };
 class SE_NullElement : public SE_Element
 {
@@ -616,6 +602,7 @@ public:
 	void measure();
 private:
 	SE_ColorEffectController* mColorEffectController;
+	SE_Element* mCurrentElement;
 };
 class SE_ColorEffectElement : public SE_Element
 {
@@ -635,6 +622,8 @@ public:
 		int mTextureFnValue;
 		SE_StringID mColorAddress;
         SE_SignColor mColorValue;
+		SE_StringID mColor2Address;
+		SE_SignColor mColor2Value;
 		_TextureMark()
 		{
 			mColorAlphaValue = 255;

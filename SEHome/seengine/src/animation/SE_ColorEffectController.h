@@ -69,8 +69,7 @@ public:
 	{
 		return mMountPointRef;
 	}
-	static bool isAddress(const SE_StringID& content);
-	static SE_StringID getAddress(const SE_StringID& content);
+	static SE_StringID getURL(const SE_StringID& uri);
 	virtual SE_StringID getBackground() const
 	{
 		return "";
@@ -98,6 +97,7 @@ public:
     {
         SE_StringID mTextureID;
         SE_StringID mColor;
+		SE_StringID mColor2;
 		//SE_StringID mColorSign[SIGN_NUM];
         SE_StringID fn;
 		SE_StringID colorAlpha;

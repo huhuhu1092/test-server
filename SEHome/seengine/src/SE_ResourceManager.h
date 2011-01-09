@@ -17,6 +17,7 @@ class SE_ShaderProgram;
 class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
+class SE_StateChangeList;
 class SE_Renderer;
 
 class SE_ResourceManager
@@ -83,12 +84,15 @@ public:
 	void loadColorEffectController(const char* colorEffectName);
 	void loadParam(const char* paramTable);
 	void loadStateTable(const char* stateTableURI);
+	void loadStateChangeTable(const char* stateChangeTableURI);
+	SE_StateChangeList* getStateChangeList(const char* stateChangeURI);
 	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
 	SE_Element* getElement(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
 	SE_Sequence* getSequence(const char* sequencePath);
 	SE_ColorEffectController* getColorEffectController(const char* colorEffectPath);
+	SE_StateMachine* getStateMachine(const char* stateMachinePath);
     const char* getDataPath();
     void setDataPath(const char* datapath);
 

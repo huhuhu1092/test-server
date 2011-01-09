@@ -55,7 +55,7 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	mp.setY(400);
 	mp.setID("p1");
 	elementRoot->addMountPoint(mp);
-	SE_ImageElement* imageElement = new SE_ImageElement;
+	SE_ImageElement* imageElement = new SE_ImageElement("");
 	imageElement->setID("ImageElement");
 	imageElement->setMountPointRef("p1");
 	elementRoot->addChild(imageElement);

@@ -76,9 +76,9 @@ void SE_ParamManager::setInt(const SE_AddressID& address, int v, bool bUpdate)
 	if(!p)
 	{
 	    p = new _Param;
+	    mDataMap.set(address, p);
 	}
 	p->data.setInt(v);
-	mDataMap.set(address, p);
 	if(bUpdate)
 		update(address, p);
 }
@@ -88,9 +88,9 @@ void SE_ParamManager::setFloat(const SE_AddressID& address, float v, bool bUpdat
 	if(!p)
 	{
 	    p = new _Param;
+	    mDataMap.set(address, p);
 	}
 	p->data.setFloat(v);
-	mDataMap.set(address, p);
 	if(bUpdate)
 		update(address, p);
 }
@@ -108,10 +108,10 @@ void SE_ParamManager::setString(const SE_AddressID& address, const std::string& 
 	_Param* p = mDataMap.get(address);
 	if(!p)
 	{
-	    p = new _Param; 
+	    p = new _Param;
+	    mDataMap.set(address, p);
 	}
 	p->data.setAscii(v.c_str());
-	mDataMap.set(address, p);
 	if(bUpdate)
 		update(address, p);
 }

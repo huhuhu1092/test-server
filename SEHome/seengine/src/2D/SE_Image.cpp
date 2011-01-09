@@ -317,7 +317,7 @@ SE_ImageData* SE_ColorEffectImage::createTextureElement(SE_Element* parent, SE_I
 	SE_ImageData* imgData = resourceManager->getImageData(img->getUrl().c_str());
 	if(!imgData)
 	{
-		SE_ImageElement* e = new SE_ImageElement(img);
+		SE_ImageElement* e = new SE_ImageElement("");
 	    parent->addChild(e);
 	    e->spawn();
 		imgData = new SE_ImageData;

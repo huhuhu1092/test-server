@@ -2,6 +2,8 @@
 #include "SE_Element.h"
 #include "SE_Image.h"
 #include "SE_Utils.h"
+#include "SE_URI.h"
+/*
 bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 {
 	std::string str = content.getStr();
@@ -13,6 +15,13 @@ bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 	else 
 		return false;
 }
+*/
+SE_StringID SE_ColorEffectFrame::getURL(const SE_StringID& uri)
+{
+	SE_URI strURI(uri.getStr());
+	return strURI.getURL();
+}
+/*
 SE_StringID SE_ColorEffectFrame::getAddress(const SE_StringID& content)
 {
 	std::string str = content.getStr();
@@ -21,48 +30,24 @@ SE_StringID SE_ColorEffectFrame::getAddress(const SE_StringID& content)
 	std::string address = str.substr(pos + 1);
 	return SE_StringID(address.c_str());
 }
+*/
 ///////////////////////////
 SE_Element* SE_ColorEffect::createElement()
 {
     SE_ColorEffectElement* e = new SE_ColorEffectElement;
-	if(isAddress(mBackgroundID))
-		e->setBackgroundAddress(getAddress(mBackgroundID));
-	else
-		e->setBackgroundValue(mBackgroundID);
-	if(isAddress(mChannelID))
-		e->setChannelAddress(getAddress(mChannelID));
-	else
-		e->setChannelValue(mChannelID);
-	if(isAddress(mBackgroundAlpha))
-		e->setBackgroundAlphaAddress(getAddress(mBackgroundAlpha));
-	else
-		e->setBackgroundAlphaValue(atoi(mBackgroundAlpha.getStr()));
+	e->setBackgroundAddress(mBackgroundID);
+    e->setChannelAddress(mChannelID);
+    e->setBackgroundAlphaAddress(mBackgroundAlpha);
 	for(int i = 0 ; i < MARK_NUM ; i++)
 	{
 		SE_ColorEffectElement::_TextureMark m;
 		_TextureColor* tc = mTextureColorData[i];
-		if(isAddress(tc->colorAlpha))
-			m.mColorAlphaAddress = getAddress(tc->colorAlpha);
-		else
-			m.mColorAlphaValue = atoi(tc->colorAlpha.getStr());
-		if(isAddress(tc->fn))
-			m.mFnAddress = getAddress(tc->fn.getStr());
-		else
-			m.mFnValue = atoi(tc->fn.getStr());
-		if(isAddress(tc->texturefn))
-			m.mTextureFnAddress = getAddress(tc->texturefn);
-		else
-			m.mTextureFnValue = atoi(tc->texturefn.getStr());
-		if(isAddress(tc->mColor))
-			m.mColorAddress = getAddress(tc->mColor);
-		else
-		{
-			m.mColorValue = SE_Util::stringToSignColor(tc->mColor.getStr());
-		}
-		if(isAddress(tc->mTextureID))
-			m.mTextureAddress = getAddress(tc->mTextureID);
-		else
-			m.mTextureValue = tc->mTextureID;
+		m.mColorAlphaAddress = tc->colorAlpha;
+        m.mFnAddress = tc->fn.getStr();
+        m.mTextureFnAddress = tc->texturefn;
+		m.mColorAddress = tc->mColor;
+		m.mColor2Address = tc->mColor2;
+		m.mTextureAddress = tc->mTextureID;
 		e->setTextureMark(i, m);
 	}
 	return e;

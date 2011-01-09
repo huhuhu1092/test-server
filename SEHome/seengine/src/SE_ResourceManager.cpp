@@ -24,6 +24,7 @@
 #include "SE_Application.h"
 #include "SE_ParamManager.h"
 #include "SE_Renderer.h"
+#include "SE_StateTable.h"
 #include "tinyxml.h"
 #include <map>
 #include <vector>
@@ -473,6 +474,8 @@ struct SE_ResourceManager::_Impl
     SE_ActionTable mActionTable;
 	SE_SequenceTable mSequenceTable;
 	SE_ElementTable mElementTable;
+	SE_StateMachineTable mStateMachineTable;
+	SE_StateChangeTable mStateChangeTable;
 	SE_ColorEffectControllerTable mColorEffectControllerTable;
 	SE_ObjectManager<SE_StringID, SE_XMLTABLE_TYPE> mXmlTypeTable;
     std::string dataPath;
@@ -492,6 +495,27 @@ public:
 	SE_ResourceManager* resourceManager;
 	std::string xmlName;
 	std::string structid;
+};
+class _StateTableContainer
+{
+public:
+	_StateTableContainer(SE_StateMachineTable* t) : stateMachineTable(t)
+	{
+		currState = NULL;
+		inProperty = false;
+		inTrigger = false;
+	}
+	SE_StateMachineTable* stateMachineTable;
+	SE_State* currState;
+	bool inProperty;
+	bool inTrigger;
+};
+class _StateChangeTableContainer
+{
+public:
+	_StateChangeTableContainer(SE_StateChangeTable* t) : stateChangeTable(t)
+	{}
+	SE_StateChangeTable* stateChangeTable;
 };
 class _SequenceContainer
 {
@@ -714,7 +738,108 @@ public:
 	{}
 	virtual void handle(SE_ColorEffectController* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_StateMachineSetHandler : public SE_XmlElementHandler<SE_StateMachineSet, _StateTableContainer>
+{
+public:
+	SE_StateMachineSetHandler(_StateTableContainer* m) : SE_XmlElementHandler<SE_StateMachineSet, _StateTableContainer>(m)
+	{}
+	virtual void handle(SE_StateMachineSet* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StateChangeTableHandler : public SE_XmlElementHandler<SE_StateChangeSet, _StateChangeTableContainer>
+{
+public:
+	SE_StateChangeTableHandler(_StateChangeTableContainer* m) : SE_XmlElementHandler<SE_StateChangeSet, _StateChangeTableContainer>(m)
+	{}
+	virtual void handle(SE_StateChangeSet* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StateMachineHandler : public SE_XmlElementHandler<SE_StateMachine, _StateTableContainer>
+{
+public:
+	SE_StateMachineHandler(_StateTableContainer* m) : SE_XmlElementHandler<SE_StateMachine, _StateTableContainer>(m)
+	{}
+	virtual void handle(SE_StateMachine* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StateChangeListHandler : public SE_XmlElementHandler<SE_StateChangeList, _StateChangeTableContainer>
+{
+public:
+	SE_StateChangeListHandler(_StateChangeTableContainer* m) : SE_XmlElementHandler<SE_StateChangeList, _StateChangeTableContainer>(m)
+	{}
+	virtual void handle(SE_StateChangeList* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
 ////////////////
+template <>
+class SE_XmlElementHandlerManager<SE_StateMachineSet, _StateTableContainer>
+{
+public:
+    SE_XmlElementHandlerManager(_StateTableContainer* m)
+	{
+		elementManager = m;
+	}
+	SE_XmlElementHandler<SE_StateMachineSet, _StateTableContainer>* getHandler(const char* name)
+	{
+		if(!strcmp(name, "StateTable"))
+		{
+			return new SE_StateMachineSetHandler(elementManager);
+		}
+		else
+			return NULL;
+	}
+	_StateTableContainer* elementManager;
+
+};
+template <>
+class SE_XmlElementHandlerManager<SE_StateMachine, _StateTableContainer>
+{
+public:
+	SE_XmlElementHandlerManager(_StateTableContainer* m)
+	{
+		elementManager = m;
+	}
+	SE_XmlElementHandler<SE_StateMachine, _StateTableContainer>* getHandler(const char* name)
+	{
+		if(!strcmp(name, "State"))
+		{
+			elementManager->currState = NULL;
+			elementManager->inProperty = false;
+			elementManager->inTrigger = false;
+			return new SE_StateMachineHandler(elementManager);
+		}
+		else if(!strcmp(name, "Property"))
+		{
+			elementManager->inProperty = true;
+			elementManager->inTrigger = false;
+			return new SE_StateMachineHandler(elementManager);
+		}
+		else if(!strcmp(name, "Trigger"))
+		{
+			elementManager->inTrigger = true;
+			elementManager->inProperty = false;
+            return new SE_StateMachineHandler(elementManager);
+		}
+		else
+			return NULL;
+	}
+	_StateTableContainer* elementManager;
+};
+template <>
+class SE_XmlElementHandlerManager<SE_StateChangeSet, _StateChangeTableContainer>
+{
+public:
+	SE_XmlElementHandlerManager(_StateChangeTableContainer* m)
+	{
+		elementManager = m;
+	}
+	SE_XmlElementHandler<SE_StateChangeSet, _StateChangeTableContainer>* getHandler(const char* name)
+	{
+		if(!strcmp(name, "StateChangeTable"))
+		{
+			return new SE_StateChangeTableHandler(elementManager);
+		}
+		else
+			return NULL;
+	}
+	_StateChangeTableContainer* elementManager;
+};
 template <>
 class SE_XmlElementHandlerManager<SE_Element, _ElementContainer>
 {
@@ -906,23 +1031,28 @@ public:
 		{
 			SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
 			h->markIndex = 0;
+			return h;
 		}
 		else if(!strcmp(name, "MarkG"))
 		{
             SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
 			h->markIndex = 1;
+			return h;
 		}
 		else if(!strcmp(name, "MarkB"))
 		{
             SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
 			h->markIndex = 2;
+			return h;
 		}
 		else if(!strcmp(name, "MarkA"))
 		{
             SE_ColorEffectMarkHandler* h = new SE_ColorEffectMarkHandler(pro);
 			h->markIndex = 3;
+			return h;
 		}
-		return NULL;
+		else
+		    return NULL;
 	}
 	_ColorEffectControllerContainer* pro;
 };
@@ -1040,6 +1170,212 @@ public:
 };
 
 ///////////////////////////////////////////
+void SE_StateChangeTableHandler::handle(SE_StateChangeSet* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_StringID id;
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+			id = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	SE_StateChangeList* sc = new SE_StateChangeList;
+	parent->setItem(id, sc);
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_StateChangeList, _StateChangeTableContainer> m(pro);
+        m.handleXmlChild(sc, pChild, i++);
+    }
+}
+void SE_StateChangeListHandler::handle(SE_StateChangeList* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_StringID change;
+	SE_StringID actionURI;
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "change"))
+        {
+			change = value;
+		}
+		else if(!strcmp(name, "actionref"))
+		{
+			actionURI = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	SE_Util::SplitStringList strList = SE_Util::splitString(change.getStr(), ":");
+	SE_ASSERT(strList.size() == 2);
+	SE_StateChange sc;
+	sc.from = strList[0].c_str();
+	sc.to = strList[1].c_str();
+	sc.actionURI = actionURI;
+	parent->add(sc);
+}
+void SE_StateMachineHandler::handle(SE_StateMachine* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_StringID id;
+	SE_StringID paramID;
+	SE_StringID paramValue;
+	SE_StringID actionURI;
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+			id = value;
+		}
+		else if(!strcmp(name, "paramid"))
+		{
+			SE_Util::SplitStringList strList = SE_Util::extractParamString(value);
+			paramID = strList[0].c_str();
+		}
+		else if(!strcmp(name, "actionref"))
+		{
+			actionURI = value;
+		}
+		else if(!strcmp(name, "value"))
+		{
+		    paramValue = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+	if(pro->currState == NULL)
+	{
+	    SE_State* state = new SE_State;
+	    state->setID(id);
+	    parent->addState(state);
+	    pro->currState = state;
+	}
+	else
+	{
+		if(pro->inProperty)
+		{
+			if(id.isValid())
+			{
+				pro->currState->setDefaultValue(id, actionURI);
+			}
+			else if(paramID.isValid())
+			{
+				pro->currState->setParam(paramID, paramValue);
+			}
+		}
+		else if(pro->inTrigger)
+		{
+			pro->currState->setTriggerAction(id, actionURI);
+		}
+	}
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_StateMachine, _StateTableContainer> m(pro);
+        m.handleXmlChild(parent, pChild, i++);
+    }
+}
+void SE_StateMachineSetHandler::handle(SE_StateMachineSet* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+	if(!parent)
+		return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	int pivotx = 0;
+	int pivoty = 0;
+	SE_StringID id;
+	SE_StringID stateChangeTableName;
+	SE_StringID start;
+	while(pAttribute)
+    {
+        const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+			id = value;
+		}
+		else if(!strcmp(name, "pivotx"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+				pivotx = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		else if(!strcmp(name, "pivoty"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                pivoty = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+		}
+		else if(!strcmp(name, "statechange"))
+		{
+            stateChangeTableName = value;
+		}
+		else if(!strcmp(name, "start"))
+		{
+			start = value;
+		}
+		pAttribute = pAttribute->Next();
+	}
+    SE_StateMachine* stateMachine = new SE_StateMachine;
+	stateMachine->setID(id);
+	stateMachine->setStartState(start);
+    parent->setItem(id, stateMachine);
+	SE_URI uri(stateChangeTableName.getStr());
+	SE_StringID url = uri.getURL();
+	SE_ResourceManager* resourceManager= SE_Application::getInstance()->getResourceManager();
+	SE_StateChangeList* cl = resourceManager->getStateChangeList(url.getStr());
+	cl->setStateMachine(stateMachine);
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_StateMachine, _StateTableContainer> m(pro);
+        m.handleXmlChild(stateMachine, pChild, i++);
+    }
+}
 void SE_ImageTable_ImageHandler::handle(SE_ImageItem* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -2330,6 +2666,30 @@ void SE_ColorEffectHandler::handle(SE_ColorEffectController* parent, TiXmlElemen
 			}
 			*/
 		}
+		else if(!strcmp(name, "pivotx"))
+		{
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+				ce->setPivotX(ival);
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "pivoty"))
+		{
+			if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
+			{
+				ce->setPivotY(ival);
+			}
+			else
+			{
+			}
+		}
+		else if(!strcmp(name, "mountpointref"))
+		{
+			ce->setMountPointRef(value);
+		}
 		pAttribute = pAttribute->Next();
 	}
     TiXmlNode* currNode = xmlElement;
@@ -2376,52 +2736,17 @@ void SE_ColorEffectMarkHandler::handle(SE_ColorEffect* parent, TiXmlElement* xml
 		{
 			tc->texturefn = SE_StringID(value);
 		}
-		else if(!strcmp(name, "coloralpha"))
+		else if(!strcmp(name, "alpha"))
 		{
 			tc->colorAlpha = SE_StringID(value);
-			/*
-            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS) 
-			{
-			    tc->alpha = ival;
-			}
-			else
-			{
-			}
-			*/
 		}
 		else if(!strcmp(name, "color"))
 		{
 			tc->mColor = SE_StringID(value);
-			/*
-			SE_Util::SplitStringList strList = SE_Util::splitString(value, " ");
-			SE_ASSERT(strList.size() == 3);
-            std::string signstr = "+-";
-			for(int i = 0 ; i < strList.size() ; i++)
-            {
-                std::string str = strList[i];
-                std::string::size_type n = str.find_first_of(signstr, 0);
-                std::string numstr;
-				if(n == std::string::npos)
-                {
-					tc->mColorSign[i] = SE_ColorEffect::SIGN_NO;
-                    numstr = str;
-                }
-                else if(str[n] == '+')
-                {
-                    tc->mColorSign[i] = SE_ColorEffect::SIGN_PLUS;
-                    numstr = str.substr(1);
-                }
-                else if(str[n] == '-')
-                {
-                    tc->mColorSign[i] = SE_ColorEffect::SIGN_MINUS;
-                    numstr = str.substr(1);
-                }
-                if(!numstr.empty())
-                {
-                    tc->mColor.d[i] = atoi(numstr.c_str());
-                }
-            }
-			*/
+		}
+		else if(!strcmp(name, "color2"))
+		{
+            tc->mColor2 = SE_StringID(value);
 		}
 		pAttribute = pAttribute->Next();
 	}
@@ -3082,6 +3407,20 @@ void SE_ResourceManager::loadAction(const char* actionTableName)
     SE_XmlElementCalculus<SE_ActionMapSet, _ActionContainer> actionElementCalculus(&actionContainer);
     actionElementCalculus.handleXmlChild(ams, &doc, 0);
 }
+SE_StateChangeList* SE_ResourceManager::getStateChangeList(const char* stateChangeURI)
+{
+	SE_Util::SplitStringList strList = SE_Util::splitString(stateChangeURI, "/");
+	SE_StateChangeSet* scl = mImpl->mStateChangeTable.getItem(strList[0].c_str());
+	if(!scl)
+	{
+		loadStateChangeTable(strList[0].c_str());
+	}
+	scl = mImpl->mStateChangeTable.getItem(strList[0].c_str());
+	if(!scl)
+		return NULL;
+	return scl->getItem(strList[1].c_str());
+}
+
 SE_Action* SE_ResourceManager::getAction(const char* actionPath)
 {
     SE_Util::SplitStringList stringList = SE_Util::splitString(actionPath, "/");  
@@ -3148,7 +3487,40 @@ void SE_ResourceManager::loadSequence(const char* sequenceName)
 }
 void SE_ResourceManager::loadStateTable(const char* stateTableURI)
 {
-
+    SE_StateMachineSet* sms = mImpl->mStateMachineTable.getItem(stateTableURI);
+	if(sms)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateTableURI;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }	
+    sms = new SE_StateMachineSet;
+    mImpl->mStateMachineTable.setItem(SE_StringID(stateTableURI), sms);
+	_StateTableContainer stc(&mImpl->mStateMachineTable);
+	SE_XmlElementCalculus<SE_StateMachineSet, _StateTableContainer> m(&stc);
+	m.handleXmlChild(sms, &doc, 0);
+}
+void SE_ResourceManager::loadStateChangeTable(const char* stateChangeTableURI)
+{
+	SE_StateChangeSet* scs = mImpl->mStateChangeTable.getItem(stateChangeTableURI);
+	if(scs)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateChangeTableURI;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }	
+	scs = new SE_StateChangeSet;
+	_StateChangeTableContainer stc(&mImpl->mStateChangeTable);
+	SE_XmlElementCalculus<SE_StateChangeSet, _StateChangeTableContainer> m(&stc);
+	m.handleXmlChild(scs, &doc, 0);
 }
 void SE_ResourceManager::loadColorEffectController(const char* colorEffectName)
 {
@@ -3184,6 +3556,22 @@ SE_ColorEffectController* SE_ResourceManager::getColorEffectController(const cha
 		return NULL;
 	SE_ColorEffectController* c = colorEffectSet->getItem(stringList[1].c_str());
 	return c;
+}
+SE_StateMachine* SE_ResourceManager::getStateMachine(const char* stateTablePath)
+{
+	SE_Util::SplitStringList strList = SE_Util::splitString(stateTablePath, "/");
+	if(strList.size() != 2)
+        return NULL;
+	SE_StateMachineSet* sms = mImpl->mStateMachineTable.getItem(strList[0].c_str());
+	if(!sms)
+	{
+		loadStateTable(strList[0].c_str());
+		sms = mImpl->mStateMachineTable.getItem(strList[0].c_str());
+	}
+	if(!sms)
+		return NULL;
+	SE_StateMachine* s = sms->getItem(strList[1].c_str());
+	return s;
 }
 const SE_ElementTable& SE_ResourceManager::getElementTable() const
 {

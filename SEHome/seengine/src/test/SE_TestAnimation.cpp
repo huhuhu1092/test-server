@@ -141,13 +141,14 @@ void SE_TestAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, fl
 	if(parentElement)
 		parentElement->removeChild(mElement);
 
-	SE_StringID str = *it2;
+    /*
 	SE_Image* image = new SE_Image(str.getStr());
 	int width = image->getWidth();
 	int height = image->getHeight();
 	image->setPivotX(width / 2);
 	image->setPivotY(height / 2);
-    SE_ImageElement* imageElement = new SE_ImageElement(image);
+	*/
+    SE_ImageElement* imageElement = new SE_ImageElement("");
 	imageElement->setID(mElement->getID());
 	imageElement->setLocalLayer(1);
 	imageElement->setMountPointRef(mElement->getMountPointRef());

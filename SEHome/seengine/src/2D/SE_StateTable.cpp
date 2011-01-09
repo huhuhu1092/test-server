@@ -1,4 +1,6 @@
 #include "SE_StateTable.h"
+#include "SE_Utils.h"
+#include "SE_URI.h"
 #include <algorithm>
 SE_State::SE_State()
 {
@@ -33,7 +35,7 @@ void SE_State::trigger(const SE_TriggerID& id)
 		{
 			if(id == d.triggerID)
 			{
-				d.action->action(NULL, NULL, triggerState);
+				d.action->action(NULL, NULL, triggerState, SE_StringID::INVALID);
 			}
 		}
 		SE_TriggerID id;
@@ -44,34 +46,98 @@ void SE_State::trigger(const SE_TriggerID& id)
 	it.triggerState = this;
 	for_each(mTriggerActionList.begin(), mTriggerActionList.end(), it);
 }
-void SE_State::addTriggerAction(const SE_TriggerID& id, SE_StateAction* action)
+void SE_State::setTriggerAction(const SE_TriggerID& id, const SE_StringID& actionURI)
 {
-	_Data d;
-	d.action = action;
-	d.triggerID = id;
-	mTriggerActionList.push_back(d);
+	_FindAction fa;
+	fa.triggerID = id;
+	_TriggerActionList::iterator it = find_if(mTriggerActionList.begin(), mTriggerActionList.end(), fa);
+	if(it != mTriggerActionList.end())
+	{
+		it->actionURI = actionURI;
+	}
+	else
+	{
+	    _Data d;
+	    d.actionURI = actionURI;
+	    d.triggerID = id;
+	    mTriggerActionList.push_back(d);
+	}
+}
+void SE_State::setTriggerAction(const SE_TriggerID& id, SE_StateAction* action)
+{
+	_FindAction fa;
+	fa.triggerID = id;
+	_TriggerActionList::iterator it = find_if(mTriggerActionList.begin(), mTriggerActionList.end(), fa);
+	if(it != mTriggerActionList.end())
+	{
+		it->action = action;
+	}
+	else
+	{
+	    _Data d;
+	    d.action = action;
+	    d.triggerID = id;
+	    mTriggerActionList.push_back(d);
+	}
+}
+SE_StringID SE_State::getDefaultValue()
+{
+	return mDefaultProperty.value;
+}
+SE_StringID SE_State::getParamValue(const char* param)
+{
+    _FindProperty fp;
+	fp.param = param;
+	_PropertyList::iterator it = find_if(mPropertyList.begin(), mPropertyList.end(), fp);
+	if(it != mPropertyList.end())
+	{
+		return it->value;
+	}
+	else
+		return "";
+}
+void SE_State::setParam(const SE_StringID& param, const SE_StringID& value)
+{
+	_Property p;
+	p.id = param;
+	p.value = value;
+	mPropertyList.push_back(p);
+}
+void SE_State::setDefaultValue(const SE_StringID& id, const SE_StringID& uri)
+{
+	mDefaultProperty.id = id;
+	mDefaultProperty.value =uri;
+}
+//////////////////////////
+SE_StateTranslation::~SE_StateTranslation()
+{
+	if(mStateAction)
+		delete mStateAction;
 }
 ///////////////////////
-SE_StateTable::SE_StateTable()
+SE_StateMachine::SE_StateMachine()
 {
 	mCurrentState = NULL;
 }
-SE_StateTable::~SE_StateTable()
-{}
-void SE_StateTable::setID(const SE_StateTableID& id)
+SE_StateMachine::~SE_StateMachine()
 {
-	mStateTableID = id;
+	for_each(mStateList.begin(), mStateList.end(), SE_DeleteObject());
+	for_each(mTranslationList.begin(), mTranslationList.end(), SE_DeleteObject());
 }
-SE_StateTableID SE_StateTable::getID()
+void SE_StateMachine::setID(const SE_StateMachineID& id)
 {
-    return mStateTableID;
+	mStateMachineID = id;
+}
+SE_StateMachineID SE_StateMachine::getID()
+{
+    return mStateMachineID;
 } 
-void SE_StateTable::addState(SE_State* state)
+void SE_StateMachine::addState(SE_State* state)
 {
 	mStateList.push_back(state);
 }
 
-void SE_StateTable::removeState(const SE_StateID& stateid)
+void SE_StateMachine::removeState(const SE_StateID& stateid)
 {
 
 	_StateList::iterator it = find_if(mStateList.begin(), mStateList.end(), _StateEqual(stateid));
@@ -81,7 +147,7 @@ void SE_StateTable::removeState(const SE_StateID& stateid)
 		mStateList.erase(it);
 	}
 }
-SE_State* SE_StateTable::getState(const SE_StateID& stateid)
+SE_State* SE_StateMachine::getState(const SE_StateID& stateid)
 {
 	_StateList::iterator it = find_if(mStateList.begin(), mStateList.end(), _StateEqual(stateid));
 	if(it != mStateList.end())
@@ -89,45 +155,127 @@ SE_State* SE_StateTable::getState(const SE_StateID& stateid)
 	else
 		return NULL;
 }
-void SE_StateTable::addTranslation(const SE_StimulateID& stimulate, const SE_StateID& from,
-								   const SE_StateID& to, SE_StateAction* action)
+void SE_StateMachine::addTranslation(const SE_StateID& from, const SE_StateID& to, const SE_StringID& actionURI)
 {
-	SE_StateTranslation t;
-	t.set(stimulate, from, to, action);
+	SE_StateTranslation* t = new SE_StateTranslation;
+	t->set(from, to, actionURI);
 	mTranslationList.push_back(t);
 }
-void SE_StateTable::removeTranslation(const SE_StimulateID& stimulate, const SE_StateID& from, const SE_StateID& to)
+SE_StateTranslation* SE_StateMachine::getTranslation(const SE_StateID& from, const SE_StateID& to)
 {
-	_TranslationEqual et;
-    et.st.setStimulate(stimulate);
-	et.st.setFrom(from);
-	et.st.setTo(to);
-	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), et);
+	_TranslationEqual te;
+	te.from = from;
+	te.to = to;
+	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), te);
+	if(it != mTranslationList.end())
+		return *it;
+	else
+		return NULL;
+}
+void SE_StateMachine::removeTranslation(const SE_StateID& from, const SE_StateID& to)
+{
+	_TranslationEqual te;
+	te.from = from;
+	te.to = to;
+	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), te);
 	if(it != mTranslationList.end())
 	{
+		delete *it;
 		mTranslationList.erase(it);
 	}
 }
-void SE_StateTable::stimulate(const SE_StimulateID& id)
+void SE_StateMachine::translateTo(const SE_StateID& to)
 {
 	if(!mCurrentState)
-		return;
-	_StimulateEqual se;
-	se.stimulateID = id;
-	se.fromID = mCurrentState->getID();
-	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), se);
+	{
+		initStartState();
+		if(!mCurrentState)
+		    return;
+	}
+	_TranslationEqual te;
+	te.to = to;
+	te.from = mCurrentState->getID();
+	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), te);
 	if(it != mTranslationList.end())
 	{
-		SE_StateID to = it->getTo();
+		SE_StateID to = (*it)->getTo();
 		SE_State* toState = getState(to);
-		SE_StateAction* action = it->getAction();
-		action->action(mCurrentState, toState, NULL);
+		SE_StateAction* action = (*it)->getAction();
+		if(action)
+			action->action(mCurrentState, toState, NULL, (*it)->getActionURI());
 		mCurrentState = toState;
 	}
 }
-void SE_StateTable::trigger(const SE_TriggerID& id)
+void SE_StateMachine::trigger(const SE_TriggerID& id)
 {
 	if(!mCurrentState)
-		return;
+	{
+		initStartState();
+		if(!mCurrentState)
+		    return;
+	}
 	mCurrentState->trigger(id);
+}
+bool SE_StateMachine::canTranslateTo(const SE_StateID& to)
+{
+	if(!mCurrentState)
+	{
+		initStartState();
+		if(!mCurrentState)
+		    return false;
+	}
+	SE_StateID from = mCurrentState->getID();
+	_TranslationEqual te;
+	te.from = from;
+	te.to = to;
+	_TranslationList::iterator it = find_if(mTranslationList.begin(), mTranslationList.end(), te);
+	if(it != mTranslationList.end())
+		return true;
+	else
+		return false;
+}
+void SE_StateMachine::initStartState()
+{
+	SE_StringID startURL = mStartURI.getURL();
+	mCurrentState = getState(startURL);
+}
+SE_State* SE_StateMachine::getCurrentState()
+{
+	if(!mCurrentState)
+	{
+		initStartState();
+	}
+	return mCurrentState;
+
+}
+SE_StateID SE_StateMachine::getCurrentStateID()
+{
+	if(!mCurrentState)
+	{
+		initStartState();
+		if(!mCurrentState)
+		    return SE_StringID::INVALID;
+	}
+	return mCurrentState->getID();
+}
+void SE_StateMachine::setStartState(const SE_StringID& stateURI)
+{
+    mStartURI.setURI(stateURI);
+}
+SE_StringID SE_StateMachine::getStartState()
+{
+	return mStartURI.getURL();
+}
+///////////
+void SE_StateChangeList::setStateMachine(SE_StateMachine* stateMachine)
+{
+	_StateChangeList::iterator it;
+	for(it = mStateChangeList.begin() ; it != mStateChangeList.end() ; it++)
+	{
+		stateMachine->addTranslation(it->from, it->to, it->actionURI);
+	}
+}
+void SE_StateChangeList::add(const SE_StateChange& sc)
+{
+	mStateChangeList.push_back(sc);
 }
