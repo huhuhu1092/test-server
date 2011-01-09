@@ -192,7 +192,7 @@ SE_Util::SplitStringList SE_Util::splitString(const char* path, const char* spli
     std::string::size_type start = 0;
     while(pos < str.size())
     {
-        pos = str.find(strSplit, start);
+        pos = str.find_first_of(strSplit, start);
         if(pos != std::string::npos)
         {
             std::string::size_type n = pos - start;
@@ -269,7 +269,7 @@ std::string SE_Util::stringReplace(std::string& src, const std::string& beReplac
 SE_SignColor SE_Util::stringToSignColor(const std::string& str)
 {
 	SE_SignColor color;
-	SE_Util::SplitStringList strList = SE_Util::splitString(str.c_str(), " ");
+	SE_Util::SplitStringList strList = SE_Util::splitString(str.c_str(), " \t");
 	SE_ASSERT(strList.size() == 3);
     std::string signstr = "+-";
 	for(int i = 0 ; i < strList.size() ; i++)

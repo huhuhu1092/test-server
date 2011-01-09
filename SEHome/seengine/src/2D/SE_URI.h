@@ -25,6 +25,8 @@ private:
 		std::string::size_type start;
 		std::string::size_type size;
 	};
+	SE_URI::_AddressLocation matchPos(std::string::size_type pos) const;
+private:
 	typedef std::list<_AddressLocation> _AddressLocationList;
 	SE_StringID mURI;
 	_AddressLocationList mAddressLocationList;

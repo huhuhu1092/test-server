@@ -3,6 +3,7 @@
 #include "SE_ResourceManager.h"
 #include "SE_Math.h"
 #include <algorithm>
+#include <stdio.h>
 const SE_AddressID SE_ParamManager::ANY_ADDRESS = "*#*#08*#*#";
 SE_ParamManager::SE_ParamManager()
 {}
@@ -21,7 +22,7 @@ int SE_ParamManager::getInt(const SE_AddressID& address, bool& ok) const
 		load(strList[0]);
 	}
 	_Param* retv = mDataMap.get(address);
-	if(!retv || retv->data.getType() != SE_Value::INT_T)
+	if(!retv || (retv->data.getType() != SE_Value::INT_T))
 	{
 		ok = false;
 		return 0x7fffffff;
@@ -40,7 +41,7 @@ float SE_ParamManager::getFloat(const SE_AddressID& address, bool& ok) const
 		load(strList[0]);
 	}
 	_Param* retv = mDataMap.get(address);
-	if(!retv || retv->data.getType() != SE_Value::FLOAT_T)
+	if(!retv || (retv->data.getType() != SE_Value::FLOAT_T))
 	{
 		ok = false;
 		return 0.0f;
@@ -59,10 +60,27 @@ std::string SE_ParamManager::getString(const SE_AddressID& address, bool& ok) co
 		load(strList[0]);
 	}
     _Param* retv = mDataMap.get(address);
-	if(!retv || retv->data.getType() != SE_Value::ASCII_T)
+	if(!retv || (retv->data.getType() != SE_Value::ASCII_T))
 	{
-		ok = false;
-		return "";
+		if(retv->data.getType() == SE_Value::INT_T)
+		{ 
+			int v = retv->data.getInt();
+			char buf[10];
+			memset(buf, 0, 10);
+#if defined(WIN32)
+		    _snprintf(buf, 9, "%d", v);
+#else
+			snprintf(buf, 9, "%d", v);
+#endif
+			std::string str(buf);
+			ok = true;
+			return str;
+		}
+		else
+		{
+		    ok = false;
+		    return "";
+		}
 	}
 	else
 	{

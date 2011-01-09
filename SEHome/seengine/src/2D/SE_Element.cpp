@@ -1534,9 +1534,52 @@ void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive)
 		start++;
 	}
 }
-void SE_ColorEffectElement::calculateValue()
+int SE_ColorEffectElement::uriToInt(const SE_StringID& uri)
 {
 	SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+	SE_URI intURI(uri.getStr());
+	SE_StringID intURL = intURI.getURL();
+	int ret = -1;
+	if(SE_Util::isDigit(intURL.getStr()))
+	{
+		ret = atoi(intURL.getStr());
+	}
+	else
+	{
+        bool ok = false;
+		int tmp = paramManager->getInt(intURL.getStr(), ok);
+		if(ok)
+			ret = tmp;
+	}
+	return ret;
+}
+void SE_ColorEffectElement::calculateValue()
+{
+	SE_URI background(mBackgroundAddress.getStr());
+	mBackgroundValue = background.getURL();
+	SE_URI channel(mChannelAddress.getStr());
+	mChannelValue = channel.getURL();
+    mBackgroundAlphaValue = uriToInt(mBackgroundAlphaAddress);
+	for(int i = 0 ; i < MARK_NUM ; i++)
+	{
+        _TextureMark& tm = mTextureMark[i];
+		if(tm.valid)
+		{
+		    SE_URI textureURI(tm.mTextureAddress.getStr());
+		    tm.mTextureValue = textureURI.getURL();
+		    tm.mFnValue = uriToInt(tm.mFnAddress);
+		    tm.mColorAlphaValue = uriToInt(tm.mColorAlphaAddress);
+		    SE_URI colorURI(tm.mColorAddress.getStr());
+		    SE_StringID colorURL = colorURI.getURL();
+		    tm.mColorValue = SE_Util::stringToSignColor(colorURL.getStr());
+		    colorURI.setURI(tm.mColor2Address);
+		    colorURL = colorURI.getURL();
+		    tm.mColor2Value = SE_Util::stringToSignColor(colorURL.getStr());
+		    tm.mTextureFnValue = uriToInt(tm.mTextureFnAddress);
+		}
+	}
+	/*
+	
 	if(mBackgroundAddress.isValid())
 	{
 		bool ok = false;
@@ -1613,7 +1656,7 @@ void SE_ColorEffectElement::calculateValue()
 			}
 		}
 	}
-
+*/
 }
 SE_XMLTABLE_TYPE SE_ColorEffectElement::getBackgroundType()
 {
@@ -1654,8 +1697,11 @@ void SE_ColorEffectElement::getExtractImageProperty(SE_XMLTABLE_TYPE& t, int& wi
 	for(int i = 0 ; i < MARK_NUM  ; i++)
 	{
 		_TextureMark& tm = mTextureMark[i];
-		SE_ExtractImageStr textureExtractImage = SE_Util::stringToExtractImage(tm.mTextureValue.getStr());
-		tm.mTextureArity = textureExtractImage.getImageNum();
+		if(tm.valid)
+		{
+		    SE_ExtractImageStr textureExtractImage = SE_Util::stringToExtractImage(tm.mTextureValue.getStr());
+		    tm.mTextureArity = textureExtractImage.getImageNum();
+		}
 	}
 }
 void SE_ColorEffectElement::spawn()

@@ -42,13 +42,17 @@ SE_Element* SE_ColorEffect::createElement()
 	{
 		SE_ColorEffectElement::_TextureMark m;
 		_TextureColor* tc = mTextureColorData[i];
-		m.mColorAlphaAddress = tc->colorAlpha;
-        m.mFnAddress = tc->fn.getStr();
-        m.mTextureFnAddress = tc->texturefn;
-		m.mColorAddress = tc->mColor;
-		m.mColor2Address = tc->mColor2;
-		m.mTextureAddress = tc->mTextureID;
-		e->setTextureMark(i, m);
+		if(tc)
+		{
+		    m.mColorAlphaAddress = tc->colorAlpha;
+            m.mFnAddress = tc->fn.getStr();
+            m.mTextureFnAddress = tc->texturefn;
+		    m.mColorAddress = tc->mColor;
+		    m.mColor2Address = tc->mColor2;
+		    m.mTextureAddress = tc->mTextureID;
+			m.valid = true;
+		    e->setTextureMark(i, m);
+		}
 	}
 	return e;
 }

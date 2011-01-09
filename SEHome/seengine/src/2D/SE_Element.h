@@ -611,6 +611,7 @@ public:
     enum {FN_ADD, FN_MULTIPLY, FN_NUM};
 	struct _TextureMark
 	{
+		bool valid;
 		SE_StringID mTextureAddress;
 		SE_StringID mTextureValue;
 		int mTextureArity;
@@ -630,6 +631,7 @@ public:
 			mFnValue = FN_ADD;
 			mTextureFnValue = FN_ADD;
 			mTextureArity = 0;
+			valid = false;
 		}
 	};
 	void setBackgroundAddress(const SE_StringID& address)
@@ -680,6 +682,7 @@ private:
 	bool isTextureEnd(_ElementList::const_iterator textureIt[4], SE_Element* texture[4]);
 	SE_Element* mergeElement(SE_Element* background, SE_Element* channel, SE_Element* texture[4]);
 	void mergeElement();
+	int uriToInt(const SE_StringID& uri);
 private:
 	SE_XMLTABLE_TYPE mBackgroundType;
 	SE_StringID mBackgroundAddress;
