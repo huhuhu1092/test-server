@@ -2592,6 +2592,7 @@ void SE_ColorEffectControllerHandler::handle(SE_ColorEffectControllerSet* parent
 		{
   	        colorEffectController = new SE_ColorEffectController;
 	        SE_StringID str = value;
+			colorEffectController->setID(value);
             parent->setItem(str, colorEffectController);
 		}
 		else if(!strcmp(name, "pivotx"))

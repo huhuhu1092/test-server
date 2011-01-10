@@ -479,9 +479,9 @@ void SE_TriSurfaceRenderUnit::draw()
 	if(!renderer)
 		return;
 	renderer->begin(shaderProgram);
-	renderer->setMatrix(this);
-	renderer->setPrimitiveType(mPrimitiveType);
 	renderer->setSurface(mSurface);
+	renderer->setPrimitiveType(mPrimitiveType);
+	renderer->setMatrix(this);
 	renderer->setImage(this);
 	renderer->setColor(this);
 	renderer->setVertex(this);

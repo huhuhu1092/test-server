@@ -48,8 +48,8 @@ class SE_ImageItemProperty
 public:
 	SE_ImageItemProperty()
 	{
-		mPivotX = INVALID_GEOMINFO;
-		mPivotY = INVALID_GEOMINFO;
+		mPivotX = 0;
+		mPivotY = 0;
 		mIndex = 0;
 	}
     void setImageDataID(const SE_ImageDataID& id)

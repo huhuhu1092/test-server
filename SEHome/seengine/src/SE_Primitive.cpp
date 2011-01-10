@@ -256,7 +256,7 @@ void SE_RectPrimitive::setImageData(SE_ImageData* imageData, SE_TEXUNIT_TYPE tex
     }
     int startx = 0;
     int starty = 0;
-    if(width != power2Width || height != power2Height)
+    if((width != power2Width || height != power2Height) && imageData->getData())
     {
         int pixelSize = imageData->getPixelSize();
         int size = power2Width * power2Height * pixelSize;

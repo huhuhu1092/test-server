@@ -185,6 +185,14 @@ private:
 class SE_ColorEffectController
 {
 public:
+	void setID(const char* id)
+	{
+		mID = id;
+	}
+    SE_StringID getID()
+	{
+		return mID;
+	}
 	void setPivotX(int pivotx)
 	{
 		mPivotX = pivotx;
@@ -217,6 +225,7 @@ private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;
 	int mPivotX;
 	int mPivotY;
+	SE_StringID mID;
 	SE_MountPointSet mMountPointSet;
 };
 typedef SE_Table<SE_StringID, SE_ColorEffectController*> SE_ColorEffectControllerSet;

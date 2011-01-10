@@ -532,9 +532,10 @@ public:
 	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);
 	void spawn();
 	void measure();
-	void saveRenderTargetID(const SE_RenderTargetID& id)
+	void update(unsigned int key);
+    void setContentChild(SE_Element* c)
 	{
-		mRenderTargetID = id;
+		mContentChild = c;
 	}
 	SE_Spatial* createSpatial();
 protected:
@@ -544,6 +545,7 @@ private:
 	SE_ImageDataID mImageDataID;
 	SE_ImageData* mImageData;
 	SE_RenderTargetID mRenderTargetID;
+	SE_Element* mContentChild;
 };
 class SE_ActionElement : public SE_Element
 {

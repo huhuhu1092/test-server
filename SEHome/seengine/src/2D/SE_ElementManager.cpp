@@ -80,6 +80,16 @@ SE_Spatial* SE_ElementManager::createSpatial()
     spatial->setLocalTranslate(SE_Vector3f(0, 0, 0));
     spatial->setLocalScale(SE_Vector3f(1, 1, 1));
 	spatial->setLocalRotate(SE_Quat::IDENTITY);
+	//add render targe element
+	std::list<SE_Element*>::iterator it = mRenderTargetElementList.begin();
+	for(; it != mRenderTargetElementList.end() ; it++)
+	{
+		SE_Element* element = *it;
+		SE_Spatial* s = element->createSpatial();
+		if(s)
+			spatial->addChild(s);
+	}
+	//end
     SE_Vector4f c1(1, 0, 0, 0);
     SE_Vector4f c2(0, -1, 0, 0);
     SE_Vector4f c3(0, 0, 1, 0);
@@ -117,12 +127,10 @@ SE_Element* SE_ElementManager::findByID(const SE_ElementID& id)
 }
 bool SE_ElementManager::addRenderTargetElement(SE_Element* child)
 {
-	if(!mRoot)
-		return false;
-    mRoot->addChild(child);
+    mRenderTargetElementList.push_back(child);
 	return true;
 }
 void SE_ElementManager::removeRenderTargetElement(SE_Element* e)
 {
-
+	mRenderTargetElementList.remove(e);
 }

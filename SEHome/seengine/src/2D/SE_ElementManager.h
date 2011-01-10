@@ -2,6 +2,7 @@
 #define SE_ELEMENTMANAGER_H
 #include <wchar.h>
 #include <string>
+#include <list>
 #include <map>
 #include "SE_Element.h"
 #include "SE_ElementMap.h"
@@ -47,6 +48,7 @@ private:
 private:
     SE_Element* mRoot;
 	SE_Rect<int> mViewport;
+	std::list<SE_Element*> mRenderTargetElementList;
     //SE_ElementMapManager mElementMapManager;
 	//SE_ElementMap* mCurrElementMap;
 };

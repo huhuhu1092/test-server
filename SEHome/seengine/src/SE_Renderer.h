@@ -87,6 +87,25 @@ public:
 private:
 	SE_SimpleSurfaceShaderProgram* mShaderProgram;
 };
+class SE_ColorEffectRenderer : public SE_Renderer
+{
+	DECLARE_OBJECT(SE_ColorEffectRenderer)
+public:
+	SE_ColorEffectRenderer();
+	~SE_ColorEffectRenderer();
+	virtual void setMatrix(SE_RenderUnit* renderUnit);
+	virtual void setImage(SE_RenderUnit* renderUnit);
+    virtual void setColor(SE_RenderUnit* renderUnit);
+    virtual void setVertex(SE_RenderUnit* renderUnit);
+    virtual void setTexVertex(SE_RenderUnit* renderUnit);
+    virtual void setDrawMode(SE_RenderUnit* renderUnit);
+	virtual void begin(SE_ShaderProgram* shaderProgram);
+    virtual void draw();
+	virtual void end();
+private:
+	SE_ColorEffectShaderProgram* mShaderProgram;
+	SE_ColorEffectShaderProperty* mShaderProperty;
+};
 class SE_LineSegRenderer : public SE_Renderer
 {
 	DECLARE_OBJECT(SE_LineSegRenderer)

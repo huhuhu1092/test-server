@@ -465,6 +465,65 @@ void SE_SimpleSurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 }
 void SE_SimpleSurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 {}
+////////////////////////////////////
+IMPLEMENT_OBJECT(SE_ColorEffectRenderer)
+SE_ColorEffectRenderer::SE_ColorEffectRenderer()
+{
+	mShaderProgram = NULL;
+	mShaderProperty = NULL;
+}
+SE_ColorEffectRenderer::~SE_ColorEffectRenderer()
+{}
+void SE_ColorEffectRenderer::setMatrix(SE_RenderUnit* renderUnit)
+{
+	SE_Renderer::setMatrix(renderUnit);
+}
+void SE_ColorEffectRenderer::setImage(SE_RenderUnit* renderUnit)
+{
+    if(!mShaderProperty)
+	{
+		mShaderProperty = (SE_ColorEffectShaderProperty*)mSurface->getShaderProperty();
+	}
+	setImage(mShaderProperty->getBackgroundTexture(), renderUnit);
+	setImage(mShaderProperty->getChannelTexture(), renderUnit);
+}
+void SE_ColorEffectRenderer::setColor(SE_RenderUnit* renderUnit)
+{
+	SE_Renderer::setColor(renderUnit);
+}
+void SE_ColorEffectRenderer::setVertex(SE_RenderUnit* renderUnit)
+{
+	SE_Renderer::setVertex(renderUnit);
+}
+void SE_ColorEffectRenderer::setTexVertex(SE_RenderUnit* renderUnit)
+{
+	SE_Renderer::setTexVertex(renderUnit);
+}
+void SE_ColorEffectRenderer::setDrawMode(SE_RenderUnit* renderUnit)
+{
+	glUniform1i(mShaderProgram->getTextureUniformLoc(0), mShaderProperty->getBackgroundTexture());
+	glUniform1i(mShaderProgram->getTextureUniformLoc(1), mShaderProperty->getChannelTexture());
+	for(int i = 0 ; i < 4 ; i++)
+	{
+	    glUniform1i(mShaderProgram->getHasTextureUniformLoc(i), 0);
+	}
+	for(int i = 0 ; i < 4 ; i++)
+	{
+	    glUniform1i(mShaderProgram->getMarkFunctionUniformLoc(i), mShaderProperty->getMarkFunction(i));
+	}
+
+}
+void SE_ColorEffectRenderer::begin(SE_ShaderProgram* shaderProgram)
+{
+	SE_Renderer::begin(shaderProgram);
+	mShaderProgram = (SE_ColorEffectShaderProgram*)shaderProgram;
+}
+void SE_ColorEffectRenderer::draw()
+{
+	SE_Renderer::draw();
+}
+void SE_ColorEffectRenderer::end()
+{}
 ///////////////////////////////////////
 IMPLEMENT_OBJECT(SE_LineSegRenderer)
 SE_LineSegRenderer::SE_LineSegRenderer()
