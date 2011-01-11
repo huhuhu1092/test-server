@@ -16,14 +16,24 @@ public:
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			mHasTex[i] = 0;
+			mHasMark[i] = 0;
+			mTextureFn[i] = 0;
 			mMarkAlpha[i] = 1.0f;
 			mMarkFunction[i] = 0;
-			mMarkTexture[i] = -1;
+			mMarkTexture[i] = i + 2;
 			mBackgroundAlpha = 1.0f;
-			mBackgroundTexture = -1;
-			mChannelTexture = -1;
+			mBackgroundTexture = 0;
+			mChannelTexture = 1;
 		}
 
+	}
+	void setHasMark(int index, bool v)
+	{
+		mHasMark[index] = v;
+	}
+	bool getHasMark(int index)
+	{
+		return mHasMark[index];
 	}
 	void setHasTex(int index, bool v)
 	{
@@ -56,6 +66,14 @@ public:
 	int getMarkFunction(int index)
 	{
 		return mMarkFunction[index];
+	}
+	int getTextureFn(int index)
+	{
+		return mTextureFn[index];
+	}
+	void setTextureFn(int index, int f)
+	{
+		mTextureFn[index] = f;
 	}
 	void setMarkColor(int index, const SE_Vector3f& c)
 	{
@@ -90,6 +108,7 @@ public:
 		return mMarkTexture[index];
 	}
 private:
+	bool mHasMark[4];
 	bool mHasTex[4];// r , g , b, a
 	float mMarkAlpha[4];//rgba
     float mBackgroundAlpha;
@@ -98,6 +117,7 @@ private:
 	int mBackgroundTexture;
 	int mChannelTexture;
 	int mMarkTexture[4];//rgba
+	int mTextureFn[4];
 };
 class SE_ColorExtractShaderProperty : public SE_ShaderProperty
 {

@@ -8,6 +8,8 @@ class SE_ShaderProgram;
 class SE_Surface;
 class SE_ColorExtractShaderProgram;
 class SE_SimpleSurfaceShaderProgram;
+class SE_ColorEffectShaderProgram;
+class SE_ColorEffectShaderProperty;
 class SE_RenderUnit;
 /*
     Usage:
@@ -87,6 +89,7 @@ public:
 private:
 	SE_SimpleSurfaceShaderProgram* mShaderProgram;
 };
+
 class SE_ColorEffectRenderer : public SE_Renderer
 {
 	DECLARE_OBJECT(SE_ColorEffectRenderer)
@@ -106,6 +109,7 @@ private:
 	SE_ColorEffectShaderProgram* mShaderProgram;
 	SE_ColorEffectShaderProperty* mShaderProperty;
 };
+
 class SE_LineSegRenderer : public SE_Renderer
 {
 	DECLARE_OBJECT(SE_LineSegRenderer)

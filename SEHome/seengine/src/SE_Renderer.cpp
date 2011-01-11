@@ -466,6 +466,7 @@ void SE_SimpleSurfaceRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 void SE_SimpleSurfaceRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 {}
 ////////////////////////////////////
+
 IMPLEMENT_OBJECT(SE_ColorEffectRenderer)
 SE_ColorEffectRenderer::SE_ColorEffectRenderer()
 {
@@ -484,8 +485,16 @@ void SE_ColorEffectRenderer::setImage(SE_RenderUnit* renderUnit)
 	{
 		mShaderProperty = (SE_ColorEffectShaderProperty*)mSurface->getShaderProperty();
 	}
-	setImage(mShaderProperty->getBackgroundTexture(), renderUnit);
-	setImage(mShaderProperty->getChannelTexture(), renderUnit);
+	SE_Renderer::setImage(mShaderProperty->getBackgroundTexture(), renderUnit);
+	SE_Renderer::setImage(mShaderProperty->getChannelTexture(), renderUnit);
+	glUniform1i(mShaderProgram->getTextureUniformLoc(0), mShaderProperty->getBackgroundTexture());
+	glUniform1i(mShaderProgram->getTextureUniformLoc(1), mShaderProperty->getChannelTexture());
+	int start = 0;
+	for(int i = 2 ; i < 6 ; i++)
+	{
+		glUniform1i(mShaderProgram->getTextureUniformLoc(i), mShaderProperty->getMarkTexture(start));
+		start++;
+	}
 }
 void SE_ColorEffectRenderer::setColor(SE_RenderUnit* renderUnit)
 {
@@ -497,20 +506,32 @@ void SE_ColorEffectRenderer::setVertex(SE_RenderUnit* renderUnit)
 }
 void SE_ColorEffectRenderer::setTexVertex(SE_RenderUnit* renderUnit)
 {
-	SE_Renderer::setTexVertex(renderUnit);
+	SE_Renderer::setTexVertex(0, renderUnit);
+	if(mHasTexCoord[0])
+	{
+		glVertexAttribPointer(mShaderProgram->getTexCoordAttribLoc(), 2, GL_FLOAT, 0, 0, mTexVertex);
+		glEnableVertexAttribArray(mShaderProgram->getTexCoordAttribLoc());
+	}
+	else
+	{
+		glDisableVertexAttribArray(mShaderProgram->getTexCoordAttribLoc());
+	}
 }
 void SE_ColorEffectRenderer::setDrawMode(SE_RenderUnit* renderUnit)
 {
-	glUniform1i(mShaderProgram->getTextureUniformLoc(0), mShaderProperty->getBackgroundTexture());
-	glUniform1i(mShaderProgram->getTextureUniformLoc(1), mShaderProperty->getChannelTexture());
+
+	glUniform1f(mShaderProgram->getBackgroundAlphaUniformLoc(), mShaderProperty->getBackgroudnAlpha());
 	for(int i = 0 ; i < 4 ; i++)
 	{
 	    glUniform1i(mShaderProgram->getHasTextureUniformLoc(i), 0);
+		glUniform1i(mShaderProgram->getHasMarkUniformLoc(i), mShaderProperty->getHasMark(i));
+		glUniform1i(mShaderProgram->getMarkFunctionUniformLoc(i), mShaderProperty->getMarkFunction(i));
+		glUniform1f(mShaderProgram->getMarkAlphaUniformLoc(i), mShaderProperty->getMarkAlpha(i));
+		glUniform1i(mShaderProgram->getTextureFnUniformLoc(i), mShaderProperty->getTextureFn(i));
+		SE_Vector3f v = mShaderProperty->getMarkColor(i);
+		glUniform3f(mShaderProgram->getMarkColorUniformLoc(i), v.x, v.y, v.z);
 	}
-	for(int i = 0 ; i < 4 ; i++)
-	{
-	    glUniform1i(mShaderProgram->getMarkFunctionUniformLoc(i), mShaderProperty->getMarkFunction(i));
-	}
+
 
 }
 void SE_ColorEffectRenderer::begin(SE_ShaderProgram* shaderProgram)
@@ -523,7 +544,10 @@ void SE_ColorEffectRenderer::draw()
 	SE_Renderer::draw();
 }
 void SE_ColorEffectRenderer::end()
-{}
+{
+	mShaderProgram->validate();
+}
+
 ///////////////////////////////////////
 IMPLEMENT_OBJECT(SE_LineSegRenderer)
 SE_LineSegRenderer::SE_LineSegRenderer()

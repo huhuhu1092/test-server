@@ -71,6 +71,7 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
     mFragmentShaderSrc[fragmentShaderSrcLen] = '\0';
 #endif
 }
+
 void SE_ShaderProgram::create(char* vertexShaderSrc, char* fragmentShaderSrc)
 {
 #ifdef GLES_20
@@ -172,6 +173,24 @@ void SE_ShaderProgram::init(char* vertexShaderSrc, char* fragmentShaderSrc)
     mShaderProgramObject = programObject;
     mHasInit = true;
 #endif
+}
+void SE_ShaderProgram::validate()
+{
+	glValidateProgram(mShaderProgramObject);
+	GLint status = 0;
+	glGetProgramiv(mShaderProgramObject, GL_VALIDATE_STATUS, &status);
+	LOGI("### validate status : %d\n", status);
+	GLint infoLen = 0;
+    glGetProgramiv(mShaderProgramObject, GL_INFO_LOG_LENGTH, &infoLen);
+	checkGLError();
+    if(infoLen > 1)
+    {
+        char* infoLog = new char[sizeof(char) * infoLen];
+        glGetProgramInfoLog(mShaderProgramObject, infoLen, 0, infoLog);
+		checkGLError();
+        LOGI("Error linking program: \n%s\n", infoLog);
+        delete[] infoLog;
+    }
 }
 void SE_ShaderProgram::use()
 {
@@ -369,6 +388,7 @@ GLint SE_ColorExtractShaderProgram::getColorChannelIndexUniformLoc(int index)
 	return ret;
 }
 /////////////////////////////////////////////
+
 IMPLEMENT_OBJECT(SE_ColorEffectShaderProgram)
 SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
 {
@@ -383,6 +403,10 @@ SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
     m_u_has_texg = -1;
     m_u_has_texb = -1;
     m_u_has_texa = -1;
+	m_u_has_markr = -1;
+	m_u_has_markg = -1;
+	m_u_has_markb = -1;
+	m_u_has_marka = -1;
     m_u_markr_alpha = -1;
     m_u_markg_alpha = -1;
     m_u_markb_alpha = -1;
@@ -392,6 +416,10 @@ SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
     m_u_markg_fn = -1;
     m_u_markb_fn = -1;
     m_u_marka_fn = -1;
+	m_u_texr_fn = -1;
+	m_u_texg_fn = -1;
+	m_u_texb_fn = -1;
+	m_u_texa_fn = -1;
     m_u_colorr = -1;
     m_u_colorg = -1;
     m_u_colorb = -1;
@@ -412,6 +440,10 @@ void SE_ColorEffectShaderProgram::link()
     m_u_has_texg = glGetUniformLocation(mShaderProgramObject, "u_has_texg");
     m_u_has_texb = glGetUniformLocation(mShaderProgramObject, "u_has_texb");
     m_u_has_texa = glGetUniformLocation(mShaderProgramObject, "u_has_texa");
+	m_u_has_markr = glGetUniformLocation(mShaderProgramObject, "u_has_markr");
+    m_u_has_markg = glGetUniformLocation(mShaderProgramObject, "u_has_markg");
+	m_u_has_markb = glGetUniformLocation(mShaderProgramObject, "u_has_markb");
+	m_u_has_marka = glGetUniformLocation(mShaderProgramObject, "u_has_marka");
     m_u_markr_alpha = glGetUniformLocation(mShaderProgramObject, "u_markr_alpha");
     m_u_markg_alpha = glGetUniformLocation(mShaderProgramObject, "u_markg_alpha");
     m_u_markb_alpha = glGetUniformLocation(mShaderProgramObject, "u_markb_alpha");
@@ -421,6 +453,10 @@ void SE_ColorEffectShaderProgram::link()
     m_u_markg_fn = glGetUniformLocation(mShaderProgramObject, "u_markg_fn");
     m_u_markb_fn = glGetUniformLocation(mShaderProgramObject, "u_markb_fn");
     m_u_marka_fn = glGetUniformLocation(mShaderProgramObject, "u_marka_fn");
+    m_u_texr_fn = glGetUniformLocation(mShaderProgramObject, "u_texr_fn");
+	m_u_texg_fn = glGetUniformLocation(mShaderProgramObject, "u_texg_fn");
+	m_u_texb_fn = glGetUniformLocation(mShaderProgramObject, "u_texb_fn");
+	m_u_texa_fn = glGetUniformLocation(mShaderProgramObject, "u_texa_fn");
     m_u_colorr = glGetUniformLocation(mShaderProgramObject, "u_colorr");
     m_u_colorg = glGetUniformLocation(mShaderProgramObject, "u_colorg");
     m_u_colorb = glGetUniformLocation(mShaderProgramObject, "u_colorb");

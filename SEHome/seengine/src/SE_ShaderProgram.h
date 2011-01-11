@@ -17,6 +17,7 @@ public:
     void recreate();
     bool initOK();
     void use();
+	void validate();
     GLint getPositionAttributeLoc()
     {
         return m_a_position_loc;
@@ -118,6 +119,7 @@ private:
 	GLint m_u_bchannelindex_loc;
 	GLint m_u_achannelindex_loc;
 };
+
 class SE_ColorEffectShaderProgram : public SE_ShaderProgram
 {
 	DECLARE_OBJECT(SE_ColorEffectShaderProgram)
@@ -158,6 +160,28 @@ public:
 		}
 		return ret;
 	}
+	//0, 1, 2, 3 | r, g, b, a
+	GLint getHasMarkUniformLoc(int index)
+	{
+        GLint ret = -1;
+		switch(index)
+		{
+		case 0:
+			ret = m_u_has_markr;
+			break;
+		case 1:
+			ret = m_u_has_markb;
+			break;
+		case 2:
+			ret = m_u_has_markg;
+			break;
+		case 3:
+			ret = m_u_has_marka;
+			break;
+		}
+		return ret;
+	}
+
     // 0, 1, 2, 3 | r g b a
     GLint getHasTextureUniformLoc(int index)
 	{
@@ -234,6 +258,26 @@ public:
 			return -1;
 		}
 	}
+	GLint getTextureFnUniformLoc(int index)
+	{
+	    switch(index)
+		{
+		case 0:
+	        return m_u_texr_fn;
+		case 1:
+	        return m_u_texg_fn;
+		case 2:
+	        return m_u_texb_fn;
+		case 3:
+	        return m_u_texa_fn;
+		default:
+			return -1;
+		}
+	}
+	GLint getBackgroundAlphaUniformLoc()
+	{
+		return m_u_background_alpha;
+	}
 protected:
     virtual void link();
 private:
@@ -248,6 +292,10 @@ private:
     GLint m_u_has_texg;
     GLint m_u_has_texb;
     GLint m_u_has_texa;
+	GLint m_u_has_markr;
+	GLint m_u_has_markg;
+	GLint m_u_has_markb;
+	GLint m_u_has_marka;
     GLint m_u_markr_alpha;
     GLint m_u_markg_alpha;
     GLint m_u_markb_alpha;
@@ -257,9 +305,14 @@ private:
     GLint m_u_markg_fn;
     GLint m_u_markb_fn;
     GLint m_u_marka_fn;
+	GLint m_u_texr_fn;
+	GLint m_u_texg_fn;
+	GLint m_u_texb_fn;
+	GLint m_u_texa_fn;
     GLint m_u_colorr;
     GLint m_u_colorg;
     GLint m_u_colorb;
     GLint m_u_colora;
 };
+
 #endif

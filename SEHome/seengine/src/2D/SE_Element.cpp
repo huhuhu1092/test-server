@@ -1500,7 +1500,13 @@ void SE_ColorEffectElement::setSurface(SE_Surface* surface)
 	for(int i = 0 ; i < MARK_NUM ; i++)
 	{
         _TextureMark& tm = mTextureMark[i];
-		if(tm.valid && tm.mTextureValue.isValid())
+		if(tm.valid)
+		{
+			cfp->setHasMark(i, true);
+		}
+		else
+			cfp->setHasMark(i, false);
+		if(tm.mTextureValue.isValid())
 		{
 			cfp->setHasTex(i, true);
 		}
@@ -1517,6 +1523,8 @@ void SE_ColorEffectElement::setSurface(SE_Surface* surface)
 		cfp->setMarkFunction(i, tm.mFnValue);
 	}
 	surface->setShaderProperty(cfp);
+	surface->setProgramDataID(COLOREFFECT_SHADER);
+	surface->setRendererID(COLOREFFECT_RENDERER);
 }
 SE_Spatial* SE_ColorEffectElement::createSpatial()
 {
