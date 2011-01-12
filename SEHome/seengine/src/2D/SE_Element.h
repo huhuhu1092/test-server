@@ -256,14 +256,6 @@ public:
 		return mTimeKey;
 	}
 	void startAnimation();
-	void setActionLayer(SE_Action::_ActionLayer* actionLayer)
-	{
-		mActionLayer = actionLayer;
-	}
-	SE_Action::_ActionLayer* getActionLayer() const
-	{
-		return mActionLayer;
-	}
 	void setStartKey(unsigned int key)
 	{
 		mStartKey = key;
@@ -338,10 +330,7 @@ public:
 	{
 		return mChildren;
 	}
-	void setURI(const SE_StringID& uri)
-	{
-        mURI.setURI(uri);
-	}
+	void setURI(const SE_StringID& uri);
 	SE_StringID getURI() const
 	{
 		return mURI.getURI();
@@ -416,7 +405,6 @@ protected:
     unsigned int mTimeKey;
 	unsigned int mStartKey;
 	unsigned int mEndKey;
-	SE_Action::_ActionLayer* mActionLayer;
 	SE_Element* mPrevElement;
 	SE_Element* mNextElement;
 	int mKeyFrameNum;
@@ -499,6 +487,8 @@ public:
 	void measure();
 	SE_Spatial* createSpatial();
 	void update(unsigned int);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 protected:
 	bool isValid();
 	virtual void setImageData(SE_RectPrimitive* primitive);
@@ -533,6 +523,8 @@ public:
 	void spawn();
 	void measure();
 	void update(unsigned int key);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
     void setContentChild(SE_Element* c)
 	{
 		mContentChild = c;
@@ -554,6 +546,8 @@ public:
 	void spawn();
 	SE_Spatial* createSpatial();
 	void update(unsigned int key);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 	void addHeadElement(SE_Element* e)
 	{
 		mHeadElementList.push_back(e);
@@ -570,6 +564,8 @@ public:
 	void update(unsigned int key);
 	void spawn();
 	void measure();
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 	SE_Spatial* createSpatial();
 private:
 	SE_StateMachine* mStateTable;
@@ -588,6 +584,8 @@ public:
     void spawn();
 	SE_Spatial* createSpatial();
 	void update(unsigned int key);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 	int getKeyFrameNum();
 private:
 	SE_Sequence* mSequence;
@@ -599,6 +597,8 @@ public:
 	SE_ColorEffectControllerElement(const SE_StringID& uri);
 	~SE_ColorEffectControllerElement();
 	void update(unsigned int key);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 	SE_Spatial* createSpatial();
 	void spawn();
 	void measure();
@@ -668,6 +668,8 @@ public:
 	SE_ColorEffectElement();
 	~SE_ColorEffectElement();
 	void update(unsigned int key);
+    void update(const SE_AddressID& address, const SE_Value& value);
+
 	SE_Spatial* createSpatial();
 	void spawn();
 	void measure();

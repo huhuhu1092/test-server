@@ -10,9 +10,14 @@ struct SE_CommonNode::_Impl
     ~_Impl()
     {
         std::list<SE_Spatial*>::iterator it;
+        SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
         for(it = children.begin() ; it != children.end() ; it++)
         {
-            delete *it;
+            SE_Spatial* s = *it;
+            SE_Spatial* ret = sceneManager->removeSpatial(s->getID());
+            SE_ASSERT(ret == s);
+            delete s;
+
         }
     }
 };

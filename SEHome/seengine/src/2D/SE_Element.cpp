@@ -44,7 +44,6 @@ SE_Element::SE_Element()
     mPivotX = mPivotY = INVALID_GEOMINFO;
 	mMountPointX = mMountPointY = INVALID_GEOMINFO;
 	mDeltaLeft = mDeltaTop = 0;
-	mActionLayer = NULL;
 	mStartKey = mEndKey = 0;
 	mTimeKey = 0;
 	mPrevElement = NULL;
@@ -65,7 +64,6 @@ SE_Element::SE_Element(float left, float top, float width, float height)
     mPivotX = mPivotY = INVALID_GEOMINFO;
 	mMountPointX = mMountPointY = INVALID_GEOMINFO;
 	mDeltaLeft = mDeltaTop = 0;
-	mActionLayer = NULL;
 	mStartKey = mEndKey = 0;
 	mTimeKey = 0;
 	mPrevElement = NULL;
@@ -80,6 +78,39 @@ SE_Element::~SE_Element()
 {
     if(mAnimation)
 		delete mAnimation;
+    if(mKeyFrameController)
+        delete mKeyFrameController;
+    std::vector<SE_AddressID> addressV = mURI.getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->unregisterObserver(addressV[i], this);
+        }
+    } 
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+    simObjectManager->remove(mSimObjectID);
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* s = sceneManager->removeSpatial(mSpatialID);
+    if(s != NULL)
+        delete s;
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    resourceManager->removePrimitive(mPrimitiveID);
+    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+    animManager->removeAnimation(mAnimationID);
+    _ElementContentList::iterator itContent;
+    for(itContent = mElementContentList.begin() ; itContent != mElementContentList.end() ; it++)
+    {
+        SE_ElementContent* c = *it;
+        delete c;
+    }
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        delete e;
+    }
 }
 int SE_Element::getKeyFrameNum() const
 {
@@ -148,6 +179,19 @@ SE_Element* SE_Element::removeChild(const SE_ElementID& id)
 	{
 		return NULL;
 	}
+}
+void SE_Element::setURI(const SE_StringID& uri)
+{
+    mURI.setURI(uri);
+    std::vector<SE_AddressID> addressV = mURI.getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->registerObserver(addressV[i], this);
+        }
+    } 
 }
 SE_Spatial* SE_Element::createNode()
 {
@@ -646,11 +690,6 @@ SE_TextureElement::~SE_TextureElement()
 	rm->removeRenderTarget(mRenderTargetID);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	elementManager->removeRenderTargetElement(mContentChild);
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	if(mSpatialID.isValid())
-	{
-		sceneManager->removeSpatial(mSpatialID);
-	}
 	if(mContentChild)
 		delete mContentChild;
 }

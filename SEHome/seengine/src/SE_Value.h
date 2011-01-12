@@ -7,10 +7,24 @@
 class SE_VirtualData
 {
 public:
+    SE_VirtualData()
+    {
+        mDeletedAuto = true;
+    }
 	virtual ~SE_VirtualData() {};
     virtual SE_VirtualData* clone() = 0;
     virtual bool eq(const SE_VirtualData& right) = 0;
     virtual bool neq(const SE_VirtualData& right) = 0;
+    void setAutoDeleted(bool v)
+    {
+        mDeletedAuto = v;
+    }
+    bool isAutoDeleted()
+    {
+        return mDeletedAuto;
+    }
+private:
+    bool mDeletedAuto;
 };
 class SE_Value
 {

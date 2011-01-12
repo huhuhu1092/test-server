@@ -84,7 +84,18 @@ SE_StringID SE_State::getDefaultValue()
 {
 	return mDefaultProperty.value;
 }
-SE_StringID SE_State::getParamValue(const char* param)
+std::vector<SE_AddressID> SE_State::getParamAddress()
+{
+    std::vector<SE_AddressID> retparam(mPropertyList.size());
+    _PropertyList::iterator it;
+    int i = 0;
+    for(it = mPropertyList.begin() , i = 0; it != mPropertyList.end(); it++, i++)
+    {
+        retparam[i] = it->id;
+    }
+    return retparam;
+}
+SE_StringID SE_State::getParamValue(const SE_AddressID& address)
 {
     _FindProperty fp;
 	fp.param = param;
@@ -96,7 +107,7 @@ SE_StringID SE_State::getParamValue(const char* param)
 	else
 		return "";
 }
-void SE_State::setParam(const SE_StringID& param, const SE_StringID& value)
+void SE_State::setParam(const SE_AddressID& param, const SE_StringID& value)
 {
 	_Property p;
 	p.id = param;
@@ -204,6 +215,13 @@ void SE_StateMachine::translateTo(const SE_StateID& to)
 		if(action)
 			action->action(mCurrentState, toState, NULL, (*it)->getActionURI());
 		mCurrentState = toState;
+        std::vector<SE_AddressID> paramID = mCurrentState->getParamAddress();
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < paramID.size() ; it++)
+        {
+            SE_StringID value = mCurrentState->getParamValue(paramID[i]);
+            paramManager->setString(paramID[i], value, true);
+        }
 	}
 }
 void SE_StateMachine::trigger(const SE_TriggerID& id)

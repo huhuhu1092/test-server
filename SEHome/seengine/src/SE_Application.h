@@ -107,6 +107,8 @@ public:
 	SE_Camera* getCamera(int index);
 	void setCurrentCamera(int index);
 	SE_Camera* getCurrentCamera();
+    //if return is false please delete dd by yourself
+    bool addDelayDestry(SE_DelayDestroy* dd);
 protected:
 	class _CommandWrapper
     {
@@ -131,6 +133,7 @@ protected:
     void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     SE_Application();
 	bool isRemoved(const _CommandWrapper& c);
+    void doDelayDestroy();
 protected:
     struct _CommandFactoryEntry
     {
@@ -152,10 +155,24 @@ protected:
 	private:
 		SE_CommandFactoryID mID;
 	};
+    class _FindDelayDestroy
+    {
+    public:
+        bool operator()(SE_DelayDestroy* dd) const
+        {
+            if(*src == *dd)
+                return true;
+            else
+                return false;
+        }
+        SE_DelayDestroy* src;
+    };
+
     //typedef std::list<_CommanDWrapper> SE_CommandList;
     typedef std::list<SE_Command*> SE_CommandList;
     typedef std::list<_CommandFactoryEntry> SE_CommandFactoryList;
 	typedef std::list<SE_Message*> SE_MessageList;
+    typedef std::list<SE_DelayDestroy*> SE_DelayDestroyList;
     SE_Camera* mCameraArray[MAX_CAMERA_NUM];
     SE_Camera* mCurrentCamera;
     SE_SceneManager* mSceneManager;
@@ -174,6 +191,7 @@ protected:
     SE_TimeMS mPrevTime;
     SE_CommandList mCommandList;
     SE_CommandFactoryList mCommandFactoryList;
+    SE_DelayDestroyList mDelayDestroyList;
     bool mStarted;
     int mFpsFrameNum;
     SE_TimeMS mFpsPrevTime;

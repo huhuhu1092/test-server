@@ -26,7 +26,8 @@ public:
 	void setTriggerAction(const SE_TriggerID& id, const SE_StringID& actionURI);
 	SE_StateAction* getTriggerAction(const SE_TriggerID& id);
     SE_StringID getDefaultValue();
-	SE_StringID getParamValue(const char* param);
+	SE_StringID getParamValue(const SE_AddressID& address);
+    std::vector<SE_AddressID> getParamAddress();
 	void setParam(const SE_StringID& param, const SE_StringID& value);
 	void setDefaultValue(const SE_StringID& id, const SE_StringID& uri);
 	/*
@@ -48,7 +49,7 @@ private:
 	};
 	struct _Property
 	{
-		SE_StringID id;
+		SE_AddressID id;
 		SE_StringID value;
 	};
 	class _FindAction

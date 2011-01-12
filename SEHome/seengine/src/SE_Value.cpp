@@ -42,7 +42,8 @@ SE_Value::~SE_Value()
         delete data.mat4f;
         break;
     case VIRTUALDATA_T:
-        delete data.virtualData;
+        if(data.virtualData->isAutoDeleted())
+            delete data.virtualData;
         break;
     }
 }
@@ -132,7 +133,10 @@ SE_Value::SE_Value(const SE_Value& right)
         *data.mat4f = *right.data.mat4f;
         break;
     case VIRTUALDATA_T:
-        data.virtualData = right.data.virtualData->clone();
+        if(right.data.virtualData->isAutoDeleted())
+            data.virtualData = right.data.virtualData->clone();
+        else
+            data.virtualData = right.data.virtualData;
         break;
     }
 }
@@ -201,7 +205,7 @@ SE_Value& SE_Value::operator=(const SE_Value& right)
             delete data.mat4f;
         break;
     case VIRTUALDATA_T:
-        if(data.virtualData)
+        if(data.virtualData && data.virtualData->isAutoDeleted())
             delete data.virtualData;
         break;
     }
@@ -289,7 +293,10 @@ SE_Value& SE_Value::operator=(const SE_Value& right)
         *data.mat4f = *right.data.mat4f;
         break;
     case VIRTUALDATA_T:
-        data.virtualData = right.data.virtualData->clone();
+        if(right.data.virtualData->isAutoDeleted())
+            data.virtualData = right.data.virtualData->clone();
+        else
+            data.virtualData = right.data.virtualData;
         break;
     }
     return *this;

@@ -82,6 +82,17 @@ SE_Application::~SE_Application()
     }
     delete mRenderManager;
 }
+void SE_Application::doDelayDestroy()
+{
+    SE_DelayDestroyList::iterator it;
+    for(it = mDelayDestroyList.begin() ; it != mDelayDestroyList.end() ; it++)
+    {
+        SE_DelayDestroy* dd = *it;
+        dd->destroy();
+        delete dd;
+    }
+    mDelayDestroyList.clear();
+}
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
@@ -90,6 +101,7 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
     mRenderManager->draw();
     mRenderManager->endDraw();
+    doDelayDestroy();
 }
 void SE_Application::start()
 {}
@@ -305,7 +317,18 @@ SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
     }
 	return NULL;
 }
-
+bool SE_Application::addDelayDestry(SE_DelayDestroy* dd)
+{
+    _FindDelayDestroy fd;
+    fd.src = dd;
+    SE_DelayDestroyList::iterator it = find_if(mDelayDestroyList.begin(), mDelayDestroyList.end(), fd);
+    if(it != mDelayDestroyList.end())
+    {
+        return false;
+    }
+    mDelayDestroyList.push_back(dd);
+    return true;
+}
 void SE_Application::sendMessage(SE_Message* message)
 {
 	mMessageList.push_back(message);
