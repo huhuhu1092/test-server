@@ -1,6 +1,8 @@
 #include "SE_StateTable.h"
 #include "SE_Utils.h"
 #include "SE_URI.h"
+#include "SE_Application.h"
+#include "SE_ParamManager.h"
 #include <algorithm>
 SE_State::SE_State()
 {
@@ -98,7 +100,7 @@ std::vector<SE_AddressID> SE_State::getParamAddress()
 SE_StringID SE_State::getParamValue(const SE_AddressID& address)
 {
     _FindProperty fp;
-	fp.param = param;
+	fp.param = address;
 	_PropertyList::iterator it = find_if(mPropertyList.begin(), mPropertyList.end(), fp);
 	if(it != mPropertyList.end())
 	{
@@ -220,7 +222,7 @@ void SE_StateMachine::translateTo(const SE_StateID& to)
         for(int i = 0 ; i < paramID.size() ; it++)
         {
             SE_StringID value = mCurrentState->getParamValue(paramID[i]);
-            paramManager->setString(paramID[i], value, true);
+			paramManager->setString(paramID[i], value.getStr(), true);
         }
 	}
 }

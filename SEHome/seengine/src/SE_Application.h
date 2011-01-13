@@ -4,6 +4,7 @@
 #include "SE_ID.h"
 #include "SE_Command.h"
 #include "SE_Message.h"
+#include "SE_DelayDestroy.h"
 #include <list>
 #include <string>
 #include <vector>
@@ -19,6 +20,7 @@ class SE_SimObjectManager;
 class SE_RenderTargetManager;
 class SE_CameraManager;
 class SE_ParamManager;
+class SE_DelayDestroy;
 class SE_Application
 {
 public:

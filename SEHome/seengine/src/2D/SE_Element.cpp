@@ -33,6 +33,7 @@
 #include "SE_ShaderProperty.h"
 #include "SE_DataValueDefine.h"
 #include "SE_StateTable.h"
+#include "SE_KeyFrameController.h"
 #include <algorithm>
 #include <math.h>
 //////////////////////////
@@ -100,9 +101,9 @@ SE_Element::~SE_Element()
     SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
     animManager->removeAnimation(mAnimationID);
     _ElementContentList::iterator itContent;
-    for(itContent = mElementContentList.begin() ; itContent != mElementContentList.end() ; it++)
+    for(itContent = mElementContentList.begin() ; itContent != mElementContentList.end() ; itContent++)
     {
-        SE_ElementContent* c = *it;
+        SE_ElementContent* c = *itContent;
         delete c;
     }
     _ElementList::iterator it;
@@ -693,6 +694,8 @@ SE_TextureElement::~SE_TextureElement()
 	if(mContentChild)
 		delete mContentChild;
 }
+void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
 void SE_TextureElement::setImageData(SE_RectPrimitive* primitive)
 {
 	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
@@ -855,6 +858,9 @@ SE_ImageElement::~SE_ImageElement()
 {
 
 }
+void SE_ImageElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 bool SE_ImageElement::isValid()
 {
 	int count = 0;
@@ -994,6 +1000,9 @@ SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 	SE_StringID url = getURL();
 	mAction = resourceManager->getAction(url.getStr());
 }
+void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 void SE_ActionElement::spawn()
 {
 	if(!mAction)
@@ -1076,6 +1085,9 @@ SE_SequenceElement::SE_SequenceElement(const SE_StringID& uri)
 	mSequence = resourceManager->getSequence(url.getStr());
 	mCurrentElement = NULL;
 }
+void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 int SE_SequenceElement::getKeyFrameNum()
 {
 	if(!mSequence)
@@ -1200,6 +1212,9 @@ SE_StateTableElement::SE_StateTableElement(const SE_StringID& uri)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mStateTable = resourceManager->getStateMachine(url.getStr());
 }
+void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 void SE_StateTableElement::update(unsigned int key)
 {}
 void SE_StateTableElement::spawn()
@@ -1234,6 +1249,9 @@ SE_ColorEffectControllerElement::SE_ColorEffectControllerElement(const SE_String
 	mID = mColorEffectController->getID().getStr();
 	mCurrentElement = NULL;
 }
+void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 void SE_ColorEffectControllerElement::update(unsigned int key)
 {
 	if(mChildren.empty())
@@ -1364,6 +1382,9 @@ SE_ColorEffectElement::~SE_ColorEffectElement()
 	}
 
 }
+void SE_ColorEffectElement::update(const SE_AddressID& address, const SE_Value& value)
+{}
+
 void SE_ColorEffectElement::update(unsigned int key)
 {}
 SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& textureURL, SE_ImageData*& imageData)

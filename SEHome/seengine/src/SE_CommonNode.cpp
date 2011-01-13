@@ -2,6 +2,8 @@
 #include "SE_Buffer.h"
 #include "SE_Camera.h"
 #include "SE_BoundingVolume.h"
+#include "SE_SceneManager.h"
+#include "SE_Application.h"
 #include <list>
 IMPLEMENT_OBJECT(SE_CommonNode)
 struct SE_CommonNode::_Impl
@@ -14,7 +16,7 @@ struct SE_CommonNode::_Impl
         for(it = children.begin() ; it != children.end() ; it++)
         {
             SE_Spatial* s = *it;
-            SE_Spatial* ret = sceneManager->removeSpatial(s->getID());
+            SE_Spatial* ret = sceneManager->removeSpatial(s->getSpatialID());
             SE_ASSERT(ret == s);
             delete s;
 
