@@ -53,6 +53,7 @@ SE_Element::SE_Element()
 	mSeqNum = -1;
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
+	mKeyFrameController = NULL;
 }
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
@@ -73,6 +74,7 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mSeqNum = -1;
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
+	mKeyFrameController = NULL;
 	//mChecker = NULL;
 }
 SE_Element::~SE_Element()
