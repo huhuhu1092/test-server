@@ -9,14 +9,13 @@
 #include "SE_ResourceManager.h"
 #include "SE_ImageMap.h"
 #include "SE_ImageTable.h"
+#include "SE_MessageEventCommandDefine.h"
 #include "SE_IO.h"
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
 /////////////////////////////////
-static const std::string ELEMENT_NODE = "Element";
-//////////////////////////////////
-
+static SE_ElementEventType SE_ElementEvent::mType = SE_ELEMENTEVENT_INVALID; 
 /////////////////////////////////
 SE_ElementManager::SE_ElementManager()
 {
@@ -133,4 +132,43 @@ bool SE_ElementManager::addRenderTargetElement(SE_Element* child)
 void SE_ElementManager::removeRenderTargetElement(SE_Element* e)
 {
 	mRenderTargetElementList.remove(e);
+}
+void SE_ElementManager::addEvent(SE_ElementEvent* event)
+{
+    if(!event->isNeedMerge())
+    {
+        mElementEventList->push_back(event);
+    }
+    else
+    {
+        std::list<SE_ElementEvent*>::iterator it;
+        bool merged = false;
+        for(it = mElementEventList.begin() ; it != mElementEventList.end() ; it++)
+        {
+            SE_ElementEvent* e = *it;
+            if(e->getType() == event->getType())
+            {
+                bool b = event->merge(e);
+                if(b)
+                    merged = b;
+            }
+             
+        }
+        if(merged)
+            delete event;
+        else
+            mElementEventList->push_back(event);
+    }
+}
+void SE_ElementManager::update()
+{
+    std::list<SE_ElementEvent*> retList = mElementEventList;
+    mElementEventList.clear();
+    std::list<SE_ElementEvent*>::iterator it;
+    for(it = retList.begin(); it != retlist.end() ; it++)
+    {
+        SE_ElementEvent* e = *it;
+        e->run();
+    }
+    for_each(retList.begin(), retList.end(), SE_DeleteObject());
 }

@@ -34,37 +34,67 @@
 #include "SE_DataValueDefine.h"
 #include "SE_StateTable.h"
 #include "SE_KeyFrameController.h"
+#include "SE_MessageEventCommandDefine.h"
 #include <algorithm>
 #include <math.h>
-//////////////////////////
-SE_Element::SE_Element()
+//////////////////////////////
+class SE_ElementParamUpdateEvent : public SE_ElementEvent
 {
-    mLeft = mTop = mWidth = mHeight = 0;
-    mAnimation = NULL;
-    mParent = NULL;
-    mPivotX = mPivotY = INVALID_GEOMINFO;
-	mMountPointX = mMountPointY = INVALID_GEOMINFO;
-	mDeltaLeft = mDeltaTop = 0;
-	mStartKey = mEndKey = 0;
-	mTimeKey = 0;
-	mPrevElement = NULL;
-	mNextElement = NULL;
-	mRenderTarget = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
-	mSeqNum = -1;
-	mNeedUpdateTransform = true;
-	mOwnRenderTargetCamera = false;
-	mKeyFrameController = NULL;
+public:
+    SE_ElementParamUpdateEvent()
+    {
+        mType = SE_ELEMENTEVENT_UPDATEPARAM;
+        mElement = NULL;
+    }
+    void run();
+    bool merge(SE_ElementEvent* mergeEvent);
+    void setParamValue(const SE_AddressID& address, const SE_Value& v)
+    {
+        mParamValueList.add(address, v);
+    }
+    SE_ParamValueList mParamValueList;
+    SE_ElementID mElementID;
+    SE_Element* mElement;
+};
+void SE_ElementParamUpdateEvent::run()
+{
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    if(!mElement)
+        mElement = elementManager->findByID(mElementID);
+    if(!mElement)
+        return;
+    mElement->update(mParamValueList);
 }
+bool SE_ElementParamUpdateEvent::merge(SE_ElementEvent* mergeEvent)
+{
+    SE_ElementParamUpdateEvent* pEvent = (SE_ElementParamUpdateEvent*)mergeEvent;
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    if(!mElement)
+        mElement = elementManager->findByID(mElementID);
+    SE_Element* mergedElement = elementManager->findByID(pEvent->mElementID);
+    if(!mElement || !mergedElement)
+        return true;
+    if(mElementID == pEvent->mElementID)
+    {
+        mergeEvent->mParamValueList.add(mParamValueList);
+        return true;
+    }
+    else
+        return false;
+}
+//////////////////////////
 SE_Element::SE_Element(float left, float top, float width, float height)
 {
-    mLeft = left;
+    mLeft = left; 
     mTop = top;
     mWidth = width;
     mHeight = height;
-    mAnimation = NULL;
-    mParent = NULL;
     mPivotX = mPivotY = INVALID_GEOMINFO;
 	mMountPointX = mMountPointY = INVALID_GEOMINFO;
+    mDeltaLeft = 0;
+    mDeltaTop = 0;
+    mAnimation = NULL;
+    mParent = NULL;
 	mDeltaLeft = mDeltaTop = 0;
 	mStartKey = mEndKey = 0;
 	mTimeKey = 0;
@@ -75,7 +105,8 @@ SE_Element::SE_Element(float left, float top, float width, float height)
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
 	mKeyFrameController = NULL;
-	//mChecker = NULL;
+    mKeyFrameNum = 0;
+    mID = SE_ID::createElementID();
 }
 SE_Element::~SE_Element()
 {
@@ -364,7 +395,7 @@ SE_Spatial* SE_Element::createSpatialByImage()
 		setSurface(surface);
 	}
 	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
-	simObject->setName(mID.getStr());
+	simObject->setName(mFullPathName.getStr());
     SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     simObjectManager->set(simObjectID, simObject);
@@ -374,8 +405,7 @@ SE_Spatial* SE_Element::createSpatialByImage()
     geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
     geom->setLocalLayer(mLocalLayer);
-	SE_ElementID eid = SE_ID::createElementID(mID.getStr());
-	geom->setElementID(eid);
+	geom->setElementID(mID);
 	geom->setRenderTarget(mRenderTarget);
 	geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
     delete[] meshArray;
@@ -422,27 +452,33 @@ int SE_Element::getContentNum() const
 }
 void SE_Element::clone(SE_Element *src, SE_Element* dst)
 {
+    dst->mID = SE_ID::createElementID();
 	dst->mLeft = src->mLeft;
 	dst->mTop = src->mTop;
 	dst->mWidth = src->mWidth;
 	dst->mHeight = src->mHeight;
 	dst->mPivotX = src->mPivotX;
 	dst->mPivotY = src->mPivotY;
+    dst->mDeltaLeft = src->mDeltaLeft;
+    dst->mDeltaTop = src->mDeltaTop;
 	dst->mMountPointX = src->mMountPointY;
 	dst->mMountPointY = src->mMountPointY;
 	dst->mLocalLayer = src->mLocalLayer;
 	dst->mLocalTranslate = src->mLocalTranslate;
 	dst->mLocalScale = src->mLocalScale;
 	dst->mLocalRotate = src->mLocalRotate;
-	dst->mID = src->mID;
-	dst->mFullPathID = src->mFullPathID;
+	dst->mName = src->mName;
+	dst->mFullPathName = src->mFullPathName;
 	dst->mMountPointID = src->mMountPointID;
 	dst->mElementRef = src->mElementRef;
+    if(src->mKeyFrameController)
+        dst->mKeyFrameController = src->mKeyFrameController->clone();
+    if(src->mAnimation)
+        dst->mAnimation = src->mAnimation->clone();
 	dst->mTimeKey = src->mTimeKey;
 	dst->mStartKey = src->mStartKey;
 	dst->mEndKey = src->mEndKey;
 	dst->mKeyFrameNum = src->mKeyFrameNum;
-	dst->mRenderTarget = src->mRenderTarget;
 	dst->mSeqNum = src->mSeqNum;
 	dst->mURI.setURI(src->mURI.getURI());
 	_ElementContentList::iterator it;
@@ -453,18 +489,59 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 	}
 	dst->mMountPointSet = mMountPointSet;
 }
+struct _ElementPair
+{
+    SE_Element* oldElement;
+    SE_Element* newElement;
+};
+
+static SE_Element* findPrevNextElement(SE_Element* e, std::list<_ElementPair>& eList)
+{
+    std::list<_ElementPair>::itertor it;
+    for(it = eList.begin(); it != eList.end() ; it++)
+    {
+        if(it->oldElement == e)
+            return it->newElement;
+    }
+    return NULL;
+} 
 SE_Element* SE_Element::clone()
 {
+    std::list<_ElementPair> elementPair;
 	SE_Element* e = new SE_Element;
 	clone(this, e);
+
 	if(!mChildren.empty())
 	{
 		_ElementList::iterator it;
 		for(it = mChildren.begin(); it != mChildren.end(); it++)
 		{
 			SE_Element* child = (*it)->clone();
-			e->addChild(child);
+			_ElementPair p;
+            p.oldElement = *it;
+            p.newElement = child;
+            elementPair.push_back(p);
 		}
+        std::list<_ElementPair>::iterator itPair;
+        for(itPair = elementPair.begin(); itPair != elementPair.end(); itPair++)
+        {
+            SE_Element* oldElement = it->oldElement;
+            SE_Element* newElement = it->newElement;
+            if(oldElement->mPrevElement)
+            {
+                SE_Element* e = findPrevNextElement(oldElement->mPrevElement, elementPair);
+                newElement->mPrevElement = e;
+            }
+            if(oldElement->mNextElement)
+            {
+                SE_Element* e = findPrevNextElement(oldElement->mNextElement, elementPair);
+                newElement->mNextElement = e;
+            }
+        }
+        for(itPair = elementPair.begin() ; itPair != elementPair.end(); itPair++)
+        {
+            e->mChildren.push_back(itPari->newElement);
+        }
 	}
 	return e;
 
@@ -579,7 +656,13 @@ SE_ImageData* SE_Element::createImageData(const SE_ImageDataID& imageDataID)
 }
 
 void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_ElementParamUpdateEvent* event = new SE_ElementParamUpdateEvent;
+    event->mElementID = mID;
+    event->mParamValueList.add(address, value);
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    elementManager->addEvent(event);
+}
 SE_Element* SE_Element::getElement(const SE_StringID& url)
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(url.getStr(), "/");
@@ -697,7 +780,9 @@ SE_TextureElement::~SE_TextureElement()
 		delete mContentChild;
 }
 void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 void SE_TextureElement::setImageData(SE_RectPrimitive* primitive)
 {
 	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
@@ -841,12 +926,20 @@ SE_Spatial* SE_NullElement::createSpatial()
 SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
 {
 	setURI(uri);
-	SE_StringID url = getURL();
 	mImageUnits[0].imageUnit = &mBaseColor;
 	mImageUnits[1].imageUnit = &mRChannel;
     mImageUnits[2].imageUnit = &mGChannel;
 	mImageUnits[3].imageUnit = &mBChannel;
     mImageUnits[4].imageUnit = &mAChannel;
+    initImage();
+}
+SE_ImageElement::~SE_ImageElement()
+{
+
+}
+void SE_ImageElement::initImage()
+{
+	SE_StringID url = getURL();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_ExtractImageStr imageStr = SE_Util::stringToExtractImage(url.getStr());
 	mBaseColor = resourceManager->getImageUnit(imageStr.base.c_str());
@@ -854,14 +947,33 @@ SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
 	mGChannel =  resourceManager->getImageUnit(imageStr.green.c_str());
 	mBChannel =  resourceManager->getImageUnit(imageStr.blue.c_str());
 	mAChannel = resourceManager->getImageUnit(imageStr.alpha.c_str());
-
 }
-SE_ImageElement::~SE_ImageElement()
+void SE_ImageElement::update(SE_ParamValueList& paramValueList)
 {
+    initImage();
+    spawn();
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* spatial = sceneManager->findSpatial(mSpatialID);
+    SE_Spatial* parentSpatial = sceneManager->findSpatial(mParent->getSpatialID());
+    if(!spatial && !parentSpatial)
+    {
+        return ;
+    }
+    else if(spatial && !parentSpatial)
+    {
+        SE_ASSERT(0);
+    }
+    else if(!spatial && parentSpatial)
+    {
 
+        SE_Spatial* s = createSpatial();
+        sceneManager->addSpatial(parentSpatial, s);
+    }
 }
 void SE_ImageElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 bool SE_ImageElement::isValid()
 {
@@ -1003,7 +1115,9 @@ SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 	mAction = resourceManager->getAction(url.getStr());
 }
 void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 void SE_ActionElement::spawn()
 {
@@ -1088,7 +1202,9 @@ SE_SequenceElement::SE_SequenceElement(const SE_StringID& uri)
 	mCurrentElement = NULL;
 }
 void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 int SE_SequenceElement::getKeyFrameNum()
 {
@@ -1215,7 +1331,9 @@ SE_StateTableElement::SE_StateTableElement(const SE_StringID& uri)
 	mStateTable = resourceManager->getStateMachine(url.getStr());
 }
 void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 void SE_StateTableElement::update(unsigned int key)
 {}
@@ -1252,7 +1370,9 @@ SE_ColorEffectControllerElement::SE_ColorEffectControllerElement(const SE_String
 	mCurrentElement = NULL;
 }
 void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 void SE_ColorEffectControllerElement::update(unsigned int key)
 {
@@ -1385,7 +1505,9 @@ SE_ColorEffectElement::~SE_ColorEffectElement()
 
 }
 void SE_ColorEffectElement::update(const SE_AddressID& address, const SE_Value& value)
-{}
+{
+    SE_Element::update(address, value);
+}
 
 void SE_ColorEffectElement::update(unsigned int key)
 {}
@@ -1597,44 +1719,7 @@ SE_Spatial* SE_ColorEffectElement::createSpatial()
 	}
 	else
 	{
-        SE_PrimitiveID primitiveID;
-		SE_RectPrimitive* primitive;
-		createPrimitive(primitiveID, primitive);
-        setImageData(primitive);
-        SE_Mesh** meshArray = NULL;
-		int meshNum = 0;
-		primitive->createMesh(meshArray, meshNum);
-		if(meshNum != 1)
-		{
-			LOGE("... rect primivitve mesh num should be 1\n");
-			delete primitive;
-			return NULL;
-		}
-		for(int i = 0 ; i < meshArray[0]->getSurfaceNum(); i++)
-		{
-			SE_Surface* surface = meshArray[0]->getSurface(i);
-			setSurface(surface);
-		}
-		SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
-		simObject->setName(mID.getStr());
-		SE_SimObjectID simObjectID = SE_ID::createSimObjectID();
-		SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-		simObjectManager->set(simObjectID, simObject);
-		SE_Geometry* geom = new SE_Geometry;
-		SE_SpatialID spatialID = geom->getSpatialID();
-		geom->attachSimObject(simObject);
-		geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
-		geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-		geom->setLocalLayer(mLocalLayer);
-		SE_ElementID eid = SE_ID::createElementID(mID.getStr());
-		geom->setElementID(eid);
-		geom->setRenderTarget(mRenderTarget);
-		geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-		delete[] meshArray;
-		mSpatialID = spatialID;
-		mPrimitiveID = primitiveID;
-		mSimObjectID = simObjectID;
-		return geom;
+        return createSpatialByImage();
 	}
 }
 void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType)

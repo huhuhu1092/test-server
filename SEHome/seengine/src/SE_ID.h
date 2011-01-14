@@ -60,7 +60,7 @@ typedef SE_StringID SE_CommandFactoryID;
 typedef SE_CommonID SE_PrimitiveID;
 typedef SE_CommonID SE_AnimationID;
 typedef SE_CommonID SE_SimObjectID;
-typedef SE_StringID SE_ElementID;
+typedef SE_CommonID SE_ElementID;
 typedef SE_StringID SE_SkinJointControllerID;
 typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
@@ -73,24 +73,24 @@ typedef SE_StringID SE_AddressID;
 class SE_ID
 {
 public:
-	static SE_ImageDataID createImageDataID(const char* str);
-	static SE_MeshID createMeshID();
-	static SE_SpatialID createSpatialID();
-	static SE_GeometryDataID createGeometryDataID();
-	static SE_TextureCoordDataID createTextureCoordDataID();
-	static SE_MaterialDataID createMaterialDataID();
-	static SE_SceneID createSceneID(const char* str);
-	static SE_ProgramDataID createProgramDataID(const char* str);
-	static SE_CommandID createCommandID(const char* str);
-	static SE_CommandFactoryID createCommandFactoryID(const char* str);
-	static SE_PrimitiveID createPrimitiveID();
-    static SE_AnimationID createAnimationID();
-    static SE_SimObjectID createSimObjectID();
-	static SE_ElementID createElementID(const char* str);
-    static SE_SkinJointControllerID createSkinJointControllerID(const char* str);
-	static SE_MountPointID createMountPointID(const char* str);
-	static SE_RendererID createRendererID(const char* str);
-    static SE_CameraID createCameraID();
+	static SE_ImageDataID createImageDataID(const char* str= NULL);
+	static SE_MeshID createMeshID(const char* str = NULL);
+	static SE_SpatialID createSpatialID(const char* str = NULL);
+	static SE_GeometryDataID createGeometryDataID(const char* str = NULL);
+	static SE_TextureCoordDataID createTextureCoordDataID(const char* str = NULL);
+	static SE_MaterialDataID createMaterialDataID(const char* str = NULL);
+	static SE_SceneID createSceneID(const char* str = NULL);
+	static SE_ProgramDataID createProgramDataID(const char* str = NULL);
+	static SE_CommandID createCommandID(const char* str = NULL);
+	static SE_CommandFactoryID createCommandFactoryID(const char* str = NULL);
+	static SE_PrimitiveID createPrimitiveID(const char* str = NULL);
+    static SE_AnimationID createAnimationID(const char* str = NULL);
+    static SE_SimObjectID createSimObjectID(const char* str = NULL);
+	static SE_ElementID createElementID(const char* str = NULL);
+    static SE_SkinJointControllerID createSkinJointControllerID(const char* str = NULL);
+	static SE_MountPointID createMountPointID(const char* str = NULL);
+	static SE_RendererID createRendererID(const char* str = NULL);
+    static SE_CameraID createCameraID(const char* str = NULL);
 };
 ///////////////////////////
 /*

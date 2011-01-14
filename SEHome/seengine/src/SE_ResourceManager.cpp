@@ -1625,9 +1625,9 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 			{
 				fullpathID = pro->xmlName + "/" + value;
 			}
-			element->setID(id.c_str());
-			element->setFullPathID(fullpathID.c_str());
-			if(element->getID().isValid())
+			element->setName(id.c_str());
+			element->setFullPathName(fullpathID.c_str());
+			if(element->getName().isValid())
 			{
 			    hasid = true;
 			}

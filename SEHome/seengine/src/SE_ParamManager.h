@@ -5,7 +5,37 @@
 #include "SE_Value.h"
 #include <string>
 #include <list>
+#include <vector>
+#include <algorithm>
 #include "SE_ParamObserver.h"
+struct SE_ParamValue
+{
+    SE_AddressID param;
+    SE_Value value;
+    SE_ParamValue(const SE_AddressID& p, const SE_Value& v) : param(p), value(v)
+    {}
+};
+class SE_ParamValueList
+{
+public:
+    void add(const SE_AddressID& param, const SE_Value& v)
+    {
+        SE_ParamValue pv(param, v);
+        mParamValueList.push_back(pv);
+    }
+    void add(std::list<SE_ParamValue>& tmpList)
+    {
+        mParamValueList.slice(mParamValueList.end(), tmpList);
+    }
+    std::vector<SE_ParamValue> getParamValue()
+    {
+        std::vector<SE_ParamValue> retV.resize(mParamValueList.size());
+        copy(mParamValueList.begin(), mParamValueList.end(), retV.begin());
+        return retV;
+    }
+private:
+    std::list<SE_ParamValue> mParamValueList;
+};
 //param is defined in struct, struct is contained by xml
 //for example: use param.xml/structid/paramid to get a param
 // param.xml/structid/paramid is the address of the value

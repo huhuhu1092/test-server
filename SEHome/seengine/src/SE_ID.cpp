@@ -175,312 +175,86 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
     return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
 
 }
+////////////////////////////////////////
+template <typename T>
+static T createID(const char* str)
+{
+    if(str == NULL)
+    {
+        return SE_Application::getInstance()->createCommonID();
+    }
+    else
+	    return SE_StringID(str);
+}
 SE_ImageDataID SE_ID::createImageDataID(const char* str)
 {
-	return SE_StringID(str);
+    return createID<SE_ImageDataID>(str)
 }
-SE_MeshID SE_ID::createMeshID()
+SE_MeshID SE_ID::createMeshID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_MeshID>(str);
 }
-SE_SpatialID SE_ID::createSpatialID()
+SE_SpatialID SE_ID::createSpatialID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_SpatialID>(str);
 }
-SE_GeometryDataID SE_ID::createGeometryDataID()
+SE_GeometryDataID SE_ID::createGeometryDataID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_GeometryDataID>(str);
 }
-SE_TextureCoordDataID SE_ID::createTextureCoordDataID()
+SE_TextureCoordDataID SE_ID::createTextureCoordDataID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_TextureCoordDataID>(str);
 }
-SE_MaterialDataID SE_ID::createMaterialDataID()
+SE_MaterialDataID SE_ID::createMaterialDataID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_MaterialDataID>(str);
 }
 SE_SceneID SE_ID::createSceneID(const char* str)
 {
-	return SE_SceneID(str);
+    return createID<SE_SceneID>(str);
 }
 SE_ProgramDataID SE_ID::createProgramDataID(const char* str)
 {
-	return SE_StringID(str);
+    return createID<SE_ProgramDataID>(str);
 }
 SE_CommandID SE_ID::createCommandID(const char* str)
 {
-    return SE_CommandID(str);
+    return createID<SE_CommandID>(str);
 }
 SE_CommandFactoryID SE_ID::createCommandFactoryID(const char* str)
 {
-	return SE_CommandFactoryID(str);
+    return createID<SE_CommandFactoryID>(str);
 }
-SE_PrimitiveID SE_ID::createPrimitiveID()
+SE_PrimitiveID SE_ID::createPrimitiveID(const char* str)
 {
-	return SE_Application::getInstance()->createCommonID();
+    return createID<SE_PrimitiveID>(str);
 }
-SE_AnimationID SE_ID::createAnimationID()
+SE_AnimationID SE_ID::createAnimationID(const char* str)
 {
-    return SE_Application::getInstance()->createCommonID();
+    return createID<SE_AnimationID>(str);
 }
-SE_SimObjectID SE_ID::createSimObjectID()
+SE_SimObjectID SE_ID::createSimObjectID(const char* str)
 {
-    return SE_Application::getInstance()->createCommonID();
+    return createID<SE_SimObjectID>(str);
 }
 SE_ElementID SE_ID::createElementID(const char* str)
 {
-	return SE_StringID(str);
+    return createID<SE_ElementID>(str);
 }
 SE_SkinJointControllerID SE_ID::createSkinJointControllerID(const char* str)
 {
-    return SE_StringID(str);
+    return createID<SE_SkinJointControllerID>(str);
 }
 SE_MountPointID SE_ID::createMountPointID(const char* str)
 {
-	return SE_StringID(str);
+    return createID<SE_MountPointID>(str);
 }
 SE_RendererID SE_ID::createRendererID(const char* str)
 {
-	return SE_StringID(str);
+    return createID<SE_RendererID>(str);
 }
-SE_CameraID SE_ID::createCameraID()
+SE_CameraID SE_ID::createCameraID(const char* str)
 {
-    return SE_Application::getInstance()->createCommonID();
+    return createID<SE_CameraID>(str);
 }
-////////////////////////////////////////////
-/*
-SE_GeometryDataID::SE_GeometryDataID()
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = 0xFFFFFFFF;
-    }
-}
-SE_GeometryDataID::SE_GeometryDataID(int i0, int i1, int i2, int i3)
-{
-    id[0] = i0;
-    id[1] = i1;
-    id[2] = i2;
-    id[3] = i3;
-}
-SE_GeometryDataID::SE_GeometryDataID(const SE_GeometryDataID& rid)
-{
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-}
-SE_GeometryDataID& SE_GeometryDataID::operator=(const SE_GeometryDataID& rid)
-{
-    if(this == &rid)
-        return *this;
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-    return *this;
-}
-bool SE_GeometryDataID::isValid()
-{
-    SE_GeometryDataID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-    return *this == invalid;
-}
-void SE_GeometryDataID::write(SE_BufferOutput& output)
-{
-    output.writeIntArray((int*)id, 4);
-}
-SE_GeometryDataID& SE_GeometryDataID::read(SE_BufferInput& input)
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = input.readInt();
-    }
-    return *this;
-}
-bool operator==(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
-}
-bool operator<(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) < 0;
-}
-bool operator>(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) > 0;
-}
-bool operator!=(const SE_GeometryDataID& lid, const SE_GeometryDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
-}
-/////////////////////////////////////////////////////////////////////
-SE_TextureCoordDataID::SE_TextureCoordDataID()
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = 0xFFFFFFFF;
-    }
-
-}
-SE_TextureCoordDataID::SE_TextureCoordDataID(int i0, int i1, int i2, int i3)
-{
-    id[0] = i0;
-    id[1] = i1;
-    id[2] = i2;
-    id[3] = i3;
-}
-
-SE_TextureCoordDataID::SE_TextureCoordDataID(const SE_TextureCoordDataID& rid)
-{
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-}
-SE_TextureCoordDataID& SE_TextureCoordDataID::operator=(const SE_TextureCoordDataID& rid)
-{
-    if(this == &rid)
-        return *this;
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-    return *this;
-}
-void SE_TextureCoordDataID::write(SE_BufferOutput& output)
-{
-    output.writeIntArray((int*)id, 4);
-}
-bool SE_TextureCoordDataID::isValid()
-{
-    SE_TextureCoordDataID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-    return *this == invalid;
-}
-SE_TextureCoordDataID& SE_TextureCoordDataID::read(SE_BufferInput& input)
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = input.readInt();
-    }
-    return *this;
-}
-bool operator==(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid)
-{
-return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
-}
-bool operator<(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) < 0;
-}
-bool operator>(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) > 0;
-}
-bool operator!=(const SE_TextureCoordDataID& lid, const SE_TextureCoordDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
-}
-///////////////////////
-SE_MaterialDataID::SE_MaterialDataID()
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = 0xFFFFFFFF;
-    }
-
-}
-bool SE_MaterialDataID::isValid()
-{
-    SE_MaterialDataID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-    return *this == invalid;
-}
-SE_MaterialDataID::SE_MaterialDataID(int i0, int i1, int i2, int i3)
-{
-    id[0] = i0;
-    id[1] = i1;
-    id[2] = i2;
-    id[3] = i3;
-}
-
-SE_MaterialDataID::SE_MaterialDataID(const SE_MaterialDataID& rid)
-{
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-}
-SE_MaterialDataID& SE_MaterialDataID::operator=(const SE_MaterialDataID& rid)
-{
-    if(this == &rid)
-        return *this;
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-    return *this;
-}
-void SE_MaterialDataID::write(SE_BufferOutput& output)
-{
-    output.writeIntArray((int*)id, 4);
-}
-SE_MaterialDataID& SE_MaterialDataID::read(SE_BufferInput& input)
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = input.readInt();
-    }
-    return *this;
-}
-bool operator==(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
-}
-bool operator<(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) < 0;
-}
-bool operator>(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) > 0;
-}
-bool operator!=(const SE_MaterialDataID& lid, const SE_MaterialDataID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
-}
-////////////////////
-SE_SceneID::SE_SceneID(int i0, int i1, int i2, int i3)
-{
-    id[0] = i0;
-    id[1] = i1;
-    id[2] = i2;
-    id[3] = i3;
-}
-SE_SceneID::SE_SceneID(const SE_SceneID& rid)
-{
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-}
-SE_SceneID& SE_SceneID::operator=(const SE_SceneID& rid)
-{
-    if(this == &rid)
-        return *this;
-    memcpy(id, rid.id, sizeof(unsigned int) * 4);
-    return *this;
-}
-bool operator==(const SE_SceneID& lid, const SE_SceneID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
-}
-bool operator<(const SE_SceneID& lid, const SE_SceneID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) < 0;
-}
-bool operator>(const SE_SceneID& lid, const SE_SceneID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) > 0;
-}
-bool operator!=(const SE_SceneID& lid, const SE_SceneID& rid)
-{
-    return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
-}
-bool SE_SceneID::isValid()
-{
-    SE_SceneID invalid(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-    return *this == invalid;
-}
-void SE_SceneID::write(SE_BufferOutput& output)
-{
-    output.writeIntArray((int*)id, 4);
-}
-SE_SceneID& SE_SceneID::read(SE_BufferInput& input)
-{
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        id[i] = input.readInt();
-    }
-    return *this;
-}
-*/
-/////////////////////////
-

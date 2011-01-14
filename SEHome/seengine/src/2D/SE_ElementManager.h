@@ -7,8 +7,40 @@
 #include "SE_Element.h"
 #include "SE_ElementMap.h"
 #include "SE_Geometry3D.h"
+#include "SE_"
 class SE_Spatial;
-
+typedef int SE_ElementEventType;
+class SE_ElementEvent
+{
+public:
+    SE_UpdateEvent()
+    {
+        mNeedMerge = false;
+        mType = t;
+    }
+    virtual ~SE_UpdateEvent() {}
+    virtual void run() = 0;
+    bool isNeedMerge()
+    {
+        return mNeedMerge;
+    }
+    void setNeedMerge(bool b)
+    {
+        mNeedMerge = b;
+    }
+    virtual bool merge(SE_UpdateEvent* mergeEvent)
+    {
+        return false;
+    }
+    static SE_ElementEventType getType() const
+    {
+        return mType;
+    }
+protected:
+    static SE_ElementEventType mType; 
+private:
+    bool mNeedMerge;
+};
 class SE_ElementManager
 {
 public:
@@ -42,6 +74,8 @@ public:
         mRoot = root;
     }
     SE_Element* findByID(const SE_ElementID& id);
+    void addEvent(SE_ElementEvent* event);
+    void update();
 private:
     SE_ElementManager(const SE_ElementManager&);
     SE_ElementManager& operator=(const SE_ElementManager&);
@@ -49,7 +83,6 @@ private:
     SE_Element* mRoot;
 	SE_Rect<int> mViewport;
 	std::list<SE_Element*> mRenderTargetElementList;
-    //SE_ElementMapManager mElementMapManager;
-	//SE_ElementMap* mCurrElementMap;
+    std::list<SE_ElementEvent*> mElemetnEventList;
 };
 #endif

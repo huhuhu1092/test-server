@@ -48,8 +48,7 @@ public:
 class SE_Element : public SE_ParamObserver
 {
 public:
-    SE_Element();
-    SE_Element(float left, float top, float width, float height);
+    SE_Element(float left = 0, float top = 0, float width = 0, float height = 0);
     virtual ~SE_Element();
     float getLeft() const
     {
@@ -125,6 +124,15 @@ public:
     {
         return mLocalLayer;
     }
+    void setName(const SE_StringID& name)
+    {
+        mName = name;
+    }
+    const SE_StringID& getName()
+    {
+        return mName;
+    }
+    
     void setID(const SE_ElementID& id)
     {
         mID = id;
@@ -133,13 +141,13 @@ public:
     {
         return mID;
     }
-	void setFullPathID(const SE_ElementID& id)
+	void setFullPathName(const SE_StringID& name)
 	{
-		mFullPathID = id;
+		mFullPathName = name;
 	}
-	SE_ElementID getFullPathID() const
+	SE_StringID getFullPathName() const
 	{
-		return mFullPathID;
+		return mFullPathName;
 	}
     void setParent(SE_Element* parent)
     {
@@ -343,6 +351,7 @@ public:
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
+    virtual void update(SE_ParamValueList& paramValueList);
 	virtual void update(const SE_AddressID& address, const SE_Value& value);
 	// spawn has different function for element node and element leaf
 	// for element node it will calculate the origin point in its parent coordinate system
@@ -385,16 +394,13 @@ protected:
 	float mMountPointY;
 	float mDeltaLeft;
 	float mDeltaTop;
-    SE_Element* mParent;
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
     SE_Layer mLocalLayer;
     SE_ElementID mID;
-	SE_ElementID mFullPathID;
-    SE_SimObjectID mSimObjectID;
-    SE_SpatialID mSpatialID;
-    SE_PrimitiveID mPrimitiveID;
+	SE_StringID mFullPathName;
+    SE_StringID mName;
 	SE_MountPointID mMountPointID;
     SE_StringID mElementRef;
 	SE_KeyFrameController* mKeyFrameController;
@@ -408,11 +414,16 @@ protected:
 	SE_Element* mPrevElement;
 	SE_Element* mNextElement;
 	int mKeyFrameNum;
-	SE_RenderTargetID mRenderTarget;
-	SE_AnimationID mAnimationID;
 	typedef std::list<SE_ElementContent*> _ElementContentList;
 	_ElementContentList mElementContentList;
 	int mSeqNum;// the sequence number in its parent element
+    // dynamic data which will not copy
+    SE_Element* mParent;
+    SE_SimObjectID mSimObjectID;
+    SE_SpatialID mSpatialID;
+    SE_PrimitiveID mPrimitiveID;
+	SE_AnimationID mAnimationID;
+	SE_RenderTargetID mRenderTarget;
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
 	SE_URI mURI;
