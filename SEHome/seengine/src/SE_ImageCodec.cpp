@@ -3,23 +3,13 @@
 #include "SE_ImageData.h"
 #include "SE_Log.h"
 #include <string.h>
-#ifdef ANDROID
-#include "SkImageDecoder.h"
-#include "SkBitmap.h"
-#include "SkCanvas.h"
-#include "SkString.h"
-#include "SkStream.h"
-
-#else
+#if defined(WIN32)
+#include <windows.h>
+#endif
 #include <IL/il.h>
 #include <IL/ilu.h>
-#include <windows.h>
-//#include <IL/ilut.h>
-#endif
-
 SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
 {
-#if defined(WIN32)
     ILuint	imgId;
     ilInit();
     iluInit();
@@ -82,6 +72,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
     imageData->setCompressType(SE_ImageData::RAW);
 	imageData->setIsFliped(fliped);
     return imageData;
+    /*
 #else
     SkFILEStream fileStream(filePath);
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
@@ -131,6 +122,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
     imageData->setCompressType(SE_ImageData::RAW);
     return imageData;
 #endif
+*/
 }
 SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath, bool fliped)
 {

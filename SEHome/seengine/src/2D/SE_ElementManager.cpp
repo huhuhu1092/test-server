@@ -1,7 +1,6 @@
 #include "SE_ElementManager.h"
 #include "SE_Log.h"
 #include "SE_Element.h"
-#include "SE_ElementGroup.h"
 #include "SE_TextureCoordAnimation.h"
 #include "SE_Common.h"
 #include "SE_Spatial.h"

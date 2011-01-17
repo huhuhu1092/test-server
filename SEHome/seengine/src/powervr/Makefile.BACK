@@ -12,13 +12,14 @@ WS = X11
 X11_INC = /usr/include/X11
 LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
                -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib
-PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -g
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DANDROID -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
+		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \
 	   $(X11_INC) 
 
 PLAT_OBJPATH = $(PLATFORM)/$(WS)
-PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 $(X11_LIBS)
+PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 -lIL $(X11_LIBS)
 INCLUDES += -I$(SDKDIR)/Shell  \
 			-I$(SDKDIR)/Shell/API/KEGL \
 			-I$(SDKDIR)/Shell/OS/LinuxX11 \
