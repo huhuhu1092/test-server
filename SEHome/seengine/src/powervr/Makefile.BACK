@@ -25,6 +25,10 @@ INCLUDES += -I$(SDKDIR)/Shell  \
 			-I$(SEENG_DIR) \
 			-I$(SEENG_DIR)/export \
 			-I$(SEENG_DIR)/command \
+			-I$(SEENG_DIR)/2D \
+			-I$(SEENG_DIR)/animation \
+			-I$(SEENG_DIR)/checkxml \
+			-I$(SEENG_DIR)/tinyxml \
             -I$(SEENG_DIR)/bullet \
 			-I$(SEENG_DIR)/bullet/BulletCollision/BroadphaseCollision \
 			-I$(SEENG_DIR)/bullet/BulletCollision/CollisionDispatch \
@@ -39,6 +43,10 @@ INCLUDES += -I$(SDKDIR)/Shell  \
 VPATH +=  ../ : \
 	  ../command : \
 	  ../export : \
+	  ../2D : \
+	  ../animation : \
+	  ../checkxml : \
+	  ../tinyxml : \
 	  ../bullet/BulletCollision/BroadphaseCollision : \
 	  ../bullet/BulletCollision/CollisionDispatch : \
 	  ../bullet/BulletCollision/CollisionShapes : \
@@ -142,6 +150,12 @@ SRC_BULLET =  btAlignedAllocator.cpp \
 	btRaycastVehicle.cpp \
 	btWheelInfo.cpp 
 
+SRCS_TINYXML = tinystr.cpp  \
+			   tinyxml.cpp  \
+               tinyxmlerror.cpp \
+               tinyxmlparser.cpp
+
+
 SRCS_CPP = SE_Buffer.cpp   \
 	SE_DataTransfer.cpp  \
 	SE_ImageData.cpp      \
@@ -178,6 +192,7 @@ SRCS_CPP = SE_Buffer.cpp   \
 	SE_Matrix.cpp     \
 	SE_RenderUnit.cpp  \
 	SE_Spatial.cpp    \
+	SE_ObjectManager.cpp \
 	SE_Vector.cpp \
 	SE_Ase.cpp \
 	SE_SystemCommand.cpp \
@@ -186,11 +201,51 @@ SRCS_CPP = SE_Buffer.cpp   \
 	SE_InputManager.cpp \
 	SE_MotionEventCamera.cpp \
 	SE_SpatialTravel.cpp \
-	SE_SimObjectState.cpp \
+	SE_AnimationManager.cpp \
+	SE_DelayDestroy.cpp \
+	SE_RenderState.cpp \
+	SE_ShaderProperty.cpp \
+	SE_ParamManager.cpp \
+    SE_Value.cpp \
+    SE_XmlHandler.cpp \
+	SE_Struct.cpp \
+	SE_ImageCodec.cpp \
+	SE_MessageEventCommandDefine.cpp \
+	SE_RenderTarget.cpp \
+	SE_RenderTargetManager.cpp \
+    SE_2DCommand.cpp \
+	SE_ElementManager.cpp \
+	SE_Image.cpp  \
+	SE_ImageTable.cpp \
+	SE_MountPoint.cpp  \
+	SE_StateTable.cpp   \
+	SE_TextureCoordAnimation.cpp \
+    SE_Element.cpp   \
+   	SE_ElementMap.cpp \
+   	SE_ImageMap.cpp  \
+	SE_InterpolateWithKey.cpp \
+	SE_StateMap.cpp   \
+	SE_TableManager.cpp \
+   	SE_URI.cpp \
+    SE_Action.cpp     \
+	SE_AnimationSet.cpp   \
+	SE_Bone.cpp          \
+	SE_ElementKeyFrameAnimation.cpp  \
+	SE_KeyFrameController.cpp  \
+	SE_Sequence.cpp  \
+	SE_SpatialAnimation.cpp \
+    SE_Animation.cpp  \
+	SE_BoneAnimation.cpp  \
+	SE_ColorEffectController.cpp  \
+	SE_Interpolate.cpp   \
+	SE_KeyFrame.cpp      \
+	SE_SkinJointController.cpp \
+    SE_CheckXml.cpp \
 	SEDemo.cpp \
 	PVRShell.cpp \
 	PVRShellAPI.cpp \
 	PVRShellOS.cpp \
+	$(SRCS_TINYXML) \
 	$(SRC_BULLET)
 SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
 SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)

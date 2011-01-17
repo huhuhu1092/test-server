@@ -55,8 +55,16 @@ template <typename ID, typename VALUE, typename PROPERTY = SE_TableDefaultProper
 class SE_Table
 {
 public:
+#if defined(WIN32)
     typedef typename ID TABLE_ITEM_ID;
+#else
+    typedef ID TABLE_ITEM_ID;
+#endif
+#if defined(WIN32)
     typedef typename VALUE TABLE_ITEM_VALUE;
+#else
+    typedef VALUE TABLE_ITEM_VALUE;
+#endif
     void setItem(const ID& id, const VALUE& v)
     {
         mTableItems.set(id, v);
@@ -97,8 +105,16 @@ template <typename ID, typename VALUE, typename PROPERTY>
 class SE_Table<ID, VALUE*, PROPERTY>
 {
 public:
+#if defined(WIN32)
     typedef typename ID TABLE_ITEM_ID;
+#else
+    typedef ID TABLE_ITEM_ID;
+#endif
+#if defined(WIN32)
     typedef typename VALUE* TABLE_ITEM_VALUE;
+#else
+    typedef VALUE* TABLE_ITEM_VALUE;
+#endif
     void setItem(const ID& id, VALUE* v)
     {
         mTableItems.set(id, v);

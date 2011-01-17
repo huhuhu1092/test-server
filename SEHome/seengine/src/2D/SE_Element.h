@@ -32,6 +32,7 @@ class SE_RectPrimitive;
 class SE_Surface;
 class SE_RectPrimitive;
 class SE_StateMachine;
+class SE_ParamValueList;
 class SE_ElementTravel
 {
 public:
