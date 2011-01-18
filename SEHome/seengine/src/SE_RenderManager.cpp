@@ -59,7 +59,7 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
 
 void SE_RenderManager::sort()
 {
-	mRenderTargetList.sort(CompareRenderTarget);
+	mRenderTargetList.sort(SE_RenderManager::CompareRenderTarget);
 	std::list<_RenderTargetUnit*>::iterator it;
 	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
 	{

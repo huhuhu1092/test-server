@@ -7,18 +7,16 @@
 #include "SE_Element.h"
 #include "SE_ElementMap.h"
 #include "SE_Geometry3D.h"
-#include "SE_"
 class SE_Spatial;
 typedef int SE_ElementEventType;
 class SE_ElementEvent
 {
 public:
-    SE_UpdateEvent()
+    SE_ElementEvent()
     {
         mNeedMerge = false;
-        mType = t;
     }
-    virtual ~SE_UpdateEvent() {}
+    virtual ~SE_ElementEvent() {}
     virtual void run() = 0;
     bool isNeedMerge()
     {
@@ -28,11 +26,11 @@ public:
     {
         mNeedMerge = b;
     }
-    virtual bool merge(SE_UpdateEvent* mergeEvent)
+    virtual bool merge(SE_ElementEvent* mergeEvent)
     {
         return false;
     }
-    static SE_ElementEventType getType() const
+    static SE_ElementEventType getType() 
     {
         return mType;
     }

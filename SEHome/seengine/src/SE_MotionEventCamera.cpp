@@ -7,7 +7,7 @@
 #include "SE_SimObject.h"
 #include "SE_Log.h"
 #include "SE_Message.h"
-#include "SE_MessageDefine.h"
+#include "SE_MessageEventCommandDefine.h"
 IMPLEMENT_OBJECT(SE_MotionEventCamera)
 SE_MotionEventCamera::SE_MotionEventCamera()
 {

@@ -48,7 +48,7 @@ private:
 	std::list<_RenderTargetUnit*> mRenderTargetList;
 private:
 	_RenderTargetUnit* findTarget(const SE_RenderTargetID& id);
-	friend bool CompareRenderTarget(_RenderTargetUnit* first, _RenderTargetUnit* second)
+	static bool CompareRenderTarget(_RenderTargetUnit* first, _RenderTargetUnit* second)
 	{
 		if(first->mRenderTargetID < second->mRenderTargetID)
 		    return true;

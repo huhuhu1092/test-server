@@ -12,6 +12,8 @@ struct SE_ParamValue
 {
     SE_AddressID param;
     SE_Value value;
+    SE_ParamValue()
+    {}
     SE_ParamValue(const SE_AddressID& p, const SE_Value& v) : param(p), value(v)
     {}
 };
@@ -25,11 +27,11 @@ public:
     }
     void add(std::list<SE_ParamValue>& tmpList)
     {
-        mParamValueList.slice(mParamValueList.end(), tmpList);
+        mParamValueList.splice(mParamValueList.end(), tmpList);
     }
     std::vector<SE_ParamValue> getParamValue()
     {
-        std::vector<SE_ParamValue> retV.resize(mParamValueList.size());
+        std::vector<SE_ParamValue> retV(mParamValueList.size());
         copy(mParamValueList.begin(), mParamValueList.end(), retV.begin());
         return retV;
     }
@@ -101,7 +103,11 @@ private:
 					}
 					else
 					{
+                    #if defined(WIN32)
 						_ObserverList::const_iterator it;
+                    #else
+                        _ObserverList::iterator it;
+                    #endif
 						for(it = param->observers.begin() ; it != param->observers.end() ; it++)
 						{
 							SE_ParamObserver* po = *it;
@@ -117,7 +123,11 @@ private:
 			}
 			else if(op == UNREGISTER_BY_OBSERVER)
 			{
+            #if defined(WIN32)
 				_ObserverList::const_iterator it;
+            #else
+                _ObserverList::iterator it;
+            #endif
 				for(it = param->observers.begin() ; it != param->observers.end() ; it++)
 				{
                     SE_ParamObserver* po = *it;
