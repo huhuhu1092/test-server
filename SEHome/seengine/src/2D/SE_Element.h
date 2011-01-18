@@ -527,7 +527,7 @@ private:
 class SE_TextureElement : public SE_Element
 {
 public:
-	SE_TextureElement();
+	SE_TextureElement(const SE_StringID& uri);
 	~SE_TextureElement();
 	void setElementImage(SE_RawImage* image);
 	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);

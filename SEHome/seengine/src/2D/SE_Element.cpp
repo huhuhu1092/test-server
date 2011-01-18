@@ -663,6 +663,32 @@ void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     elementManager->addEvent(event);
 }
+void SE_Element::updateSpatial()
+{
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* spatial = sceneManager->findSpatial(mSpatialID);
+    SE_Spatial* parentSpatial = sceneManager->findSpatial(mParent->getSpatialID());
+    if(!spatial && !parentSpatial)
+    {
+        return ;
+    }
+    else if(spatial && !parentSpatial)
+    {
+        SE_ASSERT(0);
+    }
+    else if(!spatial && parentSpatial)
+    {
+
+        SE_Spatial* s = createSpatial();
+        sceneManager->addSpatial(parentSpatial, s);
+    }
+    else if(spatial && parentSpatial)
+    {
+        sceneManager->removeSpatial(mSpatialID);
+        SE_Spatial* s = createSpatial();
+        sceneManager->addSpatial(parentSpatial, s);
+    }
+}
 SE_Element* SE_Element::getElement(const SE_StringID& url)
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(url.getStr(), "/");
@@ -729,29 +755,8 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	}
 	else if(t == SE_ELEMENT_TABLE)
 	{
-		resourceManager->loadElement(strList[0].c_str());
-		std::string ename = strList[0] + "/" + strList[1];
-		SE_Element* e = resourceManager->getElement(ename.c_str());
-        SE_TextureElement* textureElement = new SE_TextureElement;
-		textureElement->setContentChild(e);
-		textureElement->setPivotX(e->getPivotX());
-		textureElement->setPivotY(e->getPivotY());
+        SE_TextureElement* textureElement = new SE_TextureElement(uri);
 		textureElement->setMountPoint(mpx, mpy);
-		SE_ImageDataID imageDataID = e->getFullPathID().getStr();
-		SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
-		if(!imageData)
-		{
-			imageData = new SE_ImageData;
-			resourceManager->setImageData(imageDataID, imageData);
-		}
-		textureElement->setImage(imageDataID, imageData);
-		e->setMountPoint(0, 0);
-		e->setPivotX(0);
-		e->setPivotX(0);
-        e->setOwnRenderTargetCamera(true);
-		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-		elementManager->addRenderTargetElement(e);
-		//e->setNeedUpdateTransform(false);
 		rete = textureElement;
 	}
 	else if(t == SE_COLOREFFECT_TABLE)
@@ -763,10 +768,10 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	return rete;
 }
 ////////////////////////////////////////////////////////
-SE_TextureElement::SE_TextureElement()
+SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
 {
-	mImageData = NULL;
-	mContentChild = NULL;
+    setURI(uri);
+    init();
 }
 SE_TextureElement::~SE_TextureElement()
 {
@@ -778,6 +783,45 @@ SE_TextureElement::~SE_TextureElement()
 	elementManager->removeRenderTargetElement(mContentChild);
 	if(mContentChild)
 		delete mContentChild;
+}
+void SE_TextureElement::init()
+{
+	SE_StringID strURL = getURL();
+	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    mContentChild = resourceManager->getElement(strURL.getStr());
+    SE_ImageDataID imageDataID = mContentChild->getFullPathID().getStr();
+	SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
+	if(!imageData)
+	{
+		imageData = new SE_ImageData;
+		resourceManager->setImageData(imageDataID, imageData);
+	}
+    mImageData = imageData;
+    mImageDataID = imageDataID;
+    setPivotX(mContentChild->getPivotX());
+    setPivotY(mContentChild->getPivotY());
+    mContentChild->setMountPoint(0, 0);
+	mContentChild->setPivotX(0);
+	mContentChild->setPivotX(0);
+    mContentChild->setOwnRenderTargetCamera(true);
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	elementManager->addRenderTargetElement(mContentChild);
+}
+void SE_TextureElement::update(SE_ParamValueList& paramValueList)
+{
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    elementManager->removeRenderTargetElement(mContentChild);
+    delete mContentChild;
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    resourceManager->removeImageData(mImageDataID);
+	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
+	rm->removeRenderTarget(mRenderTargetID);
+    init();
+    spawn();
+    measure();
+    update(0);
+    updateSpatial():
 }
 void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
 {
@@ -969,6 +1013,12 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
         SE_Spatial* s = createSpatial();
         sceneManager->addSpatial(parentSpatial, s);
     }
+    else if(spatial && parentSpatial)
+    {
+        sceneManager->removeSpatial(mSpatialID);
+        SE_Spatial* s = createSpatial();
+        sceneManager->addSpatial(parentSpatial, s);
+    }
 }
 void SE_ImageElement::update(const SE_AddressID& address, const SE_Value& value)
 {
@@ -1118,7 +1168,21 @@ void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value
 {
     SE_Element::update(address, value);
 }
+void SE_ActionElement::update(SE_ParamValueList& paramValueList)
+{
+    if(mAction)
+        delete mAction;
+    SE_StringID url = getURL();
+    mAction = resourceManager->getAction(url.getStr());
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* s = sceneManager->removeSpatial(mSpatialID);
+    delete s;
+    spawn();
+    measure();
+    update(0);
+    updateSpatial();
 
+}
 void SE_ActionElement::spawn()
 {
 	if(!mAction)
@@ -1205,7 +1269,22 @@ void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& val
 {
     SE_Element::update(address, value);
 }
-
+void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
+{
+    SE_StringID url = getURL();
+    if(mSequence)
+        delete mSequence;
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	mSequence = resourceManager->getSequence(url.getStr());
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* s = sceneManager->removeSpatial(mSpatialID);
+    delete s;
+    clearChildren();
+    spawn();
+    measure();
+    update(0);
+    updateSpatial();
+}
 int SE_SequenceElement::getKeyFrameNum()
 {
 	if(!mSequence)
@@ -1334,7 +1413,10 @@ void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& v
 {
     SE_Element::update(address, value);
 }
+void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
+{
 
+}
 void SE_StateTableElement::update(unsigned int key)
 {}
 void SE_StateTableElement::spawn()
