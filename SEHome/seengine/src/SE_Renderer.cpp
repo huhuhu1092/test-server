@@ -545,7 +545,7 @@ void SE_ColorEffectRenderer::draw()
 }
 void SE_ColorEffectRenderer::end()
 {
-	mShaderProgram->validate();
+	//mShaderProgram->validate();
 }
 
 ///////////////////////////////////////

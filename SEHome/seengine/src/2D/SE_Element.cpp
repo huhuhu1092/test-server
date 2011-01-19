@@ -450,6 +450,27 @@ int SE_Element::getContentNum() const
 {
 	return mElementContentList.size();
 }
+void SE_Element::clearChildren(bool deleteDelayed)
+{
+    _ElementList::iterator it;
+    for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        if(deleteDelayed)
+        {
+            SE_DelayDestroyPointer<SE_Element*>* ddp = new SE_DelayDestroyPointer(e);
+            bool ret = SE_Application::getInstance()->addDelayDestroy(ddp);
+            if(!ret)
+            {
+                delete ddp;
+            }
+        }
+        else
+        {
+            delete e;
+        }
+    }
+}
 void SE_Element::clone(SE_Element *src, SE_Element* dst)
 {
     dst->mID = SE_ID::createElementID();
@@ -689,8 +710,10 @@ void SE_Element::updateSpatial()
         sceneManager->addSpatial(parentSpatial, s);
     }
 }
-SE_Element* SE_Element::getElement(const SE_StringID& url)
+SE_Element* SE_Element::getElement(const SE_StringID& uri)
 {
+    SE_URI strURI(uri);
+    SE_StringID url = strURI.getURL();
 	SE_Util::SplitStringList strList = SE_Util::splitString(url.getStr(), "/");
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
@@ -701,16 +724,16 @@ SE_Element* SE_Element::getElement(const SE_StringID& url)
 		e = resourceManager->getElement(url.getStr());
 		break;
 	case SE_ACTION_TABLE:
-		e = new SE_ActionElement(url);
+		e = new SE_ActionElement(uri);
 		break;
 	case SE_SEQUENCE_TABLE:
-		e = new SE_SequenceElement(url);
+		e = new SE_SequenceElement(uri);
 		break;
 	case SE_COLOREFFECT_TABLE:
-		e = new SE_ColorEffectControllerElement(url);
+		e = new SE_ColorEffectControllerElement(uri);
 		break;
 	case SE_IMAGE_TABLE:
-		e = new SE_ImageElement(url);
+		e = new SE_ImageElement(uri);
 		break;
 	default:
 		break;
@@ -1015,7 +1038,8 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
     }
     else if(spatial && parentSpatial)
     {
-        sceneManager->removeSpatial(mSpatialID);
+        SE_Spatial* spatial = sceneManager->removeSpatial(mSpatialID);
+        delete spatial;
         SE_Spatial* s = createSpatial();
         sceneManager->addSpatial(parentSpatial, s);
     }
@@ -1170,8 +1194,6 @@ void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value
 }
 void SE_ActionElement::update(SE_ParamValueList& paramValueList)
 {
-    if(mAction)
-        delete mAction;
     SE_StringID url = getURL();
     mAction = resourceManager->getAction(url.getStr());
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
@@ -1272,8 +1294,6 @@ void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& val
 void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
 {
     SE_StringID url = getURL();
-    if(mSequence)
-        delete mSequence;
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mSequence = resourceManager->getSequence(url.getStr());
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
@@ -1409,13 +1429,34 @@ SE_StateTableElement::SE_StateTableElement(const SE_StringID& uri)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mStateTable = resourceManager->getStateMachine(url.getStr());
 }
+void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
+{
+	SE_StringID url = getURL();
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	mStateTable = resourceManager->getStateMachine(url.getStr());   
+    clearChildren(true);
+    spawn();
+    measure();
+    update(0);
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    SE_Spatial* currSpatial = sceneManager->findSpatial(mSptialID);
+    if(!currSpatial)
+    {
+        LOGI("state table element spatial has been removed\n");
+        return;
+    }
+    currSpatial->clearChildren(false);
+    _ElementList::iterator it;
+    for(it = mChildren.begin(); it != mChildren.end() ; it++)
+    {
+        SE_Element* e = *it;
+        SE_Spatial* s = e->createSpatial();
+        sceneManager->addChild(currSpatial, s); 
+    }
+}
 void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& value)
 {
     SE_Element::update(address, value);
-}
-void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
-{
-
 }
 void SE_StateTableElement::update(unsigned int key)
 {}
@@ -1427,9 +1468,8 @@ void SE_StateTableElement::spawn()
 	if(!currState)
 		return;
 	SE_StringID strURI = currState->getDefaultValue();
-	SE_URI uri(strURI.getStr());
-	SE_StringID url = uri.getURL();
-	SE_Element* e = getElement(url);
+	SE_Element* e = getElement(strURI);
+    e->setMountPoint(0, 0);
 	this->addChild(e);
 	e->spawn();
 }
@@ -1448,8 +1488,22 @@ SE_ColorEffectControllerElement::SE_ColorEffectControllerElement(const SE_String
 	SE_StringID url = getURL();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mColorEffectController = resourceManager->getColorEffectController(url.getStr());
-	mID = mColorEffectController->getID().getStr();
+	mName = mColorEffectController->getID().getStr();
 	mCurrentElement = NULL;
+}
+void SE_ColorEffectControllerElement::update(SE_ParamValueList& paramValueList)
+{
+    SE_StringID url = getURL();
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	mColorEffectController = resourceManager->getColorEffectController(url.getStr());
+	mName = mColorEffectController->getID().getStr();
+	mCurrentElement = NULL;
+    clearChildren(true); 
+    spawn();
+    measure();
+    update(0);
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+
 }
 void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const SE_Value& value)
 {
@@ -1517,14 +1571,14 @@ void SE_ColorEffectControllerElement::update(unsigned int key)
 			if(spatial)
 				delete spatial;
 		}
-		/*
+        /*
 		SE_Spatial* spatial = first->createSpatial();
 		SE_Spatial* parentSpatial = sceneManager->find(getSpatialID());
 		sceneManager->addSpatial(parentSpatial, spatial);
 		spatial->updateRenderState();
 		spatial->updateWorldLayer();
 		spatial->updateWorldTransform();
-		*/
+        */
 		mCurrentElement = first;
 	}
 }

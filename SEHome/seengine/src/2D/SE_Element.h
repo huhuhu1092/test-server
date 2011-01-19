@@ -348,7 +348,7 @@ public:
 	{
 		return mURI.getURL();
 	}
-	static SE_Element* getElement(const SE_StringID& url);
+	static SE_Element* getElement(const SE_StringID& uri);
 public:
     virtual SE_Spatial* createSpatial();
     virtual void update(unsigned int key);
@@ -380,7 +380,7 @@ protected:
 	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
 	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
 	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
-
+    void clearChildren();
 private:
     SE_Element(const SE_Element&);
     SE_Element& operator=(const SE_Element&);

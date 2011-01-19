@@ -30,12 +30,6 @@ public:
     std::vector<SE_AddressID> getParamAddress();
 	void setParam(const SE_StringID& param, const SE_StringID& value);
 	void setDefaultValue(const SE_StringID& id, const SE_StringID& uri);
-	/*
-	SE_PropertySet& getPropertySet()
-	{
-		return mPropertySet;
-	}
-	*/
 private:
 	struct _Data
 	{
