@@ -46,7 +46,29 @@ private:
     unsigned int id[4];
 
 };
-
+class SE_TreeStructID
+{
+public:
+    SE_TreeStructID();
+    SE_TreeStructID(int i0, int i1);
+    bool isValid();
+    static SE_TreeStructID INVALID;
+    friend bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
+    friend bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
+    friend bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
+    friend bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
+    int get(int index) const
+    {
+        return id[index];
+    }
+    void set(int index, int id)
+    {
+        id[index] = id;
+    }
+private:
+    int id[2];
+};
+/////////////////////////////////////////////////////
 typedef SE_StringID SE_ImageDataID;
 typedef SE_CommonID SE_MeshID;
 typedef SE_CommonID SE_SpatialID;
