@@ -4,7 +4,7 @@
 #include "SE_Camera.h"
 #include "SE_RenderManager.h"
 #include "SE_ResourceManager.h"
-
+/*
 /////////////////////////////////////
 struct SE_SceneManager::SpatialIDMap
 {
@@ -173,3 +173,4 @@ SE_Spatial* SE_SceneManager::removeSpatial(const SE_SpatialID& spatialID)
 }
 void SE_SceneManager::checkSpatialIDMap()
 {}
+*/

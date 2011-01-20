@@ -1,6 +1,7 @@
 #ifndef SE_SCENEMANAGER_H
 #define SE_SCENEMANAGER_H
 #include "SE_ID.h"
+/*
 class SE_Spatial;
 class SE_Camera;
 class SE_CommonNode;
@@ -42,4 +43,6 @@ private:
 	SE_Spatial* mSelectedSpatial;
     SpatialIDMap* mSpatialIDMap;
 };
+*/
+class SE_SceneManager
 #endif
