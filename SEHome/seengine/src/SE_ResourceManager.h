@@ -87,7 +87,7 @@ public:
 	void loadStateChangeTable(const char* stateChangeTableURI);
 	SE_StateChangeList* getStateChangeList(const char* stateChangeURI);
 	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
-	SE_Element* getElement(const char* elementURI);
+	SE_ElementSchema* getElementSchema(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
 	SE_Sequence* getSequence(const char* sequencePath);

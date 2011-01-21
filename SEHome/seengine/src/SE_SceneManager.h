@@ -1,6 +1,7 @@
 #ifndef SE_SCENEMANAGER_H
 #define SE_SCENEMANAGER_H
 #include "SE_ID.h"
+#include "SE_TreeStructManager.h"
 /*
 class SE_Spatial;
 class SE_Camera;
@@ -45,4 +46,11 @@ private:
 };
 */
 class SE_SceneManager
+{
+public:
+    SE_SceneManager();
+	~SE_SceneManager();
+private:
+	SE_TreeStructManager<SE_Spatial> mTreeStructManager;
+};
 #endif
