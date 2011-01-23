@@ -2,6 +2,8 @@
 #define SE_SCENEMANAGER_H
 #include "SE_ID.h"
 #include "SE_TreeStructManager.h"
+class SE_Spatial;
+class SE_RenderManager;
 /*
 class SE_Spatial;
 class SE_Camera;
@@ -48,9 +50,24 @@ private:
 class SE_SceneManager
 {
 public:
+	enum {NO_ERROR, SPATIAL_NOT_EXIST};
     SE_SceneManager();
 	~SE_SceneManager();
+	int getError() const;
+	SE_Spatial* findSpatial(const SE_SpatialID& id);
+	SE_Spatial* removeSpatial(const SE_SpatialID& id);
+	SE_SpatialID addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial);
+    SE_SpatialID loadScene(const SE_SceneID& sceneID); 
+	void renderScene(SE_Camera* camera, SE_RenderManager& renderManager);
+	SE_SpatialID getCurrentSceneRootID() const;
+	void setCurrentSceneRootID(const SE_SpatialID& id);
+	SE_Spatial* getCurrentSceneRoot() const;
 private:
+	SE_SceneManager(const SE_SceneManager&);
+	SE_SceneManager& operator=(const SE_SceneManager&);	
+private:
+	SE_SpatialID mCurrentSceneRoot;
+	int mError;
 	SE_TreeStructManager<SE_Spatial> mTreeStructManager;
 };
 #endif

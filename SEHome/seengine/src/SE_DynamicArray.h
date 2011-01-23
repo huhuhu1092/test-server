@@ -7,6 +7,8 @@ public:
     enum {NO_ERROR, OVERFLOW, INDEX_ERROR};
     //size must > 1
     SE_DynamicArray(int size, int maxSize);
+	SE_DynamicArray(const SE_DynamicArray& right);
+	SE_DynamicArray& operator=(const SE_DynamicArray& right);
     ~SE_DynamicArray();
     T& operator[](int index);
     const T& operator[](int index) const;
@@ -27,6 +29,7 @@ public:
         return mError;
     }
     void expand();
+	
 private:
     T* mArray;
     int mSize;
@@ -96,5 +99,37 @@ const T& SE_DynamictArray<T>::operator[](int index) const
     }
     return mArray[index];
 }
-
+template <typename T>
+SE_DynamicArray<T>::SE_DynamicArray(const SE_DynamicArray& right)
+{
+	mSize = right.size;
+	mMaxSize = right.size;
+	mError = right.mError;
+	mInvalid = right.mInvalid;
+	mArrays = new T[mSize];
+	if(!mArrays)
+		return;
+	for(int i = 0 ; i < mSize ; i++)
+	{
+		mArrays[i] = right.mArrays[i];
+	}
+}
+template <typename T>
+SE_DynamicArray& SE_DynamicArray<T>::operator=(const SE_DynamicArray& right)
+{
+	T* newArray = new T[right.mSize];
+    if(!newArray)
+		return *this;
+	if(mArrays)
+		delete[] mArrays;
+	mArrays = newArray;
+	mSize = right.mSize;
+	mMaxSize = right.mMaxSize;
+	mError = right.mError;
+	mInvalid = right.mInvalid;
+	for(int i = 0 ; i < mSize ; i++)
+	{
+		mArrays[i] = right.mArrays[i];
+	}
+}
 #endif
