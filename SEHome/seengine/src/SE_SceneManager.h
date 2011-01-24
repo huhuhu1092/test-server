@@ -47,7 +47,7 @@ private:
     SpatialIDMap* mSpatialIDMap;
 };
 */
-class SE_SceneManager
+class SE_SpatialManager
 {
 public:
 	enum {NO_ERROR, SPATIAL_NOT_EXIST};
@@ -58,7 +58,7 @@ public:
 	SE_Spatial* removeSpatial(const SE_SpatialID& id);
 	SE_SpatialID addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial);
     SE_SpatialID loadScene(const SE_SceneID& sceneID); 
-	void renderScene(SE_Camera* camera, SE_RenderManager& renderManager);
+	void render(SE_Camera* camera, SE_RenderManager& renderManager);
 	SE_SpatialID getCurrentSceneRootID() const;
 	void setCurrentSceneRootID(const SE_SpatialID& id);
 	SE_Spatial* getCurrentSceneRoot() const;
