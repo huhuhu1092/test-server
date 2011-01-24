@@ -1,12 +1,12 @@
 #include "SE_CameraManager.h"
 #include "SE_Camera.h"
-SE_CameraManager::SE_CameraManager()
+SE_CameraManager::SE_CameraManager(), mCameraSet(100, 512)
 {}
 SE_CameraManager::~SE_CameraManager()
 {}
-void SE_CameraManager::setCamera(const SE_CameraID& id, SE_Camera* c)
+SE_CameraID SE_CameraManager::addCamera(SE_Camera* c)
 {
-	mCameraSet.set(id, c);
+	//mCameraSet.set(id, c);
 }
 SE_Camera* SE_CameraManager::getCamera(const SE_CameraID& id)
 {

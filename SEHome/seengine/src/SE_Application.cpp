@@ -47,6 +47,7 @@ SE_Application::SE_Application()
     mFpsPrevTime = 0;
     mFpsFrameNum = 0;
 	mObjectCount = 0;
+    mState = PREPARE;
 }
 SE_Application::~SE_Application()
 {
@@ -97,10 +98,13 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
 	mAnimationManager->update(realDelta, simulateDelta);
-    mRenderManager->beginDraw();
-    mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
-    mRenderManager->draw();
-    mRenderManager->endDraw();
+    if(mState == RUNNING)
+    {
+        mRenderManager->beginDraw();
+        mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
+        mRenderManager->draw();
+        mRenderManager->endDraw();
+    }
     doDelayDestroy();
 }
 void SE_Application::start()

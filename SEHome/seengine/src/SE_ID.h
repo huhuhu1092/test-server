@@ -41,6 +41,7 @@ public:
     friend bool operator>(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid);
 	void print() const;
+    std::string toString() const;
 	static SE_CommonID INVALID;
 private:
     unsigned int id[4];
@@ -89,6 +90,7 @@ public:
     {
         id[index] = id;
     }
+    std::string toString() const;
 private:
     int id[2];
 };

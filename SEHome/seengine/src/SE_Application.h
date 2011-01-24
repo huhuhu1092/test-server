@@ -24,6 +24,7 @@ class SE_DelayDestroy;
 class SE_Application
 {
 public:
+    enum {PREPARE, RUNNING, SUSPEND, EXIT};
     enum {MAIN_CAMERA = 0, MAX_CAMERA_NUM = 16};
     struct SE_APPID
 	{
@@ -61,6 +62,14 @@ public:
 	{
 		return mFrameRate;
 	}
+    int getState() const
+    {
+        return mState;
+    }
+    void setState(int s)
+    {
+        mState = s;
+    }
     SE_CommonID createCommonID();
     SE_ResourceManager* getResourceManager()
 	{
@@ -198,6 +207,7 @@ protected:
     int mFpsFrameNum;
     SE_TimeMS mFpsPrevTime;
     SE_APPID mAppID;
+    int mState;
 	int mObjectCount;
 	SE_MessageList mMessageList;
     static SE_Application* mInstance;

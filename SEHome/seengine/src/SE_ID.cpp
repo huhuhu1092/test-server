@@ -3,7 +3,8 @@
 #include "SE_Buffer.h"
 #include "SE_Application.h"
 #include "SE_Log.h"
-
+#include <stdio.h>
+#include <stdlib.h>
 ///////////////////////
 SE_StringID SE_StringID::INVALID("");
 /*
@@ -158,6 +159,14 @@ void SE_CommonID::print() const
 {
     LOGI("%d, %d, %d, %d\n", id[0], id[1], id[2], id[3]);
 }
+std::string SE_CommonID::toString() const
+{
+    char buf[41];
+    memset(buf, 0, 41);
+    snprintf(buf, 40, "%d%d%d%d", id[0], id[1], id[2], id[3]);
+    std::string str = buf;
+    return str;
+}
 bool operator==(const SE_CommonID& lid, const SE_CommonID& rid)
 {
     return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) == 0;
@@ -178,7 +187,14 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
 //////////////////////////////////////////
 SE_TreeStructID SE_TreeStructID::INVALID = SE_TreeStructID(-1, -1);
 SE_TreeStructID SE_TreeStructID::NULLID = SE_TreeStructID(-1, -2);
-
+std::string SE_TreeStructID::toString() const
+{
+    char buf[21];
+    memset(buf, 0, 21);
+    snprintf(buf, 20, "%d%d", id[0], id[1]);
+    std::string str = buf;
+    return str;
+}
 ////////////////////////////////////////
 
 SE_ImageDataID SE_ID::createImageDataID(const char* str)
