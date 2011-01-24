@@ -5,11 +5,8 @@ class SE_CommonNode : public SE_Spatial
 {
     DECLARE_OBJECT(SE_CommonNode)
 public:
-    SE_CommonNode(SE_Spatial* parent = NULL);
-    SE_CommonNode(SE_SpatialID id, SE_Spatial* parent = NULL);
+    SE_CommonNode();
     ~SE_CommonNode();
-    void addChild(SE_Spatial* child);
-    void removeChild(SE_Spatial* child);
     void updateWorldTransform();
     void updateBoundingVolume();
 	void updateRenderState();
@@ -19,8 +16,8 @@ public:
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
 	SPATIAL_TYPE getSpatialType();
-private:
-    struct _Impl;
-    _Impl* mImpl;
+//private:
+    //struct _Impl;
+    //_Impl* mImpl;
 };
 #endif

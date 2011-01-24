@@ -175,6 +175,10 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
     return memcmp(lid.id, rid.id, sizeof(unsigned int) * 4) != 0;
 
 }
+//////////////////////////////////////////
+SE_TreeStructID SE_TreeStructID::INVALID = SE_TreeStructID(-1, -1);
+SE_TreeStructID SE_TreeStructID::NULLID = SE_TreeStructID(-1, -2);
+
 ////////////////////////////////////////
 
 SE_ImageDataID SE_ID::createImageDataID(const char* str)

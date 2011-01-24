@@ -90,6 +90,14 @@ public:
 		mWidth = width;
 		mHeight = height;
 	}
+    void setCamera(const SE_CameraID& camera)
+    {
+        mCamera = camera;
+    }
+    SE_CameraID getCamera() const
+    {
+        return mCamera;
+    }
     void setElementRef(const SE_StringID& elementref)
     {
         mElementRef = elementref;

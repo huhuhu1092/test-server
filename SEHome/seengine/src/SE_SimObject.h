@@ -19,15 +19,17 @@ class SE_SimObject : public SE_Object
     DECLARE_OBJECT(SE_SimObject)
 public:
     typedef std::vector<SE_RenderUnit*> RenderUnitVector;
-    SE_SimObject(SE_Spatial* parent = NULL);
-	void setSpatial(SE_Spatial* parent)
+    SE_SimObject(const SE_SpatialID& parent = SE_SpatialID::INVALID);
+	void setSpatial(const SE_SpatialID& parent)
 	{
 		mSpatial = parent;
 	}
+    /*
 	SE_Spatial* getSpatial()
 	{
 		return mSpatial;
 	}
+    */
     virtual ~SE_SimObject();
     virtual RenderUnitVector createRenderUnit();
 	virtual SE_RenderUnit* createWireRenderUnit();
@@ -119,7 +121,7 @@ public:
 private:
 	std::string mName;
 	SE_SimObjectID mID;
-	SE_Spatial* mSpatial;
+	SE_SpatialID mSpatial;
     SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;
 	SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];

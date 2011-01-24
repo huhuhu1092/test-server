@@ -49,14 +49,38 @@ private:
 class SE_TreeStructID
 {
 public:
-    SE_TreeStructID();
-    SE_TreeStructID(int i0, int i1);
-    bool isValid();
     static SE_TreeStructID INVALID;
-    friend bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
+    static SE_TreeStructID NULLID;
+
+    SE_TreeStructID()
+    {
+        id[0] = id[1] = -1;
+    }
+    SE_TreeStructID(int i0, int i1) 
+    {
+        id[0] = i0;
+        id[1] = i1;
+    }
+    bool isValid() const
+    {
+        return id[0] != INVALILD.id[0] && id[1] != INVALID.id[1];
+    }
+    static bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return lid.id[0] == rid.id[0] && lid.id[1] == rid.id[1];
+    }
+    static bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return (lid.id[0] <= rid.id[0]) ? ((lid.id[0] < rid.id[0]) ? true : (lid.id[1] < rid.id[1])) : false;
+    }
+    static bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return (lid.id[0] >= rid.id[0]) ? ((lid.id[0] > rid.id[0]) ? true : (lid.id[1] > rid.id[1])) : false;
+    }
+    static bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return !this->operator==(lid, rid);
+    }
     int get(int index) const
     {
         return id[index];
@@ -71,23 +95,24 @@ private:
 /////////////////////////////////////////////////////
 typedef SE_StringID SE_ImageDataID;
 typedef SE_CommonID SE_MeshID;
-typedef SE_CommonID SE_SpatialID;
+//typedef SE_CommonID SE_SpatialID;
+typedef SE_TreeStructID SE_SpatialID;
 typedef SE_CommonID SE_GeometryDataID;
 typedef SE_CommonID SE_TextureCoordDataID;
 typedef SE_CommonID SE_MaterialDataID;
-typedef SE_StringID SE_SceneID;
+typedef SE_TreeStructID SE_SceneID;
 typedef SE_StringID SE_ProgramDataID;
 typedef SE_StringID SE_CommandID;
 typedef SE_StringID SE_CommandFactoryID;
 typedef SE_CommonID SE_PrimitiveID;
-typedef SE_CommonID SE_AnimationID;
-typedef SE_CommonID SE_SimObjectID;
-typedef SE_CommonID SE_ElementID;
+typedef SE_TreeStructID SE_AnimationID;
+typedef SE_TreeStructID SE_SimObjectID;
+typedef SE_TreeStructID SE_ElementID;
 typedef SE_StringID SE_SkinJointControllerID;
 typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
-typedef int SE_RenderTargetID;
-typedef SE_CommonID SE_CameraID;
+typedef SE_TreeStructID SE_RenderTargetID;
+typedef SE_TreeStructID SE_CameraID;
 typedef SE_StringID SE_StateMachineID;
 typedef SE_StringID SE_StateID;
 typedef SE_StringID SE_TriggerID;

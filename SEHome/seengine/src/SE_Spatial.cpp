@@ -6,9 +6,10 @@
 #include "SE_Camera.h"
 #include "SE_Application.h"
 #include "SE_RenderTarget.h"
+#include "SE_SpatialManager.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_Spatial)
-SE_Spatial::SE_Spatial(SE_Spatial* parent)
+SE_Spatial::SE_Spatial()
 {
     mWorldTransform.identity();
     mPrevMatrix.identity();
@@ -17,34 +18,12 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
     mLocalScale.set(1.0f, 1.0f, 1.0f);
     mLocalRotate.identity();
     mWorldBoundingVolume = NULL;
-    mParent = parent;
     mState = 0;
     mBVType = 0;
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
 	mSpatialID = SE_ID::createSpatialID();
-	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
-	mRQ = SE_RenderManager::RQ0;
-	mNeedUpdateTransform = true;
-	mOwnRenderTargetCamera = false;
-}
-SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
-{
-    mWorldTransform.identity();
-    mPrevMatrix.identity();
-    mPostMatrix.identity();
-    mLocalTranslate.setZero();
-    mLocalScale.set(1.0f, 1.0f, 1.0f);
-    mLocalRotate.identity();
-    mWorldBoundingVolume = NULL;
-    mParent = parent;
-    mSpatialID = spatialID;
-    mState = 0;
-    mBVType = 0;
-    setMovable(true);
-    setVisible(true);
-    setCollisionable(true);
 	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
 	mNeedUpdateTransform = true;
@@ -74,9 +53,10 @@ void SE_Spatial::updateWorldTransform()
     //updateWorldScale();
     //updateWorldRotate();
     //updateWorldTranslate();
-    if(mParent && mNeedUpdateTransform)
+    SE_Spatial* parent = SE_Application::getInstance()->getSpatialManager()->getParent(getID());
+    if(parent && mNeedUpdateTransform)
     {
-        SE_Matrix4f parentM = mParent->getWorldTransform();
+        SE_Matrix4f parentM = parent->getWorldTransform();
         SE_Matrix4f localM;
 		localM.set(mLocalRotate.toMatrix3f(), mLocalScale, mLocalTranslate);
         localM = mPrevMatrix.mul(localM).mul(mPostMatrix);
@@ -145,11 +125,12 @@ SE_RenderState* SE_Spatial::getRenderState(RENDER_STATE_TYPE type)
 }
 void SE_Spatial::updateRenderState()
 {
-	if(!mParent)
+    SE_Spatial* parent = SE_Application::getInstance()->getSpatialManager()->getParent(getID());
+	if(!parent)
 		return;
 	for(int i = 0 ; i < RENDERSTATE_NUM ; i++)
 	{
-		_RenderStateProperty* parentRenderProperty = &mParent->mRenderState[i];
+		_RenderStateProperty* parentRenderProperty = &parent->mRenderState[i];
 		SE_Wrapper<_RenderStateData>* parentRenderStateData = parentRenderProperty->renderData;
 		_RenderStateProperty* pRenderProperty = &mRenderState[i];
 		if(pRenderProperty->renderSource == INHERIT_PARENT && parentRenderStateData)
@@ -177,14 +158,16 @@ const SE_Matrix4f& SE_Spatial::getWorldTransform()
 
 SE_Spatial* SE_Spatial::getParent()
 {
-    return mParent;
+    return SE_Application::getInstance()->getSpatialManager()->getParent(getID());
 }
-SE_Spatial* SE_Spatial::setParent(SE_Spatial* parent)
+/*
+SE_Spatial*SE_Spatial::setParent(SE_Spatial* parent)
 {
     SE_Spatial* ret = mParent;
     mParent = parent;
     return ret;
 }
+*/
 /*
 SE_Vector3f SE_Spatial::getWorldTranslate()
 {
@@ -205,9 +188,10 @@ SE_Vector3f SE_Spatial::getWorldScale()
 */
 void SE_Spatial::updateWorldLayer()
 {
-    if(mParent)
+    SE_Spatial* parent = getParent();
+    if(parent)
     {
-        SE_Layer parentLayer = mParent->getWorldLayer();
+        SE_Layer parentLayer = parent->getWorldLayer();
         mWorldLayer = parentLayer + mLocalLayer;
     }
     else

@@ -18,14 +18,16 @@ struct SE_Geometry::_Impl
 
 };
 ///////////////////////////////////////////////
-SE_Geometry::SE_Geometry(SE_Spatial* parent) : SE_Spatial(parent)
+SE_Geometry::SE_Geometry()
 {
     mImpl = new SE_Geometry::_Impl;
 }
+/*
 SE_Geometry::SE_Geometry(SE_SpatialID id, SE_Spatial* parent) : SE_Spatial(id, parent)
 {
     mImpl = new SE_Geometry::_Impl;
 }
+*/
 SE_Geometry::~SE_Geometry()
 {
     delete mImpl;

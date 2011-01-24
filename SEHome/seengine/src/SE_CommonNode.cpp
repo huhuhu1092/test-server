@@ -4,8 +4,10 @@
 #include "SE_BoundingVolume.h"
 #include "SE_SceneManager.h"
 #include "SE_Application.h"
-#include <list>
+//#include "SE_SpatialManager.h"
+#include <vector>
 IMPLEMENT_OBJECT(SE_CommonNode)
+/*
 struct SE_CommonNode::_Impl
 {
     std::list<SE_Spatial*> children;
@@ -23,6 +25,8 @@ struct SE_CommonNode::_Impl
         }
     }
 };
+*/
+/*
 SE_CommonNode::SE_CommonNode(SE_Spatial* parent) : SE_Spatial(parent)
 {
     mImpl = new SE_CommonNode::_Impl;
@@ -35,6 +39,8 @@ SE_CommonNode::~SE_CommonNode()
 {
     delete mImpl;
 }
+*/
+/*
 void SE_CommonNode::addChild(SE_Spatial* child)
 {
 	std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
@@ -53,11 +59,15 @@ void SE_CommonNode::removeChild(SE_Spatial* child)
 		return;
     mImpl->children.remove(child);
 }
+*/
+SE_CommonNode::SE_CommonNode()
+{}
 void SE_CommonNode::updateRenderState()
 {
 	SE_Spatial::updateRenderState();
-    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
-    for(; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*> children = getChildren();
+    std::vector<SE_Spatial*>::iterator it = children.begin();//mImpl->children.begin();
+    for(; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
 		if(s)
@@ -67,8 +77,9 @@ void SE_CommonNode::updateRenderState()
 void SE_CommonNode::updateWorldTransform()
 {
     SE_Spatial::updateWorldTransform();
-    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
-    for(; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*> children = getChildren();
+    std::vector<SE_Spatial*>::iterator it = children.begin();
+    for(; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
 		if(s)
@@ -78,8 +89,9 @@ void SE_CommonNode::updateWorldTransform()
 void SE_CommonNode::updateWorldLayer()
 {
     SE_Spatial::updateWorldLayer();
-    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
-    for(; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*> children = getChildren();
+    std::vector<SE_Spatial*>::iterator it = children.begin();
+    for(; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
 		if(s)
@@ -95,8 +107,9 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
     int ret = spatialTravel->visit(this);
     if(ret)
         return ret;
-    std::list<SE_Spatial*>::iterator it = mImpl->children.begin();
-    for(; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*> children = getChildren();
+    std::list<SE_Spatial*>::iterator it = children.begin();//mImpl->children.begin();
+    for(; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
         int r = s->travel(spatialTravel, travelAlways);
@@ -116,8 +129,9 @@ void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManag
         if(culled == SE_FULL_CULL)
             return;
     }
-    std::list<SE_Spatial*>::iterator it;
-    for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*>::iterator it;
+    std::vector<SE_Spatial*> children = getChildren();
+    for(it = children.begin() ; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
         s->renderScene(camera, renderManager);
@@ -126,8 +140,9 @@ void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManag
 }
 void SE_CommonNode::updateBoundingVolume()
 {
-    std::list<SE_Spatial*>::iterator it;
-    for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+    std::vector<SE_Spatial*> children;
+    std::vector<SE_Spatial*>::iterator it;
+    for(it = children.begin() ; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
         s->updateBoundingVolume();
@@ -151,7 +166,7 @@ void SE_CommonNode::updateBoundingVolume()
 	}
 	if(mWorldBoundingVolume)
 	{
-		for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
+		for(it = children.begin() ; it != children.end() ; it++)
 		{
 			SE_Spatial* s = *it;
 			mWorldBoundingVolume->merge(s->getWorldBoundingVolume());	        

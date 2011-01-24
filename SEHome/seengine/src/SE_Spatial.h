@@ -7,6 +7,7 @@
 #include "SE_Layer.h"
 #include "SE_Object.h"
 #include "SE_RenderState.h"
+#include "SE_TreeStruct.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_SimObject;
@@ -14,6 +15,7 @@ class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Camera;
 class SE_RenderManager;
+class SE_Spatial;
 class SE_SpatialTravel
 {
 public:
@@ -21,7 +23,7 @@ public:
     virtual int visit(SE_Spatial* spatial) = 0;
     virtual int visit(SE_SimObject* simObject) = 0;
 };
-class SE_Spatial : public SE_Object
+class SE_Spatial : public SE_Object, public SE_TreeStruct<SE_Spatial>
 {
     DECLARE_OBJECT(SE_Spatial);
 public:
@@ -30,12 +32,11 @@ public:
 	enum SPATIAL_TYPE {NONE, NODE, GEOMETRY};
 	enum RENDER_STATE_TYPE {DEPTHTESTSTATE, BLENDSTATE, RENDERSTATE_NUM};
 	enum RENDER_STATE_SOURCE {INHERIT_PARENT, SELF_OWN};
-    SE_Spatial(SE_Spatial* parent = NULL);
-    SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
+    SE_Spatial();
     virtual ~SE_Spatial();
     const SE_Matrix4f& getWorldTransform();
     SE_Spatial* getParent();
-    SE_Spatial* setParent(SE_Spatial* parent);
+    //SE_Spatial* setParent(SE_Spatial* parent);
     //SE_Vector3f getWorldTranslate();
     //SE_Matrix3f getWorldRotateMatrix();
     //SE_Quat getWorldRotate();
@@ -212,8 +213,6 @@ public:
 		mNeedUpdateTransform = b;
 	}
 public:
-    virtual void addChild(SE_Spatial* child);
-    virtual void removeChild(SE_Spatial* child);
     virtual void attachSimObject(SE_SimObject* go);
     virtual void detachSimObject(SE_SimObject* go);
     virtual int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
@@ -267,7 +266,6 @@ private:
     SE_Vector3f mWorldScale;
     SE_Quat mWorldRotate;
 
-    SE_Spatial* mParent;
     SE_SpatialID mSpatialID;
     int mState;
     int mBVType;

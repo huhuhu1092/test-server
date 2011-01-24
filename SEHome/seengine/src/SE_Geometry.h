@@ -8,8 +8,7 @@ class SE_Geometry : public SE_Spatial
 {
     DECLARE_OBJECT(SE_Geometry)
 public:
-    SE_Geometry(SE_Spatial* parent = NULL);
-    SE_Geometry(SE_SpatialID id, SE_Spatial* parent = NULL);
+    SE_Geometry();
     ~SE_Geometry();
     void attachSimObject(SE_SimObject* go);
     void detachSimObject(SE_SimObject* go);

@@ -9,6 +9,9 @@
 #include "SE_DynamicArray.h"
 #include <list>
 #include <vector>
+/*
+ * SE_TreeStructManager's T must derived from SE_TreeStruct or SE_ListStruct
+ * */
 template <typename T>
 class SE_TreeStructManager
 {
@@ -18,7 +21,6 @@ public:
     enum {NO_ERROR, NO_SPACE, DUP_POINTER, EXCEPT_ERROR};
     SE_TreeStructManager(int size = 10000);
     ~SE_TreeStructManager();
-    static SE_TreeStructID NULLID;
     T* find(const SE_TreeStructID& id) const;
     T* remove(const SE_TreeStructID& id) const;
     void release(T* p, int delay = RELEASE_DELAY);
@@ -79,46 +81,6 @@ private:
     SE_DynamicArray<_Node> mNodes;
     int mError;
 };
-template <typename T>
-class SE_TreeStruct
-{
-    friend class SE_TreeStructManager<T>;
-public:
-    SE_TreeStructID getID() const
-    {
-        return mID;
-    }
-private:
-    void removeChild(T* child);
-    void setID(const SE_TreeStructID& id)
-    {
-        mID = id;
-    }
-    void addChild(T* child);
-    std::vector<T*> getChildren() const;
-private:
-    SE_TreeStructID mID;
-    std::list<T*> mChildren;
-};
-template <typename T>
-void SE_TreeStruct<T>::removeChild(T* child)
-{
-    mChildren.remove(child);
-}
-template <typename T>
-void SE_TreeStruct<T>::addChild(T* child)
-{
-    mChildren.push_back(child);
-}
-
-template <typename T>
-std::vector<T*> SE_TreeStruct<T>::getChildren() const
-{
-    std::vector<T*> ret(mChildren.size());
-    copy(mChildren.begin(), mChildren.end() , ret.begin());
-    return ret;
-}
-
 ///////////////////////////////////////////////////////////////////
 /*
 class SE_TreeStruct
@@ -138,6 +100,10 @@ private:
 };
 */
 /////////////////////////////////////////////
+/*
+template <typename T>
+SE_TreeStructID SE_TreeStructManager<T>::NULLID = SE_TreeStructID(-1, -2);
+*/
 template <typename T>
 SE_TreeStructManager<T>::SE_TreeStructManager(int size) : mNodes(size ,MAX_SIZE), mError(0)
 {

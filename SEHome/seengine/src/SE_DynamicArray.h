@@ -38,16 +38,18 @@ private:
     int mError;
 };
 template <typename T>
-SE_DynamictArray<T>::SE_DynamicArray(int size) : mArray(NULL), mSize(0), mMaxSize(0), mError(0)
+SE_DynamicArray<T>::SE_DynamicArray(int size, int maxsize) : mArray(NULL), mSize(0), mMaxSize(0), mError(0)
 {
     if(size <= 1)
         return;
+    if(maxsize <= 1)
+        return;
     mArray = new T[size];
     mSize = size;
-    mMaxSize = size;
+    mMaxSize = maxsize;
 }
 template <typename T>
-SE_DynamictArray<T>::~SE_DynamicArray()
+SE_DynamicArray<T>::~SE_DynamicArray()
 {
     if(mArray)
         delete[] mArray;
@@ -77,7 +79,7 @@ void SE_DynamicArray<T>::expand()
     delete[] oldArray;
 }
 template <typename T>
-T& SE_DynamictArray<T>::operator[](int index)
+T& SE_DynamicArray<T>::operator[](int index)
 {
     if(index >= 0 && index < mSize)
     {
@@ -90,7 +92,7 @@ T& SE_DynamictArray<T>::operator[](int index)
     }
 }
 template <typename T>
-const T& SE_DynamictArray<T>::operator[](int index) const
+const T& SE_DynamicArray<T>::operator[](int index) const
 {
     if(index < 0 || index >= mSize)
     {
@@ -106,30 +108,31 @@ SE_DynamicArray<T>::SE_DynamicArray(const SE_DynamicArray& right)
 	mMaxSize = right.size;
 	mError = right.mError;
 	mInvalid = right.mInvalid;
-	mArrays = new T[mSize];
-	if(!mArrays)
+	mArray = new T[mSize];
+	if(!mArray)
 		return;
 	for(int i = 0 ; i < mSize ; i++)
 	{
-		mArrays[i] = right.mArrays[i];
+		mArray[i] = right.mArray[i];
 	}
 }
 template <typename T>
-SE_DynamicArray& SE_DynamicArray<T>::operator=(const SE_DynamicArray& right)
+SE_DynamicArray<T>& SE_DynamicArray<T>::operator=(const SE_DynamicArray& right)
 {
 	T* newArray = new T[right.mSize];
     if(!newArray)
 		return *this;
-	if(mArrays)
-		delete[] mArrays;
-	mArrays = newArray;
+	if(mArray)
+		delete[] mArray;
+	mArray = newArray;
 	mSize = right.mSize;
 	mMaxSize = right.mMaxSize;
 	mError = right.mError;
 	mInvalid = right.mInvalid;
 	for(int i = 0 ; i < mSize ; i++)
 	{
-		mArrays[i] = right.mArrays[i];
+		mArray[i] = right.mArray[i];
 	}
+    return *this;
 }
 #endif

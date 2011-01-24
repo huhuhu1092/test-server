@@ -1,6 +1,7 @@
 #ifndef SE_LAYER_H
 #define SE_LAYER_H
 #include "SE_Common.h"
+#include <string>
 class SE_Layer
 {
 public:
@@ -9,22 +10,14 @@ public:
     ~SE_Layer();
     SE_Layer(const SE_Layer& layer);
     SE_Layer& operator=(const SE_Layer& layer);
-    friend bool operator==(const SE_Layer& left, const SE_Layer& right);
-    friend bool operator<(const SE_Layer& left, const SE_Layer& right);
-    friend bool operator>(const SE_Layer& left, const SE_Layer& right);
-    friend SE_Layer operator+(const SE_Layer& left, const SE_Layer& right);
-    friend SE_Layer operator-(const SE_Layer& left, const SE_Layer& right);
- /*
-    int getLayer() const
-    {
-        return mLayer;
-    }
-    void setLayer(int layer)
-    {
-        mLayer = layer;
-    }
+    static bool operator==(const SE_Layer& left, const SE_Layer& right);
+    static bool operator<(const SE_Layer& left, const SE_Layer& right);
+    static bool operator>(const SE_Layer& left, const SE_Layer& right);
+    static SE_Layer operator+(const SE_Layer& left, const SE_Layer& right);
+    /*
+    static SE_Layer operator-(const SE_Layer& left, const SE_Layer& right);
     */
 private:
-    int mLayer;
+    std::string mLayer;
 };
 #endif
