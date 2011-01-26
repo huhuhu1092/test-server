@@ -9,6 +9,7 @@ public:
     void popScene();
     void rotateScene();
     void swapScene();
+    void renderScene(SE_RenderManager& renderManager);
 private:
     SE_TreeStructManager<SE_Scene> mScenes;
     std::list<SE_SceneID> mStack;
