@@ -19,7 +19,7 @@ public:
     enum {MAX_SIZE = 2000000};
     enum {RELEASE_DELAY, RELEASE_NO_DELAY};
     enum {NO_ERROR, NO_SPACE, DUP_POINTER, EXCEPT_ERROR};
-    SE_TreeStructManager(int size = 10000);
+    SE_TreeStructManager(int size = 1000);
     ~SE_TreeStructManager();
     T* find(const SE_TreeStructID& id) const;
     T* remove(const SE_TreeStructID& id) const;
