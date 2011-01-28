@@ -1,6 +1,8 @@
 #ifndef SE_TREESTRUCT_H
 #define SE_TREESTRUCT_H
 #include "SE_ID.h"
+#include <list>
+#include <vector>
 template <typename T>
 class SE_TreeStruct
 {
