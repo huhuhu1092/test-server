@@ -2,8 +2,13 @@
 #define SE_ELEMENT_H
 #include "SE_Vector.h"
 #include "SE_Quat.h"
+#include "SE_TreeStruct.h"
+#include "SE_ParamObserver.h"
+#include "SE_URI.h"
 class SE_Element : public SE_ParamObserver, public SE_TreeStruct<SE_Element>
 {
+    friend class SE_ElementManager;
+    friend class SE_ElementSchema;
 public:
     enum STATE {NORMAL, SELECTED, HIGHLIGHTED, INVISIBLE, INACTIVE, 
                 ANIMATE_BEGIN, ANIMATE_RUNNING, ANIMATE_SUSPEND, ANIMATE_END};
@@ -109,12 +114,16 @@ public:
     {
         mMountPointY = y;
     }
+    void setSpatialType(int spatialType)
+    {
+        mSpatialType = spatialType;
+    }
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
     virtual void layout();
-    virtual SE_Spatial* createSpatial();
-    virtual void clone(SE_Element* srcElement);
+    virtual SE_Spatial* createSpatial(int spatialType);
+    virtual void clone(const SE_Element* srcElement);
 protected:
     int mState;
     int mType;
@@ -123,6 +132,7 @@ protected:
     float mDeltaLeft, mDeltaTop;
     int mKeyFrameNum;
     int mSeqNum;
+    int mSpatialType; // spatial type: GEOMETRY, COMMONNODE, BSPNODE
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
@@ -135,6 +145,7 @@ protected:
     SE_TimeKey mEndKey;
     SE_URI mURI;
     SE_KeyFrameController* mKeyFrameController;
+    SE_MountPointSet mMountPointSet;
     /////////////
     SE_ElementID mPrevElement;
     SE_ElementID mNextElement;
@@ -144,5 +155,17 @@ protected:
     SE_AnimationID mAnimationID;
     SE_RenderTargetID mRenderTarget;
     bool mOwnRenderTargetCamera;
+    bool mNeedUpdateTransform;
+
+};
+class SE_2DNodeElement : public SE_Element
+{
+public:
+    SE_2DNodeElement();
+    ~SE_2DNodeElement();
+    virtual void spawn();
+    virtual void update(const SE_TimeKey& timeKey);
+    virtual void layout();
+    virtual SE_Spatial* createSpatial();    
 };
 #endif

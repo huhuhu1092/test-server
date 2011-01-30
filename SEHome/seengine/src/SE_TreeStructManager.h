@@ -27,6 +27,10 @@ public:
     void release(const SE_TreeStructID& id, int delay = RELEASE_DELAY);
     //return is child's id
     SE_TreeStructID add(const SE_TreeStructID& parent, T* child);
+    void add(T* parent, T* child)
+    {
+        parent->addChild(child);
+    }
     T* getParent(const SE_TreeStructID& id) const;
     std::vector<T*> getChildren(const SE_TreeStructID& id) const;
     int getError() const
