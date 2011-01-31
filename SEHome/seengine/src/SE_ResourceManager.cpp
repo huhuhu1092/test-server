@@ -1600,8 +1600,8 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-    SE_Element* element = new SE_Element;
-	element->setSeqNum(indent);
+    SE_ElementShcema* element = new SE_ElementSchema;
+	element->seq = indent;
     bool hasLayer = false;
 	bool hasPivotx = false;
 	bool hasPivoty = false;
