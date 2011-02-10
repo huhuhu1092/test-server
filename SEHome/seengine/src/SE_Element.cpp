@@ -139,7 +139,48 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 }
 void SE_2DNodeElement::read(SE_BufferInput& inputBuffer)
 {
-    
+    mType = inputBuffer.readInt();    
+    mSpatialType = inputBuffer.readInt();
+    mState = inputBuffer.readInt();
+    mLeft = inputBuffer.readFloat();
+    mTop = inputBuffer.readFloat();
+    mWidth = inputBuffer.readFloat();
+    mHeight = inputBuffer.readFloat();
+    mPivotX = inputBuffer.readFloat();
+    mPivotY = inputBuffer.readFloat();
+    mMountPointX = inputBuffer.readFloat();
+    mMountPointY = inputBuffer.readFloat();
+    mDeltaLeft = inputBuffer.readFloat();
+    mDeltaTop = inputBuffer.readFloat();
+    mKeyFrameNum = inputBuffer.readInt();
+    mSeqNum = inputBuffer.readInt();
+    mLocalTranslate = inputBuffer.readVector3f();
+    mLocalScale = inputBuffer.readVector3f();
+    mLocalRotate = inputBuffer.readQuat();
+    mLocalLayer.read(inputBuffer);
+    mName.read(inputBuffer);
+    mFullPathName.read(inputBuffer);
+    mMountPointID.read(inputBuffer);
+    mTimeKey.read(inputBuffer);
+    mStartKey.read(inputBuffer);
+    mEndKey.read(inputBuffer);
+    mURI.read(inputBuffer);
+    int hasController = inputBuffer.readInt();
+    if(hasController)
+    {
+        if(mKeyFrameController)
+            delete mKeyFrameController;
+        mKeyFrameControler = new SE_KeyFrameController;
+        mKeyFrameController->read(inputBuffer);
+    }
+    else
+    {
+        if(mKeyFrameController)
+            delete mKeyFrameController;
+    }
+    mMountPointSet.read(inputBuffer);
+    mOwnRenderTargetCamera = (bool)inputBuffer.readInt();
+    mNeedUpdateTransform = (bool)inputBuffer.readInt();
 }
 void SE_2DNodeElement::write(SE_BufferOutput& outputBuffer)
 {

@@ -7,6 +7,7 @@ public:
     enum {MAX_SIZE = 20000};
     enum {SIZE = 1000};
     SE_ElementID addElement(const SE_ElementID& parent, SE_Element* e);
+    void addElement(SE_Element* parent, SE_Element* e);
     SE_Element* findElement(const SE_ElementID& id);
     SE_Element* removeElement(const SE_ElementID& id);
     SE_Element* getParent(const SE_ElementID& id);
