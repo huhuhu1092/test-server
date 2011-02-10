@@ -2,7 +2,7 @@
 #include "SE_Application.h"
 #include "SE_Element.h"
 #include "SE_ElementManager.h"
-void SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
+SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
 {
     SE_Element* e = new SE_Element;
     e->setName(name.getStr());
@@ -13,6 +13,7 @@ void SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Eleme
     e->setPivotY(pivoty);
     e->setSeq(seq);
     elementManager->addElement(parent, e);
+    SE_Element* root = NULL;
     if(parent == NULL)
         root = e;
     SE_ASSERT(children.empty() || contens.empty());
@@ -29,10 +30,11 @@ void SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Eleme
         SE_ElementSchema* es = *itSchema;
         es->createElement(elementManager, e); 
     }
+    return root;
 }
 SE_Element* SE_ElementSchema::createElement()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    createElement(elementManager, NULL);
+    SE_Element* root = createElement(elementManager, NULL);
     elementManager->addElement(SE_ElementID::NULLID, root);
 } 
