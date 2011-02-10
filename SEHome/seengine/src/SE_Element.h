@@ -5,6 +5,9 @@
 #include "SE_TreeStruct.h"
 #include "SE_ParamObserver.h"
 #include "SE_URI.h"
+#include "SE_Object.h"
+class SE_BufferOutput;
+class SE_BufferInput;
 class SE_Element : public SE_ParamObserver, public SE_TreeStruct<SE_Element>
 {
     friend class SE_ElementManager;
@@ -124,6 +127,8 @@ public:
     virtual void layout();
     virtual SE_Spatial* createSpatial(int spatialType);
     virtual void clone(const SE_Element* srcElement);
+    virtual void read(SE_BufferInput& inputBuffer);
+    virtual void write(SE_BufferOutput& outputBuffer);
 protected:
     int mState;
     int mType;
@@ -132,7 +137,7 @@ protected:
     float mDeltaLeft, mDeltaTop;
     int mKeyFrameNum;
     int mSeqNum;
-    int mSpatialType; // spatial type: GEOMETRY, COMMONNODE, BSPNODE
+    int mSpatialType; // spatial type: GEOMETRY, COMMONNODE, BSPNODE, etc.
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
@@ -158,7 +163,7 @@ protected:
     bool mNeedUpdateTransform;
 
 };
-class SE_2DNodeElement : public SE_Element
+class SE_2DNodeElement : public SE_Element, public SE_Object
 {
 public:
     SE_2DNodeElement();
@@ -166,6 +171,8 @@ public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
     virtual void layout();
-    virtual SE_Spatial* createSpatial();    
+    virtual SE_Spatial* createSpatial();  
+    virtual void read(SE_BufferInput& inputBuffer);
+    virtual void write(SE_BufferOutput& outputBuffer);  
 };
 #endif

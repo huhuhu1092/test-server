@@ -3001,7 +3001,12 @@ void SE_ResourceManager::setDataPath(const char* datapath)
 {
 	mImpl->dataPath = datapath;
 }
-void SE_ResourceManager::loadScene(const char* sceneName)
+void SE_ResourceManager::loadSceneFromXml(const char* sceneName)
+{
+
+}
+
+void SE_ResourceManager::loadSceneFromCbf(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
     char* data = NULL;

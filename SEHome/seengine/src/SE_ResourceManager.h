@@ -69,8 +69,16 @@ public:
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
     void loadBaseData(const char* baseResourceName);
-    void loadScene(const char* sceneName);
-
+    /*
+     * sceneName can not has sufix .cbf
+     * it will be added automatically
+     * */
+    void loadSceneFromCbf(const char* sceneName);
+    /*
+     * sceneName can not has sufix .xml
+     * it will be added automatically
+     * */
+    void loadSceneFromXml(const char* sceneName);
 	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);
 	void loadRenderer(const char* rendererFileName);

@@ -36,6 +36,13 @@ SE_Spatial* SE_Element::createSpatial(int spatialType)
 
 void SE_Element::clone(const SE_Element* srcElement)
 {}
+void SE_Element::read(SE_BufferInput& inputBuffer)
+{
+
+}
+void SE_Element::write(SE_BufferOutput& outputBuffer)
+{
+}
 ///////////////////////////////////////
 SE_2DNodeElement::SE_2DNodeElement()
 {
@@ -129,4 +136,50 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 		}
 	}
 	return parent;
+}
+void SE_2DNodeElement::read(SE_BufferInput& inputBuffer)
+{
+    
+}
+void SE_2DNodeElement::write(SE_BufferOutput& outputBuffer)
+{
+    outputBuffer.writeString("SE_2DNodeElement");
+    outputBuffer.writeInt(mType);
+    outputBuffer.writeInt(mSpatialType);
+    outputBuffer.writeInt(mState);
+    outputBuffer.writeFloat(mLeft);
+    outputBuffer.writeFloat(mTop);
+    outputBuffer.writeFloat(mWidth);
+    outputBuffer.writeFloat(mHeight);
+    outputBuffer.writeFloat(mPivotX);
+    outputBuffer.writeFloat(mPivotY);
+    outputBuffer.writeFloat(mMountPointX);
+    outputBuffer.writeFloat(mMountPointY);
+    outputBuffer.writeFloat(mDeltaLeft);
+    outputBuffer.writeFloat(mDeltaTop);
+    outputBuffer.writeInt(mKeyFrameNum);
+    outputBuffer.writeInt(mSeqNum);
+    outputBuffer.writeVector3f(mLocalTranslate);
+    outputBuffer.writeVector3f(mLocalScale);
+    outputBuffer.writeQuat(mLocalRotate);
+    mLocalLayer.write(outputBuffer);
+    mName.write(outputBuffer);
+    mFullPathName.write(outputBuffer);
+    mMountPointID.write(outputBuffer);
+    mTimeKey.write(outputBuffer);
+    mStartKey.write(outputBuffer);
+    mEndKey.write(outputBuffer);
+    mURI.write(outputBuffer);
+    if(mKeyFrameController)
+    {
+        outputBuffer.writeInt(1);
+        mKeyFrameController->write(outputBuffer);
+    }
+    else
+    {
+        outputBuffer.writeInt(0);
+    }
+    mMountPointSet.write(outputBuffer);
+    outputBuffer.writeInt(mOwnRenderTargetCamera);
+    outputBuffer.writeInt(mNeedUpdateTransform);
 }
