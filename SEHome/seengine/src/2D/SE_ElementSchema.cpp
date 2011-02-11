@@ -46,3 +46,7 @@ void SE_ElementSchema::setParent(SE_ElementSchema* p)
 {
     parent = p;
 }
+vodi SE_ElementSchema::addContent(SE_ElementContent* ec)
+{
+    contents.push_back(ec);
+}

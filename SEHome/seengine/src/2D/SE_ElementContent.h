@@ -1,0 +1,67 @@
+#ifndef SE_ELEMENTCONTENT_H
+#define SE_ELEMENTCONTENT_H
+
+class SE_ElementContent
+{
+public:
+	SE_ElementContent()
+	{
+		mParent = NULL;
+	}
+    /*
+	void setParent(SE_Element* parent)
+	{
+		mParent = parent;
+	}
+    */
+	void setURI(const SE_StringID& uri)
+	{
+		mContentURI = uri;
+	}
+	SE_StringID getURI()
+	{
+		return mContentURI;
+	}
+	virtual SE_Element* createElement(float mpx, float mpy) = 0;
+	virtual ~SE_ElementContent() {}
+	virtual SE_ElementContent* clone();
+protected:
+	void clone(SE_ElementContent* src, SE_ElementContent* dst);
+public:
+	void setID(const SE_StringID& id)
+	{
+		mID = id;
+	}
+	SE_StringID getID()
+	{
+		return mID;
+	}
+private:
+	SE_StringID mID;
+	//SE_Element* mParent;
+	SE_StringID mContentURI;
+};
+class SE_ImageContent : public SE_ElementContent
+{
+public:
+	SE_ImageContent(const SE_StringID& imageURI);
+	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
+};
+
+class SE_ActionContent : public SE_ElementContent
+{
+public:
+	SE_ActionContent(const SE_StringID& actionURI);
+	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
+};
+class SE_StateTableContent : public SE_ElementContent
+{
+public:
+	SE_StateTableContent(const SE_StringID& stateTableURI);
+	SE_Element* createElement(float mpx, float mpy);
+	SE_ElementContent* clone();
+};
+
+#endif

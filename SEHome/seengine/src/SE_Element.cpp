@@ -43,6 +43,20 @@ void SE_Element::read(SE_BufferInput& inputBuffer)
 void SE_Element::write(SE_BufferOutput& outputBuffer)
 {
 }
+void SE_Element::travel(SE_ElementTravel* travel)
+{
+	travel->visit(this);
+    std::vector<SE_Element*> children = getChildren();
+	if(!children.empty())
+    {
+        for(int i = 0 ; i < children.size() ; i++)
+        {
+            SE_Element* e = children[i];
+            e->travel(travel);
+        }
+    }
+
+}
 ///////////////////////////////////////
 SE_2DNodeElement::SE_2DNodeElement()
 {
@@ -116,11 +130,29 @@ void SE_2DNodeElement::layout()
 	mWidth = mergedRect.right - mergedRect.left;
 	mHeight = mergedRect.bottom - mergedRect.top;
 }
+SE_Spatial* SE_2DNodeElement::createSpatial(const SE_SpatialID& parentID)
+{
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_ElementManager* elementManger = SE_Application::getInstance()->getElementManager();
+	SE_Spatial* currSpatial = spatialManager->createNode(mSpatialType);
+    mSpatialID = spatialManager->addSpatial(parentID, currSpatial);
+	parent->setRenderTarget(mRenderTarget);
+	parent->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+	parent->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
+	parent->setNeedUpdateTransform(mNeedUpdateTransform);
+	std::vector<SE_Element*> children = elementManager->getChildren();
+	for(int i = 0 ; i < children.size() ; i++)
+	{
+		SE_Element* e = children[i];
+		SE_Spatial* spatial = e->createSpatial(mSpatialID);
+	}
+	return currSpatial;
+}
 SE_Spatial* SE_2DNodeElement::createSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_ElementManager* elementManger = SE_Application::getInstance()->getElementManager();
-	SE_Spatial* parent = SE_SpatialManager::createNode(mSpatialType);
+	SE_Spatial* parent = spatialManager->createNode(mSpatialType);
 	parent->setRenderTarget(mRenderTarget);
 	parent->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 	parent->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));

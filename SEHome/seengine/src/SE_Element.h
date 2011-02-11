@@ -6,6 +6,14 @@
 #include "SE_ParamObserver.h"
 #include "SE_URI.h"
 #include "SE_Object.h"
+class SE_ElementTravel
+{
+public:
+    virtual ~SE_ElementTravel()
+    {}
+    virtual void visit(SE_Element* e) = 0;
+};
+
 class SE_BufferOutput;
 class SE_BufferInput;
 class SE_Element : public SE_ParamObserver, public SE_TreeStruct<SE_Element>
@@ -121,11 +129,16 @@ public:
     {
         mSpatialType = spatialType;
     }
+    void travel(SE_ElementTravel* travel);
+    void show();
+    void hide();
+    //dismiss will make spatial node remove from spatial manager
+    void dismiss();
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
     virtual void layout();
-    virtual SE_Spatial* createSpatial(int spatialType);
+    virtual SE_Spatial* createSpatial(const SE_SpatialID& parentID);
     virtual void clone(const SE_Element* srcElement);
     virtual void read(SE_BufferInput& inputBuffer);
     virtual void write(SE_BufferOutput& outputBuffer);

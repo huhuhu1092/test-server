@@ -2,6 +2,8 @@
 #define SE_ELEMENTSCHEMA_H
 #include <list>
 #include "SE_ID.h"
+#include "SE_TableManager.h"
+#include "SE_Layer.h"
 class SE_Element;
 class SE_ElementManager;
 class SE_ElementSchema
@@ -29,4 +31,6 @@ private:
     typedef std::list<SE_ElementContent*> _ElementContentList;
     _ElementContentList contents;
 };
+typedef SE_Table<SE_StringID, SE_ElementSchema*> SE_ElementSchemaMap;
+typedef SE_Table<SE_StringID, SE_ElementSchemaMap*> SE_ElementSchemaTable;
 #endif

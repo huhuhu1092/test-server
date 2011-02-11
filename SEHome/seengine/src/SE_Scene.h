@@ -5,14 +5,15 @@ class SE_SceneManager;
 class SE_RenderManager;
 class SE_KeyEvent;
 class SE_MotionEvent;
-class SE_Scene
+class SE_Scene;
+class SE_Scene : public SE_ListStruct<SE_Scene>
 {
     friend class SE_SceneManager;
 public:
     SE_Scene();
     ~SE_Scene();
     void create(const char* sceneName);
-    SE_SceneID getID();
+    //SE_SceneID getID();
     void show();
     void exit();
     void hide();
@@ -39,9 +40,9 @@ private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
 private:
-    void setID(const SE_SceneID& sceneID);
+    //void setID(const SE_SceneID& sceneID);
 private:
-    SE_SceneID mID;
+    //SE_SceneID mID;
     SE_ElementID mRoot;
     SE_CameraID mCamera;
     bool mIsTranslucent;
