@@ -100,8 +100,9 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	mAnimationManager->update(realDelta, simulateDelta);
     if(mState == RUNNING)
     {
-        mRenderManager->beginDraw();
-        mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
+        //mRenderManager->beginDraw();
+        mSceneManager->renderScene(*mRenderManager);
+        mRenderManager->sort();
         mRenderManager->draw();
         mRenderManager->endDraw();
     }

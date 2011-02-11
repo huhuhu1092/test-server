@@ -1,6 +1,7 @@
 #ifndef SE_SCENE_H
 #define SE_SCENE_H
 #include "SE_ID.h"
+#include "SE_TreeStruct.h"
 class SE_SceneManager;
 class SE_RenderManager;
 class SE_KeyEvent;

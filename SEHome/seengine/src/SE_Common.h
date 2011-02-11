@@ -64,6 +64,7 @@ enum SE_XMLTABLE_TYPE {SE_INVALID_TABLE,
 					   SE_COLOREFFECT_TABLE,
                        SE_SEQUENCE_TABLE, 
 					   SE_TABLE_TYPE_NUM};
+extern const int SE_MAX_RENDERSCENE_SIZE;
 extern const float INVALID_GEOMINFO;
 extern const char* BAD_STR;
 //for pass data to opengl

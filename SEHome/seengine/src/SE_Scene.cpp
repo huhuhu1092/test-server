@@ -48,7 +48,7 @@ void SE_Scene::hide()
 }
 void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
-    
+            
 }
 void SE_Scene::setCamera(const SE_CameraID& cameraID)
 {

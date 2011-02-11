@@ -13,10 +13,12 @@ public:
 	enum {RENDERTARGET_SIZE = 8};
     SE_RenderManager();
     ~SE_RenderManager();
-    void beginDraw();
+    //void beginDraw();
     void endDraw();
     void draw();
     void sort();
+    void invalidScene(int sceneIndex);
+    void setSceneCamera(int sceneIndex, SE_Camera* camera);
     void addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{

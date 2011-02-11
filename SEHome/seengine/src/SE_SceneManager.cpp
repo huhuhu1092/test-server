@@ -64,7 +64,46 @@ void SE_SceneManager::hideScene(const SE_SceneID& id)
 void SE_SceneManager::dismissScene(const SE_SceneID& id)
 {}
 void SE_SceneManager::renderScene(SE_RenderManager& renderManager)
-{}
+{
+    std::list<SE_Scene*> sceneNeedRender;
+    _SceneStack::iterator it;
+    for(it = mStack.begin() ; it != mStack.end() ; it++)
+    {
+        SE_SceneID sid = *it;
+        SE_Scene* scene = findScene(sid);
+        if(scene)
+        {
+            if(scene->isTranslucent())
+            {
+                sceneNeedRender.push_front(scene);
+            }
+            else
+            {
+                sceneNeedRender.push_front(scene);
+                break;
+            }
+        }
+    }    
+    if(sceneNeedRender.size() >= SE_MAX_RENDERSCENE_SIZE)
+    {
+        SE_LOGE("scene size exceed the max size\n");
+        return;
+    }
+    std::list<SE_Scene*>::iterator itScene;
+    SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+    for(itScene = sceneNeedRender.begin() ; itScene != sceneNeedRender.end() ; itScene++)
+    {
+        SE_Scene* scene = *it;
+        SE_Camera* camera = cameraManager->findCamera(scene->getCamera());
+        if(camera)
+        {
+            renderManager->invalidScene(seq);
+            renderManager->setSceneCamera(seq, camera);
+            scene->render(seq, renderManager);
+            seq--;
+        }
+    }
+}
 void SE_SceneManager::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {}
 void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
