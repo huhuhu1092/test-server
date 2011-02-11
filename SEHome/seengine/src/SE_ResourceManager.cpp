@@ -1595,12 +1595,12 @@ void SE_ImageTableHandler::handle(SE_ImageMapSet* parent, TiXmlElement* xmlEleme
         m.handleXmlChild(imageMap, pChild, i++);
     }
 }
-void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-    SE_ElementShcema* element = new SE_ElementSchema;
+    SE_ElementShcema* elementSchema = new SE_ElementSchema;
 	element->seq = indent;
     bool hasLayer = false;
 	bool hasPivotx = false;
@@ -1625,9 +1625,9 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 			{
 				fullpathID = pro->xmlName + "/" + value;
 			}
-			element->setName(id.c_str());
-			element->setFullPathName(fullpathID.c_str());
-			if(element->getName().isValid())
+			elementSchema->name = id.c_str();
+			elementSchema->fullPathName = fullpathID.c_str();
+			if(elementSchema->name.isValid())
 			{
 			    hasid = true;
 			}
@@ -1636,7 +1636,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setLeft(ival);
+                elementSchema->x = ival;
             }
             else
             {
@@ -1647,7 +1647,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setTop(ival);
+                elementSchema->y = ival;
             }
             else
             {
@@ -1658,7 +1658,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setWidth(ival);
+                elementSchema->w = ival;
             }
             else
             {
@@ -1669,7 +1669,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setHeight(ival);
+                elementSchema->h = ival;
             }
             else
             {
@@ -1680,7 +1680,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setLocalLayer(ival);
+                elementSchame->layer = ival;
                 hasLayer = true;
             }
             else
@@ -1692,7 +1692,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setPivotX(ival);
+                elementSchame->pivotx = ival;
             }
             else
             {
@@ -1704,7 +1704,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setPivotY(ival);
+                elementSchema->pivoty = ival;
             }
             else
             {
@@ -1714,14 +1714,14 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         }
 		else if(!strcmp(name, "mountpointref"))
 		{
-			element->setMountPointRef(SE_MountPointID(value));
+			elementSchema->mountpointref = SE_MountPointID(value);
 			hasMountPointRef = true;
 		}
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
     {
-        element->setLocalLayer(indent);
+        elementSchema->layer = indent;
     }
 	if(parent == NULL)
 	{
@@ -1738,11 +1738,11 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 	if(parent)
     {
         parent->addChild(element);
-        element->setParent(parent);
+        elementSchema->setParent(parent);
     }
     else
     {
-        element->setParent(NULL);
+        elementSchema->setParent(NULL);
 		pro->elementMap->setItem(element->getName(), element);
     }
     TiXmlNode* currNode = xmlElement;
@@ -1750,11 +1750,11 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 	int i = 1;
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
-		SE_XmlElementCalculus<SE_Element, _ElementContainer> m(pro);
+		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
         m.handleXmlChild(element, pChild, i++);
     }
 }
-void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1798,9 +1798,9 @@ void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, 
 	{
 		LOGE("... mount point parent can not be NULL\n");
 	}
-	parent->addMountPoint(mp);
+	parent->mountPointSet = mp;
 }
-void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1826,7 +1826,7 @@ void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
 	imageContent->setID(id);
 	parent->addContent(imageContent);
 }
-void SE_ElementActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1846,7 +1846,7 @@ void SE_ElementActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElemen
 	}
 	parent->addContent(actionContent);
 }
-void SE_ElementStateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1866,7 +1866,7 @@ void SE_ElementStateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlEl
 	}
 	parent->addContent(stateTableContent);
 }
-void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_RendererHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1893,7 +1893,7 @@ void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, un
 	SE_RendererID rid = SE_ID::createRendererID(rendererID.c_str());
 	resourceManager->setRenderer(rid, renderer);
 }
-void SE_ParamStructHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ParamStructHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1918,7 +1918,7 @@ void SE_ParamStructHandler::handle(SE_Element* parent, TiXmlElement* xmlElement,
         m.handleXmlChild(parent, pChild, i++);
     }
 }
-void SE_ParamHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ParamHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1953,7 +1953,7 @@ void SE_ParamHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
 		paramManager->setString(id.c_str(), paramValue.c_str());
 	}
 }
-void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ShaderHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;

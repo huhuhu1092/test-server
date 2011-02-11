@@ -8,6 +8,9 @@ class SE_ElementSchema
 {
 public:
     SE_Element* createElement();
+    void addChild(SE_ElementSchema* ec);
+    void setParent(SE_ElementSchema* p);
+    void addContent(SE_ElementContent* ec);
 private:
     SE_Element* createElement(SE_ElementManager* spatialManager, SE_Element* parent);
 public:
@@ -15,8 +18,12 @@ public:
     SE_StringID fullPathName;
     SE_MountPiontSet mountPointSet;
     float pivotx, pivoty;
+    float x, y, w, h;
+    SE_Layer layer;
     int seq;
     SE_MountPointID mountpointref;
+private:
+    SE_ElementSchema* parent;
     typedef std::list<SE_ElementSchema*> _ElementSchemaList;
     _ElementSchemaList children;
     typedef std::list<SE_ElementContent*> _ElementContentList;

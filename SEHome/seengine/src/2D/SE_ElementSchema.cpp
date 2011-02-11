@@ -38,3 +38,11 @@ SE_Element* SE_ElementSchema::createElement()
     SE_Element* root = createElement(elementManager, NULL);
     elementManager->addElement(SE_ElementID::NULLID, root);
 } 
+void SE_ElementSchema::addChild(SE_ElementSchema* ec)
+{
+    children.push_back(ec);
+}
+void SE_ElementSchema::setParent(SE_ElementSchema* p)
+{
+    parent = p;
+}
