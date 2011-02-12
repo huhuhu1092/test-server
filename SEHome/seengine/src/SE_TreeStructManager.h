@@ -19,7 +19,7 @@ public:
     enum {MAX_SIZE = 2000000};
     enum {RELEASE_DELAY, RELEASE_NO_DELAY};
     enum {NO_ERROR, NO_SPACE, DUP_POINTER, EXCEPT_ERROR};
-    SE_TreeStructManager(int size = 1000);
+    SE_TreeStructManager(int size = 1000, int maxSize = MAX_SIZE);
     ~SE_TreeStructManager();
     T* find(const SE_TreeStructID& id) const;
     T* remove(const SE_TreeStructID& id) const;
@@ -86,30 +86,9 @@ private:
     int mError;
 };
 ///////////////////////////////////////////////////////////////////
-/*
-class SE_TreeStruct
-{
-public:
-    SE_TreeStructID getID() const;
-    void setID(const SE_TreeStructID& id);
-    SE_TreeStruct();
-    void removeChild(const SE_TreeStructID& id);
-    SE_TreeStructID getParent();
-    void setParent(const SE_TreeStructID p);
-private:
-    typedef std::list<SE_TreeStructID> _ChildrenList;
-    _ChildrenList mChildren;
-    SE_TreeStructID mParent; 
-    SE_TreeStructID mID;
-};
-*/
-/////////////////////////////////////////////
-/*
+
 template <typename T>
-SE_TreeStructID SE_TreeStructManager<T>::NULLID = SE_TreeStructID(-1, -2);
-*/
-template <typename T>
-SE_TreeStructManager<T>::SE_TreeStructManager(int size) : mNodes(size ,MAX_SIZE), mError(0)
+SE_TreeStructManager<T>::SE_TreeStructManager(int size, int maxSize) : mNodes(size , maxSize), mError(0)
 {
     /*
     if(size <= 0)
@@ -138,10 +117,6 @@ SE_TreeStructManager<T>::~SE_TreeStructManager()
                 delete dd;
         }
     }
-    /*
-    if(mNodes)
-        delete[] mNodes;
-        */
 }
 template <typename T>
 SE_TreeStructID SE_TreeStructManager::createID(int index)

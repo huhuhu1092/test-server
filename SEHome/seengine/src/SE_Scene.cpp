@@ -37,6 +37,12 @@ void SE_Scene::show()
         rootElement->createSpatial(SE_SpatialID::NULLID);
     }
 }
+SE_Element* SE_Scene::getRootElement()
+{
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    SE_Element* rootElement = elementManager->findElement(mRoot);
+    return rootElement;
+}
 void SE_Scene::exit()
 {}
 void SE_Scene::hide()
@@ -48,7 +54,26 @@ void SE_Scene::hide()
 }
 void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
-            
+    SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+    if(mRenderTargetID == SE_RenderTargetID::INVALIDID)
+    {
+        SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
+        
+        mRenderTargetID = renderTargetManager->addRenderTarget(renderTarget);
+    }        
+    SE_Element* rootElement = getRootElement();
+    if(rootElement)
+    {
+        rootElement->setSceneRenderSeq(seq);
+        rootElement->setRenderTargetID(mRenderTargetID);
+    }
+    SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
+    renderTarget->setBackground(mBackground);
+    if(mTranslucent)
+        renderTarget->setClearTarget(false);
+    else
+        renderTarget->setClearTarget(true);
+    renderTarget->setCamera(mCamera);
 }
 void SE_Scene::setCamera(const SE_CameraID& cameraID)
 {

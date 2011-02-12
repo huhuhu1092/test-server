@@ -20,6 +20,10 @@ public:
     void hide();
     void render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager);
     void setCamera(const SE_CameraID& cameraID);
+    void setBackground(const SE_Vector4f& color)
+    {
+        mBackground = color;
+    }
     void dispatchKeyEvent(const SE_KeyEvent& keyEvent);
     void dispatchMotionEvent(const SE_MotionEvent& motionEvent);
     void setTranslucent(bool bTranslucent)
@@ -40,13 +44,16 @@ public:
 private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
+    SE_Element* getRootElement();
 private:
     //void setID(const SE_SceneID& sceneID);
 private:
     //SE_SceneID mID;
     SE_ElementID mRoot;
     SE_CameraID mCamera;
+    SE_RenderTargetID mRenderTargetID;
     bool mIsTranslucent;
     float mX, mY, mWidth, mHeight;// left low corner and width , height
+    SE_Vector4f mBackground;
 };
 #endif

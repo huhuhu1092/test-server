@@ -14,6 +14,11 @@
 
 SE_RenderManager::SE_RenderManager()
 {
+    for(int i = 0 ;  i < SE_MAX_RENDERSCENE_SIZE ; i++)
+    {
+        _SceneRenderUnit* sru = new _SceneRenderUnit;
+        mSceneRenderUnit[i] = sru;
+    }
 }
 static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
 {
@@ -59,55 +64,78 @@ static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
 
 void SE_RenderManager::sort()
 {
-	mRenderTargetList.sort(SE_RenderManager::CompareRenderTarget);
-	std::list<_RenderTargetUnit*>::iterator it;
-	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
-	{
-		_RenderTargetUnit* rt = *it;
-        for(int i = 0 ; i < RQ_NUM ; i++)
-        {
-            RenderUnitList* ruList = rt->mRenderQueue[i];
-            ruList->sort(_CompareRenderUnit) ;
-        }
-	}
+    for(int i = 0 ;  i < SE_MAX_RENDERSCENE_SIZE ; i++)
+    {
+        _SceneRenderUnit* sru = mSceneRenderUnit[i];
+	    sru->renderTargetList.sort(SE_RenderManager::CompareRenderTarget);
+	    std::list<_RenderTargetUnit*>::iterator it;
+	    for(it = sru->renderTargetList.begin() ; it != sru->renderTargetList.end() ; it++)
+	    {
+		    _RenderTargetUnit* rt = *it;
+            for(int i = 0 ; i < RQ_NUM ; i++)
+            {
+                RenderUnitList* ruList = rt->mRenderQueue[i];
+                ruList->sort(_CompareRenderUnit) ;
+            }
+	    }
+    }
 }
 void SE_RenderManager::clear()
 {
-	std::list<_RenderTargetUnit*>::iterator it;
-	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
-	{
-		_RenderTargetUnit* rt = *it;
-		if(rt)
-		{
-			for(int i = 0 ; i  < RQ_NUM ; i++)
-			{
-				RenderUnitList* ruList = rt->mRenderQueue[i];
-				RenderUnitList::iterator it;
-				for(it = ruList->begin() ; it != ruList->end() ;it++)
-				{
-					SE_RenderUnit* ru = *it;
-					delete ru;
-				}
-				ruList->clear();
-				delete ruList;
-			}
-			delete rt;
-		}
-	}
-    mRenderTargetList.clear();
 }
 SE_RenderManager::~SE_RenderManager()
 {
     clear();
 }
+/*
 void SE_RenderManager::beginDraw()
+{
+}
+*/
+void SE_RenderManager::endDraw()
 {
     clear();
 }
-void SE_RenderManager::endDraw()
-{}
 void SE_RenderManager::draw()
 {
+    SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+    for(int i = 0 ; i < SE_MAX_RENDERSCENE_SIZE ; i++)
+    {
+        _SceneRenderUnit* sru = mSceneRenderUnit[i];
+        if(!sru->needDraw)
+            continue;
+        std::list<_RenderTargetUnit*>::iterator it;
+        for(it = sru->renderTargetList.begin() ; it != sru->renderTargetList.end() ; it++)
+        {
+            _RenderTargetUnit* rt = *it;
+            SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
+            SE_Camera* camera = renderTarget->getCamera();
+		    if(renderTarget->prepare() && camera)
+		    {
+				m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
+				SE_Rect<int> rect = camera->getViewport();
+			    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
+                if(renderTarget->getClearTarget())
+                {
+				    SE_Renderer::setClearColor(renderTarget->getBackground());
+			        SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
+                }
+			    for(int i = 0 ; i < RQ_NUM ; i++)
+			    {
+				    RenderUnitList* ruList = rt->mRenderQueue[i];
+				    RenderUnitList::iterator it;
+				    for(it = ruList->begin() ; it != ruList->end() ;it++)
+				    {
+					    SE_RenderUnit* ru = *it;
+					    ru->setViewToPerspectiveMatrix(m);
+					    ru->applyRenderState();
+					    ru->draw();
+				    }
+			    }
+		    }            
+        }
+    }
+    /*
 	if(mRenderTargetList.empty())
 		return;
     SE_Matrix4f m;
@@ -172,11 +200,12 @@ void SE_RenderManager::draw()
 			}
 		}
 	}
+    */
 }
-SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(const SE_RenderTargetID& id)
+SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(_SceneRenderUnit* sceneRenderUnit, const SE_RenderTargetID& id)
 {
 	std::list<_RenderTargetUnit*>::iterator it;
-	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
+	for(it = sceneRenderUnit->renderTargetUnit.begin() ; it != sceneRenderUnit->renderTargetUnit.end() ; it++)
 	{
         _RenderTargetUnit* rt = *it;
 		if(rt->mRenderTargetID == id)
@@ -186,14 +215,16 @@ SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(const SE_Rende
 	}
 	return NULL;
 }
-void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq)
+void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq)
 {
-    _RenderTargetUnit* rt = findTarget(renderTarget);
+    SE_ASSERT(sceneRenderSeq >= 0 && sceneRenderSeq < SE_MAX_RENDERSCENE_SIZE);
+    _SceneRenderUnit* sceneRenderUnit = mSceneRenderUnit[sceneRenderSeq];
+    _RenderTargetUnit* rt = findTarget(sceneRenderUnit, renderTarget);
 	if(rt == NULL)
 	{
 	    rt = new _RenderTargetUnit;
 	    rt->mRenderTargetID = renderTarget;
-	    mRenderTargetList.push_back(rt);
+	    sceneRenderUnit->renderTargetUnit.push_back(rt);
 	}
     rt->mRenderQueue[rq]->push_back(ru);
 }

@@ -43,6 +43,35 @@ void SE_Element::read(SE_BufferInput& inputBuffer)
 void SE_Element::write(SE_BufferOutput& outputBuffer)
 {
 }
+void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
+{
+    mSceneRenderSeq = seq;
+    std::vector<SE_Element*> children = getChildren();
+    if(!children.empty())
+    {
+        for(int i = 0 ; i < children.size() ; i++)
+        {
+            SE_Element* e = children[i];
+            e->setSceneRenderSeq(seq);
+        }
+    }
+}
+void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
+{
+    if(!renderTarget.isValid())
+    {
+        mRenderTarget = renderTarget;
+    }
+    std::vector<SE_Element*> children = getChildren();
+    if(!children.empty())
+    {
+        for(int i = 0 ; i < children.size() ; i++)
+        {
+            SE_Element* e = children[i];
+            e->setRenderTargetID(renderTarget);
+        }
+    }
+}
 void SE_Element::travel(SE_ElementTravel* travel)
 {
 	travel->visit(this);

@@ -17,9 +17,13 @@ public:
     void endDraw();
     void draw();
     void sort();
-    void invalidScene(int sceneIndex);
-    void setSceneCamera(int sceneIndex, SE_Camera* camera);
-    void addRenderUnit(SE_RenderUnit* ru, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
+    void enableDraw(const SE_SceneRenderSeq& index);
+    void disableDraw(const SE_SceneRenderSeq& index);
+    //void setSceneTranslucent(const SE_SceneRenderSeq& index, bool translucent);
+    //void setSceneCamera(const SE_SceneRenderSeq& index, SE_Camera* camera);
+    //void setSceneBackground(const SE_SceneRenderSeq& index, const SE_Vector4f& background);
+    void addRenderUnit(SE_RenderUnit* ru, cosnt SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
+    /*
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{
 		mWorldToViewMatrix = m;
@@ -31,7 +35,8 @@ public:
 	void setBackground(const SE_Vector3f& background)
 	{
 		mBackground = background;
-	}    
+	} 
+ */   
 private:
     typedef std::list<SE_RenderUnit*> RenderUnitList;
 	struct _RenderTargetUnit
@@ -47,9 +52,20 @@ private:
 			mRenderTargetID = 0;
 		}
 	};
-	std::list<_RenderTargetUnit*> mRenderTargetList;
+    struct _SceneRenderUnit
+    {
+        bool translucent;
+        bool needDraw;
+        std::list<_RenderTargetUnit*> renderTargetUnit;
+        _SceneRenderUnit()
+        {
+            translucent = false;
+            needDraw = true;
+        }
+    };
+	//std::list<_RenderTargetUnit*> mRenderTargetList;
 private:
-	_RenderTargetUnit* findTarget(const SE_RenderTargetID& id);
+	_RenderTargetUnit* findTarget(_SceneRenderUnit* sceneRenderUnit, const SE_RenderTargetID& id);
 	static bool CompareRenderTarget(_RenderTargetUnit* first, _RenderTargetUnit* second)
 	{
 		if(first->mRenderTargetID < second->mRenderTargetID)
@@ -57,10 +73,13 @@ private:
 	    else
 		    return false;
 	}
+private:
+
 	void clear();
 private:
-    SE_Matrix4f mWorldToViewMatrix;
-    SE_Matrix4f mPerspectiveMatrix;
-	SE_Vector3f mBackground;
+    _SceneRenderUnit* mSceneRenderUnit[SE_MAX_RENDERSCENE_SIZE];
+    //SE_Matrix4f mWorldToViewMatrix;
+    //SE_Matrix4f mPerspectiveMatrix;
+	//SE_Vector3f mBackground;
 };
 #endif

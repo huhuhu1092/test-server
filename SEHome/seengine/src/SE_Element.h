@@ -129,6 +129,12 @@ public:
     {
         mSpatialType = spatialType;
     }
+    void setRenderQueueSeq(int q)
+    {
+        mRenderQueueSeq = q;
+    }
+    void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
+    void setRenderTargetID(const SE_RenderTargetID& renderTarget);
     void travel(SE_ElementTravel* travel);
     void show();
     void hide();
@@ -174,7 +180,8 @@ protected:
     SE_RenderTargetID mRenderTarget;
     bool mOwnRenderTargetCamera;
     bool mNeedUpdateTransform;
-
+    SE_SceneRenderSeq mSceneRenderSeq;
+    int mRenderQueueSeq;
 };
 class SE_2DNodeElement : public SE_Element, public SE_Object
 {

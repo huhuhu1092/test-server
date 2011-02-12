@@ -89,19 +89,20 @@ void SE_SceneManager::renderScene(SE_RenderManager& renderManager)
         SE_LOGE("scene size exceed the max size\n");
         return;
     }
+    int seq = sceneNeedRender.size() - 1;
     std::list<SE_Scene*>::iterator itScene;
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
     for(itScene = sceneNeedRender.begin() ; itScene != sceneNeedRender.end() ; itScene++)
     {
         SE_Scene* scene = *it;
-        SE_Camera* camera = cameraManager->findCamera(scene->getCamera());
-        if(camera)
-        {
-            renderManager->invalidScene(seq);
-            renderManager->setSceneCamera(seq, camera);
+        //SE_Camera* camera = cameraManager->findCamera(scene->getCamera());
+        //if(camera)
+        //{
+        //    renderManager->invalidScene(seq);
+        //    renderManager->setSceneCamera(seq, camera);
             scene->render(seq, renderManager);
             seq--;
-        }
+        //}
     }
 }
 void SE_SceneManager::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
