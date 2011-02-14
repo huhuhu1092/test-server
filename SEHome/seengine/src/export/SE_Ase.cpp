@@ -574,6 +574,7 @@ WRIET_SURFACE:
         }
     }
     /////// create scene //////////
+	/*
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
 	rootNode->setCollisionable(false);
@@ -680,10 +681,12 @@ WRIET_SURFACE:
 	rootNode->travel(&wst, true);
 	//write spatial scene
     writeSpatialScene(outScene, meshIDVector);
+	*/
     LOGI("write end\n");
 }
 void ASE_Loader::writeSpatialScene(SE_BufferOutput& outScene, std::vector<SE_MeshID>& meshIDVector)
 {
+	/*
     /////// create scene //////////
     SE_SpatialID spatialID = SE_Application::getInstance()->createCommonID();
     SE_CommonNode* rootNode = new SE_CommonNode(spatialID, NULL);
@@ -788,6 +791,7 @@ void ASE_Loader::writeSpatialScene(SE_BufferOutput& outScene, std::vector<SE_Mes
     sceneID.write(outScene);
 	_WriteSceneTravel wst(outScene);
 	rootNode->travel(&wst, true);
+	*/
 
 }
 void ASE_Loader::Write(const char* dataPath, const char* outFileName)

@@ -9,7 +9,7 @@
 #include "SE_ObjectManager.h"
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
-#include "SE_Element.h"
+#include "SE_ElementSchema.h"
 #include "SE_Utils.h"
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
@@ -17,6 +17,7 @@
 #include "SE_ImageMap.h"
 #include "SE_ObjectManager.h"
 #include "SE_TableManager.h"
+#include "SE_ElementContent.h"
 #include "SE_Log.h"
 const int BUF_SIZE = 1000;
 const char* xmlElementKeyword[] = {"Image", "Action", "StateTable", "Element", "MountPoint", "SequenceFrame",
@@ -430,7 +431,7 @@ static void checkResolvedURI(const std::string& uri)
 	{
 	case SE_ELEMENT_TABLE:
 		{
-			SE_Element* e = resourceManager->getElement(uri.c_str());
+			SE_ElementSchema* e = resourceManager->getElementSchema(uri.c_str());
 			if(!e)
 			{
 				OUTSTRING("... %s is not define in %s", uri.c_str(), strList[0].c_str());
@@ -497,10 +498,10 @@ static void checkURI(const char* strURI)
 		checkResolvedURI(resolvedURI);
 	}
 }
-class ElementTravel : public SE_ElementTravel
+class ElementTravel : public SE_ElementSchemaVisitor
 {
 public:
-	void visit(SE_Element* e)
+	void visit(SE_ElementSchema* e)
 	{
 		int contentNum = e->getContentNum();
 		for(int i = 0 ; i < contentNum ; i++)
@@ -511,19 +512,19 @@ public:
 		}
 	}
 };
-class ElementVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_Element*>
+class ElementVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ElementSchema*>
 {
 public:
-	void visit(const SE_StringID& id, const SE_Element* element)
+	void visit(const SE_StringID& id, const SE_ElementSchema* element)
 	{
 		ElementTravel et;
-		element->travel(&et);
+		((SE_ElementSchema*)element)->travel(&et);
 	}
 };
-class ElementMapVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ElementMap*>
+class ElementMapVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ElementSchemaMap*>
 {
 public:
-	void visit(const SE_StringID& id, const SE_ElementMap* elementMap)
+	void visit(const SE_StringID& id, const SE_ElementSchemaMap* elementMap)
 	{
 		if(id == elementMapID)
 		{
@@ -549,7 +550,7 @@ static void checkElementTable(const char* fileName)
 	    checkDocument(fileName, doc, elementKeyword, sizeof(elementKeyword) / sizeof(const char*));
 	    delete doc;
 	}
-	const SE_ElementTable& elementTable = resourceManager->getElementTable();
+	const SE_ElementSchemaTable& elementTable = resourceManager->getElementSchemaTable();
 	ElementMapVisitor emv;
 	emv.elementMapID = fileName;
 	elementTable.traverse(emv);
@@ -634,8 +635,8 @@ public:
 		{
 			const SE_Action::_ActionLayer* actionLayer = *it;
 			const SE_KeyFrameSequence<SE_ActionUnit*>& sequences = actionLayer->sequences;
-            std::vector<unsigned int> keys = sequences.getKeys();
-			for(int i = 0 ; i < keys.size() ; i++)
+            std::vector<SE_TimeKey> keys = sequences.getKeys();
+			for(size_t i = 0 ; i < keys.size() ; i++)
 			{
 				SE_KeyFrame<SE_ActionUnit*>* keyframe = sequences.getKeyFrame(keys[i]);
 				SE_ActionUnit* data = keyframe->data;
@@ -688,7 +689,7 @@ class ColorEffectVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_ColorE
 public:
 	void visit(const SE_StringID& id, const SE_ColorEffectController* c)
 	{
-		std::vector<unsigned int> keys = c->getKeys();
+		std::vector<SE_TimeKey> keys = c->getKeys();
 		for(int i = 0 ; i < keys.size() ; i++)
 		{
 			SE_ColorEffectFrame* cef = c->getKeyFrame(keys[i]);
@@ -737,7 +738,7 @@ class SequenceVisitor : public SE_ObjectManagerVisitor<SE_StringID, SE_Sequence*
 public:
 	void visit(const SE_StringID& id, const SE_Sequence* s)
 	{
-        std::vector<unsigned int> keys = s->getKeys();
+        std::vector<SE_TimeKey> keys = s->getKeys();
 		for(int i = 0 ; i < keys.size() ; i++)
 		{
 			SE_Sequence::_Frame f = s->getFrame(keys[i]);

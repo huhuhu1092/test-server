@@ -108,7 +108,7 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
     if(ret)
         return ret;
     std::vector<SE_Spatial*> children = getChildren();
-    std::list<SE_Spatial*>::iterator it = children.begin();//mImpl->children.begin();
+    std::vector<SE_Spatial*>::iterator it = children.begin();//mImpl->children.begin();
     for(; it != children.end() ; it++)
     {
         SE_Spatial* s = *it;
@@ -176,7 +176,8 @@ void SE_CommonNode::updateBoundingVolume()
 void SE_CommonNode::write(SE_BufferOutput& output)
 {
     output.writeString("SE_CommonNode");
-    output.writeInt(mImpl->children.size());
+	std::vector<SE_Spatial*> children = getChildren();
+    output.writeInt(children.size());
     SE_Spatial::write(output);
     /*
     std::list<SE_Spatial*>::iterator it;

@@ -3,7 +3,7 @@
 #include "SE_Spatial.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_SimObject)
-SE_SimObject::SE_SimObject(const SE_SpatialID spatial)
+SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 {
 	mSpatial = spatial;
     mPropertySet = NULL;
@@ -18,11 +18,13 @@ SE_SimObject::~SE_SimObject()
     if(mPropertySet)
         delete mPropertySet;
 }
+/*
 SE_Spatial* SE_SimObject::getSpatial()
 {
     SE_Spatial* spatial = SE_Application::getInstance()->getSpatialManager()->findSpatial(mSpatialID)
 	return spatial;
 }
+*/
 
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 {

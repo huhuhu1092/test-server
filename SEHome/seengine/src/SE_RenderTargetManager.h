@@ -1,6 +1,7 @@
 #ifndef SE_RENDERTARGETMANAGER_H
 #define SE_RENDERTARGETMANAGER_H
 #include "SE_ID.h"
+#include "SE_TreeStructManager.h"
 //#include <vector>
 class SE_RenderTarget;
 class SE_RenderTargetManager

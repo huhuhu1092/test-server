@@ -6,6 +6,7 @@
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
 #include "SE_Element.h"
+#include "SE_ElementSchema.h"
 #include <string>
 class SE_GeometryData;
 class SE_TextureCoordData;
@@ -18,6 +19,7 @@ class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
 class SE_StateChangeList;
+class SE_StateMachine;
 class SE_Renderer;
 
 class SE_ResourceManager
@@ -110,7 +112,7 @@ public:
     void releaseHardwareResource();
 public:
 	// used to test xml
-	const SE_ElementTable& getElementTable() const;
+	const SE_ElementSchemaTable& getElementSchemaTable() const;
 	const SE_ImageTable& getImageTable() const;
 	const SE_ActionTable& getActionTable() const;
 	const SE_ColorEffectControllerTable& getColorEffectControllerTable() const;

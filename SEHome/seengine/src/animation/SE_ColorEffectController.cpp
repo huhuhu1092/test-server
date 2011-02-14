@@ -1,5 +1,6 @@
 #include "SE_ColorEffectController.h"
-#include "SE_Element.h"
+#include "SE_TimeKey.h"
+#include "SE_2DElement.h"
 #include "SE_Image.h"
 #include "SE_Utils.h"
 #include "SE_URI.h"
@@ -74,19 +75,19 @@ SE_Element* SE_ColorEffectReload::createElement(const SE_ColorEffectInput& input
 	return NULL;
 }
 ////////////////////
-void SE_ColorEffectController::addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame)
+void SE_ColorEffectController::addKeyFrame(const SE_TimeKey& key, SE_ColorEffectFrame* frame)
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* keyframe = new SE_KeyFrame<SE_ColorEffectFrame*>;
     keyframe->data = frame;
     keyframe->key = key;
     mKeySequence.addKeyFrame(keyframe);
 }
-SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key) const
+SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(const SE_TimeKey& key) const
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
     return frame->data;
 }
-std::vector<unsigned int> SE_ColorEffectController::getKeys() const
+std::vector<SE_TimeKey> SE_ColorEffectController::getKeys() const
 {
 	return mKeySequence.getKeys();
 }

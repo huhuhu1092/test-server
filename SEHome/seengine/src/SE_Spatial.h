@@ -203,6 +203,14 @@ public:
 	{
 		return mOwnRenderTargetCamera;
 	}
+	void setSceneRenderSeq(const SE_SceneRenderSeq& seq)
+	{
+		mSceneRenderSeq = seq;
+	}
+	SE_SceneRenderSeq getSceneRenderSeq() const
+	{
+		return mSceneRenderSeq;
+	}
 	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
 	//dont use getRenderState to get some spatial's renderstate and then 
 	// set it to the other spatial;
@@ -280,5 +288,6 @@ private:
 	int mRQ;
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
+	SE_SceneRenderSeq mSceneRenderSeq;
 };
 #endif

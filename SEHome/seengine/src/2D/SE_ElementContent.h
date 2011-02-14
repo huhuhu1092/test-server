@@ -1,6 +1,6 @@
 #ifndef SE_ELEMENTCONTENT_H
 #define SE_ELEMENTCONTENT_H
-
+class SE_ElementSchema;
 class SE_ElementContent
 {
 public:
@@ -8,12 +8,10 @@ public:
 	{
 		mParent = NULL;
 	}
-    /*
-	void setParent(SE_Element* parent)
+	void setParent(SE_ElementSchema* parent)
 	{
 		mParent = parent;
 	}
-    */
 	void setURI(const SE_StringID& uri)
 	{
 		mContentURI = uri;
@@ -38,7 +36,7 @@ public:
 	}
 private:
 	SE_StringID mID;
-	//SE_Element* mParent;
+    SE_ElementSchema* mParent;
 	SE_StringID mContentURI;
 };
 class SE_ImageContent : public SE_ElementContent

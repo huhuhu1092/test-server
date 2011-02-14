@@ -39,7 +39,7 @@ public:
     void sendCommand(SE_Command* command);
     void postCommand(SE_Command* command);
 	void sendMessage(SE_Message* message);
-	int getMessageCount();
+	size_t getMessageCount();
 	//after getMessage , the message's pointer are copy to _MessageVector
 	_MessageVector getMessage();
 	void releaseMessage();
@@ -119,7 +119,11 @@ public:
 	void setCurrentCamera(int index);
 	SE_Camera* getCurrentCamera();
     //if return is false please delete dd by yourself
-    bool addDelayDestry(SE_DelayDestroy* dd);
+    bool addDelayDestroy(SE_DelayDestroy* dd);
+	size_t getSeqNum()
+	{
+		return mSeqNum++;
+	}
 protected:
 	class _CommandWrapper
     {
@@ -210,6 +214,7 @@ protected:
     int mState;
 	int mObjectCount;
 	SE_MessageList mMessageList;
+	size_t mSeqNum;
     static SE_Application* mInstance;
 };
 #endif

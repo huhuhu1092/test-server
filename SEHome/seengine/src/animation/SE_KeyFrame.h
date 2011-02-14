@@ -2,6 +2,7 @@
 #define SE_KEYFRAME_H
 #include "SE_Quat.h"
 #include "SE_Vector.h"
+#include "SE_TimeKey.h"
 #include <list>
 #include <vector>
 struct SE_Transform
@@ -18,9 +19,8 @@ class SE_KeyFrame
 public:
     SE_KeyFrame()
     {
-        key = 0;
     }
-    unsigned int key;// this the number of the  time sequence
+    SE_TimeKey key;// this the number of the  time sequence
     T data;
 };
 template <typename T>
@@ -29,7 +29,6 @@ class SE_KeyFrame<T*>
 public:
 	SE_KeyFrame()
 	{
-		key = 0;
 		data = NULL;
 	}
 	~SE_KeyFrame()
@@ -37,7 +36,7 @@ public:
         if(data)
 			delete data;
 	}
-	unsigned int key;
+    SE_TimeKey key;
 	T* data;
 };
 template <typename T>
@@ -63,12 +62,12 @@ public:
     void setKeyFrame(SE_KeyFrame<T>* kf);
     //if key is not in key frame sequnce , it will return the 
     //first key frame
-    SE_KeyFrame<T>* getKeyFrame(unsigned int key) const;
+    SE_KeyFrame<T>* getKeyFrame(const SE_TimeKey& key) const;
     int getKeyFrameNum() const
     {
         return mKeyFrameSequence.size();
     }
-	std::vector<unsigned int> getKeys() const;
+	std::vector<SE_TimeKey> getKeys() const;
     SE_KeyFrame<T>* find(SE_KeyFrameCompare<T> compare) const;
 	void remove_if(SE_KeyFrameCompare<T> compare);
 private:
@@ -118,9 +117,9 @@ SE_KeyFrameSequence<T>::~SE_KeyFrameSequence()
 
 }
 template <typename T>
-std::vector<unsigned int> SE_KeyFrameSequence<T>::getKeys() const
+std::vector<SE_TimeKey> SE_KeyFrameSequence<T>::getKeys() const
 {
-	std::vector<unsigned int> keys(mKeyFrameSequence.size());
+	std::vector<SE_TimeKey> keys(mKeyFrameSequence.size());
     typename _KeyFrameSequence::const_iterator it ;
 	int i = 0 ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)
@@ -177,7 +176,7 @@ void SE_KeyFrameSequence<T>::setKeyFrame(SE_KeyFrame<T>* kf)
     mKeyFrameSequence.push_back(kf);
 }
 template <typename T>
-SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(unsigned int key) const
+SE_KeyFrame<T>* SE_KeyFrameSequence<T>::getKeyFrame(const SE_TimeKey& key) const
 {
     typename _KeyFrameSequence::const_iterator it ;
     for(it = mKeyFrameSequence.begin() ; it != mKeyFrameSequence.end() ; it++)

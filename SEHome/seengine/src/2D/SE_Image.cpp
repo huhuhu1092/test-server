@@ -10,7 +10,7 @@
 #include "SE_Common.h"
 #include "SE_ImageData.h"
 #include "SE_ShaderProperty.h"
-#include "SE_Element.h"
+#include "SE_2DElement.h"
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
 #include "SE_DataValueDefine.h"

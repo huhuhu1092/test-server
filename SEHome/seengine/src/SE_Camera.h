@@ -7,7 +7,8 @@
 #include "SE_Common.h"
 #include "SE_Object.h"
 #include "SE_BoundingVolume.h"
-class SE_Camera : public SE_Object
+#include "SE_TreeStruct.h"
+class SE_Camera : public SE_Object, public SE_ListStruct<SE_Camera>
 {
 DECLARE_OBJECT(SE_Camera)
 public:

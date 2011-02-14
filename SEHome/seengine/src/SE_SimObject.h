@@ -6,6 +6,7 @@
 #include "SE_Spatial.h"
 #include "SE_Vector.h"
 #include "SE_Quat.h"
+#include "SE_TreeStruct.h"
 #include <vector>
 #include <string>
 class SE_RenderUnit;
@@ -14,22 +15,22 @@ class SE_BufferOutput;
 class SE_Vector3i;
 class SE_Mesh;
 class SE_RenderState;
-class SE_SimObject : public SE_Object
+class SE_Spatial;
+class SE_SimObject;
+class SE_SimObject : public SE_Object, public SE_ListStruct<SE_SimObject>
 {
     DECLARE_OBJECT(SE_SimObject)
 public:
     typedef std::vector<SE_RenderUnit*> RenderUnitVector;
-    SE_SimObject(const SE_SpatialID& parent = SE_SpatialID::INVALID);
-	void setSpatial(const SE_SpatialID& parent)
+    SE_SimObject(SE_Spatial* parent = NULL);
+	void setSpatial(SE_Spatial* parent)
 	{
 		mSpatial = parent;
 	}
-    /*
 	SE_Spatial* getSpatial()
 	{
 		return mSpatial;
 	}
-    */
     virtual ~SE_SimObject();
     virtual RenderUnitVector createRenderUnit();
 	virtual SE_RenderUnit* createWireRenderUnit();
@@ -121,7 +122,7 @@ public:
 private:
 	std::string mName;
 	SE_SimObjectID mID;
-	SE_SpatialID mSpatial;
+	SE_Spatial* mSpatial;
     SE_PropertySet* mPropertySet;
 	SE_Matrix4f mLocalMatrix;
 	SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];

@@ -25,6 +25,7 @@
 #include "SE_Renderer.h"
 #include "SE_StateTable.h"
 #include "SE_ElementSchema.h"
+#include "SE_ElementContent.h"
 #include "tinyxml.h"
 #include <map>
 #include <vector>
@@ -491,7 +492,7 @@ struct SE_ResourceManager::_Impl
 class _ElementContainer
 {
 public:
-	SE_ElementMap* elementMap;
+	SE_ElementSchemaMap* elementMap;
 	SE_ResourceManager* resourceManager;
 	std::string xmlName;
 	std::string structid;
@@ -1600,8 +1601,8 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-    SE_ElementShcema* elementSchema = new SE_ElementSchema;
-	element->seq = indent;
+    SE_ElementSchema* elementSchema = new SE_ElementSchema;
+	elementSchema->seq = indent;
     bool hasLayer = false;
 	bool hasPivotx = false;
 	bool hasPivoty = false;
@@ -1619,7 +1620,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 			std::string fullpathID;
 			if(parent)
 			{
-				fullpathID = std::string(parent->getName().getStr()) + "/" + value;
+				fullpathID = std::string(parent->name.getStr()) + "/" + value;
 			}
 			else
 			{
@@ -1680,7 +1681,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                elementSchame->layer = ival;
+                elementSchema->layer = ival;
                 hasLayer = true;
             }
             else
@@ -1692,7 +1693,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                elementSchame->pivotx = ival;
+                elementSchema->pivotx = ival;
             }
             else
             {
@@ -1737,13 +1738,13 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 
 	if(parent)
     {
-        parent->addChild(element);
+        parent->addChild(elementSchema);
         elementSchema->setParent(parent);
     }
     else
     {
         elementSchema->setParent(NULL);
-		pro->elementMap->setItem(element->getName(), element);
+		pro->elementMap->setItem(elementSchema->name, elementSchema);
     }
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
@@ -1751,7 +1752,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
 		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
-        m.handleXmlChild(element, pChild, i++);
+        m.handleXmlChild(elementSchema, pChild, i++);
     }
 }
 void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
@@ -1798,7 +1799,7 @@ void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlEle
 	{
 		LOGE("... mount point parent can not be NULL\n");
 	}
-	parent->mountPointSet = mp;
+	parent->mountPointSet.addMountPoint(mp);
 }
 void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -2930,10 +2931,10 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
 }
 static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
-    spatial->setParent(parent);
-	if(parent)
-	    parent->addChild(spatial);
+    //spatial->setParent(parent);
+	spatialManager->addSpatial(parent, spatial);
     return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
@@ -3573,7 +3574,7 @@ SE_StateMachine* SE_ResourceManager::getStateMachine(const char* stateTablePath)
 	SE_StateMachine* s = sms->getItem(strList[1].c_str());
 	return s;
 }
-const SE_ElementSchemaTable& SE_ResourceManager::getElementTable() const
+const SE_ElementSchemaTable& SE_ResourceManager::getElementSchemaTable() const
 {
 	return mImpl->mElementTable;
 }

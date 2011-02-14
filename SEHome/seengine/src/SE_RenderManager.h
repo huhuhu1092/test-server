@@ -22,7 +22,7 @@ public:
     //void setSceneTranslucent(const SE_SceneRenderSeq& index, bool translucent);
     //void setSceneCamera(const SE_SceneRenderSeq& index, SE_Camera* camera);
     //void setSceneBackground(const SE_SceneRenderSeq& index, const SE_Vector4f& background);
-    void addRenderUnit(SE_RenderUnit* ru, cosnt SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
+    void addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
     /*
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{
@@ -49,7 +49,6 @@ private:
             {
                 mRenderQueue[i] = new RenderUnitList;
             }
-			mRenderTargetID = 0;
 		}
 	};
     struct _SceneRenderUnit

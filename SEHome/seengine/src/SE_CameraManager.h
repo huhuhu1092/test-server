@@ -11,7 +11,9 @@ public:
 	~SE_CameraManager();
     SE_CameraID addCamera(SE_Camera* c);
 	SE_Camera* getCamera(const SE_CameraID& id);
-	void removeCamera(const SE_CameraID& id);
+	SE_Camera* removeCamera(const SE_CameraID& id);
+	void release(SE_Camera* c, int delay = SE_RELEASE_DELAY);
+	void release(const SE_CameraID& c , int delay = SE_RELEASE_DELAY);
 private:
 	SE_CameraManager(const SE_CameraManager&);
 	SE_CameraManager& operator=(const SE_CameraManager&);

@@ -48,6 +48,7 @@ SE_Application::SE_Application()
     mFpsFrameNum = 0;
 	mObjectCount = 0;
     mState = PREPARE;
+	mSeqNum = 0;
 }
 SE_Application::~SE_Application()
 {
@@ -322,7 +323,7 @@ SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
     }
 	return NULL;
 }
-bool SE_Application::addDelayDestry(SE_DelayDestroy* dd)
+bool SE_Application::addDelayDestroy(SE_DelayDestroy* dd)
 {
     _FindDelayDestroy fd;
     fd.src = dd;
@@ -338,7 +339,7 @@ void SE_Application::sendMessage(SE_Message* message)
 {
 	mMessageList.push_back(message);
 }
-int SE_Application::getMessageCount()
+size_t SE_Application::getMessageCount()
 {
 	return mMessageList.size();
 }

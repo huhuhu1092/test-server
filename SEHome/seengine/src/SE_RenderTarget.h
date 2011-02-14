@@ -2,6 +2,7 @@
 #define SE_RENDERTARGET_H
 #include "SE_ID.h"
 #include "SE_Vector.h"
+#include "SE_TreeStruct.h"
 class SE_Camera;
 class SE_ImageData;
 class SE_RenderTarget;

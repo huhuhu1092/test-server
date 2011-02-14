@@ -6,6 +6,12 @@
 #include "SE_ParamObserver.h"
 #include "SE_URI.h"
 #include "SE_Object.h"
+#include "SE_TimeKey.h"
+#include "SE_MountPoint.h"
+#include "SE_Layer.h"
+class SE_KeyFrameController;
+class SE_Spatial;
+class SE_Element;
 class SE_ElementTravel
 {
 public:
@@ -71,9 +77,13 @@ public:
     {
         return mLocalLayer;
     }
+	int getKeyFrameNum()
+	{
+		return mKeyFrameNum;
+	}
     void setName(const SE_StringID& name)
     {
-        mName = name
+        mName = name;
     }
     SE_StringID getName() const
     {
@@ -117,6 +127,10 @@ public:
     {
         mPivotY = py;
     }
+    void setMountPointRef(const SE_MountPointID& ref)
+    {
+        mMountPointID = ref;
+    }
     void setMountPointX(float x)
     {
         mMountPointX = x;
@@ -125,6 +139,31 @@ public:
     {
         mMountPointY = y;
     }
+    void clearMountPoint()
+    {
+        mMountPointSet.clearMountPoint();
+    }
+	void setTimeKey(const SE_TimeKey& key)
+	{
+		mTimeKey = key;
+	}
+	void setStartKey(const SE_TimeKey& key)
+	{
+		mStartKey = key;
+	}
+	void setEndKey(const SE_TimeKey& key)
+	{
+		mEndKey = key;
+	}
+    void addMountPoint(const SE_MountPoint& mountPoint)
+    {
+        mMountPointSet.addMountPoint(mountPoint);
+    }
+    void removeMountPoint(const SE_MountPointID& mountPointID)
+    {
+        mMountPointSet.removeMountPoint(mountPointID);
+    }
+    SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID) const;
     void setSpatialType(int spatialType)
     {
         mSpatialType = spatialType;
@@ -133,6 +172,14 @@ public:
     {
         mRenderQueueSeq = q;
     }
+    void setPrev(SE_Element* prev)
+	{
+		mPrevElement = prev;
+	}
+	void setNext(SE_Element* next)
+	{
+		mNextElement = next;
+	}
     void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
     void setRenderTargetID(const SE_RenderTargetID& renderTarget);
     void travel(SE_ElementTravel* travel);
@@ -171,8 +218,10 @@ protected:
     SE_KeyFrameController* mKeyFrameController;
     SE_MountPointSet mMountPointSet;
     /////////////
-    SE_ElementID mPrevElement;
-    SE_ElementID mNextElement;
+    SE_Element* mPrevElement;
+    SE_Element* mNextElement;
+    //SE_ElementID mPrevElement;
+    //SE_ElementID mNextElement;
     SE_SpatialID mSpatialID;
     SE_SimObjectID mSimObjectID;
     SE_PrimitiveID mPrimitiveID;

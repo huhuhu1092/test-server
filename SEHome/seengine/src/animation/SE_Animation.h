@@ -2,8 +2,10 @@
 #define SE_ANIMATION_H
 #include "SE_Time.h"
 #include "SE_ID.h"
+#include "SE_TreeStruct.h"
 class SE_Interpolate;
-class SE_Animation
+class SE_Animation;
+class SE_Animation : public SE_ListStruct<SE_Animation>
 {
 public:
     enum RUN_MODE {NOT_REPEAT, REPEAT, ONE_FRAME, REVERSE_NOT_REPEAT, REVERSE_REPEAT, REVERSE_ONE_FRAME};

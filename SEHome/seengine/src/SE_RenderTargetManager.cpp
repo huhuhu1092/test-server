@@ -25,7 +25,7 @@ SE_RenderTargetManager::~SE_RenderTargetManager()
 }
 SE_RenderTargetID SE_RenderTargetManager::addRenderTarget(SE_RenderTarget* renderTarget)
 {
-    return mRenderTargets.add(renderTarget);
+	return mRenderTargets.add(SE_RenderTargetID::NULLID, renderTarget);
     /*
     if(mCurrentIndex == RENDERTARGET_SIZE)
     {
@@ -51,7 +51,7 @@ SE_RenderTargetID SE_RenderTargetManager::addRenderTarget(SE_RenderTarget* rende
 }
 SE_RenderTarget* SE_RenderTargetManager::getRenderTarget(const SE_RenderTargetID& id)
 {
-    return mRenderTarges.find(id);
+    return mRenderTargets.find(id);
     /*
     if(id < 0 || id >= RENDERTARGET_SIZE)
         return NULL;

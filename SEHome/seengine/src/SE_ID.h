@@ -64,23 +64,23 @@ public:
     }
     bool isValid() const
     {
-        return id[0] != INVALILD.id[0] && id[1] != INVALID.id[1];
+        return id[0] != INVALID.id[0] && id[1] != INVALID.id[1];
     }
-    static bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    friend bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
     {
         return lid.id[0] == rid.id[0] && lid.id[1] == rid.id[1];
     }
-    static bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    friend bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
     {
         return (lid.id[0] <= rid.id[0]) ? ((lid.id[0] < rid.id[0]) ? true : (lid.id[1] < rid.id[1])) : false;
     }
-    static bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    friend bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
     {
         return (lid.id[0] >= rid.id[0]) ? ((lid.id[0] > rid.id[0]) ? true : (lid.id[1] > rid.id[1])) : false;
     }
-    static bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    friend bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
     {
-        return !this->operator==(lid, rid);
+        return !operator==(lid, rid);
     }
     int get(int index) const
     {
@@ -88,7 +88,7 @@ public:
     }
     void set(int index, int id)
     {
-        id[index] = id;
+        this->id[index] = id;
     }
     std::string toString() const;
 private:
@@ -124,22 +124,22 @@ class SE_ID
 public:
 	static SE_ImageDataID createImageDataID(const char* str= NULL);
 	static SE_MeshID createMeshID(const char* str = NULL);
-	static SE_SpatialID createSpatialID(const char* str = NULL);
+	//static SE_SpatialID createSpatialID(const char* str = NULL);
 	static SE_GeometryDataID createGeometryDataID(const char* str = NULL);
 	static SE_TextureCoordDataID createTextureCoordDataID(const char* str = NULL);
 	static SE_MaterialDataID createMaterialDataID(const char* str = NULL);
-	static SE_SceneID createSceneID(const char* str = NULL);
+	//static SE_SceneID createSceneID(const char* str = NULL);
 	static SE_ProgramDataID createProgramDataID(const char* str = NULL);
 	static SE_CommandID createCommandID(const char* str = NULL);
 	static SE_CommandFactoryID createCommandFactoryID(const char* str = NULL);
 	static SE_PrimitiveID createPrimitiveID(const char* str = NULL);
-    static SE_AnimationID createAnimationID(const char* str = NULL);
-    static SE_SimObjectID createSimObjectID(const char* str = NULL);
-	static SE_ElementID createElementID(const char* str = NULL);
+    //static SE_AnimationID createAnimationID(const char* str = NULL);
+    //static SE_SimObjectID createSimObjectID(const char* str = NULL);
+	//static SE_ElementID createElementID(const char* str = NULL);
     static SE_SkinJointControllerID createSkinJointControllerID(const char* str = NULL);
 	static SE_MountPointID createMountPointID(const char* str = NULL);
 	static SE_RendererID createRendererID(const char* str = NULL);
-    static SE_CameraID createCameraID(const char* str = NULL);
+    //static SE_CameraID createCameraID(const char* str = NULL);
 };
 ///////////////////////////
 /*

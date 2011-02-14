@@ -34,6 +34,7 @@ SE_Init2D::~SE_Init2D()
 
 void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	//resourceManager->loadImageTable("ImageTable1.xml");
@@ -64,6 +65,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     sceneManager->addSpatial(NULL, root);
 	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
 	renderManager->setBackground(SE_Vector3f(1, 1, 1));
+	*/
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)
@@ -75,6 +77,7 @@ SE_2DUpdateCameraCommand::~SE_2DUpdateCameraCommand()
 {}
 void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     SE_Vector3f location(0, 0, 10);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_Rect<int> viewport = elementManager->getViewport();
@@ -89,6 +92,7 @@ void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDel
 	SE_InputManager* inputManager = mApp->getInputManager();
     inputManager->removeMotionEventObserver(NULL);
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
+	*/
 }
 ////////////////
 SE_2DRunAllAnimation::SE_2DRunAllAnimation(SE_Application* app) : SE_Command(app)
@@ -100,6 +104,7 @@ class SE_RunAllAnimationTravel : public SE_SpatialTravel
 public:
     int visit(SE_Spatial* spatial)
     {
+		/*
 		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 		SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
 		SE_ElementID elementID = spatial->getElementID();
@@ -119,6 +124,7 @@ public:
 				cloneAnim->run();
 			}
 		}
+		*/
 		return 0;
     }
     int visit(SE_SimObject* simObject)
@@ -128,8 +134,10 @@ public:
 };
 void SE_2DRunAllAnimation::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
 	SE_SceneManager* sceneManager = mApp->getSceneManager();
 	SE_Spatial* root = sceneManager->getRoot();
 	SE_RunAllAnimationTravel rat;
 	root->travel(&rat, true);
+	*/
 }

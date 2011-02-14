@@ -4,8 +4,15 @@
 #include "SE_ID.h"
 #include "SE_TableManager.h"
 #include "SE_Layer.h"
+#include "SE_MountPoint.h"
+class SE_ElementSchemaVisitor
+{
+public:
+	virtual void visit(SE_ElementSchema* e) = 0;
+};
 class SE_Element;
 class SE_ElementManager;
+class SE_ElementContent;
 class SE_ElementSchema
 {
 public:
@@ -13,12 +20,18 @@ public:
     void addChild(SE_ElementSchema* ec);
     void setParent(SE_ElementSchema* p);
     void addContent(SE_ElementContent* ec);
+	int getContentNum()
+	{
+		return contents.size();
+	}
+	SE_ElementContent* getContent(int index);
+	void travel(SE_ElementSchemaVisitor* v);
 private:
-    SE_Element* createElement(SE_ElementManager* spatialManager, SE_Element* parent);
+    SE_Element* createElement(SE_ElementManager* elementManager, SE_Element* parent);
 public:
     SE_StringID name;
     SE_StringID fullPathName;
-    SE_MountPiontSet mountPointSet;
+    SE_MountPointSet mountPointSet;
     float pivotx, pivoty;
     float x, y, w, h;
     SE_Layer layer;

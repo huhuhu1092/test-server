@@ -4,6 +4,9 @@
 #include <list>
 #include <vector>
 template <typename T>
+class SE_TreeStructManager;
+
+template <typename T>
 class SE_TreeStruct
 {
     friend class SE_TreeStructManager<T>;

@@ -7,6 +7,7 @@
 #include "SE_Application.h"
 #include "SE_DelayDestroy.h"
 #include "SE_DynamicArray.h"
+#include "SE_Log.h"
 #include <list>
 #include <vector>
 /*
@@ -17,20 +18,50 @@ class SE_TreeStructManager
 {
 public:
     enum {MAX_SIZE = 2000000};
-    enum {RELEASE_DELAY, RELEASE_NO_DELAY};
-    enum {NO_ERROR, NO_SPACE, DUP_POINTER, EXCEPT_ERROR};
-    SE_TreeStructManager(int size = 1000, int maxSize = MAX_SIZE);
+    enum {SE_NO_ERROR, SE_NO_SPACE, SE_DUP_POINTER, SE_EXCEPT_ERROR};
+    SE_TreeStructManager(size_t size = 1000, size_t maxSize = MAX_SIZE);
     ~SE_TreeStructManager();
-    T* find(const SE_TreeStructID& id) const;
-    T* remove(const SE_TreeStructID& id) const;
-    void release(T* p, int delay = RELEASE_DELAY);
-    void release(const SE_TreeStructID& id, int delay = RELEASE_DELAY);
+    T* find(const SE_TreeStructID& id);
+    T* remove(const SE_TreeStructID& id);
+    void release(T* p, int delay = SE_RELEASE_DELAY);
+    void release(const SE_TreeStructID& id, int delay = SE_RELEASE_DELAY);
     //return is child's id
     SE_TreeStructID add(const SE_TreeStructID& parent, T* child);
     void add(T* parent, T* child)
     {
         parent->addChild(child);
     }
+	template <typename CONDITION>
+	std::vector<T*> remove_if(CONDITION condition)
+	{
+		struct _NodeData
+		{
+			_Node* node;
+			size_t index;
+		};
+		std::list<_NodeData> removedNode;
+		for(size_t i = 0 ; i < mNodes.size() ; i++)
+		{
+            _Node* node = &mNodes[i];
+			if(node->alloc && node->data && condition(node->data))
+			{
+				_NodeData nd;
+				nd.node = node;
+				nd.index = i;
+                removedNode.push_back(nd);
+			}
+		} 
+		std::list<T*> removeList;
+		std::list<_NodeData>::iterator it;
+		for(it = removedNode.begin() ; it != removedNode.end() ; it++)
+		{
+			T* data = removeNode(it->index, it->node);
+			removeList.push_back(data);
+		}
+		std::vector<T*> ret(removeList.size());
+		copy(removeList.begin(), removeList.end(), ret.begin());
+		return ret;
+	}
     T* getParent(const SE_TreeStructID& id) const;
     std::vector<T*> getChildren(const SE_TreeStructID& id) const;
     int getError() const
@@ -38,7 +69,7 @@ public:
         return mError;
     }
     void check();
-    int getAllocatedNodeNum() const;
+    size_t getAllocatedNodeNum() const;
     T* clone(const SE_TreeStructID& id);
 private:
     struct _Node
@@ -53,13 +84,12 @@ private:
         }
     };
 private:
-    SE_TreeStructID createID(int index);
+    SE_TreeStructID createID(size_t index);
     _Node* findNode(const SE_TreeStructID& id);
-    bool findIndex(int index)
+    bool findIndex(size_t index)
     {
         _NodeIndexList::iterator it;
         bool ret = false;
-        int index = id.get(0);
         for(it = mFreeNodeIndexList.begin() ; it != mFreeNodeIndexList.end() ; it++)
         {
             if(*it == index)
@@ -69,7 +99,7 @@ private:
     }
     void createFreeIndexList()
     {
-        for(int i = 0 ; i < mNodes.size() ; i++)
+        for(size_t i = 0 ; i < mNodes.size() ; i++)
         {
             _Node* node = &mNodes[i];
             if(!node->alloc)
@@ -79,26 +109,32 @@ private:
             }
         }
     }
+    typedef std::list<size_t> _NodeIndexList;
+	T* removeNode(size_t index, _Node* node);
+public:
+	template <typename FUNC>
+	void traverse(FUNC f)
+	{
+		_NodeIndexList::iterator it;
+		for(it = mBusyNodeIndexList.begin() ; it != mBusyNodeIndexList.end() ; it++)
+		{
+			size_t index = *it;
+			_Node* node = &mNodes[index];
+			f(node->data);
+		}
+	}
 private:
-    typedef std::list<int> _NodeIndexList;
     _NodeIndexList mFreeNodeIndexList;
+	_NodeIndexList mBusyNodeIndexList;
     SE_DynamicArray<_Node> mNodes;
     int mError;
 };
 ///////////////////////////////////////////////////////////////////
 
 template <typename T>
-SE_TreeStructManager<T>::SE_TreeStructManager(int size, int maxSize) : mNodes(size , maxSize), mError(0)
+SE_TreeStructManager<T>::SE_TreeStructManager(size_t size, size_t maxSize) : mNodes(size , maxSize), mError(0)
 {
-    /*
-    if(size <= 0)
-        return;
-    mNodes = new _Node[size];
-    if(!mNodes)
-        return;
-    mNodeSize = size;
-    */
-    for(int i = 0 ; i < mNodes.size() ; i++)
+    for(size_t i = 0 ; i < mNodes.size() ; i++)
     {
         mFreeNodeIndexList.push_back(i);
     }
@@ -106,7 +142,7 @@ SE_TreeStructManager<T>::SE_TreeStructManager(int size, int maxSize) : mNodes(si
 template <typename T>
 SE_TreeStructManager<T>::~SE_TreeStructManager()
 {
-    for(int i = 0 ; i < mNodes.size() ; i++)
+    for(size_t i = 0 ; i < mNodes.size() ; i++)
     {
         _Node* node = &mNodes[i];
         if(node->alloc)
@@ -119,12 +155,12 @@ SE_TreeStructManager<T>::~SE_TreeStructManager()
     }
 }
 template <typename T>
-SE_TreeStructID SE_TreeStructManager::createID(int index)
+SE_TreeStructID SE_TreeStructManager<T>::createID(size_t index)
 {
     return SE_TreeStructID(index, SE_Application::getInstance()->getSeqNum());
 }
 template <typename T>
-T* SE_TreeStructManager<T>::find(const SE_TreeStructID& id) const
+T* SE_TreeStructManager<T>::find(const SE_TreeStructID& id)
 {
     _Node* node = findNode(id);
     if(!node)
@@ -132,9 +168,9 @@ T* SE_TreeStructManager<T>::find(const SE_TreeStructID& id) const
     return node->data;
 }
 template <typename T>
-_Node* SE_TreeStructNode<T>::findNode(const SE_TreeStructID& id) const
+typename SE_TreeStructManager<T>::_Node* SE_TreeStructManager<T>::findNode(const SE_TreeStructID& id)
 {
-   int index = id.get(0);
+   size_t index = id.get(0);
    if(index < 0 || index >= mNodes.size()) 
        return NULL;
    _Node* node = &mNodes[index];
@@ -146,21 +182,11 @@ _Node* SE_TreeStructNode<T>::findNode(const SE_TreeStructID& id) const
    return node;    
 }
 template <typename T>
-T* SE_TreeStructManager::remove(const SE_TreeStructID& id)
+T* SE_TreeStructManager<T>::removeNode(size_t index, _Node* node)
 {
-    _Node* node = findNode(id);
-    if(!node)
-        return NULL;
     T* retData = node->data;
     node->alloc = false;
     node->data = NULL;
-    int index = id.get(0);
-#ifdef _DEBUG
-    {
-        bool ret = findIndex(index);
-        SE_ASSERT(!ret);
-    }
-#endif
     _Node* parentNode = findNode(node->parent);
     if(parentNode)
     {
@@ -169,8 +195,9 @@ T* SE_TreeStructManager::remove(const SE_TreeStructID& id)
     }
     node->parent = SE_TreeStructID::NULLID;
     mFreeNodeIndexList.push_back(index);
+	mBusyNodeIndexList.remove(index);
     std::vector<T*> children = retData->getChildren();
-    for(int i = 0 ; i < children.size() ; i++)
+    for(size_t i = 0 ; i < children.size() ; i++)
     {
         T* cc = children[i];
         remove(cc->getID());
@@ -181,11 +208,26 @@ T* SE_TreeStructManager::remove(const SE_TreeStructID& id)
     return retData;
 }
 template <typename T>
+T* SE_TreeStructManager<T>::remove(const SE_TreeStructID& id)
+{
+    _Node* node = findNode(id);
+    if(!node)
+        return NULL;
+    size_t index = id.get(0);
+#ifdef _DEBUG
+    {
+        bool ret = findIndex(index);
+        SE_ASSERT(!ret);
+    }
+#endif
+	return removeNode(index, node);
+}
+template <typename T>
 void SE_TreeStructManager<T>::release(T* p, int delay)
 {
     if(p == NULL)
         return;
-    if(delay == RELEASE_NO_DELAY)
+    if(delay == SE_RELEASE_NO_DELAY)
     {
         delete p;
     }
@@ -213,7 +255,7 @@ void SE_TreeStructManager<T>::release(const SE_TreeStructID& id, int delay)
 template <typename T>
 SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T* child)
 {
-    if(parentID != NULLID)
+	if(parentID != SE_TreeStructID::NULLID)
     {
         _Node* parentNode = findNode(parentID);
         if(!parentNode)
@@ -227,8 +269,9 @@ SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T*
         }
         parentNode->data->addChild(child);
     }
-    int index = mFreeNodeIndexList.front();
+    size_t index = mFreeNodeIndexList.front();
     mFreeNodeIndexList.pop_front();
+	mBusyNodeIndexList.push_back(index);
     SE_ASSERT(index >= 0 && index < mNodes.size());
     _Node* node = &mNodes[index];
     node->alloc = true;
@@ -237,7 +280,7 @@ SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T*
     SE_TreeStructID childID = createID(index);
     child->setID(childID);
     std::vector<T*> children = child->getChildren();
-    for(int i = 0 ; i < children.size() ; i++)
+    for(size_t i = 0 ; i < children.size() ; i++)
     {
         T* cc = children[i];
         add(childID, cc);
@@ -254,9 +297,9 @@ void SE_TreeStructManager<T>::check()
     {
         LOGE("error: %d\n", mError);
     }
-    int allocNum = getAllocatedNodeNum();
-    int num = 0;
-    for(int i = 0 ; i < mNodes.size() ; i++)
+    size_t allocNum = getAllocatedNodeNum();
+    size_t num = 0;
+    for(size_t i = 0 ; i < mNodes.size() ; i++)
     {
         if(mNodes[i].alloc)
             num++;
@@ -267,10 +310,10 @@ void SE_TreeStructManager<T>::check()
     }
 }
 template <typename T>
-int SE_TreeStructManager<T>::getAllocatedNodeNum() const
+size_t SE_TreeStructManager<T>::getAllocatedNodeNum() const
 {
-    int size = mFreeNodeIndexList.size();
-    return mNodeSize - size;
+    size_t size = mFreeNodeIndexList.size();
+    return mNodes.size() - size;
 }
 template <typename T>
 T* SE_TreeStructManager<T>::getParent(const SE_TreeStructID& id) const

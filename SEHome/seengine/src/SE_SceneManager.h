@@ -38,6 +38,7 @@ public:
     {
         mHeight = height;
     }
+
 private:
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);

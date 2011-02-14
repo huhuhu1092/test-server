@@ -2,6 +2,7 @@
 #include "SE_Application.h"
 #include "SE_Element.h"
 #include "SE_ElementManager.h"
+#include "SE_Utils.h"
 SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
 {
     SE_Element* e = new SE_Element;
@@ -49,4 +50,24 @@ void SE_ElementSchema::setParent(SE_ElementSchema* p)
 vodi SE_ElementSchema::addContent(SE_ElementContent* ec)
 {
     contents.push_back(ec);
+}
+void SE_ElementSchema::travel(SE_ElementSchemaVisitor* v)
+{
+	v->visit(this);
+	_ElementList::iterator it;
+	for(it = children.begin() ; it != children.end() ; it++)
+	{
+		SE_ElementShcema* ec = *it;
+		ec->travel(v);
+	}
+}
+SE_ElementContent* SE_ElementSchema::getContent(int index)
+{
+	_ElementContentList::const_iterator it = listElementRef(contents, index);
+	if(it != contents.end())
+	{
+		return *it;
+	}
+	else
+		return NULL
 }

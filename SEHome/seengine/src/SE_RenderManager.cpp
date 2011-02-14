@@ -67,9 +67,9 @@ void SE_RenderManager::sort()
     for(int i = 0 ;  i < SE_MAX_RENDERSCENE_SIZE ; i++)
     {
         _SceneRenderUnit* sru = mSceneRenderUnit[i];
-	    sru->renderTargetList.sort(SE_RenderManager::CompareRenderTarget);
+		sru->renderTargetUnit.sort(SE_RenderManager::CompareRenderTarget);
 	    std::list<_RenderTargetUnit*>::iterator it;
-	    for(it = sru->renderTargetList.begin() ; it != sru->renderTargetList.end() ; it++)
+	    for(it = sru->renderTargetUnit.begin() ; it != sru->renderTargetUnit.end() ; it++)
 	    {
 		    _RenderTargetUnit* rt = *it;
             for(int i = 0 ; i < RQ_NUM ; i++)
@@ -105,14 +105,14 @@ void SE_RenderManager::draw()
         if(!sru->needDraw)
             continue;
         std::list<_RenderTargetUnit*>::iterator it;
-        for(it = sru->renderTargetList.begin() ; it != sru->renderTargetList.end() ; it++)
+        for(it = sru->renderTargetUnit.begin() ; it != sru->renderTargetUnit.end() ; it++)
         {
             _RenderTargetUnit* rt = *it;
             SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
             SE_Camera* camera = renderTarget->getCamera();
 		    if(renderTarget->prepare() && camera)
 		    {
-				m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
+				SE_Matrix4f m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
 				SE_Rect<int> rect = camera->getViewport();
 			    SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
                 if(renderTarget->getClearTarget())
@@ -218,7 +218,7 @@ SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(_SceneRenderUn
 void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq)
 {
     SE_ASSERT(sceneRenderSeq >= 0 && sceneRenderSeq < SE_MAX_RENDERSCENE_SIZE);
-    _SceneRenderUnit* sceneRenderUnit = mSceneRenderUnit[sceneRenderSeq];
+    _SceneRenderUnit* sceneRenderUnit = mSceneRenderUnit[sceneRenderSeq.toInt()];
     _RenderTargetUnit* rt = findTarget(sceneRenderUnit, renderTarget);
 	if(rt == NULL)
 	{

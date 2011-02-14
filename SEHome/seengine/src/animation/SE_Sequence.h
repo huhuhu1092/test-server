@@ -12,12 +12,12 @@ public:
         SE_StringID imageref;
         SE_MountPointID mpref;
     };
-    void setFrame(unsigned int key, const _Frame& f);
-	_Frame getFrame(unsigned int) const;
+    void setFrame(const SE_TimeKey& key, const _Frame& f);
+	_Frame getFrame(const SE_TimeKey& key) const;
     SE_MountPoint getMountPoint(const SE_MountPointID& id) const;
 	void addMountPoint(const SE_MountPoint& mp);
 	std::vector<SE_MountPoint> getMountPoint() const;
-	std::vector<unsigned int> getKeys() const
+	std::vector<SE_TimeKey> getKeys() const
 	{
 		return mSequenceFrame.getKeys();
 	}

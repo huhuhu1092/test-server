@@ -4,15 +4,15 @@ template <typename T>
 class SE_DynamicArray
 {
 public:
-    enum {NO_ERROR, OVERFLOW, INDEX_ERROR};
+    enum {SE_NO_ERROR, SE_OVERFLOW, SE_INDEX_ERROR};
     //size must > 1
-    SE_DynamicArray(int size, int maxSize);
+    SE_DynamicArray(size_t size, size_t maxSize);
 	SE_DynamicArray(const SE_DynamicArray& right);
 	SE_DynamicArray& operator=(const SE_DynamicArray& right);
     ~SE_DynamicArray();
-    T& operator[](int index);
-    const T& operator[](int index) const;
-    int size() const
+    T& operator[](size_t index);
+    const T& operator[](size_t index) const;
+    size_t size() const
     {
         return mSize;
     }
@@ -32,17 +32,17 @@ public:
 	
 private:
     T* mArray;
-    int mSize;
-    int mMaxSize;
+    size_t mSize;
+    size_t mMaxSize;
     T mInvalid;
     int mError;
 };
 template <typename T>
-SE_DynamicArray<T>::SE_DynamicArray(int size, int maxsize) : mArray(NULL), mSize(0), mMaxSize(0), mError(0)
+SE_DynamicArray<T>::SE_DynamicArray(size_t size, size_t maxsize) : mArray(NULL), mSize(0), mMaxSize(0), mError(0)
 {
-    if(size <= 1)
+    if(size < 1)
         return;
-    if(maxsize <= 1)
+    if(maxsize < 1)
         return;
     mArray = new T[size];
     mSize = size;
@@ -57,16 +57,16 @@ SE_DynamicArray<T>::~SE_DynamicArray()
 template <typename T>
 void SE_DynamicArray<T>::expand()
 {
-    int size = mSize + (mSize * 3) / 4;
+    size_t size = mSize + (mSize * 3) / 4;
     if(size > mMaxSize)
     {
-        mError = OVERFLOW;
+        mError = SE_OVERFLOW;
         return;
     }
     T* newArray = new T[size];
     if(!newArray)
     {
-        mError = OVERFLOW;
+        mError = SE_OVERFLOW;
         return;
     }
     for(int i = 0 ; i < mSize ; i++)
@@ -79,7 +79,7 @@ void SE_DynamicArray<T>::expand()
     delete[] oldArray;
 }
 template <typename T>
-T& SE_DynamicArray<T>::operator[](int index)
+T& SE_DynamicArray<T>::operator[](size_t index)
 {
     if(index >= 0 && index < mSize)
     {
@@ -87,16 +87,16 @@ T& SE_DynamicArray<T>::operator[](int index)
     }
     else
     {
-        mError = INDEX_ERROR;
+        mError = SE_INDEX_ERROR;
         return mInvalid;
     }
 }
 template <typename T>
-const T& SE_DynamicArray<T>::operator[](int index) const
+const T& SE_DynamicArray<T>::operator[](size_t index) const
 {
     if(index < 0 || index >= mSize)
     {
-        mError = INDEX_ERROR;
+        mError = SE_INDEX_ERROR;
         return mInvalid;
     }
     return mArray[index];
@@ -111,7 +111,7 @@ SE_DynamicArray<T>::SE_DynamicArray(const SE_DynamicArray& right)
 	mArray = new T[mSize];
 	if(!mArray)
 		return;
-	for(int i = 0 ; i < mSize ; i++)
+	for(size_t i = 0 ; i < mSize ; i++)
 	{
 		mArray[i] = right.mArray[i];
 	}
@@ -129,7 +129,7 @@ SE_DynamicArray<T>& SE_DynamicArray<T>::operator=(const SE_DynamicArray& right)
 	mMaxSize = right.mMaxSize;
 	mError = right.mError;
 	mInvalid = right.mInvalid;
-	for(int i = 0 ; i < mSize ; i++)
+	for(size_t i = 0 ; i < mSize ; i++)
 	{
 		mArray[i] = right.mArray[i];
 	}

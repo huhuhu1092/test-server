@@ -13,7 +13,6 @@ public:
     {
         return !this->operator==(right);
     }
-protected:
     virtual bool eq(const SE_DelayDestroy& right) const = 0;
     virtual void* getPtr() const = 0;
 };
@@ -30,7 +29,7 @@ public:
         delete pointer;
     }
 protected:
-    bool eq(const SE_DelayDestroy& right)
+    bool eq(const SE_DelayDestroy& right) const
     {
         return pointer == right.getPtr();
     }

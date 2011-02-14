@@ -7,6 +7,7 @@
 #include "SE_TableManager.h"
 #include "SE_MountPoint.h"
 #include "SE_ColorEffectController.h"
+#include "SE_TimeKey.h"
 class SE_Element;
 class SE_ActionElement;
 class SE_ActionUnit
@@ -14,7 +15,7 @@ class SE_ActionUnit
 public:
 	SE_ActionUnit()
 	{
-		mPivotX = mPivotY = INVALID_GEOMINFO;
+		mPivotX = mPivotY = 0;
 	}
     virtual ~SE_ActionUnit() {}
     SE_StringID getID() const
@@ -61,9 +62,9 @@ public:
 	{
 		return NULL;
 	}
-    virtual std::vector<unsigned int> getKeys() const
+    virtual std::vector<SE_TimeKey> getKeys() const
     {
-        return std::vector<unsigned int>();
+        return std::vector<SE_TimeKey>();
     }
 	virtual SE_StringID getURI() const
 	{
@@ -158,7 +159,7 @@ public:
         return mSequenceFrameRef;
     }
 	SE_Element* createElement();
-    std::vector<unsigned int> getKeys() const;
+    std::vector<SE_TimeKey> getKeys() const;
 	SE_StringID getURI() const
 	{
 		return mSequenceFrameRef;
@@ -270,8 +271,8 @@ public:
 	public:
 		SE_Layer layer;
         SE_KeyFrameSequence<SE_ActionUnit*> sequences;
-		unsigned int startkey;
-		unsigned int endkey;
+		SE_TimeKey startkey;
+		SE_TimeKey endkey;
 		_ActionLayer()
 		{
 			startkey = 0;

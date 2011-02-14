@@ -1,5 +1,6 @@
 #ifndef SE_2DELEMENT_H
 #define SE_2DELEMENT_H
+#include "SE_Element.h"
 #include "SE_Layer.h"
 #include "SE_Vector.h"
 #include "SE_Quat.h"
@@ -15,6 +16,7 @@
 #include "SE_URI.h"
 #include <string>
 #include <list>
+#include <vector>
 #include <map>
 class SE_Spatial;
 class SE_Element;
@@ -33,14 +35,6 @@ class SE_Surface;
 class SE_RectPrimitive;
 class SE_StateMachine;
 class SE_ParamValueList;
-class SE_ElementTravel
-{
-public:
-    virtual ~SE_ElementTravel()
-    {}
-    virtual void visit(SE_Element* e) = 0;
-};
-
 /*
     SE_Element is a tree structure. SE_Element is the node , it can has child.
 	An element which has content can not has child, it responsibility is just to create
@@ -642,10 +636,9 @@ private:
 	void setSurface(SE_Surface* surface);
 	void calculateValue();
 	SE_XMLTABLE_TYPE getBackgroundType();
-	//void getBackgroundBound(int& width, int& height);
 	void getExtractImageProperty(SE_XMLTABLE_TYPE& t, int& width, int& height);
 	SE_ImageElement* createImageElement(const SE_StringID& textureURL, SE_ImageData*& imageData);
-	bool isTextureEnd(_ElementList::const_iterator textureIt[4], SE_Element* texture[4]);
+	bool isTextureEnd(std::vector<SE_Element*>::iterator textureIt[4], SE_Element* texture[4]);
 	SE_Element* mergeElement(SE_Element* background, SE_Element* channel, SE_Element* texture[4]);
 	void mergeElement();
 	int uriToInt(const SE_StringID& uri);

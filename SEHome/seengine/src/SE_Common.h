@@ -64,7 +64,10 @@ enum SE_XMLTABLE_TYPE {SE_INVALID_TABLE,
 					   SE_COLOREFFECT_TABLE,
                        SE_SEQUENCE_TABLE, 
 					   SE_TABLE_TYPE_NUM};
-extern const int SE_MAX_RENDERSCENE_SIZE;
+//extern const int SE_MAX_RENDERSCENE_SIZE;
+enum {SE_MAX_RENDERSCENE_SIZE = 128};
+enum {SE_RELEASE_DELAY, SE_RELEASE_NO_DELAY};
+
 extern const float INVALID_GEOMINFO;
 extern const char* BAD_STR;
 //for pass data to opengl
@@ -77,6 +80,47 @@ struct _Vector2f
     float d[2];
 };
 extern const char* SE_SEP;
+class SE_SceneRenderSeq
+{
+public:
+	SE_SceneRenderSeq(int i)
+	{
+		mSeq = i;
+	}
+	friend bool operator==(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq == r.mSeq;
+	}
+	friend bool operator!=(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq != r.mSeq;
+	}
+	friend bool operator<(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq < r.mSeq;
+	}
+	friend bool operator<=(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq <= r.mSeq;
+	}
+	friend bool operator>=(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq >= r.mSeq;
+	}
+	friend bool operator>(const SE_SceneRenderSeq& l, const SE_SceneRenderSeq& r)
+	{
+		return l.mSeq > r.mSeq;
+	}
+	int toInt() const
+	{
+		return mSeq;
+	}
+
+private:
+	int mSeq;
+};
+
+/////////////////////////
 template <class T>
 class SE_Wrapper
 {

@@ -163,7 +163,11 @@ std::string SE_CommonID::toString() const
 {
     char buf[41];
     memset(buf, 0, 41);
+#if defined(WIN32)
+    _snprintf(buf, 40, "%d%d%d%d", id[0], id[1], id[2], id[3]);
+#else
     snprintf(buf, 40, "%d%d%d%d", id[0], id[1], id[2], id[3]);
+#endif
     std::string str = buf;
     return str;
 }
@@ -191,7 +195,11 @@ std::string SE_TreeStructID::toString() const
 {
     char buf[21];
     memset(buf, 0, 21);
+#if defined(WIN32)
+    _snprintf(buf, 20, "%d%d", id[0], id[1]);
+#else
     snprintf(buf, 20, "%d%d", id[0], id[1]);
+#endif
     std::string str = buf;
     return str;
 }
@@ -205,11 +213,13 @@ SE_MeshID SE_ID::createMeshID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 }
+/*
 SE_SpatialID SE_ID::createSpatialID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 
 }
+*/
 SE_GeometryDataID SE_ID::createGeometryDataID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
@@ -224,10 +234,12 @@ SE_MaterialDataID SE_ID::createMaterialDataID(const char* str)
     return SE_Application::getInstance()->createCommonID();
 
 }
+/*
 SE_SceneID SE_ID::createSceneID(const char* str)
 {
     return SE_StringID(str);
 }
+*/
 SE_ProgramDataID SE_ID::createProgramDataID(const char* str)
 {
     return SE_StringID(str);
@@ -248,21 +260,27 @@ SE_PrimitiveID SE_ID::createPrimitiveID(const char* str)
     return SE_Application::getInstance()->createCommonID();
 
 }
+/*
 SE_AnimationID SE_ID::createAnimationID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 
 }
+*/
+/*
 SE_SimObjectID SE_ID::createSimObjectID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 
 }
+*/
+/*
 SE_ElementID SE_ID::createElementID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 
 }
+*/
 SE_SkinJointControllerID SE_ID::createSkinJointControllerID(const char* str)
 {
     return SE_StringID(str);
@@ -277,8 +295,10 @@ SE_RendererID SE_ID::createRendererID(const char* str)
     return SE_StringID(str);
 
 }
+/*
 SE_CameraID SE_ID::createCameraID(const char* str)
 {
     return SE_Application::getInstance()->createCommonID();
 
 }
+*/

@@ -5,6 +5,7 @@
 #include "SE_Vector.h"
 #include "SE_MountPoint.h"
 #include "SE_TableManager.h"
+#include "SE_TimeKey.h"
 #include "SE_Vector.h"
 class SE_Element;
 class SE_ChannelInput
@@ -217,9 +218,9 @@ public:
 	{
 		return mMountPointSet.getMountPoint(id);
 	}
-    void addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame);
-    SE_ColorEffectFrame* getKeyFrame(unsigned int key) const;
-    std::vector<unsigned int> getKeys() const;
+    void addKeyFrame(const SE_TimeKey& key, SE_ColorEffectFrame* frame);
+    SE_ColorEffectFrame* getKeyFrame(const SE_TimeKey& key) const;
+    std::vector<SE_TimeKey> getKeys() const;
 	int getKeyFrameNum();
 private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;

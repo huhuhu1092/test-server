@@ -1587,7 +1587,7 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	renderTarget->create();
 	return imageElement;
 }
-bool SE_ColorEffectElement::isTextureEnd(_ElementList::const_iterator textureIt[4], SE_Element* texture[4])
+bool SE_ColorEffectElement::isTextureEnd(std::vector<SE_Element*>::iterator textureIt[4], SE_Element* texture[4])
 {
 	bool ret = false;
 	for(int i = 0 ; i < MARK_NUM ; i++)
@@ -1605,19 +1605,21 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 												SE_Element* texture[4])
 {
 	SE_Element* element = NULL;
-    if(!background->getChildren().empty() && !channel->getChildren().empty())
+    std::<SE_Element*> backgroundChildren = background->getChildren();
+    std::<SE_Element*> channelChildren = channel->getChildren();
+    if(!backgroundChildren.empty() && !channelChildren.empty())
 	{
 		element = background->clone();
-		_ElementList::const_iterator backgroundIt = background->getChildren().begin();
-		_ElementList::const_iterator channelIt = channel->getChildren().begin();
-		_ElementList::const_iterator textureIt[MARK_NUM];
+        std::<SE_Element*>::iterator backgroundIt = backgroundChildren.begin();
+        std::<SE_Element*>::iterator channelIt = channelChildren.begin();
+        std::<SE_Element*>::iterator textureIt[MARK_NUM];
 		for(int i = 0 ; i < MARK_NUM ; i++)
 		{
 			if(texture[i])
 				textureIt[i] = texture[i]->getChildren().begin();
 		}
-		while(backgroundIt != background->getChildren().end() &&
-			channelIt != channel->getChildren().end() && !isTextureEnd(textureIt, texture))
+		while(backgroundIt != backgroundChildren.end() &&
+			channelIt != channelChildren.end() && !isTextureEnd(textureIt, texture))
 		{
 			SE_Element* bc = *backgroundIt;
 			SE_Element* cc = *channelIt;
@@ -1637,7 +1639,7 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 					textureIt[i]++;
 			}
 		}
-		SE_ASSERT(backgroundIt == background->getChildren().end() && channelIt == channel->getChildren().end());
+		SE_ASSERT(backgroundIt == backgroundChildren.end() && channelIt == channelChildren.end());
 		for(int i = 0 ; i < MARK_NUM ; i++)
 		{
 			if(texture[i])
