@@ -203,6 +203,16 @@ std::string SE_TreeStructID::toString() const
     std::string str = buf;
     return str;
 }
+void SE_TreeStructID::write(SE_BufferOutput& output)
+{
+	output.writeInt(id[0]);
+	output.writeInt(id[1]);
+}
+void SE_TreeStructID::read(SE_BufferInput& input)
+{
+	id[0] = input.readInt();
+	id[1] = input.readInt();
+}
 ////////////////////////////////////////
 
 SE_ImageDataID SE_ID::createImageDataID(const char* str)

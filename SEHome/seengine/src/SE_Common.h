@@ -83,7 +83,7 @@ extern const char* SE_SEP;
 class SE_SceneRenderSeq
 {
 public:
-	SE_SceneRenderSeq(int i)
+	SE_SceneRenderSeq(int i = 0)
 	{
 		mSeq = i;
 	}

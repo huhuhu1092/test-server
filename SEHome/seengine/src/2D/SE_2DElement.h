@@ -440,15 +440,16 @@ public:
 	SE_ImageElement(const SE_StringID& uri);
 	~SE_ImageElement();
 	void spawn();
-	void measure();
+	void layout();
 	SE_Spatial* createSpatial();
-	void update(unsigned int);
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
 protected:
 	bool isValid();
 	virtual void setImageData(SE_RectPrimitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
+	void initImage();
 private:
 	enum {IMG_SIZE = 5};
 	struct _ImageUnitData
@@ -477,10 +478,10 @@ public:
 	void setElementImage(SE_RawImage* image);
 	void setImage(const SE_ImageDataID& id, SE_ImageData* imageData);
 	void spawn();
-	void measure();
-	void update(unsigned int key);
+	void layout();
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
     void setContentChild(SE_Element* c)
 	{
 		mContentChild = c;
@@ -489,6 +490,7 @@ public:
 protected:
 	void setImageData(SE_RectPrimitive* primitive);
 	void setSurface(SE_Surface* surface);
+	void init();
 private:
 	SE_ImageDataID mImageDataID;
 	SE_ImageData* mImageData;
@@ -501,9 +503,9 @@ public:
 	SE_ActionElement(const SE_StringID& uri);
 	void spawn();
 	SE_Spatial* createSpatial();
-	void update(unsigned int key);
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
 	void addHeadElement(SE_Element* e)
 	{
 		mHeadElementList.push_back(e);
@@ -519,7 +521,7 @@ public:
 	SE_StateTableElement(const SE_StringID& uri);
 	void update(unsigned int key);
 	void spawn();
-	void measure();
+	void layout();
     void update(const SE_AddressID& address, const SE_Value& value);
 
 	SE_Spatial* createSpatial();
@@ -539,9 +541,9 @@ public:
 	SE_SequenceElement(const SE_StringID& uri);
     void spawn();
 	SE_Spatial* createSpatial();
-	void update(unsigned int key);
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
 	int getKeyFrameNum();
 private:
 	SE_Sequence* mSequence;
@@ -552,12 +554,12 @@ class SE_ColorEffectControllerElement : public SE_Element
 public:
 	SE_ColorEffectControllerElement(const SE_StringID& uri);
 	~SE_ColorEffectControllerElement();
-	void update(unsigned int key);
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
 
 	SE_Spatial* createSpatial();
 	void spawn();
-	void measure();
+	void layout();
 private:
 	SE_ColorEffectController* mColorEffectController;
 	SE_Element* mCurrentElement;
@@ -623,12 +625,12 @@ public:
 	}
 	SE_ColorEffectElement();
 	~SE_ColorEffectElement();
-	void update(unsigned int key);
+	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
 
 	SE_Spatial* createSpatial();
 	void spawn();
-	void measure();
+	void layout();
 private:
 	void setImageData(SE_RectPrimitive* primitive);
 	void setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType);

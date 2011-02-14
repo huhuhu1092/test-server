@@ -26,6 +26,7 @@
 #include "SE_StateTable.h"
 #include "SE_ElementSchema.h"
 #include "SE_ElementContent.h"
+#include "SE_SpatialManager.h"
 #include "tinyxml.h"
 #include <map>
 #include <vector>
@@ -3071,6 +3072,10 @@ void SE_ResourceManager::releaseHardwareResource()
         shader->releaseHardwareResource();
     }
 }
+SE_Element* SE_ResourceManager::loadScene(const char* sceneName)
+{
+	return NULL;
+}
 void SE_ResourceManager::loadElementSchema(const char* elementResourceName)
 {
 	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + elementResourceName;
@@ -3085,7 +3090,7 @@ void SE_ResourceManager::loadElementSchema(const char* elementResourceName)
 	if(!elementMap)
 	{
 		elementMap = new SE_ElementSchemaMap;
-		mImpl->mElementTable.setItem(elementResourceName, elementMap);
+		mImpl->mElementSchemaTable.setItem(elementResourceName, elementMap);
 	}
 	else
 	{
@@ -3576,7 +3581,7 @@ SE_StateMachine* SE_ResourceManager::getStateMachine(const char* stateTablePath)
 }
 const SE_ElementSchemaTable& SE_ResourceManager::getElementSchemaTable() const
 {
-	return mImpl->mElementTable;
+	return mImpl->mElementSchemaTable;
 }
 const SE_ImageTable& SE_ResourceManager::getImageTable() const
 {

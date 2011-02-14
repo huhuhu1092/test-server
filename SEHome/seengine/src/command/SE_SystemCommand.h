@@ -70,7 +70,7 @@ public:
 
 };
 /////////////////////////////////
-class SE_FunctionCommand : public Command
+class SE_FunctionCommand : public SE_Command
 {
 public:
     SE_FunctionCommand(SE_Application* app);

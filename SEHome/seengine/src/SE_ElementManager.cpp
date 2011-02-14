@@ -1,6 +1,7 @@
 #include "SE_ElementManager.h"
 #include "SE_Element.h"
 #include "SE_Utils.h"
+#include <algorithm>
 SE_ElementID SE_ElementManager::addElement(const SE_ElementID& parent, SE_Element* e)
 {
     if(e == NULL)
@@ -30,23 +31,23 @@ SE_Element* SE_ElementManager::getParent(const SE_ElementID& id)
         return NULL;
     return mElements.getParent(id);
 }
-std::vector<SE_Element*> SE_ElementManager::getChildren(const SE_ElementID& id) const
+std::vector<SE_Element*> SE_ElementManager::getChildren(const SE_ElementID& id)
 {
     return mElements.getChildren(id);
 }
-void SE_ElementManager::releaseElement(SE_Element* element, int delay = SE_TreeStructManager<SE_Element>::RELEASE_DELAY)
+void SE_ElementManager::releaseElement(SE_Element* element, int delay)
 {
     mElements.release(element, delay);
 }
-void SE_ElementManager::releaseElement(const SE_ElementID& id, int delay = SE_TreeStructManager<SE_Element>::RELEASE_DELAY)
+void SE_ElementManager::releaseElement(const SE_ElementID& id, int delay)
 {
-    mElements.release(element, delay);
+    mElements.release(id, delay);
 }
 void SE_ElementManager::addEvent(SE_ElementEvent* event)
 {
     if(!event->isNeedMerge())
     {
-        mElementEventList->push_back(event);
+        mElementEventList.push_back(event);
     }
     else
     {
@@ -66,7 +67,7 @@ void SE_ElementManager::addEvent(SE_ElementEvent* event)
         if(merged)
             delete event;
         else
-            mElementEventList->push_back(event);
+            mElementEventList.push_back(event);
     }
 }
 void SE_ElementManager::update()
@@ -74,7 +75,7 @@ void SE_ElementManager::update()
     std::list<SE_ElementEvent*> retList = mElementEventList;
     mElementEventList.clear();
     std::list<SE_ElementEvent*>::iterator it;
-    for(it = retList.begin(); it != retlist.end() ; it++)
+    for(it = retList.begin(); it != retList.end() ; it++)
     {
         SE_ElementEvent* e = *it;
         e->run();

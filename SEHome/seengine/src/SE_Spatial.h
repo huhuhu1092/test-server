@@ -45,6 +45,7 @@ public:
     SE_Matrix3f getLocalRotateMatrix();
     SE_Quat getLocalRotate();
     SE_Vector3f getLocalScale();
+	/*
     SE_SpatialID getSpatialID()
     {
         return mSpatialID;
@@ -53,6 +54,7 @@ public:
     {
         mSpatialID = spatialID;
     }
+	*/
     void setLocalTranslate(const SE_Vector3f& translate);
     void setLocalRotate(const SE_Quat& rotate);
     void setLocalRotate(const SE_Matrix3f& rotate);
@@ -231,7 +233,7 @@ public:
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
-	virtual SPATIAL_TYPE getSpatialType();
+	virtual int getSpatialType();
 protected:
     //void updateWorldTranslate();
     //void updateWorldRotate();
@@ -274,7 +276,6 @@ private:
     SE_Vector3f mWorldScale;
     SE_Quat mWorldRotate;
 
-    SE_SpatialID mSpatialID;
     int mState;
     int mBVType;
     SE_Layer mLocalLayer;

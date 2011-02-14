@@ -1,12 +1,15 @@
 #ifndef SE_SCENE_H
 #define SE_SCENE_H
 #include "SE_ID.h"
+#include "SE_Common.h"
 #include "SE_TreeStruct.h"
+#include "SE_Vector.h"
 class SE_SceneManager;
 class SE_RenderManager;
 class SE_KeyEvent;
 class SE_MotionEvent;
 class SE_Scene;
+class SE_Element;
 class SE_Scene : public SE_ListStruct<SE_Scene>
 {
     friend class SE_SceneManager;

@@ -109,7 +109,7 @@ void SE_AnimationManager::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     _DoUpdate du;
 	du.realDelta = realDelta;
 	du.simulateDelta = simulateDelta;
-	mAnimationMap.traverse(du);
+	mAnimationMap.traverseList(du);
 	/*
     _AnimationMap::iterator it;
     for(it = mAnimationMap.begin() ; it != mAnimationMap.end() ; it++)

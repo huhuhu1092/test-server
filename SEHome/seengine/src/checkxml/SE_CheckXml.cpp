@@ -543,7 +543,7 @@ static void checkDocument(const char* fileName, TiXmlDocument* doc, const char**
 static void checkElementTable(const char* fileName)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	resourceManager->loadElement(fileName);
+	resourceManager->loadElementSchema(fileName);
 	TiXmlDocument* doc = getDocument(fileName);
 	if(doc)
 	{
@@ -721,7 +721,7 @@ public:
 static void checkColorEffectControllerTable(const char* fileName)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	resourceManager->loadElement(fileName);
+	resourceManager->loadElementSchema(fileName);
 	TiXmlDocument* doc = getDocument(fileName);
 	if(doc)
 	{
@@ -778,7 +778,7 @@ static void checkSequenceTable(const char* fileName)
 static void checkStateTable(const char* fileName)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	resourceManager->loadElement(fileName);
+	resourceManager->loadElementSchema(fileName);
 	TiXmlDocument* doc = getDocument(fileName);
 	if(doc)
 	{

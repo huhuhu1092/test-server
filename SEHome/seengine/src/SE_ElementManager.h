@@ -46,13 +46,13 @@ public:
     SE_Element* findElement(const SE_ElementID& id);
     SE_Element* removeElement(const SE_ElementID& id);
     SE_Element* getParent(const SE_ElementID& id);
-    std::vector<SE_Element*> getChildren(const SE_ElementID& id) const;
+    std::vector<SE_Element*> getChildren(const SE_ElementID& id) ;
     void releaseElement(SE_Element* element, int delay = SE_RELEASE_DELAY);
     void releaseElement(const SE_ElementID& id, int delay = SE_RELEASE_DELAY);
 	void addEvent(SE_ElementEvent* event);
     void update();
 private:
     SE_TreeStructManager<SE_Element> mElements;
-	std::list<SE_ElementEvent*> mElemetnEventList;
+	std::list<SE_ElementEvent*> mElementEventList;
 };
 #endif

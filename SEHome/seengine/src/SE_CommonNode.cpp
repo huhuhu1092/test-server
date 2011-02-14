@@ -98,7 +98,7 @@ void SE_CommonNode::updateWorldLayer()
             s->updateWorldLayer();
     }
 }
-SE_Spatial::SPATIAL_TYPE SE_CommonNode::getSpatialType()
+int SE_CommonNode::getSpatialType()
 {
 	return NODE;
 }

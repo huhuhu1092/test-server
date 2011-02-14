@@ -146,7 +146,7 @@ int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 	else
 		return r;
 }
-SE_Spatial::SPATIAL_TYPE SE_Geometry::getSpatialType()
+int SE_Geometry::getSpatialType()
 {
 	return GEOMETRY;
 }

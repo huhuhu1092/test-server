@@ -2,6 +2,8 @@
 #define SE_LAYER_H
 #include "SE_Common.h"
 #include <string>
+class SE_BufferInput;
+class SE_BufferOutput;
 class SE_Layer
 {
 public:
@@ -28,7 +30,8 @@ public:
 		l.mLayer = (left.mLayer + right.mLayer);
 		return l;
 	}
-
+    void read(SE_BufferInput& input);
+	void write(SE_BufferOutput& output);
     /*
     static SE_Layer operator-(const SE_Layer& left, const SE_Layer& right);
     */

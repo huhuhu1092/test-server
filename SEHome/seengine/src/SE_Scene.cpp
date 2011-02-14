@@ -1,6 +1,11 @@
 #include "SE_Scene.h"
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
+#include "SE_ElementManager.h"
+#include "SE_RenderTargetManager.h"
+#include "SE_RenderTarget.h"
+#include "SE_CameraManager.h"
+#include "SE_SpatialManager.h"
 SE_Scene::SE_Scene()
 {
     mX = mY = mWidth = mHeight = 0;
@@ -34,7 +39,10 @@ void SE_Scene::show()
     SE_Element* rootElement = elementManager->findElement(mRoot);
     if(rootElement)
     {
-        rootElement->createSpatial(SE_SpatialID::NULLID);
+		SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+        SE_Spatial* spatial = rootElement->createSpatial();
+		spatialManager->addSpatial(SE_SpatialID::NULLID, spatial);
+
     }
 }
 SE_Element* SE_Scene::getRootElement()
@@ -55,7 +63,7 @@ void SE_Scene::hide()
 void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
     SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-    if(mRenderTargetID == SE_RenderTargetID::INVALIDID)
+    if(mRenderTargetID == SE_RenderTargetID::INVALID)
     {
         SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
         
@@ -69,7 +77,7 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
     }
     SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
     renderTarget->setBackground(mBackground);
-    if(mTranslucent)
+    if(mIsTranslucent)
         renderTarget->setClearTarget(false);
     else
         renderTarget->setClearTarget(true);

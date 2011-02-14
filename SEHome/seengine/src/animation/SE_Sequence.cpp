@@ -1,12 +1,13 @@
 #include "SE_Sequence.h"
-void SE_Sequence::setFrame(unsigned int key, const SE_Sequence::_Frame& frame)
+#include "SE_TimeKey.h"
+void SE_Sequence::setFrame(const SE_TimeKey& key, const SE_Sequence::_Frame& frame)
 {
     SE_KeyFrame<_Frame>* kf = new SE_KeyFrame<_Frame>;
     kf->key = key;
     kf->data = frame;
     mSequenceFrame.setKeyFrame(kf);
 }
-SE_Sequence::_Frame SE_Sequence::getFrame(unsigned int key) const
+SE_Sequence::_Frame SE_Sequence::getFrame(const SE_TimeKey& key) const
 {
     SE_KeyFrame<_Frame>* kf = mSequenceFrame.getKeyFrame(key);
     if(!kf)

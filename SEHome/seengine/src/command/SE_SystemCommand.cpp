@@ -21,6 +21,7 @@ SE_InitAppCommand::~SE_InitAppCommand()
 {}
 void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     std::string inPath = dataPath + SE_SEP + fileName + ".ASE";
     std::string outPath = dataPath + SE_SEP + fileName;
 #ifndef ANDROID
@@ -61,6 +62,7 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	SE_InputManager* inputManager = mApp->getInputManager();
     inputManager->removeMotionEventObserver(NULL);
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
+	*/
 }
 ////////////////
 SE_UpdateCameraCommand::SE_UpdateCameraCommand(SE_Application* app) : SE_Command(app)
@@ -70,12 +72,14 @@ SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
 void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
 	//SE_Vector3f location(45.4441,	-234.7624,	93.7012);
+	/*
 	SE_Vector3f location(-42.2706,	-75.5129,	9.1142);
 	SE_Vector3f zAxis(0, -1, 0);
 	SE_Vector3f up(0, 0, 1);
 	SE_Camera* c = mApp->getCurrentCamera();
 	c->create(location, zAxis, up, 90.0f,((float)height)/ width, 1.0f, 1000.0f);
     c->setViewport(0, 0, width, height);
+	*/
 }
 ////////////////////////////////////////////////////////
 SE_KeyEventCommand::SE_KeyEventCommand(SE_Application* app) : SE_Command(app)
@@ -112,6 +116,7 @@ SE_LoadSceneCommand::SE_LoadSceneCommand(SE_Application* app) : SE_Command(app)
 {}
 void SE_LoadSceneCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     if(sceneName == "")
         return;
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
@@ -121,6 +126,7 @@ void SE_LoadSceneCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     SE_Spatial* rootScene = sceneManager->getRoot();
     rootScene->updateWorldTransform();
 	rootScene->updateBoundingVolume();
+	*/
 }
 
 ////////////////////////////////////////////////////////
@@ -131,6 +137,7 @@ SE_MoveCameraCommand::~SE_MoveCameraCommand()
 {}
 void SE_MoveCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
 	SE_Vector3f startLocation = camera->getLocation();
 	camera->rotateLocal(rotateAngle, axis);
 	camera->translateLocal(translate);
@@ -145,4 +152,5 @@ void SE_MoveCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	{
 		camera->setLocation(moveTravel.location);
 	}
+	*/
 }

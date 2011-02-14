@@ -26,6 +26,10 @@ public:
 	}
 	SE_ElementContent* getContent(int index);
 	void travel(SE_ElementSchemaVisitor* v);
+	int getSeqNum() const
+	{
+		return seq;
+	}
 private:
     SE_Element* createElement(SE_ElementManager* elementManager, SE_Element* parent);
 public:

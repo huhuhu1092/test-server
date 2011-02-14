@@ -17,7 +17,7 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-#include "SE_MessageDefine.h"
+#include "SE_MessageEventCommandDefine.h"
 //#include "SE_Physics.h"
 #include "SE_2DCommand.h"
 #include "SE_ElementManager.h"
@@ -107,6 +107,7 @@ bool SEDemo::QuitApplication()
 {
 	return true;
 }
+/*
 class SE_RunAllAnimationTravel : public SE_SpatialTravel
 {
 public:
@@ -158,6 +159,7 @@ public:
         return 0;
 	}
 };
+*/
 void SEDemo::handleInput(int width, int height)
 {
     static float prevPointer[2];
@@ -223,13 +225,14 @@ void SEDemo::handleInput(int width, int height)
 	        root->travel(&rat, true);
 		}
 		*/
-		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-		SE_Element* root = elementManager->getRoot();
-		root->startAnimation();
+		//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		//SE_Element* root = elementManager->getRoot();
+		//root->startAnimation();
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
+		/*
 		if(mSelectedSpatial)
 		{
 		    SE_AnimationID animID = mSelectedSpatial->getAnimationID();
@@ -238,10 +241,12 @@ void SEDemo::handleInput(int width, int height)
 			if(anim)
 		        anim->nextFrame(30, 30);
 		}
+		*/
         LOGI("## right ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+		/*
 		if(mSelectedSpatial)
 		{
 			SE_PauseAllAnimationTravel rat;
@@ -254,13 +259,16 @@ void SEDemo::handleInput(int width, int height)
 	        SE_PauseAllAnimationTravel rat;
 	        root->travel(&rat, true);
 		}
+		*/
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
+		/*
 		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 		sceneManager->setSelectedSpatial(NULL);
 		mSelectedSpatial = NULL;
+		*/
 	    LOGI("## down ##\n");
     }
 }
@@ -298,7 +306,7 @@ bool SEDemo::RenderScene()
 			LOGI("### msg type = %d ####\n", msg->type);
 			if(msg->type == SE_MSG_SIMOBJECT_NAME)
 			{
-				mSelectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
+				//mSelectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
 			}
 			SE_Struct* structData = msg->data;
 			int structItemSize = structData->getCount();

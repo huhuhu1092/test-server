@@ -23,8 +23,6 @@ SE_Spatial::SE_Spatial()
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
-	mSpatialID = SE_ID::createSpatialID();
-	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
@@ -44,7 +42,7 @@ SE_Spatial::~SE_Spatial()
 		}
 	}
 }
-SE_Spatial::SPATIAL_TYPE SE_Spatial::getSpatialType()
+int SE_Spatial::getSpatialType()
 {
 	return NONE;
 }
@@ -291,10 +289,12 @@ void SE_Spatial::setLocalScale(const SE_Vector3f& scale)
 {
     mLocalScale = scale;
 }
+/*
 void SE_Spatial::addChild(SE_Spatial* child)
 {}
 void SE_Spatial::removeChild(SE_Spatial* child)
 {}
+*/
 void SE_Spatial::attachSimObject(SE_SimObject* go)
 {}
 void SE_Spatial::detachSimObject(SE_SimObject* go)
@@ -305,7 +305,7 @@ int SE_Spatial::travel(SE_SpatialTravel* spatialTravel, bool tranvelAlways)
 }
 void SE_Spatial::read(SE_BufferInput& input)
 {
-    mSpatialID.read(input);
+    getID().read(input);
     mState = input.readInt();
     mBVType = input.readInt();
     mLocalTranslate = input.readVector3f();
@@ -316,7 +316,7 @@ void SE_Spatial::read(SE_BufferInput& input)
 }
 void SE_Spatial::write(SE_BufferOutput& output)
 {
-    mSpatialID.write(output);
+    getID().write(output);
     output.writeInt(mState);
     output.writeInt(mBVType);
     output.writeVector3f(mLocalTranslate);

@@ -90,6 +90,8 @@ public:
     {
         this->id[index] = id;
     }
+	void write(SE_BufferOutput& output);
+    void read(SE_BufferInput& input);
     std::string toString() const;
 private:
     int id[2];

@@ -47,28 +47,53 @@ private:
     SpatialIDMap* mSpatialIDMap;
 };
 */
+class SE_SpatialCreator
+{
+public:
+	virtual ~SE_SpatialCreator() {}
+	virtual SE_Spatial* create(int type);
+};
 class SE_SpatialManager
 {
 public:
-	enum {NO_ERROR, SPATIAL_NOT_EXIST};
-    SE_SceneManager();
-	~SE_SceneManager();
-	int getError() const;
+	enum {SE_NO_ERROR, SE_SPATIAL_NOT_EXIST};
+    SE_SpatialManager();
+	~SE_SpatialManager();
+	int getError() const
+	{
+		return mError;
+	}
 	SE_Spatial* findSpatial(const SE_SpatialID& id);
 	SE_Spatial* removeSpatial(const SE_SpatialID& id);
 	SE_SpatialID addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial);
 	void addSpatial(SE_Spatial* parent, SE_Spatial* child);
     //SE_SpatialID loadScene(const SE_SceneID& sceneID); 
 	void render(SE_Camera* camera, SE_RenderManager& renderManager);
-	SE_SpatialID getCurrentSceneRootID() const;
-	void setCurrentSceneRootID(const SE_SpatialID& id);
-	SE_Spatial* getCurrentSceneRoot() const;
+	//SE_SpatialID getCurrentSceneRootID() const;
+	//void setCurrentSceneRootID(const SE_SpatialID& id);
+	//SE_Spatial* getCurrentSceneRoot() const;
+	SE_Spatial* createSpatial(int spatialType);
+	void setSpatialCreator(SE_SpatialCreator* c)
+	{
+		if(mSpatialCreator)
+			delete mSpatialCreator;
+		mSpatialCreator = c;
+	}
+	SE_SpatialCreator* getSpatialCreator() const
+	{
+		return mSpatialCreator;
+	}
+	void release(const SE_SpatialID& id, int delay = SE_RELEASE_DELAY);
+	void release(SE_Spatial* spatial, int delay = SE_RELEASE_DELAY);
+	std::vector<SE_Spatial*> getChildren(const SE_SpatialID& id) ;
+	SE_Spatial* getParent(const SE_SpatialID& id) ;
 private:
-	SE_SceneManager(const SE_SceneManager&);
-	SE_SceneManager& operator=(const SE_SceneManager&);	
+	SE_SpatialManager(const SE_SpatialManager&);
+	SE_SpatialManager& operator=(const SE_SpatialManager&);	
 private:
-	SE_SpatialID mCurrentSceneRoot;
+	//SE_SpatialID mCurrentSceneRoot;
 	int mError;
-	SE_TreeStructManager<SE_Spatial> mTreeStructManager;
+	SE_TreeStructManager<SE_Spatial> mSpatials;
+	SE_SpatialCreator* mSpatialCreator;
 };
 #endif

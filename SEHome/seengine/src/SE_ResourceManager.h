@@ -81,10 +81,11 @@ public:
      * it will be added automatically
      * */
     void loadSceneFromXml(const char* sceneName);
+	SE_Element* loadScene(const char* sceneName);
 	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
 	void loadShader(const char* shaderFileName);
 	void loadRenderer(const char* rendererFileName);
-    void loadElement(const char* elementResourceName);
+    void loadElementSchema(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
 	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,

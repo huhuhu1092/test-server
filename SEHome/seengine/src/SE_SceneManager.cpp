@@ -2,8 +2,10 @@
 #include "SE_CommonNode.h"
 #include "SE_Application.h"
 #include "SE_Camera.h"
+#include "SE_Scene.h"
 #include "SE_RenderManager.h"
 #include "SE_ResourceManager.h"
+#include "SE_Log.h"
 SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneManager::MAX_SIZE)
 {
     mWidth = mHeight = 0;
@@ -54,7 +56,7 @@ void SE_SceneManager::showScene(const SE_SceneID& id)
     }
     if(it != mStack.end())
         mStack.erase(it);
-    mStack.push_front();
+    mStack.push_front(id);
     scene->show();
 }
 void SE_SceneManager::hideScene(const SE_SceneID& id)
@@ -86,7 +88,7 @@ void SE_SceneManager::renderScene(SE_RenderManager& renderManager)
     }    
     if(sceneNeedRender.size() >= SE_MAX_RENDERSCENE_SIZE)
     {
-        SE_LOGE("scene size exceed the max size\n");
+        LOGE("scene size exceed the max size\n");
         return;
     }
     int seq = sceneNeedRender.size() - 1;
@@ -94,7 +96,7 @@ void SE_SceneManager::renderScene(SE_RenderManager& renderManager)
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
     for(itScene = sceneNeedRender.begin() ; itScene != sceneNeedRender.end() ; itScene++)
     {
-        SE_Scene* scene = *it;
+        SE_Scene* scene = *itScene;
         //SE_Camera* camera = cameraManager->findCamera(scene->getCamera());
         //if(camera)
         //{

@@ -1,4 +1,4 @@
-#include "SE_Element.h"
+#include "SE_2DElement.h"
 #include "SE_Geometry3D.h"
 #include "SE_Primitive.h"
 #include "SE_ImageData.h"
@@ -35,9 +35,12 @@
 #include "SE_StateTable.h"
 #include "SE_KeyFrameController.h"
 #include "SE_MessageEventCommandDefine.h"
+#include "SE_ElementSchema.h"
+#include "SE_SpatialManager.h"
 #include <algorithm>
 #include <math.h>
 //////////////////////////////
+/*
 class SE_ElementParamUpdateEvent : public SE_ElementEvent
 {
 public:
@@ -740,6 +743,7 @@ SE_Element* SE_Element::getElement(const SE_StringID& uri)
 	};
 	return e;
 }
+*/
 ////////////////////////////////////////////////////////
 SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
 {
@@ -762,8 +766,9 @@ void SE_TextureElement::init()
 	SE_StringID strURL = getURL();
 	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    mContentChild = resourceManager->getElement(strURL.getStr());
-    SE_ImageDataID imageDataID = mContentChild->getFullPathID().getStr();
+	SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
+    mContentChild = elementSchema->createElement();
+    SE_ImageDataID imageDataID = mContentChild->getFullPathName().getStr();
 	SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 	if(!imageData)
 	{
@@ -792,9 +797,9 @@ void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 	rm->removeRenderTarget(mRenderTargetID);
     init();
     spawn();
-    measure();
+    layout();
     update(0);
-    updateSpatial():
+    updateSpatial();
 }
 void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
 {
@@ -811,7 +816,7 @@ void SE_TextureElement::setSurface(SE_Surface* surface)
 }
 void SE_TextureElement::spawn()
 {
-	SE_ASSERT(mChildren.size() == 0);
+	SE_ASSERT(getChildren().size() == 0);
 	calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 	if(mContentChild)
 		mContentChild->spawn();
@@ -827,7 +832,7 @@ void SE_TextureElement::spawn()
 	}
 	*/
 }
-void SE_TextureElement::update(unsigned int key)
+void SE_TextureElement::update(const SE_TimeKey& key)
 {
 	if(mContentChild)
 		mContentChild->update(key);
@@ -837,20 +842,20 @@ void SE_TextureElement::setImage(const SE_ImageDataID& id, SE_ImageData* imageDa
 	mImageDataID = id;
 	mImageData = imageData;
 }
-void SE_TextureElement::measure()
+void SE_TextureElement::layout()
 {
 	if(!mContentChild)
 	{
 		return;
 	}
-    mContentChild->measure();
+    mContentChild->layout();
 	mWidth = mContentChild->getWidth();
 	mHeight = mContentChild->getHeight();
 	SE_TextureTarget* textureTarget = new SE_TextureTarget(mImageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
     mRenderTargetID = renderTargetManager->addRenderTarget(textureTarget);
 	textureTarget->setBackground(SE_Vector4f(0, 0, 0, 0));
-	mContentChild->setRenderTarget(mRenderTargetID);
+	mContentChild->setRenderTargetID(mRenderTargetID);
 	float ratio = mHeight / mWidth;
 	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
     SE_Camera* camera = new SE_Camera;
@@ -864,8 +869,7 @@ void SE_TextureElement::measure()
 	mImageData->setHeight(mHeight);
 	mImageData->setPixelFormat(SE_ImageData::RGBA);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_CameraID cameraID = SE_ID::createCameraID();
-	cameraManager->setCamera(cameraID, camera);
+	SE_CameraID cameraID = cameraManager->addCamera(camera);
 	textureTarget->setWidth(mWidth);
 	textureTarget->setHeight(mHeight);
 	textureTarget->setCamera(cameraID);
@@ -903,7 +907,6 @@ SE_Spatial* SE_NullElement::createSpatial()
 	SE_Spatial* spatial = new SE_Spatial;
 	spatial->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
     spatial->setLocalLayer(mLocalLayer);
-	setSpatialID(spatial->getSpatialID());
 	return spatial;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -936,9 +939,12 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
 {
     initImage();
     spawn();
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Spatial* spatial = sceneManager->findSpatial(mSpatialID);
-    SE_Spatial* parentSpatial = sceneManager->findSpatial(mParent->getSpatialID());
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* spatial = spatialManager->findSpatial(getID());
+	SE_Element* parent = getParent();
+	if(!parent)
+		return;
+    SE_Spatial* parentSpatial = spatialManager->findSpatial(parent->getID());
     if(!spatial && !parentSpatial)
     {
         return ;
@@ -951,14 +957,14 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
     {
 
         SE_Spatial* s = createSpatial();
-        sceneManager->addSpatial(parentSpatial, s);
+        spatialManager->addSpatial(parentSpatial->getID(), s);
     }
     else if(spatial && parentSpatial)
     {
-        SE_Spatial* spatial = sceneManager->removeSpatial(mSpatialID);
-        delete spatial;
+        SE_Spatial* spatial = spatialManager->removeSpatial(getID());
         SE_Spatial* s = createSpatial();
-        sceneManager->addSpatial(parentSpatial, s);
+        spatialManager->addSpatial(parentSpatial->getID(), s);
+		spatialManager->release(spatial);
     }
 }
 void SE_ImageElement::update(const SE_AddressID& address, const SE_Value& value)
@@ -1060,7 +1066,7 @@ void SE_ImageElement::setSurface(SE_Surface* surface)
     surface->setProgramDataID(COLOREXTRACT_SHADER);
 	surface->setRendererID(COLOREXTRACT_RENDERER);
 }
-void SE_ImageElement::update(unsigned int)
+void SE_ImageElement::update(const SE_TimeKey& key)
 {}
 void SE_ImageElement::spawn()
 {
@@ -1083,7 +1089,7 @@ void SE_ImageElement::spawn()
 	}
 	calculateRect(pivotx, pivoty, width, height);
 }
-void SE_ImageElement::measure()
+void SE_ImageElement::layout()
 {
 }
 SE_Spatial* SE_ImageElement::createSpatial()
@@ -1112,15 +1118,15 @@ void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value
 void SE_ActionElement::update(SE_ParamValueList& paramValueList)
 {
     SE_StringID url = getURL();
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     mAction = resourceManager->getAction(url.getStr());
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Spatial* s = sceneManager->removeSpatial(mSpatialID);
-    delete s;
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* s = spatialManager->removeSpatial(getID());
     spawn();
-    measure();
+    layout();
     update(0);
     updateSpatial();
-
+	spatialManager->release(s);
 }
 void SE_ActionElement::spawn()
 {
@@ -1129,8 +1135,9 @@ void SE_ActionElement::spawn()
 	mAction->sort();
 	calculateRect(mAction->getPivotX(), mAction->getPivotY(), 0, 0);
 	mAction->createElement(this);
-	_ElementList::iterator it;
-	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	std::vector<SE_Element*> children = getChildren();
+	std::vector<SE_Element*>::iterator it;
+	for(it = children.begin() ; it != children.end() ; it++)
 	{
 		SE_Element* e = *it;
 		e->spawn();
@@ -1140,21 +1147,22 @@ SE_Spatial* SE_ActionElement::createSpatial()
 {
 	if(!mAction)
 		return NULL;
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_CommonNode* node = new SE_CommonNode;
 	node->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
     node->setLocalLayer(mLocalLayer);
-	setSpatialID(node->getSpatialID());
-	_ElementList::iterator it;
-	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	std::vector<SE_Element*> children = getChildren();
+	std::vector<SE_Element*>::iterator it;
+	for(it = children.begin() ; it != children.end() ; it++)
 	{
 		SE_Element* e = *it;
 		SE_Spatial* spatial = e->createSpatial();
 		if(spatial)
-		    node->addChild(spatial);
+		    spatialManager->addSpatial(node, spatial);
 	}
 	return node;
 }
-void SE_ActionElement::update(unsigned int key)
+void SE_ActionElement::update(const SE_TimeKey& key)
 {
 	_HeadElementList::iterator it;
     for(it = mHeadElementList.begin() ; it != mHeadElementList.end() ; it++)
@@ -1226,7 +1234,7 @@ int SE_SequenceElement::getKeyFrameNum()
 {
 	if(!mSequence)
 		return 0;
-    std::vector<unsigned int> keys = mSequence->getKeys();
+    std::vector<SE_TimeKey> keys = mSequence->getKeys();
     return keys.size();
 }
 void SE_SequenceElement::spawn()
@@ -1240,15 +1248,15 @@ void SE_SequenceElement::spawn()
 	{
 		mMountPointSet.addMountPoint(mountPoints[i]);
 	}
-	std::vector<unsigned int> keys = mSequence->getKeys();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	std::vector<SE_TimeKey> keys = mSequence->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_Sequence::_Frame f = mSequence->getFrame(keys[i]);
 		SE_ImageElement* e = new SE_ImageElement(f.imageref);
 		e->setMountPointRef(f.mpref);
 		e->setTimeKey(keys[i]);
-		e->setParent(this);
-		this->addChild(e);
+		elementManger->addElement(this->getID(), e);
 		e->spawn();
 	}
 	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
@@ -1265,10 +1273,9 @@ SE_Spatial* SE_SequenceElement::createSpatial()
     SE_CommonNode* node = new SE_CommonNode;
 	node->setLocalTranslate(SE_Vector3f(mLeft , mTop , 0));
     node->setLocalLayer(mLocalLayer);
-	setSpatialID(node->getSpatialID());
 	return node;
 }
-void SE_SequenceElement::update(unsigned int key)
+void SE_SequenceElement::update(const SE_TimeKey key)
 {
 	if(mChildren.empty())
 		return;
@@ -1375,7 +1382,7 @@ void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& v
 {
     SE_Element::update(address, value);
 }
-void SE_StateTableElement::update(unsigned int key)
+void SE_StateTableElement::update(const SE_TimeKey& key)
 {}
 void SE_StateTableElement::spawn()
 {
@@ -1427,7 +1434,7 @@ void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const 
     SE_Element::update(address, value);
 }
 
-void SE_ColorEffectControllerElement::update(unsigned int key)
+void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 {
 	if(mChildren.empty())
 		return;
@@ -1516,7 +1523,7 @@ void SE_ColorEffectControllerElement::spawn()
 	if(!mColorEffectController)
 		return;
 	calculateRect(mColorEffectController->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
-	std::vector<unsigned int> keys = mColorEffectController->getKeys();
+	std::vector<SE_TimeKey> keys = mColorEffectController->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
@@ -1562,7 +1569,7 @@ void SE_ColorEffectElement::update(const SE_AddressID& address, const SE_Value& 
     SE_Element::update(address, value);
 }
 
-void SE_ColorEffectElement::update(unsigned int key)
+void SE_ColorEffectElement::update(const SE_TimeKey& key)
 {}
 SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& textureURL, SE_ImageData*& imageData)
 {
@@ -1696,7 +1703,7 @@ void SE_ColorEffectElement::mergeElement()
     mMergedElement = mergeElement(mBackgroundImageElement, mChannelImageElement, textureElement);       
 	//addChild(element);
 }
-void SE_ColorEffectElement::measure()
+void SE_ColorEffectElement::layout()
 {
 	if(mBackgroundElement)
 	{

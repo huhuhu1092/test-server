@@ -3,6 +3,8 @@
 #include "SE_ID.h"
 #include <list>
 #include <vector>
+class SE_BufferInput;
+class SE_BufferOutput;
 class SE_URI
 {
 public:
@@ -15,6 +17,8 @@ public:
 	SE_StringID getURL() const;
 	bool isContainAddress(const SE_AddressID& address) const;
 	std::vector<SE_AddressID> getAddress() const;
+	void read(SE_BufferInput& input);
+	void write(SE_BufferOutput& output);
 private:
 	void parse();
 private:

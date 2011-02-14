@@ -20,6 +20,7 @@ class SE_SimObjectManager;
 class SE_RenderTargetManager;
 class SE_CameraManager;
 class SE_ParamManager;
+class SE_SpatialManager;
 class SE_DelayDestroy;
 class SE_Application
 {
@@ -111,6 +112,10 @@ public:
 	{
 		return mParamManager;
 	}
+	SE_SpatialManager* getSpatialManager()
+	{
+		return mSpatialManager;
+	}
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
 	//index 0 to max camera num
@@ -200,6 +205,7 @@ protected:
 	SE_RenderTargetManager* mRenderTargetManager;
 	SE_CameraManager* mCameraManager;
 	SE_ParamManager* mParamManager;
+	SE_SpatialManager* mSpatialManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

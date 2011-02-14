@@ -9,9 +9,13 @@
 #include "SE_TimeKey.h"
 #include "SE_MountPoint.h"
 #include "SE_Layer.h"
+#include "SE_Primitive.h"
 class SE_KeyFrameController;
 class SE_Spatial;
 class SE_Element;
+class SE_Value;
+class SE_ParamValueList;
+class SE_ImageData;
 class SE_ElementTravel
 {
 public:
@@ -127,6 +131,14 @@ public:
     {
         mPivotY = py;
     }
+	float getPivotX() const
+	{
+		return mPivotX;
+	}
+	float getPivotY() const
+	{
+		return mPivotY;
+	}
     void setMountPointRef(const SE_MountPointID& ref)
     {
         mMountPointID = ref;
@@ -139,17 +151,34 @@ public:
     {
         mMountPointY = y;
     }
+	void setMountPoint(float x, float y)
+	{
+		mMountPointX = x;
+		mMountPointY = y;
+	}
     void clearMountPoint()
     {
         mMountPointSet.clearMountPoint();
     }
+	SE_TimeKey getTimeKey() const
+	{
+		return mTimeKey;
+	}
 	void setTimeKey(const SE_TimeKey& key)
 	{
 		mTimeKey = key;
 	}
+	SE_TimeKey getStartKey() const
+	{
+		return mTimeKey;
+	}
 	void setStartKey(const SE_TimeKey& key)
 	{
 		mStartKey = key;
+	}
+	SE_TimeKey getEndKey() const
+	{
+		return mEndKey;
 	}
 	void setEndKey(const SE_TimeKey& key)
 	{
@@ -172,9 +201,17 @@ public:
     {
         mRenderQueueSeq = q;
     }
+	SE_Element* getPrev() const
+	{
+		return mPrevElement;
+	}
     void setPrev(SE_Element* prev)
 	{
 		mPrevElement = prev;
+	}
+	SE_Element* getNext() const
+	{
+		return mNextElement;
 	}
 	void setNext(SE_Element* next)
 	{
@@ -187,14 +224,80 @@ public:
     void hide();
     //dismiss will make spatial node remove from spatial manager
     void dismiss();
+	float getLeft() const
+	{
+		return mLeft;
+	}
+	float getTop() const
+	{
+		return mTop;
+	}
+	void setLeft(float left)
+	{
+		mLeft = left;
+	}
+	void setTop(float top)
+	{
+		mTop = top;
+	}
+	float getWidth() const
+	{
+		return mWidth;
+	}
+	float getHeight() const
+	{
+		return mHeight;
+	}
+	void setWidth(float w)
+	{
+		mWidth = w;
+	}
+	void setHeight(float h)
+	{
+		mHeight = h;
+	}
+	float getDeltaLeft() const
+	{
+		return mDeltaLeft;
+	}
+    float getDeltaTop() const
+	{
+		return mDeltaTop;
+	}
+	void setDeltaLeft(float l)
+	{
+		mDeltaLeft = l;
+	}
+	void setDeltaTop(float t)
+	{
+		mDeltaTop = t;
+	}
+	SE_Element* getParent();
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
+	virtual void update(SE_ParamValueList& paramValueList);
+	virtual void update(const SE_AddressID& address, const SE_Value& value);
+	virtual void updateSpatial();
     virtual void layout();
-    virtual SE_Spatial* createSpatial(const SE_SpatialID& parentID);
+    virtual SE_Spatial* createSpatial();
     virtual void clone(const SE_Element* srcElement);
     virtual void read(SE_BufferInput& inputBuffer);
     virtual void write(SE_BufferOutput& outputBuffer);
+	virtual SE_Element* clone();
+protected:
+	void updateMountPoint();
+	//if pivotx == INVALID_GEOMINFO mPivotX will not be changed
+	// if pivoty == INVALID_GEOMINFO mPivotY will not be changed
+	//if width == INVALID_GEOMINFO || height == INVALID_GEOMINFO , error will be raised
+	void calculateRect(float pivotx, float pivoty, float width, float height);
+	SE_Spatial* createNode();
+	SE_Spatial* createSpatialByImage();
+	void clone(SE_Element *src, SE_Element* dst);
+	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
+	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
+	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
+    void clearChildren();
 protected:
     int mState;
     int mType;
@@ -242,6 +345,8 @@ public:
     virtual void layout();
     virtual SE_Spatial* createSpatial();  
     virtual void read(SE_BufferInput& inputBuffer);
-    virtual void write(SE_BufferOutput& outputBuffer);  
+    virtual void write(SE_BufferOutput& outputBuffer); 
+protected:
+	//SE_Spatial* createSpatial(const SE_SpatialID& parentID);
 };
 #endif

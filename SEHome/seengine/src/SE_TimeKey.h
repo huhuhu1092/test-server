@@ -1,5 +1,7 @@
 #ifndef SE_TIMEKEY_H
 #define SE_TIMEKEY_H
+class SE_BufferInput;
+class SE_BufferOutput;
 class SE_TimeKey
 {
 public:
@@ -36,7 +38,8 @@ public:
 	{
 		return SE_TimeKey(mKey - r.mKey);
 	}
-
+    void read(SE_BufferInput& input);
+	void write(SE_BufferOutput& output);
 private:
 	unsigned int mKey;
 };

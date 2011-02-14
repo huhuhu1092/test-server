@@ -1,4 +1,5 @@
 #include "SE_Layer.h"
+#include "SE_Buffer.h"
 #include <stdio.h>
 SE_Layer::SE_Layer()
 {
@@ -26,4 +27,12 @@ SE_Layer& SE_Layer::operator=(const SE_Layer& layer)
         return *this;
     mLayer = layer.mLayer;
     return *this;
+}
+void SE_Layer::read(SE_BufferInput& input)
+{
+	mLayer = input.readString();
+}
+void SE_Layer::write(SE_BufferOutput& output)
+{
+	output.writeString(mLayer.c_str());
 }

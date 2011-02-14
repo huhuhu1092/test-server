@@ -15,7 +15,7 @@ public:
 	void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
-	SPATIAL_TYPE getSpatialType();
+	int getSpatialType();
 //private:
     //struct _Impl;
     //_Impl* mImpl;

@@ -62,8 +62,8 @@ public:
 		copy(removeList.begin(), removeList.end(), ret.begin());
 		return ret;
 	}
-    T* getParent(const SE_TreeStructID& id) const;
-    std::vector<T*> getChildren(const SE_TreeStructID& id) const;
+    T* getParent(const SE_TreeStructID& id);
+    std::vector<T*> getChildren(const SE_TreeStructID& id);
     int getError() const
     {
         return mError;
@@ -113,7 +113,7 @@ private:
 	T* removeNode(size_t index, _Node* node);
 public:
 	template <typename FUNC>
-	void traverse(FUNC f)
+	void traverseList(FUNC f)
 	{
 		_NodeIndexList::iterator it;
 		for(it = mBusyNodeIndexList.begin() ; it != mBusyNodeIndexList.end() ; it++)
@@ -316,7 +316,7 @@ size_t SE_TreeStructManager<T>::getAllocatedNodeNum() const
     return mNodes.size() - size;
 }
 template <typename T>
-T* SE_TreeStructManager<T>::getParent(const SE_TreeStructID& id) const
+T* SE_TreeStructManager<T>::getParent(const SE_TreeStructID& id)
 {
     _Node* node = findNode(id);
     if(!node)
@@ -329,7 +329,7 @@ T* SE_TreeStructManager<T>::getParent(const SE_TreeStructID& id) const
     
 }
 template <typename T>
-std::vector<T*> SE_TreeStructManager<T>::getChildren(const SE_TreeStructID& id) const
+std::vector<T*> SE_TreeStructManager<T>::getChildren(const SE_TreeStructID& id)
 {
     std::vector<T*> ret;
     _Node* node = findNode(id);
