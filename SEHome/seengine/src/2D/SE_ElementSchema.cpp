@@ -41,6 +41,7 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
     e->setPivotX(pivotx);
     e->setPivotY(pivoty);
     e->setSeqNum(seq);
+	e->setLocalLayer(layer);
     SE_Element* root = NULL;
     if(parent == NULL)
         root = e;

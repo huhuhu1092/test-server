@@ -24,6 +24,7 @@
 #include "SE_CheckXml.h"
 #include "SE_Scene.h"
 #include "SE_SceneManager.h"
+#include "SE_CameraManager.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -38,12 +39,27 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
+	resourceManager->loadShader("ShaderDefine.xml");
+	resourceManager->loadRenderer("RendererDefine.xml");
     SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
+	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
 	scene->create(sceneName.c_str());
 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_SceneID sceneID = sceneManager->addScene(scene);
+	//create camera
+    SE_Vector3f location(0, 0, 10);
+    float ratio = height / (float)width;
+	float angle = 2 * SE_RadianToAngle(atanf(width / 20.0f));
+    SE_Camera* camera = new SE_MotionEventCamera;
+	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
+	camera->setViewport(0, 0, (int)width, (int)height);
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+	SE_CameraID cameraID = cameraManager->addCamera(camera);
+	scene->setCamera(cameraID);
+	//end
 	sceneManager->showScene(sceneID);
+	SE_Application::getInstance()->setState(SE_Application::RUNNING);
 	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());

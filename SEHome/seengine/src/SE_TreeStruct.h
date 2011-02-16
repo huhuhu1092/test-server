@@ -3,6 +3,7 @@
 #include "SE_ID.h"
 #include <list>
 #include <vector>
+#include <algorithm>
 template <typename T>
 class SE_TreeStructManager;
 
@@ -36,7 +37,9 @@ void SE_TreeStruct<T>::removeChild(T* child)
 template <typename T>
 void SE_TreeStruct<T>::addChild(T* child)
 {
-    mChildren.push_back(child);
+	std::list<T*>::iterator it = find(mChildren.begin(), mChildren.end(), child);
+	if(it == mChildren.end())
+        mChildren.push_back(child);
 }
 
 template <typename T>

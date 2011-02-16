@@ -222,6 +222,7 @@ public:
 	{
 		mNeedUpdateTransform = b;
 	}
+	void updateSpatialIDToElement();
 public:
     virtual void attachSimObject(SE_SimObject* go);
     virtual void detachSimObject(SE_SimObject* go);

@@ -65,6 +65,7 @@ void SE_Scene::show()
 		SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
         SE_Spatial* spatial = rootElement->createSpatial();
 		spatialManager->addSpatial(SE_SpatialID::NULLID, spatial, false);
+		spatial->updateSpatialIDToElement();
 		SE_DepthTestState* rs = new SE_DepthTestState();
 		rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
 		SE_BlendState* blendRs = new SE_BlendState;
@@ -76,7 +77,6 @@ void SE_Scene::show()
 		spatial->updateWorldTransform();
 		spatial->updateWorldLayer();
 		spatial->updateRenderState();
-
     }
 }
 SE_Element* SE_Scene::getRootElement()
@@ -104,18 +104,26 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
         mRenderTargetID = renderTargetManager->addRenderTarget(renderTarget);
     }        
     SE_Element* rootElement = getRootElement();
-    if(rootElement)
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* rootSpatial = NULL;
+	if(rootElement)
+	    rootSpatial = spatialManager->findSpatial(rootElement->getSpatialID());
+
+    if(rootSpatial)
     {
         rootElement->setSceneRenderSeq(seq);
         rootElement->setRenderTargetID(mRenderTargetID);
+	    SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
+        renderTarget->setBackground(mBackground);
+        if(mIsTranslucent)
+            renderTarget->setClearTarget(false);
+        else
+            renderTarget->setClearTarget(true);
+        renderTarget->setCamera(mCamera);
+		SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+		SE_Camera* camera = cameraManager->getCamera(mCamera);
+		rootSpatial->renderScene(camera, &renderManager);
     }
-    SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
-    renderTarget->setBackground(mBackground);
-    if(mIsTranslucent)
-        renderTarget->setClearTarget(false);
-    else
-        renderTarget->setClearTarget(true);
-    renderTarget->setCamera(mCamera);
 }
 void SE_Scene::setCamera(const SE_CameraID& cameraID)
 {

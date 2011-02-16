@@ -11,7 +11,7 @@
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
 #include <string.h>
-
+#include <algorithm>
 SE_RenderManager::SE_RenderManager()
 {
     for(int i = 0 ;  i < SE_MAX_RENDERSCENE_SIZE ; i++)
@@ -82,10 +82,29 @@ void SE_RenderManager::sort()
 }
 void SE_RenderManager::clear()
 {
+    for(int i = 0 ;  i < SE_MAX_RENDERSCENE_SIZE ; i++)
+    {
+        _SceneRenderUnit* sru = mSceneRenderUnit[i];
+	    std::list<_RenderTargetUnit*>::iterator it;
+	    for(it = sru->renderTargetUnit.begin() ; it != sru->renderTargetUnit.end() ; it++)
+	    {
+		    _RenderTargetUnit* rt = *it;
+            for(int i = 0 ; i < SE_RQ_NUM ; i++)
+            {
+                RenderUnitList* ruList = rt->mRenderQueue[i];
+				for_each(ruList->begin(), ruList->end(), SE_DeleteObject());
+				ruList->clear();
+            }
+	    }
+		for_each(sru->renderTargetUnit.begin(), sru->renderTargetUnit.end(), SE_DeleteObject());
+		sru->renderTargetUnit.clear();
+
+    }
 }
 SE_RenderManager::~SE_RenderManager()
 {
     clear();
+
 }
 /*
 void SE_RenderManager::beginDraw()

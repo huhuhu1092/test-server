@@ -162,6 +162,12 @@ void SE_Element::write(SE_BufferOutput& outputBuffer)
 void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {
     mSceneRenderSeq = seq;
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* spatial = spatialManager->findSpatial(mSpatialID);
+    if(spatial)
+	{
+		spatial->setSceneRenderSeq(seq);
+	}
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
     {
@@ -174,10 +180,16 @@ void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 }
 void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 {
-    if(!renderTarget.isValid())
+    if(!mRenderTarget.isValid())
     {
         mRenderTarget = renderTarget;
     }
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* spatial = spatialManager->findSpatial(mSpatialID);
+    if(spatial)
+	{
+		spatial->setRenderTarget(mRenderTarget);
+	}
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
     {
@@ -332,27 +344,7 @@ void SE_2DNodeElement::layout()
 	mWidth = mergedRect.right - mergedRect.left;
 	mHeight = mergedRect.bottom - mergedRect.top;
 }
-/*
-SE_Spatial* SE_2DNodeElement::createSpatial(const SE_SpatialID& parentID)
-{
-    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_ElementManager* elementManger = SE_Application::getInstance()->getElementManager();
-	SE_Spatial* currSpatial = spatialManager->createSpatial(mSpatialType);
-    mSpatialID = spatialManager->addSpatial(parentID, currSpatial);
-	//SE_Spatial* parent = spatialManager->findSpatial(parentID);
-	currSpatial->setRenderTarget(mRenderTarget);
-	currSpatial->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-	currSpatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
-	currSpatial->setNeedUpdateTransform(mNeedUpdateTransform);
-	std::vector<SE_Element*> children = elementManager->getChildren();
-	for(int i = 0 ; i < children.size() ; i++)
-	{
-		SE_Element* e = children[i];
-		SE_Spatial* spatial = e->createSpatial(mSpatialID);
-	}
-	return currSpatial;
-}
-*/
+
 SE_Spatial* SE_2DNodeElement::createSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
@@ -364,6 +356,8 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 	parent->setNeedUpdateTransform(mNeedUpdateTransform);
     parent->setPrevMatrix(mPrevMatrix);
     parent->setPostMatrix(mPostMatrix);
+	parent->setLocalLayer(mLocalLayer);
+	parent->setElementID(getID());
 	std::vector<SE_Element*> children = elementManager->getChildren(getID());
 	for(int i = 0 ; i < children.size() ; i++)
 	{

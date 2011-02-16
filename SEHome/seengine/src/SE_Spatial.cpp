@@ -7,6 +7,8 @@
 #include "SE_Application.h"
 #include "SE_RenderTarget.h"
 #include "SE_SpatialManager.h"
+#include "SE_Element.h"
+#include "SE_ElementManager.h"
 #include "SE_Log.h"
 IMPLEMENT_OBJECT(SE_Spatial)
 SE_Spatial::SE_Spatial()
@@ -147,6 +149,21 @@ void SE_Spatial::updateRenderState()
 				parentRenderStateData->inc();
 			}
 		}
+	}
+}
+void SE_Spatial::updateSpatialIDToElement()
+{
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	SE_Element* element = elementManager->findElement(mElementID);
+	if(element)
+	{
+		element->setSpatialID(getID());
+	}
+	std::vector<SE_Spatial*> children = getChildren();
+	for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		SE_Spatial* s = children[i];
+		s->updateSpatialIDToElement();
 	}
 }
 const SE_Matrix4f& SE_Spatial::getWorldTransform()
