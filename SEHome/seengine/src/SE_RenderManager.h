@@ -9,7 +9,6 @@ class SE_RenderUnit;
 class SE_RenderManager
 {
 public:
-    enum RENDER_QUEUE {RQ0, RQ1, RQ2, RQ3, RQ4, RQ5, RQ6, RQ7, RQ_NUM};
 	enum {RENDERTARGET_SIZE = 8};
     SE_RenderManager();
     ~SE_RenderManager();
@@ -22,7 +21,7 @@ public:
     //void setSceneTranslucent(const SE_SceneRenderSeq& index, bool translucent);
     //void setSceneCamera(const SE_SceneRenderSeq& index, SE_Camera* camera);
     //void setSceneBackground(const SE_SceneRenderSeq& index, const SE_Vector4f& background);
-    void addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq);
+    void addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq);
     /*
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{
@@ -41,11 +40,11 @@ private:
     typedef std::list<SE_RenderUnit*> RenderUnitList;
 	struct _RenderTargetUnit
 	{
-        RenderUnitList* mRenderQueue[RQ_NUM];
+        RenderUnitList* mRenderQueue[SE_RQ_NUM];
         SE_RenderTargetID mRenderTargetID;
 		_RenderTargetUnit()
 		{
-			for(int i = 0 ; i < RQ_NUM ; i++)
+			for(int i = 0 ; i < SE_RQ_NUM ; i++)
             {
                 mRenderQueue[i] = new RenderUnitList;
             }

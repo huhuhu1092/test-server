@@ -2,15 +2,17 @@
 #define SE_SIMOBJECTMANAGER_H
 #include "SE_ID.h"
 #include "SE_SimObject.h"
-#include "SE_ObjectManager.h"
+//#include "SE_ObjectManager.h"
+#include "SE_TreeStructManager.h"
 class SE_SimObjectManager
 {
 public:
-    void set(const SE_SimObjectID& simObjectID, SE_SimObject* simObject);
+    SE_SimObjectID add(SE_SimObject* simObject);
     SE_SimObject* get(const SE_SimObjectID& simObjectID);
-    void remove(const SE_SimObjectID& simObjectiD);
-	SE_SimObject* findByName(const char* name);
+    SE_SimObject* remove(const SE_SimObjectID& simObjectiD);
+	std::vector<SE_SimObject*> find(const char* name);
 private:
-    SE_ObjectManager<SE_SimObjectID, SE_SimObject*> mSimObjectManager;
+    //SE_ObjectManager<SE_SimObjectID, SE_SimObject*> mSimObjectManager;
+	SE_TreeStructManager<SE_SimObject> mSimObjectManager;
 };
 #endif

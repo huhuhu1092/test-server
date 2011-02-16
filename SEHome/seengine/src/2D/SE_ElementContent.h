@@ -1,6 +1,8 @@
 #ifndef SE_ELEMENTCONTENT_H
 #define SE_ELEMENTCONTENT_H
+#include "SE_ID.h"
 class SE_ElementSchema;
+class SE_Element;
 class SE_ElementContent
 {
 public:

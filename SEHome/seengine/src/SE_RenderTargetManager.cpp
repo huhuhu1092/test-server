@@ -49,6 +49,14 @@ SE_RenderTargetID SE_RenderTargetManager::addRenderTarget(SE_RenderTarget* rende
     }
     */
 }
+void SE_RenderTargetManager::release(SE_RenderTarget* rt, int delay)
+{
+	mRenderTargets.release(rt, delay);
+}
+void SE_RenderTargetManager::release(const SE_RenderTargetID& id, int delay)
+{
+	mRenderTargets.release(id, delay);
+}
 SE_RenderTarget* SE_RenderTargetManager::getRenderTarget(const SE_RenderTargetID& id)
 {
     return mRenderTargets.find(id);

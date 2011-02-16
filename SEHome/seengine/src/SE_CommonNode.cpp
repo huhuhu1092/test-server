@@ -62,6 +62,8 @@ void SE_CommonNode::removeChild(SE_Spatial* child)
 */
 SE_CommonNode::SE_CommonNode()
 {}
+SE_CommonNode::~SE_CommonNode()
+{}
 void SE_CommonNode::updateRenderState()
 {
 	SE_Spatial::updateRenderState();

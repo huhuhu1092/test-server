@@ -16,7 +16,6 @@ public:
         return mID;
     }
     virtual ~SE_TreeStruct() {}
-protected:
     std::vector<T*> getChildren() const;
 private:
     void removeChild(T* child);

@@ -14,7 +14,7 @@ class SE_Scene : public SE_ListStruct<SE_Scene>
 {
     friend class SE_SceneManager;
 public:
-    SE_Scene();
+    SE_Scene(SE_SCENE_TYPE t);
     ~SE_Scene();
     void create(const char* sceneName);
     //SE_SceneID getID();
@@ -37,10 +37,8 @@ public:
     {
         return mIsTranslucent;
     }
-    void setBound(float x , float y, float width, float height)
+    void setBound(float width, float height)
     {
-        mX = x;
-        mY = y;
         mWidth = width;
         mHeight = height;
     }
@@ -56,7 +54,8 @@ private:
     SE_CameraID mCamera;
     SE_RenderTargetID mRenderTargetID;
     bool mIsTranslucent;
-    float mX, mY, mWidth, mHeight;// left low corner and width , height
+    float mWidth, mHeight;// left low corner and width , height
     SE_Vector4f mBackground;
+    SE_SCENE_TYPE mSceneType;
 };
 #endif

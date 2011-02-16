@@ -55,9 +55,9 @@ public:
 
     SE_TreeStructID()
     {
-        id[0] = id[1] = -1;
+        id[0] = id[1] = 0xFFFFFFFE;
     }
-    SE_TreeStructID(int i0, int i1) 
+    SE_TreeStructID(size_t i0, size_t i1) 
     {
         id[0] = i0;
         id[1] = i1;
@@ -82,11 +82,11 @@ public:
     {
         return !operator==(lid, rid);
     }
-    int get(int index) const
+    size_t get(int index) const
     {
         return id[index];
     }
-    void set(int index, int id)
+    void set(int index, size_t id)
     {
         this->id[index] = id;
     }
@@ -94,7 +94,7 @@ public:
     void read(SE_BufferInput& input);
     std::string toString() const;
 private:
-    int id[2];
+    size_t id[2];
 };
 /////////////////////////////////////////////////////
 typedef SE_StringID SE_ImageDataID;

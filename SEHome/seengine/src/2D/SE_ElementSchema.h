@@ -5,6 +5,7 @@
 #include "SE_TableManager.h"
 #include "SE_Layer.h"
 #include "SE_MountPoint.h"
+class SE_ElementSchema;
 class SE_ElementSchemaVisitor
 {
 public:
@@ -16,11 +17,13 @@ class SE_ElementContent;
 class SE_ElementSchema
 {
 public:
+	SE_ElementSchema();
+	~SE_ElementSchema();
     SE_Element* createElement();
     void addChild(SE_ElementSchema* ec);
     void setParent(SE_ElementSchema* p);
     void addContent(SE_ElementContent* ec);
-	int getContentNum()
+	size_t getContentNum()
 	{
 		return contents.size();
 	}
@@ -32,6 +35,7 @@ public:
 	}
 private:
     SE_Element* createElement(SE_ElementManager* elementManager, SE_Element* parent);
+	void clear();
 public:
     SE_StringID name;
     SE_StringID fullPathName;
@@ -40,7 +44,7 @@ public:
     float x, y, w, h;
     SE_Layer layer;
     int seq;
-    SE_MountPointID mountpointref;
+    SE_MountPointID mountPointRef;
 private:
     SE_ElementSchema* parent;
     typedef std::list<SE_ElementSchema*> _ElementSchemaList;

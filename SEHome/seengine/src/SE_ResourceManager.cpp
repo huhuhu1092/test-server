@@ -1716,7 +1716,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         }
 		else if(!strcmp(name, "mountpointref"))
 		{
-			elementSchema->mountpointref = SE_MountPointID(value);
+			elementSchema->mountPointRef = SE_MountPointID(value);
 			hasMountPointRef = true;
 		}
         pAttribute = pAttribute->Next();
@@ -3074,7 +3074,10 @@ void SE_ResourceManager::releaseHardwareResource()
 }
 SE_Element* SE_ResourceManager::loadScene(const char* sceneName)
 {
-	return NULL;
+    SE_ElementSchema* es = getElementSchema(sceneName);
+    if(!es)
+        return NULL;
+    return es->createElement();    
 }
 void SE_ResourceManager::loadElementSchema(const char* elementResourceName)
 {

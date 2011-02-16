@@ -15,6 +15,8 @@ public:
     SE_RenderTargetID addRenderTarget(SE_RenderTarget* renderTarget);
     SE_RenderTarget* getRenderTarget(const SE_RenderTargetID& id);
     SE_RenderTarget* removeRenderTarget(const SE_RenderTargetID& id);
+	void release(SE_RenderTarget* rt, int delay = SE_RELEASE_DELAY);
+	void release(const SE_RenderTargetID& id, int delay = SE_RELEASE_DELAY);
 private:
     /*
     typedef std::vector<SE_RenderTarget*> _RenderTargetSet;

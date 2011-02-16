@@ -26,7 +26,7 @@ public:
     void release(T* p, int delay = SE_RELEASE_DELAY);
     void release(const SE_TreeStructID& id, int delay = SE_RELEASE_DELAY);
     //return is child's id
-    SE_TreeStructID add(const SE_TreeStructID& parent, T* child);
+    SE_TreeStructID add(const SE_TreeStructID& parent, T* child, bool linkToParent = true);
     void add(T* parent, T* child)
     {
         parent->addChild(child);
@@ -253,7 +253,7 @@ void SE_TreeStructManager<T>::release(const SE_TreeStructID& id, int delay)
 }
 
 template <typename T>
-SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T* child)
+SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T* child, bool linkToParent)
 {
 	if(parentID != SE_TreeStructID::NULLID)
     {
@@ -267,7 +267,8 @@ SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T*
             if(mFreeNodeIndexList.empty())
                 return SE_TreeStructID::INVALID;
         }
-        parentNode->data->addChild(child);
+		if(linkToParent)
+            parentNode->data->addChild(child);
     }
     size_t index = mFreeNodeIndexList.front();
     mFreeNodeIndexList.pop_front();
@@ -283,7 +284,7 @@ SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T*
     for(size_t i = 0 ; i < children.size() ; i++)
     {
         T* cc = children[i];
-        add(childID, cc);
+        add(childID, cc, linkToParent);
     }
 #ifdef _DEBUG
     check();

@@ -6,10 +6,13 @@
 #include "SE_RenderTarget.h"
 #include "SE_CameraManager.h"
 #include "SE_SpatialManager.h"
-SE_Scene::SE_Scene()
+#include "SE_RenderState.h"
+#include "SE_Spatial.h"
+SE_Scene::SE_Scene(SE_SCENE_TYPE t)
 {
-    mX = mY = mWidth = mHeight = 0;
+    mWidth = mHeight = 0;
     mIsTranslucent = false;
+    mSceneType = t;
 }
 SE_Scene::~SE_Scene()
 {
@@ -21,11 +24,31 @@ SE_Scene::~SE_Scene()
 void SE_Scene::create(const char* sceneName)
 {
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    SE_Element* rootElement = resourceManager->loadScene(sceneName);
+    SE_Element* element = resourceManager->loadScene(sceneName);
+    SE_Element* root = NULL;
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    mRoot = elementManager->addElement(SE_ElementID::NULLID, rootElement);
-    rootElement->spawn();
-    rootElement->layout();
+    if(mSceneType == SE_2D_SCENE)
+    {
+        root = new SE_2DNodeElement;
+        SE_Vector4f c1(1, 0, 0, 0);
+        SE_Vector4f c2(0, -1, 0, 0);
+        SE_Vector4f c3(0, 0, 1, 0);
+        SE_Vector4f c4(-mWidth / 2, mHeight / 2, 0, 1);
+        SE_Matrix4f localM;
+        localM.setColumn(0, c1);
+        localM.setColumn(1, c2);
+        localM.setColumn(2, c3);
+        localM.setColumn(3, c4);
+        root->setPostMatrix(localM);
+		elementManager->addElement(root, element);
+    }
+    else
+    {
+        root = element;
+    }
+    mRoot = elementManager->addElement(SE_ElementID::NULLID, root, false);
+    root->spawn();
+    root->layout();
 }
 /*
 SE_SceneID SE_Scene::getID()
@@ -41,7 +64,18 @@ void SE_Scene::show()
     {
 		SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
         SE_Spatial* spatial = rootElement->createSpatial();
-		spatialManager->addSpatial(SE_SpatialID::NULLID, spatial);
+		spatialManager->addSpatial(SE_SpatialID::NULLID, spatial, false);
+		SE_DepthTestState* rs = new SE_DepthTestState();
+		rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
+		SE_BlendState* blendRs = new SE_BlendState;
+		blendRs->setBlendProperty(SE_BlendState::BLEND_ENABLE);
+		blendRs->setBlendSrcFunc(SE_BlendState::SRC_ALPHA);
+		blendRs->setBlendDstFunc(SE_BlendState::ONE_MINUS_SRC_ALPHA);
+		spatial->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
+		spatial->setRenderState(SE_Spatial::BLENDSTATE, blendRs, OWN);
+		spatial->updateWorldTransform();
+		spatial->updateWorldLayer();
+		spatial->updateRenderState();
 
     }
 }

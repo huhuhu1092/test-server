@@ -22,6 +22,8 @@
 #include "SE_RenderManager.h"
 #include "SE_ImageMap.h"
 #include "SE_CheckXml.h"
+#include "SE_Scene.h"
+#include "SE_SceneManager.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -34,6 +36,14 @@ SE_Init2D::~SE_Init2D()
 
 void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+    SE_ResourceManager* resourceManager = mApp->getResourceManager();
+    resourceManager->setDataPath(dataPath.c_str());
+    SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
+	scene->setBound(width, height);
+	scene->create(sceneName.c_str());
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_SceneID sceneID = sceneManager->addScene(scene);
+	sceneManager->showScene(sceneID);
 	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());

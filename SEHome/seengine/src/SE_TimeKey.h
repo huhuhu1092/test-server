@@ -25,6 +25,14 @@ public:
 	{
 		return mKey > r.mKey;
 	}
+	bool operator >=(const SE_TimeKey& r) const
+	{
+		return mKey >= r.mKey;
+	}
+	bool operator <=(const SE_TimeKey& r) const
+	{
+		return mKey <= r.mKey;
+	}
 	SE_TimeKey operator+(const SE_TimeKey& r) const
 	{
 		return SE_TimeKey(mKey + r.mKey);
@@ -37,6 +45,10 @@ public:
 	SE_TimeKey operator-(const SE_TimeKey& r) const
 	{
 		return SE_TimeKey(mKey - r.mKey);
+	}
+	unsigned int toInt()
+	{
+		return mKey;
 	}
     void read(SE_BufferInput& input);
 	void write(SE_BufferOutput& output);

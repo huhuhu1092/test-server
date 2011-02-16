@@ -69,7 +69,7 @@ void SE_DynamicArray<T>::expand()
         mError = SE_OVERFLOW;
         return;
     }
-    for(int i = 0 ; i < mSize ; i++)
+    for(size_t i = 0 ; i < mSize ; i++)
     {
         newArray[i] = mArray[i];
     } 

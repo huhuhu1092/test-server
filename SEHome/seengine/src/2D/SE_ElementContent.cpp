@@ -2,6 +2,7 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_2DElement.h"
+#include "SE_ElementSchema.h"
 void SE_ElementContent::clone(SE_ElementContent* src, SE_ElementContent* dst)
 {
 	dst->mContentURI = src->mContentURI;
@@ -49,6 +50,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		colorEffectControllerElement->setMountPoint(mpx, mpy);
 		rete = colorEffectControllerElement;
 	}
+    rete->setName(getID().getStr());
 	return rete;
 }
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI)

@@ -72,7 +72,7 @@ void SE_RenderManager::sort()
 	    for(it = sru->renderTargetUnit.begin() ; it != sru->renderTargetUnit.end() ; it++)
 	    {
 		    _RenderTargetUnit* rt = *it;
-            for(int i = 0 ; i < RQ_NUM ; i++)
+            for(int i = 0 ; i < SE_RQ_NUM ; i++)
             {
                 RenderUnitList* ruList = rt->mRenderQueue[i];
                 ruList->sort(_CompareRenderUnit) ;
@@ -120,7 +120,7 @@ void SE_RenderManager::draw()
 				    SE_Renderer::setClearColor(renderTarget->getBackground());
 			        SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
                 }
-			    for(int i = 0 ; i < RQ_NUM ; i++)
+			    for(int i = 0 ; i < SE_RQ_NUM ; i++)
 			    {
 				    RenderUnitList* ruList = rt->mRenderQueue[i];
 				    RenderUnitList::iterator it;
@@ -215,7 +215,7 @@ SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(_SceneRenderUn
 	}
 	return NULL;
 }
-void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, RENDER_QUEUE rq)
+void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq)
 {
     SE_ASSERT(sceneRenderSeq >= 0 && sceneRenderSeq < SE_MAX_RENDERSCENE_SIZE);
     _SceneRenderUnit* sceneRenderUnit = mSceneRenderUnit[sceneRenderSeq.toInt()];

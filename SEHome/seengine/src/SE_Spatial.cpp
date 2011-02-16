@@ -23,7 +23,7 @@ SE_Spatial::SE_Spatial()
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
-	mRQ = SE_RenderManager::RQ0;
+	mRQ = SE_RQ0;
 	mNeedUpdateTransform = true;
 	mOwnRenderTargetCamera = false;
 }

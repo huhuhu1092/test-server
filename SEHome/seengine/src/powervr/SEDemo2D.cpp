@@ -23,6 +23,8 @@
 #include "SE_ElementManager.h"
 #include "SE_AnimationManager.h"
 #include "SE_Animation.h"
+#include "SE_SpatialManager.h"
+#include "SE_ElementManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -62,8 +64,30 @@ private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
 };
+static void doTest()
+{
+	struct testTraverse
+	{
+		void operator()(SE_Spatial* s)
+		{
+			SE_SpatialID id = s->getID();
+		}
+	};
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_CommonNode* cn = new SE_CommonNode;
+	for(int i = 0 ; i < 10 ; i++)
+	{
+        SE_Spatial* s = new SE_Spatial;
+		spatialManager->addSpatial(cn, s);
+	}
+	SE_SpatialID ii = spatialManager->addSpatial(SE_SpatialID::NULLID, cn, false);
+	SE_Spatial* s = spatialManager->removeSpatial(ii);
+	spatialManager->release(s);
+	//spatialManager->check();
+}
 bool SEDemo::InitApplication()
 {
+	doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
 	SE_Application::SE_APPID appid;
@@ -79,7 +103,7 @@ bool SEDemo::InitApplication()
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
-	c->fileName = "TestElement.xml";
+	c->sceneName = "TestElement.xml/PFemaleBase";
 	c->left = 0;
 	c->top = 0;
 	c->width = 480;

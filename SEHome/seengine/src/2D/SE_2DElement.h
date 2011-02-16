@@ -434,7 +434,7 @@ protected:
 };
 */
 ///////////////////////
-class SE_ImageElement : public SE_Element
+class SE_ImageElement : public SE_2DNodeElement
 {
 public:
 	SE_ImageElement(const SE_StringID& uri);
@@ -445,6 +445,7 @@ public:
 	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
     void update(SE_ParamValueList& paramValueList);
+	SE_Element* clone();
 protected:
 	bool isValid();
 	virtual void setImageData(SE_RectPrimitive* primitive);
@@ -470,7 +471,7 @@ private:
 	_ImageUnitData mImageUnits[IMG_SIZE];
 };
 
-class SE_TextureElement : public SE_Element
+class SE_TextureElement : public SE_2DNodeElement
 {
 public:
 	SE_TextureElement(const SE_StringID& uri);
@@ -482,11 +483,12 @@ public:
 	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
     void update(SE_ParamValueList& paramValueList);
-    void setContentChild(SE_Element* c)
+    void setContentChild(SE_2DNodeElement* c)
 	{
 		mContentChild = c;
 	}
 	SE_Spatial* createSpatial();
+	SE_Element* clone();
 protected:
 	void setImageData(SE_RectPrimitive* primitive);
 	void setSurface(SE_Surface* surface);
@@ -495,9 +497,9 @@ private:
 	SE_ImageDataID mImageDataID;
 	SE_ImageData* mImageData;
 	SE_RenderTargetID mRenderTargetID;
-	SE_Element* mContentChild;
+	SE_2DNodeElement* mContentChild;
 };
-class SE_ActionElement : public SE_Element
+class SE_ActionElement : public SE_2DNodeElement
 {
 public:
 	SE_ActionElement(const SE_StringID& uri);
@@ -510,32 +512,34 @@ public:
 	{
 		mHeadElementList.push_back(e);
 	}
+	SE_Element* clone();
 private:
 	SE_Action* mAction;
 	typedef std::list<SE_Element*> _HeadElementList;
 	_HeadElementList mHeadElementList;
 };
-class SE_StateTableElement : public SE_Element
+class SE_StateTableElement : public SE_2DNodeElement
 {
 public:
 	SE_StateTableElement(const SE_StringID& uri);
-	void update(unsigned int key);
+	void update(const SE_TimeKey& key);
 	void spawn();
 	void layout();
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
 	SE_Spatial* createSpatial();
+	SE_Element* clone();
 private:
 	SE_StateMachine* mStateTable;
 };
-class SE_NullElement : public SE_Element
+class SE_NullElement : public SE_2DNodeElement
 {
 public:
 	SE_NullElement()
 	{}
 	SE_Spatial* createSpatial();
 };
-class SE_SequenceElement : public SE_Element
+class SE_SequenceElement : public SE_2DNodeElement
 {
 public:
 	SE_SequenceElement(const SE_StringID& uri);
@@ -545,26 +549,28 @@ public:
     void update(const SE_AddressID& address, const SE_Value& value);
     void update(SE_ParamValueList& paramValueList);
 	int getKeyFrameNum();
+	SE_Element* clone();
 private:
 	SE_Sequence* mSequence;
-	SE_Element* mCurrentElement;
+	SE_2DNodeElement* mCurrentElement;
 };
-class SE_ColorEffectControllerElement : public SE_Element
+class SE_ColorEffectControllerElement : public SE_2DNodeElement
 {
 public:
 	SE_ColorEffectControllerElement(const SE_StringID& uri);
 	~SE_ColorEffectControllerElement();
 	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
-
+    void update(SE_ParamValueList& paramValueList);
 	SE_Spatial* createSpatial();
 	void spawn();
 	void layout();
+	SE_Element* clone();
 private:
 	SE_ColorEffectController* mColorEffectController;
-	SE_Element* mCurrentElement;
+	SE_2DNodeElement* mCurrentElement;
 };
-class SE_ColorEffectElement : public SE_Element
+class SE_ColorEffectElement : public SE_2DNodeElement
 {
 public:
 	enum {MARK_A, MARK_R, MARK_G, MARK_B, MARK_NUM};
@@ -631,6 +637,7 @@ public:
 	SE_Spatial* createSpatial();
 	void spawn();
 	void layout();
+	SE_Element* clone();
 private:
 	void setImageData(SE_RectPrimitive* primitive);
 	void setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType);
@@ -661,13 +668,13 @@ private:
 	SE_StringID mBackgroundAlphaAddress;
     int mBackgroundAlphaValue;
 	_TextureMark mTextureMark[MARK_NUM];
-	SE_Element* mBackgroundElement;
-	SE_Element* mChannelElement;
-	SE_Element* mTextureElement[MARK_NUM];
+	SE_2DNodeElement* mBackgroundElement;
+	SE_2DNodeElement* mChannelElement;
+	SE_2DNodeElement* mTextureElement[MARK_NUM];
 	SE_ImageData* mTextureImageData[MARK_NUM];
 	SE_ImageDataID mTextureImageDataID[MARK_NUM];
 	SE_ImageElement* mTextureImageElement[MARK_NUM];
-	SE_Element* mMergedElement;
+	SE_2DNodeElement* mMergedElement;
 };
 typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
 typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;

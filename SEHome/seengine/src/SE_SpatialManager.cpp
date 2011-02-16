@@ -18,7 +18,16 @@ SE_Spatial* SE_SpatialCreator::create(int type)
 		return NULL;
 	}
 }
-
+SE_SpatialManager::SE_SpatialManager()
+{
+	mError = SE_NO_ERROR;
+	mSpatialCreator = new SE_SpatialCreator;
+}
+SE_SpatialManager::~SE_SpatialManager()
+{
+	if(mSpatialCreator)
+		delete mSpatialCreator;
+}
 SE_Spatial* SE_SpatialManager::findSpatial(const SE_SpatialID& id)
 {
 	return mSpatials.find(id);
@@ -27,9 +36,9 @@ SE_Spatial* SE_SpatialManager::removeSpatial(const SE_SpatialID& id)
 {
 	return mSpatials.remove(id);
 }
-SE_SpatialID SE_SpatialManager::addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial)
+SE_SpatialID SE_SpatialManager::addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial, bool linkToParent)
 {
-	return mSpatials.add(parentID, spatial);
+	return mSpatials.add(parentID, spatial, linkToParent);
 }
 void SE_SpatialManager::addSpatial(SE_Spatial* parent, SE_Spatial* child)
 {

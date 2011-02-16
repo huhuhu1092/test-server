@@ -2,11 +2,11 @@
 #include "SE_Element.h"
 #include "SE_Utils.h"
 #include <algorithm>
-SE_ElementID SE_ElementManager::addElement(const SE_ElementID& parent, SE_Element* e)
+SE_ElementID SE_ElementManager::addElement(const SE_ElementID& parent, SE_Element* e, bool linkToParent)
 {
     if(e == NULL)
         return SE_ElementID::INVALID;
-    return mElements.add(parent, e);
+    return mElements.add(parent, e, linkToParent);
 }
 SE_Element* SE_ElementManager::findElement(const SE_ElementID& id)
 {

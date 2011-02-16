@@ -189,8 +189,8 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
 
 }
 //////////////////////////////////////////
-SE_TreeStructID SE_TreeStructID::INVALID = SE_TreeStructID(-1, -1);
-SE_TreeStructID SE_TreeStructID::NULLID = SE_TreeStructID(-1, -2);
+SE_TreeStructID SE_TreeStructID::INVALID = SE_TreeStructID(0xFFFFFFFE, 0xFFFFFFFE);
+SE_TreeStructID SE_TreeStructID::NULLID = SE_TreeStructID(0xFFFFFFFF, 0xFFFFFFFF);
 std::string SE_TreeStructID::toString() const
 {
     char buf[21];

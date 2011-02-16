@@ -18,7 +18,7 @@ public:
     void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 public:
     std::string dataPath;
-    std::string fileName;
+    std::string sceneName;
 	int left, top, width, height;
 };
 

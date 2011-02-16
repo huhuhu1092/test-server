@@ -37,6 +37,7 @@
 #include "SE_MessageEventCommandDefine.h"
 #include "SE_ElementSchema.h"
 #include "SE_SpatialManager.h"
+#include "SE_TimeKey.h"
 #include <algorithm>
 #include <math.h>
 //////////////////////////////
@@ -744,6 +745,38 @@ SE_Element* SE_Element::getElement(const SE_StringID& uri)
 	return e;
 }
 */
+static SE_Element* getElement(const SE_StringID& uri)
+{
+	SE_URI strURI(uri.getStr());
+    SE_StringID url = strURI.getURL();
+	SE_Util::SplitStringList strList = SE_Util::splitString(url.getStr(), "/");
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
+	SE_Element* e = NULL;
+	SE_ElementSchema* es = NULL;
+	switch(t)
+	{
+	case SE_ELEMENT_TABLE:
+		es = resourceManager->getElementSchema(url.getStr());
+		e = es->createElement();
+		break;
+	case SE_ACTION_TABLE:
+		e = new SE_ActionElement(uri);
+		break;
+	case SE_SEQUENCE_TABLE:
+		e = new SE_SequenceElement(uri);
+		break;
+	case SE_COLOREFFECT_TABLE:
+		e = new SE_ColorEffectControllerElement(uri);
+		break;
+	case SE_IMAGE_TABLE:
+		e = new SE_ImageElement(uri);
+		break;
+	default:
+		break;
+	};
+	return e;
+}
 ////////////////////////////////////////////////////////
 SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
 {
@@ -755,11 +788,18 @@ SE_TextureElement::~SE_TextureElement()
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	resourceManager->removeImageData(mImageDataID);
 	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
-	rm->removeRenderTarget(mRenderTargetID);
-	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	elementManager->removeRenderTargetElement(mContentChild);
+	SE_RenderTarget* renderTarget = rm->removeRenderTarget(mRenderTargetID);
+	rm->release(renderTarget);
+	//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	//elementManager->removeRenderTargetElement(mContentChild);
 	if(mContentChild)
 		delete mContentChild;
+}
+SE_Element* SE_TextureElement::clone()
+{
+	SE_TextureElement* element = new SE_TextureElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
 }
 void SE_TextureElement::init()
 {
@@ -767,7 +807,7 @@ void SE_TextureElement::init()
 	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
-    mContentChild = elementSchema->createElement();
+    mContentChild = (SE_2DNodeElement*)elementSchema->createElement();
     SE_ImageDataID imageDataID = mContentChild->getFullPathName().getStr();
 	SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 	if(!imageData)
@@ -783,14 +823,16 @@ void SE_TextureElement::init()
 	mContentChild->setPivotX(0);
 	mContentChild->setPivotX(0);
     mContentChild->setOwnRenderTargetCamera(true);
-	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	elementManager->addRenderTargetElement(mContentChild);
+	//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	//elementManager->addRenderTargetElement(mContentChild);
 }
 void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    elementManager->removeRenderTargetElement(mContentChild);
-    delete mContentChild;
+    //elementManager->removeRenderTargetElement(mContentChild);
+	elementManager->removeElement(mContentChild->getID());
+	elementManager->releaseElement(mContentChild);
+    //delete mContentChild;
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     resourceManager->removeImageData(mImageDataID);
 	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
@@ -803,7 +845,7 @@ void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 }
 void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 void SE_TextureElement::setImageData(SE_RectPrimitive* primitive)
 {
@@ -864,9 +906,9 @@ void SE_TextureElement::layout()
 	SE_Vector3f v(left , top , 10);
 	camera->setLocation(v);
 	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
-	camera->setViewport(0, 0, mWidth, mHeight);
-	mImageData->setWidth(mWidth);
-	mImageData->setHeight(mHeight);
+	camera->setViewport(0, 0, (int)mWidth, (int)mHeight);
+	mImageData->setWidth((int)mWidth);
+	mImageData->setHeight((int)mHeight);
 	mImageData->setPixelFormat(SE_ImageData::RGBA);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
 	SE_CameraID cameraID = cameraManager->addCamera(camera);
@@ -920,6 +962,12 @@ SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
     mImageUnits[4].imageUnit = &mAChannel;
     initImage();
 }
+SE_Element* SE_ImageElement::clone()
+{
+	SE_ImageElement* element = new SE_ImageElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
+}
 SE_ImageElement::~SE_ImageElement()
 {
 
@@ -957,19 +1005,19 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
     {
 
         SE_Spatial* s = createSpatial();
-        spatialManager->addSpatial(parentSpatial->getID(), s);
+        spatialManager->addSpatial(parentSpatial->getID(), s, true);
     }
     else if(spatial && parentSpatial)
     {
         SE_Spatial* spatial = spatialManager->removeSpatial(getID());
         SE_Spatial* s = createSpatial();
-        spatialManager->addSpatial(parentSpatial->getID(), s);
+        spatialManager->addSpatial(parentSpatial->getID(), s, true);
 		spatialManager->release(spatial);
     }
 }
 void SE_ImageElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 
 bool SE_ImageElement::isValid()
@@ -1111,9 +1159,15 @@ SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 	SE_StringID url = getURL();
 	mAction = resourceManager->getAction(url.getStr());
 }
+SE_Element* SE_ActionElement::clone()
+{
+	SE_ActionElement* element = new SE_ActionElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
+}
 void SE_ActionElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 void SE_ActionElement::update(SE_ParamValueList& paramValueList)
 {
@@ -1214,19 +1268,25 @@ SE_SequenceElement::SE_SequenceElement(const SE_StringID& uri)
 }
 void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
+}
+SE_Element* SE_SequenceElement::clone()
+{
+	SE_SequenceElement* element = new SE_SequenceElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
 }
 void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
 {
     SE_StringID url = getURL();
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mSequence = resourceManager->getSequence(url.getStr());
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Spatial* s = sceneManager->removeSpatial(mSpatialID);
-    delete s;
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* s = spatialManager->removeSpatial(getID());
+	spatialManager->release(s);
     clearChildren();
     spawn();
-    measure();
+    layout();
     update(0);
     updateSpatial();
 }
@@ -1256,13 +1316,14 @@ void SE_SequenceElement::spawn()
 		SE_ImageElement* e = new SE_ImageElement(f.imageref);
 		e->setMountPointRef(f.mpref);
 		e->setTimeKey(keys[i]);
-		elementManger->addElement(this->getID(), e);
+		elementManager->addElement(this->getID(), e, true);
 		e->spawn();
 	}
 	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
 	anim->setElement(this);
 	int frameRate = SE_Application::getInstance()->getFrameRate();
-	SE_TimeMS duration = (this->getEndKey() - this->getStartKey()) * frameRate;
+	SE_TimeKey diff = (this->getEndKey() - this->getStartKey());
+	SE_TimeMS duration = diff.toInt() * frameRate;
 	anim->setDuration(duration);
 	this->setAnimation(anim);
 }
@@ -1275,18 +1336,19 @@ SE_Spatial* SE_SequenceElement::createSpatial()
     node->setLocalLayer(mLocalLayer);
 	return node;
 }
-void SE_SequenceElement::update(const SE_TimeKey key)
+void SE_SequenceElement::update(const SE_TimeKey& key)
 {
-	if(mChildren.empty())
+	std::vector<SE_Element*> children = getChildren();
+	if(children.empty())
 		return;
-	_ElementList::iterator it;
+	std::vector<SE_Element*>::iterator it;
 	SE_Element* first = NULL;
 	SE_Element* second = NULL;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	_ElementList::iterator currIt = mChildren.end();
-	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	std::vector<SE_Element*>::iterator currIt = children.end();
+	for(it = children.begin() ; it != children.end() ; it++)
 	{
 		SE_Element* e = *it;
 		if(e->getTimeKey() >= key)
@@ -1295,7 +1357,7 @@ void SE_SequenceElement::update(const SE_TimeKey key)
 			break;
 		}
 	}
-	if(currIt == mChildren.end())
+	if(currIt == children.end())
 	{
 		currIt--;
 		first = *currIt;
@@ -1303,7 +1365,7 @@ void SE_SequenceElement::update(const SE_TimeKey key)
 	}
 	else
 	{
-		if(currIt == mChildren.begin())
+		if(currIt == children.begin())
 		{
 			if((*currIt)->getTimeKey() == key)
 			{
@@ -1332,17 +1394,17 @@ void SE_SequenceElement::update(const SE_TimeKey key)
 		{
 			simObjectManager->remove(mCurrentElement->getSimObjectID());
 			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = sceneManager->removeSpatial(mCurrentElement->getSpatialID());
+			SE_Spatial* spatial = spatialManager->removeSpatial(mCurrentElement->getSpatialID());
 			if(spatial)
-				delete spatial;
+				spatialManager->release(spatial);
 		}
 		SE_Spatial* spatial = first->createSpatial();
-		SE_Spatial* parentSpatial = sceneManager->find(getSpatialID());
-		sceneManager->addSpatial(parentSpatial, spatial);
+		SE_Spatial* parentSpatial = spatialManager->findSpatial(getID());
+		spatialManager->addSpatial(parentSpatial->getID(), spatial, true);
 		spatial->updateRenderState();
 		spatial->updateWorldLayer();
 		spatial->updateWorldTransform();
-		mCurrentElement = first;
+		mCurrentElement = (SE_2DNodeElement*)first;
 	}
 }
 ////////////////
@@ -1353,34 +1415,41 @@ SE_StateTableElement::SE_StateTableElement(const SE_StringID& uri)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mStateTable = resourceManager->getStateMachine(url.getStr());
 }
+SE_Element* SE_StateTableElement::clone()
+{
+	SE_StateTableElement* element = new SE_StateTableElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
+}
 void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
 {
 	SE_StringID url = getURL();
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mStateTable = resourceManager->getStateMachine(url.getStr());   
-    clearChildren(true);
+    clearChildren();
     spawn();
-    measure();
+    layout();
     update(0);
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Spatial* currSpatial = sceneManager->findSpatial(mSptialID);
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* currSpatial = spatialManager->findSpatial(getID());
     if(!currSpatial)
     {
         LOGI("state table element spatial has been removed\n");
         return;
     }
-    currSpatial->clearChildren(false);
-    _ElementList::iterator it;
-    for(it = mChildren.begin(); it != mChildren.end() ; it++)
+    clearChildren();
+	std::vector<SE_Element*> children = getChildren();
+	std::vector<SE_Element*>::iterator it;
+    for(it = children.begin(); it != children.end() ; it++)
     {
         SE_Element* e = *it;
         SE_Spatial* s = e->createSpatial();
-        sceneManager->addChild(currSpatial, s); 
+        spatialManager->addSpatial(currSpatial->getID(), s, true); 
     }
 }
 void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 void SE_StateTableElement::update(const SE_TimeKey& key)
 {}
@@ -1392,14 +1461,16 @@ void SE_StateTableElement::spawn()
 	if(!currState)
 		return;
 	SE_StringID strURI = currState->getDefaultValue();
-	SE_Element* e = getElement(strURI);
+	SE_2DNodeElement* e = (SE_2DNodeElement*)getElement(strURI);
     e->setMountPoint(0, 0);
-	this->addChild(e);
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	elementManager->addElement(getID(), e, true);
+	//this->addChild(e);
 	e->spawn();
 }
-void SE_StateTableElement::measure()
+void SE_StateTableElement::layout()
 {
-	SE_Element::measure();
+	SE_Element::layout();
 }
 SE_Spatial* SE_StateTableElement::createSpatial()
 {
@@ -1415,6 +1486,12 @@ SE_ColorEffectControllerElement::SE_ColorEffectControllerElement(const SE_String
 	mName = mColorEffectController->getID().getStr();
 	mCurrentElement = NULL;
 }
+SE_Element* SE_ColorEffectControllerElement::clone()
+{
+	SE_ColorEffectControllerElement* element = new SE_ColorEffectControllerElement(getURI());
+	SE_2DNodeElement::clone(this, element);
+	return element;
+}
 void SE_ColorEffectControllerElement::update(SE_ParamValueList& paramValueList)
 {
     SE_StringID url = getURL();
@@ -1422,30 +1499,31 @@ void SE_ColorEffectControllerElement::update(SE_ParamValueList& paramValueList)
 	mColorEffectController = resourceManager->getColorEffectController(url.getStr());
 	mName = mColorEffectController->getID().getStr();
 	mCurrentElement = NULL;
-    clearChildren(true); 
+    clearChildren(); 
     spawn();
-    measure();
+    layout();
     update(0);
-    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    //SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 
 }
 void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 
 void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 {
-	if(mChildren.empty())
+	std::vector<SE_Element*> children = getChildren();
+	if(children.empty())
 		return;
-	_ElementList::iterator it;
+	std::vector<SE_Element*>::iterator it;
 	SE_Element* first = NULL;
 	SE_Element* second = NULL;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	_ElementList::iterator currIt = mChildren.end();
-	for(it = mChildren.begin() ; it != mChildren.end() ; it++)
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	std::vector<SE_Element*>::iterator currIt = children.end();
+	for(it = children.begin() ; it != children.end() ; it++)
 	{
 		SE_Element* e = *it;
 		if(e->getTimeKey() >= key)
@@ -1454,7 +1532,7 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 			break;
 		}
 	}
-	if(currIt == mChildren.end())
+	if(currIt == children.end())
 	{
 		currIt--;
 		first = *currIt;
@@ -1462,7 +1540,7 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 	}
 	else
 	{
-		if(currIt == mChildren.begin())
+		if(currIt == children.begin())
 		{
 			if((*currIt)->getTimeKey() == key)
 			{
@@ -1491,9 +1569,10 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 		{
 			simObjectManager->remove(mCurrentElement->getSimObjectID());
 			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = sceneManager->removeSpatial(mCurrentElement->getSpatialID());
+			SE_Spatial* spatial = spatialManager->removeSpatial(mCurrentElement->getID());
 			if(spatial)
-				delete spatial;
+				spatialManager->release(spatial);
+				//delete spatial;
 		}
         /*
 		SE_Spatial* spatial = first->createSpatial();
@@ -1503,7 +1582,7 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 		spatial->updateWorldLayer();
 		spatial->updateWorldTransform();
         */
-		mCurrentElement = first;
+		mCurrentElement = (SE_2DNodeElement*)first;
 	}
 }
 SE_Spatial* SE_ColorEffectControllerElement::createSpatial()
@@ -1512,7 +1591,7 @@ SE_Spatial* SE_ColorEffectControllerElement::createSpatial()
 	{
 	    SE_Spatial* node = createNode();
         SE_Spatial* spatial = mCurrentElement->createSpatial();
-		node->addChild(spatial);
+		//node->addChild(spatial);
 		return node;
 	}
 	else
@@ -1522,24 +1601,26 @@ void SE_ColorEffectControllerElement::spawn()
 {
 	if(!mColorEffectController)
 		return;
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	calculateRect(mColorEffectController->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
 	std::vector<SE_TimeKey> keys = mColorEffectController->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
 		SE_ColorEffectFrame* f = mColorEffectController->getKeyFrame(keys[i]);
-        SE_Element* e = f->createElement();
+        SE_2DNodeElement* e = (SE_2DNodeElement*)f->createElement();
 		e->setPivotX(f->getPivotX());
 		e->setPivotY(f->getPivotY());
 		e->setMountPointRef(f->getMountPointRef());
-		this->addChild(e);
+		elementManager->addElement(getID(), e, true);
+		//this->addChild(e);
 		e->spawn();
 	}
 }
 SE_ColorEffectControllerElement::~SE_ColorEffectControllerElement()
 {}
-void SE_ColorEffectControllerElement::measure()
+void SE_ColorEffectControllerElement::layout()
 {
-	SE_Element::measure();
+	SE_Element::layout();
 }
 ///////////////
 SE_ColorEffectElement::SE_ColorEffectElement()
@@ -1564,9 +1645,15 @@ SE_ColorEffectElement::~SE_ColorEffectElement()
 	}
 
 }
+SE_Element* SE_ColorEffectElement::clone()
+{
+	SE_ColorEffectElement* element = new SE_ColorEffectElement;
+	SE_2DNodeElement::clone(this, element);
+	return element;
+}
 void SE_ColorEffectElement::update(const SE_AddressID& address, const SE_Value& value)
 {
-    SE_Element::update(address, value);
+    SE_2DNodeElement::update(address, value);
 }
 
 void SE_ColorEffectElement::update(const SE_TimeKey& key)
@@ -1575,7 +1662,7 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 {
     SE_ImageElement* imageElement = new SE_ImageElement(textureURL);
 	imageElement->spawn();
-	imageElement->measure();
+	imageElement->layout();
 	imageData = createImageData(textureURL);
     imageData->setWidth(imageElement->getWidth());
 	imageData->setHeight(imageElement->getHeight());
@@ -1583,8 +1670,8 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 	SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(renderTarget);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	elementManager->addRenderTargetElement(imageElement);
-	imageElement->setRenderTarget(renderTargetID);
+	//elementManager->addRenderTargetElement(imageElement);
+	imageElement->setRenderTargetID(renderTargetID);
     SE_CameraID cameraID = createRenderTargetCamera(imageElement->getDeltaLeft(), 
 		                                            imageElement->getDeltaTop(), 
 												    imageElement->getWidth(),
@@ -1612,14 +1699,15 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 												SE_Element* texture[4])
 {
 	SE_Element* element = NULL;
-    std::<SE_Element*> backgroundChildren = background->getChildren();
-    std::<SE_Element*> channelChildren = channel->getChildren();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    std::vector<SE_Element*> backgroundChildren = background->getChildren();
+    std::vector<SE_Element*> channelChildren = channel->getChildren();
     if(!backgroundChildren.empty() && !channelChildren.empty())
 	{
 		element = background->clone();
-        std::<SE_Element*>::iterator backgroundIt = backgroundChildren.begin();
-        std::<SE_Element*>::iterator channelIt = channelChildren.begin();
-        std::<SE_Element*>::iterator textureIt[MARK_NUM];
+        std::vector<SE_Element*>::iterator backgroundIt = backgroundChildren.begin();
+        std::vector<SE_Element*>::iterator channelIt = channelChildren.begin();
+        std::vector<SE_Element*>::iterator textureIt[MARK_NUM];
 		for(int i = 0 ; i < MARK_NUM ; i++)
 		{
 			if(texture[i])
@@ -1637,7 +1725,8 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 					tc[i] = *textureIt[i];
 			}
 			SE_Element* child = mergeElement(bc, cc, tc);
-			element->addChild(child);
+			elementManager->addElement(getID(), child, true);
+			//element->addChild(child);
 			backgroundIt++;
 			channelIt++;
 			for(int i = 0 ; i < MARK_NUM ; i++)
@@ -1656,7 +1745,7 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
  	}
 	else // has no child it must be SE_ImageElement
 	{
-		SE_ASSERT(background->getChildren().empty() && channel->getChildren().empty());
+		SE_ASSERT(backgroundChildren.empty() && channelChildren.empty());
 		for(int i = 0 ; i < 4 ; i++)
 		{
 			if(texture[i])
@@ -1670,8 +1759,7 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 			if(texture[i])
 				textureURI[i] = texture[i]->getURI();
 		}
-		SE_ColorEffectElement* retElement = new SE_ColorEffectElement;
-		clone(background, retElement);
+		SE_ColorEffectElement* retElement = (SE_ColorEffectElement*)background->clone();
 		retElement->setBackgroundValue(backgroundImageURI);
 		retElement->setChannelValue(channelImageURI);
 		retElement->setBackgroundAlphaValue(mBackgroundAlphaValue);
@@ -1700,14 +1788,14 @@ void SE_ColorEffectElement::mergeElement()
 		return;
 	SE_Element* textureElement[4] = {mTextureImageElement[0], mTextureImageElement[1], mTextureImageElement[2],
 	                                 mTextureImageElement[3]};
-    mMergedElement = mergeElement(mBackgroundImageElement, mChannelImageElement, textureElement);       
+    mMergedElement = (SE_2DNodeElement*)mergeElement(mBackgroundImageElement, mChannelImageElement, textureElement);       
 	//addChild(element);
 }
 void SE_ColorEffectElement::layout()
 {
 	if(mBackgroundElement)
 	{
-		mBackgroundElement->measure();
+		mBackgroundElement->layout();
 		int width = mBackgroundElement->getWidth();
 		int height = mBackgroundElement->getHeight();
 		setWidth(width);
@@ -1945,12 +2033,14 @@ void SE_ColorEffectElement::spawn()
 		calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
 		if(mBackgroundElement)
 			delete mBackgroundElement;
-		mBackgroundElement = resourceManager->getElement(mBackgroundValue.getStr());
+		SE_ElementSchema* es = resourceManager->getElementSchema(mBackgroundValue.getStr());
+		mBackgroundElement = (SE_2DNodeElement*)es->createElement();
 		mBackgroundElement->setRect(0, 0, 0, 0);
 		mBackgroundElement->spawn();
 		if(mChannelElement)
 			delete mChannelElement;
-		mChannelElement = resourceManager->getElement(mChannelValue.getStr());
+		es = resourceManager->getElementSchema(mChannelValue.getStr());
+		mChannelElement = (SE_2DNodeElement*)es->createElement();
         mChannelElement->setRect(0, 0, 0, 0);
 		mChannelElement->spawn();
 		for(int i = 0 ; i < MARK_NUM ; i++)
@@ -1960,7 +2050,8 @@ void SE_ColorEffectElement::spawn()
 			{
 			    if(mTextureElement[i])
 				    delete mTextureElement[i];
-				mTextureElement[i] = resourceManager->getElement(tm.mTextureValue.getStr());
+				es = resourceManager->getElementSchema(tm.mTextureValue.getStr());
+				mTextureElement[i] = (SE_2DNodeElement*)es->createElement();
 				mTextureElement[i]->setRect(0, 0, 0, 0);
 				mTextureElement[i]->spawn();
 			}

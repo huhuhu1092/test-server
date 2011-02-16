@@ -1,28 +1,58 @@
-#include "SE_ElementScheme.h"
+#include "SE_ElementSchema.h"
 #include "SE_Application.h"
 #include "SE_Element.h"
 #include "SE_ElementManager.h"
+#include "SE_ElementContent.h"
 #include "SE_Utils.h"
-SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
+#include <algorithm>
+SE_ElementSchema::SE_ElementSchema()
 {
-    SE_Element* e = new SE_Element;
-    e->setName(name.getStr());
-    e->setFullPathName(fullPathName.getStr());
-    e->setMountPointID(mountPointRef);
-    e->setMountPoint(mountPointSet);
-    e->setPivotX(pivotx);
-    e->setPivotY(pivoty);
-    e->setSeq(seq);
-    elementManager->addElement(parent, e);
-    SE_Element* root = NULL;
-    if(parent == NULL)
-        root = e;
-    SE_ASSERT(children.empty() || contens.empty());
+	x = y = w = h = 0;
+	pivotx = pivoty = 0;
+	seq = -1;
+}
+SE_ElementSchema::~SE_ElementSchema()
+{
+	clear();
+}
+void SE_ElementSchema::clear()
+{
     _ElementContentList::iterator it;
     for(it = contents.begin() ; it != contents.end() ; it++)
     {
         SE_ElementContent* ec = *it;
-        SE_Element* childElement = ec->createElement();
+        delete ec;
+    } 
+    _ElementSchemaList::iterator itSchema;
+    for(itSchema = children.begin() ; itSchema != children.end() ; itSchema++)
+    {
+        SE_ElementSchema* es = *itSchema;
+		es->clear();
+		delete es;
+    }
+}
+SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
+{
+    SE_2DNodeElement* e = new SE_2DNodeElement;
+    e->setName(name.getStr());
+    e->setFullPathName(fullPathName.getStr());
+    e->setMountPointRef(mountPointRef);
+    e->setMountPoint(mountPointSet);
+    e->setPivotX(pivotx);
+    e->setPivotY(pivoty);
+    e->setSeqNum(seq);
+    SE_Element* root = NULL;
+    if(parent == NULL)
+        root = e;
+	else
+        elementManager->addElement(parent, e);
+
+    SE_ASSERT(children.empty() || contents.empty());
+    _ElementContentList::iterator it;
+    for(it = contents.begin() ; it != contents.end() ; it++)
+    {
+        SE_ElementContent* ec = *it;
+        SE_Element* childElement = ec->createElement(0, 0);
         elementManager->addElement(e, childElement);
     } 
     _ElementSchemaList::iterator itSchema;
@@ -35,9 +65,9 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
 }
 SE_Element* SE_ElementSchema::createElement()
 {
-    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     SE_Element* root = createElement(elementManager, NULL);
-    elementManager->addElement(SE_ElementID::NULLID, root);
+	return root;
 } 
 void SE_ElementSchema::addChild(SE_ElementSchema* ec)
 {
@@ -47,17 +77,17 @@ void SE_ElementSchema::setParent(SE_ElementSchema* p)
 {
     parent = p;
 }
-vodi SE_ElementSchema::addContent(SE_ElementContent* ec)
+void SE_ElementSchema::addContent(SE_ElementContent* ec)
 {
     contents.push_back(ec);
 }
 void SE_ElementSchema::travel(SE_ElementSchemaVisitor* v)
 {
 	v->visit(this);
-	_ElementList::iterator it;
+	_ElementSchemaList::iterator it;
 	for(it = children.begin() ; it != children.end() ; it++)
 	{
-		SE_ElementShcema* ec = *it;
+		SE_ElementSchema* ec = *it;
 		ec->travel(v);
 	}
 }
@@ -69,5 +99,5 @@ SE_ElementContent* SE_ElementSchema::getContent(int index)
 		return *it;
 	}
 	else
-		return NULL
+		return NULL;
 }

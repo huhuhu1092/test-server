@@ -7,5 +7,6 @@ class SE_KeyFrameController
 public:
 	void read(SE_BufferInput& input);
 	void write(SE_BufferOutput& output);
+	virtual SE_KeyFrameController* clone();
 };
 #endif

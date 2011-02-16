@@ -60,7 +60,7 @@ SE_Element* SE_TextureAnimationObject::createElement()
 		{
 			//resourceManager->loadElement(strURL.getStr());
 			SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
-            SE_Element* element = elementSchema->createElement();
+            SE_2DNodeElement* element = (SE_2DNodeElement*)elementSchema->createElement();
 			element->setMountPointRef(getMountPointRef());
 			return element;
 		}
