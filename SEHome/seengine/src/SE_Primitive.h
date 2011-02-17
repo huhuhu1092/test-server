@@ -287,7 +287,7 @@ public:
     }
     //imageData must from SE_ResourceManager
     //SE_RectPatch will not own imageData
-    void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData);
+    void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
 	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
 private:
     void createGeometryData();

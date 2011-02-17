@@ -867,9 +867,31 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_RectPatch*& ou
         break;
     }
 }
-void SE_RectPatch::setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData)
+void SE_RectPatch::setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion)
 {
+	if(!imageData)
+		return;
     mImageData[texUnit] = imageData;
+	char* data = imageData->getData();
+	char* dataPower2 = imageData->getDataPower2();
+	float width, height, power2Width, power2Height, startx, starty;
+	width = (float)imageData->getWidth();
+	height = (float)imageData->getHeight();
+	startx = (float)imageData->getRealStartX();
+	starty = imageData->getRealStartY();
+	if(imageData->isSizePower2())
+	{
+		power2Width = (float)imageData->getWidth();
+		power2Height = (float)imageData->getHeight();
+	}
+	else
+	{
+		power2Width = (float)imageData->getWidthPower2();
+		power2Height = (float)imageData->getHeightPower2();
+	}
+    float stepx = (width / power2Width) / 3;
+	float stepy = (height / power2Height) / 3;
+
 }
 void SE_RectPatch::createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 {
