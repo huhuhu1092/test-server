@@ -277,4 +277,24 @@ private:
 	SE_PrimitiveID mRectPrimitiveID[6];
 	SE_Vector3f mScale;
 };
+class SE_RectPatch : public SE_Primitive
+{
+public:
+    enum PATCH_TYPE {R1_C3, R3_C1, R3_C3};
+    SE_RectPatch(PATCH_TYPE t) : mType(t)
+    {
+        createGeometryData();
+    }
+    //imageData must from SE_ResourceManager
+    //SE_RectPatch will not own imageData
+    void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData);
+	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
+private:
+    void createGeometryData();
+private:
+    PATCH_TYPE mType;
+    SE_ImageData* mImageData[SE_TEXUNIT_NUM];
+    std::vector<SE_TextureCoordData*> mTextureCoordData;
+    std::vector<SE_GeometryData*> mGeometryData;
+};
 #endif

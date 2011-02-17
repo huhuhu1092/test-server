@@ -502,3 +502,387 @@ SE_BoxPrimitive* SE_BoxPrimitive::clone()
 {
 	return NULL;
 }
+///////////////////////////////////////////////////
+static SE_Vector2f _r1c3TexVexterData[] = {SE_Vector2f(0, 0), SE_Vector2f(0.33333, 0), SE_Vector2f(0.66666, 0), SE_Vector2f(1.0, 0), SE_Vector2f(1, 1), SE_Vector2f(0.66666, 1), SE_Vector2f(0.33333, 1), SE_Vector2f(0, 1)};
+static SE_Vector2f _r3c1TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(1, 0), SE_Vector2f(1, 0.33333), SE_Vector2f(1, 0.66666), SE_Vector2f(1, 1), SE_Vector2f(0, 1), SE_Vector2f(0, 0.66666), SE_Vector2f(0, 0.33333) };
+static SE_Vector2f _r3c3TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(0.33333, 0), SE_Vector2f(0.66666, 0), SE_Vector2f(1, 0), SE_Vector2f(1, 0.33333), SE_Vector2f(1, 0.66666), SE_Vector2f(1, 1), SE_Vector2f(0.66666, 1), SE_Vector2f(0.33333, 1), SE_Vector2f(0, 1), SE_Vector2f(0, 0.66666), SE_Vector2f(0, 0.33333), SE_Vector2f(0.33333, 0.33333), SE_Vector2f(0.66666, 0.33333), SE_Vectord2f(0.66666, 0.66666), SE_Vector2f(0.33333, 0.66666) 
+
+};
+void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_RectPatch*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
+{
+    SE_RectPatch* rectPatch = new SE_RectPatch(t);
+    if(!rectPatch)
+    {
+        outPrimitive = NULL;
+        outPrimitiveID = SE_PrimitiveID::INVALID;
+        return;
+    }    
+    float rectExtent[2];
+    SE_Vector3f rectCenter;
+    SE_Vector3f rectXAxis, rectYAxis;
+    rect.getExtent(rectExtent);
+    rectCenter = rect.getCenter();
+    rectXAxis = rect.getXAxis();
+    rectYAxis = rect.getYAxis();
+    SE_Vertex3f* vertexRectPatch = NULL;
+    switch(t)
+    {
+    case R1_C3:
+    case R3_C1:
+        vertexRectPatch = new SE_Vector3f[8];
+        break;
+    case R3_C3:
+        vertexRectPatch = new SE_Vector3f[16];
+        break;
+    default:
+        break;
+    }
+    if(!vertexRectPatch)
+    {
+        delete rectPatch;
+        outPrimitive = NULL;
+        outPrimitiveID = SE_PrimitiveID::INVALID;
+        return;
+    }
+    SE_Vector3f v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15;
+    switch(t)
+    {
+    case R1_C3:
+        {
+            rectPatch->mGeometryData.resize(3);
+            float step = (rectExtent[0] * 2) / 3;
+            v0 = rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v1 = v0 + rectXAxis * step;
+            v2 = v0 + rectXAxis * (step * 2);
+            v3 = rectCenter + rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v4 = rectCenter + rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            v5 = v4 - rectXAxis * step;
+            v6 = v4 - rectXAxis * (step * 2);
+            v7 =  rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            // rect 1
+            SE_GeometryData* geomData = new SE_GeometryData;
+            SE_Vector3f* v = new SE_Vector3f[4];
+            v[0] = v0;
+            v[1] = v1;
+            v[2] = v6;
+            v[3] = v7;
+            SE_Vector3i* f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[0] = geomData;
+            // rect 2
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v1;
+            v[1] = v2;
+            v[2] = v5;
+            v[3] = v6;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[1] = geomData; 
+            //rect 3
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v2;
+            v[1] = v3;
+            v[2] = v4;
+            v[3] = v5;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[2] = geomData;
+        }
+        break;
+    case R3_C1:
+        {
+            rectPatch->mGeometryData.resize(3);
+            float step = (rectExtent[1] * 2) / 3;
+            v0 = rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v1 = rectCenter + rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v2 = v1 + rectYAxis * step;
+            v3 = v1 + rectYAxis * (step * 2);
+            v4 =  rectCenter + rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            v5 = rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            v6 = v5 - rectYAxis * step;
+            v7 = v5 - rectYAxis * (step * 2);
+            //rect 1
+            SE_GeometryData* geomData = new SE_GeometryData;
+            SE_Vertex3f* v = new SE_Vector3f[4];
+            v[0] = v0;
+            v[1] = v1;
+            v[2] = v2;
+            v[3] = v7;
+            SE_Vector3i* f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[0] = geomData;
+            //rect 2
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v7;
+            v[1] = v2;
+            v[2] = v3;
+            v[3] = v6;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[1] = geomData;
+
+            //rect 3
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v6;
+            v[1] = v3;
+            v[2] = v4;
+            v[3] = v5;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[2] = geomData;
+        }
+        break;
+    case R3_C3:
+        {
+            rectPatch->mGeometryData.resize(3);
+            float stepx = (rectExtent[0] * 2) / 3;
+            float stepy = (rectExtent[1] * 2) / 3;
+            v0 =  rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v1 = v0 + rectXAxis * stepx;
+            v2 = v0 + rectXAxis * (stepx * 2);
+            v3 =  rectCenter + rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
+            v4 = v3 + rectYAxis * stepy;
+            v5 = v3 + rectYAxis * (stepy * 2);
+            v6 =  rectCenter + rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            v7 = v6 - rectXAxis * stepx;
+            v8 = v6 - rectXAxis * (stepx * 2);
+            v9 = rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            v10 = v9 - rectYAxis * stepy;
+            v11 = v9 - rectYAxis * stepy;
+            v12 = v11 + rectXAxis * stepx;
+            v13 = v11 + rectXAxis * (stepx * 2);
+            v14 = v13 + rectYAxis * stepy;
+            v15 = v14 - rectXAxis * stepx;
+
+            //rect 1
+            SE_GeometryData* geomData = new SE_GeometryData;
+            SE_Vector3f* v = new SE_Vector3f[4];
+            v[0]  = v0;
+            v[1] = v1;
+            v[2] = v12;
+            v[3] = v11;
+            SE_Vector3i* f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[0] = geomData;
+
+            //rect 2
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v1;
+            v[1] = v2;
+            v[2] = v13;
+            v[3] = v12;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[1] = geomData;
+
+            //rect 3
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v2;
+            v[1] = v3;
+            v[2] = v4;
+            v[3] = v13;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[2] = geomData;
+
+            //rect 4
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v13;
+            v[1] = v4;
+            v[2] = v5;
+            v[3] = v14;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[3] = geomData;
+
+            //rect 5
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v14;
+            v[1] = v5;
+            v[2] = v6;
+            v[3] = v7;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[4] = geomData;
+
+            //rect6
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v15;
+            v[1] = v14;
+            v[2] = v7;
+            v[3] = v8;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[5] = geomData;
+
+            //rect 7
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v10;
+            v[1] = v15;
+            v[2] = v8;
+            v[3] = v9;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[6] = geomData;
+
+            //rect 8
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v11;
+            v[1] = v12;
+            v[2] = v15;
+            v[3] = v10;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[7] = geomData;
+
+            //rect 9
+            geomData = new SE_GeometryData;
+            v = new SE_Vector3f[4];
+            v[0] = v12;
+            v[1] = v13;
+            v[2] = v14;
+            v[3] = v15;
+            f = new SE_Vector3i[2];
+            f[0].x = 0;
+            f[0].y = 1;
+            f[0].z = 2;
+            f[1].x = 0;
+            f[1].y = 2;
+            f[1].z = 3;
+            geomData->setVertexArray(v, 4);
+            geomData->setFaceArray(f, 2);
+            rectPatch->mGeometryData[8] = geomData;
+        }
+        break;
+    default:
+        break;
+    }
+}
+void SE_RectPatch::setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData)
+{
+    mImageData[texUnit] = imageData;
+}
+void SE_RectPatch::createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
+{
+    SE_Mesh* mesh = new SE_Mesh(1, 1);
+    
+}
+void SE_RectPatch::createGeometryData()
+{
+    mGeometryData = new SE_GeometryData;
+    
+    switch(mType)
+    {
+    case R1_C3:
+         
+    }
+}

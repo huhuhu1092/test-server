@@ -74,16 +74,24 @@ public:
     {
         mWidth = 0;
         mHeight = 0;
+        mWidthPower2 = 0;
+        mHeightPower2 = 0;
         mPixelFormat = INVALID;
         mBytesPerRow = 0;
+        mBytesPerRowPower2 = 0
         mData = 0;
+        mDataPower2 = 0;
         mTexid = 0;
 		mIsFliped = 0;
+        mRealStartX = 0;
+        mRealStartY = 0;
     }
     ~SE_ImageData()
     {
         if(mData)
             delete[] mData;
+        if(mDataPower2)
+            delete[] mDataPower2;
     }
     // the bytes of per pixel
     int getPixelSize()
@@ -156,15 +164,42 @@ public:
         return mCompressType == RAW;
     }
     bool isCompressTypeByHardware();
-
+    int getWidthPower2() const
+    {
+        return mWidthPower2;
+    }
+    int getHeightPower2() const
+    {
+        return mHeightPower2;
+    }
+    int getBytesPerRowPower2() const
+    {
+        return mBytesPerRowPower2;
+    }
+    bool isSizePower2() const;
+    char* getDataPower2() const;
+    int getRealStartX() const
+    {
+        return mRealStartX;
+    }
+    int getRealStartY() const
+    {
+        return mRealStartY;
+    }
 private:
     int mHeight;
     int mWidth;
+    int mWidthPower2;
+    int mHeightPower2;
+    int mRealStartX;
+    int mRealStartY;
+    int mBytesPerRowPower2;
     int mPixelFormat;
     int mBytesPerRow;
     int mCompressType;
 	bool mIsFliped;
     char* mData;
+    char* mDataPower2;
     GLuint mTexid;
 };
 #endif
