@@ -38,15 +38,30 @@ public:
     virtual void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
     virtual void read(SE_BufferInput& input);
     virtual void write(SE_BufferOutput& output);
+    // if simobject has multiple mesh, it get the first mesh's vertex array 
     virtual SE_Vector3f* getVertexArray();
     virtual int getVertexNum();
+    //if simobject has multiple mesh, it get the first mesh's face array
     virtual SE_Vector3i* getFaceArray();
     virtual int getFaceNum();
+    //if simobject has multiple mesh, it get the first mesh's surface
     virtual int getSurfaceNum();
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
 	virtual void onClick();
+    //if simobject has multiple mesh, it get the first mesh
 	virtual SE_Mesh* getMesh();
     virtual void setMesh(SE_Mesh*, SE_OWN_TYPE own);
+    
+    //function for multiple mesh
+    virtual void setMesh(SE_Mesh** meshArray, int num, SE_OWN_TYPE own);
+    virtual int getMeshNum() const;
+    virtual SE_Mesh* getMesh(int meshIndex);
+    virtual SE_Vector3f* getVertexArray(int meshIndex);
+    virtual int getVertexNum(int meshIndex) const;
+    virtual SE_Vector3i* getFaceArray(int meshIndex);
+    virtual int getFaceNum(int meshIndex) const;
+    virtual int getSurfaceNum(int meshIndex) const;
+    virtual void getSurfaceFacet(int meshIndex, int surfaceIndex, int*& facets, int& facetNum);
 public:
 	const char* getName()
 	{

@@ -281,20 +281,49 @@ class SE_RectPatch : public SE_Primitive
 {
 public:
     enum PATCH_TYPE {R1_C3, R3_C1, R3_C3};
-    SE_RectPatch(PATCH_TYPE t) : mType(t)
-    {
-        createGeometryData();
-    }
+    SE_RectPatch(PATCH_TYPE t);
     //imageData must from SE_ResourceManager
     //SE_RectPatch will not own imageData
     void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
 	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
+	void setColor(const SE_Vector3f& color)
+	{
+		mColor = color;
+	}
+    void setSampleMin(int smin)
+	{
+		mSampleMin = smin;
+	}
+	void setSampleMag(int smag)
+	{
+		mSampleMag = smag;
+	}
+	void setWrapS(int ws)
+	{
+		mWrapS = ws;
+	}
+	void setWrapT(int wt)
+	{
+		mWrapT = wt;
+	}
+	void setProgramDataID(const SE_ProgramDataID& programID)
+	{
+		mProgramDataID = programID;
+	}
 private:
     void createGeometryData();
+    void setTextureCoord(int texCoordDataIndex, int v0 , int v1, int v2, int v3);
 private:
     PATCH_TYPE mType;
     SE_ImageData* mImageData[SE_TEXUNIT_NUM];
     std::vector<SE_TextureCoordData*> mTextureCoordData;
     std::vector<SE_GeometryData*> mGeometryData;
+	SE_Vector3f mColor;
+    int mSampleMin;
+	int mSampleMag;
+	int mWrapS;
+	int mWrapT;
+	SE_ProgramDataID mProgramDataID;
+
 };
 #endif
