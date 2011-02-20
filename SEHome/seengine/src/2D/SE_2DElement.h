@@ -30,9 +30,9 @@ class SE_Sequence;
 class SE_ColorEffectImage;
 class SE_ColorEffectController;
 class SE_ElementContent;
-class SE_RectPrimitive;
+class SE_Primitive;
 class SE_Surface;
-class SE_RectPrimitive;
+class SE_Primitive;
 class SE_StateMachine;
 class SE_ParamValueList;
 /*
@@ -448,7 +448,7 @@ public:
 	SE_Element* clone();
 protected:
 	bool isValid();
-	virtual void setImageData(SE_RectPrimitive* primitive);
+	virtual void setImageData(SE_Primitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 	void initImage();
 private:
@@ -490,7 +490,7 @@ public:
 	SE_Spatial* createSpatial();
 	SE_Element* clone();
 protected:
-	void setImageData(SE_RectPrimitive* primitive);
+	void setImageData(SE_Primitive* primitive);
 	void setSurface(SE_Surface* surface);
 	void init();
 private:
@@ -639,9 +639,9 @@ public:
 	void layout();
 	SE_Element* clone();
 private:
-	void setImageData(SE_RectPrimitive* primitive);
-	void setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType);
-	void setImageData(SE_RectPrimitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType);
+	void setImageData(SE_Primitive* primitive);
+	void setImageData(SE_Primitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType);
+	void setImageData(SE_Primitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType);
 	void setSurface(SE_Surface* surface);
 	void calculateValue();
 	SE_XMLTABLE_TYPE getBackgroundType();
@@ -676,6 +676,7 @@ private:
 	SE_ImageElement* mTextureImageElement[MARK_NUM];
 	SE_2DNodeElement* mMergedElement;
 };
+extern SE_2DNodeElement* SE_GetElement(const SE_StringID& uri);
 typedef SE_Table<SE_StringID, SE_Element*> SE_ElementMap;
 typedef SE_Table<SE_StringID, SE_ElementMap*> SE_ElementTable;
 

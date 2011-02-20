@@ -2,24 +2,24 @@
 #include "SE_Element.h"
 #include "SE_Utils.h"
 #include <algorithm>
-SE_ElementID SE_ElementManager::addElement(const SE_ElementID& parent, SE_Element* e, bool linkToParent)
+SE_ElementID SE_ElementManager::add(const SE_ElementID& parent, SE_Element* e, bool linkToParent)
 {
     if(e == NULL)
         return SE_ElementID::INVALID;
     return mElements.add(parent, e, linkToParent);
 }
-SE_Element* SE_ElementManager::findElement(const SE_ElementID& id)
+SE_Element* SE_ElementManager::get(const SE_ElementID& id)
 {
     if(id == SE_ElementID::INVALID)
         return NULL;
     return mElements.find(id);
 }
-void SE_ElementManager::addElement(SE_Element* parent, SE_Element* e)
+void SE_ElementManager::add(SE_Element* parent, SE_Element* e)
 {
 	mElements.add(parent, e);
 	//parent->addChild(e);
 }
-SE_Element* SE_ElementManager::removeElement(const SE_ElementID& id)
+SE_Element* SE_ElementManager::remove(const SE_ElementID& id)
 {
     if(id == SE_ElementID::INVALID)
         return NULL;
@@ -35,11 +35,11 @@ std::vector<SE_Element*> SE_ElementManager::getChildren(const SE_ElementID& id)
 {
     return mElements.getChildren(id);
 }
-void SE_ElementManager::releaseElement(SE_Element* element, int delay)
+void SE_ElementManager::release(SE_Element* element, int delay)
 {
     mElements.release(element, delay);
 }
-void SE_ElementManager::releaseElement(const SE_ElementID& id, int delay)
+void SE_ElementManager::release(const SE_ElementID& id, int delay)
 {
     mElements.release(id, delay);
 }

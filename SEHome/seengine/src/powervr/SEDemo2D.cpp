@@ -78,10 +78,10 @@ static void doTest()
 	for(int i = 0 ; i < 10 ; i++)
 	{
         SE_Spatial* s = new SE_Spatial;
-		spatialManager->addSpatial(cn, s);
+		spatialManager->add(cn, s);
 	}
-	SE_SpatialID ii = spatialManager->addSpatial(SE_SpatialID::NULLID, cn, false);
-	SE_Spatial* s = spatialManager->removeSpatial(ii);
+	SE_SpatialID ii = spatialManager->add(SE_SpatialID::NULLID, cn, false);
+	SE_Spatial* s = spatialManager->remove(ii);
 	spatialManager->release(s);
 	//spatialManager->check();
 }

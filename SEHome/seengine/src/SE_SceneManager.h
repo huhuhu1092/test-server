@@ -18,23 +18,23 @@ public:
     enum {SIZE = 200};
     SE_SceneManager();
     ~SE_SceneManager();
-    SE_SceneID addScene(SE_Scene* scene);
-    SE_SceneID topScene();
-    SE_Scene* findScene(const SE_SceneID& id);
-    void popScene();
-    void rotateScene();
-    void swapScene();
-    void showScene(const SE_SceneID& id);
-    void hideScene(const SE_SceneID& id);
-    void dismissScene(const SE_SceneID& id);
-    void renderScene(SE_RenderManager& renderManager);
+    SE_SceneID add(SE_Scene* scene);
+    SE_SceneID top();
+    SE_Scene* get(const SE_SceneID& id);
+    void pop();
+    void rotate();
+    void swap();
+    void show(const SE_SceneID& id);
+    void hide(const SE_SceneID& id);
+    void dismiss(const SE_SceneID& id);
+    void render(SE_RenderManager& renderManager);
     void dispatchKeyEvent(const SE_KeyEvent& keyEvent);
     void dispatchMotionEvent(const SE_MotionEvent& motionEvent);
-    void setSceneWidth(float width)
+    void setWidth(float width)
     {
         mWidth = width;
     }
-    void setSceneHeight(float height)
+    void setHeight(float height)
     {
         mHeight = height;
     }

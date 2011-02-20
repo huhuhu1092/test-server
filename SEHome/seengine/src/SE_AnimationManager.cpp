@@ -20,7 +20,7 @@ SE_AnimationManager::~SE_AnimationManager()
     }
 	*/
 }
-SE_AnimationID SE_AnimationManager::addAnimation(SE_Animation* anim)
+SE_AnimationID SE_AnimationManager::add(SE_Animation* anim)
 {
     if(!anim)
         return SE_AnimationID::INVALID;
@@ -37,7 +37,7 @@ void SE_AnimationManager::release(SE_Animation* a, int delay)
 {
 	mAnimationMap.release(a, delay);
 }
-SE_Animation* SE_AnimationManager::removeAnimation(const SE_AnimationID& animID)
+SE_Animation* SE_AnimationManager::remove(const SE_AnimationID& animID)
 {
 	return mAnimationMap.remove(animID);
 	/*
@@ -51,7 +51,7 @@ SE_Animation* SE_AnimationManager::removeAnimation(const SE_AnimationID& animID)
     }
 	*/
 }
-SE_Animation*  SE_AnimationManager::getAnimation(const SE_AnimationID& animID)
+SE_Animation*  SE_AnimationManager::get(const SE_AnimationID& animID)
 {
 	return mAnimationMap.find(animID);
 	/*

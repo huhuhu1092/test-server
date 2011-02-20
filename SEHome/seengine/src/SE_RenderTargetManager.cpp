@@ -23,7 +23,7 @@ SE_RenderTargetManager::~SE_RenderTargetManager()
     }
     */
 }
-SE_RenderTargetID SE_RenderTargetManager::addRenderTarget(SE_RenderTarget* renderTarget)
+SE_RenderTargetID SE_RenderTargetManager::add(SE_RenderTarget* renderTarget)
 {
 	return mRenderTargets.add(SE_RenderTargetID::NULLID, renderTarget);
     /*
@@ -57,7 +57,7 @@ void SE_RenderTargetManager::release(const SE_RenderTargetID& id, int delay)
 {
 	mRenderTargets.release(id, delay);
 }
-SE_RenderTarget* SE_RenderTargetManager::getRenderTarget(const SE_RenderTargetID& id)
+SE_RenderTarget* SE_RenderTargetManager::get(const SE_RenderTargetID& id)
 {
     return mRenderTargets.find(id);
     /*
@@ -66,7 +66,7 @@ SE_RenderTarget* SE_RenderTargetManager::getRenderTarget(const SE_RenderTargetID
     return mRenderTargets[id];
     */
 }
-SE_RenderTarget* SE_RenderTargetManager::removeRenderTarget(const SE_RenderTargetID& id)
+SE_RenderTarget* SE_RenderTargetManager::remove(const SE_RenderTargetID& id)
 {
     return mRenderTargets.remove(id);
     /*

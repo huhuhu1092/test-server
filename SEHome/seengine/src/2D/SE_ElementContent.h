@@ -1,14 +1,15 @@
 #ifndef SE_ELEMENTCONTENT_H
 #define SE_ELEMENTCONTENT_H
 #include "SE_ID.h"
-class SE_ElementSchema;
 class SE_Element;
+class SE_ElementSchema;
 class SE_ElementContent
 {
 public:
 	SE_ElementContent()
 	{
 		mParent = NULL;
+        mState = 0;
 	}
 	void setParent(SE_ElementSchema* parent)
 	{
@@ -18,6 +19,14 @@ public:
 	{
 		mContentURI = uri;
 	}
+    int getState() const
+    {
+        return mState;
+    }
+    void setState(int state)
+    {
+        mState = state;
+    }
 	SE_StringID getURI()
 	{
 		return mContentURI;
@@ -40,6 +49,7 @@ private:
 	SE_StringID mID;
     SE_ElementSchema* mParent;
 	SE_StringID mContentURI;
+    int mState;
 };
 class SE_ImageContent : public SE_ElementContent
 {

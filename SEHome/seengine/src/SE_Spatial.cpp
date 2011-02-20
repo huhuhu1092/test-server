@@ -72,7 +72,7 @@ void SE_Spatial::updateWorldTransform()
 	if(mOwnRenderTargetCamera)
 	{
 		SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
-		SE_RenderTarget* rt = rm->getRenderTarget(mRenderTargetID);
+		SE_RenderTarget* rt = rm->get(mRenderTargetID);
 		if(rt)
 		{
 			SE_Camera* camera = rt->getCamera();
@@ -154,7 +154,7 @@ void SE_Spatial::updateRenderState()
 void SE_Spatial::updateSpatialIDToElement()
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	SE_Element* element = elementManager->findElement(mElementID);
+	SE_Element* element = elementManager->get(mElementID);
 	if(element)
 	{
 		element->setSpatialID(getID());

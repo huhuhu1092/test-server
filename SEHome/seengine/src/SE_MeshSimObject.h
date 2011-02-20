@@ -17,7 +17,7 @@ public:
     SE_MeshSimObject(const SE_MeshID& meshID);
     SE_MeshSimObject(SE_Mesh* mesh, SE_OWN_TYPE ownMesh);
     SE_MeshSimObject(const SE_MeshID* meshIDArray, int meshIDNum);
-    SE_SimObject(SE_Mesh** meshArray, int meshNum, SE_OWN_TYPE ownMesh);
+    SE_MeshSimObject(SE_Mesh** meshArray, int meshNum, SE_OWN_TYPE ownMesh);
     ~SE_MeshSimObject();
     void doTransform(const SE_Matrix4f& m);
     void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
@@ -51,10 +51,11 @@ private:
     void setMesh(const SE_MeshID& meshID);
     void clear();
     void clearMesh();
+	void clearMeshID();
     void clearGeometryData();
     void createMesh(int num);
     void createGeometryData(int num);
-    void createMeshID(int num);
+	void createMeshID(int num);
 private:
     SE_GeometryData** mWorldGeomDataArray;
     SE_Mesh** mMeshArray;

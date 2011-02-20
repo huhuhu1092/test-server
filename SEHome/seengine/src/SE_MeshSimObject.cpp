@@ -29,7 +29,7 @@ SE_MeshSimObject::SE_MeshSimObject(SE_Mesh* mesh, SE_OWN_TYPE ownMesh) : mWorldG
     mMeshNum = 0;
 }
 
-SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NULL), mMesh(NULL), mMeshID(NULL),mOwnMesh(NOT_OWN)
+SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomDataArray(NULL), mMeshArray(NULL), mMeshIDArray(NULL),mOwnMesh(NOT_OWN)
 {
     setMesh(meshID);
     createGeometryData(1);
@@ -37,9 +37,22 @@ SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NU
     mMeshIDArray[0] = meshID;
     mMeshNum = 0;
 }
+SE_MeshSimObject::SE_MeshSimObject(SE_Mesh** meshArray, int meshNum, SE_OWN_TYPE ownMesh)
+{
+	if(meshNum <= 0)
+		return;
+	mOwnMesh = ownMesh;
+	mMeshNum = meshNum;
+    createMesh(meshNum);
+	createGeometryData(meshNum);
+	for(int i = 0 ; i < meshNum ; i++)
+	{
+		mMeshArray[i] = meshArray[i];
+	}
+}
 void SE_MeshSimObject::clearMesh()
 {
-    if(mOwnMeshArray && mOwnMesh== OWN)
+    if(mMeshArray && mOwnMesh == OWN)
     {
         for(int i = 0 ; i < mMeshNum ; i++)
         {
@@ -85,18 +98,22 @@ void SE_MeshSimObject::createMesh(int num)
 }
 void SE_MeshSimObject::createGeometryData(int num)
 {
-    mGeometryDataArray = new SE_GeometryData*[num];
+    mWorldGeomDataArray = new SE_GeometryData*[num];
     for(int i = 0 ; i < num ; i++)
     {
-        mGeometryDataArray[i] = new SE_GeometryData;
+        mWorldGeomDataArray[i] = new SE_GeometryData;
     }
+}
+void SE_MeshSimObject::clearMeshID()
+{
+	if(mMeshIDArray)
+		delete[] mMeshIDArray;
 }
 void SE_MeshSimObject::setMesh(const SE_MeshID& meshID)
 {
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(meshID);
     if(!meshTransfer)
 	{
-		mMeshID = SE_MeshID::INVALID;
         return;
 	}
     createMesh(1);
@@ -122,7 +139,7 @@ void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
 {
     if(!mMeshArray)
         return;
-    SE_ASSERT(mWorldGeomData);
+    SE_ASSERT(mWorldGeomDataArray);
     for(int i = 0 ; i < mMeshNum ; i++)
     {
         if(mMeshArray[i])
@@ -151,7 +168,7 @@ void SE_MeshSimObject::read(SE_BufferInput& input)
     createMeshID(1);
     mMeshIDArray[0].read(input);
     setMesh(mMeshIDArray[0]);
-    createGeometryData();
+    createGeometryData(1);
 	SE_SimObject::read(input);
 }
 void SE_MeshSimObject::write(SE_BufferOutput& output)
@@ -306,35 +323,35 @@ SE_Mesh* SE_MeshSimObject::getMesh(int meshIndex)
 }
 SE_Vector3f* SE_MeshSimObject::getVertexArray(int meshIndex)
 {
-    if(!mWorldGeomeryDataArray)
+    if(!mWorldGeomDataArray)
         return NULL;
     if(meshIndex < 0 || meshIndex >= mMeshNum)
         return NULL;
-    return mWorldGeometryDataArray[meshIndex]->getVertexArray();
+    return mWorldGeomDataArray[meshIndex]->getVertexArray();
 }
 int SE_MeshSimObject::getVertexNum(int meshIndex) const
 {
-    if(!mWorldGeometryDataArray)
+    if(!mWorldGeomDataArray)
         return 0;
     if(meshIndex < 0 || meshIndex >= mMeshNum)
         return 0;
-    return mWorldGeometryDataArray[meshIndex]->getVertexNum(); 
+    return mWorldGeomDataArray[meshIndex]->getVertexNum(); 
 }
 SE_Vector3i* SE_MeshSimObject::getFaceArray(int meshIndex)
 {
-    if(!mWorldGeometryDataArray)
+    if(!mWorldGeomDataArray)
         return 0;
     if(meshIndex < 0 || meshIndex >= mMeshNum)
         return 0;
-    return mWorldGeometryDataArray[meshIndex]->getFaceArray(); 
+    return mWorldGeomDataArray[meshIndex]->getFaceArray(); 
 }
 int SE_MeshSimObject::getFaceNum(int meshIndex) const
 {
-    if(!mWorldGeometryDataArray)
+    if(!mWorldGeomDataArray)
         return 0;
     if(meshIndex < 0 || meshIndex >= mMeshNum)
         return 0;
-    return mWorldGeometryDataArray[meshIndex]->getFaceNum(); 
+    return mWorldGeomDataArray[meshIndex]->getFaceNum(); 
 }
 int SE_MeshSimObject::getSurfaceNum(int meshIndex) const
 {
@@ -367,7 +384,7 @@ void SE_MeshSimObject::getSurfaceFacet(int meshIndex, int surfaceIndex, int*& fa
     }
     SE_Surface* surface = mMeshArray[meshIndex]->getSurface(surfaceIndex);
     facets = surface->getFacetArray();
-    faceNum = surface->getFacetNum();
+    facetNum = surface->getFacetNum();
 
 }
     

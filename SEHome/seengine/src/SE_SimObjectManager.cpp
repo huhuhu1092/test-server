@@ -14,6 +14,14 @@ SE_SimObject* SE_SimObjectManager::remove(const SE_SimObjectID& simObjectID)
 {
     return mSimObjectManager.remove(simObjectID);
 }
+void SE_SimObjectManager::release(const SE_SimObjectID& id, int delay)
+{
+	mSimObjectManager.release(id, delay);
+}
+void SE_SimObjectManager::release(SE_SimObject* simObject, int delay)
+{
+	mSimObjectManager.release(simObject, delay);
+}
 /*
 struct _FindSimObj : public SE_FindObjCondition<SE_SimObject*>
 {

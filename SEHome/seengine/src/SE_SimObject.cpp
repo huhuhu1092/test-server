@@ -118,6 +118,5 @@ int SE_SimObject::getSurfaceNum(int meshIndex) const
 }
 void SE_SimObject::getSurfaceFacet(int meshIndex, int surfaceIndex, int*& facets, int& facetNum)
 {
-    return NULL;
 }
 

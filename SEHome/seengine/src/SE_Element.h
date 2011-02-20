@@ -10,6 +10,7 @@
 #include "SE_MountPoint.h"
 #include "SE_Layer.h"
 #include "SE_Primitive.h"
+#include "SE_ObjectManager.h"
 class SE_KeyFrameController;
 class SE_Spatial;
 class SE_Element;
@@ -38,10 +39,15 @@ public:
                 ANIMATE_BEGIN, ANIMATE_RUNNING, ANIMATE_SUSPEND, ANIMATE_END};
     SE_Element();
     virtual ~SE_Element();
+    //mState is a type of STATE
     int getState() const
     {
         return mState;
     }
+	void setState(int state)
+	{
+		mState = state;
+	}
     int getType() const
     {
         return mType;
@@ -105,14 +111,8 @@ public:
 		return mFullPathName;
 	}
 	void setURI(const SE_StringID& uri);
-	SE_StringID getURI() const
-	{
-		return mURI.getURI();
-	}
-    SE_StringID getURL() const
-	{
-		return mURI.getURL();
-	}
+	SE_StringID getURI() const;
+    SE_StringID getURL() const;
 	void setOwnRenderTargetCamera(bool own)
 	{
 		mOwnRenderTargetCamera = own;
@@ -246,6 +246,9 @@ public:
     }
     bool isRoot();
     void clearChildren();
+	void setStateURI(int state, const SE_StringID& uri);
+	SE_URI getURI(int state) const;
+    SE_StringID getURL(int state) const;
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
@@ -257,8 +260,19 @@ public:
     virtual void read(SE_BufferInput& inputBuffer);
     virtual void write(SE_BufferOutput& outputBuffer);
 	virtual SE_Element* clone();
-	virtual void setImageData(SE_RectPrimitive* primitive);
-	virtual void setSurface(SE_Surface* surface);
+private:
+	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
+	{
+	public:
+		void visit(const int& state, const SE_URI& uri)
+		{
+			element->removeObserverFromParamManager(&uri);
+		}
+		SE_Element* element;
+	};
+private:
+    void removeObserverFromParamManager(const SE_URI* uri);
+	void addObserverToParamManager(const SE_URI* uri);
 protected:
     virtual void clone(SE_Element* src, SE_Element* dst);
 protected:
@@ -276,8 +290,9 @@ protected:
     SE_TimeKey mTimeKey;
     SE_TimeKey mStartKey;
     SE_TimeKey mEndKey;
-    SE_URI mURI;
+    //SE_URI mURI;
     SE_KeyFrameController* mKeyFrameController;
+	SE_ObjectManager<int , SE_URI> mStateURIManager;
     /////////////
     SE_Element* mPrevElement;
     SE_Element* mNextElement;
@@ -407,6 +422,14 @@ public:
 	{
 		return mMountPointSet.getMountPoint(mountPointID);
 	}
+	void setRectPatchType(int rectPatchType)
+	{
+		mRectPatchType;
+	}
+	int getRectPatchType() const
+	{
+		return mRectPatchType;
+	}
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
@@ -417,6 +440,8 @@ public:
     virtual void read(SE_BufferInput& inputBuffer);
     virtual void write(SE_BufferOutput& outputBuffer); 
     virtual SE_Element* clone();
+    virtual void setImageData(SE_Primitive* primitive);
+	virtual void setSurface(SE_Surface* surface);
 protected:
     virtual void clone(SE_Element* src, SE_Element* dst);
 protected:
@@ -427,7 +452,8 @@ protected:
 	void calculateRect(float pivotx, float pivoty, float width, float height);
 	SE_Spatial* createNode();
 	SE_Spatial* createSpatialByImage();
-	void createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive);
+	SE_Spatial* createRectPatchSpatial();
+	void createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& outPrimitive);
 	SE_ImageData* createImageData(const SE_ImageDataID& imageDataID);
 	SE_CameraID createRenderTargetCamera(float left, float top, float width, float height);
 protected:
@@ -436,5 +462,6 @@ protected:
     float mDeltaLeft, mDeltaTop;
     SE_MountPointSet mMountPointSet;
     SE_MountPointID mMountPointID;
+	int mRectPatchType;
 };
 #endif

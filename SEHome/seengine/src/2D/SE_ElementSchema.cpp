@@ -4,12 +4,14 @@
 #include "SE_ElementManager.h"
 #include "SE_ElementContent.h"
 #include "SE_Utils.h"
+#include "SE_ElementType.h"
 #include <algorithm>
 SE_ElementSchema::SE_ElementSchema()
 {
 	x = y = w = h = 0;
 	pivotx = pivoty = 0;
 	seq = -1;
+    type = SE_2D_UI_NODE;
 }
 SE_ElementSchema::~SE_ElementSchema()
 {
@@ -31,9 +33,25 @@ void SE_ElementSchema::clear()
 		delete es;
     }
 }
+SE_2DNodeElement* SE_ElementSchema::createElement(int type)
+{
+    switch(type)
+    {
+    case SE_2D_UI_NODE:
+        return new SE_2DNodeElement;
+    case SE_UI_BUTTON:
+        return new SE_Button;
+    case SE_UI_TEXT:
+        return new SE_TextView;
+    default:
+        break;
+    }
+    return NULL;
+}
 SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
 {
-    SE_2DNodeElement* e = new SE_2DNodeElement;
+    SE_2DNodeElement* e = createElement(type); 
+    new SE_2DNodeElement;
     e->setName(name.getStr());
     e->setFullPathName(fullPathName.getStr());
     e->setMountPointRef(mountPointRef);
@@ -46,7 +64,7 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
     if(parent == NULL)
         root = e;
 	else
-        elementManager->addElement(parent, e);
+        elementManager->add(parent, e);
 
     SE_ASSERT(children.empty() || contents.empty());
     _ElementContentList::iterator it;
@@ -54,7 +72,7 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
     {
         SE_ElementContent* ec = *it;
         SE_Element* childElement = ec->createElement(0, 0);
-        elementManager->addElement(e, childElement);
+        elementManager->add(e, childElement);
     } 
     _ElementSchemaList::iterator itSchema;
     for(itSchema = children.begin() ; itSchema != children.end() ; itSchema++)

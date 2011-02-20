@@ -8,9 +8,9 @@ bool SE_ImageData::isCompressTypeByHardware()
 }
 bool SE_ImageData::isSizePower2() const
 {
-    return SE_Util::isPower2(width) && SE_Util::isPower2(height);
+    return SE_Util::isPower2(mWidth) && SE_Util::isPower2(mHeight);
 }
-char* SE_ImageData::getDataPower2() const
+char* SE_ImageData::getDataPower2()
 {
     if(isSizePower2())
         return mData;
@@ -26,7 +26,7 @@ char* SE_ImageData::getDataPower2() const
     if(!data)
         return NULL;
     memset(data, 0, size);
-    char* src = imageData->getData();
+    char* src = getData();
     int starty = (power2Height - mHeight) >> 1;
     int startx = (power2Width - mWidth) >> 1;
     for(int y = 0 ; y < mHeight ; y++)

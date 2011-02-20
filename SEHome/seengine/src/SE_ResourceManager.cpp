@@ -26,6 +26,8 @@
 #include "SE_StateTable.h"
 #include "SE_ElementSchema.h"
 #include "SE_ElementContent.h"
+#include "SE_ElementType.h"
+#include "SE_Element.h"
 #include "SE_SpatialManager.h"
 #include "tinyxml.h"
 #include <map>
@@ -36,6 +38,33 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
+static int getElementState(const SE_StringID& state)
+{
+    if(state == "normal")
+        return SE_Element::NORMAL;
+    else if(state == "highlighted")
+        return SE_Element::HIGHLIGHTED;
+    else if(state == "selected")
+        return SE_Element::SELECTED;
+    else if(state == "inactive")
+        return SE_Element::INACTIVE;
+    else
+        return SE_Element::INVALID;
+
+}
+static int getElementType(const SE_StringID& type)
+{
+    if(type == "button")
+    {
+        return SE_UI_BUTTON;
+    }
+    else if(type == "textview")
+    {
+        return SE_UI_TEXTVIEW;
+    }
+    else
+        return SE_INVALID;
+}
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   
@@ -547,6 +576,15 @@ public:
     {}
     virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+/*
+class SE_ButtonHandler : public  SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+    SE_ButtonHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+*/
 class SE_MountPointHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
@@ -856,6 +894,12 @@ public:
 		{
 			return new SE_ElementHandler(elementManager);
 		}
+        /*
+        else if(!strcmp(name, "Button"))
+        {
+            return new SE_ButtonHandler(elementManager);
+        }
+        */
 		else if(!strcmp(name, "Image"))
 		{
 			return new SE_ImageHandler(elementManager);
@@ -1719,6 +1763,14 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 			elementSchema->mountPointRef = SE_MountPointID(value);
 			hasMountPointRef = true;
 		}
+        else if(!strcmp(name, "type"))
+        {
+            elementSchema->type = getElementType(value);
+        }
+        else if(!strcmp(name, "text"))
+        {
+            elementSchema->text = value;
+        }
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
@@ -1756,6 +1808,169 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         m.handleXmlChild(elementSchema, pChild, i++);
     }
 }
+/*
+void SE_ButtonHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    SE_ElementSchema* elementSchema = new SE_ElementSchema;
+	elementSchema->seq = indent;
+    elementSchema->type = SE_UI_BUTTON;
+    bool hasLayer = false;
+	bool hasPivotx = false;
+	bool hasPivoty = false;
+	bool hasMountPointRef = false;
+	bool hasid = false;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+			std::string id = value;
+			std::string fullpathID;
+			if(parent)
+			{
+				fullpathID = std::string(parent->name.getStr()) + "/" + value;
+			}
+			else
+			{
+				fullpathID = pro->xmlName + "/" + value;
+			}
+			elementSchema->name = id.c_str();
+			elementSchema->fullPathName = fullpathID.c_str();
+			if(elementSchema->name.isValid())
+			{
+			    hasid = true;
+			}
+        }
+        else if(!strcmp(name, "x"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->x = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "y"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->y = ival;
+            }
+            else
+            {
+                LOGI("... parse y value error\n");
+            }
+        }
+        else if(!strcmp(name, "width"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->w = ival;
+            }
+            else
+            {
+                LOGI("... parse width value error\n");
+            }
+        }
+        else if(!strcmp(name, "height"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->h = ival;
+            }
+            else
+            {
+                LOGI("... parse height value error\n");
+            }
+        }
+        else if(!strcmp(name, "layer"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->layer = ival;
+                hasLayer = true;
+            }
+            else
+            {
+                LOGI("... parse layer value error\n");
+            }
+        }
+        else if(!strcmp(name, "pivotx"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->pivotx = ival;
+            }
+            else
+            {
+                LOGI("... parse pivotx value error\n");
+            }
+			hasPivotx = true;
+        }
+        else if(!strcmp(name, "pivoty"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->pivoty = ival;
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+			hasPivoty = true;
+        }
+		else if(!strcmp(name, "mountpointref"))
+		{
+			elementSchema->mountPointRef = SE_MountPointID(value);
+			hasMountPointRef = true;
+		}
+        pAttribute = pAttribute->Next();
+    }
+    if(!hasLayer)
+    {
+        elementSchema->layer = indent;
+    }
+	if(parent == NULL)
+	{
+		if(!hasid)
+		{
+			LOGE("... element error : top element must has id\n");
+		}
+	}
+	if(parent && !hasMountPointRef)
+	{
+		LOGE("... element error : child element must has mountpointref\n");
+	}
+
+	if(parent)
+    {
+        parent->addChild(elementSchema);
+        elementSchema->setParent(parent);
+    }
+    else
+    {
+        elementSchema->setParent(NULL);
+		pro->elementMap->setItem(elementSchema->name, elementSchema);
+    }
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
+        m.handleXmlChild(elementSchema, pChild, i++);
+    };
+    
+}
+*/
 void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -1809,6 +2024,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ImageContent* imageContent = NULL;
 	SE_StringID id;
+    SE_StringID state;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1823,9 +2039,14 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 		{
 			id = value;
 		}
+        else if(!strcmp(name, "state"))
+        {
+            state = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
 	imageContent->setID(id);
+    imageContent->setState(getElementState(state));
 	parent->addContent(imageContent);
 }
 void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
@@ -2935,7 +3156,7 @@ static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
     //spatial->setParent(parent);
-	spatialManager->addSpatial(parent, spatial);
+	spatialManager->add(parent, spatial);
     return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)

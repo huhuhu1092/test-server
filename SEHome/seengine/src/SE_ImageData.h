@@ -78,7 +78,7 @@ public:
         mHeightPower2 = 0;
         mPixelFormat = INVALID;
         mBytesPerRow = 0;
-        mBytesPerRowPower2 = 0
+        mBytesPerRowPower2 = 0;
         mData = 0;
         mDataPower2 = 0;
         mTexid = 0;
@@ -94,7 +94,7 @@ public:
             delete[] mDataPower2;
     }
     // the bytes of per pixel
-    int getPixelSize()
+    int getPixelSize() const
     {
         switch(mPixelFormat)
         {
@@ -108,9 +108,9 @@ public:
                 return 0;
         }
     }
-    int getHeight()
+    int getHeight() const
     {return mHeight;}
-    int getWidth()
+    int getWidth() const
     {return mWidth;}
     int getPixelFormat()
     {return mPixelFormat;}
@@ -177,7 +177,7 @@ public:
         return mBytesPerRowPower2;
     }
     bool isSizePower2() const;
-    char* getDataPower2() const;
+    char* getDataPower2();
     int getRealStartX() const
     {
         return mRealStartX;

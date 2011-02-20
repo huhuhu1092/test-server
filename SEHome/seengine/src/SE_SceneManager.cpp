@@ -14,12 +14,12 @@ SE_SceneManager::~SE_SceneManager()
 {
 
 }
-SE_SceneID SE_SceneManager::addScene(SE_Scene* scene)
+SE_SceneID SE_SceneManager::add(SE_Scene* scene)
 {
     SE_SceneID id = mScenes.add(SE_SceneID::NULLID, scene);
     return id;
 }
-SE_SceneID SE_SceneManager::topScene()
+SE_SceneID SE_SceneManager::top()
 {
     _SceneStack::iterator it = mStack.begin();
     if(it != mStack.end())
@@ -29,24 +29,24 @@ SE_SceneID SE_SceneManager::topScene()
     else
         return SE_SceneID::NULLID;
 }
-SE_Scene* SE_SceneManager::findScene(const SE_SceneID& id)
+SE_Scene* SE_SceneManager::get(const SE_SceneID& id)
 {
     return mScenes.find(id);
 }
-void SE_SceneManager::popScene()
+void SE_SceneManager::pop()
 {
     mStack.pop_front();
 }
-void SE_SceneManager::rotateScene()
+void SE_SceneManager::rotate()
 {}
-void SE_SceneManager::swapScene()
+void SE_SceneManager::swap()
 {}
-void SE_SceneManager::showScene(const SE_SceneID& id)
+void SE_SceneManager::show(const SE_SceneID& id)
 {
-    SE_Scene* scene = findScene(id);
+    SE_Scene* scene = get(id);
     if(scene == NULL)
         return;
-    if(id == topScene())
+    if(id == top())
         return;
     _SceneStack::iterator it;
     for(it = mStack.begin() ; it != mStack.end() ; it++)
@@ -59,20 +59,20 @@ void SE_SceneManager::showScene(const SE_SceneID& id)
     mStack.push_front(id);
     scene->show();
 }
-void SE_SceneManager::hideScene(const SE_SceneID& id)
+void SE_SceneManager::hide(const SE_SceneID& id)
 {
 
 }
-void SE_SceneManager::dismissScene(const SE_SceneID& id)
+void SE_SceneManager::dismiss(const SE_SceneID& id)
 {}
-void SE_SceneManager::renderScene(SE_RenderManager& renderManager)
+void SE_SceneManager::render(SE_RenderManager& renderManager)
 {
     std::list<SE_Scene*> sceneNeedRender;
     _SceneStack::iterator it;
     for(it = mStack.begin() ; it != mStack.end() ; it++)
     {
         SE_SceneID sid = *it;
-        SE_Scene* scene = findScene(sid);
+        SE_Scene* scene = get(sid);
         if(scene)
         {
             if(scene->isTranslucent())

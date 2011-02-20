@@ -280,7 +280,7 @@ void SE_Action::createElement(SE_ActionElement* parent)
 			e->setTimeKey(keys[i]);
 			e->setStartKey(actionLayer->startkey);
 			e->setEndKey(actionLayer->endkey);
-			elementManager->addElement(parent, e);
+			elementManager->add(parent, e);
 			//e->setParent(parent);
 			if(prev)
 			{

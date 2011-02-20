@@ -12,9 +12,9 @@ public:
 	enum {MAX_SIZE = 1000};
 	SE_AnimationManager() : mAnimationMap(SIZE, MAX_SIZE)
 	{}
-    SE_AnimationID addAnimation(SE_Animation* anim);
-    SE_Animation* removeAnimation(const SE_AnimationID& animID);
-    SE_Animation* getAnimation(const SE_AnimationID& animID);
+    SE_AnimationID add(SE_Animation* anim);
+    SE_Animation* remove(const SE_AnimationID& animID);
+    SE_Animation* get(const SE_AnimationID& animID);
     void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 	std::vector<SE_Animation*> removeAllEndedAnimation();
 	void release(const SE_AnimationID& id, int delay = SE_RELEASE_DELAY);

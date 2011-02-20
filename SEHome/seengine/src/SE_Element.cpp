@@ -21,6 +21,7 @@
 #include "SE_SimObjectManager.h"
 #include "SE_Geometry.h"
 #include "SE_MessageEventCommandDefine.h"
+#include "SE_AnimationManager.h"
 #include <math.h>
 //////////////////////////////
 class SE_ElementParamUpdateEvent : public SE_ElementEvent
@@ -45,7 +46,7 @@ void SE_ElementParamUpdateEvent::run()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     if(!mElement)
-        mElement = elementManager->findElement(mElementID);
+        mElement = elementManager->get(mElementID);
     if(!mElement)
         return;
     mElement->update(mParamValueList);
@@ -55,8 +56,8 @@ bool SE_ElementParamUpdateEvent::merge(SE_ElementEvent* mergeEvent)
     SE_ElementParamUpdateEvent* pEvent = (SE_ElementParamUpdateEvent*)mergeEvent;
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     if(!mElement)
-        mElement = elementManager->findElement(mElementID);
-    SE_Element* mergedElement = elementManager->findElement(pEvent->mElementID);
+        mElement = elementManager->get(mElementID);
+    SE_Element* mergedElement = elementManager->get(pEvent->mElementID);
     if(!mElement || !mergedElement)
         return true;
     if(mElementID == pEvent->mElementID)
@@ -80,10 +81,35 @@ SE_Element::SE_Element()
     mNeedUpdateTransform = true;
     mRenderQueueSeq =  SE_RQ0;
 }
+
 SE_Element::~SE_Element()
 {
     if(mKeyFrameController)
         delete mKeyFrameController;
+    /*
+    std::vector<SE_AddressID> addressV = mURI.getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->unregisterObserver(addressV[i], this);
+        }
+    } 
+    */
+    _DeleteURI deleteURI;
+    deleteURI.element = this;
+    mStateURIManager.traverse(deleteURI);
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+	SE_SimObject* simObject = simObjectManager->remove(mSimObjectID);
+	simObjectManager->release(simObject);
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* s = spatialManager->remove(mSpatialID);
+    spatialManager->release(s);
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    resourceManager->removePrimitive(mPrimitiveID);
+    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+    animManager->remove(mAnimationID);
 }
 bool SE_Element::isRoot()
 {
@@ -94,11 +120,6 @@ SE_Element* SE_Element::getParent()
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	return elementManager->getParent(getID());
 }
-
-void SE_Element::setImageData(SE_RectPrimitive* primitive)
-{}
-void SE_Element::setSurface(SE_Surface* surface)
-{}
 void SE_Element::setKeyFrameController(SE_KeyFrameController* kfc)
 {
     if(mKeyFrameController)
@@ -117,11 +138,11 @@ void SE_Element::layout()
 void SE_Element::updateSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* spatial = spatialManager->findSpatial(getID());
+    SE_Spatial* spatial = spatialManager->get(getID());
 	SE_Element* parent = getParent();
 	if(!parent)
 		return;
-    SE_Spatial* parentSpatial = spatialManager->findSpatial(parent->getID());
+    SE_Spatial* parentSpatial = spatialManager->get(parent->getID());
     if(!spatial && !parentSpatial)
     {
         return ;
@@ -133,13 +154,13 @@ void SE_Element::updateSpatial()
     else if(!spatial && parentSpatial)
     {
         SE_Spatial* s = createSpatial();
-		spatialManager->addSpatial(parentSpatial->getID(), s, true);
+		spatialManager->add(parentSpatial->getID(), s, true);
     }
     else if(spatial && parentSpatial)
     {
-        SE_Spatial* oldSpatial = spatialManager->removeSpatial(mSpatialID);
+        SE_Spatial* oldSpatial = spatialManager->remove(mSpatialID);
         SE_Spatial* s = createSpatial();
-        spatialManager->addSpatial(parentSpatial->getID(), s, true);
+        spatialManager->add(parentSpatial->getID(), s, true);
 		spatialManager->release(oldSpatial);
     }
 }
@@ -163,7 +184,7 @@ void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {
     mSceneRenderSeq = seq;
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-	SE_Spatial* spatial = spatialManager->findSpatial(mSpatialID);
+	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
 		spatial->setSceneRenderSeq(seq);
@@ -185,7 +206,7 @@ void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
         mRenderTarget = renderTarget;
     }
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-	SE_Spatial* spatial = spatialManager->findSpatial(mSpatialID);
+	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
 		spatial->setRenderTarget(mRenderTarget);
@@ -228,23 +249,91 @@ void SE_Element::clearChildren()
 	for(int i = 0 ; i < children.size() ; i++)
 	{
 		SE_Element* e = children[i];
-		elementManager->removeElement(e->getID());
-        elementManager->releaseElement(e);
+		elementManager->remove(e->getID());
+        elementManager->release(e);
 	}
 }
+void SE_Element::setStateURI(int state, const SE_StringID& uri)
+{
+	SE_URI tURI(uri.getStr());
+	bool isContain = mStateURIManager.isContain(state);
+	if(isContain)
+	{
+		SE_URI oldURI = mStateURIManager.get(state);
+		removeObserverFromParamManager(&oldURI);
 
+	}
+	mStateURIManager.set(state, tURI);
+    addObserverToParamManager(&tURI);
+}
+void SE_Element::removeObserverFromParamManager(const SE_URI* uri)
+{
+    std::vector<SE_AddressID> addressV = uri->getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->unregisterObserver(addressV[i], this);
+        }
+    }   
+}
+void SE_Element::addObserverToParamManager(const SE_URI* uri)
+{
+    std::vector<SE_AddressID> addressV = uri->getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->unregisterObserver(addressV[i], this);
+        }
+    }    
+}
+SE_URI SE_Element::getURI(int state) const
+{
+	SE_URI uri = mStateURIManager.get(state);
+	return uri;
+}
+SE_StringID SE_Element::getURL(int state) const
+{
+	SE_URI uri = mStateURIManager.get(state);
+	return uri.getURL();
+}
+SE_StringID SE_Element::getURI() const
+{
+	SE_URI uri = getURI(NORMAL);
+	return uri.getURI();
+}
+SE_StringID SE_Element::getURL() const
+{
+	SE_URI uri = getURI(NORMAL);
+	return uri.getURL();
+}
 void SE_Element::setURI(const SE_StringID& uri)
 {
-    mURI.setURI(uri);
+	setStateURI(NORMAL, uri);
+	/*
     std::vector<SE_AddressID> addressV = mURI.getAddress();
     if(addressV.size() > 0)
     {
         SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
         for(int i = 0 ; i < addressV.size() ; i++)
         {
-            paramManager->registerObserver(addressV[i], this);
+            paramManager->unregisterObserver(addressV[i], this);
         }
     }    
+    mURI.setURI(uri);
+    addressV = mURI.getAddress();
+    if(addressV.size() > 0)
+    {
+        SE_ParamManager* paramManager = SE_Application::getInstance()->getParamManager();
+        for(int i = 0 ; i < addressV.size() ; i++)
+        {
+            paramManager->unregisterObserver(addressV[i], this);
+        }
+    } 
+	*/
 }
 void SE_Element::clone(SE_Element *src, SE_Element* dst)
 {
@@ -264,7 +353,6 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 	dst->mEndKey = src->mEndKey;
 	dst->mKeyFrameNum = src->mKeyFrameNum;
 	dst->mSeqNum = src->mSeqNum;
-	dst->mURI.setURI(src->mURI.getURI());
 }
 
 ///////////////////////////////////////
@@ -274,6 +362,7 @@ SE_2DNodeElement::SE_2DNodeElement()
     mPivotX = mPivotY = mMountPointX = mMountPointY = 0;
     mDeltaLeft = mDeltaTop = 0;
     mSpatialType = SE_COMMON_NODE_TYPE;
+	mRectPatchType = SE_RectPatch::INVALID;
 }
 SE_2DNodeElement::~SE_2DNodeElement()
 {
@@ -365,7 +454,7 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 		SE_Spatial* spatial = e->createSpatial();
 		if(spatial)
 		{
-            spatialManager->addSpatial(parent, spatial);
+            spatialManager->add(parent, spatial);
 		}
 	}
 	return parent;
@@ -462,36 +551,43 @@ SE_Spatial* SE_2DNodeElement::createNode()
 	commonNode->setNeedUpdateTransform(mNeedUpdateTransform);
 	return commonNode;
 }
-void SE_2DNodeElement::createPrimitive(SE_PrimitiveID& outID, SE_RectPrimitive*& outPrimitive)
+void SE_2DNodeElement::createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& outPrimitive)
 {
 	float e[2] = {1, 1};
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
-    SE_RectPrimitive* primitive = NULL;
+    SE_Primitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
-    SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+	if(mRectPatchType == SE_RectPatch::INVALID)
+        SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+	else
+		SE_RectPatch::create(rect3D, (SE_RectPatch::PATCH_TYPE)mRectPatchType, primitive, primitiveID);
 	outID = primitiveID;
 	outPrimitive = primitive;
 }
+SE_Spatial* SE_2DNodeElement::createRectPatchSpatial()
+{
+	return NULL;
+}
 SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 {
-    SE_RectPrimitive* primitive = NULL;
+    SE_Primitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
 	createPrimitive(primitiveID, primitive);
 	setImageData(primitive);
     SE_Mesh** meshArray = NULL;
     int meshNum = 0;
     primitive->createMesh(meshArray, meshNum);
-    if(meshNum != 1)
+    SE_ASSERT(meshNum > 0);
+	SE_ASSERT(meshArray != NULL);
+    for(int i = 0 ; i < meshNum ; i++)
 	{
-		LOGE("... rect primivitve mesh num should be 1\n");
-		return NULL;
+	    for(int j = 0 ; j < meshArray[j]->getSurfaceNum(); j++)
+	    {
+		    SE_Surface* surface = meshArray[j]->getSurface(j);
+		    setSurface(surface);
+	    }
 	}
-	for(int i = 0 ; i < meshArray[0]->getSurfaceNum(); i++)
-	{
-		SE_Surface* surface = meshArray[0]->getSurface(i);
-		setSurface(surface);
-	}
-	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[0], OWN);
+	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray, meshNum, OWN);
 	simObject->setName(mFullPathName.getStr());
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     SE_SimObjectID simObjectID = simObjectManager->add(simObject);
@@ -561,7 +657,7 @@ void SE_2DNodeElement::read(SE_BufferInput& inputBuffer)
     mTimeKey.read(inputBuffer);
     mStartKey.read(inputBuffer);
     mEndKey.read(inputBuffer);
-    mURI.read(inputBuffer);
+    //mURI.read(inputBuffer);
     int hasController = inputBuffer.readInt();
     if(hasController)
     {
@@ -579,6 +675,10 @@ void SE_2DNodeElement::read(SE_BufferInput& inputBuffer)
     mOwnRenderTargetCamera = (bool)inputBuffer.readInt();
     mNeedUpdateTransform = (bool)inputBuffer.readInt();
 }
+void SE_2DNodeElement::setImageData(SE_Primitive* primitive)
+{}
+void SE_2DNodeElement::setSurface(SE_Surface* surface)
+{}
 void SE_2DNodeElement::write(SE_BufferOutput& outputBuffer)
 {
     outputBuffer.writeString("SE_2DNodeElement");
@@ -607,7 +707,7 @@ void SE_2DNodeElement::write(SE_BufferOutput& outputBuffer)
     mTimeKey.write(outputBuffer);
     mStartKey.write(outputBuffer);
     mEndKey.write(outputBuffer);
-    mURI.write(outputBuffer);
+    //mURI.write(outputBuffer);
     if(mKeyFrameController)
     {
         outputBuffer.writeInt(1);

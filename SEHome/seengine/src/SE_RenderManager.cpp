@@ -127,7 +127,7 @@ void SE_RenderManager::draw()
         for(it = sru->renderTargetUnit.begin() ; it != sru->renderTargetUnit.end() ; it++)
         {
             _RenderTargetUnit* rt = *it;
-            SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(rt->mRenderTargetID);
+            SE_RenderTarget* renderTarget = renderTargetManager->get(rt->mRenderTargetID);
             SE_Camera* camera = renderTarget->getCamera();
 		    if(renderTarget->prepare() && camera)
 		    {

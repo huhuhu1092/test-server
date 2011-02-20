@@ -46,7 +46,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	scene->setBound(width, height);
 	scene->create(sceneName.c_str());
 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	SE_SceneID sceneID = sceneManager->addScene(scene);
+	SE_SceneID sceneID = sceneManager->add(scene);
 	//create camera
     SE_Vector3f location(0, 0, 10);
     float ratio = height / (float)width;
@@ -58,7 +58,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	SE_CameraID cameraID = cameraManager->addCamera(camera);
 	scene->setCamera(cameraID);
 	//end
-	sceneManager->showScene(sceneID);
+	sceneManager->show(sceneID);
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
 	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();

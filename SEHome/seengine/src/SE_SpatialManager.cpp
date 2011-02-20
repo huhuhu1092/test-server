@@ -28,19 +28,19 @@ SE_SpatialManager::~SE_SpatialManager()
 	if(mSpatialCreator)
 		delete mSpatialCreator;
 }
-SE_Spatial* SE_SpatialManager::findSpatial(const SE_SpatialID& id)
+SE_Spatial* SE_SpatialManager::get(const SE_SpatialID& id)
 {
 	return mSpatials.find(id);
 }
-SE_Spatial* SE_SpatialManager::removeSpatial(const SE_SpatialID& id)
+SE_Spatial* SE_SpatialManager::remove(const SE_SpatialID& id)
 {
 	return mSpatials.remove(id);
 }
-SE_SpatialID SE_SpatialManager::addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial, bool linkToParent)
+SE_SpatialID SE_SpatialManager::add(const SE_SpatialID& parentID, SE_Spatial* spatial, bool linkToParent)
 {
 	return mSpatials.add(parentID, spatial, linkToParent);
 }
-void SE_SpatialManager::addSpatial(SE_Spatial* parent, SE_Spatial* child)
+void SE_SpatialManager::add(SE_Spatial* parent, SE_Spatial* child)
 {
 	mSpatials.add(parent, child);
 }

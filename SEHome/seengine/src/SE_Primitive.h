@@ -19,6 +19,41 @@ public:
 	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 	{
 	}
+	// index is face index
+    virtual  void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
+	{}
+	void setColor(const SE_Vector3f& color)
+	{
+		mColor = color;
+	}
+    void setSampleMin(int smin)
+	{
+		mSampleMin = smin;
+	}
+	void setSampleMag(int smag)
+	{
+		mSampleMag = smag;
+	}
+	void setWrapS(int ws)
+	{
+		mWrapS = ws;
+	}
+	void setWrapT(int wt)
+	{
+		mWrapT = wt;
+	}
+	void setProgramDataID(const SE_ProgramDataID& programID)
+	{
+		mProgramDataID = programID;
+	}
+protected:
+	SE_Vector3f mColor;
+    int mSampleMin;
+	int mSampleMag;
+	int mWrapS;
+	int mWrapT;
+	SE_ProgramDataID mProgramDataID;
 };
 // primitive contain the data which used by SE_Mesh, so it can not allocate on stack
 // it must be own by some global structure.
@@ -45,12 +80,12 @@ private:
 	};
 public:
 	//SE_RectPrimitive(const SE_Rect3D& rect);
-	static void create(const SE_Rect3D& rect, SE_RectPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+	static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
     //when imageData's width and height is not power of 2
     //we need to adjust the texture coordidate
-	void setImageData(SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
     //void setImagePortion(const SE_ImageDataPortion& portion);
     void setMaterialData(const SE_MaterialData& materialData)
 	{
@@ -59,30 +94,7 @@ public:
 		mMaterialData = new SE_MaterialData;
 		*mMaterialData = materialData;
 	}
-	void setColor(const SE_Vector3f& color)
-	{
-		mColor = color;
-	}
-    void setSampleMin(int smin)
-	{
-		mSampleMin = smin;
-	}
-	void setSampleMag(int smag)
-	{
-		mSampleMag = smag;
-	}
-	void setWrapS(int ws)
-	{
-		mWrapS = ws;
-	}
-	void setWrapT(int wt)
-	{
-		mWrapT = wt;
-	}
-	void setProgramDataID(const SE_ProgramDataID& programID)
-	{
-		mProgramDataID = programID;
-	}
+
 	//virtual void read(SE_BufferInput& input);
 	//virtual void write(SE_BufferOutput& output);
 	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
@@ -101,12 +113,6 @@ private:
 	SE_Wrapper<SE_GeometryData>* mGeometryData;
 	SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
-	SE_Vector3f mColor;
-    int mSampleMin;
-	int mSampleMag;
-	int mWrapS;
-	int mWrapT;
-	SE_ProgramDataID mProgramDataID;
     SE_ImageDataPortion mImageDataPortion;
     int mAdjustedStartX;//the x coordinate after change width to power2 width
     int mAdjustedStartY;//the y coordinate after change height to power2 height
@@ -155,7 +161,8 @@ public:
 			}
 		}
 	}
-	void setImageData(FACE_INDEX index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+	//index is the face index in this primitive
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{
 		if(index < LEFT || index > ALL)
@@ -163,14 +170,14 @@ public:
 		if(index < ALL)
 		{
 			if(mRectPrimitive[index])
-				mRectPrimitive[index]->setImageData(imageData, texUnitType, own, imageDataPortion);
+				mRectPrimitive[index]->setImageData(0, imageData, texUnitType, own, imageDataPortion);
 		}
 		else
 		{
 			for(int i = LEFT; i < ALL ; i++)
 			{
 				if(mRectPrimitive[i])
-					mRectPrimitive[i]->setImageData(imageData, texUnitType, own, imageDataPortion);
+					mRectPrimitive[i]->setImageData(0, imageData, texUnitType, own, imageDataPortion);
 			}
 		}
 	}
@@ -271,7 +278,6 @@ private:
 	SE_BoxPrimitive(const SE_Rect3D& rect);
 	SE_BoxPrimitive(const SE_RectPrimitive&);
 	SE_BoxPrimitive& operator=(const SE_RectPrimitive&);
-
 private:
 	SE_RectPrimitive* mRectPrimitive[6];
 	SE_PrimitiveID mRectPrimitiveID[6];
@@ -280,50 +286,28 @@ private:
 class SE_RectPatch : public SE_Primitive
 {
 public:
-    enum PATCH_TYPE {R1_C3, R3_C1, R3_C3};
+    enum PATCH_TYPE {INVALID, R1_C3, R3_C1, R3_C3};
     SE_RectPatch(PATCH_TYPE t);
+	static void create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
     //imageData must from SE_ResourceManager
     //SE_RectPatch will not own imageData
-    void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+    //void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
 	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
-	void setColor(const SE_Vector3f& color)
-	{
-		mColor = color;
-	}
-    void setSampleMin(int smin)
-	{
-		mSampleMin = smin;
-	}
-	void setSampleMag(int smag)
-	{
-		mSampleMag = smag;
-	}
-	void setWrapS(int ws)
-	{
-		mWrapS = ws;
-	}
-	void setWrapT(int wt)
-	{
-		mWrapT = wt;
-	}
-	void setProgramDataID(const SE_ProgramDataID& programID)
-	{
-		mProgramDataID = programID;
-	}
 private:
+    struct _TexCoordSet
+    {
+        SE_Vector2f tex[16];
+    };
     void createGeometryData();
-    void setTextureCoord(int texCoordDataIndex, int v0 , int v1, int v2, int v3);
+    _TexCoordSet calculateImageFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
+    _TexCoordSet calculateImageNoFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
+    void setTextureCoord(const _TexCoordSet& texCoordSet, int texCoordDataIndex, int v0 , int v1, int v2, int v3);
 private:
     PATCH_TYPE mType;
     SE_ImageData* mImageData[SE_TEXUNIT_NUM];
     std::vector<SE_TextureCoordData*> mTextureCoordData;
     std::vector<SE_GeometryData*> mGeometryData;
-	SE_Vector3f mColor;
-    int mSampleMin;
-	int mSampleMag;
-	int mWrapS;
-	int mWrapT;
-	SE_ProgramDataID mProgramDataID;
-
 };
 #endif

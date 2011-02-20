@@ -63,10 +63,10 @@ public:
 	{
 		return mError;
 	}
-	SE_Spatial* findSpatial(const SE_SpatialID& id);
-	SE_Spatial* removeSpatial(const SE_SpatialID& id);
-	SE_SpatialID addSpatial(const SE_SpatialID& parentID, SE_Spatial* spatial, bool linkToParent);
-	void addSpatial(SE_Spatial* parent, SE_Spatial* child);
+	SE_Spatial* get(const SE_SpatialID& id);
+	SE_Spatial* remove(const SE_SpatialID& id);
+	SE_SpatialID add(const SE_SpatialID& parentID, SE_Spatial* spatial, bool linkToParent);
+	void add(SE_Spatial* parent, SE_Spatial* child);
     //SE_SpatialID loadScene(const SE_SceneID& sceneID); 
 	void render(SE_Camera* camera, SE_RenderManager& renderManager);
 	//SE_SpatialID getCurrentSceneRootID() const;

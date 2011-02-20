@@ -7,6 +7,7 @@ void SE_ElementContent::clone(SE_ElementContent* src, SE_ElementContent* dst)
 {
 	dst->mContentURI = src->mContentURI;
 	dst->mID = src->mID;
+    dst->mState = src->mState;
 }
 SE_ElementContent* SE_ElementContent::clone()
 {
@@ -51,6 +52,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		rete = colorEffectControllerElement;
 	}
     rete->setName(getID().getStr());
+    rete->setState(getState());
 	return rete;
 }
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI)
@@ -67,6 +69,7 @@ SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 {
 	SE_ActionElement* e = new SE_ActionElement(getURI());
 	e->setMountPoint(mpx, mpy);
+    e->setState(getState());
 	return e;
 }
 SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI)
@@ -83,6 +86,7 @@ SE_Element* SE_StateTableContent::createElement(float mpx, float mpy)
 {
 	SE_StateTableElement* e = new SE_StateTableElement(getURI());
 	e->setMountPoint(mpx, mpy);
+    e->setState(getState());
 	return e;
 }
 

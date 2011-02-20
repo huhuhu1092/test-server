@@ -17,7 +17,7 @@ SE_Scene::SE_Scene(SE_SCENE_TYPE t)
 SE_Scene::~SE_Scene()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    elementManager->removeElement(mRoot);
+    elementManager->remove(mRoot);
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
     cameraManager->removeCamera(mCamera);
 }
@@ -40,13 +40,13 @@ void SE_Scene::create(const char* sceneName)
         localM.setColumn(2, c3);
         localM.setColumn(3, c4);
         root->setPostMatrix(localM);
-		elementManager->addElement(root, element);
+		elementManager->add(root, element);
     }
     else
     {
         root = element;
     }
-    mRoot = elementManager->addElement(SE_ElementID::NULLID, root, false);
+    mRoot = elementManager->add(SE_ElementID::NULLID, root, false);
     root->spawn();
     root->layout();
 }
@@ -59,12 +59,12 @@ SE_SceneID SE_Scene::getID()
 void SE_Scene::show()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    SE_Element* rootElement = elementManager->findElement(mRoot);
+    SE_Element* rootElement = elementManager->get(mRoot);
     if(rootElement)
     {
 		SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
         SE_Spatial* spatial = rootElement->createSpatial();
-		spatialManager->addSpatial(SE_SpatialID::NULLID, spatial, false);
+		spatialManager->add(SE_SpatialID::NULLID, spatial, false);
 		spatial->updateSpatialIDToElement();
 		SE_DepthTestState* rs = new SE_DepthTestState();
 		rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
@@ -82,7 +82,7 @@ void SE_Scene::show()
 SE_Element* SE_Scene::getRootElement()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    SE_Element* rootElement = elementManager->findElement(mRoot);
+    SE_Element* rootElement = elementManager->get(mRoot);
     return rootElement;
 }
 void SE_Scene::exit()
@@ -90,7 +90,7 @@ void SE_Scene::exit()
 void SE_Scene::hide()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    SE_Element* rootElement = elementManager->findElement(mRoot);
+    SE_Element* rootElement = elementManager->get(mRoot);
     if(rootElement)
         rootElement->hide();
 }
@@ -101,19 +101,19 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
     {
         SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
         
-        mRenderTargetID = renderTargetManager->addRenderTarget(renderTarget);
+        mRenderTargetID = renderTargetManager->add(renderTarget);
     }        
     SE_Element* rootElement = getRootElement();
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* rootSpatial = NULL;
 	if(rootElement)
-	    rootSpatial = spatialManager->findSpatial(rootElement->getSpatialID());
+	    rootSpatial = spatialManager->get(rootElement->getSpatialID());
 
     if(rootSpatial)
     {
         rootElement->setSceneRenderSeq(seq);
         rootElement->setRenderTargetID(mRenderTargetID);
-	    SE_RenderTarget* renderTarget = renderTargetManager->getRenderTarget(mRenderTargetID);
+	    SE_RenderTarget* renderTarget = renderTargetManager->get(mRenderTargetID);
         renderTarget->setBackground(mBackground);
         if(mIsTranslucent)
             renderTarget->setClearTarget(false);

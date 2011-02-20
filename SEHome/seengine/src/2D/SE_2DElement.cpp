@@ -745,20 +745,20 @@ SE_Element* SE_Element::getElement(const SE_StringID& uri)
 	return e;
 }
 */
-static SE_Element* getElement(const SE_StringID& uri)
+static SE_2DNodeElement* getElement(const SE_StringID& uri)
 {
 	SE_URI strURI(uri.getStr());
     SE_StringID url = strURI.getURL();
 	SE_Util::SplitStringList strList = SE_Util::splitString(url.getStr(), "/");
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
-	SE_Element* e = NULL;
+	SE_2DNodeElement* e = NULL;
 	SE_ElementSchema* es = NULL;
 	switch(t)
 	{
 	case SE_ELEMENT_TABLE:
 		es = resourceManager->getElementSchema(url.getStr());
-		e = es->createElement();
+		e = (SE_2DNodeElement*)es->createElement();
 		break;
 	case SE_ACTION_TABLE:
 		e = new SE_ActionElement(uri);
@@ -777,6 +777,10 @@ static SE_Element* getElement(const SE_StringID& uri)
 	};
 	return e;
 }
+SE_2DNodeElement* SE_GetElement(const SE_StringID& uri)
+{
+	return getElement(uri);
+}
 ////////////////////////////////////////////////////////
 SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
 {
@@ -788,7 +792,7 @@ SE_TextureElement::~SE_TextureElement()
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	resourceManager->removeImageData(mImageDataID);
 	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
-	SE_RenderTarget* renderTarget = rm->removeRenderTarget(mRenderTargetID);
+	SE_RenderTarget* renderTarget = rm->remove(mRenderTargetID);
 	rm->release(renderTarget);
 	//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	//elementManager->removeRenderTargetElement(mContentChild);
@@ -830,13 +834,13 @@ void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     //elementManager->removeRenderTargetElement(mContentChild);
-	elementManager->removeElement(mContentChild->getID());
-	elementManager->releaseElement(mContentChild);
+	elementManager->remove(mContentChild->getID());
+	elementManager->release(mContentChild);
     //delete mContentChild;
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     resourceManager->removeImageData(mImageDataID);
 	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
-	rm->removeRenderTarget(mRenderTargetID);
+	rm->remove(mRenderTargetID);
     init();
     spawn();
     layout();
@@ -847,9 +851,9 @@ void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& valu
 {
     SE_2DNodeElement::update(address, value);
 }
-void SE_TextureElement::setImageData(SE_RectPrimitive* primitive)
+void SE_TextureElement::setImageData(SE_Primitive* primitive)
 {
-	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
+	primitive->setImageData(0, mImageData, SE_TEXTURE0, NOT_OWN);
 }
 void SE_TextureElement::setSurface(SE_Surface* surface)
 {
@@ -895,7 +899,7 @@ void SE_TextureElement::layout()
 	mHeight = mContentChild->getHeight();
 	SE_TextureTarget* textureTarget = new SE_TextureTarget(mImageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-    mRenderTargetID = renderTargetManager->addRenderTarget(textureTarget);
+    mRenderTargetID = renderTargetManager->add(textureTarget);
 	textureTarget->setBackground(SE_Vector4f(0, 0, 0, 0));
 	mContentChild->setRenderTargetID(mRenderTargetID);
 	float ratio = mHeight / mWidth;
@@ -988,11 +992,11 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
     initImage();
     spawn();
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* spatial = spatialManager->findSpatial(getID());
+    SE_Spatial* spatial = spatialManager->get(getID());
 	SE_Element* parent = getParent();
 	if(!parent)
 		return;
-    SE_Spatial* parentSpatial = spatialManager->findSpatial(parent->getID());
+    SE_Spatial* parentSpatial = spatialManager->get(parent->getID());
     if(!spatial && !parentSpatial)
     {
         return ;
@@ -1005,13 +1009,13 @@ void SE_ImageElement::update(SE_ParamValueList& paramValueList)
     {
 
         SE_Spatial* s = createSpatial();
-        spatialManager->addSpatial(parentSpatial->getID(), s, true);
+        spatialManager->add(parentSpatial->getID(), s, true);
     }
     else if(spatial && parentSpatial)
     {
-        SE_Spatial* spatial = spatialManager->removeSpatial(getID());
+        SE_Spatial* spatial = spatialManager->remove(getID());
         SE_Spatial* s = createSpatial();
-        spatialManager->addSpatial(parentSpatial->getID(), s, true);
+        spatialManager->add(parentSpatial->getID(), s, true);
 		spatialManager->release(spatial);
     }
 }
@@ -1031,7 +1035,7 @@ bool SE_ImageElement::isValid()
 	}
 	return count > 0;
 }
-void SE_ImageElement::setImageData(SE_RectPrimitive* primitive)
+void SE_ImageElement::setImageData(SE_Primitive* primitive)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	int j = 0;
@@ -1050,7 +1054,7 @@ void SE_ImageElement::setImageData(SE_RectPrimitive* primitive)
 		    dp.setY(imageUnit->imageRect.y);
 		    dp.setWidth(imageUnit->imageRect.width);
 		    dp.setHeight(imageUnit->imageRect.height);
-		    primitive->setImageData(imageData, (SE_TEXUNIT_TYPE)j, NOT_OWN, dp);
+		    primitive->setImageData(0, imageData, (SE_TEXUNIT_TYPE)j, NOT_OWN, dp);
 			j++;
 			mImageUnits[i].valid = 1;
 		}
@@ -1175,7 +1179,7 @@ void SE_ActionElement::update(SE_ParamValueList& paramValueList)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     mAction = resourceManager->getAction(url.getStr());
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* s = spatialManager->removeSpatial(getID());
+    SE_Spatial* s = spatialManager->remove(getID());
     spawn();
     layout();
     update(0);
@@ -1212,7 +1216,7 @@ SE_Spatial* SE_ActionElement::createSpatial()
 		SE_Element* e = *it;
 		SE_Spatial* spatial = e->createSpatial();
 		if(spatial)
-		    spatialManager->addSpatial(node, spatial);
+		    spatialManager->add(node, spatial);
 	}
 	return node;
 }
@@ -1282,7 +1286,7 @@ void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mSequence = resourceManager->getSequence(url.getStr());
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* s = spatialManager->removeSpatial(getID());
+    SE_Spatial* s = spatialManager->remove(getID());
 	spatialManager->release(s);
     clearChildren();
     spawn();
@@ -1316,7 +1320,7 @@ void SE_SequenceElement::spawn()
 		SE_ImageElement* e = new SE_ImageElement(f.imageref);
 		e->setMountPointRef(f.mpref);
 		e->setTimeKey(keys[i]);
-		elementManager->addElement(this->getID(), e, true);
+		elementManager->add(this->getID(), e, true);
 		e->spawn();
 	}
 	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
@@ -1394,13 +1398,13 @@ void SE_SequenceElement::update(const SE_TimeKey& key)
 		{
 			simObjectManager->remove(mCurrentElement->getSimObjectID());
 			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = spatialManager->removeSpatial(mCurrentElement->getSpatialID());
+			SE_Spatial* spatial = spatialManager->remove(mCurrentElement->getSpatialID());
 			if(spatial)
 				spatialManager->release(spatial);
 		}
 		SE_Spatial* spatial = first->createSpatial();
-		SE_Spatial* parentSpatial = spatialManager->findSpatial(getID());
-		spatialManager->addSpatial(parentSpatial->getID(), spatial, true);
+		SE_Spatial* parentSpatial = spatialManager->get(getID());
+		spatialManager->add(parentSpatial->getID(), spatial, true);
 		spatial->updateRenderState();
 		spatial->updateWorldLayer();
 		spatial->updateWorldTransform();
@@ -1431,7 +1435,7 @@ void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
     layout();
     update(0);
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* currSpatial = spatialManager->findSpatial(getID());
+    SE_Spatial* currSpatial = spatialManager->get(getID());
     if(!currSpatial)
     {
         LOGI("state table element spatial has been removed\n");
@@ -1444,7 +1448,7 @@ void SE_StateTableElement::update(SE_ParamValueList& paramValueList)
     {
         SE_Element* e = *it;
         SE_Spatial* s = e->createSpatial();
-        spatialManager->addSpatial(currSpatial->getID(), s, true); 
+        spatialManager->add(currSpatial->getID(), s, true); 
     }
 }
 void SE_StateTableElement::update(const SE_AddressID& address, const SE_Value& value)
@@ -1464,7 +1468,7 @@ void SE_StateTableElement::spawn()
 	SE_2DNodeElement* e = (SE_2DNodeElement*)getElement(strURI);
     e->setMountPoint(0, 0);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	elementManager->addElement(getID(), e, true);
+	elementManager->add(getID(), e, true);
 	//this->addChild(e);
 	e->spawn();
 }
@@ -1569,7 +1573,7 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 		{
 			simObjectManager->remove(mCurrentElement->getSimObjectID());
 			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = spatialManager->removeSpatial(mCurrentElement->getID());
+			SE_Spatial* spatial = spatialManager->remove(mCurrentElement->getID());
 			if(spatial)
 				spatialManager->release(spatial);
 				//delete spatial;
@@ -1611,7 +1615,7 @@ void SE_ColorEffectControllerElement::spawn()
 		e->setPivotX(f->getPivotX());
 		e->setPivotY(f->getPivotY());
 		e->setMountPointRef(f->getMountPointRef());
-		elementManager->addElement(getID(), e, true);
+		elementManager->add(getID(), e, true);
 		//this->addChild(e);
 		e->spawn();
 	}
@@ -1668,7 +1672,7 @@ SE_ImageElement* SE_ColorEffectElement::createImageElement(const SE_StringID& te
 	imageData->setHeight(imageElement->getHeight());
 	SE_TextureTarget* renderTarget = new SE_TextureTarget(imageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-	SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(renderTarget);
+	SE_RenderTargetID renderTargetID = renderTargetManager->add(renderTarget);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	//elementManager->addRenderTargetElement(imageElement);
 	imageElement->setRenderTargetID(renderTargetID);
@@ -1725,7 +1729,7 @@ SE_Element* SE_ColorEffectElement::mergeElement(SE_Element* background, SE_Eleme
 					tc[i] = *textureIt[i];
 			}
 			SE_Element* child = mergeElement(bc, cc, tc);
-			elementManager->addElement(getID(), child, true);
+			elementManager->add(getID(), child, true);
 			//element->addChild(child);
 			backgroundIt++;
 			channelIt++;
@@ -1872,16 +1876,16 @@ SE_Spatial* SE_ColorEffectElement::createSpatial()
         return createSpatialByImage();
 	}
 }
-void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType)
+void SE_ColorEffectElement::setImageData(SE_Primitive* primitive, SE_ImageData* imageData, SE_TEXUNIT_TYPE texType)
 {
 	SE_ImageDataPortion dp;
 	dp.setX(0);
 	dp.setY(0);
 	dp.setWidth(imageData->getWidth());
 	dp.setHeight(imageData->getHeight());
-    primitive->setImageData(imageData, texType, NOT_OWN, dp);
+    primitive->setImageData(0, imageData, texType, NOT_OWN, dp);
 }
-void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType)
+void SE_ColorEffectElement::setImageData(SE_Primitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_ImageUnit iu = resourceManager->getImageUnit(imageID.getStr());
@@ -1891,9 +1895,9 @@ void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive, const SE_S
 	dp.setY(iu.imageRect.y);
 	dp.setWidth(iu.imageRect.width);
 	dp.setHeight(iu.imageRect.height);
-	primitive->setImageData(imageData, texType, NOT_OWN, dp);
+	primitive->setImageData(0, imageData, texType, NOT_OWN, dp);
 }
-void SE_ColorEffectElement::setImageData(SE_RectPrimitive* primitive)
+void SE_ColorEffectElement::setImageData(SE_Primitive* primitive)
 {
     if(mBackgroundArity > 1)
 	{

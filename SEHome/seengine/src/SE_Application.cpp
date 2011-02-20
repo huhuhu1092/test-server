@@ -106,7 +106,7 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     if(mState == RUNNING)
     {
         //mRenderManager->beginDraw();
-        mSceneManager->renderScene(*mRenderManager);
+        mSceneManager->render(*mRenderManager);
         mRenderManager->sort();
         mRenderManager->draw();
         mRenderManager->endDraw();

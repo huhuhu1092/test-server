@@ -41,14 +41,14 @@ class SE_ElementManager
 public:
     enum {MAX_SIZE = 20000};
     enum {SIZE = 1000};
-    SE_ElementID addElement(const SE_ElementID& parent, SE_Element* e, bool linkToParent);
-    void addElement(SE_Element* parent, SE_Element* e);
-    SE_Element* findElement(const SE_ElementID& id);
-    SE_Element* removeElement(const SE_ElementID& id);
+    SE_ElementID add(const SE_ElementID& parent, SE_Element* e, bool linkToParent);
+    void add(SE_Element* parent, SE_Element* e);
+    SE_Element* get(const SE_ElementID& id);
+    SE_Element* remove(const SE_ElementID& id);
     SE_Element* getParent(const SE_ElementID& id);
     std::vector<SE_Element*> getChildren(const SE_ElementID& id) ;
-    void releaseElement(SE_Element* element, int delay = SE_RELEASE_DELAY);
-    void releaseElement(const SE_ElementID& id, int delay = SE_RELEASE_DELAY);
+    void release(SE_Element* element, int delay = SE_RELEASE_DELAY);
+    void release(const SE_ElementID& id, int delay = SE_RELEASE_DELAY);
 	void addEvent(SE_ElementEvent* event);
     void update();
 private:

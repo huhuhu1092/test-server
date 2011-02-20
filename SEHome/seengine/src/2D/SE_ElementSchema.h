@@ -36,6 +36,7 @@ public:
 private:
     SE_Element* createElement(SE_ElementManager* elementManager, SE_Element* parent);
 	void clear();
+    SE_2DNodeElement* createElement(int type);
 public:
     SE_StringID name;
     SE_StringID fullPathName;
@@ -45,12 +46,15 @@ public:
     SE_Layer layer;
     int seq;
     SE_MountPointID mountPointRef;
+    int type;// element type: BUTTON, TEXT, 2D_UI_NODE, etc;
+    SE_StringID text;
 private:
     SE_ElementSchema* parent;
     typedef std::list<SE_ElementSchema*> _ElementSchemaList;
     _ElementSchemaList children;
     typedef std::list<SE_ElementContent*> _ElementContentList;
     _ElementContentList contents;
+    
 };
 typedef SE_Table<SE_StringID, SE_ElementSchema*> SE_ElementSchemaMap;
 typedef SE_Table<SE_StringID, SE_ElementSchemaMap*> SE_ElementSchemaTable;
