@@ -589,23 +589,73 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 		    setSurface(surface);
 	    }
 	}
-	SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray, meshNum, OWN);
-	simObject->setName(mFullPathName.getStr());
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-    SE_SimObjectID simObjectID = simObjectManager->add(simObject);
-    SE_Geometry* geom = new SE_Geometry;
-    geom->attachSimObject(simObject);
-    geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
-    geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-    geom->setLocalLayer(mLocalLayer);
-	geom->setElementID(getID());
-	geom->setRenderTarget(mRenderTarget);
-	geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-    delete[] meshArray;
-	//SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-	//mSpatialID = spatialManager->addSpatial()
-    mPrimitiveID = primitiveID;
-    mSimObjectID = simObjectID;
+    SE_Spatial* geom = NULL;
+    float paddingx = primitive->getPaddingX();
+    float paddingy = primitive->getPaddingY();
+    if(mRectPatch == SE_RectPatch::INVALID)
+    {
+        mSimObjectIDArray.resize(1);
+        mPrimitiveIDArray.resize(1);
+	    SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray, meshNum, OWN);
+	    simObject->setName(mFullPathName.getStr());
+        SE_SimObjectID simObjectID = simObjectManager->add(simObject);
+        geom = new SE_Geometry;
+        geom->attachSimObject(simObject);
+        geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+        geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
+        geom->setLocalLayer(mLocalLayer);
+	    geom->setElementID(getID());
+	    geom->setRenderTarget(mRenderTarget);
+	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+        delete[] meshArray;
+        mPrimitiveIDArray[0] = primitiveID;
+        mSimObjectIDArray[0] = simObjectID;
+    }
+    else
+    {
+        SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+        mPrimitiveIDArray.resize(1);
+        mSimObjectIDArray.resize(meshNum);
+        mPrimitiveIDArray[0] = primitiveID;
+        geom = spatialManager->createSpatial(mSpatialType);
+        geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
+        geom->setLocalLayer(mLocalLayer);
+	    geom->setElementID(getID());
+	    geom->setRenderTarget(mRenderTarget);
+	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+        std::vector<SE_Geometry*> childGeom(meshNum);
+        for(int i = 0 ; i < meshNum ; i++)
+        {
+	        SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[i], OWN);
+	        simObject->setName(mFullPathName.getStr());
+            SE_SimObjectID simObjectID = simObjectManager->add(simObject);
+            childGeom[i] = new SE_Geometry;
+            childGeom[i]->attachObject(simObject);
+            mSimObjectIDArray[i] = simObjectID;
+        }
+        switch(mRectType)
+        {
+        case SE_RectPatch::R1_C3:
+            {
+                childGeom[0]->setLocalScale(SE_Vector3f(1, 1, 1));
+                childGeom[1]->setLocalScale(SE_Vector3f((mWidth - 2 * paddingx) / 2, mHeight  / 2, 1));
+                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1));
+            }
+            break;
+        case SE_RectPatch::R3_C1:
+            {
+                childGeom[0]->setLocalScale(SE_Vector3f(1, 1, 1));
+                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, (mHeight - 2 * paddingy) / 2, 1));
+                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1))
+            }
+            break;
+        case SE_RectPatch::R3_C3:
+        default:
+            break;
+        }
+            
+    }
     return geom;
 }
 void SE_2DNodeElement::clone(SE_Element* src, SE_Element* dst)

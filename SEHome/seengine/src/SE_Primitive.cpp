@@ -516,12 +516,20 @@ SE_RectPatch::SE_RectPatch(PATCH_TYPE t) : mType(t)
     mSampleMag = 0;
     mWrapS = 0;
     mWrapT = 0;
+    for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
+        mImageData[i] = NULL;
 }
  
 void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
 {
+	if(t != SE_RectPatch::R1_C3 && t != SE_RectPatch::R3_C1 && t != SE_RectPatch::R3_C3)
+	{
+        outPrimitive = NULL;
+        outPrimitiveID = SE_PrimitiveID::INVALID;
+		return;
+	}
     SE_RectPatch* rectPatch = new SE_RectPatch(t);
-    if(!rectPatch)
+	if(!rectPatch)
     {
         outPrimitive = NULL;
         outPrimitiveID = SE_PrimitiveID::INVALID;
@@ -876,6 +884,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
     default:
         break;
     }
+	outPrimitive = rectPatch;
+    outPrimitiveID = SE_ID::createPrimitiveID();
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    resourceManager->setPrimitive(outPrimitiveID, outPrimitive);
 }
 
 SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
@@ -1006,8 +1018,6 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
 		power2Width = (float)imageData->getWidthPower2();
 		power2Height = (float)imageData->getHeightPower2();
 	}
-    float stepx = width / 3;
-	float stepy = height / 3;
     float portionx, portiony, portionw, portionh;
     if(imageDataPortion.isValid())
     {
@@ -1023,6 +1033,10 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
         portionw = width;
         portionh = height;
     }
+    float stepx = portionw / 3;
+	float stepy = portionh / 3;
+    mPaddingX = stepx;
+    mPaddingY = stepy;
     _TexCoordSet texCoordset;
     if(imageData->isFliped())
     {
@@ -1199,6 +1213,7 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
         break;
     }
 }
+
 void SE_RectPatch::createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 {
     int meshNum = 0;

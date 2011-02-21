@@ -11,6 +11,7 @@
 #include "SE_Layer.h"
 #include "SE_Primitive.h"
 #include "SE_ObjectManager.h"
+#include <vector>
 class SE_KeyFrameController;
 class SE_Spatial;
 class SE_Element;
@@ -21,6 +22,7 @@ class SE_Animation;
 class SE_Spatial;
 class SE_RectPrimitive;
 class SE_Surface;
+
 class SE_ElementTravel
 {
 public:
@@ -168,6 +170,7 @@ public:
     {
         return mSpatialID;
     }
+    /*
 	void setPrimitiveID(const SE_PrimitiveID& id)
 	{
 		mPrimitiveID = id;
@@ -184,6 +187,7 @@ public:
     {
         return mSimObjectID;
     }
+    */
 	void setAnimationID(const SE_AnimationID& animID)
 	{
 		mAnimationID = animID;
@@ -297,8 +301,8 @@ protected:
     SE_Element* mPrevElement;
     SE_Element* mNextElement;
     SE_SpatialID mSpatialID;
-    SE_SimObjectID mSimObjectID;
-    SE_PrimitiveID mPrimitiveID;
+    std::vector<SE_SimObjectID> mSimObjectIDArray;
+    std::vector<SE_PrimitiveID> mPrimitiveIDArray;
     SE_AnimationID mAnimationID;
     SE_RenderTargetID mRenderTarget;
     bool mOwnRenderTargetCamera;
@@ -424,7 +428,7 @@ public:
 	}
 	void setRectPatchType(int rectPatchType)
 	{
-		mRectPatchType;
+		mRectPatchType = rectPatchType;
 	}
 	int getRectPatchType() const
 	{

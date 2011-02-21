@@ -240,6 +240,7 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
     }
     RenderUnitVector ruv;
     ruv.resize(totalSurfaceNum, NULL);
+    int surfaceIndex = 0;
     for(int i = 0 ; i < mMeshNum ; i++)
     {
         int surfaceNum = mMeshArray[i]->getSurfaceNum();
@@ -262,7 +263,7 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
 		    {
 			    tsru->setRenderState((SE_Spatial::RENDER_STATE_TYPE)k, rs[k], NOT_OWN);
 		    }
-            ruv[j] = tsru;
+            ruv[surfaceIndex++] = tsru;
         }
     }
     return ruv;

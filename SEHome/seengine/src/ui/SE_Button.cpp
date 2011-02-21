@@ -30,6 +30,8 @@ void SE_Button::spawn()
         return;
 	normalElement->spawn();
 	mElement = normalElement;
+	mElement->setRectPatchType(SE_RectPatch::R1_C3);
+	calculateRect(mPivotX, mPivotY, 0, 0);
 	/*
     if(mElement)
 		mElement->dismiss();

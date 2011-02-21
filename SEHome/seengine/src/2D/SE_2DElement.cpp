@@ -1396,11 +1396,7 @@ void SE_SequenceElement::update(const SE_TimeKey& key)
 	{
 		if(mCurrentElement)
 		{
-			simObjectManager->remove(mCurrentElement->getSimObjectID());
-			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = spatialManager->remove(mCurrentElement->getSpatialID());
-			if(spatial)
-				spatialManager->release(spatial);
+			mCurrentElement->dismiss();
 		}
 		SE_Spatial* spatial = first->createSpatial();
 		SE_Spatial* parentSpatial = spatialManager->get(getID());
@@ -1571,12 +1567,7 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 	{
 		if(mCurrentElement)
 		{
-			simObjectManager->remove(mCurrentElement->getSimObjectID());
-			resourceManager->removePrimitive(mCurrentElement->getPrimitiveID());
-			SE_Spatial* spatial = spatialManager->remove(mCurrentElement->getID());
-			if(spatial)
-				spatialManager->release(spatial);
-				//delete spatial;
+			mCurrentElement->dismiss();
 		}
         /*
 		SE_Spatial* spatial = first->createSpatial();

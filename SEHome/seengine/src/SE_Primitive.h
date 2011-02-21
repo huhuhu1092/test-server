@@ -23,6 +23,14 @@ public:
     virtual  void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{}
+    virtual float getPaddingX()
+    {
+        return 0;
+    }
+    virtual float getPaddingY()
+    {
+        return 0;
+    }
 	void setColor(const SE_Vector3f& color)
 	{
 		mColor = color;
@@ -295,6 +303,15 @@ public:
 	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
 	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
+    float getPaddingX()
+    {
+        return mPaddingX;
+    }
+    
+    float getPaddingY()
+    {
+        return mPaddingY;
+    }
 private:
     struct _TexCoordSet
     {
@@ -309,5 +326,6 @@ private:
     SE_ImageData* mImageData[SE_TEXUNIT_NUM];
     std::vector<SE_TextureCoordData*> mTextureCoordData;
     std::vector<SE_GeometryData*> mGeometryData;
+    float mPaddingX, mPaddingY;
 };
 #endif
