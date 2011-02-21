@@ -35,7 +35,7 @@ class SE_Element : public SE_ParamObserver, public SE_TreeStruct<SE_Element>
 {
     friend class SE_ElementManager;
 public:
-    enum STATE {NORMAL, SELECTED, HIGHLIGHTED, INVISIBLE, INACTIVE, 
+    enum STATE {INVALID, NORMAL, SELECTED, HIGHLIGHTED, INVISIBLE, INACTIVE, 
                 ANIMATE_BEGIN, ANIMATE_RUNNING, ANIMATE_SUSPEND, ANIMATE_END};
     SE_Element();
     virtual ~SE_Element();

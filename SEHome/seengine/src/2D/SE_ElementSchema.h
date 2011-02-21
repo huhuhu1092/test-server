@@ -6,6 +6,7 @@
 #include "SE_Layer.h"
 #include "SE_MountPoint.h"
 class SE_ElementSchema;
+class SE_2DNodeElement;
 class SE_ElementSchemaVisitor
 {
 public:

@@ -48,8 +48,10 @@ static int getElementState(const SE_StringID& state)
         return SE_Element::SELECTED;
     else if(state == "inactive")
         return SE_Element::INACTIVE;
-    else
-        return SE_Element::INVALID;
+    else if(state == "")
+        return SE_Element::NORMAL;
+	else
+		return SE_Element::INVALID;
 
 }
 static int getElementType(const SE_StringID& type)

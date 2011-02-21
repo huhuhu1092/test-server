@@ -5,6 +5,8 @@
 #include "SE_ElementContent.h"
 #include "SE_Utils.h"
 #include "SE_ElementType.h"
+#include "SE_TextView.h"
+#include "SE_Button.h"
 #include <algorithm>
 SE_ElementSchema::SE_ElementSchema()
 {
@@ -41,7 +43,7 @@ SE_2DNodeElement* SE_ElementSchema::createElement(int type)
         return new SE_2DNodeElement;
     case SE_UI_BUTTON:
         return new SE_Button;
-    case SE_UI_TEXT:
+    case SE_UI_TEXTVIEW:
         return new SE_TextView;
     default:
         break;

@@ -100,16 +100,7 @@ SE_Element::~SE_Element()
     _DeleteURI deleteURI;
     deleteURI.element = this;
     mStateURIManager.traverse(deleteURI);
-    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-	SE_SimObject* simObject = simObjectManager->remove(mSimObjectID);
-	simObjectManager->release(simObject);
-    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* s = spatialManager->remove(mSpatialID);
-    spatialManager->release(s);
-    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    resourceManager->removePrimitive(mPrimitiveID);
-    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
-    animManager->remove(mAnimationID);
+    dismiss();
 }
 bool SE_Element::isRoot()
 {
@@ -239,8 +230,22 @@ void SE_Element::update(SE_ParamValueList& paramValueList)
 {}
 void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
 {}
-
+void SE_Element::dismiss()
+{
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+	SE_SimObject* simObject = simObjectManager->remove(mSimObjectID);
+	simObjectManager->release(simObject);
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* s = spatialManager->remove(mSpatialID);
+    spatialManager->release(s);
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    resourceManager->removePrimitive(mPrimitiveID);
+    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+    animManager->remove(mAnimationID);
+}
 void SE_Element::hide()
+{}
+void SE_Element::show()
 {}
 void SE_Element::clearChildren()
 {
@@ -438,15 +443,7 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	SE_Spatial* parent = spatialManager->createSpatial(mSpatialType);
-	parent->setRenderTarget(mRenderTarget);
-	parent->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-	parent->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
-	parent->setNeedUpdateTransform(mNeedUpdateTransform);
-    parent->setPrevMatrix(mPrevMatrix);
-    parent->setPostMatrix(mPostMatrix);
-	parent->setLocalLayer(mLocalLayer);
-	parent->setElementID(getID());
+	SE_Spatial* parent = createNode();
 	std::vector<SE_Element*> children = elementManager->getChildren(getID());
 	for(int i = 0 ; i < children.size() ; i++)
 	{
@@ -544,12 +541,17 @@ SE_ImageData* SE_2DNodeElement::createImageData(const SE_ImageDataID& imageDataI
 }
 SE_Spatial* SE_2DNodeElement::createNode()
 {
-	SE_Spatial* commonNode = new SE_CommonNode;
-	commonNode->setRenderTarget(mRenderTarget);
-	commonNode->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-	commonNode->setLocalTranslate(SE_Vector3f(getLeft(), getTop(), 0));
-	commonNode->setNeedUpdateTransform(mNeedUpdateTransform);
-	return commonNode;
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* spatial = spatialManager->createSpatial(mSpatialType);
+	spatial->setRenderTarget(mRenderTarget);
+	spatial->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+	spatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
+	spatial->setNeedUpdateTransform(mNeedUpdateTransform);
+    spatial->setPrevMatrix(mPrevMatrix);
+    spatial->setPostMatrix(mPostMatrix);
+	spatial->setLocalLayer(mLocalLayer);
+	spatial->setElementID(getID());
+    return spatial;
 }
 void SE_2DNodeElement::createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& outPrimitive)
 {
@@ -581,9 +583,9 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	SE_ASSERT(meshArray != NULL);
     for(int i = 0 ; i < meshNum ; i++)
 	{
-	    for(int j = 0 ; j < meshArray[j]->getSurfaceNum(); j++)
+	    for(int j = 0 ; j < meshArray[i]->getSurfaceNum(); j++)
 	    {
-		    SE_Surface* surface = meshArray[j]->getSurface(j);
+		    SE_Surface* surface = meshArray[i]->getSurface(j);
 		    setSurface(surface);
 	    }
 	}

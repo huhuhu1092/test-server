@@ -87,7 +87,7 @@ static void doTest()
 }
 bool SEDemo::InitApplication()
 {
-	doTest();
+	//doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
 	SE_Application::SE_APPID appid;

@@ -13,13 +13,26 @@ SE_Button::~SE_Button()
 {}
 void SE_Button::spawn()
 {
-	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    if(mElement)
+	std::vector<SE_Element*> children = getChildren();
+	if(children.size() <= 0)
+		return;
+	SE_2DNodeElement* normalElement = NULL;
+    for(int i = 0 ; i < children.size() ; i++)
 	{
-		elementManager->remove(mElement->getID());
-		elementManager->release(mElement, SE_RELEASE_NO_DELAY);
-		mElement = NULL;
+		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
+		if(e->getState() == SE_Element::NORMAL)
+		{
+			normalElement = e;
+			break;
+		}
 	}
+	if(!normalElement)
+        return;
+	normalElement->spawn();
+	mElement = normalElement;
+	/*
+    if(mElement)
+		mElement->dismiss();
     SE_StringID uri = getImageURI();
 	mElement = SE_GetElement(uri);
 	SE_Element* parentElement = this->getParent();
@@ -32,6 +45,7 @@ void SE_Button::spawn()
 
 	mElement->setMountPoint(0, 0);
 	mElement->spawn();
+	*/
 }
 void SE_Button::update(const SE_TimeKey& timeKey)
 {}
@@ -45,7 +59,15 @@ void SE_Button::layout()
 }
 SE_Spatial* SE_Button::createSpatial()
 {
-	return SE_Widget::createSpatial();
+	//return SE_Widget::createSpatial();
+	SE_Spatial* parent = createNode();
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	if(mElement)
+	{
+		SE_Spatial* s = mElement->createSpatial();
+		spatialManager->add(parent, s);
+	}
+	return parent;
 }
 void SE_Button::read(SE_BufferInput& inputBuffer)
 {}

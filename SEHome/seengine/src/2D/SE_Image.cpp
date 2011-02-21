@@ -13,6 +13,7 @@
 #include "SE_2DElement.h"
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
+#include "SE_ElementManager.h"
 #include "SE_DataValueDefine.h"
 
 static const int DEFAULT_COLOR = 0;
@@ -140,7 +141,7 @@ void SE_Image::setImageData(SE_RectPrimitive* primitive)
 		    dp.setY(imageUnit->imageRect.y);
 		    dp.setWidth(imageUnit->imageRect.width);
 		    dp.setHeight(imageUnit->imageRect.height);
-		    primitive->setImageData(imageData, (SE_TEXUNIT_TYPE)j, NOT_OWN, dp);
+		    primitive->setImageData(0, imageData, (SE_TEXUNIT_TYPE)j, NOT_OWN, dp);
 			j++;
 			mImageUnits[i].valid = 1;
 		}
@@ -224,7 +225,7 @@ SE_RawImage::~SE_RawImage()
 }
 void SE_RawImage::setImageData(SE_RectPrimitive* primitive)
 {
-	primitive->setImageData(mImageData, SE_TEXTURE0, NOT_OWN);
+	primitive->setImageData(0, mImageData, SE_TEXTURE0, NOT_OWN);
 }
 void SE_RawImage::setSurface(SE_Surface* surface)
 {
@@ -314,18 +315,19 @@ int SE_ColorEffectImage::getValidImageNum()
 SE_ImageData* SE_ColorEffectImage::createTextureElement(SE_Element* parent, SE_Image* img)
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_ImageData* imgData = resourceManager->getImageData(img->getUrl().c_str());
 	if(!imgData)
 	{
 		SE_ImageElement* e = new SE_ImageElement("");
-	    parent->addChild(e);
+	    elementManager->add(parent, e);
 	    e->spawn();
 		imgData = new SE_ImageData;
 		SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
 	    resourceManager->setImageData(img->getUrl().c_str(), imgData);
 		SE_RenderTarget* renderTarget = new SE_TextureTarget(imgData);
-	    SE_RenderTargetID renderTargetID = renderTargetManager->addRenderTarget(renderTarget);
-	    e->setRenderTarget(renderTargetID);
+	    SE_RenderTargetID renderTargetID = renderTargetManager->add(renderTarget);
+	    e->setRenderTargetID(renderTargetID);
 	}
 	return imgData;
 }
@@ -362,7 +364,7 @@ void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive, SE_TEXUNIT_T
 		dp.setY(0);
 		dp.setWidth(imageData->getWidth());
 		dp.setHeight(imageData->getHeight());
-        primitive->setImageData(imageData, texType, NOT_OWN, dp);
+        primitive->setImageData(0, imageData, texType, NOT_OWN, dp);
 	}
 	else
 	{
@@ -372,7 +374,7 @@ void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive, SE_TEXUNIT_T
 		dp.setY(image->getBaseColor().imageRect.y);
 		dp.setWidth(image->getBaseColor().imageRect.width);
 		dp.setHeight(image->getBaseColor().imageRect.height);
-		primitive->setImageData(imageDataTmp, texType, NOT_OWN, dp);
+		primitive->setImageData(0, imageDataTmp, texType, NOT_OWN, dp);
 	}
 }
 void SE_ColorEffectImage::setImageData(SE_RectPrimitive* primitive)
