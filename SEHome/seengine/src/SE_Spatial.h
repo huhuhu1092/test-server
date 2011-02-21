@@ -153,10 +153,7 @@ public:
 	{
 		return (mState & SELECTED_MASK) == SELECTED; 
 	}
-	void setRenderTarget(const SE_RenderTargetID& renderTargetID)
-	{
-		mRenderTargetID = renderTargetID;
-	}
+	void setRenderTarget(const SE_RenderTargetID& renderTargetID);
 	SE_RenderTargetID getRenderTarget()
 	{
 		return mRenderTargetID;
@@ -205,10 +202,7 @@ public:
 	{
 		return mOwnRenderTargetCamera;
 	}
-	void setSceneRenderSeq(const SE_SceneRenderSeq& seq)
-	{
-		mSceneRenderSeq = seq;
-	}
+	void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;

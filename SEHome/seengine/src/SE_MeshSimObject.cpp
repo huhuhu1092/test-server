@@ -26,7 +26,7 @@ SE_MeshSimObject::SE_MeshSimObject(SE_Mesh* mesh, SE_OWN_TYPE ownMesh) : mWorldG
     mMeshArray[0] = mesh;
     mOwnMesh = ownMesh;
     createGeometryData(1);
-    mMeshNum = 0;
+    mMeshNum = 1;
 }
 
 SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomDataArray(NULL), mMeshArray(NULL), mMeshIDArray(NULL),mOwnMesh(NOT_OWN)
@@ -35,7 +35,7 @@ SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomDataArr
     createGeometryData(1);
     createMeshID(1); 
     mMeshIDArray[0] = meshID;
-    mMeshNum = 0;
+    mMeshNum = 1;
 }
 SE_MeshSimObject::SE_MeshSimObject(SE_Mesh** meshArray, int meshNum, SE_OWN_TYPE ownMesh)
 {

@@ -204,7 +204,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         SE_SimObject* so = *it;
         SE_SimObject::RenderUnitVector renderUnitVector = so->createRenderUnit();
         SE_SimObject::RenderUnitVector::iterator itRU;
-        for(itRU = renderUnitVector.begin() ; itRU!= renderUnitVector.end(); itRU++)
+        for(itRU = renderUnitVector.begin() ; itRU != renderUnitVector.end(); itRU++)
         {
 			if(*itRU)
 			{

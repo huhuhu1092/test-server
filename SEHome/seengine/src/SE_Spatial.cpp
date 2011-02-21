@@ -151,6 +151,27 @@ void SE_Spatial::updateRenderState()
 		}
 	}
 }
+void SE_Spatial::setRenderTarget(const SE_RenderTargetID& renderTargetID)
+{
+	mRenderTargetID = renderTargetID;
+	std::vector<SE_Spatial*> children = getChildren();
+	for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		SE_Spatial* s = children[i];
+		s->setRenderTarget(renderTargetID);
+	}
+}
+void SE_Spatial::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
+{
+	mSceneRenderSeq = seq;
+	std::vector<SE_Spatial*> children = getChildren();
+	for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		SE_Spatial* s = children[i];
+		s->setSceneRenderSeq(seq);
+	}
+}
+
 void SE_Spatial::updateSpatialIDToElement()
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();

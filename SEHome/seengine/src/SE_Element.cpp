@@ -233,13 +233,19 @@ void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
 void SE_Element::dismiss()
 {
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-	SE_SimObject* simObject = simObjectManager->remove(mSimObjectID);
-	simObjectManager->release(simObject);
+	for(int i = 0 ; i < mSimObjectIDArray.size() ; i++)
+	{
+	    SE_SimObject* simObject = simObjectManager->remove(mSimObjectIDArray[i]);
+	    simObjectManager->release(simObject);
+	}
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* s = spatialManager->remove(mSpatialID);
     spatialManager->release(s);
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    resourceManager->removePrimitive(mPrimitiveID);
+	for(int i = 0 ; i < mPrimitiveIDArray.size() ; i++)
+	{
+        resourceManager->removePrimitive(mPrimitiveIDArray[i]);
+	}
     SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
     animManager->remove(mAnimationID);
 }
@@ -508,6 +514,10 @@ void SE_2DNodeElement::calculateRect(float pivotx, float pivoty, float width, fl
 	{
 	    mPivotY = pivoty;
 	}
+	if(mWidth == 0)
+		mWidth = width;
+	if(mHeight == 0)
+		mHeight = height;
 	updateMountPoint();
 	if(mPivotX == INVALID_GEOMINFO || mPivotY == INVALID_GEOMINFO ||
 	   mMountPointX == INVALID_GEOMINFO || mMountPointY == INVALID_GEOMINFO)
@@ -517,8 +527,6 @@ void SE_2DNodeElement::calculateRect(float pivotx, float pivoty, float width, fl
 	{
         mLeft = mMountPointX - mPivotX;
 		mTop = mMountPointY - mPivotY;
-		mWidth = width;
-		mHeight = height;
 	}
 	if(mLeft == INVALID_GEOMINFO || mTop == INVALID_GEOMINFO ||
 		mWidth == INVALID_GEOMINFO || mHeight == INVALID_GEOMINFO)
@@ -593,7 +601,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
     SE_Spatial* geom = NULL;
     float paddingx = primitive->getPaddingX();
     float paddingy = primitive->getPaddingY();
-    if(mRectPatch == SE_RectPatch::INVALID)
+    if(mRectPatchType == SE_RectPatch::INVALID)
     {
         mSimObjectIDArray.resize(1);
         mPrimitiveIDArray.resize(1);
@@ -608,7 +616,6 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	    geom->setElementID(getID());
 	    geom->setRenderTarget(mRenderTarget);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-        delete[] meshArray;
         mPrimitiveIDArray[0] = primitiveID;
         mSimObjectIDArray[0] = simObjectID;
     }
@@ -631,23 +638,30 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	        simObject->setName(mFullPathName.getStr());
             SE_SimObjectID simObjectID = simObjectManager->add(simObject);
             childGeom[i] = new SE_Geometry;
-            childGeom[i]->attachObject(simObject);
+            childGeom[i]->attachSimObject(simObject);
+			spatialManager->add(geom, childGeom[i]);
             mSimObjectIDArray[i] = simObjectID;
         }
-        switch(mRectType)
+        switch(mRectPatchType)
         {
         case SE_RectPatch::R1_C3:
             {
-                childGeom[0]->setLocalScale(SE_Vector3f(1, 1, 1));
+                childGeom[0]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
+                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
+                childGeom[2]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
+				/*
+				childGeom[0]->setLocalTranslate(SE_Vector3f(- mWidth / 3, 0, 0));
+                childGeom[0]->setLocalScale(SE_Vector3f(paddingx, mHeight / 2, 1));
                 childGeom[1]->setLocalScale(SE_Vector3f((mWidth - 2 * paddingx) / 2, mHeight  / 2, 1));
-                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1));
+                childGeom[2]->setLocalScale(SE_Vector3f(paddingx, mHeight / 2, 1));
+				*/
             }
             break;
         case SE_RectPatch::R3_C1:
             {
                 childGeom[0]->setLocalScale(SE_Vector3f(1, 1, 1));
                 childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, (mHeight - 2 * paddingy) / 2, 1));
-                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1))
+                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1));
             }
             break;
         case SE_RectPatch::R3_C3:
@@ -656,6 +670,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         }
             
     }
+	delete[] meshArray;
     return geom;
 }
 void SE_2DNodeElement::clone(SE_Element* src, SE_Element* dst)

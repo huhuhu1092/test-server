@@ -28,6 +28,8 @@ void SE_Button::spawn()
 	}
 	if(!normalElement)
         return;
+	normalElement->setWidth(mWidth);
+	normalElement->setHeight(mHeight);
 	normalElement->spawn();
 	mElement = normalElement;
 	mElement->setRectPatchType(SE_RectPatch::R1_C3);
