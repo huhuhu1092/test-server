@@ -14,6 +14,7 @@ SE_ElementSchema::SE_ElementSchema()
 	pivotx = pivoty = 0;
 	seq = -1;
     type = SE_2D_UI_NODE;
+	patchType = SE_NO_PATCH;
 }
 SE_ElementSchema::~SE_ElementSchema()
 {
@@ -64,6 +65,7 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
 	e->setHeight(h);
     e->setSeqNum(seq);
 	e->setLocalLayer(layer);
+	e->setRectPatchType(patchType);
     SE_Element* root = NULL;
     if(parent == NULL)
         root = e;

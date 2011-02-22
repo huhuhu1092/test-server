@@ -31,6 +31,11 @@ public:
 	{
 		return mContentURI;
 	}
+	void setRectPatchType(const SE_StringID& type);
+	int getRectPatchType() const
+	{
+		return mRectPatchType;
+	}
 	virtual SE_Element* createElement(float mpx, float mpy) = 0;
 	virtual ~SE_ElementContent() {}
 	virtual SE_ElementContent* clone();
@@ -50,6 +55,7 @@ private:
     SE_ElementSchema* mParent;
 	SE_StringID mContentURI;
     int mState;
+	int mRectPatchType;
 };
 class SE_ImageContent : public SE_ElementContent
 {

@@ -373,7 +373,7 @@ SE_2DNodeElement::SE_2DNodeElement()
     mPivotX = mPivotY = mMountPointX = mMountPointY = 0;
     mDeltaLeft = mDeltaTop = 0;
     mSpatialType = SE_COMMON_NODE_TYPE;
-	mRectPatchType = SE_RectPatch::INVALID;
+	mRectPatchType = SE_NO_PATCH;
 }
 SE_2DNodeElement::~SE_2DNodeElement()
 {
@@ -567,10 +567,10 @@ void SE_2DNodeElement::createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& out
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
     SE_Primitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
-	if(mRectPatchType == SE_RectPatch::INVALID)
+	if(mRectPatchType == SE_NO_PATCH)
         SE_RectPrimitive::create(rect3D, primitive, primitiveID);
 	else
-		SE_RectPatch::create(rect3D, (SE_RectPatch::PATCH_TYPE)mRectPatchType, primitive, primitiveID);
+		SE_RectPatch::create(rect3D, (SE_RECTPATCH_TYPE)mRectPatchType, primitive, primitiveID);
 	outID = primitiveID;
 	outPrimitive = primitive;
 }
@@ -601,7 +601,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
     SE_Spatial* geom = NULL;
     float paddingx = primitive->getPaddingX();
     float paddingy = primitive->getPaddingY();
-    if(mRectPatchType == SE_RectPatch::INVALID)
+    if(mRectPatchType == SE_NO_PATCH)
     {
         mSimObjectIDArray.resize(1);
         mPrimitiveIDArray.resize(1);
@@ -644,27 +644,56 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         }
         switch(mRectPatchType)
         {
-        case SE_RectPatch::R1_C3:
+        case SE_PATCH_R1_C3:
             {
-                childGeom[0]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-                childGeom[2]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
-				/*
-				childGeom[0]->setLocalTranslate(SE_Vector3f(- mWidth / 3, 0, 0));
-                childGeom[0]->setLocalScale(SE_Vector3f(paddingx, mHeight / 2, 1));
-                childGeom[1]->setLocalScale(SE_Vector3f((mWidth - 2 * paddingx) / 2, mHeight  / 2, 1));
-                childGeom[2]->setLocalScale(SE_Vector3f(paddingx, mHeight / 2, 1));
-				*/
+                childGeom[0]->setLocalTranslate(SE_Vector3f(-((mWidth - 2 * paddingx) / 2 + paddingx / 2), 0, 0));
+                childGeom[0]->setLocalScale(SE_Vector3f(paddingx / 2, mHeight / 2, 1));
+                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2 - paddingx, mHeight / 2, 1));
+                childGeom[2]->setLocalTranslate(SE_Vector3f(((mWidth - 2 * paddingx) / 2 + paddingx / 2), 0, 0));
+                childGeom[2]->setLocalScale(SE_Vector3f(paddingx / 2, mHeight / 2, 1));
             }
             break;
-        case SE_RectPatch::R3_C1:
+        case SE_PATCH_R3_C1:
             {
-                childGeom[0]->setLocalScale(SE_Vector3f(1, 1, 1));
-                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, (mHeight - 2 * paddingy) / 2, 1));
-                childGeom[2]->setLocalScale(SE_Vector3f(1, 1, 1));
+                childGeom[0]->setLocalTranslate(SE_Vector3f(0, ((mHeight - 2 * paddingy) / 2 + paddingy / 2), 0));
+                childGeom[0]->setLocalScale(SE_Vector3f(mWidth / 2, paddingy / 2, 1));
+                childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2 - paddingy, 1));
+                childGeom[2]->setLocalTranslate(SE_Vector3f(0, -((mHeight - 2 * paddingy) / 2 + paddingy / 2), 0));
+                childGeom[2]->setLocalScale(SE_Vector3f(mWidth / 2, paddingy / 2, 1));
             }
             break;
-        case SE_RectPatch::R3_C3:
+        case SE_PATCH_R3_C3:
+            {
+                float tx = mWidth - 2 * paddingx;
+                float ty = mHeight - 2 * paddingy;
+                SE_Vector3f t0(-tx / 2 - paddingx / 2, ty / 2 + paddingy / 2, 0);
+                SE_Vector3f t1(0, ty / 2 + paddingy / 2, 0);
+                SE_Vector3f t2(tx / 2 + paddingx / 2, ty / 2 + paddingy / 2, 0);
+                SE_Vector3f t3(tx / 2 + paddingx / 2, 0, 0);
+                SE_Vector3f t4(tx / 2 + paddingx / 2, -ty / 2 - paddingy / 2, 0);
+                SE_Vector3f t5(0, -ty / 2 - paddingy / 2, 0);
+                SE_Vector3f t6(-tx / 2 - paddingx / 2, -ty / 2 - paddingy / 2, 0);
+                SE_Vector3f t7(-tx / 2 - paddingx / 2, 0, 0);
+                SE_Vector3f t8(0, 0, 0);
+                SE_Vector3f s0(paddingx / 2, paddingy / 2, 1);
+                SE_Vector3f s1(tx / 2, paddingy / 2, 1);
+                SE_Vector3f s2(paddingx / 2, paddingy / 2, 1);
+                SE_Vector3f s3(paddingx / 2, ty / 2, 1);
+                SE_Vector3f s4(paddingx / 2, paddingy / 2, 1);
+                SE_Vector3f s5(tx / 2, paddingy / 2, 1);
+                SE_Vector3f s6(paddingx / 2, paddingy / 2, 1);
+                SE_Vector3f s7(paddingx / 2, ty / 2, 1);
+                SE_Vector3f s8(tx / 2, ty / 2, 1);
+                SE_Vector3f translate[] = {t0, t1, t2, t3, t4, t5, t6, t7, t8};
+                SE_Vector3f scale[] = {s0, s1, s2, s3, s4, s5, s6, s7, s8};
+                SE_ASSERT(meshNum == 9);
+                for(int i = 0 ; i < 9 ; i++)
+                {
+                    childGeom[i]->setLocalTranslate(translate[i]);
+                    childGeom[i]->setLocalScale(scale[i]);
+                }
+            }
+            break;
         default:
             break;
         }

@@ -294,9 +294,8 @@ private:
 class SE_RectPatch : public SE_Primitive
 {
 public:
-    enum PATCH_TYPE {INVALID, R1_C3, R3_C1, R3_C3};
-    SE_RectPatch(PATCH_TYPE t);
-	static void create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+    SE_RectPatch(SE_RECTPATCH_TYPE t);
+	static void create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
     //imageData must from SE_ResourceManager
     //SE_RectPatch will not own imageData
     //void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
@@ -318,11 +317,11 @@ private:
         SE_Vector2f tex[16];
     };
     void createGeometryData();
-    _TexCoordSet calculateImageFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
-    _TexCoordSet calculateImageNoFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
+    _TexCoordSet calculateImageFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
+    _TexCoordSet calculateImageNoFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
     void setTextureCoord(const _TexCoordSet& texCoordSet, int texCoordDataIndex, int v0 , int v1, int v2, int v3);
 private:
-    PATCH_TYPE mType;
+    SE_RECTPATCH_TYPE mType;
     SE_ImageData* mImageData[SE_TEXUNIT_NUM];
     std::vector<SE_TextureCoordData*> mTextureCoordData;
     std::vector<SE_GeometryData*> mGeometryData;

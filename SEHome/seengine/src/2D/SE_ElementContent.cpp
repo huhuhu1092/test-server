@@ -13,6 +13,17 @@ SE_ElementContent* SE_ElementContent::clone()
 {
 	return NULL;
 }
+void SE_ElementContent::setRectPatchType(const SE_StringID& type)
+{
+	if(type == "1:3")
+		mRectPatchType = SE_PATCH_R1_C3;
+	else if(type == "3:1")
+		mRectPatchType = SE_PATCH_R3_C1;
+	else if(type == "3:3")
+		mRectPatchType = SE_PATCH_R3_C3;
+	else
+		mRectPatchType = SE_NO_PATCH;
+}
 ///////////////////////////////////////
 SE_ImageContent::SE_ImageContent(const SE_StringID& imageURI)
 {
@@ -32,7 +43,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	SE_StringID strURL = rui.getURL();
 	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
 	SE_XMLTABLE_TYPE t = resourceManager->getXmlType(strList[0].c_str());
-	SE_Element* rete = NULL;
+	SE_2DNodeElement* rete = NULL;
 	if(t == SE_IMAGE_TABLE)
 	{
 	    SE_ImageElement* imageElement = new SE_ImageElement(getURI());
@@ -53,6 +64,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 	}
     rete->setName(getID().getStr());
     rete->setState(getState());
+	rete->setRectPatchType(getRectPatchType());
 	return rete;
 }
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI)

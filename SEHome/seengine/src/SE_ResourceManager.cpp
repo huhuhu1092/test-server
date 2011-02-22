@@ -2027,6 +2027,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	SE_ImageContent* imageContent = NULL;
 	SE_StringID id;
     SE_StringID state;
+	SE_StringID patchType;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2045,9 +2046,14 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         {
             state = value;
         }
+		else if(!strcmp(name, "patch"))
+		{
+			patchType = value;
+		}
 		pAttribute = pAttribute->Next();
 	}
 	imageContent->setID(id);
+	imageContent->setRectPatchType(patchType);
     imageContent->setState(getElementState(state));
 	parent->addContent(imageContent);
 }
@@ -3369,6 +3375,7 @@ SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {
+
 	SE_ImageData* imageData = getImageData(SE_ImageDataID(imageName));
 	if(imageData)
 		return imageData;

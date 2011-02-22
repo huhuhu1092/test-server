@@ -1047,7 +1047,7 @@ void SE_ImageElement::setImageData(SE_Primitive* primitive)
 			SE_ImageData* imageData = resourceManager->getImageData(imageUnit->imageDataID.getStr());
 		    if(!imageData)
 		    {
-			    imageData = resourceManager->loadImage(imageUnit->imageDataID.getStr());
+			    imageData = resourceManager->loadImage(imageUnit->imageDataID.getStr(), false);
 		    } 
             SE_ImageDataPortion dp;
 		    dp.setX(imageUnit->imageRect.x);

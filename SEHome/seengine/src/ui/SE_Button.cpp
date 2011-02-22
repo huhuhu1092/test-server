@@ -32,7 +32,7 @@ void SE_Button::spawn()
 	normalElement->setHeight(mHeight);
 	normalElement->spawn();
 	mElement = normalElement;
-	mElement->setRectPatchType(SE_RectPatch::R1_C3);
+	//mElement->setRectPatchType(SE_PATCH_R3_C3);
 	calculateRect(mPivotX, mPivotY, 0, 0);
 	/*
     if(mElement)

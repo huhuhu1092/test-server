@@ -82,7 +82,7 @@ public:
      * */
     void loadSceneFromXml(const char* sceneName);
 	SE_Element* loadScene(const char* sceneName);
-	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
+	SE_ImageData* loadImage(const char* imageName, bool fliped = false);
 	void loadShader(const char* shaderFileName);
 	void loadRenderer(const char* rendererFileName);
     void loadElementSchema(const char* elementResourceName);

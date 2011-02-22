@@ -510,7 +510,7 @@ static SE_Vector2f _r3c1TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(1, 0),
 static SE_Vector2f _r3c3TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(0.33333, 0), SE_Vector2f(0.66666, 0), SE_Vector2f(1, 0), SE_Vector2f(1, 0.33333), SE_Vector2f(1, 0.66666), SE_Vector2f(1, 1), SE_Vector2f(0.66666, 1), SE_Vector2f(0.33333, 1), SE_Vector2f(0, 1), SE_Vector2f(0, 0.66666), SE_Vector2f(0, 0.33333), SE_Vector2f(0.33333, 0.33333), SE_Vector2f(0.66666, 0.33333), SE_Vector2f(0.66666, 0.66666), SE_Vector2f(0.33333, 0.66666) 
 
 };
-SE_RectPatch::SE_RectPatch(PATCH_TYPE t) : mType(t)
+SE_RectPatch::SE_RectPatch(SE_RECTPATCH_TYPE t) : mType(t)
 {
     mSampleMin = 0;
     mSampleMag = 0;
@@ -520,9 +520,9 @@ SE_RectPatch::SE_RectPatch(PATCH_TYPE t) : mType(t)
         mImageData[i] = NULL;
 }
  
-void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
+void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
 {
-	if(t != SE_RectPatch::R1_C3 && t != SE_RectPatch::R3_C1 && t != SE_RectPatch::R3_C3)
+	if(t != SE_PATCH_R1_C3 && t != SE_PATCH_R3_C1 && t != SE_PATCH_R3_C3)
 	{
         outPrimitive = NULL;
         outPrimitiveID = SE_PrimitiveID::INVALID;
@@ -536,20 +536,22 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
         return;
     }    
     float rectExtent[2];
+    SE_Vector3f vertex[4];
     SE_Vector3f rectCenter;
     SE_Vector3f rectXAxis, rectYAxis;
     rect.getExtent(rectExtent);
+    rect.getVertex(vertex);
     rectCenter = rect.getCenter();
     rectXAxis = rect.getXAxis();
     rectYAxis = rect.getYAxis();
     SE_Vector3f* vertexRectPatch = NULL;
     switch(t)
     {
-    case R1_C3:
-    case R3_C1:
+    case SE_PATCH_R1_C3:
+    case SE_PATCH_R3_C1:
         vertexRectPatch = new SE_Vector3f[8];
         break;
-    case R3_C3:
+	case SE_PATCH_R3_C3:
         vertexRectPatch = new SE_Vector3f[16];
         break;
     default:
@@ -565,10 +567,11 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
     SE_Vector3f v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15;
     switch(t)
     {
-    case R1_C3:
+    case SE_PATCH_R1_C3:
         {
             rectPatch->mGeometryData.resize(3);
             float step = (rectExtent[0] * 2) / 3;
+            /*
             v0 = rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
             v1 = v0 + rectXAxis * step;
             v2 = v0 + rectXAxis * (step * 2);
@@ -577,13 +580,14 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             v5 = v4 - rectXAxis * step;
             v6 = v4 - rectXAxis * (step * 2);
             v7 =  rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
+            */
             // rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
-            v[0] = v0;
-            v[1] = v1;
-            v[2] = v6;
-            v[3] = v7;
+            v[0] = vertex[0];//v0;
+            v[1] = vertex[1];//v1;
+            v[2] = vertex[2];//v6;
+            v[3] = vertex[3];//v7;
             SE_Vector3i* f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -597,10 +601,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             // rect 2
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v1;
-            v[1] = v2;
-            v[2] = v5;
-            v[3] = v6;
+            v[0] = vertex[0];//v1;
+            v[1] = vertex[1];//v2;
+            v[2] = vertex[2];//v5;
+            v[3] = vertex[3];//v6;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -614,10 +618,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 3
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v2;
-            v[1] = v3;
-            v[2] = v4;
-            v[3] = v5;
+            v[0] = vertex[0];//v2;
+            v[1] = vertex[1];//v3;
+            v[2] = vertex[2];//v4;
+            v[3] = vertex[3];//v5;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -630,7 +634,7 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             rectPatch->mGeometryData[2] = geomData;
         }
         break;
-    case R3_C1:
+    case SE_PATCH_R3_C1:
         {
             rectPatch->mGeometryData.resize(3);
             float step = (rectExtent[1] * 2) / 3;
@@ -645,10 +649,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
-            v[0] = v0;
-            v[1] = v1;
-            v[2] = v2;
-            v[3] = v7;
+            v[0] = vertex[0];//v0;
+            v[1] = vertex[1];//v1;
+            v[2] = vertex[2];//v2;
+            v[3] = vertex[3];//v7;
             SE_Vector3i* f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -662,10 +666,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 2
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v7;
-            v[1] = v2;
-            v[2] = v3;
-            v[3] = v6;
+            v[0] = vertex[0];//v7;
+            v[1] = vertex[1];//v2;
+            v[2] = vertex[2];//v3;
+            v[3] = vertex[3];//v6;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -680,10 +684,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 3
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v6;
-            v[1] = v3;
-            v[2] = v4;
-            v[3] = v5;
+            v[0] = vertex[0];//v6;
+            v[1] = vertex[1];//v3;
+            v[2] = vertex[2];//v4;
+            v[3] = vertex[3];//v5;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -696,9 +700,9 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             rectPatch->mGeometryData[2] = geomData;
         }
         break;
-    case R3_C3:
+    case SE_PATCH_R3_C3:
         {
-            rectPatch->mGeometryData.resize(3);
+            rectPatch->mGeometryData.resize(9);
             float stepx = (rectExtent[0] * 2) / 3;
             float stepy = (rectExtent[1] * 2) / 3;
             v0 =  rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
@@ -717,14 +721,13 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             v13 = v11 + rectXAxis * (stepx * 2);
             v14 = v13 + rectYAxis * stepy;
             v15 = v14 - rectXAxis * stepx;
-
             //rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
-            v[0]  = v0;
-            v[1] = v1;
-            v[2] = v12;
-            v[3] = v11;
+            v[0] = vertex[0];//v0;
+            v[1] = vertex[1];//v1;
+            v[2] = vertex[2];//v12;
+            v[3] = vertex[3];//v11;
             SE_Vector3i* f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -739,10 +742,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 2
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v1;
-            v[1] = v2;
-            v[2] = v13;
-            v[3] = v12;
+            v[0] = vertex[0];//v1;
+            v[1] = vertex[1];//v2;
+            v[2] = vertex[2];//v13;
+            v[3] = vertex[3];//v12;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -757,10 +760,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 3
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v2;
-            v[1] = v3;
-            v[2] = v4;
-            v[3] = v13;
+            v[0] = vertex[0];//v2;
+            v[1] = vertex[1];//v3;
+            v[2] = vertex[2];//v4;
+            v[3] = vertex[3];//v13;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -775,10 +778,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 4
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v13;
-            v[1] = v4;
-            v[2] = v5;
-            v[3] = v14;
+            v[0] = vertex[0];//v13;
+            v[1] = vertex[1];//v4;
+            v[2] = vertex[2];//v5;
+            v[3] = vertex[3];//v14;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -793,10 +796,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 5
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v14;
-            v[1] = v5;
-            v[2] = v6;
-            v[3] = v7;
+            v[0] = vertex[0];//v14;
+            v[1] = vertex[1];//v5;
+            v[2] = vertex[2];//v6;
+            v[3] = vertex[3];//v7;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -811,10 +814,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect6
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v15;
-            v[1] = v14;
-            v[2] = v7;
-            v[3] = v8;
+            v[0] = vertex[0];//v15;
+            v[1] = vertex[1];//v14;
+            v[2] = vertex[2];//v7;
+            v[3] = vertex[3];//v8;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -829,10 +832,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 7
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v10;
-            v[1] = v15;
-            v[2] = v8;
-            v[3] = v9;
+            v[0] = vertex[0];//v10;
+            v[1] = vertex[1];//v15;
+            v[2] = vertex[2];//v8;
+            v[3] = vertex[3];//v9;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -847,10 +850,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 8
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v11;
-            v[1] = v12;
-            v[2] = v15;
-            v[3] = v10;
+            v[0] = vertex[0];//v11;
+            v[1] = vertex[1];//v12;
+            v[2] = vertex[2];//v15;
+            v[3] = vertex[3];//v10;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -865,10 +868,10 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
             //rect 9
             geomData = new SE_GeometryData;
             v = new SE_Vector3f[4];
-            v[0] = v12;
-            v[1] = v13;
-            v[2] = v14;
-            v[3] = v15;
+            v[0] = vertex[0];//v12;
+            v[1] = vertex[1];//v13;
+            v[2] = vertex[2];//v14;
+            v[3] = vertex[3];//v15;
             f = new SE_Vector3i[2];
             f[0].x = 0;
             f[0].y = 1;
@@ -890,12 +893,12 @@ void SE_RectPatch::create(const SE_Rect3D& rect, PATCH_TYPE t, SE_Primitive*& ou
     resourceManager->setPrimitive(outPrimitiveID, outPrimitive);
 }
 
-SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
+SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
 {
     _TexCoordSet texset;
     switch(t)
     {
-    case SE_RectPatch::R1_C3:
+    case SE_PATCH_R1_C3:
         {
             texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
             texset.tex[1] = SE_Vector2f((startx + portionx + stepx) /power2Width, (starty + portiony) / power2Height);
@@ -907,7 +910,7 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RectPatch::PATC
             texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
         }
         break;
-    case SE_RectPatch::R3_C1:
+    case SE_PATCH_R3_C1:
         {
             texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
             texset.tex[1] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) /power2Height);
@@ -919,7 +922,7 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RectPatch::PATC
             texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy) / power2Height);
         }
         break;
-    case SE_RectPatch::R3_C3:
+    case SE_PATCH_R3_C3:
         {
             texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
             texset.tex[1] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony) / power2Height);
@@ -944,7 +947,7 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RectPatch::PATC
     }
     return texset;
 }
-SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageNoFliped(SE_RectPatch::PATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
+SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageNoFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
 {
     _TexCoordSet texset = calculateImageFliped(t, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy);
     for(int i = 0 ; i < 16 ; i++)
@@ -952,27 +955,6 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageNoFliped(SE_RectPatch::PA
         texset.tex[i].y = 1 - texset.tex[i].y;
     }
     return texset;
-    /*
-    _TexCoordSet texset;
-    switch(t)
-    {
-    case R1_C3:
-        {
-            
-        }
-        break;
-    case R3_C1:
-        {
-        }
-        break;
-    case R3_C3:
-        {
-        }
-        break;
-    default:
-        break;
-    }
-    */
 }
 void SE_RectPatch::setTextureCoord(const _TexCoordSet& texCoordSet, int texCoordDataIndex, int v0 , int v1, int v2, int v3)
 {
@@ -1048,7 +1030,7 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
     }
     switch(mType)
     {
-    case R1_C3:
+    case SE_PATCH_R1_C3:
         {
             mTextureCoordData.resize(3);
             setTextureCoord(texCoordset, 0, 0, 1, 6, 7);
@@ -1112,7 +1094,7 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
 
         }
         break;
-    case R3_C1:
+    case SE_PATCH_R3_C1:
         {
             mTextureCoordData.resize(3);
             setTextureCoord(texCoordset, 0, 0, 1, 2, 7);
@@ -1174,7 +1156,7 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
             */
         } 
         break;
-    case R3_C3:
+    case SE_PATCH_R3_C3:
         {
             mTextureCoordData.resize(9);
             setTextureCoord(texCoordset, 0, 0, 1, 12, 11);
@@ -1219,13 +1201,13 @@ void SE_RectPatch::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     int meshNum = 0;
     switch(mType)
     {
-    case R1_C3:
+    case SE_PATCH_R1_C3:
         meshNum = 3;
         break;
-    case R3_C1:
+    case SE_PATCH_R3_C1:
         meshNum = 3;
         break;
-    case R3_C3:
+    case SE_PATCH_R3_C3:
         meshNum = 9;
         break;
     default:
