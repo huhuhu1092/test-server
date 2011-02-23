@@ -48,5 +48,6 @@ private:
     _SceneStack mStack;
     float mWidth;
     float mHeight;
+	SE_ElementID mPointedElementID;
 };
 #endif

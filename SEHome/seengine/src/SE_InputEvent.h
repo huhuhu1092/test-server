@@ -6,7 +6,7 @@
 class SE_MotionEvent
 {
 public:
-	enum TYPE {DOWN, UP, MOVE};
+	enum TYPE {DOWN, UP, MOVE, CANCEL};
 	enum {MOVE_SLOPE = 5};
 	SE_MotionEvent(TYPE t, int x = 0, int y = 0)
 	{

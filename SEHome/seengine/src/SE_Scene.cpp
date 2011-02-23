@@ -13,6 +13,7 @@ SE_Scene::SE_Scene(SE_SCENE_TYPE t)
     mWidth = mHeight = 0;
     mIsTranslucent = false;
     mSceneType = t;
+	mIsModel = true;
 }
 SE_Scene::~SE_Scene()
 {

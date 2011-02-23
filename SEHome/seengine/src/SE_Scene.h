@@ -42,6 +42,14 @@ public:
         mWidth = width;
         mHeight = height;
     }
+	bool isModel() const
+	{
+		return mIsModel;
+	}
+	void setModel(bool b)
+	{
+		mIsModel = b;
+	}
 private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
@@ -57,5 +65,6 @@ private:
     float mWidth, mHeight;// left low corner and width , height
     SE_Vector4f mBackground;
     SE_SCENE_TYPE mSceneType;
+    bool mIsModel;
 };
 #endif
