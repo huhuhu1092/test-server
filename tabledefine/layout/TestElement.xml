@@ -13,12 +13,14 @@
 <MountPoint 	id= "	PEffact03	" x= "	108 	" y= "	701 	" />																																									
 <MountPoint 	id= "	PEffact21	" x= "	383 	" y= "	95 	" />																																									
 <MountPoint 	id= "	PEffact22	" x= "	383 	" y= "	374 	" />																																									
-<MountPoint 	id= "	PEffact23	" x= "	383 	" y= "	701 	" />																																									
+<MountPoint 	id= "	PEffact23	" x= "	383 	" y= "	701 	" />																																								<!--	
 	<Element 	id= "	Face	" pivotx = "	0 	" pivoty = "	0 	" mountpointref = "	PFace	" layer = "	2	" >																																					
 		<Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" />																																													
     </Element>	
-    <Element id = "testButton" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "3" width = "100" height = "100" type = "button">
+    -->
+    <Element id = "testButton" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "3" width = "300" height = "129" type = "button">
         <Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" state = "normal" />
+        <Image dataref = "CharaterFaceImageDefine.xml/CFaceaccessories/C001/1" state = "highlighted" />
     </Element>    
     <!--												
 

@@ -206,11 +206,6 @@ public:
 		return mSceneRenderSeq;
 	}
     void travel(SE_ElementTravel* travel);
-    void show();
-    void hide();
-    //dismiss will make spatial node remove from spatial manager
-    void dismiss();
-	bool click();
 	void setClickHandler(SE_ElementClickHandler* clickHandler)
 	{
 		mClickHandler = clickHandler;
@@ -245,6 +240,12 @@ public:
 	void setStateURI(int state, const SE_StringID& uri);
 	SE_URI getURI(int state) const;
     SE_StringID getURL(int state) const;
+	bool canPointed() const
+	{
+		return mCanPointed;
+	}
+	void setCanPointed(bool b);
+	SE_Element* getCanPointedElement();
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
@@ -258,6 +259,11 @@ public:
 	virtual SE_Element* clone();
 	virtual bool dispatchMotionEvent(const SE_MotionEvent& motionEvent);
 	virtual bool dispatchKeyEvent(const SE_KeyEvent& keyEvent);
+    virtual void show();
+    virtual void hide();
+    //dismiss will make spatial node remove from spatial manager
+    virtual void dismiss();
+	virtual bool click();
 private:
 	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
 	{
@@ -307,6 +313,7 @@ protected:
     SE_Matrix4f mPrevMatrix;
     SE_Matrix4f mPostMatrix;
 	SE_ElementClickHandler* mClickHandler;
+	bool mCanPointed;
 };
 class SE_2DNodeElement : public SE_Element, public SE_Object
 {

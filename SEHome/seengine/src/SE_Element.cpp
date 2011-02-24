@@ -82,6 +82,7 @@ SE_Element::SE_Element()
     mNeedUpdateTransform = true;
     mRenderQueueSeq =  SE_RQ0;
 	mClickHandler = NULL;
+	mCanPointed = true;
 }
 
 SE_Element::~SE_Element()
@@ -184,6 +185,31 @@ void SE_Element::read(SE_BufferInput& inputBuffer)
 }
 void SE_Element::write(SE_BufferOutput& outputBuffer)
 {
+}
+SE_Element* SE_Element::getCanPointedElement()
+{
+	if(canPointed())
+		return this;
+	SE_Element* e = getParent();
+	while(e)
+	{
+		if(e->canPointed())
+			break;
+		e = e->getParent();
+	}
+	if(e && e->canPointed())
+		return e;
+	else
+		return NULL;
+}
+void SE_Element::setCanPointed(bool b)
+{
+	mCanPointed = b;
+	std::vector<SE_Element*> children = getChildren();
+	for(int i = 0 ; i < children.size() ; i++)
+	{
+		children[i]->setCanPointed(b);
+	}
 }
 void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {

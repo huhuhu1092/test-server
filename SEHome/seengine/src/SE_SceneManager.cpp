@@ -197,7 +197,7 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
         }
     } 
 	std::list<SE_Scene*>::iterator itScene;
-	SE_SceneRenderSeq sceneRenderSeq = 0;
+	SE_SceneRenderSeq sceneRenderSeq = -1;
 	SE_Element* pointedElement = NULL;
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	for(itScene = sceneMotionEvent.begin() ; itScene != sceneMotionEvent.end(); itScene++)
@@ -215,29 +215,7 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 	}
 	if(pointedElement)
 	{
-		switch(motionEvent.getType())
-		{
-		case SE_MotionEvent::DOWN:
-			{
-
-			}
-			break;
-		case SE_MotionEvent::UP:
-			{
-
-			}
-			break;
-		case SE_MotionEvent::MOVE:
-			{
-
-			}
-			break;
-		case SE_MotionEvent::CANCEL:
-			{
-			    mMotionCancelElementID = pointedElement->getID();
-			}
-			break;
-		}
+        handleMotionEvent(pointedElement, motionEvent);
 	}
 }
 

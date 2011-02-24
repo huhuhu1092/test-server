@@ -150,6 +150,17 @@ bool SE_Scene::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {
     return false;
 }
+static SE_Element* getPointedElement(SE_Spatial* spatial, SE_ElementManager* elementManager)
+{
+	if(spatial == NULL)
+		return NULL;
+	SE_ElementID elementID = spatial->getElementID();
+	SE_Element* e = elementManager->get(elementID);
+	if(e && e->canPointed())
+		return e;
+	SE_Spatial* parent = spatial->getParent();
+	return getPointedElement(parent, elementManager);
+}
 SE_Element* SE_Scene::getPointedElement(float x, float y)
 {
     SE_Spatial* rootSpatial = getRootSpatial();
@@ -163,10 +174,23 @@ SE_Element* SE_Scene::getPointedElement(float x, float y)
     SE_FindSpatialCollision spatialCollision(ray);
 	rootSpatial->travel(&spatialCollision, true);
 	SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
+	SE_SimObject* simObject = spatialCollision.getCollisionObject();
+	SE_Element* rete = NULL;
+	if(collisionSpatial == NULL || simObject == NULL)
+		return NULL;
 	SE_ElementID elementID = collisionSpatial->getElementID();
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_Element* e = elementManager->get(elementID);
-	return e;
+	SE_Spatial* parentSpatial = collisionSpatial->getParent();
+	if(e == NULL)
+	{
+		rete = ::getPointedElement(parentSpatial, elementManager);
+	}
+	else
+	{
+		rete = e->getCanPointedElement();
+	}
+	return rete;
 }
 bool SE_Scene::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 {

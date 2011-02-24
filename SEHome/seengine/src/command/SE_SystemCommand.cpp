@@ -15,6 +15,7 @@
 #include "SE_InputManager.h"
 #include "SE_InputEvent.h"
 #include "SE_MotionEventCamera.h"
+#include "SE_SceneManager.h"
 SE_InitAppCommand::SE_InitAppCommand(SE_Application* app) : SE_Command(app)
 {}
 SE_InitAppCommand::~SE_InitAppCommand()
@@ -93,8 +94,11 @@ SE_KeyEventCommand::~SE_KeyEventCommand()
 }
 void SE_KeyEventCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	SE_InputManager* inputManager = mApp->getInputManager();
-	inputManager->update(keyEvent);
+	SE_SceneManager* sceneManager = mApp->getSceneManager();
+	if(keyEvent)
+	    sceneManager->dispatchKeyEvent(*keyEvent);
+	//SE_InputManager* inputManager = mApp->getInputManager();
+	//inputManager->update(keyEvent);
 }
 
 SE_MotionEventCommand::SE_MotionEventCommand(SE_Application* app) : SE_Command(app)
@@ -108,8 +112,11 @@ SE_MotionEventCommand::~SE_MotionEventCommand()
 }
 void SE_MotionEventCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	SE_InputManager* inputManager = mApp->getInputManager();
-	inputManager->update(motionEvent);
+	//SE_InputManager* inputManager = mApp->getInputManager();
+	//inputManager->update(motionEvent);
+	SE_SceneManager* sceneManager = mApp->getSceneManager();
+	if(motionEvent)
+		sceneManager->dispatchMotionEvent(*motionEvent);
 }
 //////////////
 SE_LoadSceneCommand::SE_LoadSceneCommand(SE_Application* app) : SE_Command(app)

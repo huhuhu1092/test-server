@@ -16,22 +16,23 @@ void SE_Button::spawn()
 	std::vector<SE_Element*> children = getChildren();
 	if(children.size() <= 0)
 		return;
-	SE_2DNodeElement* normalElement = NULL;
+	SE_2DNodeElement* element = NULL;
     for(int i = 0 ; i < children.size() ; i++)
 	{
 		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
-		if(e->getState() == SE_Element::NORMAL)
+		e->setCanPointed(false);
+		if(e->getState() == mState)
 		{
-			normalElement = e;
+			element = e;
 			break;
 		}
 	}
-	if(!normalElement)
+	if(!element)
         return;
-	normalElement->setWidth(mWidth);
-	normalElement->setHeight(mHeight);
-	normalElement->spawn();
-	mElement = normalElement;
+	element->setWidth(mWidth);
+	element->setHeight(mHeight);
+	element->spawn();
+	mElement = element;
 	//mElement->setRectPatchType(SE_PATCH_R3_C3);
 	calculateRect(mPivotX, mPivotY, 0, 0);
 	/*
