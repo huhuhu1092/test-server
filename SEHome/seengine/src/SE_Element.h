@@ -22,7 +22,9 @@ class SE_Animation;
 class SE_Spatial;
 class SE_RectPrimitive;
 class SE_Surface;
-
+class SE_MotionEvent;
+class SE_KeyEvent;
+class SE_ElementClickHandler;
 class SE_ElementTravel
 {
 public:
@@ -46,10 +48,9 @@ public:
     {
         return mState;
     }
-	void setState(int state)
-	{
-		mState = state;
-	}
+	// update indicate whether element will update is spatial to make 
+	// according state's appearance work
+	void setState(int state, bool update = false);
     int getType() const
     {
         return mType;
@@ -170,24 +171,6 @@ public:
     {
         return mSpatialID;
     }
-    /*
-	void setPrimitiveID(const SE_PrimitiveID& id)
-	{
-		mPrimitiveID = id;
-	}
-    SE_PrimitiveID getPrimitiveID() const
-    {
-        return mPrimitiveID;
-    }
-	void setSimObjectID(const SE_SimObjectID& simObj)
-	{
-		mSimObjectID = simObj;
-	}
-    SE_SimObjectID getSimObjectID()
-    {
-        return mSimObjectID;
-    }
-    */
 	void setAnimationID(const SE_AnimationID& animID)
 	{
 		mAnimationID = animID;
@@ -218,11 +201,20 @@ public:
 	}
     void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
     void setRenderTargetID(const SE_RenderTargetID& renderTarget);
+	SE_SceneRenderSeq getSceneRenderSeq()
+	{
+		return mSceneRenderSeq;
+	}
     void travel(SE_ElementTravel* travel);
     void show();
     void hide();
     //dismiss will make spatial node remove from spatial manager
     void dismiss();
+	bool click();
+	void setClickHandler(SE_ElementClickHandler* clickHandler)
+	{
+		mClickHandler = clickHandler;
+	}
 	void setAnimation(SE_Animation* anim)
 	{
 		mAnimation = anim;
@@ -264,6 +256,8 @@ public:
     virtual void read(SE_BufferInput& inputBuffer);
     virtual void write(SE_BufferOutput& outputBuffer);
 	virtual SE_Element* clone();
+	virtual bool dispatchMotionEvent(const SE_MotionEvent& motionEvent);
+	virtual bool dispatchKeyEvent(const SE_KeyEvent& keyEvent);
 private:
 	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
 	{
@@ -312,6 +306,7 @@ protected:
 	SE_Animation* mAnimation;
     SE_Matrix4f mPrevMatrix;
     SE_Matrix4f mPostMatrix;
+	SE_ElementClickHandler* mClickHandler;
 };
 class SE_2DNodeElement : public SE_Element, public SE_Object
 {

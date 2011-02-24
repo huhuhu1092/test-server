@@ -5,6 +5,7 @@
 class SE_Scene;
 class SE_KeyEvent;
 class SE_MotionEvent;
+class SE_Element;
 class SE_RenderManager;
 /*
  * SceneManager manage the all screen region
@@ -42,12 +43,18 @@ public:
 private:
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);
+	void handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent);
 private:
     SE_TreeStructManager<SE_Scene> mScenes;
     typedef std::list<SE_SceneID> _SceneStack;
     _SceneStack mStack;
     float mWidth;
     float mHeight;
-	SE_ElementID mPointedElementID;
+	SE_ElementID mMotionDownElementID;
+	SE_ElementID mMotionMoveElementID;
+	SE_ElementID mMotionUpElementID;
+	SE_ElementID mMotionCancelElementID;
+	float mPrevX, mPrevY;
+	int mPrevMotionEventType;
 };
 #endif

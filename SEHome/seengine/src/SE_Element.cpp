@@ -22,6 +22,7 @@
 #include "SE_Geometry.h"
 #include "SE_MessageEventCommandDefine.h"
 #include "SE_AnimationManager.h"
+#include "SE_InputEventHandler.h"
 #include <math.h>
 //////////////////////////////
 class SE_ElementParamUpdateEvent : public SE_ElementEvent
@@ -80,6 +81,7 @@ SE_Element::SE_Element()
     mOwnRenderTargetCamera = false;
     mNeedUpdateTransform = true;
     mRenderQueueSeq =  SE_RQ0;
+	mClickHandler = NULL;
 }
 
 SE_Element::~SE_Element()
@@ -126,6 +128,12 @@ void SE_Element::update(const SE_TimeKey& timeKey)
 }
 void SE_Element::layout()
 {}
+bool SE_Element::click()
+{
+	if(!mClickHandler)
+		return false;
+	return mClickHandler->handle(this);
+}
 void SE_Element::updateSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
@@ -154,6 +162,12 @@ void SE_Element::updateSpatial()
         spatialManager->add(parentSpatial->getID(), s, true);
 		spatialManager->release(oldSpatial);
     }
+	if(spatial)
+	{
+		spatial->updateWorldTransform();
+        spatial->updateWorldLayer();
+	    spatial->updateRenderState();
+	}
 }
 SE_Element* SE_Element::clone()
 {
@@ -365,7 +379,26 @@ void SE_Element::clone(SE_Element *src, SE_Element* dst)
 	dst->mKeyFrameNum = src->mKeyFrameNum;
 	dst->mSeqNum = src->mSeqNum;
 }
-
+bool SE_Element::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
+{
+	return false;
+}
+bool SE_Element::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
+{
+	return false;
+}
+void SE_Element::setState(int state, bool update)
+{
+	if(mState == state)
+		return;
+	mState = state;
+	if(!update)
+        return;
+	dismiss();
+	spawn();
+	layout();
+	updateSpatial();
+}
 ///////////////////////////////////////
 SE_2DNodeElement::SE_2DNodeElement()
 {

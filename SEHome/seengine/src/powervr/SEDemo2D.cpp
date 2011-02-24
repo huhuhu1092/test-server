@@ -90,6 +90,12 @@ bool SEDemo::InitApplication()
 	//doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+	//debug
+#if defined(WIN32)
+    TCHAR ttt[] = L"È·¶¨";
+#else
+#endif
+	//end
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;

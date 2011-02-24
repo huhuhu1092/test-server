@@ -8,6 +8,9 @@
 #include "SE_SpatialManager.h"
 #include "SE_RenderState.h"
 #include "SE_Spatial.h"
+#include "SE_SpatialTravel.h"
+#include "SE_Geometry3D.h"
+#include "SE_Camera.h"
 SE_Scene::SE_Scene(SE_SCENE_TYPE t)
 {
     mWidth = mHeight = 0;
@@ -80,6 +83,19 @@ void SE_Scene::show()
 		spatial->updateRenderState();
     }
 }
+SE_Spatial* SE_Scene::getRootSpatial()
+{
+	SE_Element* rootElement = getRootElement();
+	if(rootElement)
+	{
+	    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	    SE_Spatial* rootSpatial = NULL;
+	    rootSpatial = spatialManager->get(rootElement->getSpatialID());
+		return rootSpatial;
+	}
+	else
+		return NULL;
+}
 SE_Element* SE_Scene::getRootElement()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
@@ -130,10 +146,32 @@ void SE_Scene::setCamera(const SE_CameraID& cameraID)
 {
     mCamera = cameraID;
 }
-void SE_Scene::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
-{}
-void SE_Scene::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
-{}
+bool SE_Scene::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
+{
+    return false;
+}
+SE_Element* SE_Scene::getPointedElement(float x, float y)
+{
+    SE_Spatial* rootSpatial = getRootSpatial();
+	if(!rootSpatial)
+		return NULL;
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+	SE_Camera* camera = cameraManager->getCamera(mCamera);
+	if(camera == NULL)
+		return NULL;
+	SE_Ray ray = camera->screenCoordinateToRay(x, y);
+    SE_FindSpatialCollision spatialCollision(ray);
+	rootSpatial->travel(&spatialCollision, true);
+	SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
+	SE_ElementID elementID = collisionSpatial->getElementID();
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	SE_Element* e = elementManager->get(elementID);
+	return e;
+}
+bool SE_Scene::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
+{
+	return false;
+}
 /*
 void SE_Scene::setID(const SE_SceneID& sceneID)
 {

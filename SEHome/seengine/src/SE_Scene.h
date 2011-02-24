@@ -10,6 +10,7 @@ class SE_KeyEvent;
 class SE_MotionEvent;
 class SE_Scene;
 class SE_Element;
+class SE_Spatial;
 class SE_Scene : public SE_ListStruct<SE_Scene>
 {
     friend class SE_SceneManager;
@@ -27,8 +28,9 @@ public:
     {
         mBackground = color;
     }
-    void dispatchKeyEvent(const SE_KeyEvent& keyEvent);
-    void dispatchMotionEvent(const SE_MotionEvent& motionEvent);
+    bool dispatchKeyEvent(const SE_KeyEvent& keyEvent);
+    bool dispatchMotionEvent(const SE_MotionEvent& motionEvent);
+	SE_Element* getPointedElement(float x, float y);
     void setTranslucent(bool bTranslucent)
     {
         mIsTranslucent = bTranslucent;
@@ -54,6 +56,7 @@ private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
     SE_Element* getRootElement();
+	SE_Spatial* getRootSpatial();
 private:
     //void setID(const SE_SceneID& sceneID);
 private:
