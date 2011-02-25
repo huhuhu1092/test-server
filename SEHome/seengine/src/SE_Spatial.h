@@ -202,6 +202,14 @@ public:
 	{
 		return mOwnRenderTargetCamera;
 	}
+	void setName(const char* name)
+	{
+		mName = name;
+	}
+	SE_StringID getName() const
+	{
+		return mName;
+	}
 	void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
@@ -285,5 +293,6 @@ private:
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
 	SE_SceneRenderSeq mSceneRenderSeq;
+	SE_StringID mName;
 };
 #endif

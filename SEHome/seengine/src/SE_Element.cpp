@@ -23,6 +23,7 @@
 #include "SE_MessageEventCommandDefine.h"
 #include "SE_AnimationManager.h"
 #include "SE_InputEventHandler.h"
+#include "SE_Utils.h"
 #include <math.h>
 //////////////////////////////
 class SE_ElementParamUpdateEvent : public SE_ElementEvent
@@ -142,7 +143,7 @@ void SE_Element::updateSpatial()
 	SE_Element* parent = getParent();
 	if(!parent)
 		return;
-    SE_Spatial* parentSpatial = spatialManager->get(parent->getID());
+	SE_Spatial* parentSpatial = spatialManager->get(parent->getSpatialID());
     if(!spatial && !parentSpatial)
     {
         return ;
@@ -155,6 +156,13 @@ void SE_Element::updateSpatial()
     {
         SE_Spatial* s = createSpatial();
 		spatialManager->add(parentSpatial->getID(), s, true);
+		s->updateSpatialIDToElement();
+		if(s)
+	    {
+		    s->updateWorldTransform();
+            s->updateWorldLayer();
+	        s->updateRenderState();
+	    }
     }
     else if(spatial && parentSpatial)
     {
@@ -162,13 +170,15 @@ void SE_Element::updateSpatial()
         SE_Spatial* s = createSpatial();
         spatialManager->add(parentSpatial->getID(), s, true);
 		spatialManager->release(oldSpatial);
+		s->updateSpatialIDToElement();
+		if(s)
+	    {
+		    s->updateWorldTransform();
+            s->updateWorldLayer();
+	        s->updateRenderState();
+	    }
     }
-	if(spatial)
-	{
-		spatial->updateWorldTransform();
-        spatial->updateWorldLayer();
-	    spatial->updateRenderState();
-	}
+
 }
 SE_Element* SE_Element::clone()
 {
@@ -252,6 +262,32 @@ void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
         }
     }
 }
+SE_StringID SE_Element::getStateName(int state) const
+{
+	switch(state)
+	{
+	case NORMAL:
+		return "normal";
+	case HIGHLIGHTED:
+		return "highlighted";
+	case SELECTED:
+		return "selected";
+	case INVISIBLE:
+		return "invisible";
+	case INACTIVE: 
+		return "inactive";
+	case ANIMATE_BEGIN:
+		return "animate_begin";
+	case ANIMATE_RUNNING:
+		return "animate_running";
+	case ANIMATE_SUSPEND: 
+		return "animate_suspend";
+	case ANIMATE_END:
+		return "animate_end";
+	default:
+		return "other";
+	}
+}
 void SE_Element::travel(SE_ElementTravel* travel)
 {
 	travel->visit(this);
@@ -272,6 +308,11 @@ void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
 {}
 void SE_Element::dismiss()
 {
+	std::vector<SE_Element*> children = getChildren();
+    for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		children[i]->dismiss();
+	}
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
 	for(int i = 0 ; i < mSimObjectIDArray.size() ; i++)
 	{
@@ -287,7 +328,9 @@ void SE_Element::dismiss()
         resourceManager->removePrimitive(mPrimitiveIDArray[i]);
 	}
     SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
-    animManager->remove(mAnimationID);
+    SE_Animation* anim = animManager->remove(mAnimationID);
+	animManager->release(anim);
+
 }
 void SE_Element::hide()
 {}
@@ -413,17 +456,22 @@ bool SE_Element::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {
 	return false;
 }
-void SE_Element::setState(int state, bool update)
+void SE_Element::onStateChange(int newState, int oldState)
 {
-	if(mState == state)
-		return;
-	mState = state;
-	if(!update)
-        return;
 	dismiss();
 	spawn();
 	layout();
 	updateSpatial();
+}
+void SE_Element::setState(int state, bool update)
+{
+	if(mState == state)
+		return;
+    int oldState = mState;
+	mState = state;
+	if(!update)
+        return;
+    onStateChange(mState, oldState);
 }
 ///////////////////////////////////////
 SE_2DNodeElement::SE_2DNodeElement()
@@ -510,6 +558,7 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_Spatial* parent = createNode();
 	std::vector<SE_Element*> children = elementManager->getChildren(getID());
+	parent->setName(getName().getStr());
 	for(int i = 0 ; i < children.size() ; i++)
 	{
 		SE_Element* e = children[i];
@@ -675,6 +724,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	    geom->setElementID(getID());
 	    geom->setRenderTarget(mRenderTarget);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+		geom->setName(getName().getStr());
         mPrimitiveIDArray[0] = primitiveID;
         mSimObjectIDArray[0] = simObjectID;
     }
@@ -690,6 +740,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	    geom->setElementID(getID());
 	    geom->setRenderTarget(mRenderTarget);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
+		geom->setName(getName().getStr());
         std::vector<SE_Geometry*> childGeom(meshNum);
         for(int i = 0 ; i < meshNum ; i++)
         {
@@ -700,6 +751,9 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
             childGeom[i]->attachSimObject(simObject);
 			spatialManager->add(geom, childGeom[i]);
             mSimObjectIDArray[i] = simObjectID;
+			std::string strIndex = SE_Util::intToString(i);
+			std::string str = std::string(getName().getStr()) + "_" + strIndex;
+			childGeom[i]->setName(str.c_str());
         }
         switch(mRectPatchType)
         {

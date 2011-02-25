@@ -125,8 +125,12 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 		mPrevMotionEventType = SE_MotionEvent::DOWN;
 		mPrevX = motionEvent.getX();
 		mPrevY = motionEvent.getY();
-	    mMotionDownElementID = pointedElement->getID();
-	    pointedElement->setState(SE_Element::HIGHLIGHTED, true);
+		if(pointedElement)
+		{
+	        mMotionDownElementID = pointedElement->getID();
+	        pointedElement->setState(SE_Element::HIGHLIGHTED, true);
+		}
+		LOGI("#### motion event down ###\n");
 	}
 	else if((mPrevMotionEventType == SE_MotionEvent::DOWN || mPrevMotionEventType == SE_MotionEvent::MOVE)&& 
 		    motionEvent.getType() == SE_MotionEvent::DOWN)
@@ -140,7 +144,9 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 		}
 		if(mPrevMotionEventType == SE_MotionEvent::MOVE)
 		{
-			mMotionMoveElementID = pointedElement->getID();
+			LOGI("#### motion event move ###\n");
+			if(pointedElement)
+			    mMotionMoveElementID = pointedElement->getID();
 			if(mMotionMoveElementID != mMotionDownElementID)
 			{
 				SE_Element* e = elementManager->get(mMotionDownElementID);
@@ -155,7 +161,9 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
  	}
 	else if(motionEvent.getType() == SE_MotionEvent::UP && mPrevMotionEventType == SE_MotionEvent::MOVE)
 	{
-		mMotionMoveElementID = pointedElement->getID();
+		if(pointedElement)
+		    mMotionMoveElementID = pointedElement->getID();
+		mPrevMotionEventType = SE_MotionEvent::UP;
 	    if(mMotionMoveElementID != mMotionDownElementID)
 		{
 			SE_Element* e = elementManager->get(mMotionDownElementID);
@@ -167,11 +175,23 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 	}
 	else if(motionEvent.getType() == SE_MotionEvent::UP && mPrevMotionEventType == SE_MotionEvent::DOWN)
 	{
-        mMotionUpElementID = pointedElement->getID();
-		if(mMotionDownElementID == mMotionUpElementID)
+		LOGI("#### motion event up ###\n");
+		if(pointedElement)
+            mMotionUpElementID = pointedElement->getID();
+		mPrevMotionEventType = SE_MotionEvent::UP;
+		if(mMotionDownElementID == mMotionUpElementID && pointedElement)
 		{
+			LOGI("#### motion event click ###\n");
 			pointedElement->setState(SE_Element::NORMAL, true);
 			pointedElement->click();
+		}
+		else
+		{
+			SE_Element* e = elementManager->get(mMotionDownElementID);
+			if(e)
+			{
+				e->setState(SE_Element::NORMAL, true);
+			}
 		}
 	}   
 }
@@ -213,9 +233,6 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 			}
 		}
 	}
-	if(pointedElement)
-	{
-        handleMotionEvent(pointedElement, motionEvent);
-	}
+    handleMotionEvent(pointedElement, motionEvent);
 }
 

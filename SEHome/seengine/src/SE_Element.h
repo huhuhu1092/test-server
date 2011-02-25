@@ -246,6 +246,7 @@ public:
 	}
 	void setCanPointed(bool b);
 	SE_Element* getCanPointedElement();
+	SE_StringID getStateName(int state) const;
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
@@ -264,6 +265,7 @@ public:
     //dismiss will make spatial node remove from spatial manager
     virtual void dismiss();
 	virtual bool click();
+    virtual void onStateChange(int newState, int oldState);
 private:
 	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
 	{

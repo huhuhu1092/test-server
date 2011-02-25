@@ -191,7 +191,7 @@ T* SE_TreeStructManager<T>::removeNode(size_t index, _Node* node)
     if(parentNode)
     {
         SE_ASSERT(parentNode->alloc && parentNode->data != NULL);
-        parentNode->data->removeChild(node->data);
+        parentNode->data->removeChild(retData);
     }
     node->parent = SE_TreeStructID::NULLID;
     mFreeNodeIndexList.push_back(index);
@@ -239,6 +239,14 @@ void SE_TreeStructManager<T>::release(T* p, int delay)
         {
             delete dd;
         }
+		std::vector<T*> children = p->getChildren();
+		for(size_t i = 0 ; i < children.size() ; i++)
+		{
+			dd = new SE_DelayDestroyPointer<T>(children[i]);
+			ret = SE_Application::getInstance()->addDelayDestroy(dd);
+			if(!ret)
+				delete dd;
+		}
     }
 }
 template <typename T>

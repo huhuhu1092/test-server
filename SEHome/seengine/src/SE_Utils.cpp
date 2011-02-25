@@ -681,3 +681,27 @@ std::string SE_Util::resolveParamString(const char* str)
 	else
 		return paramString;
 }
+std::string SE_Util::intToString(int i)
+{
+    char buf[10];
+	memset(buf, 0, 10);
+#if defined(WIN32)
+	_snprintf(buf, 9, "%d", i);
+#else
+	snprintf(buf, 9, "%d", i);
+#endif
+	std::string str = buf;
+	return str;
+}
+std::string SE_Util::floatToString(float f)
+{
+    char buf[20];
+	memset(buf, 0, 20);
+#if defined(WIN32)
+	_snprintf(buf, 19, "%f", f);
+#else
+	snprintf(buf, 19, "%f", f);
+#endif
+	std::string str = buf;
+	return str;
+}

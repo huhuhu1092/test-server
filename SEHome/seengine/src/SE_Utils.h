@@ -73,6 +73,8 @@ public:
 	static SplitStringList extractParamString(const char* str);
 	static std::string resolveParamString(const char* str);
 	static bool isDigit(const char* str);
+	static std::string intToString(int i);
+	static std::string floatToString(float f);
 };
 
 #endif /** end SE_UTILS_H*/

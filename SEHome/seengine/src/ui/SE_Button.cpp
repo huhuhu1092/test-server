@@ -5,6 +5,7 @@
 #include "SE_ElementManager.h"
 #include "SE_Spatial.h"
 #include "SE_2DElement.h"
+#include "SE_Utils.h"
 SE_Button::SE_Button()
 {
 	mElement = NULL;
@@ -17,10 +18,19 @@ void SE_Button::spawn()
 	if(children.size() <= 0)
 		return;
 	SE_2DNodeElement* element = NULL;
-    for(int i = 0 ; i < children.size() ; i++)
+	for(int i = 0 ; i < children.size() ; i++)
 	{
 		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
 		e->setCanPointed(false);
+		std::string str;
+		std::string strIndex = SE_Util::intToString(i);
+		SE_StringID stateName = e->getStateName(e->getState());
+		str = std::string("button_") + stateName.getStr() + "_" + strIndex;
+		e->setName(str.c_str());
+	}
+    for(int i = 0 ; i < children.size() ; i++)
+	{
+		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
 		if(e->getState() == mState)
 		{
 			element = e;
@@ -66,6 +76,7 @@ SE_Spatial* SE_Button::createSpatial()
 {
 	//return SE_Widget::createSpatial();
 	SE_Spatial* parent = createNode();
+	parent->setName(getName().getStr());
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	if(mElement)
 	{
