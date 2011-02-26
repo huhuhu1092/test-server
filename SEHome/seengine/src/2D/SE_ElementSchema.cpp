@@ -54,7 +54,6 @@ SE_2DNodeElement* SE_ElementSchema::createElement(int type)
 SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, SE_Element* parent)
 {
     SE_2DNodeElement* e = createElement(type); 
-    new SE_2DNodeElement;
     e->setName(name.getStr());
     e->setFullPathName(fullPathName.getStr());
     e->setMountPointRef(mountPointRef);
