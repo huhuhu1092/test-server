@@ -19,9 +19,13 @@
     </Element>	
     -->
     <Element id = "testButton" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "3" width = "300" height = "129" type = "button">
-        <Image id = "face1" dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" state = "normal" patch = "1:3"/>
-        <Image id = "face2" dataref = "CharaterFaceImageDefine.xml/avatar/C001/1" state = "highlighted" patch = "1:3"/>
-    </Element>    
+        <Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" state = "normal" />
+        <Image dataref = "CharaterFaceImageDefine.xml/CFaceaccessories/C001/1" state = "highlighted" />
+    </Element>
+    <!--
+    <Element id = "testText" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "4" width = "16" height = "16" type = "textview" >
+    </Element>
+    -->
     <!--												
 
     	<Element id = "testAction" mountpointref = "PLifthand" layer = "	4	" >

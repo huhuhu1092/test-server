@@ -548,8 +548,12 @@ void SE_2DNodeElement::layout()
 
 	mDeltaLeft = mergedRect.left;
 	mDeltaTop = mergedRect.top;
-	mWidth = mergedRect.right - mergedRect.left;
-	mHeight = mergedRect.bottom - mergedRect.top;
+    //if node's width is not dispatched, merged width will be used
+    if(mWidth == 0)
+	    mWidth = mergedRect.right - mergedRect.left;
+    //if node's height is not dispatched, merged height will be used
+    if(mHeight == 0)
+	    mHeight = mergedRect.bottom - mergedRect.top;
 }
 
 SE_Spatial* SE_2DNodeElement::createSpatial()
