@@ -87,6 +87,8 @@ public:
 	void loadRenderer(const char* rendererFileName);
     void loadElementSchema(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
+    char* loadFontData(const char* fontFileName, char*& outData, int& outLen);
+
 	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,
 						  SE_ImageMapVisitor* imageMapTravel);

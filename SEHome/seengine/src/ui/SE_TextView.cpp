@@ -9,28 +9,32 @@
 #include FT_FREETYPE_H 
 #include FT_GLYPH_H
 
-SE_TextView::SE_TextView()
+SE_CharView::SE_TextView()
 {
-
+    mCharImage = NULL;
+    mFontSize = 0;
 }
-SE_TextView::~SE_TextView()
+SE_CharView::~SE_TextView()
 {
+    /*
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     for(int i = 0 ; i < mCharImageIDArray.size() ; i++)
 	{
 		resourceManager->removeImageData(mCharImageIDArray[i]);
 	}
+    */
 }
 
-void SE_TextView::spawn()
+void SE_CharView::spawn()
 {
+    /*
     FT_Library library;
     FT_Face face;
     FT_Glyph glyph;
     FT_UInt glyph_index;
     FT_Error error;
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    SE_StringID fontResource = "D:\\model\\newhome3\\fonts\\DroidSansFallback.ttf";
+    SE_StringID fontResource = "C:\\model\\newhome3\\fonts\\DroidSansFallback.ttf";
     error = FT_Init_FreeType(&library);
     if(error)
     {
@@ -105,25 +109,51 @@ void SE_TextView::spawn()
    mCharImageIDArray[0] = imageDataID;
    mCharImageArray.resize(1);
    mCharImageArray[0] = imageData;
-   calculateRect(mPivotX, mPivotY, 0, 0);
+   */
+       /*
+    int charNum = mText.getCharNum(); //unicode char num
+    float left = 0, top = 0;
+    SE_FontManager* fontManager = SE_Application::getInstanc()->getFontManager();
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    SE_FontProperty fontProperty;
+    fontProperty.fontSize = mFontSize;
+    fontProperty.fontStyle = mCharStyle;
+    fontProperty.fontColor = mFontColor;
+    for(int i = 0 ; i < charNum ; i++)
+    {
+        SE_CharCode c = mText.getCharCode(i);
+        SE_ImageData* image = fontManager->getImageData(c, fontProperty);
+        if(image)
+        {
+            SE_TextView* t = new SE_TextView;
+            t->setLeft(left);
+            t->setTop(top);
+            t->setWidth(image->getWidth());
+            t->setHeight(image->getHeight());
+            elementManager->add(getID(), t);
+            t->mCharImageArray.resize(1);
+            t->mCharImageArray[0] = image;
+        }
+    }
+    */
+    SE_FontManager* fontManager = SE_Application::getInstanc()->getFontManager();
+    SE_FontProperty fontProperty;
+    fontProperty.fontSize = mFontSize;
+    fontProperty.fontStyle = mCharStyle;
+    fontProperty.fontColor = mFontColor;
+    if(mCharImage == NULL)
+    {
+        mCharImage = fontManager->getImageData(c, fontProperty);
+    }
+    calculateRect(mPivotX, mPivotY, 0, 0);
 }
-void SE_TextView::setImageData(SE_Primitive* primitive)
+void SE_CharView::setImageData(SE_Primitive* primitive)
 {
     SE_ImageDataPortion dp;
-	SE_ImageData* imageData = mCharImageArray[0];
-	/*
-	if(!imageData->isSizePower2())
-	{
-		imageData->getDataPower2();
-	}
-	dp.setX(imageData->getRealStartX());
-	dp.setY(imageData->getRealStartY());
-	dp.setWidth(imageData->getWidth());
-	dp.setHeight(imageData->getHeight());
-	*/
+	SE_ImageData* imageData = mCharImage;
 	primitive->setImageData(0, imageData, SE_TEXTURE0, NOT_OWN, dp);
 }
-void SE_TextView::setSurface(SE_Surface* surface)
+void SE_CharView::setSurface(SE_Surface* surface)
 {
     SE_ColorExtractShaderProperty* sp = new SE_ColorExtractShaderProperty;
     sp->setColorOperationMode(16);
@@ -131,15 +161,70 @@ void SE_TextView::setSurface(SE_Surface* surface)
     surface->setProgramDataID(COLOREXTRACT_SHADER);
 	surface->setRendererID(COLOREXTRACT_RENDERER);
 }
+void SE_CharView::layout()
+{}
+SE_Spatial* SE_CharView::createSpatial()
+{
+	SE_Spatial* spatial = createSpatialByImage();
+    return spatial;
+}
+//////////////////
+SE_TextView::SE_TextView()
+{
+    mFontSize = 0;
+}
+void SE_TextView::calculateTextBound(float& outWidth, float& outHeight)
+{
+    float textWidth = 0, textHeight = 0;
+    for(int i = 0 ; i < charNum ; i++)
+    {
+        textWidth += mCharImageData[i]->getWidth();
+        if(textHeight < mCharImageData[i]->getHeight())
+            textHeight = mCharImageData[i]->getHeight();
+    }
+    outWidth = textWidth;
+    outHeight = textHeight;
+}
+void SE_TextView::spawn()
+{
+    int charNum = mText.getCharNum(); //unicode char num
+    std::vector<SE_ImageData*> charImageData;
+    charImageData.resize(charNum);
+    SE_FontManager* fontManager = SE_Application::getInstanc()->getFontManager();
+    SE_FontProperty fontProperty;
+    fontProperty.fontSize = mFontSize;
+    fontProperty.fontStyle = mCharStyle;
+    fontProperty.fontColor = mFontColor;
+    for(int i = 0 ; i < charNum ; i++)
+    {
+        SE_CharCode c = mText.getCharCode(i);
+        charImageData = fontManager->getImageData(c, fontProperty);
+        SE_ASSERT(charImageData != NULL);
+    }
+    float textWidth = 0, textHeight = 0;
+    calculateTextBound(textWidth, textHeight);
+    float startx = 0 , starty = 0;
+    if(textWidth < mWidth)
+        startx = (mWidth - textWidth) / 2;
+    if(textHeight < mHeight)
+        starty = (mHeight - textHeight) / 2;
+    for(int i = 0 ; i < charNum ; i++)
+    {
+        SE_CharView* cv = new SE_CharView;
+        cv->setImageData(mCharImageData[i]);
+        cv->setPivotX(0);
+        cv->setPivotY(0);
+        cv->setMountPoint(startx, starty);
+        cv->setWidth(mCharImageData[i]->getWidth());
+        cv->setHeight(mCharImageData[i]->getHeight());
+        elementManager->add(getID(), cv);
+        cv->spawn();
+    }
+    calculate(mPivotX, mPivoty, 0, 0);
+}
 void SE_TextView::layout()
 {}
 SE_Spatial* SE_TextView::createSpatial()
 {
-	/*
-	SE_Primitive* primitive = NULL;
-	SE_PrimitiveID primitiveID;
-	createPrimitive(primitive, primitiveID);
-	setImageData(primitive);
-	*/
-	return createSpatialByImage();
+    
 }

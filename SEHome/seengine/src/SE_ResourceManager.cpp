@@ -3373,6 +3373,16 @@ SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)
 	SE_ElementSchema* e = elementMap->getItem(strList[1].c_str());
 	return e;
 }
+void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, int& outLen)
+{
+    std::string dataPath = getDataPath();
+    std::string filePath = dataPath + "/" + "fonts" + fontFileName;
+    char* data = NULL;
+    int len = 0;
+    SE_IO::readFileAll(imageName, data, len);
+    outData = data;
+    outLen = len;`
+}
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {
 

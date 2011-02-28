@@ -90,12 +90,6 @@ bool SEDemo::InitApplication()
 	//doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
-	//debug
-#if defined(WIN32)
-    TCHAR ttt[] = L"È·¶¨";
-#else
-#endif
-	//end
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
@@ -105,7 +99,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
