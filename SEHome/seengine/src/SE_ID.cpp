@@ -7,61 +7,31 @@
 #include <stdlib.h>
 ///////////////////////
 SE_StringID SE_StringID::INVALID("");
-/*
-struct SE_StringID::_Impl
-{
-    std::string id;
-};
-*/
 SE_StringID::~SE_StringID()
 {
 }
 SE_StringID::SE_StringID()
 {
-    //mImpl = new SE_StringID::_Impl;
+    mType = ASCII;
 }
 const char* SE_StringID::getStr() const
 {
     return mStr.c_str();
 }
-SE_StringID::SE_StringID(const char* id)
+SE_StringID::SE_StringID(const char* id, ENCODING_TYPE t) : mType(ASCII)
 {
-    SE_ASSERT(id);
-    //mImpl = new SE_StringID::_Impl;
-    //mImpl->id = id;
+    if(!id)
+		return;
 	mStr = id;
+    mType = t;
 }
-SE_StringID::SE_StringID(const char* id, int size)
+SE_StringID::SE_StringID(const char* id, int size, ENCODING_TYPE t = ASCII) : mType(ASCII)
 {
-    SE_ASSERT(id);
-    //mImpl = new SE_StringID::_Impl;
+    if(!id)
+		return;
     mStr.assign(id, size);
 }
-/*
-SE_StringID::SE_StringID(const SE_StringID& id)
-{
-    mImpl = new SE_StringID::_Impl;
-    if(!mImpl)
-        return ;
-    mImpl->id = id.mImpl->id;
 
-}
-*/
-/*
-SE_StringID& SE_StringID::operator=(const SE_StringID& id)
-{
-    if(this == &id)
-        return *this;
-    SE_StringID::_Impl* tmp = new SE_StringID::_Impl;
-    if(!tmp)
-        return *this;
-    tmp->id = id.mImpl->id;
-    if(mImpl)
-        delete mImpl;
-    mImpl = tmp;
-    return *this;
-}
-*/
 bool SE_StringID::isValid() const
 {
     SE_StringID invalid("");
@@ -73,13 +43,71 @@ void SE_StringID::print() const
 }
 SE_StringID& SE_StringID::read(SE_BufferInput& input)
 {
+	int type = input.readInt();
     std::string str = input.readString();
     mStr = str;
+	mType = type;
     return *this;
 }
 void SE_StringID::write(SE_BufferOutput& output)
 {
+	output.writeInt(mType);
     output.writeString(mStr.c_str());
+}
+void SE_StringID::convertToCharCode()
+{
+	switch(mType)
+	{
+	case SE_ASCII:
+		{
+            mCharCodeArray.resize(mStr.size());
+			for(size_t i = 0 ; i < mStr.size() ; i++)
+			{
+				mCharCodeArray[i] = SE_CharCodeDefine::asciiToUnicode[mStr[i]];
+			}
+		}
+		break;
+	case SE_UNICODE:
+		{
+			size_t num = mStr.size() / 2;
+			mCharCodeArray.resize(num);
+			size_t j = 0;
+			for(size_t i = 0 ; i < mStr.size() ; i += 2)
+			{
+                int c1 = mStr[i];
+				int c2 = mStr[i + 1];
+				int c = (c2 << 8) | c1;
+				SE_CharCode cc((wchar_t)c);
+                mCharCodeArray[j++] = cc;
+			}
+		}
+		break;
+	case SE_UTF8:
+		{
+		}
+		break;
+	case SE_UTF16:
+		{
+		}
+		break;
+	case SE_UTF32:
+		{
+		}
+		break;
+	}
+}
+int SE_StringID::getCharNum()
+{
+    int num = 0;
+	convertToCharCode();
+    return mCharCodeArray.size();
+
+}
+SE_CharCode SE_StringID::getCharCode(int i)
+{
+	if(i < 0 || i >= mCharCodeArray.size())
+		return SE_CharCode();
+	return mCharCodeArray[i];
 }
 bool operator==(const SE_StringID& id1, const SE_StringID& id2)
 {

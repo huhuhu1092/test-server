@@ -622,6 +622,13 @@ public:
 	{}
     virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_FontDefineHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+    SE_FontDefineHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
 class SE_RendererHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
@@ -930,6 +937,10 @@ public:
 		{
 			return new SE_ParamStructHandler(elementManager);
 		}
+        else if(!strcmp(name, "FontDefine"))
+        {
+            return new SE_FontDefineHandler(elementManager);
+        }
 		else if(!strcmp(name, "Param"))
 		{
 			return new SE_ParamHandler(elementManager);
@@ -2184,6 +2195,39 @@ void SE_ParamHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 		paramManager->setString(id.c_str(), paramValue.c_str());
 	}
 }
+void SE_FontDefineHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	std::string shaderID;
+    SE_FontManager* fontManager = SE_Application::getInstance()->getFontManager();
+	std::string style;
+    std::string fileName;
+    std::string format;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        if(!strcmp(name, "style"))
+        {
+            style = value;
+        }
+        else if(!strcmp(name, "filename"))
+        {
+            fileName = value;
+        }
+        else if(!strcmp(name, "format"))
+        {
+            format = value;
+        }
+    	pAttribute = pAttribute->Next();
+    }
+    SE_CharStyle cs;
+    cs.set(style);
+    fontManager->setStyle(cs, fileName, format);
+}
 void SE_ShaderHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -3372,6 +3416,23 @@ SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)
 	}
 	SE_ElementSchema* e = elementMap->getItem(strList[1].c_str());
 	return e;
+}
+void SE_ResourceManager::loadFont(const char* fontDefineFileName)
+{
+	if(!fontDefineFileName)
+		return;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + "fonts" + fontDefineFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
+    m.handleXmlChild(NULL, &doc, 0);
 }
 void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, int& outLen)
 {

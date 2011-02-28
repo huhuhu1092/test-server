@@ -226,5 +226,5 @@ void SE_TextView::layout()
 {}
 SE_Spatial* SE_TextView::createSpatial()
 {
-    
+	return SE_Widget::createSpatial();
 }
