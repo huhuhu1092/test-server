@@ -4,6 +4,7 @@
 #include "SE_CharStyle.h"
 #include "SE_CharCode.h"
 #include <vector>
+#include <map>
 class SE_Spatial;
 class SE_Primitive;
 class SE_Surface;
@@ -16,7 +17,7 @@ public:
     {
         mCharCode = c;
     }
-    void setFontColor(const SE_Vector3f& c)
+    void setFontColor(const SE_Vector3i& c)
     {
         mFontColor = c;
     }
@@ -39,8 +40,8 @@ protected:
 	virtual void setImageData(SE_Primitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
 private:
-	SE_CharCode mText;
-	SE_Vector3f mFontColor;
+	SE_CharCode mCharCode;
+	SE_Vector3i mFontColor;
     int mFontSize;
     SE_CharStyle mCharStyle;
 	SE_ImageData* mCharImage;
@@ -55,28 +56,43 @@ public:
     {
         mText = t;
     }
-    void setFontColor(const SE_Vector3f& c)
+    void setFontColor(int state, const SE_Vector3i& c)
     {
-        mFontColor = c;
+        mTextProperty[state].mFontColor = c;
     }
-    void setFontSize(int fontSize)
+    void setFontSize(int state, int fontSize)
     {
-        mFontSize = fontSize;
+        mTextProperty[state].mFontSize = fontSize;
     }
-    void setCharStyle(const SE_CharStyle& s)
+    void setCharStyle(int state, const SE_CharStyle& s)
     {
-        mCharStyle = s;
+        mTextProperty[state].mCharStyle = s;
     }
+	void setAlign(int state, ALIGN a)
+	{
+		mTextProperty[state].mAlign = a;
+	}
+	void setOrientation(int state, ORIENTATION o)
+	{
+		mTextProperty[state].mOrientation = o;
+	}
 	void spawn();
 	void layout();
 	SE_Spatial* createSpatial();
 private:
+	struct _TextProperty
+	{
+        SE_Vector3i mFontColor;
+        int mFontSize;
+        SE_CharStyle mCharStyle;
+        ALIGN mAlign;
+        ORIENTATION mOrientation;
+	};
+private:
+	void calculateTextBound(float& outWidth, float& outHeight);
+private:
     SE_StringID mText;
-    SE_Vector3f mFontColor;
-    int mFontSize;
-    SE_CharStyle mCharStyle;
-    ALIGH mAligh;
-    ORIENTATION mOrientation;
+	std::map<int, _TextProperty> mTextProperty;
     std::vector<SE_ImageData*> mCharImageData;
 };
 #endif

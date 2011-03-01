@@ -2,6 +2,8 @@
 #include "SE_Common.h"
 #include "SE_Buffer.h"
 #include "SE_Application.h"
+#include "SE_CharCodeDefine.h"
+#include "SE_Utils.h"
 #include "SE_Log.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,20 +14,20 @@ SE_StringID::~SE_StringID()
 }
 SE_StringID::SE_StringID()
 {
-    mType = ASCII;
+    mType = SE_ASCII;
 }
 const char* SE_StringID::getStr() const
 {
     return mStr.c_str();
 }
-SE_StringID::SE_StringID(const char* id, ENCODING_TYPE t) : mType(ASCII)
+SE_StringID::SE_StringID(const char* id, ENCODING_TYPE t) : mType(SE_ASCII)
 {
     if(!id)
 		return;
 	mStr = id;
     mType = t;
 }
-SE_StringID::SE_StringID(const char* id, int size, ENCODING_TYPE t = ASCII) : mType(ASCII)
+SE_StringID::SE_StringID(const char* id, int size, ENCODING_TYPE t) : mType(SE_ASCII)
 {
     if(!id)
 		return;
@@ -46,7 +48,7 @@ SE_StringID& SE_StringID::read(SE_BufferInput& input)
 	int type = input.readInt();
     std::string str = input.readString();
     mStr = str;
-	mType = type;
+	mType = (ENCODING_TYPE)type;
     return *this;
 }
 void SE_StringID::write(SE_BufferOutput& output)
@@ -63,7 +65,7 @@ void SE_StringID::convertToCharCode()
             mCharCodeArray.resize(mStr.size());
 			for(size_t i = 0 ; i < mStr.size() ; i++)
 			{
-				mCharCodeArray[i] = SE_CharCodeDefine::asciiToUnicode[mStr[i]];
+				mCharCodeArray[i].set(SE_CharCodeDefine::asciiToUnicode[mStr[i]]);
 			}
 		}
 		break;
@@ -84,6 +86,14 @@ void SE_StringID::convertToCharCode()
 		break;
 	case SE_UTF8:
 		{
+			int size = SE_Util::getUtf32LenFromUtf8(mStr.c_str(), mStr.size());
+			unsigned int* data = new unsigned int[size];
+			SE_Util::utf8ToUtf32(mStr.c_str(), mStr.size(), data, size);
+			mCharCodeArray.resize(size);
+			for(int i = 0 ; i < size ; i++)
+			{
+				mCharCodeArray[i].set(data[i]);
+			}
 		}
 		break;
 	case SE_UTF16:

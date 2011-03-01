@@ -2,11 +2,13 @@
 #include "SE_Application.h"
 #include "SE_Element.h"
 #include "SE_ElementManager.h"
+#include "SE_ResourceManager.h"
 #include "SE_ElementContent.h"
 #include "SE_Utils.h"
 #include "SE_ElementType.h"
 #include "SE_TextView.h"
 #include "SE_Button.h"
+#include "SE_CharStyle.h"
 #include <algorithm>
 SE_ElementSchema::SE_ElementSchema()
 {
@@ -35,6 +37,39 @@ void SE_ElementSchema::clear()
 		es->clear();
 		delete es;
     }
+    _ElementPropertyList::iterator itProperty;
+    for(itProperty = properties.begin() ; itProperty != properties.end();  itProperty++)
+    {
+        delete *itProperty  ;  
+    }
+}
+static SE_TextView::ALIGN getTextAlign(std::string str)
+{
+    if(str == "left")
+        return SE_TextView::LEFT;
+    else if(str == "right")
+        return SE_TextView::RIGHT;
+    else if(str == "mid")
+        return SE_TextView::MID;
+    else if(str == "top")
+        return SE_TextView::TOP;
+    else if(str == "BOTTOM")
+        return SE_TextView::BOTTOM;
+    else
+        return SE_TextView::LEFT;
+}
+static SE_TextView::ORIENTATION getTextOrientation(std::string str)
+{
+    if(str == "vertical")
+        return SE_TextView::VERTICAL;
+    else if(str == "horizontal")
+        return SE_TextView::HORIZONTAL;
+    else
+        return SE_TextView::HORIZONTAL;
+}
+static int getTextState(std::string state)
+{
+	return SE_Element::getStateFromName(state.c_str());
 }
 SE_2DNodeElement* SE_ElementSchema::createElement(int type)
 {
@@ -45,7 +80,24 @@ SE_2DNodeElement* SE_ElementSchema::createElement(int type)
     case SE_UI_BUTTON:
         return new SE_Button;
     case SE_UI_TEXTVIEW:
-        return new SE_TextView;
+        {
+			SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+            SE_TextView* tv = new SE_TextView;
+			SE_StringID str = resourceManager->getString(text.getStr());
+			tv->setText(str);
+            _ElementPropertyList::iterator it;
+            for(it = properties.begin() ; it != properties.end() ; it++)
+            {
+                SE_TextProperty* textp = (SE_TextProperty*)*it;
+                int state = getTextState(textp->state);
+                tv->setAlign(state, getTextAlign(textp->align));
+                tv->setOrientation(state,getTextOrientation(textp->orientation));
+                tv->setFontColor(state,textp->color);
+                tv->setFontSize(state,textp->size);
+				tv->setCharStyle(state, SE_CharStyle(textp->style));
+            }
+			return tv;
+        }
     default:
         break;
     }
@@ -100,6 +152,10 @@ void SE_ElementSchema::addChild(SE_ElementSchema* ec)
 void SE_ElementSchema::setParent(SE_ElementSchema* p)
 {
     parent = p;
+}
+void SE_ElementSchema::addProperty(SE_ElementProperty* p)
+{
+    properties.push_back(p);
 }
 void SE_ElementSchema::addContent(SE_ElementContent* ec)
 {

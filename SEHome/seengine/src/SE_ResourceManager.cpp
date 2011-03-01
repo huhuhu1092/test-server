@@ -29,6 +29,7 @@
 #include "SE_ElementType.h"
 #include "SE_Element.h"
 #include "SE_SpatialManager.h"
+#include "SE_FontManager.h"
 #include "tinyxml.h"
 #include <map>
 #include <vector>
@@ -490,6 +491,8 @@ ResourceMap<TID, T>::~ResourceMap()
         delete data;
     }
 }
+typedef SE_Table<SE_StringID, SE_StringID> SE_StringMap;
+typedef SE_Table<SE_StringID, SE_StringMap*> SE_StringTable;
 ////////////////////
 struct SE_ResourceManager::_Impl
 {
@@ -511,6 +514,7 @@ struct SE_ResourceManager::_Impl
 	SE_StateChangeTable mStateChangeTable;
 	SE_ColorEffectControllerTable mColorEffectControllerTable;
 	SE_ObjectManager<SE_StringID, SE_XMLTABLE_TYPE> mXmlTypeTable;
+    SE_StringTable mStringTable;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 	SE_Element* mElementRoot;
@@ -524,8 +528,15 @@ struct SE_ResourceManager::_Impl
 class _ElementContainer
 {
 public:
+    _ElementContainer()
+    {
+        elementMap = NULL;
+        resourceManager = NULL;
+        impl = NULL;
+    }
 	SE_ElementSchemaMap* elementMap;
 	SE_ResourceManager* resourceManager;
+	SE_ResourceManager::_Impl* impl;
 	std::string xmlName;
 	std::string structid;
 };
@@ -594,6 +605,13 @@ public:
     {}
     virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
+class SE_TextPropertyHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+    SE_TextPropertyHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
 class SE_ImageHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
@@ -626,6 +644,13 @@ class SE_FontDefineHandler : public SE_XmlElementHandler<SE_ElementSchema, _Elem
 {
 public:
     SE_FontDefineHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_StringDefineHandler : public  SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+    SE_StringDefineHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
     virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
@@ -940,6 +965,14 @@ public:
         else if(!strcmp(name, "FontDefine"))
         {
             return new SE_FontDefineHandler(elementManager);
+        }
+        else if(!strcmp(name, "String"))
+        {
+            return new SE_StringDefineHandler(elementManager);
+        }
+        else if(!strcmp(name, "TextProperty"))
+        {
+            return new SE_TextPropertyHandler(elementManager);
         }
 		else if(!strcmp(name, "Param"))
 		{
@@ -2030,6 +2063,69 @@ void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlEle
 	}
 	parent->mountPointSet.addMountPoint(mp);
 }
+void SE_TextPropertyHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	SE_ImageContent* imageContent = NULL;
+	std::string style;
+    std::string align;
+    std::string orientation;
+    std::string state;
+    int size;
+    SE_Vector3i color;
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "style"))
+        {
+            style = value;
+        }
+        else if(!strcmp(name, "color"))
+        {
+            SE_SignColor c = SE_Util::stringToSignColor(value);
+            color.x = c.data[0].value;
+            color.y = c.data[1].value;
+            color.z = c.data[2].value; 
+        }
+        else if(!strcmp(name, "size"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                size = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "align"))
+        {
+            align = value;
+        }
+        else if(!strcmp(name, "orientation"))
+        {
+            orientation = value;
+        }
+        else if(!strcmp(name, "state"))
+        {
+            state = value;
+        }
+        pAttribute = pAttribute->Next();
+	}
+    SE_TextProperty *p = new SE_TextProperty;
+    p->style = style;
+    p->color = color;
+    p->size = size;
+    p->align = align;
+    p->orientation = orientation;
+    p->state = state;
+    parent->addProperty(p);
+}
 void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
@@ -2194,6 +2290,33 @@ void SE_ParamHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	{
 		paramManager->setString(id.c_str(), paramValue.c_str());
 	}
+}
+void SE_StringDefineHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	std::string shaderID;
+    SE_FontManager* fontManager = SE_Application::getInstance()->getFontManager();
+	SE_StringID id;
+    SE_StringID data;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
+        else if(!strcmp(name, "data"))
+        {
+            data.set(value, SE_StringID::SE_UTF8);
+        }
+        pAttribute = pAttribute->Next();
+    }
+	SE_StringMap* stringMap = pro->impl->mStringTable.getItem(pro->xmlName.c_str()); 
+    stringMap->setItem(id, data);
 }
 void SE_FontDefineHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
@@ -3417,11 +3540,35 @@ SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)
 	SE_ElementSchema* e = elementMap->getItem(strList[1].c_str());
 	return e;
 }
+void SE_ResourceManager::loadString(const char* stringFileName)
+{
+	if(!stringFileName)
+		return;
+    SE_StringMap* stringMap = mImpl->mStringTable.getItem(stringFileName);
+    if(stringMap)
+        return;
+	stringMap = new SE_StringMap;
+    mImpl->mStringTable.setItem(SE_StringID(stringFileName), stringMap);
+	std::string fileFullPath = std::string(getDataPath()) + SE_SEP + "string" + SE_SEP + stringFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    ec.impl = mImpl;
+    ec.xmlName = stringFileName;
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
+    m.handleXmlChild(NULL, &doc, 0);
+}
 void SE_ResourceManager::loadFont(const char* fontDefineFileName)
 {
 	if(!fontDefineFileName)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + "fonts" + fontDefineFileName;
+	std::string fileFullPath = std::string(getDataPath()) + SE_SEP + "fonts" + SE_SEP +fontDefineFileName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3437,12 +3584,12 @@ void SE_ResourceManager::loadFont(const char* fontDefineFileName)
 void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, int& outLen)
 {
     std::string dataPath = getDataPath();
-    std::string filePath = dataPath + "/" + "fonts" + fontFileName;
+    std::string filePath = dataPath + SE_SEP + "fonts" + SE_SEP + fontFileName;
     char* data = NULL;
     int len = 0;
-    SE_IO::readFileAll(imageName, data, len);
+	SE_IO::readFileAll(filePath.c_str(), data, len);
     outData = data;
-    outLen = len;`
+    outLen = len;
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {
@@ -3730,7 +3877,24 @@ SE_StateChangeList* SE_ResourceManager::getStateChangeList(const char* stateChan
 		return NULL;
 	return scl->getItem(strList[1].c_str());
 }
-
+SE_StringID SE_ResourceManager::getString(const char* id)
+{
+    SE_Util::SplitStringList stringList = SE_Util::splitString(id, "/");
+    if(stringList.size() < 2)
+    {
+        LOGI("... string path error\n");
+        return SE_StringID::INVALID;
+    }
+    SE_StringMap* stringMap = mImpl->mStringTable.getItem(stringList[0].c_str());
+    if(!stringMap)
+    {
+        loadString(stringList[0].c_str());
+        stringMap = mImpl->mStringTable.getItem(stringList[0].c_str());
+    } 
+    if(!stringMap)
+        return SE_StringID::INVALID;
+    return stringMap->getItem(stringList[1].c_str());
+}
 SE_Action* SE_ResourceManager::getAction(const char* actionPath)
 {
     SE_Util::SplitStringList stringList = SE_Util::splitString(actionPath, "/");  

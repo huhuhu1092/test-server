@@ -115,6 +115,74 @@ public:
         }
         return false;
 	}
+	friend bool operator<(const SE_Vector2f& v1, const SE_Vector2f& v2)
+	{
+		if(v1.d[0] <= v2.d[0])
+		{
+		    if(v1.d[0] < v2.d[0])
+				return true;
+			else
+			{
+				if(v1.d[1] < v2.d[1])
+					return true;
+				else
+				    return false;
+			}
+		}
+		else 
+			return false;
+	}
+	friend bool operator>(const SE_Vector2f& v1, const SE_Vector2f& v2)
+	{
+		if(v1.d[0] >= v2.d[0])
+		{
+			if(v1.d[0] > v2.d[0])
+				return true;
+			else 
+			{
+				if(v1.d[1] > v2.d[1])
+				    return true;
+				else
+					return false;
+			}
+		}
+		else
+			return false;
+	}
+	friend bool operator <=(const SE_Vector2f& v1, const SE_Vector2f& v2)
+	{
+		if(v1.d[0] <= v2.d[0])
+		{
+			if(v1.d[0]  < v2.d[0])
+				return true;
+			else
+			{
+				if(v1.d[1] < v2.d[1])
+					return true;
+				else
+					return false;
+			}
+		}
+		else
+			return false;
+	}
+	friend bool operator >=(const SE_Vector2f& v1, const SE_Vector2f& v2)
+	{
+		if(v1.d[0] >= v2.d[0])
+		{
+			if(v1.d[0]  > v2.d[0])
+				return true;
+			else
+			{
+				if(v1.d[1] > v2.d[1])
+					return true;
+				else
+					return false;
+			}
+		}
+		else
+			return false;
+	}
     union
     {
         float d[2];
@@ -184,6 +252,90 @@ public:
         return false;
 
     }
+	friend bool operator>=(const SE_Vector3f& v1, const SE_Vector3f& v2)
+	{
+		int n = 0;
+		for(int i = 0 ; i < 3 ; i++)
+		{
+			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+			{
+				n = i;
+				break;
+			}
+		}
+		if(n < 3)
+		{
+			if(v1.d[n] > v2.d[n])
+				return true;
+			else
+				return false;
+		}
+		else
+			return true;
+	}
+	friend bool operator<=(const SE_Vector3f& v1, const SE_Vector3f& v2)
+	{
+		int n = 0;
+		for(int i = 0 ; i < 3 ; i++)
+		{
+			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+			{
+				n = i;
+				break;
+			}
+		}
+		if(n < 3)
+		{
+			if(v1.d[n] < v2.d[n])
+				return true;
+			else
+				return false;
+		}
+		else
+			return true;
+	}
+	friend bool operator>(const SE_Vector3f& v1, const SE_Vector3f& v2)
+	{
+		int n = 0;
+		for(int i = 0 ; i < 3 ; i++)
+		{
+			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+			{
+				n = i;
+				break;
+			}
+		}
+		if(n < 3)
+		{
+			if(v1.d[n] > v2.d[n])
+				return true;
+			else
+				return false;
+		}
+		else
+			return false;
+	}
+	friend bool operator<(const SE_Vector3f& v1, const SE_Vector3f& v2)
+	{
+		int n = 0;
+		for(int i = 0 ; i < 3 ; i++)
+		{
+			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
+			{
+				n = i;
+				break;
+			}
+		}
+		if(n < 3)
+		{
+			if(v1.d[n] < v2.d[n])
+				return true;
+			else
+				return false;
+		}
+		else
+			return false;
+	}
     inline float operator[](int i)
     {
 	    return d[i];
@@ -506,7 +658,92 @@ public:
         return true;
 
     }
+    friend bool operator<(const SE_Vector3i& v1, const SE_Vector3i& v2)
+	{
+		int n = 0;
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] != v2.d[i])
+			{
+                n = i;
+				break;
+			}
+        }
+		if(n == 3)
+			return false;
+		else
+		{
+			if(v1.d[n] < v2.d[n])
+				return true;
+			else
+				return false;
+		}
 
+	}
+    friend bool operator>(const SE_Vector3i& v1, const SE_Vector3i& v2)
+	{
+		int n = 0;
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] != v2.d[i])
+			{
+                n = i;
+				break;
+			}
+        }
+		if(n == 3)
+			return false;
+		else
+		{
+			if(v1.d[n] > v2.d[n])
+				return true;
+			else
+				return false;
+		}
+	}
+	friend bool operator<=(const SE_Vector3i& v1, const SE_Vector3i& v2)
+	{
+		int n = 0;
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] != v2.d[i])
+			{
+                n = i;
+				break;
+			}
+        }
+		if(n == 3)
+			return true;
+		else
+		{
+			if(v1.d[n] < v2.d[n])
+				return true;
+			else
+				return false;
+		}
+	}
+    friend bool operator>=(const SE_Vector3i& v1, const SE_Vector3i& v2)
+	{
+		int n = 0;
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            if(v1.d[i] != v2.d[i])
+			{
+                n = i;
+				break;
+			}
+        }
+		if(n == 3)
+			return true;
+		else
+		{
+			if(v1.d[n] > v2.d[n])
+				return true;
+			else
+				return false;
+		}
+
+	}
 public:
     union
     {

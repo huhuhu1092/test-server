@@ -1,7 +1,8 @@
 #include "SE_FontManager.h"
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
-#include "SE_FontDefine.h"
+#include "SE_ImageData.h"
+#include "SE_Log.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H 
 #include FT_GLYPH_H
@@ -12,9 +13,9 @@ SE_FontManager::~SE_FontManager()
 {}
 SE_CharFontMap* SE_FontManager::loadCharStyle(const SE_CharStyle& cs)
 {
-    
+	return NULL;
 }
-void SE_FontManager::setStyle(const SE_CharStyle& cs, char* fontData, const std::string& fontType;)
+void SE_FontManager::setStyle(const SE_CharStyle& cs, char* fontData, const std::string& fontType)
 {
     SE_CharFontMap* charFontMap = mFontStyleMap.getItem(cs);
     if(charFontMap == NULL)
@@ -54,7 +55,7 @@ void SE_FontManager::setStyle(const SE_CharStyle& cs, const std::string& fontFil
     fontResData.fontDataLen = len;
     fontResData.fontType = fontType;
 }
-void SE_FontManager::initChar(SE_CharFontMap* charFontMap, const SE_CharCode& ch, int fontSize, const SE_Vector3f& fontColor);
+SE_ImageData* SE_FontManager::initChar(SE_CharFontMap* charFontMap, const SE_CharCode& ch, int fontSize, const SE_Vector3i& fontColor)
 {
     SE_FontResData& fontResData = charFontMap->getProperty();
     SE_ASSERT(fontResData.fontData);
@@ -71,7 +72,7 @@ void SE_FontManager::initChar(SE_CharFontMap* charFontMap, const SE_CharCode& ch
             LOGI("can not init free type lib\n");
             return NULL;
         }
-        error = FT_New_Face(library, fontResData.fontData, fontResData.fontDataLen, 0, &face);
+        error = FT_New_Memory_Face(library, (const FT_Byte *)fontResData.fontData, fontResData.fontDataLen, 0, &face);
         if(error == FT_Err_Unknown_File_Format)
         {
             LOGI("font format is not supported\n");
@@ -165,7 +166,7 @@ SE_ImageData* SE_FontManager::getImageData(const SE_CharCode& c, const SE_FontPr
         {
             SE_ColorFontMap* colorFontMap = new SE_ColorFontMap;
             colorFontMap->setItem(p.fontColor, imageData);
-            sizeFonMap->setItem(p.fontSize, colorFontMap);
+            sizeFontMap->setItem(p.fontSize, colorFontMap);
             return imageData;
         }
         else

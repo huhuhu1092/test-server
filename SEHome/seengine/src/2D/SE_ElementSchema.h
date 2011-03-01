@@ -5,12 +5,28 @@
 #include "SE_TableManager.h"
 #include "SE_Layer.h"
 #include "SE_MountPoint.h"
+#include "SE_Vector.h"
 class SE_ElementSchema;
 class SE_2DNodeElement;
 class SE_ElementSchemaVisitor
 {
 public:
 	virtual void visit(SE_ElementSchema* e) = 0;
+};
+class SE_ElementProperty
+{
+public:
+    virtual ~SE_ElementProperty() {}
+};
+class SE_TextProperty : public SE_ElementProperty
+{
+public:
+    std::string style;
+    SE_Vector3i color;
+    int size;
+    std::string align;
+    std::string orientation;
+    std::string state;
 };
 class SE_Element;
 class SE_ElementManager;
@@ -24,6 +40,7 @@ public:
     void addChild(SE_ElementSchema* ec);
     void setParent(SE_ElementSchema* p);
     void addContent(SE_ElementContent* ec);
+    void addProperty(SE_ElementProperty* p);
 	size_t getContentNum()
 	{
 		return contents.size();
@@ -56,6 +73,8 @@ private:
     _ElementSchemaList children;
     typedef std::list<SE_ElementContent*> _ElementContentList;
     _ElementContentList contents;
+    typedef std::list<SE_ElementProperty*> _ElementPropertyList;
+    _ElementPropertyList properties;
     
 };
 typedef SE_Table<SE_StringID, SE_ElementSchema*> SE_ElementSchemaMap;

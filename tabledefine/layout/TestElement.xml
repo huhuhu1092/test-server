@@ -22,8 +22,8 @@
         <Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" state = "normal" />
         <Image dataref = "CharaterFaceImageDefine.xml/CFaceaccessories/C001/1" state = "highlighted" />
     </Element>
-    <Element id = "testText" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "4" width = "200" height = "32" type = "textview" text = "string.xml/c1">
-        <TextProperty id = "q1" style = "normal" color = "1.0 0.0 0.0" size = "16" align = "left" orientation = "horizontal" state = "normal" />
+    <Element id = "testText" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "4" width = "200" height = "32" type = "textview" text = "strings.xml/c1">
+        <TextProperty id = "q1" style = "normal" color = "255 0 0" size = "16" align = "left" orientation = "horizontal" state = "normal" />
     </Element>
     <!--												
 

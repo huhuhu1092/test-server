@@ -6,6 +6,10 @@ class SE_CharStyle
 public:
     SE_CharStyle()
     {}
+	SE_CharStyle(const std::string s)
+	{
+		mStyle = s;
+	}
     void set(const std::string& str)
     {
         mStyle = str;
@@ -35,7 +39,7 @@ public:
         return compare(l, r) == 0 || compare(l, r) > 0;
     }
 private:
-    int compare(const SE_CodeStyle& l, const SE_CodeStyle& r)
+    friend int compare(const SE_CharStyle& l, const SE_CharStyle& r)
     {
         return l.mStyle.compare(r.mStyle);
     }

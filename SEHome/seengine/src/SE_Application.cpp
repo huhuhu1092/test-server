@@ -14,6 +14,7 @@
 #include "SE_CameraManager.h"
 #include "SE_ParamManager.h"
 #include "SE_SpatialManager.h"
+#include "SE_FontManager.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -41,6 +42,7 @@ SE_Application::SE_Application()
 	mCameraManager = new SE_CameraManager;
 	mParamManager = new SE_ParamManager;
 	mSpatialManager = new SE_SpatialManager;
+	mFontManager =  new SE_FontManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -81,6 +83,8 @@ SE_Application::~SE_Application()
 		delete mParamManager;
 	if(mSpatialManager)
 		delete mSpatialManager;
+	if(mFontManager)
+		delete mFontManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {

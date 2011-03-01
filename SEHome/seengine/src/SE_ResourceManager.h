@@ -67,6 +67,7 @@ public:
 	SE_Spatial* getScene(const SE_SceneID& sceneID);
 	void setScene(const SE_SceneID& id, SE_Spatial* spatial);
 	void removeScene(const SE_SceneID& id);
+
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
@@ -87,8 +88,9 @@ public:
 	void loadRenderer(const char* rendererFileName);
     void loadElementSchema(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
-    char* loadFontData(const char* fontFileName, char*& outData, int& outLen);
+    void loadFontData(const char* fontFileName, char*& outData, int& outLen);
     void loadFont(const char* fontDefineFileName);
+    void loadString(const char* stringFileName);
 	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,
 						  SE_ImageMapVisitor* imageMapTravel);
@@ -99,6 +101,7 @@ public:
 	void loadStateTable(const char* stateTableURI);
 	void loadStateChangeTable(const char* stateChangeTableURI);
 	SE_StateChangeList* getStateChangeList(const char* stateChangeURI);
+    SE_StringID getString(const char* id);
 	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
 	SE_ElementSchema* getElementSchema(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);

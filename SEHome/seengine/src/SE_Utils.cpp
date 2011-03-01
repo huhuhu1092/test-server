@@ -705,3 +705,78 @@ std::string SE_Util::floatToString(float f)
 	std::string str = buf;
 	return str;
 }
+SE_CharCode SE_Util::stringToCharCode(const char* s, int len)
+{
+    enum {SE_UNICODE_MODE, SE_ASCII_MODE};
+    if(s == NULL || len == 0)
+        return SE_CharCode();
+    return SE_CharCode();
+}
+static int utf32_at_internal(const char* cur, size_t *num_read)
+{
+    const char first_char = *cur;
+    if ((first_char & 0x80) == 0) { // ASCII
+        *num_read = 1;
+        return *cur;
+    }
+    cur++;
+    unsigned int mask, to_ignore_mask;
+    size_t num_to_read = 0;
+    unsigned int utf32 = first_char;
+    for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0xFFFFFF80;
+         (first_char & mask);
+         num_to_read++, to_ignore_mask |= mask, mask >>= 1) {
+        // 0x3F == 00111111
+        utf32 = (utf32 << 6) + (*cur++ & 0x3F);
+    }
+    to_ignore_mask |= mask;
+    utf32 &= ~(to_ignore_mask << (6 * (num_to_read - 1)));
+
+    *num_read = num_to_read;
+    return static_cast<int>(utf32);
+}
+size_t SE_Util::getUtf32LenFromUtf8(const char* src, size_t src_len)
+{
+    if (src == NULL || src_len == 0) {
+        return 0;
+    }
+    size_t ret = 0;
+    const char* cur;
+    const char* end;
+    size_t num_to_skip;
+    for (cur = src, end = src + src_len, num_to_skip = 1;
+         cur < end;
+         cur += num_to_skip, ret++) {
+        const char first_char = *cur;
+        num_to_skip = 1;
+        if ((first_char & 0x80) == 0) {  // ASCII
+            continue;
+        }
+        int mask;
+
+        for (mask = 0x40; (first_char & mask); num_to_skip++, mask >>= 1) {
+        }
+    }
+    return ret;    
+}
+size_t SE_Util::utf8ToUtf32(const char* src, size_t src_len, unsigned int* dst, size_t dst_len)
+{
+    if (src == NULL || src_len == 0 || dst == NULL || dst_len == 0) {
+        return 0;
+    }
+
+    const char* cur = src;
+    const char* end = src + src_len;
+    unsigned int* cur_utf32 = dst;
+    const unsigned int* end_utf32 = dst + dst_len;
+    while (cur_utf32 < end_utf32 && cur < end) {
+        size_t num_read;
+        *cur_utf32++ =
+                static_cast<unsigned int>(utf32_at_internal(cur, &num_read));
+        cur += num_read;
+    }
+    if (cur_utf32 < end_utf32) {
+        *cur_utf32 = 0;
+    }
+    return static_cast<size_t>(cur_utf32 - dst);    
+}

@@ -1,6 +1,7 @@
 #ifndef SE_ID_H
 #define SE_ID_H
 #include <string>
+#include <vector>
 #include "SE_CharCode.h"
 class SE_BufferOutput;
 class SE_BufferInput;
@@ -10,8 +11,8 @@ public:
 	enum ENCODING_TYPE {SE_ASCII, SE_UNICODE, SE_UTF8, SE_UTF16, SE_UTF32};
     SE_StringID();
     ~SE_StringID();
-    SE_StringID(const char* id, ENCODING_TYPE t = ASCII);
-    SE_StringID(const char* id, int size, ENCODING_TYPE t = ASCII);
+    SE_StringID(const char* id, ENCODING_TYPE t = SE_ASCII);
+    SE_StringID(const char* id, int size, ENCODING_TYPE t = SE_ASCII);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
 	friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);
@@ -23,7 +24,15 @@ public:
 	void print() const;
 	int getCharNum();
 	SE_CharCode getCharCode(int i);
+    void set(const char* str, ENCODING_TYPE t)
+    {
+        mStr = str;
+        mType = t;
+        mCharCodeArray.clear();
+    }
 	static SE_StringID INVALID;
+private:
+	void convertToCharCode();
 private:
 	std::vector<SE_CharCode> mCharCodeArray;
 	std::string mStr;

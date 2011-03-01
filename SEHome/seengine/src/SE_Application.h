@@ -21,6 +21,7 @@ class SE_RenderTargetManager;
 class SE_CameraManager;
 class SE_ParamManager;
 class SE_SpatialManager;
+class SE_FontManager;
 class SE_DelayDestroy;
 class SE_Application
 {
@@ -116,6 +117,11 @@ public:
 	{
 		return mSpatialManager;
 	}
+	SE_FontManager* getFontManager()
+	{
+		return mFontManager;
+	}
+
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
 	//index 0 to max camera num
@@ -206,6 +212,7 @@ protected:
 	SE_CameraManager* mCameraManager;
 	SE_ParamManager* mParamManager;
 	SE_SpatialManager* mSpatialManager;
+	SE_FontManager* mFontManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

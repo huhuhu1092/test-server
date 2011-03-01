@@ -246,7 +246,8 @@ public:
 	}
 	void setCanPointed(bool b);
 	SE_Element* getCanPointedElement();
-	SE_StringID getStateName(int state) const;
+	static SE_StringID getStateName(int state);
+	static int getStateFromName(const char* name);
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);

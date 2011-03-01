@@ -262,7 +262,50 @@ void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
         }
     }
 }
-SE_StringID SE_Element::getStateName(int state) const
+int SE_Element::getStateFromName(const char* name)
+{
+	if(!strcmp(name, "normal"))
+	{
+		return NORMAL;
+	}
+	else if(!strcmp(name, "highlighted"))
+	{
+		return HIGHLIGHTED;
+	}
+	else if(!strcmp(name, "selected"))
+	{
+		return SELECTED;
+	}
+	else if(!strcmp(name, "invisible"))
+	{
+		return INVISIBLE;
+	}
+	else if(!strcmp(name, "inactive"))
+	{
+		return INACTIVE;
+	}
+	else if(!strcmp(name, "animate_begin"))
+	{
+		return ANIMATE_BEGIN;
+	}
+	else if(!strcmp(name, "animate_running"))
+	{
+		return ANIMATE_RUNNING;
+	}
+	else if(!strcmp(name, "animate_suspend"))
+	{
+		return ANIMATE_SUSPEND;
+	}
+	else if(!strcmp(name, "animate_end"))
+	{
+		return ANIMATE_END;
+	}
+	else
+	{
+		return INVALID;
+	}
+}
+SE_StringID SE_Element::getStateName(int state)
 {
 	switch(state)
 	{

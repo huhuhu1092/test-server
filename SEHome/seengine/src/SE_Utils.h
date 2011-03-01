@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include "SE_CharCode.h"
 template <typename T>
 typename std::list<T>::const_iterator listElementRef(const std::list<T>& data, int index)
 {
@@ -73,8 +74,16 @@ public:
 	static SplitStringList extractParamString(const char* str);
 	static std::string resolveParamString(const char* str);
 	static bool isDigit(const char* str);
+    //return is a ascii string
 	static std::string intToString(int i);
 	static std::string floatToString(float f);
+    //string to charcode
+    //string format : \u78CE is unicode
+    //                \a45 is ascii
+    static SE_CharCode stringToCharCode(const char* s, int len);
+    static size_t getUtf32LenFromUtf8(const char* src, size_t src_len); 
+    static size_t utf8ToUtf32(const char* src, size_t src_len,
+                       unsigned int* dst, size_t dst_len);
 };
 
 #endif /** end SE_UTILS_H*/

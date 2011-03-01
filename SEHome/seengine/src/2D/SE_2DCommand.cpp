@@ -41,6 +41,7 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     resourceManager->setDataPath(dataPath.c_str());
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
+	resourceManager->loadFont("fontDefine.xml");
     SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
 	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
