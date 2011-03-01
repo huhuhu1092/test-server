@@ -1,0 +1,23 @@
+<ImageTable id = "ChessGame" >
+    <ImageItem id = "chessboard" name = "chess/chessboard.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "blackbackground" name = "chess/blackbackground.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redbackground" name = "chess/redbackground.png" pivotx = "0" pivoty = "0" />
+
+    <ImageItem id = "blacksoldiers" name = "chess/blacksoldiers.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redsoldiers" name = "chess/redsoldiers.png" pivotx = "0" pivoty = "0" />
+    
+    <ImageItem id = "blackhorse" name = "chess/blackhorse.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redhorse" name = "chess/redhorse.png" pivotx = "0" pivoty = "0" />
+    
+    <ImageItem id = "blackchariot" name = "chess/blackchariot.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redchariot" name = "chess/redchariot.png" pivotx = "0" pivoty = "0" />
+
+    <ImageItem id = "blackknight" name = "chess/blackknight.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redknight" name = "chess/redknight.png" pivotx = "0" pivoty = "0" />
+
+    <ImageItem id = "blackking" name = "chess/blackking.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redking" name = "chess/redking.png" pivotx = "0" pivoty = "0" />
+    
+    <ImageItem id = "blackchancellor" name = "chess/blackchancellor.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redchancellor" name = "chess/redchancellor.png" pivotx = "0" pivoty = "0" />
+</ImageTable>

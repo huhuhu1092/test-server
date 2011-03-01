@@ -1830,11 +1830,6 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 			LOGE("... element error : top element must has id\n");
 		}
 	}
-	if(parent && !hasMountPointRef)
-	{
-		LOGE("... element error : child element must has mountpointref\n");
-	}
-
 	if(parent)
     {
         parent->addChild(elementSchema);

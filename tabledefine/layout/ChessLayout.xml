@@ -1,0 +1,101 @@
+<Element id = "ChessRoot" pivotx = "0" pivoty = "0">
+    <MountPoint id = "chessboard" x = "8" y = "194" />
+    <MountPoint id = "redchariot1" x = "2" y = "660" />
+    <MountPoint id = "redhorse1" x = "55" y = "660" />
+    <MountPoint id = "redchancellor1" x = "108" y = "660" />
+    <MountPoint id = "redknight1" x = "161" y = "660" />
+    <MountPoint id = "redking" x = "214" y = "660" />
+
+    <MountPoint id = "redknight2" x = "267" y = "660" />
+    <MountPoint id = "redchancellor2" x = "320" y = "660" />
+    <MountPoint id = "redhorse2" x = "373" y = "660" />
+    <MountPoint id = "redchariot2" x = "426" y = "660" />
+
+    <Element id = "ChessBoard" pivotx = "0" pivoty = "0" mountpointref = "chessboard" layer = "1" >
+        <Image dataref = "ChessImage.xml/ChessGame/chessboard" />
+    </Element>
+
+    <Element id = "redchariot1" poivotx = "0" pivoty = "0" mountpointref = "redchariot1" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redchariot" />
+        </Element>
+    </Element>
+
+    <Element id = "redhorse1" poivotx = "0" pivoty = "0" mountpointref = "redhorse1" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redhorse" />
+        </Element>
+    </Element>
+
+    <Element id = "redchancellor1" poivotx = "0" pivoty = "0" mountpointref = "redchancellor1" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redchancellor" />
+        </Element>
+
+    </Element>
+
+    <Element id = "redknight1" poivotx = "0" pivoty = "0" mountpointref = "redknight1" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redknight" />
+        </Element>
+    </Element>
+
+    <Element id = "redking" poivotx = "0" pivoty = "0" mountpointref = "redking" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redking" />
+        </Element>
+    </Element>
+
+
+    <Element id = "redchariot2" poivotx = "0" pivoty = "0" mountpointref = "redchariot2" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redchariot" />
+        </Element>
+    </Element>
+
+    <Element id = "redhorse2" poivotx = "0" pivoty = "0" mountpointref = "redhorse2" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redhorse" />
+        </Element>
+    </Element>
+
+    <Element id = "redchancellor2" poivotx = "0" pivoty = "0" mountpointref = "redchancellor2" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redchancellor" />
+        </Element>
+
+    </Element>
+
+    <Element id = "redknight2" poivotx = "0" pivoty = "0" mountpointref = "redknight2" layer = "2" >
+        <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
+        </Element>
+        <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/redknight" />
+        </Element>
+    </Element>
+</Element>
