@@ -63,7 +63,7 @@ public:
     }
     void set(int index, int id)
     {
-        id[index] = id;
+        this->id[index] = id;
     }
 private:
     int id[2];
