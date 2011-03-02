@@ -853,7 +853,7 @@ void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& valu
 }
 void SE_TextureElement::setImageData(SE_Primitive* primitive)
 {
-	primitive->setImageData(0, mImageData, SE_TEXTURE0, NOT_OWN);
+	primitive->setImageData(0, mImageData, SE_TEXTURE0);
 }
 void SE_TextureElement::setSurface(SE_Surface* surface)
 {
@@ -1054,7 +1054,7 @@ void SE_ImageElement::setImageData(SE_Primitive* primitive)
 		    dp.setY(imageUnit->imageRect.y);
 		    dp.setWidth(imageUnit->imageRect.width);
 		    dp.setHeight(imageUnit->imageRect.height);
-		    primitive->setImageData(0, imageData, (SE_TEXUNIT_TYPE)j, NOT_OWN, dp);
+		    primitive->setImageData(0, imageData, (SE_TEXUNIT_TYPE)j, dp);
 			j++;
 			mImageUnits[i].valid = 1;
 		}
@@ -1874,7 +1874,7 @@ void SE_ColorEffectElement::setImageData(SE_Primitive* primitive, SE_ImageData* 
 	dp.setY(0);
 	dp.setWidth(imageData->getWidth());
 	dp.setHeight(imageData->getHeight());
-    primitive->setImageData(0, imageData, texType, NOT_OWN, dp);
+    primitive->setImageData(0, imageData, texType, dp);
 }
 void SE_ColorEffectElement::setImageData(SE_Primitive* primitive, const SE_StringID& imageID, SE_TEXUNIT_TYPE texType)
 {
@@ -1886,7 +1886,7 @@ void SE_ColorEffectElement::setImageData(SE_Primitive* primitive, const SE_Strin
 	dp.setY(iu.imageRect.y);
 	dp.setWidth(iu.imageRect.width);
 	dp.setHeight(iu.imageRect.height);
-	primitive->setImageData(0, imageData, texType, NOT_OWN, dp);
+	primitive->setImageData(0, imageData, texType, dp);
 }
 void SE_ColorEffectElement::setImageData(SE_Primitive* primitive)
 {

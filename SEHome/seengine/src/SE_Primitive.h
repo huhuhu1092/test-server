@@ -12,15 +12,16 @@ class SE_TextureCoordData;
 class SE_Primitive
 {
 public:
-	//static SE_PrimitiveID normalizeRectPrimitiveID;
-	//static SE_PrimitiveID normalizeCubePrimitiveID;
+    SE_Primitive();
 	virtual ~SE_Primitive() 
 	{}
 	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 	{
+        outMesh = NULL;
+        outMeshNum = 0;
 	}
 	// index is face index
-    virtual  void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+    virtual  void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{}
     virtual float getPaddingX()
@@ -71,29 +72,14 @@ private:
 	struct _ImageData
 	{
 		SE_ImageData* imageData;
-		SE_OWN_TYPE own;
-		_ImageData()
-		{
-			imageData = NULL;
-			own = NOT_OWN;
-		}
-        ~_ImageData()
-        {
-            if(own == OWN && imageData)
-            {
-                delete imageData;
-                imageData = NULL;
-            }
-        }
+        SE_ImageDataID imageDataID;
 	};
 public:
 	//SE_RectPrimitive(const SE_Rect3D& rect);
 	static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
-    //when imageData's width and height is not power of 2
-    //we need to adjust the texture coordidate
-	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
     //void setImagePortion(const SE_ImageDataPortion& portion);
     void setMaterialData(const SE_MaterialData& materialData)
 	{
@@ -111,19 +97,22 @@ private:
 	SE_RectPrimitive(const SE_Rect3D& rect);
 	SE_RectPrimitive(const SE_RectPrimitive&);
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
-
+    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3);
+    static bool createGeometryData(SE_RectPrimitive* rectPrimitive);
 private:
 	SE_Rect3D mRect3D;
-	//_ImageData mImageDataArray[SE_Texture::TEXUNIT_NUM];
-	//SE_GeometryData* mGeometryData;
-	//SE_TextureCoordData* mTexCoordData;
-	SE_Wrapper<_ImageData>* mImageDataArray[SE_TEXUNIT_NUM];
-	SE_Wrapper<SE_GeometryData>* mGeometryData;
-	SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
+	SE_ImageData* mImageDataArray[SE_TEXUNIT_NUM];
+	SE_GeometryData* mGeometryData;
+    SE_GeometryDataID mGeometryDataID;
+	SE_TextureCoordData* mTexCoordData;
+    SE_TextureCoordDataID mTexCoordDataID;
+	//SE_Wrapper<_ImageData>* mImageDataArray[SE_TEXUNIT_NUM];
+	//SE_Wrapper<SE_GeometryData>* mGeometryData;
+	//SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
-    SE_ImageDataPortion mImageDataPortion;
-    int mAdjustedStartX;//the x coordinate after change width to power2 width
-    int mAdjustedStartY;//the y coordinate after change height to power2 height
+    //SE_ImageDataPortion mImageDataPortion;
+   // int mAdjustedStartX;//the x coordinate after change width to power2 width
+   // int mAdjustedStartY;//the y coordinate after change height to power2 height
 };
 
 class SE_BoxPrimitive : public SE_Primitive
@@ -170,7 +159,7 @@ public:
 		}
 	}
 	//index is the face index in this primitive
-	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{
 		if(index < LEFT || index > ALL)
@@ -178,14 +167,14 @@ public:
 		if(index < ALL)
 		{
 			if(mRectPrimitive[index])
-				mRectPrimitive[index]->setImageData(0, imageData, texUnitType, own, imageDataPortion);
+				mRectPrimitive[index]->setImageData(0, imageData, texUnitType, imageDataPortion);
 		}
 		else
 		{
 			for(int i = LEFT; i < ALL ; i++)
 			{
 				if(mRectPrimitive[i])
-					mRectPrimitive[i]->setImageData(0, imageData, texUnitType, own, imageDataPortion);
+					mRectPrimitive[i]->setImageData(0, imageData, texUnitType, imageDataPortion);
 			}
 		}
 	}
@@ -299,7 +288,7 @@ public:
     //imageData must from SE_ResourceManager
     //SE_RectPatch will not own imageData
     //void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
-	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
 	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
     float getPaddingX()

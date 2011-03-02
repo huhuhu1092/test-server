@@ -8,21 +8,37 @@
 #include <memory>
 //SE_PrimitiveID SE_Primitive::normalizeRectPrimitiveID = SE_CommonID(0, 0, 0, 0);
 //SE_PrimitiveID SE_Primitive::normalizeCubePrimitiveID = SE_CommonID(0, 0, 0, 1);
-SE_RectPrimitive::SE_RectPrimitive(const SE_Rect3D& rect) : mRect3D(rect)
+SE_Primitive::SE_Primitive()
 {
-    memset(mImageDataArray, 0, sizeof(SE_Wrapper<_ImageData>*) * SE_TEXUNIT_NUM);
-    mGeometryData = NULL;
-    mTexCoordData = NULL;
-    mMaterialData = NULL;
     mSampleMin = 0;
     mSampleMag = 0;
     mWrapS = 0;
     mWrapT = 0;
-    mAdjustedStartX = 0;
-    mAdjustedStartY = 0;
+}
+SE_RectPrimitive::SE_RectPrimitive()
+{
+    memset(mImageDataArray, 0, SE_TEXUNIT_NUM * sizeof(SE_ImageData*));
+    mGeometryData = NULL;
+    mTexCoordData = NULL;
+    mMaterialData = NULL;    
+}
+SE_RectPrimitive::SE_RectPrimitive(const SE_Rect3D& rect) : mRect3D(rect)
+{
+    memset(mImageDataArray, 0, SE_TEXUNIT_NUM * sizeof(SE_ImageData*));
+    mGeometryData = NULL;
+    mTexCoordData = NULL;
+    mMaterialData = NULL;
+
+    //mAdjustedStartX = 0;
+    //mAdjustedStartY = 0;
 }
 SE_RectPrimitive::~SE_RectPrimitive()
 {
+    if(mGeometryData)
+        delete mGeometryData;
+    if(mTexCoordData)
+        delete mTexCoordData;
+    /*
     mGeometryData->dec();
     mTexCoordData->dec();
     if(mGeometryData->getNum() == 0)
@@ -44,6 +60,76 @@ SE_RectPrimitive::~SE_RectPrimitive()
 			}
 		}
     }
+    */
+}
+bool SE_RectPrimitive::createGeometryData(SE_RectPrimitive* rectPrimitive)
+{
+	SE_Vector3f* vertex = new SE_Vector3f[4];
+    if(!vertex)
+        return false;
+    rectPrimitive->mRect3D.getVertex(vertex);
+    SE_Vector3i* faces = new SE_Vector3i[2];
+    if(!faces)
+    {
+        delete[] vertex;
+        return false;
+    }
+    rectPrimitive->mRect3D.getFaces(faces);
+    SE_GeometryData* geomData = new SE_GeometryData;
+    if(!geomData)
+    {
+        delete[] vertex;
+        delete[] faces;
+        return false;
+    }
+    geomData->setVertexArray(vertex, 4);
+	geomData->setFaceArray(faces, 2);
+	rectPrimitive->mGeometryData = geomData;
+    return true;
+}
+bool SE_RectPrimitive::createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3)
+{
+    SE_Vector2f* texVertex = new SE_Vector2f[4];
+    if(!texVertex)
+    {
+		return false;
+    }
+    texVertex[0] = v0;
+    texVertex[1] = v1;
+    texVertex[2] = v2;
+    texVertex[3] = v3;
+    SE_Vector3i* texFaces = new SE_Vector3i[2];
+    if(!texFaces)
+    {
+        delete[] texVertex;
+		return false;
+    }
+	SE_Vector3i* faces = rectPrimitive->mGeometryData->getFaceArray();
+	int faceNum = rectPrimitive->mGeometryData->getFaceNum();
+	memcpy(texFaces, faces, faceNum * sizeof(SE_Vector3i));
+	/*
+    texFaces[0].x = 0;
+    texFaces[0].y = 1;
+    texFaces[0].z = 2;
+    texFaces[1].x = 0;
+    texFaces[1].y = 2;
+    texFaces[1].z = 3;
+	*/
+    SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
+    if(!texCoordData)
+    {
+        delete[] texVertex;
+        delete[] texFaces;
+        return false;
+    }
+    texCoordData->setTexVertexArray(texVertex, 4);
+    texCoordData->setTexFaceArray(texFaces, 2);
+    rectPrimitive->mTexCoordData = texCoordData;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    rectPrimitive->mTexCoordDataID = SE_ID::createTextureCoordDataID();
+    resourceManager->setTextureCoordData(rectPrimitive->mTexCoordDataID, rectPrimitive->mTexCoordData);
+   
+    return true;
 }
 void SE_RectPrimitive::create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
 {
@@ -54,85 +140,10 @@ void SE_RectPrimitive::create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive
         outPrimitiveID = SE_PrimitiveID::INVALID;
         return;
     }
-	SE_Vector3f* vertex = new SE_Vector3f[4];
-	if(!vertex)
+    bool ret = createGeometryData(rectPrimitive);
+    if(!ret)
     {
         delete rectPrimitive;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-	rectPrimitive->mRect3D.getVertex(vertex);
-    SE_Vector3i* faces = new SE_Vector3i[2];
-    if(!faces)
-    {
-        delete rectPrimitive;
-        delete[] vertex;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    rectPrimitive->mRect3D.getFaces(faces);
-    SE_GeometryData* geomData = new SE_GeometryData;
-    if(!geomData)
-    {
-        delete rectPrimitive;
-        delete[] vertex;
-        delete[] faces;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    geomData->setVertexArray(vertex, 4);
-	geomData->setFaceArray(faces, 2);
-	rectPrimitive->mGeometryData = new SE_Wrapper<SE_GeometryData>(geomData, SE_Wrapper<SE_GeometryData>::NOT_ARRAY);
-    if(!rectPrimitive->mGeometryData)
-    {
-        delete rectPrimitive;
-        delete geomData;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    SE_Vector2f* texVertex = new SE_Vector2f[4];
-    if(!texVertex)
-    {
-        delete rectPrimitive;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    texVertex[0] = SE_Vector2f(0, 0);
-    texVertex[1] = SE_Vector2f(1, 0);
-    texVertex[2] = SE_Vector2f(1, 1);
-    texVertex[3] = SE_Vector2f(0, 1);
-    SE_Vector3i* texFaces = new SE_Vector3i[2];
-    if(!texFaces)
-    {
-        delete rectPrimitive;
-        delete[] texVertex;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    memcpy(texFaces, faces, sizeof(SE_Vector3i) * 2);
-    SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-    if(!texCoordData)
-    {
-        delete rectPrimitive;
-        delete[] texVertex;
-        delete[] texFaces;
-        outPrimitive = NULL;
-        outPrimitiveID = SE_PrimitiveID::INVALID;
-		return;
-    }
-    texCoordData->setTexVertexArray(texVertex, 4);
-    texCoordData->setTexFaceArray(texFaces, 2);
-    rectPrimitive->mTexCoordData = new SE_Wrapper<SE_TextureCoordData>(texCoordData, SE_Wrapper<SE_TextureCoordData>::NOT_ARRAY);
-    if(!rectPrimitive->mTexCoordData)
-    {
-        delete rectPrimitive;
-        delete texCoordData;
         outPrimitive = NULL;
         outPrimitiveID = SE_PrimitiveID::INVALID;
 		return;
@@ -141,6 +152,8 @@ void SE_RectPrimitive::create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive
     outPrimitiveID = SE_ID::createPrimitiveID();
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     resourceManager->setPrimitive(outPrimitiveID, outPrimitive);
+    rectPrimitive->mGeometryDataID = SE_ID::createGeometryDataID();
+    resourceManager->setGeometryData(rectPrimitive->mGeometryDataID, rectPrimitive->mGeometryData);
 }
 SE_RectPrimitive* SE_RectPrimitive::clone()
 {
@@ -150,12 +163,12 @@ SE_RectPrimitive* SE_RectPrimitive::clone()
      if(mGeometryData)
      {
          primitive->mGeometryData = mGeometryData;
-         mGeometryData->inc();
+         primitive->mGeometryDataID = mGeometryDataID;
      }
      if(mTexCoordData)
      {
          primitive->mTexCoordData = mTexCoordData;
-         mTexCoordData->inc();
+         primitive->mTexCoordDataID = mTexCoordDataID;
      }
      if(mMaterialData)
      {
@@ -173,7 +186,6 @@ SE_RectPrimitive* SE_RectPrimitive::clone()
          if(mImageDataArray[i])
          {
              primitive->mImageDataArray[i] = mImageDataArray[i];
-             mImageDataArray[i]->inc();
          }
      }
 	 return primitive;
@@ -217,147 +229,59 @@ void SE_RectPrimitive::setImagePortion(const SE_ImageDataPortion& portion)
     mTexCoordData  = new SE_Wrapper<SE_TextureCoordData>(texCoordData, SE_Wrapper<SE_TextureCoordData>::NOT_ARRAY);
 }
 */
-void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType,
-										 SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion)
+void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion)
 {
 	if(texUnitType >= SE_TEXUNIT_NUM || texUnitType < SE_TEXTURE0)
 		return;
-    _ImageData* img = new _ImageData;
-    if(!img)
-        return;
-    img->imageData = imageData;
-    img->own = own;
-    SE_Wrapper<_ImageData>* imageDataWrapper = mImageDataArray[texUnitType];
-	if(imageDataWrapper)
-	{
-        imageDataWrapper->dec();
-        if(imageDataWrapper->getNum() == 0)
-        {
-            delete imageDataWrapper;
-            mImageDataArray[texUnitType] = NULL;
-        }
-	}
-    imageDataWrapper = new SE_Wrapper<_ImageData>(img, SE_Wrapper<_ImageData>::NOT_ARRAY);
-    mImageDataArray[texUnitType] = imageDataWrapper;
     if(!imageData)
     {
         return;
     }
-    int width = imageData->getWidth();
-	int height = imageData->getHeight();
-    int power2Width = width;
-    int power2Height = height;
-	if(!SE_Util::isPower2(width))
+    SE_Vector2f v0, v1, v2, v3;    
+    float startx = 0, starty = 0;
+    int portionx = 0;
+    int portiony = 0;
+    int portionw = 0;
+    int portionh = 0;
+    if(!imageData->isSizePower2())
     {
-        power2Width = SE_Util::higherPower2(width);
+        imageData->getDataPower2();
     }
-    if(!SE_Util::isPower2(height))
+    if(imageDataPortion.isValid())
     {
-        power2Height = SE_Util::higherPower2(height);
-    }
-    int startx = 0;
-    int starty = 0;
-    if((width != power2Width || height != power2Height) && imageData->getData())
-    {
-        int pixelSize = imageData->getPixelSize();
-        int size = power2Width * power2Height * pixelSize;
-        char* data = new char[size];
-        if(!data)
-        {
-            delete imageDataWrapper;
-            mImageDataArray[texUnitType] = NULL;
-            return;
-        }
-        memset(data, 0, size);
-        char* src = imageData->getData();
-        starty = (power2Height - height) >> 1;
-        startx = (power2Width - width) >> 1;
-        for(int y = 0 ; y < height ; y++)
-        {
-            char* ydst = &data[(starty + y) * power2Width * pixelSize];
-            memcpy(&ydst[startx * pixelSize], src, width * pixelSize);
-            src += width * pixelSize;
-        }
-        SE_ImageData* imageDataPower2 = new SE_ImageData;
-        if(!imageDataPower2)
-        {
-            delete[] data;
-            delete imageDataWrapper;
-            mImageDataArray[texUnitType] = NULL;
-            return;
-        }
-        imageDataPower2->setWidth(power2Width);
-        imageDataPower2->setHeight(power2Height);
-        imageDataPower2->setPixelFormat(imageData->getPixelFormat());
-        imageDataPower2->setBytesPerRow(power2Width * pixelSize);
-        imageDataPower2->setCompressType(SE_ImageData::RAW);
-        imageDataPower2->setData(data);
-        delete imageDataWrapper;
-        img = new _ImageData;
-        img->imageData = imageDataPower2;
-        img->own = OWN;
-        imageDataWrapper = new SE_Wrapper<_ImageData>(img, SE_Wrapper<_ImageData>::NOT_ARRAY);
-        mImageDataArray[texUnitType] = imageDataWrapper;
-    }
-    SE_Vector3i* texFaces = new SE_Vector3i[2];
-    if(mTexCoordData)
-    {
-        SE_TextureCoordData* texCoordData = mTexCoordData->getPtr();
-        memcpy(texFaces, texCoordData->getTexFaceArray(), sizeof(SE_Vector3i) * 2);
-        mTexCoordData->dec();
-        if(mTexCoordData->getNum() == 0)
-        {
-            delete mTexCoordData;
-            mTexCoordData = NULL;
-        }
-    }
-    SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-    SE_Vector2f* texVertex = new SE_Vector2f[4];
-	SE_Wrapper<_ImageData>* imageDataPower2 = mImageDataArray[texUnitType];
-
-    if(!imageDataPortion.isValid())
-    {
-		if(imageDataPower2->getPtr()->imageData->isFliped())
-		{
-            texVertex[0] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
-            texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
-            texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
-            texVertex[3] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
-		}
-		else
-		{
-			texVertex[0] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
-			texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
-			texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
-			texVertex[3] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
-		}
+        portionx = imageDataPortion.getX();
+        portiony = imageDataPortion.getY();
+        portionw = imageDataPortion.getWidth();
+        portionh = imageDataPortion.getHeight();
     }
     else
     {
-        int portionx = imageDataPortion.getX();
-        int portiony = imageDataPortion.getY();
-        int portionw = imageDataPortion.getWidth();
-        int portionh = imageDataPortion.getHeight();
-		if(imageDataPower2->getPtr()->imageData->isFliped())
-		{
-            texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width, (power2Height - starty - portionh - portiony) / (float)power2Height);
-            texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portionh - portiony) / (float)power2Height);
-            texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portiony) / (float)power2Height);
-            texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width,  (power2Height - starty - portiony) / (float)power2Height);
-		}
-		else
-		{
-            texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width,  (starty + portiony + portionh) / (float)power2Height);
-            texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (starty + portiony + portionh) / (float)power2Height);
-            texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (starty + portiony) / (float)power2Height);
-            texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width, (starty + portiony) / (float)power2Height);
-		}
+        portionw = imageData->getWidth();
+        portionh = imageData->getHeight();
     }
-    texCoordData->setTexVertexArray(texVertex, 4);
-    texCoordData->setTexFaceArray(texFaces, 2);
-    mTexCoordData  = new SE_Wrapper<SE_TextureCoordData>(texCoordData, SE_Wrapper<SE_TextureCoordData>::NOT_ARRAY);
-    mAdjustedStartX = startx;
-    mAdjustedStartY = starty;
+    startx = imageData->getRealStartX();
+    starty = imageData->getRealStartY();
+    float power2Width = imageData->getWidthPower2();
+    float power2Height = imageData->getHeightPower2();
+
+	if(imageData->isFliped())
+	{
+        v0 = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+        v1 = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+        v2 = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+        v3 = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);       
+	}
+	else
+	{
+        v0 = SE_Vector2f((startx + portionx) / power2Width, 1 - (starty + portiony) / power2Height);
+        v1 = SE_Vector2f((startx + portionx + portionw) / power2Width, 1 - (starty + portiony) / power2Height);
+        v2 = SE_Vector2f((startx + portionx + portionw) / power2Width, 1 - (starty + portiony + portionh) / power2Height);
+        v3 = SE_Vector2f((startx + portionx) / power2Width, 1 - (starty + portiony + portionh) / power2Height);               
+	}
+    bool ret = createTexCoordData(this, v0, v1, v2, v3);
+    if(!ret)
+        return;
+    mImageDataArray[texUnitType] = imageData; 
 }
 
 void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
@@ -371,8 +295,8 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
 	}
     std::auto_ptr<SE_Surface> surface(new SE_Surface);
     std::auto_ptr<SE_Texture> texture(new SE_Texture);
-	mesh->setGeometryData(mGeometryData->getPtr());
-    surface->setGeometryData(mGeometryData->getPtr());
+	mesh->setGeometryData(mGeometryData);
+    surface->setGeometryData(mGeometryData);
     surface->setMaterialData(mMaterialData);
     surface->setTexture(texture.get());
     int facetNum = 2;
@@ -392,9 +316,9 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
         SE_TextureUnit* texUnit = new SE_TextureUnit();
         texUnit->setImageDataNum(1);
 		if(mImageDataArray[i])
-		    texUnit->setImageData(0, mImageDataArray[i]->getPtr()->imageData);
+		    texUnit->setImageData(0, mImageDataArray[i]);
 		if(i == 0)
-            texUnit->setTextureCoordData(mTexCoordData->getPtr());
+            texUnit->setTextureCoordData(mTexCoordData);
         texture->setTextureUnit(i, texUnit);
     }
     mesh->setSurface(0, surface.get());
@@ -978,7 +902,7 @@ void SE_RectPatch::setTextureCoord(const _TexCoordSet& texCoordSet, int texCoord
 }
 
 void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
-									 SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion)
+								SE_ImageDataPortion imageDataPortion)
 {
 	if(!imageData)
 		return;

@@ -38,7 +38,7 @@ void SE_CharView::setImageData(SE_Primitive* primitive)
 {
     SE_ImageDataPortion dp;
 	SE_ImageData* imageData = mCharImage;
-	primitive->setImageData(0, imageData, SE_TEXTURE0, NOT_OWN, dp);
+	primitive->setImageData(0, imageData, SE_TEXTURE0, dp);
 }
 void SE_CharView::setSurface(SE_Surface* surface)
 {

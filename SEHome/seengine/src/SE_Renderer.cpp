@@ -120,7 +120,11 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
         {
             type = GL_UNSIGNED_SHORT_5_6_5;
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
+		if(!imageData->isSizePower2())
+		{
+			imageData->getDataPower2();
+		}
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidthPower2(), imageData->getHeightPower2(),0, format, type, imageData->getDataPower2());
         checkGLError();
     }
     else

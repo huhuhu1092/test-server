@@ -117,6 +117,9 @@ void SE_RenderManager::endDraw()
 }
 void SE_RenderManager::draw()
 {
+#ifdef DEBUG
+		int renderUnitNum = 0;
+#endif
     SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
     for(int i = 0 ; i < SE_MAX_RENDERSCENE_SIZE ; i++)
     {
@@ -149,11 +152,17 @@ void SE_RenderManager::draw()
 					    ru->setViewToPerspectiveMatrix(m);
 					    ru->applyRenderState();
 					    ru->draw();
+#ifdef DEBUG
+		                renderUnitNum++;
+#endif
 				    }
 			    }
 		    }            
         }
     }
+#ifdef DEBUG
+	LOGI("### render unit num = %d ####\n", renderUnitNum);
+#endif
     /*
 	if(mRenderTargetList.empty())
 		return;
