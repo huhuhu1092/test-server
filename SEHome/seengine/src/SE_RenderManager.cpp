@@ -131,6 +131,8 @@ void SE_RenderManager::draw()
         {
             _RenderTargetUnit* rt = *it;
             SE_RenderTarget* renderTarget = renderTargetManager->get(rt->mRenderTargetID);
+			if(!renderTarget)
+				continue;
             SE_Camera* camera = renderTarget->getCamera();
 		    if(renderTarget->prepare() && camera)
 		    {

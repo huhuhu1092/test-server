@@ -11,10 +11,20 @@
     <MountPoint id = "redhorse2" x = "373" y = "660" />
     <MountPoint id = "redchariot2" x = "426" y = "660" />
 
+    <MountPoint id = "blackchariot2" x = "2" y = "188" />
+    <MountPoint id = "blackhorse2" x = "55" y = "188" />
+    <MountPoint id = "blackchancellor2" x = "108" y = "188" />
+    <MountPoint id = "blackknight2" x = "161" y = "188" />
+    <MountPoint id = "blackking" x = "214" y = "188" />
+
+    <MountPoint id = "blackknight1" x = "267" y = "188" />
+    <MountPoint id = "blackchancellor1" x = "320" y = "188" />
+    <MountPoint id = "blackhorse1" x = "373" y = "188" />
+    <MountPoint id = "blackchariot1" x = "426" y = "188" />
+
     <Element id = "ChessBoard" pivotx = "0" pivoty = "0" mountpointref = "chessboard" layer = "1" >
         <Image dataref = "ChessImage.xml/ChessGame/chessboard" />
     </Element>
-
     <Element id = "redchariot1" poivotx = "0" pivoty = "0" mountpointref = "redchariot1" layer = "2" >
         <Element id = "redbackground" pivotx = "0" pivoty = "0" layer = "1">
             <Image dataref = "ChessImage.xml/ChessGame/redbackground" />
@@ -96,6 +106,90 @@
         </Element>
         <Element id = "redchar" pivotx = "0" pivoty = "0" layer = "2">
             <Image dataref = "ChessImage.xml/ChessGame/redknight" />
+        </Element>
+    </Element>
+
+    <Element id = "blackchariot2" poivotx = "0" pivoty = "0" mountpointref = "blackchariot2" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackchariot" />
+        </Element>
+    </Element>
+
+    <Element id = "blackhorse2" poivotx = "0" pivoty = "0" mountpointref = "blackhorse2" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackhorse" />
+        </Element>
+    </Element>
+
+    <Element id = "blackchancellor2" poivotx = "0" pivoty = "0" mountpointref = "blackchancellor2" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackchancellor" />
+        </Element>
+
+    </Element>
+
+    <Element id = "blackknight2" poivotx = "0" pivoty = "0" mountpointref = "blackknight2" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackknight" />
+        </Element>
+    </Element>
+
+    <Element id = "blackking" poivotx = "0" pivoty = "0" mountpointref = "blackking" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackking" />
+        </Element>
+    </Element>
+
+
+    <Element id = "blackchariot1" poivotx = "0" pivoty = "0" mountpointref = "blackchariot1" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackchariot" />
+        </Element>
+    </Element>
+
+    <Element id = "blackhorse1" poivotx = "0" pivoty = "0" mountpointref = "blackhorse1" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackhorse" />
+        </Element>
+    </Element>
+
+    <Element id = "blackchancellor1" poivotx = "0" pivoty = "0" mountpointref = "blackchancellor1" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackchancellor" />
+        </Element>
+
+    </Element>
+
+    <Element id = "blackknight1" poivotx = "0" pivoty = "0" mountpointref = "blackknight1" layer = "2" >
+        <Element id = "blackbackground" pivotx = "0" pivoty = "0" layer = "1">
+            <Image dataref = "ChessImage.xml/ChessGame/blackbackground" />
+        </Element>
+        <Element id = "blackchar" pivotx = "0" pivoty = "0" layer = "2">
+            <Image dataref = "ChessImage.xml/ChessGame/blackknight" />
         </Element>
     </Element>
 </Element>

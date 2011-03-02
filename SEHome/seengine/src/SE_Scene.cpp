@@ -17,6 +17,7 @@ SE_Scene::SE_Scene(SE_SCENE_TYPE t)
     mIsTranslucent = false;
     mSceneType = t;
 	mIsModel = true;
+	mSceneRenderSeq = -1;
 }
 SE_Scene::~SE_Scene()
 {
@@ -114,7 +115,8 @@ void SE_Scene::hide()
 void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
     SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-    if(mRenderTargetID == SE_RenderTargetID::INVALID)
+    SE_RenderTargetID oldID = mRenderTargetID;
+	if(mRenderTargetID == SE_RenderTargetID::INVALID)
     {
         SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
         
@@ -128,8 +130,13 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
 
     if(rootSpatial)
     {
-        rootElement->setSceneRenderSeq(seq);
-        rootElement->setRenderTargetID(mRenderTargetID);
+		if(mSceneRenderSeq != seq)
+		{
+			mSceneRenderSeq = seq;
+            rootElement->setSceneRenderSeq(seq);
+		}
+		if(oldID == SE_RenderTargetID::INVALID)
+            rootElement->setRenderTargetID(mRenderTargetID);
 	    SE_RenderTarget* renderTarget = renderTargetManager->get(mRenderTargetID);
         renderTarget->setBackground(mBackground);
         if(mIsTranslucent)

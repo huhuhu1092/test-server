@@ -69,5 +69,6 @@ private:
     SE_Vector4f mBackground;
     SE_SCENE_TYPE mSceneType;
     bool mIsModel;
+	SE_SceneRenderSeq mSceneRenderSeq;
 };
 #endif

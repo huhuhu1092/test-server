@@ -1112,11 +1112,17 @@ void SE_ImageElement::setSurface(SE_Surface* surface)
 	if(mBaseColor.isValid() && op == 0)
 	{
 		op = NO_REPLACE;
+        delete sp;
+        surface->setProgramDataID(DEFAULT_SHADER);
+	    surface->setRendererID(DEFAULT_RENDERER);
 	}
-	sp->setColorOperationMode(op);
-	surface->setShaderProperty(sp);
-    surface->setProgramDataID(COLOREXTRACT_SHADER);
-	surface->setRendererID(COLOREXTRACT_RENDERER);
+    else
+    {    
+	    sp->setColorOperationMode(op);
+	    surface->setShaderProperty(sp);
+        surface->setProgramDataID(COLOREXTRACT_SHADER);
+	    surface->setRendererID(COLOREXTRACT_RENDERER);
+    }
 }
 void SE_ImageElement::update(const SE_TimeKey& key)
 {}
