@@ -63,6 +63,7 @@ public:
 	{
 		return mBoundingVolume;
 	}
+	static SE_Camera* create2DSceneCamera(float width, float height);
 private:
     SE_Frustum mFrustum;
     SE_Rect<int> mViewport;

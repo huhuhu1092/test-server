@@ -15,9 +15,22 @@ SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneMana
 	mPrevX = 0 ;
 	mPrevY = 0;
 	mPrevMotionEventType = SE_MotionEvent::UP;
+	mCursorScene = NULL;
 }
 SE_SceneManager::~SE_SceneManager()
 {
+
+}
+void SE_SceneManager::loadCursor(const char* cursorResource)
+{
+	if(mCursorScene)
+	{ 
+        delete mCursorScene;  
+	}
+	mCursorScene = new SE_Scene(SE_2D_SCENE);
+	mCursorScene->setBound(mWidth, mHeight);
+	SE_Camera* camera = SE_Camera::create2DSceneCamera(mWidth, mHeight);
+	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
 
 }
 SE_SceneID SE_SceneManager::add(SE_Scene* scene)

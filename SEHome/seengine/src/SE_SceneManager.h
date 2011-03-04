@@ -39,7 +39,7 @@ public:
     {
         mHeight = height;
     }
-
+    void loadCursor(const char* cursorResource);
 private:
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);
@@ -56,5 +56,6 @@ private:
 	SE_ElementID mMotionCancelElementID;
 	float mPrevX, mPrevY;
 	int mPrevMotionEventType;
+	SE_Scene* mCursorScene;
 };
 #endif

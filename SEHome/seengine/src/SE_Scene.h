@@ -52,11 +52,11 @@ public:
 	{
 		mIsModel = b;
 	}
+    SE_Element* getRootElement();
+	SE_Spatial* getRootSpatial();
 private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
-    SE_Element* getRootElement();
-	SE_Spatial* getRootSpatial();
 private:
     //void setID(const SE_SceneID& sceneID);
 private:
