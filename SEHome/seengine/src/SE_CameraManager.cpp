@@ -4,16 +4,16 @@ SE_CameraManager::SE_CameraManager(): mCameraSet(100, 512)
 {}
 SE_CameraManager::~SE_CameraManager()
 {}
-SE_CameraID SE_CameraManager::addCamera(SE_Camera* c)
+SE_CameraID SE_CameraManager::add(SE_Camera* c)
 {
 	return mCameraSet.add(SE_CameraID::NULLID, c);
 	//mCameraSet.set(id, c);
 }
-SE_Camera* SE_CameraManager::getCamera(const SE_CameraID& id)
+SE_Camera* SE_CameraManager::get(const SE_CameraID& id)
 {
 	return mCameraSet.find(id);
 }
-SE_Camera* SE_CameraManager::removeCamera(const SE_CameraID& id)
+SE_Camera* SE_CameraManager::remove(const SE_CameraID& id)
 {
 	return mCameraSet.remove(id);
 }

@@ -915,7 +915,7 @@ void SE_TextureElement::layout()
 	mImageData->setHeight((int)mHeight);
 	mImageData->setPixelFormat(SE_ImageData::RGBA);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_CameraID cameraID = cameraManager->addCamera(camera);
+	SE_CameraID cameraID = cameraManager->add(camera);
 	textureTarget->setWidth(mWidth);
 	textureTarget->setHeight(mHeight);
 	textureTarget->setCamera(cameraID);
@@ -1145,10 +1145,15 @@ void SE_ImageElement::spawn()
 		pivotx = iu.imageRect.pivotx;
 		pivoty = iu.imageRect.pivoty;
 	}
-	calculateRect(pivotx, pivoty, width, height);
+	mPivotX = pivotx;
+	mPivotY = pivoty;
+	mWidth = width;
+	mHeight = height;
 }
 void SE_ImageElement::layout()
 {
+	SE_2DNodeElement::layout();
+	//calculateRect(pivotx, pivoty, width, height);
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {

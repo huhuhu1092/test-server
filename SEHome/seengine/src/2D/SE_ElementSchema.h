@@ -66,7 +66,9 @@ public:
     SE_MountPointID mountPointRef;
     int type;// element type: BUTTON, TEXT, 2D_UI_NODE, etc;
     SE_StringID text;
+    int state;
 	SE_RECTPATCH_TYPE patchType;
+    bool canpointed;
 private:
     SE_ElementSchema* parent;
     typedef std::list<SE_ElementSchema*> _ElementSchemaList;

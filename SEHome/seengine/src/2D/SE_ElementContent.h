@@ -10,6 +10,7 @@ public:
 	{
 		mParent = NULL;
         mState = 0;
+        mCanPointed = true;
 	}
 	void setParent(SE_ElementSchema* parent)
 	{
@@ -31,6 +32,14 @@ public:
 	{
 		return mContentURI;
 	}
+    void setCanPointed(bool b)
+    {
+        mCanPointed = b;
+    }
+    bool getCanPointed()
+    {
+        return mCanPointed;
+    }
 	void setRectPatchType(const SE_StringID& type);
 	int getRectPatchType() const
 	{
@@ -56,6 +65,7 @@ private:
 	SE_StringID mContentURI;
     int mState;
 	int mRectPatchType;
+    bool mCanPointed;
 };
 class SE_ImageContent : public SE_ElementContent
 {

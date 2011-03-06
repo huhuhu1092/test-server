@@ -99,7 +99,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
@@ -188,24 +188,28 @@ void SEDemo::handleInput(int width, int height)
 {
     static float prevPointer[2];
     static bool bPressed = false;
+	bool equal = false;
     int buttonState = PVRShellGet(prefButtonState);
     float* pointerLocation = (float*)PVRShellGet(prefPointerLocation);
     /*LOGI("## buttonstate = %d ##\n", buttonState);*/
     if(pointerLocation)
     {
 		//LOGI("### pointer location = %f, %f ###\n", pointerLocation[0], pointerLocation[1]);
+		if(prevPointer[0] == pointerLocation[0] && prevPointer[1] == pointerLocation[1] )
+			equal = true;
         prevPointer[0] = pointerLocation[0];
         prevPointer[1] = pointerLocation[1];
     }
     if((buttonState & ePVRShellButtonLeft))
     {
-		SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
-		if(c)
-		{
-			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
-			c->motionEvent = ke;
-			SE_Application::getInstance()->postCommand(c);
-		}
+	
+		    SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
+		    if(c)
+		    {
+			    SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
+			    c->motionEvent = ke;
+			    SE_Application::getInstance()->postCommand(c);
+		    }
 	    bPressed = 1;
     }
     else if(bPressed)

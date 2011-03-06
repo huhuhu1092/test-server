@@ -1817,6 +1817,21 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         {
             elementSchema->text = value;
         }
+        else if(!strcmp(name, "canpointed"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->canpointed = ival;
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+        }
+        else if(!strcmp(name, "state"))
+        {
+            elementSchema->state = getElementState(value);
+        }
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
@@ -2130,6 +2145,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	SE_StringID id;
     SE_StringID state;
 	SE_StringID patchType;
+    bool canpointed;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2152,11 +2168,23 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 		{
 			patchType = value;
 		}
+        else if(!strcmp(name, "canpointed"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                canpointed = (bool)ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
 		pAttribute = pAttribute->Next();
 	}
 	imageContent->setID(id);
 	imageContent->setRectPatchType(patchType);
     imageContent->setState(getElementState(state));
+    imageContent->setCanPointed(canpointed);
 	parent->addContent(imageContent);
 }
 void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)

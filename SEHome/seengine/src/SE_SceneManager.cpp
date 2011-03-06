@@ -7,7 +7,9 @@
 #include "SE_ResourceManager.h"
 #include "SE_InputEvent.h"
 #include "SE_ElementManager.h"
+#include "SE_Element.h"
 #include "SE_Math.h"
+#include "SE_Cursor.h"
 #include "SE_Log.h"
 SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneManager::MAX_SIZE)
 {
@@ -15,23 +17,26 @@ SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneMana
 	mPrevX = 0 ;
 	mPrevY = 0;
 	mPrevMotionEventType = SE_MotionEvent::UP;
-	mCursorScene = NULL;
+	mCursor = NULL;
+	mPointedElement = NULL;
 }
 SE_SceneManager::~SE_SceneManager()
 {
 
 }
-void SE_SceneManager::loadCursor(const char* cursorResource)
+void SE_SceneManager::loadCursor(const char* cursorResource, float mx, float my)
 {
-	if(mCursorScene)
-	{ 
-        delete mCursorScene;  
-	}
-	mCursorScene = new SE_Scene(SE_2D_SCENE);
-	mCursorScene->setBound(mWidth, mHeight);
-	SE_Camera* camera = SE_Camera::create2DSceneCamera(mWidth, mHeight);
-	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-
+    if(!cursorResource)
+        return;
+	if(mCursor)
+		delete mCursor;
+	mCursor = new SE_Cursor(mWidth, mHeight);
+	mCursor->setMointPoint(mx, my);
+	mCursor->load(cursorResource);
+}
+void SE_SceneManager::showCursor()
+{
+	mCursor->show();
 }
 SE_SceneID SE_SceneManager::add(SE_Scene* scene)
 {
@@ -116,20 +121,21 @@ void SE_SceneManager::render(SE_RenderManager& renderManager)
     for(itScene = sceneNeedRender.begin() ; itScene != sceneNeedRender.end() ; itScene++)
     {
         SE_Scene* scene = *itScene;
-        //SE_Camera* camera = cameraManager->findCamera(scene->getCamera());
-        //if(camera)
-        //{
-        //    renderManager->invalidScene(seq);
-        //    renderManager->setSceneCamera(seq, camera);
-            scene->render(seq, renderManager);
-            seq--;
-        //}
+        scene->render(seq, renderManager);
+        seq--;
     }
+	if(mCursor)
+	{
+	    seq = sceneNeedRender.size();
+		mCursor->render(seq, renderManager);
+	}
+    
 }
 void SE_SceneManager::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {
 
 }
+
 void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent)
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
@@ -210,6 +216,12 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 }
 void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 {
+	if(!mCursor)
+		return;
+	mCursor->handleMotionEvent(motionEvent);
+    SE_Vector2f v = mCursor->getCursorTip();
+	float x = v.x;
+	float y = v.y;
     std::list<SE_Scene*> sceneMotionEvent;
     _SceneStack::iterator it;
     for(it = mStack.begin() ; it != mStack.end() ; it++)
@@ -236,9 +248,10 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 	for(itScene = sceneMotionEvent.begin() ; itScene != sceneMotionEvent.end(); itScene++)
 	{
 		SE_Scene* scene = *itScene;
-		SE_Element* e = scene->getPointedElement(motionEvent.getX(), motionEvent.getY());
+		SE_Element* e = scene->getPointedElement(x, y);
 		if(e)
 		{
+			LOGI("### pointed element = %s ## \n", e->getName().getStr());
             if(e->getSceneRenderSeq() > sceneRenderSeq)
 			{
 				pointedElement = e;
@@ -246,6 +259,32 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 			}
 		}
 	}
-    handleMotionEvent(pointedElement, motionEvent);
+	if(mCursor->getState() == SE_Cursor::CLICKED || mCursor->getState() == SE_Cursor::UP)
+	{
+		if(mPointedElementPrev == mPointedElement && mPointedElement != NULL)
+		{
+			mPointedElement = NULL;
+			mPointedElementPrev = NULL;
+		}
+		else
+            mPointedElementPrev = (SE_2DNodeElement*)pointedElement;
+	}
+	else if(mCursor->getState() == SE_Cursor::DOWN)
+	{
+		mPointedElement = (SE_2DNodeElement*)pointedElement;
+	}
+	else if(mCursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
+	{
+		SE_Vector2f v = mCursor->getDisplacement();
+		LOGI("#!!!! displacement : %f, %f @@@@\n", v.x, v.y);
+        if(mPointedElement)
+		{
+			x = mPointedElement->getLeft();
+			y = mPointedElement->getTop();
+			mPointedElement->setLeft(x + v.x);
+			mPointedElement->setTop(y + v.y);
+            mPointedElement->updateSpatial(false);
+		}
+	}
 }
 

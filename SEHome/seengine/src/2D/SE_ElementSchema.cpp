@@ -17,6 +17,8 @@ SE_ElementSchema::SE_ElementSchema()
 	seq = -1;
     type = SE_2D_UI_NODE;
 	patchType = SE_NO_PATCH;
+    canpointed = true;
+    state = SE_Element::NORMAL;
 }
 SE_ElementSchema::~SE_ElementSchema()
 {
@@ -117,6 +119,8 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
     e->setSeqNum(seq);
 	e->setLocalLayer(layer);
 	e->setRectPatchType(patchType);
+    e->setCanPointed(canpointed);
+    e->setState(state, false);
     SE_Element* root = NULL;
     if(parent == NULL)
         root = e;

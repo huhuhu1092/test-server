@@ -39,3 +39,6 @@
     <ImageItem id = "blackchancellor" name = "chess/blackchancellor.png" pivotx = "0" pivoty = "0" />
     <ImageItem id = "redchancellor" name = "chess/redchancellor.png" pivotx = "0" pivoty = "0" />
 </ImageTable>
+<ImageTable id = "Cursor">
+    <ImageItem id = "001" name = "chess/selection_001.png" pivotx = "64" pivoty = "94" />
+</ImageTable>

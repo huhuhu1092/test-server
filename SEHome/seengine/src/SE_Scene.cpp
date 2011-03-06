@@ -24,7 +24,7 @@ SE_Scene::~SE_Scene()
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     elementManager->remove(mRoot);
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-    cameraManager->removeCamera(mCamera);
+    cameraManager->remove(mCamera);
 }
 void SE_Scene::create(const char* sceneName)
 {
@@ -35,6 +35,7 @@ void SE_Scene::create(const char* sceneName)
     if(mSceneType == SE_2D_SCENE)
     {
         root = new SE_2DNodeElement;
+		root->setCanPointed(false);
         SE_Vector4f c1(1, 0, 0, 0);
         SE_Vector4f c2(0, -1, 0, 0);
         SE_Vector4f c3(0, 0, 1, 0);
@@ -145,7 +146,7 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
             renderTarget->setClearTarget(true);
         renderTarget->setCamera(mCamera);
 		SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-		SE_Camera* camera = cameraManager->getCamera(mCamera);
+		SE_Camera* camera = cameraManager->get(mCamera);
 		rootSpatial->renderScene(camera, &renderManager);
     }
 }
@@ -174,7 +175,7 @@ SE_Element* SE_Scene::getPointedElement(float x, float y)
 	if(!rootSpatial)
 		return NULL;
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_Camera* camera = cameraManager->getCamera(mCamera);
+	SE_Camera* camera = cameraManager->get(mCamera);
 	if(camera == NULL)
 		return NULL;
 	SE_Ray ray = camera->screenCoordinateToRay(x, y);

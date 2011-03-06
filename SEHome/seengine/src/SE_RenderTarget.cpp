@@ -19,12 +19,12 @@ SE_RenderTarget::SE_RenderTarget()
 SE_RenderTarget::~SE_RenderTarget()
 {
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	cameraManager->removeCamera(mCameraID);
+	cameraManager->remove(mCameraID);
 }
 SE_Camera* SE_RenderTarget::getCamera()
 {
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	return cameraManager->getCamera(mCameraID);
+	return cameraManager->get(mCameraID);
 }
 /////////////////
 SE_FrameBufferTarget::SE_FrameBufferTarget()

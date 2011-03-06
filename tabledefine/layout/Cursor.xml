@@ -1,0 +1,6 @@
+<Element id = "cursorroot" pivotx = "0" pivoty = "0">
+    <MountPoint id = "cursorm" x = "100" y = "100" />
+    <Element id = "cursor" pivotx = "64" pivoty = "94" mountpointref="cursorm">
+        <Image dataref = "ChessImage.xml/Cursor/001" state = "normal" />
+    </Element>
+</Element>

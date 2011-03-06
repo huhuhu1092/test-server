@@ -8,6 +8,7 @@ void SE_ElementContent::clone(SE_ElementContent* src, SE_ElementContent* dst)
 	dst->mContentURI = src->mContentURI;
 	dst->mID = src->mID;
     dst->mState = src->mState;
+    dst->mCanPointed = src->mCanPointed;
 }
 SE_ElementContent* SE_ElementContent::clone()
 {
@@ -65,6 +66,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
     rete->setName(getID().getStr());
     rete->setState(getState());
 	rete->setRectPatchType(getRectPatchType());
+    rete->setCanPointed(getCanPointed());
 	return rete;
 }
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI)

@@ -6,6 +6,8 @@ class SE_Scene;
 class SE_KeyEvent;
 class SE_MotionEvent;
 class SE_Element;
+class SE_Cursor;
+class SE_2DNodeElement;
 class SE_RenderManager;
 /*
  * SceneManager manage the all screen region
@@ -39,7 +41,8 @@ public:
     {
         mHeight = height;
     }
-    void loadCursor(const char* cursorResource);
+    void loadCursor(const char* cursorResource, float mx, float my);
+	void showCursor();
 private:
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);
@@ -54,8 +57,10 @@ private:
 	SE_ElementID mMotionMoveElementID;
 	SE_ElementID mMotionUpElementID;
 	SE_ElementID mMotionCancelElementID;
+	SE_2DNodeElement* mPointedElement;
+	SE_2DNodeElement* mPointedElementPrev;
 	float mPrevX, mPrevY;
 	int mPrevMotionEventType;
-	SE_Scene* mCursorScene;
+	SE_Cursor* mCursor;
 };
 #endif

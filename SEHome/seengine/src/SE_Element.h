@@ -246,6 +246,7 @@ public:
 	}
 	void setCanPointed(bool b);
 	SE_Element* getCanPointedElement();
+	SE_Element* findByName(const char* name);
 	static SE_StringID getStateName(int state);
 	static int getStateFromName(const char* name);
 public:
@@ -253,7 +254,7 @@ public:
     virtual void update(const SE_TimeKey& timeKey);
 	virtual void update(SE_ParamValueList& paramValueList);
 	virtual void update(const SE_AddressID& address, const SE_Value& value);
-	virtual void updateSpatial();
+	virtual void updateSpatial(bool bRecreate = true);
     virtual void layout();
     virtual SE_Spatial* createSpatial();
     virtual void read(SE_BufferInput& inputBuffer);
@@ -267,6 +268,7 @@ public:
     virtual void dismiss();
 	virtual bool click();
     virtual void onStateChange(int newState, int oldState);
+	virtual void justUpdateSpatial(SE_Spatial* spatial) {}
 private:
 	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
 	{
@@ -451,6 +453,7 @@ public:
     virtual SE_Element* clone();
     virtual void setImageData(SE_Primitive* primitive);
 	virtual void setSurface(SE_Surface* surface);
+	virtual void justUpdateSpatial(SE_Spatial* spatial);
 protected:
     virtual void clone(SE_Element* src, SE_Element* dst);
 protected:

@@ -136,10 +136,16 @@ bool SE_Element::click()
 		return false;
 	return mClickHandler->handle(this);
 }
-void SE_Element::updateSpatial()
+
+void SE_Element::updateSpatial(bool bRecreate)
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* spatial = spatialManager->get(getID());
+    SE_Spatial* spatial = spatialManager->get(getSpatialID());
+	if(!bRecreate)
+	{
+        justUpdateSpatial(spatial);
+		return;
+	}
 	SE_Element* parent = getParent();
 	if(!parent)
 		return;
@@ -168,6 +174,8 @@ void SE_Element::updateSpatial()
     {
         SE_Spatial* oldSpatial = spatialManager->remove(mSpatialID);
         SE_Spatial* s = createSpatial();
+		s->setSceneRenderSeq(oldSpatial->getSceneRenderSeq());
+		s->setRenderTarget(oldSpatial->getRenderTarget());
         spatialManager->add(parentSpatial->getID(), s, true);
 		spatialManager->release(oldSpatial);
 		s->updateSpatialIDToElement();
@@ -516,6 +524,20 @@ void SE_Element::setState(int state, bool update)
         return;
     onStateChange(mState, oldState);
 }
+SE_Element* SE_Element::findByName(const char* name)
+{
+	SE_StringID str(name);
+	if(getName() == str)
+		return this;
+	std::vector<SE_Element*> children = getChildren();
+	for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		SE_Element* e = children[i]->findByName(name);
+		if(e)
+			return e;
+	}
+	return NULL;
+}
 ///////////////////////////////////////
 SE_2DNodeElement::SE_2DNodeElement()
 {
@@ -532,7 +554,6 @@ SE_2DNodeElement::~SE_2DNodeElement()
 void SE_2DNodeElement::spawn()
 {
     //SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    calculateRect(mPivotX, mPivotY, 0, 0);
     std::vector<SE_Element*> children = getChildren();//elementManager->getChildren(getID());
     for(int i = 0 ; i < children.size() ; i++)
     {
@@ -561,42 +582,46 @@ static void merge(SE_Rect<float>& mergedRect ,const SE_Rect<float>& srcRect)
 }
 void SE_2DNodeElement::layout()
 {
-	SE_Rect<float> mergedRect;
-	mergedRect.left = INVALID_GEOMINFO;
-	mergedRect.top = INVALID_GEOMINFO;
-	mergedRect.right = -INVALID_GEOMINFO;
-	mergedRect.bottom = -INVALID_GEOMINFO;
-    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	calculateRect(mPivotX, mPivotY, mWidth, mHeight);
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     std::vector<SE_Element*> children = elementManager->getChildren(getID());
-    for(int i = 0 ; i < children.size() ; i++)
-    {
-		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
-		e->layout();
-        SE_Rect<float> srcRect;
-		srcRect.left = e->getLeft() + e->getDeltaLeft();
-		srcRect.top = e->getTop() + e->getDeltaTop();
-		srcRect.right = e->getLeft() + e->getDeltaLeft() + e->getWidth();
-		srcRect.bottom = e->getTop() + e->getDeltaTop() + e->getHeight();
-		merge(mergedRect, srcRect);
-	}
-	float left = 0, top = 0;
-	if(left < mergedRect.left)
-		mergedRect.left = left;
-	if(top < mergedRect.top)
-		mergedRect.top = top;
-	if(left > mergedRect.right )
-		mergedRect.right = left;
-	if(top > mergedRect.bottom)
-		mergedRect.bottom = top;
+	if(!children.empty())
+	{
+		SE_Rect<float> mergedRect;
+		mergedRect.left = INVALID_GEOMINFO;
+		mergedRect.top = INVALID_GEOMINFO;
+		mergedRect.right = -INVALID_GEOMINFO;
+		mergedRect.bottom = -INVALID_GEOMINFO;
+		for(int i = 0 ; i < children.size() ; i++)
+		{
+			SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
+			e->layout();
+			SE_Rect<float> srcRect;
+			srcRect.left = e->getLeft() + e->getDeltaLeft();
+			srcRect.top = e->getTop() + e->getDeltaTop();
+			srcRect.right = e->getLeft() + e->getDeltaLeft() + e->getWidth();
+			srcRect.bottom = e->getTop() + e->getDeltaTop() + e->getHeight();
+			merge(mergedRect, srcRect);
+		}
+		float left = 0, top = 0;
+		if(left < mergedRect.left)
+			mergedRect.left = left;
+		if(top < mergedRect.top)
+			mergedRect.top = top;
+		if(left > mergedRect.right )
+			mergedRect.right = left;
+		if(top > mergedRect.bottom)
+			mergedRect.bottom = top;
 
-	mDeltaLeft = mergedRect.left;
-	mDeltaTop = mergedRect.top;
-    //if node's width is not dispatched, merged width will be used
-    if(mWidth == 0)
-	    mWidth = mergedRect.right - mergedRect.left;
-    //if node's height is not dispatched, merged height will be used
-    if(mHeight == 0)
-	    mHeight = mergedRect.bottom - mergedRect.top;
+		mDeltaLeft = mergedRect.left;
+		mDeltaTop = mergedRect.top;
+		//if node's width is not dispatched, merged width will be used
+		if(mWidth == 0)
+			mWidth = mergedRect.right - mergedRect.left;
+		//if node's height is not dispatched, merged height will be used
+		if(mHeight == 0)
+			mHeight = mergedRect.bottom - mergedRect.top;
+	}
 }
 
 SE_Spatial* SE_2DNodeElement::createSpatial()
@@ -629,7 +654,7 @@ SE_CameraID SE_2DNodeElement::createRenderTargetCamera(float left, float top, fl
 	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 	camera->setViewport(0, 0, width, height);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_CameraID cameraID = cameraManager->addCamera(camera);
+	SE_CameraID cameraID = cameraManager->add(camera);
 	return cameraID;
 }
 
@@ -863,6 +888,19 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
     }
 	delete[] meshArray;
     return geom;
+}
+void SE_2DNodeElement::justUpdateSpatial(SE_Spatial* spatial)
+{
+	std::vector<SE_Element*> children = getChildren();
+	if(children.empty())
+	{
+        spatial->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2 , 0));
+	}
+	else
+	{
+		spatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
+	}
+	spatial->updateWorldTransform();
 }
 void SE_2DNodeElement::clone(SE_Element* src, SE_Element* dst)
 {

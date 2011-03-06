@@ -145,7 +145,7 @@ void SE_Application::run()
     if(fpsDelta > 1000)
     {
         float fFPS = 1000.0f * mFpsFrameNum /(float)fpsDelta;
-        LOGI("FPS : %f\n", fFPS);
+        //LOGI("FPS : %f\n", fFPS);
         mFpsFrameNum = 0;
         mFpsPrevTime = currTime;
     }

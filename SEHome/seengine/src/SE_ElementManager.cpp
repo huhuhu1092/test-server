@@ -31,6 +31,7 @@ SE_Element* SE_ElementManager::getParent(const SE_ElementID& id)
         return NULL;
     return mElements.getParent(id);
 }
+
 std::vector<SE_Element*> SE_ElementManager::getChildren(const SE_ElementID& id)
 {
     return mElements.getChildren(id);

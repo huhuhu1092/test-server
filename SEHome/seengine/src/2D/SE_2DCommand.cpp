@@ -42,19 +42,25 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadFont("fontDefine.xml");
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
     SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
 	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
 	scene->create(sceneName.c_str());
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_SceneID sceneID = sceneManager->add(scene);
 	//create camera
 	SE_Camera* camera = SE_Camera::create2DSceneCamera(width, height);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_CameraID cameraID = cameraManager->addCamera(camera);
+	SE_CameraID cameraID = cameraManager->add(camera);
 	scene->setCamera(cameraID);
 	//end
 	sceneManager->show(sceneID);
+
+	sceneManager->setWidth(width);
+	sceneManager->setHeight(height);
+	sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
+	sceneManager->showCursor();
+
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
 	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
