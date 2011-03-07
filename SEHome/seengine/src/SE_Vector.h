@@ -4,6 +4,16 @@
 class SE_Vector2i
 {
 public:
+	SE_Vector2i()
+	{
+		x = 0;
+		y = 0;
+	}
+	SE_Vector2i(int x, int y)
+	{
+		this->x = x;
+		this->y = y;
+	}
     int x;
     int y;
 };

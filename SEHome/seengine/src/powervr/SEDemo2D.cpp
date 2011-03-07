@@ -25,6 +25,7 @@
 #include "SE_Animation.h"
 #include "SE_SpatialManager.h"
 #include "SE_ElementManager.h"
+#include "SE_CChess.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -52,6 +53,7 @@ public:
 	{
 		//mPhysics = NULL;
 		mSelectedSpatial = NULL;
+	    mChessApp = new SE_CChess(34, 784, 64, 64, SE_CChess::RED, SE_CChess::BLACK);
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -63,6 +65,7 @@ private:
 private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
+	SE_CChess* mChessApp;
 };
 static void doTest()
 {
@@ -99,11 +102,12 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
 	c->sceneName = "ChessLayout.xml/ChessRoot";//"TestElement.xml/PFemaleBase";
+	c->chessApp = mChessApp;
 	c->left = 0;
 	c->top = 0;
 	c->width = 480;

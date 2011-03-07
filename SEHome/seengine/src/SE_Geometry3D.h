@@ -28,10 +28,10 @@ struct SE_Rect
 	{
 		left = right = top = bottom = 0;
 	}
-    bool isContain(T x, T y);
+    bool isContain(T x, T y) const;
 };
 template <typename T>
-bool SE_Rect<T>::isContain(T x, T y)
+bool SE_Rect<T>::isContain(T x, T y) const
 {
     if(x >= left && x < right && y >= top && y < bottom)
         return true;

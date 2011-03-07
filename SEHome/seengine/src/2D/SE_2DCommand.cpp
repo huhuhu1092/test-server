@@ -25,6 +25,7 @@
 #include "SE_Scene.h"
 #include "SE_SceneManager.h"
 #include "SE_CameraManager.h"
+#include "SE_CChess.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -42,58 +43,15 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadFont("fontDefine.xml");
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
-	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-	scene->setBound(width, height);
-	scene->create(sceneName.c_str());
-	SE_SceneID sceneID = sceneManager->add(scene);
-	//create camera
-	SE_Camera* camera = SE_Camera::create2DSceneCamera(width, height);
-	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-	SE_CameraID cameraID = cameraManager->add(camera);
-	scene->setCamera(cameraID);
-	//end
-	sceneManager->show(sceneID);
-
-	sceneManager->setWidth(width);
-	sceneManager->setHeight(height);
-	sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
-	sceneManager->showCursor();
-
+	chessApp->loadScene(sceneName.c_str(), width, height);
+	std::string path = std::string(resourceManager->getDataPath()) + SE_SEP + "data" + SE_SEP + "ChessOpening.dat";
+	char* data = NULL;
+	int len = 0;
+	SE_IO::readFileAll(path.c_str(), data, len);
+	chessApp->setOpening(data, len);
+	delete[] data;
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
-	/*
-    SE_ResourceManager* resourceManager = mApp->getResourceManager();
-    resourceManager->setDataPath(dataPath.c_str());
-	//resourceManager->loadImageTable("ImageTable1.xml");
-	//checkXml();
-	resourceManager->loadShader("ShaderDefine.xml");
-	resourceManager->loadRenderer("RendererDefine.xml");
-	//resourceManager->loadElement("TestElement.xml");
-    SE_ElementManager* elementManager = mApp->getElementManager();
-	//elementManager->load("TestElement.xml/PFemaleBase");
-    elementManager->load("ElementCharacterGroup.xml/PFemaleBase");
-    SE_SceneManager* sceneManager = mApp->getSceneManager();
-    elementManager->setViewport(left, top, width, height);
-	elementManager->spawn();
-	elementManager->measure();
-	elementManager->update(0);
-    SE_Spatial* root = elementManager->createSpatial();
-    SE_DepthTestState* rs = new SE_DepthTestState();
-	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
-    SE_BlendState* blendRs = new SE_BlendState;
-    blendRs->setBlendProperty(SE_BlendState::BLEND_ENABLE);
-    blendRs->setBlendSrcFunc(SE_BlendState::SRC_ALPHA);
-    blendRs->setBlendDstFunc(SE_BlendState::ONE_MINUS_SRC_ALPHA);
-	root->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
-    root->setRenderState(SE_Spatial::BLENDSTATE, blendRs, OWN);
-	root->updateWorldTransform();
-    root->updateWorldLayer();
-	root->updateRenderState();
-    sceneManager->addSpatial(NULL, root);
-	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
-	renderManager->setBackground(SE_Vector3f(1, 1, 1));
-	*/
+
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)
