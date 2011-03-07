@@ -20,7 +20,7 @@ public:
     std::vector<float> distance;
     bool intersected; //
 };
-template <class T>
+template <typename T>
 struct SE_Rect
 {
     T left ,right, top, bottom;
@@ -28,7 +28,16 @@ struct SE_Rect
 	{
 		left = right = top = bottom = 0;
 	}
+    bool isContain(T x, T y);
 };
+template <typename T>
+bool SE_Rect<T>::isContain(T x, T y)
+{
+    if(x >= left && x < right && y >= top && y < bottom)
+        return true;
+    else
+        return false;
+}
 class SE_Rect3D
 {
 public:

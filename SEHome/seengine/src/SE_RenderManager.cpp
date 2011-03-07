@@ -163,7 +163,7 @@ void SE_RenderManager::draw()
         }
     }
 #ifdef DEBUG
-	LOGI("### render unit num = %d ####\n", renderUnitNum);
+	//LOGI("### render unit num = %d ####\n", renderUnitNum);
 #endif
     /*
 	if(mRenderTargetList.empty())

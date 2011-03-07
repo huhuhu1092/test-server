@@ -1,6 +1,12 @@
 #ifndef SE_VECTOR_H
 #define SE_VECTOR_H
 #include "SE_Math.h"
+class SE_Vector2i
+{
+public:
+    int x;
+    int y;
+};
 class SE_Vector2f
 {
 public:
