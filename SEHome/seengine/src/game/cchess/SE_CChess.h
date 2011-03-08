@@ -114,8 +114,8 @@ private:
     typedef void (SE_CChess::*CHESSPIECEHANDLER)(const _BoardUnitData& src, const _BoardUnitData& dst);
 	int piecesNumBetweenCol(int row, int srcCol, int dstCol);
     int piecesNumBetweenRow(int col, int srcRow, int dstRow);
-    bool canMoveTo(const _ChessPieces& src, const _ChessPieces& dst);
     void doMove(const _BoardUnitData& src, const _BoardUnitData& dst);
+    bool canRookMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst);
     void handleRook(const _BoardUnitData& src, const _BoardUnitData& dst);
     bool canHorseMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst);
     void handleHorse(const _BoardUnitData& src, const _BoardUnitData& dst);
@@ -130,6 +130,8 @@ private:
 	bool canCannonMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst);
 	void handleCannon(const _BoardUnitData& src, const _BoardUnitData& dst);
     _BoardUnitData getBoardUnitData(const SE_Rect<float>& rect); 
+	bool isSameColor(const _BoardUnitData& src, const _BoardUnitData& dst);
+
     struct _RowCol
     {
         int row;
@@ -145,8 +147,8 @@ private:
     _ChessPiecesData mChessPiecesData[COLOR_NUM][PIECES_NUM];
     _BoardUnitData mDstMove;
     _ChessPiecesData* mRemoved;
-    int mPlayerBoundary[COLOR_NUM];
-    SE_Vector2i mKingBoundary[COLOR_NUM][2];
+    int mPlayerBoundary[PLAYER_NUM];
+    SE_Vector2i mKingBoundary[PLAYER_NUM][2];
     CHESSPIECEHANDLER mChessPieceHandler[PIECES_NUM];
 	int mAction;
 	SE_SceneID mSceneID;

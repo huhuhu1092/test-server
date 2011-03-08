@@ -31,6 +31,10 @@ float SE_Fabs(float f)
 {
     return fabs(f);
 }
+int SE_Iabs(int i)
+{
+	return abs(i);
+}
 float SE_Tanf(float f)
 {
     return tanf(f);

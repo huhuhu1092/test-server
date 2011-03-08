@@ -49,91 +49,139 @@ static void initNameChessPiecesMap()
 	nameChessPiecesMap["blackprivate4"] = SE_CChess::_ChessPieces(SE_CChess::BLACK, SE_CChess::PRIVATE4);
 	nameChessPiecesMap["blackprivate5"] = SE_CChess::_ChessPieces(SE_CChess::BLACK, SE_CChess::PRIVATE5);
 }
+static std::string getRedChessPieces(SE_CChess::CHESS_PIECES_TYPE t)
+{
+	std::string ret;
+	switch(t)
+	{
+	case SE_CChess::ROOK1:
+		ret = "redrook1";
+		break;
+    case SE_CChess::HORSE1:
+		ret = "redhorse1";
+		break;
+	case SE_CChess::ELEPHANT1:
+		ret = "redelephant1";
+		break;
+	case SE_CChess::KNIGHT1:
+		ret = "redknight1";
+		break;
+	case SE_CChess::KING:
+		ret =  "redking";
+		break;
+	case SE_CChess::ROOK2:
+		ret = "redrook2";
+		break;
+	case SE_CChess::HORSE2:
+		ret = "redhorse2";
+		break;
+	case SE_CChess::ELEPHANT2:
+		ret = "redelephant2";
+		break;
+	case SE_CChess::KNIGHT2:
+		ret = "redknight2";
+		break;
+	case SE_CChess::CANNON1:
+		ret = "redcannon1";
+		break;
+	case SE_CChess::CANNON2:
+		ret = "redcannon2";
+		break;
+	case SE_CChess::PRIVATE1:
+		ret = "redprivate1";
+		break;
+    case SE_CChess::PRIVATE2:
+		ret = "redprivate2";
+		break;
+	case SE_CChess::PRIVATE3:
+		ret =  "redprivate3";
+		break;
+	case SE_CChess::PRIVATE4:
+		ret = "redprivate4";
+		break;
+	case SE_CChess::PRIVATE5:
+		ret = "redprivate5";
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+static std::string getBlackChessPieces(SE_CChess::CHESS_PIECES_TYPE t)
+{
+	std::string ret;
+	switch(t)
+	{
+	case SE_CChess::ROOK1:
+		ret = "blackrook1";
+		break;
+    case SE_CChess::HORSE1:
+		ret = "blackhorse1";
+		break;
+	case SE_CChess::ELEPHANT1:
+		ret  = "blackelephant1";
+		break;
+	case SE_CChess::KNIGHT1:
+		ret = "blackknight1";
+		break;
+	case SE_CChess::KING:
+		ret = "blackking";
+		break;
+	case SE_CChess::ROOK2:
+		ret = "blackrook2";
+		break;
+	case SE_CChess::HORSE2:
+		ret = "blackhorse2";
+		break;
+	case SE_CChess::ELEPHANT2:
+		ret = "blackelephant2";
+		break;
+	case SE_CChess::KNIGHT2:
+		ret = "blackknight2";
+		break;
+	case SE_CChess::CANNON1:
+		ret = "blackcannon1";
+		break;
+	case SE_CChess::CANNON2:
+		ret = "blackcannon2";
+		break;
+	case SE_CChess::PRIVATE1:
+		ret = "blackprivate1";
+		break;
+    case SE_CChess::PRIVATE2:
+		ret = "blackprivate2";
+		break;
+	case SE_CChess::PRIVATE3:
+		ret = "blackprivate3";
+		break;
+	case SE_CChess::PRIVATE4:
+		ret = "blackprivate4";
+		break;
+	case SE_CChess::PRIVATE5:
+		ret = "blackprivate5";
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
 static std::string getNameByChessPieces(const SE_CChess::_ChessPieces& cp)
 {
-	/*
+	std::string ret;
 	switch(cp.color)
 	{
 	case SE_CChess::RED:
 		{
-			switch(cp.cp)
-			{
-			case SE_CChess::ROOK1:
-				return "redrook1";
-            case SE_CChess::HORSE1:
-				return "redhorse1";
-			case SE_CChess::ELEPHANT1:
-				return "redelephant1";
-			case SE_CChess::KNIGHT1:
-				return "redknight1";
-			case SE_CChess::KING:
-				return "redking";
-			case SE_CChess::ROOK2:
-				return "redrook2";
-			case SE_CChess::HORSE2:
-				return "redhorse2";
-			case SE_CChess::ELEPHANT2:
-				return "redelephant2";
-			case SE_CChess::KNIGHT2:
-				return "redknight2";
-			case SE_CChess::CANNON1:
-				return "redcannon1";
-			case SE_CChess::CANNON2:
-				return "redcannon2";
-			case SE_CChess::PRIVATE1:
-				return "redprivate1";
-            case SE_CChess::PRIVATE2:
-				return "redprivate2";
-			case SE_CChess::PRIVATE3:
-				return "redprivate3";
-			case SE_CChess::PRIVATE4:
-				return "redprivate4";
-			case SE_CChess::PRIVATE5:
-				return "redprivate5";
-			}
+            ret = getRedChessPieces(cp.cp);
 		}
 		break;
 	case SE_CChess::BLACK:
 		{
-			switch(cp.cp)
-			{
-			case SE_CChess::ROOK1:
-				return "blackrook1";
-            case SE_CChess::HORSE1:
-				return "blackhorse1";
-			case SE_CChess::ELEPHANT1:
-				return "blackelephant1";
-			case SE_CChess::KNIGHT1:
-				return "blackknight1";
-			case SE_CChess::KING:
-				return "blackking";
-			case SE_CChess::ROOK2:
-				return "blackrook2";
-			case SE_CChess::HORSE2:
-				return "blackhorse2";
-			case SE_CChess::ELEPHANT2:
-				return "blackelephant2";
-			case SE_CChess::KNIGHT2:
-				return "blackknight2";
-			case SE_CChess::CANNON1:
-				return "blackcannon1";
-			case SE_CChess::CANNON2:
-				return "blackcannon2";
-			case SE_CChess::PRIVATE1:
-				return "blackprivate1";
-            case SE_CChess::PRIVATE2:
-				return "blackprivate2";
-			case SE_CChess::PRIVATE3:
-				return "blackprivate3";
-			case SE_CChess::PRIVATE4:
-				return "blackprivate4";
-			case SE_CChess::PRIVATE5:
-				return "blackprivate5";
+			ret = getBlackChessPieces(cp.cp);
 		}
 		break;
 	}
-	*/
-	return "";
+	return ret;
 }
 class SE_ChessPointedElementHandler : public SE_PointedElementHandler
 {
@@ -428,51 +476,63 @@ void SE_CChess::check()
 		}
 	}
 }
-bool SE_CChess::canMoveTo(const _ChessPieces& src, const _ChessPieces& dst)
-{
-    if(src.color == dst.color && src.color != INVALID_COLOR)
-        return false;
-    else if(src.color != dst.color && dst.color == INVALID_COLOR)
-        return true;
-    else
-        return false;
-}
+
 void SE_CChess::doMove(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
-    if(!canMoveTo(src.cp, dst.cp))
+    if(dst.cp.color == INVALID_COLOR && dst.cp.cp == INVALID_PIECE)
     {
-        mAction = CANNOT_MOVE;
+        mAction = CAN_MOVE;
+        mRemoved = NULL;
     }
     else
     {
-        if(dst.cp.color == INVALID_COLOR && dst.cp.cp == INVALID_PIECE)
-        {
-            mAction = CAN_MOVE;
-            mRemoved = NULL;
-        }
-        else
-        {
-            mAction = CAN_MOVE;
-            mChessPiecesData[dst.cp.color][dst.cp.cp].state = DEAD;
-            mRemoved = &mChessPiecesData[dst.cp.color][dst.cp.cp];
-        }
-        _BoardUnitData* d = &mBoardData[dst.row][dst.col];
-        d->cp = src.cp;
-		mChessPiecesData[src.cp.color][src.cp.cp].row = dst.row;
-		mChessPiecesData[src.cp.color][src.cp.cp].col = dst.col;
-		mBoardData[src.row][src.col].cp = SE_CChess::_ChessPieces();
-        mDstMove = *d;
+        mAction = CAN_MOVE;
+        mChessPiecesData[dst.cp.color][dst.cp.cp].state = DEAD;
+        mRemoved = &mChessPiecesData[dst.cp.color][dst.cp.cp];
     }
+    _BoardUnitData* d = &mBoardData[dst.row][dst.col];
+    d->cp = src.cp;
+	mChessPiecesData[src.cp.color][src.cp.cp].row = dst.row;
+	mChessPiecesData[src.cp.color][src.cp.cp].col = dst.col;
+	mBoardData[src.row][src.col].cp = SE_CChess::_ChessPieces();
+    mDstMove = *d;
 }
 bool SE_CChess::canPrivateMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
+	SE_ASSERT(src.cp.color != INVALID_COLOR && src.cp.cp != INVALID_PIECE);
+	if(dst.row == -1 || dst.col == -1)
+		return false;
+	if(src.row != dst.row && src.col != dst.col)
+		return false;
+    if(src.row == dst.row && src.col == dst.col)
+    {
+        return false;
+    }
+	if(SE_Iabs(src.row - dst.row) > 1)
+		return false;
+	if(SE_Iabs(src.row - dst.row) > 1)
+		return false;
+	if(src.cp.color == dst.cp.color)
+		return false;
     _RowCol movePoint[3];
 	movePoint[0].row = src.row;
 	movePoint[0].col = src.col - 1;
 	movePoint[1].row = src.row;
 	movePoint[1].col = src.col + 1;
-	movePoint[2].row = src.row + 1;
-	movePoint[2].col = src.col;
+	if(mPlayerColor[SELF] == src.cp.color)
+	{
+	    movePoint[2].row = src.row + 1;
+	    movePoint[2].col = src.col;
+	}
+	else if(mPlayerColor[OPPONENT] == src.cp.color)
+	{
+		movePoint[2].row = src.row - 1;
+		movePoint[2].col = src.col;
+	}
+	else
+	{
+		SE_ASSERT(0);
+	}
 	int k = -1;
     for(int i = 0 ; i < 3 ; i++)
 	{
@@ -485,7 +545,13 @@ bool SE_CChess::canPrivateMoveTo(const _BoardUnitData& src, const _BoardUnitData
 	if(k == -1)
 		return false;
 	else
+	{
+		if(mPlayerColor[SELF] == src.cp.color && src.row <= mPlayerBoundary[SELF] && dst.row == src.row)
+			return false;
+		if(mPlayerColor[OPPONENT] == src.cp.color && src.row >= mPlayerBoundary[OPPONENT] && dst.row == src.row)
+			return false;
 		return true;
+	}
 }
 void SE_CChess::handlePrivate(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
@@ -496,16 +562,41 @@ void SE_CChess::handlePrivate(const _BoardUnitData& src, const _BoardUnitData& d
 	}
 	doMove(src, dst);
 }
+bool SE_CChess::isSameColor(const _BoardUnitData& src, const _BoardUnitData& dst)
+{
+	return src.cp.color == dst.cp.color;
+}
 bool SE_CChess::canCannonMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
+	if(dst.row == -1 || dst.col == -1)
+		return false;
 	if(src.row != dst.row && src.col != dst.col)
 		return false;
+	if(src.row == dst.row && src.col == dst.col)
+    {
+        return false;
+    }
     if(src.row == dst.row)
 	{
 		int count = piecesNumBetweenCol(src.row, src.col, dst.col);
-		if(count == 1 || count == 0)
+		if(count == 0)
 		{
-			return true;
+			if(dst.cp.color != INVALID_COLOR || dst.cp.cp != INVALID_PIECE)
+				return false;
+			else
+			    return true;
+		}
+		else if(count == 1)
+		{
+			if(dst.cp.color == INVALID_COLOR || dst.cp.cp == INVALID_PIECE)
+				return false;
+			else
+			{
+				if(isSameColor(src, dst))
+					return false;
+				else
+			        return true;
+			}
 		}
 		else
 		{
@@ -515,9 +606,26 @@ bool SE_CChess::canCannonMoveTo(const _BoardUnitData& src, const _BoardUnitData&
 	else
 	{
 		int count = piecesNumBetweenRow(src.col, src.row, dst.row);
-		if(count == 1 || count == 0)
+		if(count == 0)
 		{
-            return true;
+			if(dst.cp.color != INVALID_COLOR || dst.cp.cp != INVALID_PIECE)
+				return false;
+			else
+			    return true;
+		}
+		else if(count == 1)
+		{
+			if(dst.cp.color == INVALID_COLOR || dst.cp.cp == INVALID_PIECE)
+				return false;
+			else
+			{
+				if(isSameColor(src, dst))
+				{
+					return false;
+				}
+				else
+			        return true;
+			}
 		}
 		else
 		{
@@ -535,61 +643,102 @@ void SE_CChess::handleCannon(const _BoardUnitData& src, const _BoardUnitData& ds
 	}
 	doMove(src, dst);
 }
-void SE_CChess::handleRook(const _BoardUnitData& src, const _BoardUnitData& dst)
+bool SE_CChess::canRookMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
     if(src.row != dst.row && src.col != dst.col)
     {
-        mAction = CANNOT_MOVE;
-        return;
+        return false;
     }
     if(src.row == dst.row && src.col == dst.col)
     {
-        mAction = CANNOT_MOVE;
-        return;
+        return false;
     }
+    if(src.cp.color == dst.cp.color)
+        return false;
+	if(dst.row == -1 || dst.col == -1)
+		return false;
     if(src.row == dst.row)
     {
         if(piecesNumBetweenCol(src.row, src.col, dst.col) > 0)
         {
-            mAction = CANNOT_MOVE;
+            return false;
         }
         else
         {
-            doMove(src, dst);
+            return true;
         }
     }
     else
     {
         if(piecesNumBetweenRow(src.col, src.row, dst.row) > 0)
         {
-            mAction = CANNOT_MOVE;
+            return false;
         }
         else
         {
-            doMove(src, dst);
+            return true;
         }
     }
 }
+void SE_CChess::handleRook(const _BoardUnitData& src, const _BoardUnitData& dst)
+{
+    if(!canRookMoveTo(src, dst))
+	{
+		mAction = CANNOT_MOVE;
+		return;
+	}
+    doMove(src, dst);
+
+}
 bool SE_CChess::canHorseMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
-
+	if(src.cp.color == dst.cp.color)
+		return false;
+	if(dst.row == -1 || dst.col == -1)
+		return false;
     _RowCol movePoint[8];
     movePoint[0].row = src.row + 2;
     movePoint[0].col = src.col + 1;
+
     movePoint[1].row = src.row + 2;
     movePoint[1].col = src.col - 1;
-    movePoint[2].row = src.row - 1;
-    movePoint[2].col = src.col - 1;
-    movePoint[3].row = src.row  - 2;
-    movePoint[3].col = src.col + 1;
-    movePoint[4].row = src.row + 1;
-    movePoint[4].col = src.col + 2;
-    movePoint[5].row = src.row + 1;
-    movePoint[5].col = src.col - 2;
-    movePoint[6].row = src.row - 1;
-    movePoint[6].col = src.col - 2;
-    movePoint[7].row = src.row - 1;
-    movePoint[7].col = src.col - 2;
+
+    movePoint[2].row = src.row + 1;
+    movePoint[2].col = src.col - 2;
+    
+	movePoint[3].row = src.row  - 1;
+    movePoint[3].col = src.col - 2;
+    
+	movePoint[4].row = src.row - 2;
+    movePoint[4].col = src.col - 1;
+    
+	movePoint[5].row = src.row - 2;
+    movePoint[5].col = src.col + 1;
+    
+	movePoint[6].row = src.row - 1;
+    movePoint[6].col = src.col + 2;
+    
+	movePoint[7].row = src.row + 1;
+    movePoint[7].col = src.col + 2;
+	struct _BarrierData
+	{
+		int vr;
+		int vc;
+		int br;
+		int bc;
+		_BarrierData(int vc, int vr, int br, int bc)
+		{
+            this->vr = vr;
+			this->vc = vc;
+			this->br = br;
+			this->bc = bc;
+		}
+	};
+	_BarrierData barrier[8] = {_BarrierData(1, 2, src.row + 1, src.col), _BarrierData(-1, 2, src.row + 1, src.col), 
+		_BarrierData(-2, 1, src.row, src.col - 1),
+		_BarrierData(-2, -1, src.row, src.col - 1), _BarrierData(-1, -2, src.row - 1, src.col), 
+		_BarrierData(1, -2, src.row - 1, src.col), 
+		_BarrierData(2, -1, src.row, src.col + 1), _BarrierData(2, 1, src.row, src.col + 1)};
     int k = -1;
     for(int i = 0 ; i < 8 ; i++)
     {
@@ -605,7 +754,24 @@ bool SE_CChess::canHorseMoveTo(const _BoardUnitData& src, const _BoardUnitData& 
     }
     else
     {
-        return true;
+		int x = dst.col - src.col;
+		int y = dst.row - src.row;
+		k = -1;
+		for(int i = 0 ; i < 8 ; i++)
+		{
+			if(barrier[i].vc == x && barrier[i].vr == y)
+			{
+				k = i;
+				break;
+			}
+		}
+		SE_ASSERT(k != -1);
+		int row = barrier[k].br;
+		int col = barrier[k].bc;
+		if(mBoardData[row][col].cp.color != INVALID_COLOR && mBoardData[row][col].cp.cp != INVALID_PIECE)
+			return false;
+		else
+            return true;
     }
 }
 void SE_CChess::handleHorse(const _BoardUnitData& src, const _BoardUnitData& dst)
@@ -619,6 +785,8 @@ void SE_CChess::handleHorse(const _BoardUnitData& src, const _BoardUnitData& dst
 }
 bool SE_CChess::canElephantMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
+	if(src.cp.color == dst.cp.color)
+		return false;
 
     _RowCol movePoint[4];
     movePoint[0].row = src.row - 2;
@@ -629,9 +797,9 @@ bool SE_CChess::canElephantMoveTo(const _BoardUnitData& src, const _BoardUnitDat
     movePoint[2].col = src.col - 2;
     movePoint[3].row = src.row + 2;
     movePoint[3].col = src.col + 2;
-    if(src.cp.color == BLACK && dst.row < mPlayerBoundary[BLACK])
+    if(src.cp.color == mPlayerColor[SELF] && dst.row > mPlayerBoundary[SELF])
         return false;
-    else if(src.cp.color == RED && dst.row > mPlayerBoundary[RED])
+    else if(src.cp.color == mPlayerColor[OPPONENT] && dst.row < mPlayerBoundary[OPPONENT])
         return false;
     int k = -1;
     for(int i = 0 ; i < 4 ; i++)
@@ -645,7 +813,18 @@ bool SE_CChess::canElephantMoveTo(const _BoardUnitData& src, const _BoardUnitDat
     if(k == -1)
         return false;
     else
-        return true;
+	{
+		int row = dst.row - src.row;
+		int col = dst.col - src.col;
+		row = row / 2;
+		col = col / 2;
+		row = src.row + row;
+		col = src.col + col;
+		if(mBoardData[row][col].cp.color != INVALID_COLOR || mBoardData[row][col].cp.cp != INVALID_PIECE)
+			return false;
+		else
+            return true;
+	}
 }
 void SE_CChess::handleElephant(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
@@ -658,6 +837,10 @@ void SE_CChess::handleElephant(const _BoardUnitData& src, const _BoardUnitData& 
 }
 bool SE_CChess::canKnightMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
+	if(src.cp.color == dst.cp.color)
+		return false;
+	if(dst.row == -1 || dst.col == -1)
+		return false;
     _RowCol movePoint[4];
     movePoint[0].row = src.row - 1;
     movePoint[0].col = src.col - 1;
@@ -667,8 +850,17 @@ bool SE_CChess::canKnightMoveTo(const _BoardUnitData& src, const _BoardUnitData&
     movePoint[2].col = src.col - 1;
     movePoint[3].row = src.row + 1;
     movePoint[3].col = src.col + 1;
-    if(dst.row >= mKingBoundary[src.cp.color][0].x && dst.row <= mKingBoundary[src.cp.color][1].x &&
-       dst.col >= mKingBoundary[src.cp.color][0].y && dst.col <= mKingBoundary[src.cp.color][1].y)
+	int player = SELF;
+	for(int i = 0 ; i < 2 ; i++)
+	{
+		if(mPlayerColor[i] == src.cp.color)
+		{
+			player = i;
+			break;
+		}
+	}
+    if(dst.row >= mKingBoundary[player][0].y && dst.row <= mKingBoundary[player][1].y &&
+       dst.col >= mKingBoundary[player][0].x && dst.col <= mKingBoundary[player][1].x)
     {
         int k = -1;
         for(int i = 0 ; i < 4 ; i++)
@@ -698,6 +890,10 @@ void SE_CChess::handleKnight(const _BoardUnitData& src, const _BoardUnitData& ds
 }
 bool SE_CChess::canKingMoveTo(const _BoardUnitData& src, const _BoardUnitData& dst)
 {
+	if(src.cp.color == dst.cp.color)
+		return false;
+	if(dst.row == -1 || dst.col == -1)
+		return false;
     _RowCol movePoint[4];
     movePoint[0].row = src.row - 1;
     movePoint[0].col = src.col;
@@ -707,8 +903,17 @@ bool SE_CChess::canKingMoveTo(const _BoardUnitData& src, const _BoardUnitData& d
     movePoint[2].col = src.col - 1;
     movePoint[3].row = src.row;
     movePoint[3].col = src.col + 1;
-    if(dst.row >= mKingBoundary[src.cp.color][0].x && dst.row <= mKingBoundary[src.cp.color][1].x &&
-       dst.col >= mKingBoundary[src.cp.color][0].y && dst.col <= mKingBoundary[src.cp.color][1].y)
+	int player = SELF;
+	for(int i = 0 ; i < 2 ; i++)
+	{
+		if(mPlayerColor[i] == src.cp.color)
+		{
+			player = i;
+			break;
+		}
+	}
+    if(dst.row >= mKingBoundary[player][0].y && dst.row <= mKingBoundary[player][1].y &&
+       dst.col >= mKingBoundary[player][0].x && dst.col <= mKingBoundary[player][1].x)
     {
         int k = -1;
         for(int i = 0 ; i < 4 ; i++)
