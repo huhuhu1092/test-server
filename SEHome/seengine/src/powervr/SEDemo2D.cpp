@@ -53,7 +53,7 @@ public:
 	{
 		//mPhysics = NULL;
 		mSelectedSpatial = NULL;
-	    mChessApp = new SE_CChess(34, 784, 64, 64, SE_CChess::RED, SE_CChess::BLACK);
+	    mChessApp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -102,7 +102,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
@@ -110,8 +110,13 @@ bool SEDemo::InitApplication()
 	c->chessApp = mChessApp;
 	c->left = 0;
 	c->top = 0;
+#ifdef ROTATE
+	c->width = 800;
+	c->height = 480;
+#else
 	c->width = 480;
 	c->height = 800;
+#endif
 	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
@@ -207,13 +212,17 @@ void SEDemo::handleInput(int width, int height)
     if((buttonState & ePVRShellButtonLeft))
     {
 	
-		    SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
-		    if(c)
-		    {
-			    SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
-			    c->motionEvent = ke;
-			    SE_Application::getInstance()->postCommand(c);
-		    }
+	    SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
+	    if(c)
+	    {
+#ifdef ROTATE
+            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+#else
+		    SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
+#endif
+		    c->motionEvent = ke;
+		    SE_Application::getInstance()->postCommand(c);
+	    }
 	    bPressed = 1;
     }
     else if(bPressed)
@@ -221,7 +230,12 @@ void SEDemo::handleInput(int width, int height)
         SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
 		if(c)
 		{
+#ifdef ROTATE
+            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+
+#else
 			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP, prevPointer[0] * width, prevPointer[1] * height);
+#endif	
 			c->motionEvent = ke;
 			SE_Application::getInstance()->postCommand(c);
 		}

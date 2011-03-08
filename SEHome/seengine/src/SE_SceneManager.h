@@ -9,6 +9,12 @@ class SE_Element;
 class SE_Cursor;
 class SE_2DNodeElement;
 class SE_RenderManager;
+class SE_PointedElementHandler
+{
+public:
+	virtual ~SE_PointedElementHandler() {}
+	virtual void handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y) = 0;
+};
 /*
  * SceneManager manage the all screen region
  * its geometry is (0, 0, mWidth, mHeight)
@@ -43,24 +49,32 @@ public:
     }
     void loadCursor(const char* cursorResource, float mx, float my);
 	void showCursor();
+	void setPointedElementHandler(SE_PointedElementHandler* h)
+	{
+		if(mPointedElementHandler)
+			delete mPointedElementHandler;
+		mPointedElementHandler = h;
+	}
 private:
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);
-	void handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent);
+	//void handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent);
+	void handlePointedElement(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y);
 private:
     SE_TreeStructManager<SE_Scene> mScenes;
     typedef std::list<SE_SceneID> _SceneStack;
     _SceneStack mStack;
     float mWidth;
     float mHeight;
-	SE_ElementID mMotionDownElementID;
-	SE_ElementID mMotionMoveElementID;
-	SE_ElementID mMotionUpElementID;
-	SE_ElementID mMotionCancelElementID;
-	SE_2DNodeElement* mPointedElement;
-	SE_2DNodeElement* mPointedElementPrev;
-	float mPrevX, mPrevY;
-	int mPrevMotionEventType;
+	//SE_ElementID mMotionDownElementID;
+	//SE_ElementID mMotionMoveElementID;
+	//SE_ElementID mMotionUpElementID;
+	//SE_ElementID mMotionCancelElementID;
+	//SE_2DNodeElement* mPointedElement;
+	//SE_2DNodeElement* mPointedElementPrev;
+	//float mPrevX, mPrevY;
+	//int mPrevMotionEventType;
 	SE_Cursor* mCursor;
+	SE_PointedElementHandler* mPointedElementHandler;
 };
 #endif

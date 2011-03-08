@@ -14,11 +14,12 @@
 SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneManager::MAX_SIZE)
 {
     mWidth = mHeight = 0;
-	mPrevX = 0 ;
-	mPrevY = 0;
-	mPrevMotionEventType = SE_MotionEvent::UP;
+	//mPrevX = 0 ;
+	//mPrevY = 0;
+	//mPrevMotionEventType = SE_MotionEvent::UP;
 	mCursor = NULL;
-	mPointedElement = NULL;
+	//mPointedElement = NULL;
+	mPointedElementHandler = NULL;
 }
 SE_SceneManager::~SE_SceneManager()
 {
@@ -135,7 +136,7 @@ void SE_SceneManager::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {
 
 }
-
+/*
 void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent)
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
@@ -214,6 +215,7 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 		}
 	}   
 }
+*/
 void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 {
 	if(!mCursor)
@@ -244,6 +246,7 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 	std::list<SE_Scene*>::iterator itScene;
 	SE_SceneRenderSeq sceneRenderSeq = -1;
 	SE_Element* pointedElement = NULL;
+	SE_Scene* pointedScene = NULL;
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	for(itScene = sceneMotionEvent.begin() ; itScene != sceneMotionEvent.end(); itScene++)
 	{
@@ -255,36 +258,18 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
             if(e->getSceneRenderSeq() > sceneRenderSeq)
 			{
 				pointedElement = e;
+				pointedScene = scene;
 				sceneRenderSeq = e->getSceneRenderSeq();
 			}
 		}
 	}
-	if(mCursor->getState() == SE_Cursor::CLICKED || mCursor->getState() == SE_Cursor::UP)
-	{
-		if(mPointedElementPrev == mPointedElement && mPointedElement != NULL)
-		{
-			mPointedElement = NULL;
-			mPointedElementPrev = NULL;
-		}
-		else
-            mPointedElementPrev = (SE_2DNodeElement*)pointedElement;
-	}
-	else if(mCursor->getState() == SE_Cursor::DOWN)
-	{
-		mPointedElement = (SE_2DNodeElement*)pointedElement;
-	}
-	else if(mCursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
-	{
-		SE_Vector2f v = mCursor->getDisplacement();
-		LOGI("#!!!! displacement : %f, %f @@@@\n", v.x, v.y);
-        if(mPointedElement)
-		{
-			x = mPointedElement->getLeft();
-			y = mPointedElement->getTop();
-			mPointedElement->setLeft(x + v.x);
-			mPointedElement->setTop(y + v.y);
-            mPointedElement->updateSpatial(false);
-		}
-	}
+	handlePointedElement(pointedScene, pointedElement, mCursor, x, y);
 }
 
+void SE_SceneManager::handlePointedElement(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)
+{
+	if(mPointedElementHandler)
+	{
+		mPointedElementHandler->handle(pointedScene, pointedElement, cursor , x, y);
+	}
+}

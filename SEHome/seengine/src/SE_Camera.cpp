@@ -99,8 +99,13 @@ void SE_Camera::translateLocal(const SE_Vector3f& translate)
 }
 SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
 {
+#ifdef ROTATE
+	float yp = 1 - ((float)x) / (mViewport.bottom - mViewport.top);
+	float xp = 1 - ((float)y) / (mViewport.right - mViewport.left);
+#else
     float xp = ((float)x) / (mViewport.right - mViewport.left);
     float yp = 1 - ((float)y) / (mViewport.bottom - mViewport.top);
+#endif
     SE_Rect<float> nearRect = mFrustum.getNearPlaneRect();
     float xv = (1 - xp) * nearRect.left + xp * nearRect.right;
     float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;

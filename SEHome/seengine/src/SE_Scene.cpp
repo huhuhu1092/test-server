@@ -36,10 +36,19 @@ void SE_Scene::create(const char* sceneName)
     {
         root = new SE_2DNodeElement;
 		root->setCanPointed(false);
+
+
+#ifdef ROTATE
+	    SE_Vector4f c1(0, -1, 0, 0);
+        SE_Vector4f c2(-1, 0, 0, 0);
+        SE_Vector4f c3(0, 0, 1, 0);
+        SE_Vector4f c4(mWidth / 2, mHeight / 2, 0, 1);
+#else
         SE_Vector4f c1(1, 0, 0, 0);
         SE_Vector4f c2(0, -1, 0, 0);
         SE_Vector4f c3(0, 0, 1, 0);
         SE_Vector4f c4(-mWidth / 2, mHeight / 2, 0, 1);
+#endif
         SE_Matrix4f localM;
         localM.setColumn(0, c1);
         localM.setColumn(1, c2);
@@ -158,6 +167,14 @@ bool SE_Scene::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
 {
     return false;
 }
+SE_Element* SE_Scene::findByName(const char* name)
+{
+	SE_Element* rootElement = getRootElement();
+	if(rootElement)
+		return rootElement->findByName(name);
+	else
+		return NULL;
+}
 static SE_Element* getPointedElement(SE_Spatial* spatial, SE_ElementManager* elementManager)
 {
 	if(spatial == NULL)
@@ -179,7 +196,7 @@ SE_Element* SE_Scene::getPointedElement(float x, float y)
 	if(camera == NULL)
 		return NULL;
 	SE_Ray ray = camera->screenCoordinateToRay(x, y);
-    SE_FindSpatialCollision spatialCollision(ray);
+	SE_FindSpatialCollision spatialCollision(ray);
 	rootSpatial->travel(&spatialCollision, true);
 	SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
 	SE_SimObject* simObject = spatialCollision.getCollisionObject();

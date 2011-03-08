@@ -54,6 +54,7 @@ public:
 	}
     SE_Element* getRootElement();
 	SE_Spatial* getRootSpatial();
+	SE_Element* findByName(const char* name);
 private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);

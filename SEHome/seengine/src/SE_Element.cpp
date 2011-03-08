@@ -546,6 +546,7 @@ SE_2DNodeElement::SE_2DNodeElement()
     mDeltaLeft = mDeltaTop = 0;
     mSpatialType = SE_COMMON_NODE_TYPE;
 	mRectPatchType = SE_NO_PATCH;
+	mUpdateFromMountPointID = true;
 }
 SE_2DNodeElement::~SE_2DNodeElement()
 {
@@ -671,6 +672,8 @@ void SE_2DNodeElement::update(const SE_AddressID& address, const SE_Value& value
 }
 void SE_2DNodeElement::updateMountPoint()
 {
+	if(!mUpdateFromMountPointID)
+		return;
 	SE_2DNodeElement* parent = (SE_2DNodeElement*)getParent();
 	if(parent && mMountPointID.isValid())
 	{

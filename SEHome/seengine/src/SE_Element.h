@@ -355,19 +355,23 @@ public:
     void setMountPointX(float x)
     {
         mMountPointX = x;
+		mUpdateFromMountPointID = false;
     }
     void setMountPointY(float y)
     {
         mMountPointY = y;
+		mUpdateFromMountPointID = false;
     }
 	void setMountPoint(float x, float y)
 	{
 		mMountPointX = x;
 		mMountPointY = y;
+		mUpdateFromMountPointID = false;
 	}
 	void setMountPoint(const SE_MountPointSet& mountPointSet)
 	{
 		mMountPointSet = mountPointSet;
+		
 	}
     void clearMountPoint()
     {
@@ -475,5 +479,6 @@ protected:
     SE_MountPointSet mMountPointSet;
     SE_MountPointID mMountPointID;
 	int mRectPatchType;
+	bool mUpdateFromMountPointID;
 };
 #endif
