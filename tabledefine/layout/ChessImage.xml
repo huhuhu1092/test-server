@@ -38,6 +38,10 @@
     
     <ImageItem id = "blackchancellor" name = "chess/blackchancellor.png" pivotx = "0" pivoty = "0" />
     <ImageItem id = "redchancellor" name = "chess/redchancellor.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redcannon" name = "chess/redcannon.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "blackcannon" name = "chess/blackcannon.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "redprivate" name = "chess/redprivate.png" pivotx = "0" pivoty = "0" />
+    <ImageItem id = "blackprivate" name = "chess/blackprivate.png" pivotx = "0" pivoty = "0" />
 </ImageTable>
 <ImageTable id = "Cursor">
     <ImageItem id = "001" name = "chess/selection_001.png" pivotx = "64" pivoty = "94" />
