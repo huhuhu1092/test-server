@@ -411,8 +411,13 @@ void SE_CChess::setOpening(const char* startOpening, int len)
 }
 int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 {
+#if defined(ANDROID)
     int cs = std::min(srcCol, dstCol);
     int cd = std::max(srcCol, dstCol);
+#elif defined(WIN32)
+    int cs = min(srcCol, dstCol);
+    int cd = max(srcCol, dstCol);
+#endif
 	int count = 0;
     for(int i = (cs + 1) ; i < cd ; i++)
     {
@@ -426,8 +431,13 @@ int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 }
 int SE_CChess::piecesNumBetweenRow(int col, int srcRow, int dstRow)
 {
+#if defined(ANDROID)
     int rs = std::min(srcRow, dstRow);
     int rd = std::max(srcRow, dstRow);
+#elif defined(WIN32)
+    int rs = min(srcRow, dstRow);
+    int rd = max(srcRow, dstRow);
+#endif
 	int count = 0;
     for(int i = (rs + 1) ; i < rd ; i++)
     {
