@@ -23,7 +23,7 @@
 
 <resources>
     <!-- Simple strings. -->
-    <string name="sedemo_activity">SEHome</string>
+    <string name="sedemo_activity">CChess</string>
     <string name="activity_not_found">NotFoundActivity</string>
 </resources>
 

@@ -86,7 +86,7 @@ public:
     }
     SE_StringID getControllerRef()
     {
-        mControllerRef;
+        return mControllerRef;
     }
     int getRepeatMode()
     {

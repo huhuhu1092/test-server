@@ -39,15 +39,25 @@ public class SEApplication
     public SEApplication()
     {
     }
-    public native void init(int userid, String dataPath, String sceneName);
+    public native void init(int userid0, int userid1, String dataPath, String sceneName);
     public native void destroy();
     public native void resize(int width, int height);
+    
     public native void sendKeyCommand(int keyType, int keyCode);
     public native void sendMotionCommand(int motionType, int x, int y);
     public native void sendLoadSceneCommand(String name);
     public native void sendUpdateCameraCommand(int width, int height);
-    public native String getResponseName();
-    public native int getResponseContentSize();
-    public native String getResponseStringValue();
+    
+    public native int getMessageNum();
+    public native int getMessageType(int messageIndex);
+    public native int getMessageItemNum(int messageIndex);
+    public native int getMessageItemType(int messageIndex, int itemIndex);
+    public native int getByteMessageItem(int messageIndex,int itemIndex);
+    public native int getShortMessageItem(int messageIndex,int itemIndex);
+    public native int getIntMessageItem(int messageIndex,int itemIndex);
+    public native float getFloatMessageItem(int messageIndex,int itemIndex);
+    public native String getStringMessageItem(int messageIndex,int itemIndex);
+    
+    public native void releaseMessage();
     public native void runOneFrame();
 }

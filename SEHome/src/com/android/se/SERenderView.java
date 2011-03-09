@@ -185,7 +185,7 @@ public class SERenderView extends GLSurfaceView
             if(!mInit)
             {
                 //mApp.sendLoadSceneCommand("home");
-                mApp.init(18215879, "/sdcard/sedemo/", "home");
+                mApp.init(137, 18215879, "/sdcard/sedemo/", "ChessLayout.xml/ChessRoot");
                 mInit = true;
             }
             if(mSizeChange)
@@ -194,16 +194,14 @@ public class SERenderView extends GLSurfaceView
                 mSizeChange = false;
             }
             mApp.runOneFrame();
-            int resint = mApp.getResponseContentSize();
-            if(resint > 0)
+            int resSize = mApp.getMessageNum();
+            //Log.d(TAGR, TAGF + " message num = " + resSize);
+            
+            if (resSize > 0) 
             {
-                String response = mApp.getResponseStringValue();
-                Message msg = Message.obtain();
-                msg.what = H.MSG_NAME;
-                msg.obj = response;
-                mH.sendMessage(msg);
-                Log.e("AAAAA", response);
+
             }
+            mApp.releaseMessage();
         }
       
     }

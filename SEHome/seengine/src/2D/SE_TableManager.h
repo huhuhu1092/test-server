@@ -79,7 +79,7 @@ public:
     }
     bool isContain(const ID& id) const
     {
-		mTableItems.isContain(id);
+	    return mTableItems.isContain(id);
     }
 	const PROPERTY& getProperty() const
 	{

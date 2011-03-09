@@ -37,7 +37,11 @@ void SE_TreeStruct<T>::removeChild(T* child)
 template <typename T>
 void SE_TreeStruct<T>::addChild(T* child)
 {
+#if defined(WIN32)
 	std::list<T*>::iterator it = find(mChildren.begin(), mChildren.end(), child);
+#else
+    typename std::list<T*>::iterator it = find(mChildren.begin(), mChildren.end(), child);
+#endif
 	if(it == mChildren.end())
         mChildren.push_back(child);
 }

@@ -3500,7 +3500,7 @@ SE_Element* SE_ResourceManager::loadScene(const char* sceneName)
 }
 void SE_ResourceManager::loadElementSchema(const char* elementResourceName)
 {
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + elementResourceName;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + elementResourceName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE)

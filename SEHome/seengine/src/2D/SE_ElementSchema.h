@@ -11,6 +11,7 @@ class SE_2DNodeElement;
 class SE_ElementSchemaVisitor
 {
 public:
+    virtual ~SE_ElementSchemaVisitor() {}
 	virtual void visit(SE_ElementSchema* e) = 0;
 };
 class SE_ElementProperty

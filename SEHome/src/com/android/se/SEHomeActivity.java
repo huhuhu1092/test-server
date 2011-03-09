@@ -172,8 +172,8 @@ public class SEHomeActivity extends Activity
                 mRenderView.setMessageHandler(mMsgH);
             }
             setContentView(mRenderView);
-            Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
-            loader.start();
+            //Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
+           // loader.start();
         }
     }
     private boolean foundSEData() {

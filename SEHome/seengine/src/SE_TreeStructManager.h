@@ -31,37 +31,6 @@ public:
     {
         parent->addChild(child);
     }
-	template <typename CONDITION>
-	std::vector<T*> remove_if(CONDITION condition)
-	{
-		struct _NodeData
-		{
-			_Node* node;
-			size_t index;
-		};
-		std::list<_NodeData> removedNode;
-		for(size_t i = 0 ; i < mNodes.size() ; i++)
-		{
-            _Node* node = &mNodes[i];
-			if(node->alloc && node->data && condition(node->data))
-			{
-				_NodeData nd;
-				nd.node = node;
-				nd.index = i;
-                removedNode.push_back(nd);
-			}
-		} 
-		std::list<T*> removeList;
-		std::list<_NodeData>::iterator it;
-		for(it = removedNode.begin() ; it != removedNode.end() ; it++)
-		{
-			T* data = removeNode(it->index, it->node);
-			removeList.push_back(data);
-		}
-		std::vector<T*> ret(removeList.size());
-		copy(removeList.begin(), removeList.end(), ret.begin());
-		return ret;
-	}
     T* getParent(const SE_TreeStructID& id);
     std::vector<T*> getChildren(const SE_TreeStructID& id);
     int getError() const
@@ -83,6 +52,54 @@ private:
             alloc = false;
         }
     };
+	struct _NodeData
+	{
+		_Node* node;
+		size_t index;
+	};
+public:
+	template <typename CONDITION>
+	std::vector<T*> remove_if(CONDITION condition)
+	{
+        /*
+		struct _NodeData
+		{
+			_Node* node;
+			size_t index;
+		};
+        */
+#if defined(WIN32)
+        std::list<_NodeData> removedNode;
+#else
+		std::list<_NodeData> removedNode;
+#endif
+		for(size_t i = 0 ; i < mNodes.size() ; i++)
+		{
+            _Node* node = &mNodes[i];
+			if(node->alloc && node->data && condition(node->data))
+			{
+				_NodeData nd;
+				nd.node = node;
+				nd.index = i;
+                removedNode.push_back(nd);
+			}
+		} 
+		std::list<T*> removeList;
+#if defined(WIN32)
+        std::list<_NodeData>::iterator it;
+#else
+		typename std::list<_NodeData>::iterator it;
+#endif
+		for(it = removedNode.begin() ; it != removedNode.end() ; it++)
+		{
+			T* data = removeNode(it->index, it->node);
+			removeList.push_back(data);
+		}
+		std::vector<T*> ret(removeList.size());
+		copy(removeList.begin(), removeList.end(), ret.begin());
+		return ret;
+	}
+
 private:
     SE_TreeStructID createID(size_t index);
     _Node* findNode(const SE_TreeStructID& id);
@@ -302,7 +319,7 @@ SE_TreeStructID SE_TreeStructManager<T>::add(const SE_TreeStructID& parentID, T*
 template <typename T>
 void SE_TreeStructManager<T>::check()
 {
-    if(mError != NO_ERROR)
+    if(mError != SE_NO_ERROR)
     {
         LOGE("error: %d\n", mError);
     }

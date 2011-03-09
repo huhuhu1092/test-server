@@ -11,6 +11,7 @@
 #include "SE_ElementManager.h"
 #include <string>
 #include <map>
+#include <algorithm>
 static std::map<std::string, SE_CChess::_ChessPieces> nameChessPiecesMap;
 static void initNameChessPiecesMap()
 {
@@ -410,8 +411,8 @@ void SE_CChess::setOpening(const char* startOpening, int len)
 }
 int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 {
-    int cs = min(srcCol, dstCol);
-    int cd = max(srcCol, dstCol);
+    int cs = std::min(srcCol, dstCol);
+    int cd = std::max(srcCol, dstCol);
 	int count = 0;
     for(int i = (cs + 1) ; i < cd ; i++)
     {
@@ -425,8 +426,8 @@ int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 }
 int SE_CChess::piecesNumBetweenRow(int col, int srcRow, int dstRow)
 {
-    int rs = min(srcRow, dstRow);
-    int rd = max(srcRow, dstRow);
+    int rs = std::min(srcRow, dstRow);
+    int rd = std::max(srcRow, dstRow);
 	int count = 0;
     for(int i = (rs + 1) ; i < rd ; i++)
     {

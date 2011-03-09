@@ -4,21 +4,14 @@
 #include "SE_Application.h"
 #include "SE_ParamManager.h"
 #include <algorithm>
+#include <functional>
+
 SE_State::SE_State()
 {
 }
 SE_State::~SE_State()
 {
-    class _DeleteData
-	{
-	public:
-		void operator()(_Data& d) const
-		{
-			if(d.action)
-				delete d.action;
-		}
-	};
-	for_each(mTriggerActionList.begin(), mTriggerActionList.end(), _DeleteData());
+    std::for_each(mTriggerActionList.begin(), mTriggerActionList.end(), _DeleteData());
 }
 void SE_State::setID(const SE_StateID& id)
 {
@@ -30,23 +23,10 @@ SE_StateID SE_State::getID()
 }
 void SE_State::trigger(const SE_TriggerID& id)
 {
-	class InvokeTrigger
-	{
-	public:
-		void operator()(_Data& d) const
-		{
-			if(id == d.triggerID)
-			{
-				d.action->action(NULL, NULL, triggerState, SE_StringID::INVALID);
-			}
-		}
-		SE_TriggerID id;
-		SE_State* triggerState;
-	} ;
 	InvokeTrigger it;
 	it.id = id;
 	it.triggerState = this;
-	for_each(mTriggerActionList.begin(), mTriggerActionList.end(), it);
+    std::for_each(mTriggerActionList.begin(), mTriggerActionList.end(), it);
 }
 void SE_State::setTriggerAction(const SE_TriggerID& id, const SE_StringID& actionURI)
 {

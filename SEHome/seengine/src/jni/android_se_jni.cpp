@@ -13,10 +13,13 @@
 #include "SE_SystemCommand.h"
 #include "SE_InputEvent.h"
 #include "SE_Struct.h"
+#include "SE_2DCommand.h"
+#include "SE_CChess.h"
 #define LOG_TAG "SEJNI"
 //namespace android {
 
 static SE_Application* gApp = NULL;
+static SE_CChess* mChessApp = NULL;
 static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstring datapath, jstring scenename)
 {
     LOGI("## init command ###");
@@ -24,6 +27,10 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstr
     {
         LOGI("## gApp is not null ###");
         return;
+    }
+    if(mChessApp == NULL)
+    {
+        mChessApp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
     }
     gApp = SE_Application::getInstance();
     SE_Application::SE_APPID appid;
@@ -33,11 +40,17 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstr
     gApp->start();
     SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
     gApp->registerCommandFactory("SystemCommand", sf);
-    SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
+    //SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
+    SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
     const char* datapath8 = env->GetStringUTFChars(datapath, NULL);
     const char* scene8 = env->GetStringUTFChars(scenename, NULL);
 	c->dataPath = datapath8;
-	c->fileName = scene8;
+	c->sceneName = scene8;
+    c->chessApp = mChessApp;
+	c->left = 0;
+	c->top = 0;
+	c->width = 480;
+	c->height = 800;
 	SE_Application::getInstance()->postCommand(c);
 }
 static void se_destroy(JNIEnv* env, jobject clazz)
@@ -47,10 +60,12 @@ static void se_destroy(JNIEnv* env, jobject clazz)
 static void se_resize(JNIEnv* env, jobject clazz, jint width, jint height)
 {
     LOGI("## resize command ###");
+    /*
 	SE_UpdateCameraCommand* c = (SE_UpdateCameraCommand*)gApp->createCommand("SE_UpdateCameraCommand");
 	c->width = width;
 	c->height = height;
 	gApp->postCommand(c);
+    */
 }
 static void se_sendKeyCommand(JNIEnv* env, jobject clazz, jint keyType, jint keyCode)
 {
@@ -71,6 +86,7 @@ static void se_sendMotionCommand(JNIEnv* env, jobject clazz, jint motionType, ji
 }
 static void se_sendLoadSceneCommand(JNIEnv* env, jobject clazz, jstring name)
 {
+    /*
     LOGI("## load scene command ###");
     const char* scene8 = env->GetStringUTFChars(name, NULL);
     SE_LoadSceneCommand* c = (SE_LoadSceneCommand*)gApp->createCommand("SE_LoadSceneCommand");
@@ -79,6 +95,7 @@ static void se_sendLoadSceneCommand(JNIEnv* env, jobject clazz, jstring name)
         c->sceneName = scene8;
         gApp->postCommand(c);
     }
+    */
 }
 /*
 static jstring se_getResponseName(JNIEnv* env, jobject clazz)
@@ -105,10 +122,12 @@ static jstring se_getResponseStringValue(JNIEnv* env, jobject clazz)
 static void se_sendUpdateCameraCommand(JNIEnv* env, jobject clazz, jint width, jint height)
 {
     LOGI("## update camera command ###");
+    /*
     SE_UpdateCameraCommand* c = (SE_UpdateCameraCommand*)gApp->createCommand("SE_UpdateCameraCommand");
 	c->width = width;
 	c->height = height;
 	gApp->postCommand(c);
+    */
 
 }
 static void se_runOneFrame(JNIEnv* env, jobject clazz)
@@ -138,8 +157,8 @@ jint se_getMessageItemType(JNIEnv* env, jobject clazz, jint messageIndex, jint i
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    return di.type;
+    SE_Value di = item->getDataItem(0);
+    return di.getType();
 }
 jint se_getByteMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
 {
@@ -147,8 +166,8 @@ jint se_getByteMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint i
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    jint ret = di.data.c;
+    SE_Value di = item->getDataItem(0);
+    jint ret = di.getChar();
     return ret;
 }
 jint se_getShortMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
@@ -157,8 +176,8 @@ jint se_getShortMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint 
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    jint ret = di.data.s;
+    SE_Value di = item->getDataItem(0);
+    jint ret = di.getShort();
     return ret;
 
 }
@@ -168,8 +187,8 @@ jint se_getIntMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint it
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    jint ret = di.data.i;
+    SE_Value di = item->getDataItem(0);
+    jint ret = di.getInt();
     return ret;
 
 }
@@ -179,8 +198,8 @@ jfloat se_getFloatMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jin
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    jfloat ret = di.data.f;
+    SE_Value di = item->getDataItem(0);
+    jfloat ret = di.getFloat();
     return ret;
 
 }
@@ -190,8 +209,8 @@ jstring se_getStringMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, j
     SE_Message* msg = messageVector[messageIndex];
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
-    SE_DataItem di = item->getDataItem(0);
-    SE_StdString* strData = (SE_StdString*)di.data.virtualData;
+    SE_Value di = item->getDataItem(0);
+    SE_StdString* strData = (SE_StdString*)di.getVirtualData();
     const char* str = strData->data.c_str();
     android::String16 s16(str);
     return env->NewString((const jchar*)s16.string(), s16.size());
@@ -251,6 +270,7 @@ static int registerNatives(JNIEnv* env)
 {
   if (!registerNativeMethods(env, classPathName,
                  methods, sizeof(methods) / sizeof(methods[0]))) {
+      LOGI("###### register error ######\n");
     return JNI_FALSE;
   }
 

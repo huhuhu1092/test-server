@@ -5,6 +5,7 @@ class SE_Value;
 class SE_ParamObserver
 {
 public:
+    virtual ~SE_ParamObserver() {}
     virtual void update(const SE_AddressID& address, const SE_Value& value) = 0;
 };
 #endif

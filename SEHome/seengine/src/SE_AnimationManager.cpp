@@ -64,16 +64,19 @@ SE_Animation*  SE_AnimationManager::get(const SE_AnimationID& animID)
     return NULL;
 	*/
 }
-static bool isRemoved(SE_Animation* a)
+struct isRemoved
 {
-	if(a->isEnd())
-		return true;
-	else
-		return false;
-}
+    bool operator()(SE_Animation* a)
+    {
+	    if(a->isEnd())
+		    return true;
+	    else
+		    return false;
+    }
+};
 std::vector<SE_Animation*> SE_AnimationManager::removeAllEndedAnimation()
 {
-	std::vector<SE_Animation*> removedAnimation = mAnimationMap.remove_if(isRemoved);
+	std::vector<SE_Animation*> removedAnimation = mAnimationMap.remove_if(isRemoved());
     return removedAnimation;
 	/*
     _AnimationMap::iterator it;

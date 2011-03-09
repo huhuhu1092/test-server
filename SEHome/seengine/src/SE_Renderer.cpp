@@ -85,24 +85,23 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
     {
 		if(glIsTexture(texid) == GL_TRUE)
 		{
-			LOGI("### is texture ####\n");
+			//LOGI("### is texture ####\n");
+            glBindTexture(GL_TEXTURE_2D, texid);
+		    return;
 		}
-        glBindTexture(GL_TEXTURE_2D, texid);
-		return;
-		/*
-		GLenum error = glGetError();
-		if(error == GL_NO_ERROR)
-		{
-			return;
-		}
-		else if(error == GL_INVALID_ENUM)
-		{
-			LOGI("### bindtexture error ###\n");
+        else
+        {
+#if defined(ANDROID)
+			LOGI("### rebind texture ###\n");
             glGenTextures(1, &texid);
             checkGLError();
             imageData->setTexID(texid);
+#elif defined(WIN32)
+            glBindTexture(GL_TEXTURE_2D, texid);
+		    return;
+
+#endif
 		}
-		*/
     }
     glBindTexture(GL_TEXTURE_2D, texid);
     checkGLError();

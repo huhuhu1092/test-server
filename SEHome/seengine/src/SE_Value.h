@@ -50,6 +50,25 @@ public:
         type = INT_T;
         data.i = v;
     }
+    void setUShort(unsigned short us)
+    {
+        type = USHORT_T;
+        data.us = us;
+    }
+    void setShort(short s)
+    {
+        type = SHORT_T;
+        data.s = s;
+    }
+    unsigned short getUShort() const
+    {
+        return data.us;
+    } 
+    short getShort() const
+    {
+        return data.s;
+    }
+
     unsigned int getUint() const
     {
         return data.ui;

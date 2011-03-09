@@ -98,6 +98,7 @@ public:
 	{}
 	bool find(const char* keyword)
 	{
+        return false;
 	}
 
 };

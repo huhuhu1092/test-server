@@ -7,7 +7,6 @@
 #include "SE_ColorEffectController.h"
 #include "SE_ElementSchema.h"
 #include <algorithm>
-
 struct _EqualTest
 {
     bool operator()(const SE_ActionUnit* data)
@@ -129,10 +128,10 @@ void SE_Action::sort()
 		_ActionLayer* al = *it;
 		std::vector<SE_TimeKey> keys = al->sequences.getKeys();
 		std::vector<SE_TimeKey>::iterator it;
-		it = min_element(keys.begin(), keys.end());
+		it = std::min_element(keys.begin(), keys.end());
 		if(it != keys.end())
 			al->startkey = *it;
-		it = max_element(keys.begin(), keys.end());
+		it = std::max_element(keys.begin(), keys.end());
 		if(it != keys.end())
 		    al->endkey = *it;
 		if(al->startkey == al->endkey)

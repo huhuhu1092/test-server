@@ -24,6 +24,7 @@
 #include "SE_AnimationManager.h"
 #include "SE_InputEventHandler.h"
 #include "SE_Utils.h"
+#include "SE_ParamManager.h"
 #include <math.h>
 //////////////////////////////
 class SE_ElementParamUpdateEvent : public SE_ElementEvent
@@ -64,7 +65,8 @@ bool SE_ElementParamUpdateEvent::merge(SE_ElementEvent* mergeEvent)
         return true;
     if(mElementID == pEvent->mElementID)
     {
-		pEvent->mParamValueList.add(mParamValueList.getParamValue());
+        std::vector<SE_ParamValue> pp = mParamValueList.getParamValue();
+		pEvent->mParamValueList.add(pp);
         return true;
     }
     else
