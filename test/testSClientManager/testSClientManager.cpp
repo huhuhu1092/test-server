@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     //fd_set rfds;
 
     //SNetAddress na("192.168.2.184", SUtil::Host2NetInt16(10000));
-    SNetAddress na("127.0.0.1", SUtil::Host2NetInt16(10000));
+    SNetAddress na("222.130.196.2", SUtil::Host2NetInt16(10000));
     SSocketClient client(STREAM, na);
     if(client.getError() != S_NO_ERROR)
         return -1;

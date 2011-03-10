@@ -124,6 +124,8 @@ public:
     {
         return SE_Vector2f(mWidth, mHeight);
     }
+
+    void connect();
 public:
 	//for debug; don't use it for other use
 	void check();

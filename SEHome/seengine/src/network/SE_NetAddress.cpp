@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-
+#include "SE_Log.h"
 SE_NetAddress::SE_NetAddress(const char* ip, uint16_t port)
 {
     mPort = port;
@@ -37,12 +37,14 @@ void SE_NetAddress::setIp(const char* ip)
 #else
         struct in_addr in_ip;
         int ret = inet_aton(ip, &in_ip);
+        LOGI("## SE_NetAddress ret = %d $$\n", ret);
         if(ret == 0)
         {
             mIp = htonl(INADDR_ANY);
         }
         else
         {
+            LOGI("#### ip = %d ####\n", in_ip.s_addr);
             mIp = in_ip.s_addr;
         }
 #endif

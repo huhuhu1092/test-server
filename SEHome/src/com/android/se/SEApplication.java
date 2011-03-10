@@ -34,7 +34,7 @@ public class SEApplication
 
     static 
     {
-        System.loadLibrary("se");
+        System.loadLibrary("cse");
     }
     public SEApplication()
     {

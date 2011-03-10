@@ -14,7 +14,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := CChess
 
-LOCAL_REQUIRED_MODULES := libse
+LOCAL_REQUIRED_MODULES := libcse
 
 include $(BUILD_PACKAGE)
 
@@ -48,9 +48,11 @@ LOCAL_C_INCLUDES += bionic \
 					$(TOP_LOCAL_PATH)/seengine/src/animation \
 					$(TOP_LOCAL_PATH)/seengine/src/2D \
 					$(TOP_LOCAL_PATH)/seengine/src/game/cchess \
+                    $(TOP_LOCAL_PATH)/seengine/src/game \
                     $(TOP_LOCAL_PATH)/seengine/src/test \
                     $(TOP_LOCAL_PATH)/seengine/src/checkxml \
-                    $(TOP_LOCAL_PATH)/seengine/src/ui
+                    $(TOP_LOCAL_PATH)/seengine/src/ui \
+                    $(TOP_LOCAL_PATH)/seengine/src/network 
 LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./2D/SE_2DElement.cpp \
 				./animation/SE_Action.cpp \
@@ -67,6 +69,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_Camera.cpp \
 				./SE_CameraManager.cpp \
 				./game/cchess/SE_CChess.cpp \
+				./game/cchess/SE_ChessCommand.cpp \
 				./font/SE_CharCode.cpp \
 				./font/SE_CharCodeDefine.cpp \
 				./checkxml/SE_CheckXml.cpp \
@@ -88,6 +91,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./2D/SE_ElementSchema.cpp \
 				./SE_File.cpp \
 				./font/SE_FontManager.cpp \
+				./game/SE_Game.cpp \
 				./SE_Geometry.cpp \
 				./SE_Geometry3D.cpp \
 				./SE_GeometryData.cpp \
@@ -114,6 +118,10 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_MessageEventCommandDefine.cpp \
 				./SE_MotionEventCamera.cpp \
 				./2D/SE_MountPoint.cpp \
+				./network/SE_NetAddress.cpp \
+				./network/SE_Socket.cpp \
+				./network/SE_Mutex.cpp \
+				./network/SE_MessageStream.cpp \
 				./SE_Object.cpp \
 				./SE_ObjectManager.cpp \
 				./SE_ParamManager.cpp \
@@ -178,7 +186,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_STATIC_LIBRARIES := libft2 
 LOCAL_LDLIBS := -lpthread
 
-LOCAL_MODULE := libse
+LOCAL_MODULE := libcse
 
 LOCAL_ARM_MODE := arm
 

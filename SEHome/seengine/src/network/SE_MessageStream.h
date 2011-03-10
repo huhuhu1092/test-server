@@ -59,6 +59,7 @@ public:
 class SE_NetMessagePacketFunctor
 {
 public:
+    virtual ~SE_NetMessagePacketFunctor() {}
     virtual void handleMessagePacket(SE_NetMessagePacket* packet) {}
 };
 class SE_NetMessageStream

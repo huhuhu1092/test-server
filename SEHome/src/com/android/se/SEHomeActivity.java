@@ -30,8 +30,14 @@ import java.util.List;
 import android.content.ActivityNotFoundException;
 import android.widget.Toast;
 import java.io.File;
-
-
+import java.io.BufferedReader;  
+import java.io.BufferedWriter;  
+import java.io.InputStreamReader;  
+import java.io.OutputStreamWriter;  
+import java.io.PrintWriter;  
+import java.net.Socket;  
+import android.util.Log;
+import java.lang.String;
 public class SEHomeActivity extends Activity
 {
     private static final String TAG = "SEHomeActivity";
@@ -91,6 +97,20 @@ public class SEHomeActivity extends Activity
         ArrayList<ApplicationInfo> mApplicationList = new ArrayList<ApplicationInfo>();
         public void run()
         {
+            String name = new String("222.130.196.2");
+            Socket socket = null;
+            try {
+                socket = new Socket(name, 10000);
+            }
+            catch(Exception ex)
+            {
+                Log.i(TAG, "#### socket create error ###");
+            }
+            if(socket.isConnected())
+            {
+                Log.i(TAG, " ##### connect to server ####");
+            }
+            /*
             Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             final PackageManager manager = getPackageManager();
@@ -119,6 +139,7 @@ public class SEHomeActivity extends Activity
             msg.what = H.READAPPINFO_FINISH;
             msg.obj = mApplicationList;
             mH.sendMessage(msg);
+            */
         }
     }
     private class MessageHandler implements SERenderView.MessageHandler
@@ -172,8 +193,8 @@ public class SEHomeActivity extends Activity
                 mRenderView.setMessageHandler(mMsgH);
             }
             setContentView(mRenderView);
-            //Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
-           // loader.start();
+            Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
+            loader.start();
         }
     }
     private boolean foundSEData() {

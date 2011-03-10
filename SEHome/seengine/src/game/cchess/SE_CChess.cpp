@@ -12,6 +12,9 @@
 #include "SE_InputEventHandler.h"
 #include "SE_IO.h"
 #include "SE_Button.h"
+#include "SE_NetAddress.h"
+#include "SE_Socket.h"
+#include "SE_ChessCommand.h"
 #include <string>
 #include <map>
 #include <algorithm>
@@ -318,6 +321,11 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 	{
 		LOGI("$$$$ pointed element ######\n");
 		mPointedElement = (SE_2DNodeElement*)pointedElement;
+        if(mPointedElement == NULL)
+        {
+            LOGI("### pointed not element ####\n");
+            mChessApp->connect();
+        }
 	}
 	else if(cursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
 	{
@@ -428,6 +436,25 @@ static int getChessPiece(const std::string& str)
 SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 {
 	return mBoardData[row][col].cp;
+}
+void SE_CChess::connect()
+{
+    SE_NetAddress na("222.130.196.2", SE_Util::host2NetInt16(10000));
+    SE_SocketClient client(SE_STREAM, na);
+    if(client.getError() != SE_NO_ERROR)
+    {
+        LOGI("### socket error###\n");
+        return ;
+    }
+    std::string name = "aa";
+    std::string pa = "bb";
+    SE_ChessLoginRequest se(name, pa);
+    char* out;
+    int len;
+    se.pack(out, len);
+    int ret = client.send((unsigned char*)out, len);
+    LOGI("#### write num = %d ####\n", ret);
+    
 }
 void SE_CChess::setOpening(const char* startOpening, int len)
 {

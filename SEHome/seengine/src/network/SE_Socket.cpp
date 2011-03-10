@@ -195,6 +195,7 @@ SE_SocketClient::SE_SocketClient(int transferType, const SE_NetAddress& address)
     SE_SOCKET_TYPE s = INVALID_SOCKET;
     if(transferType == SE_STREAM)
     {
+        LOGI("#### create socket ####\n");
         s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     }
     else if(transferType == SE_DATAGRAM)
@@ -204,6 +205,7 @@ SE_SocketClient::SE_SocketClient(int transferType, const SE_NetAddress& address)
     if(s == SOCKET_ERROR)
     {
         mError = SE_CREATE_ERROR;
+        LOGI("#### create socket error \n");
         return;
     }
     mRemote.setSocket(s);
