@@ -43,13 +43,11 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadFont("fontDefine.xml");
-	chessApp->loadScene(sceneName.c_str(), width, height);
-	std::string path = std::string(resourceManager->getDataPath()) + SE_SEP + "data" + SE_SEP + "ChessOpening.dat";
-	char* data = NULL;
-	int len = 0;
-	SE_IO::readFileAll(path.c_str(), data, len);
-	chessApp->setOpening(data, len);
-	delete[] data;
+ 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	sceneManager->setWidth(width);
+	sceneManager->setHeight(height);
+    chessApp->setBound(width, height);
+    chessApp->start();
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
 
 }

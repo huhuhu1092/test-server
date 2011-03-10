@@ -89,7 +89,10 @@ void SE_SceneManager::hide(const SE_SceneID& id)
 
 }
 void SE_SceneManager::dismiss(const SE_SceneID& id)
-{}
+{
+    mScenes.release(id);
+    mStack.remove(id);
+}
 void SE_SceneManager::render(SE_RenderManager& renderManager)
 {
     std::list<SE_Scene*> sceneNeedRender;
