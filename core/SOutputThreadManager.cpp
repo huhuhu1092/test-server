@@ -2,6 +2,8 @@
 #include "SWorkingThreadManager.h"
 #include "SEvent.h"
 #include "SClient.h"
+#include <functional>
+#include <algorithm>
 SOutputThreadManager* SOutputThreadManager::instance = NULL;
 SOutputThreadManager* SOutputThreadManager::getInstance()
 {
@@ -66,11 +68,11 @@ bool SOutputThreadManager::eventFilter(SObject*, SEvent*)
 }
 void SOutputThreadManager::processEvents()
 {
-    mSem.v();
+    //mSem.v();
     SActivityThread::processEvents(); 
 }
 void SOutputThreadManager::sendOutput(SOutputDataEvent* e)
 {
     SActivityThread::postEvent(NULL, e);
-    mSem.p(); 
+    //mSem.p(); 
 }

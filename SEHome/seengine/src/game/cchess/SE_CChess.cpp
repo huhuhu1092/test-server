@@ -9,6 +9,12 @@
 #include "SE_Element.h"
 #include "SE_Cursor.h"
 #include "SE_ElementManager.h"
+#include "SE_InputEventHandler.h"
+#include "SE_IO.h"
+#include "SE_Button.h"
+#include "SE_NetAddress.h"
+#include "SE_Socket.h"
+#include "SE_ChessCommand.h"
 #include <string>
 #include <map>
 #include <algorithm>
@@ -184,6 +190,38 @@ static std::string getNameByChessPieces(const SE_CChess::_ChessPieces& cp)
 	}
 	return ret;
 }
+//////////////
+class SE_LoginElementClickHandler : public SE_ElementClickHandler
+{
+public:
+    virtual bool handle(SE_Element* element);
+};
+bool SE_LoginElementClickHandler::handle(SE_Element* element)
+{
+	SE_Button* loginButton = (SE_Button*)element;
+	LOGI("#### handle click #####\n");
+	return true;
+}
+////////////////////////
+class SE_LoginPointedElementHandler : public SE_PointedElementHandler
+{
+public:
+	SE_LoginPointedElementHandler(SE_CChess* c)
+	{
+		mChessApp = c;
+		savedLeft = 0;
+		savedTop = 0;
+		mPointedElement = NULL;
+		mPointedElementPrev = NULL;
+	}
+    void handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y);
+private:
+	SE_CChess* mChessApp;
+	SE_2DNodeElement* mPointedElement;
+	SE_2DNodeElement* mPointedElementPrev;
+	float savedLeft;
+	float savedTop;
+};
 class SE_ChessPointedElementHandler : public SE_PointedElementHandler
 {
 public:
@@ -192,6 +230,8 @@ public:
 		mChessApp = c;
 		savedLeft = 0;
 		savedTop = 0;
+		mPointedElement = NULL;
+		mPointedElementPrev = NULL;
 	}
 	void handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y);
 private:
@@ -201,6 +241,21 @@ private:
 	float savedLeft;
 	float savedTop;
 };
+////////////////////////////////////////////
+void SE_LoginPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)
+{
+	if(cursor->getState() == SE_Cursor::DOWN && pointedElement)
+	{
+        pointedElement->setState(SE_Element::SELECTED, true);
+
+	}
+	else if(cursor->getState() == SE_Cursor::CLICKED && pointedElement)
+	{
+		pointedElement->setState(SE_Element::NORMAL, true);
+		pointedElement->click();
+	}
+}
+////////////////////
 void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)
 {
 	if(cursor->getState() == SE_Cursor::CLICKED || cursor->getState() == SE_Cursor::UP)
@@ -266,6 +321,11 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 	{
 		LOGI("$$$$ pointed element ######\n");
 		mPointedElement = (SE_2DNodeElement*)pointedElement;
+        if(mPointedElement == NULL)
+        {
+            LOGI("### pointed not element ####\n");
+            mChessApp->connect();
+        }
 	}
 	else if(cursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
 	{
@@ -326,6 +386,9 @@ SE_CChess::SE_CChess(float boardx, float boardy, float unitw, float unith, COLOR
 		starty -= mBoardUnitHeight;
 	}
 	mAction = CANNOT_MOVE;
+    mGameState = LOGIN;
+    mWidth = 0;
+    mHeight = 0;
 }
 
 static void getRowCol(const std::string str, int& row, int& col)
@@ -374,6 +437,25 @@ SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 {
 	return mBoardData[row][col].cp;
 }
+void SE_CChess::connect()
+{
+    SE_NetAddress na("222.130.196.2", SE_Util::host2NetInt16(10000));
+    SE_SocketClient client(SE_STREAM, na);
+    if(client.getError() != SE_NO_ERROR)
+    {
+        LOGI("### socket error###\n");
+        return ;
+    }
+    std::string name = "aa";
+    std::string pa = "bb";
+    SE_ChessLoginRequest se(name, pa);
+    char* out;
+    int len;
+    se.pack(out, len);
+    int ret = client.send((unsigned char*)out, len);
+    LOGI("#### write num = %d ####\n", ret);
+    
+}
 void SE_CChess::setOpening(const char* startOpening, int len)
 {
     if(!startOpening)
@@ -411,8 +493,13 @@ void SE_CChess::setOpening(const char* startOpening, int len)
 }
 int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 {
+#if defined(ANDROID)
     int cs = std::min(srcCol, dstCol);
     int cd = std::max(srcCol, dstCol);
+#elif defined(WIN32)
+    int cs = min(srcCol, dstCol);
+    int cd = max(srcCol, dstCol);
+#endif
 	int count = 0;
     for(int i = (cs + 1) ; i < cd ; i++)
     {
@@ -426,8 +513,13 @@ int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 }
 int SE_CChess::piecesNumBetweenRow(int col, int srcRow, int dstRow)
 {
+#if defined(ANDROID)
     int rs = std::min(srcRow, dstRow);
     int rd = std::max(srcRow, dstRow);
+#elif defined(WIN32)
+    int rs = min(srcRow, dstRow);
+    int rd = max(srcRow, dstRow);
+#endif
 	int count = 0;
     for(int i = (rs + 1) ; i < rd ; i++)
     {
@@ -944,9 +1036,7 @@ void SE_CChess::handleKing(const _BoardUnitData& src, const _BoardUnitData& dst)
 }
 void SE_CChess::loadScene(const char* sceneName, float width, float height)
 {
-	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	sceneManager->setWidth(width);
-	sceneManager->setHeight(height);
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
     SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
 	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
@@ -961,11 +1051,12 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height)
 	sceneManager->show(sceneID);
 	sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
 	sceneManager->showCursor();
+    if(mSceneID.isValid())
+    {
+        sceneManager->dismiss(mSceneID);
+    }
 	mSceneID = sceneID;
 
-	SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
-	sceneManager->setPointedElementHandler(h);
-	initNameChessPiecesMap();
 }
 void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
 {
@@ -998,4 +1089,30 @@ SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rec
     {
         return mBoardData[r][c];
     }
+}
+void SE_CChess::loadBoard()
+{
+    loadScene("ChessLayout.xml/ChessRoot", mWidth, mHeight);
+    SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
+	sceneManager->setPointedElementHandler(h);
+	initNameChessPiecesMap();
+	std::string path = std::string(resourceManager->getDataPath()) + SE_SEP + "data" + SE_SEP + "ChessOpening.dat";
+	char* data = NULL;
+	int len = 0;
+	SE_IO::readFileAll(path.c_str(), data, len);
+	setOpening(data, len);
+	delete[] data;
+}
+void SE_CChess::start()
+{
+    loadScene("Login.xml/loginroot", mWidth, mHeight);
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_LoginPointedElementHandler* p = new SE_LoginPointedElementHandler(this);
+	sceneManager->setPointedElementHandler(p);
+	SE_Scene* scene = sceneManager->get(mSceneID);
+	SE_Element* e = scene->findByName("login");
+	SE_LoginElementClickHandler* ech = new SE_LoginElementClickHandler;
+	e->setClickHandler(ech);
 }

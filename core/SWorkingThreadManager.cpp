@@ -10,6 +10,8 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <functional>
+#include <algorithm>
 using namespace std;
 typedef map<SNetAddress, SClient*> SClientMap;
 class SClientMapFunctorBase

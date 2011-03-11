@@ -4,7 +4,8 @@
 #include "SE_Vector.h"
 #include "SE_Geometry3D.h"
 #include "SE_ID.h"
-class SE_CChess
+#include "SE_Game.h"
+class SE_CChess : public SE_Game
 {
 public:
     enum PLAYER {INVALID_PLAYER = -1, SELF = 0, OPPONENT = 1, PLAYER_NUM = 2};
@@ -14,7 +15,14 @@ public:
     enum STATE {DEAD, ALIVE};
     enum {CAN_MOVE, CANNOT_MOVE};
 	enum COLOR {INVALID_COLOR = -1, RED = 0, BLACK = 1, COLOR_NUM = 2};
+    enum GAME_STATE {LOGIN, RUN, LOGOUT};
     SE_CChess(float boardx, float boardy, float unitw, float unith, COLOR selfc , COLOR oppc);
+    GAME_STATE getGameState()
+    {
+        return mGameState;
+    }
+    void start();
+    void loadBoard();
 	void loadScene(const char* name, float width, float height);
 	void setOpening(const char* startOpening, int len);
     void setBoardUnitBound(float width, float height)
@@ -107,6 +115,17 @@ public:
 	{
 		return mSceneID;
 	}
+    void setBound(float w, float h)
+    {
+        mWidth = w;
+        mHeight = h;
+    }
+    SE_Vector2f getBound()
+    {
+        return SE_Vector2f(mWidth, mHeight);
+    }
+
+    void connect();
 public:
 	//for debug; don't use it for other use
 	void check();
@@ -152,5 +171,8 @@ private:
     CHESSPIECEHANDLER mChessPieceHandler[PIECES_NUM];
 	int mAction;
 	SE_SceneID mSceneID;
+    GAME_STATE mGameState;
+    float mWidth;
+    float mHeight;
 };
 #endif

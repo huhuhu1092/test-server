@@ -2145,7 +2145,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	SE_StringID id;
     SE_StringID state;
 	SE_StringID patchType;
-    bool canpointed;
+    bool canpointed = true;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();

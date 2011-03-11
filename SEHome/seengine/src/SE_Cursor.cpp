@@ -87,7 +87,15 @@ void SE_Cursor::handleMotionEvent(const SE_MotionEvent& motionEvent)
 		mState = DOWN;
 	    mMountPointXPrev = x;
 	    mMountPointYPrev = y;
-		pointValid = true;
+	    SE_Element* selectedElement = mCursorScene->getPointedElement(x, y);
+		if(selectedElement)
+		{
+		    pointValid = false;
+		}
+		else
+		{
+			pointValid = true;
+		}
 		LOGI(" UP --> DOWN\n");
 	}
 	else if(mState == DOWN && motionEvent.getType() == SE_MotionEvent::DOWN)

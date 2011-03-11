@@ -15,6 +15,8 @@
 #include "SE_ParamManager.h"
 #include "SE_SpatialManager.h"
 #include "SE_FontManager.h"
+#include "SE_DelayDestroy.h"
+#include "SE_Game.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -373,4 +375,48 @@ SE_Application::_MessageVector SE_Application::getMessage()
 		v[i++] = msg;
 	}
 	return v;
+}
+void SE_Application::addGame(std::string gameName, SE_Game* game)
+{
+    _GameMap::iterator it = mGameMap.find(gameName);
+    if(it == mGameMap.end())
+    {
+        mGameMap.insert(std::pair<std::string, SE_Game*>(gameName, game));
+    }
+    else
+    {
+        SE_Game* g = it->second;
+        SE_DelayDestroy* dd = new SE_DelayDestroyPointer<SE_Game>(g);
+        bool ret = addDelayDestroy(dd);
+        if(!ret)
+        {
+            delete dd;
+        }
+        it->second = game;
+    }
+}
+void SE_Application::removeGame(std::string gameName)
+{
+    _GameMap::iterator it = mGameMap.find(gameName);
+    if(it != mGameMap.end())
+    {
+        SE_Game* game = it->second;
+        mGameMap.erase(it);
+        SE_DelayDestroy* dd = new SE_DelayDestroyPointer<SE_Game>(game);
+        bool ret = addDelayDestroy(dd);
+        if(!ret)
+        {
+            delete dd;
+        }
+    }
+}
+SE_Game* SE_Application::getGame(std::string gameName)
+{
+     _GameMap::iterator it = mGameMap.find(gameName);
+    if(it != mGameMap.end())
+    {
+        return it->second;
+    }   
+    else
+        return NULL;
 }

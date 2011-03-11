@@ -8,6 +8,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <map>
 class SE_CommandFactory;
 class SE_Camera;
 class SE_ResourceManager;
@@ -23,6 +24,7 @@ class SE_ParamManager;
 class SE_SpatialManager;
 class SE_FontManager;
 class SE_DelayDestroy;
+class SE_Game;
 class SE_Application
 {
 public:
@@ -121,7 +123,9 @@ public:
 	{
 		return mFontManager;
 	}
-
+    void addGame(std::string gameName, SE_Game* game);
+    void removeGame(std::string gameName);
+    SE_Game* getGame(std::string gameName);
     static SE_Application* getInstance();
 	SE_Camera* getMainCamera();
 	//index 0 to max camera num
@@ -229,5 +233,7 @@ protected:
 	SE_MessageList mMessageList;
 	size_t mSeqNum;
     static SE_Application* mInstance;
+    typedef std::map<std::string, SE_Game*> _GameMap;
+    _GameMap mGameMap;
 };
 #endif

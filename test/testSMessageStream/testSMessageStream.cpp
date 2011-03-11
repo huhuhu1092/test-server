@@ -1,6 +1,8 @@
 #include "SMessageStream.h"
 #include "SType.h"
 #include "SUtil.h"
+#include <stdio.h>
+#include <string.h>
 static void setDataLen(uint8_t* data, uint16_t len)
 {
     uint16_t data_len = SUtil::Host2NetInt16(len);
