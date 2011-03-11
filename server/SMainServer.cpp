@@ -130,6 +130,7 @@ int main(int argc, char** argv)
     while(true)
     {
         SClientProp cp = ss.accept();
+        SLog::msg("## new client ##\n");
         if(ss.getError() != S_NO_ERROR)
         {
             SLog::msg("## accept error ###\n");
