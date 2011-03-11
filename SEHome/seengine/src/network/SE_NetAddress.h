@@ -33,7 +33,7 @@ public:
     friend bool operator <(const SE_NetAddress&,const SE_NetAddress&);
     friend bool operator >(const SE_NetAddress&,const SE_NetAddress&);
     friend bool operator !=(const SE_NetAddress&,const SE_NetAddress&);
-    bool toString(char* outIp, int size, uint16_t& outPort);
+    bool toString(char* outIp, int size, uint16_t& outPort) const;
 private:
     uint32_t mIp;
     uint16_t mPort;

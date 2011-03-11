@@ -47,8 +47,8 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	sceneManager->setWidth(width);
 	sceneManager->setHeight(height);
     chessApp->setBound(width, height);
-    //chessApp->start();
-    chessApp->loadBoard();
+    chessApp->start();
+    //chessApp->loadBoard();
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
 
 }

@@ -324,7 +324,7 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
         if(mPointedElement == NULL)
         {
             LOGI("### pointed not element ####\n");
-            mChessApp->connect();
+            //mChessApp->connect();
         }
 	}
 	else if(cursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
@@ -439,13 +439,14 @@ SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 }
 void SE_CChess::connect()
 {
-    SE_NetAddress na("222.130.196.2", SE_Util::host2NetInt16(10000));
+    SE_NetAddress na("222.130.194.156", 10000);
     SE_SocketClient client(SE_STREAM, na);
     if(client.getError() != SE_NO_ERROR)
     {
         LOGI("### socket error###\n");
         return ;
     }
+    LOGI("### socket connect ok ###\n");
     std::string name = "aa";
     std::string pa = "bb";
     SE_ChessLoginRequest se(name, pa);

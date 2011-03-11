@@ -35,7 +35,7 @@
     <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
     <uses-permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"/>
     <uses-permission android:name="android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS" />
-
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-sdk minSdkVersion="7" />
     <application android:icon="@drawable/app_quake"
             android:label="@string/sedemo_activity">
