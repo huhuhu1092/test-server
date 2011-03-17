@@ -1,6 +1,10 @@
 #include "SE_NetAddress.h"
 #if defined(WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <winsock2.h>
+#include <windows.h>
 #else
 #include <netinet/in.h> 
 #include <arpa/inet.h>

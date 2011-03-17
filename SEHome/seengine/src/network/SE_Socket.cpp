@@ -1,6 +1,5 @@
 #include "SE_Socket.h"
 #include "SE_Utils.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +19,7 @@
 ////////////////////////////
 //SNetAddress SNetAddress::nullAddress(NULL, 0);
 ////////////////////////////
-SE_Socket::SE_Socket(SE_SOCKET_TYPE fd)
+SE_Socket::SE_Socket(SOCKET fd)
 {
     SE_ASSERT(fd > 0);
     mSocket = fd;
@@ -120,7 +119,7 @@ int SE_Socket::read(unsigned char* outBuffer, int size)
 //////////////////////////////////////////////
 SE_SocketServer::SE_SocketServer(int transferType, const SE_NetAddress& address) : mError(SE_NO_ERROR)
 {
-    SE_SOCKET_TYPE s = INVALID_SOCKET;
+    SOCKET s = INVALID_SOCKET;
 #if defined(WIN32)
     WSADATA wsd;
     if(WSAStartup(MAKEWORD(2, 2), &wsd ) != 0)
@@ -172,7 +171,7 @@ SE_ClientProp SE_SocketServer::accept()
 {
     struct sockaddr_in clientAddr;
     socklen_t clilen = sizeof(clientAddr);
-    SE_SOCKET_TYPE clientSocket = ::accept(mServer.getSocket(), (sockaddr*)&clientAddr, &clilen);
+    SOCKET clientSocket = ::accept(mServer.getSocket(), (sockaddr*)&clientAddr, &clilen);
     if(clientSocket == INVALID_SOCKET)
     {
         mError = SE_ACCEPT_ERROR;
@@ -192,7 +191,7 @@ SE_ClientProp SE_SocketServer::accept()
 //////////////////////////////////////////////////////////////
 SE_SocketClient::SE_SocketClient(int transferType, const SE_NetAddress& address)
 {
-    SE_SOCKET_TYPE s = INVALID_SOCKET;
+    SOCKET s = INVALID_SOCKET;
     if(transferType == SE_STREAM)
     {
         LOGI("#### create socket ####\n");

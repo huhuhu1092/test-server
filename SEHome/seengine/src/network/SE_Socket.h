@@ -3,11 +3,23 @@
 #include "SE_Common.h"
 #include "SE_NetAddress.h"
 #if defined(WIN32)
+#ifndef _WIN32_WINNT            // Specifies that the minimum required platform is Windows Vista.
+#define _WIN32_WINNT 0x0600     // Change this to the appropriate value to target other versions of Windows.
+#endif
+
+#undef _INC_WINDOWS
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <winsock2.h>
-typedef SOCKET SE_SOCKET_TYPE;
+
+
+//#include <windows.h>
+
+//typedef SOCKET SE_SOCKET_TYPE;
 typedef int socklen_t;
 #else
-typedef int SE_SOCKET_TYPE;
+typedef int SOCKET;
 const int SOCKET_ERROR = -1;
 const int INVALID_SOCKET = -1;
 #endif
@@ -16,17 +28,17 @@ enum {SE_NO_ERROR, SE_CREATE_ERROR, SE_BIND_ERROR, SE_LISTEN_ERROR, SE_CONNECT_E
 class SE_Socket
 {
 public:
-    SE_Socket(SE_SOCKET_TYPE fd);
+	SE_Socket(SOCKET fd);
     SE_Socket()
     {
         mSocket = INVALID_SOCKET;
     }
     ~SE_Socket();
-    void setSocket(SE_SOCKET_TYPE fd)
+    void setSocket(SOCKET fd)
     {
         mSocket = fd;
     }
-    SE_SOCKET_TYPE getSocket() const
+    SOCKET getSocket() const
     {
         return mSocket;
     }
@@ -35,7 +47,7 @@ public:
     int read(unsigned char* outBuffer, int size);
     int close();
 private:
-    SE_SOCKET_TYPE mSocket;
+    SOCKET mSocket;
 };
 struct SE_ClientProp
 {
@@ -72,7 +84,7 @@ public:
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
     int getError();
-    SE_SOCKET_TYPE getSocket()
+    SOCKET getSocket()
     {
         return mRemote.getSocket();
     }

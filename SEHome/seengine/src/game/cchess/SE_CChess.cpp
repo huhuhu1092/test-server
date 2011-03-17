@@ -12,12 +12,21 @@
 #include "SE_InputEventHandler.h"
 #include "SE_IO.h"
 #include "SE_Button.h"
-#include "SE_NetAddress.h"
-#include "SE_Socket.h"
 #include "SE_ChessCommand.h"
 #include <string>
 #include <map>
 #include <algorithm>
+#include <curl/curl.h>
+#include <stdio.h>
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+  int written = fwrite(ptr, size, nmemb, (FILE *)stream);
+  std::string str((char*)ptr, size);
+  LOGI("## receive data = %s ####\n", str.c_str());
+  return written;
+}
+ 
+///////////////////////////////////////
 static std::map<std::string, SE_CChess::_ChessPieces> nameChessPiecesMap;
 static void initNameChessPiecesMap()
 {
@@ -439,23 +448,61 @@ SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 }
 void SE_CChess::connect()
 {
-    SE_NetAddress na("222.130.196.2", SE_Util::host2NetInt16(10000));
-    SE_SocketClient client(SE_STREAM, na);
-    if(client.getError() != SE_NO_ERROR)
-    {
-        LOGI("### socket error###\n");
-        return ;
-    }
-    std::string name = "aa";
-    std::string pa = "bb";
-    SE_ChessLoginRequest se(name, pa);
-    char* out;
-    int len;
-    se.pack(out, len);
-    int ret = client.send((unsigned char*)out, len);
-    LOGI("#### write num = %d ####\n", ret);
-    
+   CURL* curl;
+   CURLcode res;
+   static const char *headerfilename = "C:\\head.out";
+  FILE *headerfile = NULL;
+  static const char *bodyfilename = "C:\\body.out";
+  FILE *bodyfile = NULL;
+
+  curl_global_init(CURL_GLOBAL_ALL);
+   curl = curl_easy_init();
+   if(curl)
+   {
+       curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.5.102/cchess/login");
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "aa aa");
+		  /* no progress meter please */ 
+		  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+		 
+		  /* send all data to this function  */ 
+		  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+
+		 
+		  /* open the files */ 
+		  headerfile = fopen(headerfilename,"w");
+		  if (headerfile == NULL) 
+		  {
+			curl_easy_cleanup(curl);
+			return;
+		  }
+		  bodyfile = fopen(bodyfilename,"w");
+		  if (bodyfile == NULL) 
+		  {
+			curl_easy_cleanup(curl);
+			return;
+          }
+ 
+		  /* we want the headers to this file handle */ 
+		  curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, headerfile);
+		 
+		  /*
+		   * Notice here that if you want the actual data sent anywhere else but
+		   * stdout, you should consider using the CURLOPT_WRITEDATA option.  */ 
+		 
+          curl_easy_setopt(curl, CURLOPT_WRITEDATA, bodyfile);
+
+       res = curl_easy_perform(curl);
+       if(CURLE_OK == res)
+       {
+
+       }
+	   		  fclose(headerfile);
+
+		  fclose(bodyfile);
+       curl_easy_cleanup(curl);
+   } 
 }
+
 void SE_CChess::setOpening(const char* startOpening, int len)
 {
     if(!startOpening)
