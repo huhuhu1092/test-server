@@ -191,7 +191,11 @@ SE_ClientProp SE_SocketServer::accept()
 //////////////////////////////////////////////////////////////
 SE_SocketClient::SE_SocketClient(int transferType, const SE_NetAddress& address)
 {
-    SOCKET s = INVALID_SOCKET;
+    SE_SOCKET_TYPE s = INVALID_SOCKET;
+    char buf[100];
+    uint16_t ppp;
+    address.toString(buf, 100, ppp);
+    LOGI("### ip address = %s , port = %d ###\n", buf, ppp);
     if(transferType == SE_STREAM)
     {
         LOGI("#### create socket ####\n");
@@ -219,7 +223,6 @@ SE_SocketClient::SE_SocketClient(int transferType, const SE_NetAddress& address)
         LOGI("### connect error ####\n");
         mError = SE_CONNECT_ERROR;
     }
-
     //fcntl(s, F_SETFL, O_NONBLOCK );
 }
 SE_SocketClient::~SE_SocketClient()

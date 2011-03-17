@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.util.ArrayList;
+import java.io.*;
 import android.util.Log;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -38,9 +39,31 @@ import java.io.PrintWriter;
 import java.net.Socket;  
 import android.util.Log;
 import java.lang.String;
+import com.android.internal.telephony.Phone;
+//import android.provider.Telephony.Messaging;
+import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.webkit.WebSettings;
+import android.text.TextUtils;
+import android.provider.Telephony;
+import android.provider.Telephony.Carriers;
+import android.database.Cursor;
+import android.net.http.AndroidHttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpHost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+//import android.net.NetworkConnectivityListener;
+
 public class SEHomeActivity extends Activity
 {
     private static final String TAG = "SEHomeActivity";
+    private static final int EVENT_DATA_STATE_CHANGED = 2;
+
     SEApplication mSEApp;
     SERenderView mRenderView;
     private boolean mKeepScreenOn = true;
@@ -48,6 +71,13 @@ public class SEHomeActivity extends Activity
     private H mH = new H();
     private boolean mReadAppInfoFinish = false;
     private ArrayList<ApplicationInfo> mAppList = null;
+    //private static ServiceHandler mServiceHandler;
+    //private static NetworkConnectivityListener mConnectivityListener;
+    boolean mConnected = false;
+            private String mNetworkProfile = "wap";//Phone.APN_TYPE_DEFAULT;
+        private String mNetworkInterface;
+        private String mNetworkApn;
+
     private class H extends Handler
     {
         public static final int READAPPINFO_FINISH = 0;;
@@ -92,24 +122,186 @@ public class SEHomeActivity extends Activity
             return title.toString();
         }
     }
+    private final class ServiceHandler extends Handler {
+        
+        public void handleMessage(Message msg) {
+            Log.e(TAG, "ServiceHandler: new message: " + msg);
+            switch (msg.what) {
+                case EVENT_DATA_STATE_CHANGED: {
+                    Log.i(TAG, "####### EVENT_DATA_STATE_CHANGED ##########");
+                    /*                    
+                    NetworkInfo info = mConnectivityListener.getNetworkInfo();
+                    if (info == null) {
+                        Log.e(TAG, "Network Info is null ! ");
+                        return;
+                    }
+
+                    if (!TextUtils.equals(info.getApType(), mNetworkProfile)) {
+                        Log.e(TAG, "The msg is for (" + info.getApType()
+                                + "),  Discard this msg.");
+                        return;
+                    }
+                    
+                    if (info.getState() == NetworkInfo.State.CONNECTED) {
+                        mConnected = true;
+                        Log.d(TAG, "mConnected changed to CONNECTED");
+
+                        if(info.getApType().equals(Phone.APN_TYPE_INTERNET)) {
+                            mNetworkInterface = null;
+                        }else {
+                            mNetworkInterface = info.getInterfaceName();
+                        }
+                        mNetworkApn = info.getExtraInfo();
+
+                        Log.d(TAG, "bind socket to interface:" + mNetworkInterface + "/" + info.getApType()+", apn_new="+ mNetworkApn);
+                        try {
+
+                            Socket.setInterface(mNetworkInterface);
+                        } catch (Exception e) {
+                            // OMS: only catch this exception, wired crash need further investigation.
+                            // #0107183 
+                            mConnected = false;
+                            Log.e(TAG, "!!! setup network failed, something really strange happened", e);
+                            return ;
+                        }
+                        if(mConnected)
+                        {
+                            Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
+                            loader.start();
+
+                        }
+                    } else if (info.getState() == NetworkInfo.State.DISCONNECTED) {
+                        String reason = info.getReason();
+                        Log.d(TAG, "mConnected changed to DISCONNECTED " + info.getDetailedState() + "/" + reason);
+                        mConnected = false;
+
+                        // OMS: There's a trick in ConnectivityManager: the msg of 
+                        // DISCONNECTED/DISCONNECTED in "internet" group is a sticky 
+                        // one by Android design. 
+                        // So we may need to ignore it during opening data connection.
+                        if(info.getDetailedState() == NetworkInfo.DetailedState.CONNECTING) {
+                            // Ignore if the NetworkInfo.State is DISCONNECTED while
+                            // current NetworkInfo.DetailedState is still CONNECTING.
+                            Log.d(TAG, "DISCONNECTED ignored as DetailedState is CONNECTING.");
+                            return;
+                        }
+
+                        // This is the case when failed to open data connection.
+                        // TODO: This may come from other app...
+                        if(info.getDetailedState() == NetworkInfo.DetailedState.FAILED) {
+                            Log.i(TAG, "### DISCONNECTED #############");
+                            return;
+                        } 
+                        
+                        // Always ignor REASON_DATA_DISABLED when it's    
+                        // from other network type or APN...
+                        if(reason != null && reason.equals(Phone.REASON_DATA_DISABLED)) {
+                            The following block is not used at present, hence we ignore all
+                               REASON_DATA_DISABLEDs.
+                            if (!TextUtils.equals(info.getApType(), mNetworkProfile)) {
+                                Log.e(TAG, "Discard the msg for" + info.getApType());
+                                return;
+                            }
+                            if (!TextUtils.equals(info.getExtraInfo(), mNetworkApn)) {
+                                Log.e(TAG, "Discard the msg for" + info.getExtraInfo());
+                                return;
+                            }
+                            
+                            return;
+                        }
+                    } else {
+                        Log.e(TAG, " >>>>>>> status = "+info.getDetailedState() + "/" + info.getReason());
+                    }
+                    */
+                    break;
+                }
+                default:
+                    Log.d(TAG, "unhandled msg, msg="+msg);
+                    break;
+            }
+        }
+    }
+
     private class ApplicationLoader implements Runnable
     {
         ArrayList<ApplicationInfo> mApplicationList = new ArrayList<ApplicationInfo>();
+
         public void run()
         {
-            String name = new String("222.130.196.2");
-            Socket socket = null;
-            try {
-                socket = new Socket(name, 10000);
+            Log.i(TAG, "##################start create socket ###################3\n");
+            createSocket();
+/*
+            ConnectivityManager mConnMgr = (ConnectivityManager) SEHomeActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            int result = mConnMgr.startUsingNetworkFeature(
+                                 ConnectivityManager.TYPE_MOBILE, mNetworkProfile);
+            if (mConnectivityListener != null && mServiceHandler != null) {
+                try {
+                    mConnectivityListener.stopListening();
+                    mConnectivityListener.unregisterHandler(mServiceHandler);
+                }catch(Exception ee) {
+                    Log.w(TAG, "Error when removing listener: ", ee);
+                }finally {
+                    Log.d(TAG, "set mConnectivityListener to null", new Throwable());
+                    mConnectivityListener = null;
+                    mServiceHandler = null;
+                }
             }
-            catch(Exception ex)
+            mServiceHandler = new ServiceHandler();
+            mConnectivityListener = new NetworkConnectivityListener();
+        try {
+            mConnectivityListener.registerHandler(mServiceHandler, EVENT_DATA_STATE_CHANGED);
+            mConnectivityListener.startListening(SEHomeActivity.this);
+
+            boolean found = false;
+            switch(result)
             {
-                Log.i(TAG, "#### socket create error ###");
+            case Phone.APN_ALREADY_ACTIVE:
+                NetworkInfo[] netInfos = mConnMgr.getAllNetworkInfo();
+                for(NetworkInfo netInfo : netInfos) {
+                    if(TextUtils.equals(mNetworkProfile, 
+                            netInfo.getApType()) && netInfo.isConnected()) {
+                        found = true;
+                        // remember this for later query
+                        mNetworkApn = netInfo.getExtraInfo();
+                        mNetworkInterface = netInfo.getInterfaceName();
+                        break;
+                    }
+                }
+                if(!found)
+                {
+                    Log.w(TAG, "No matched NetInfo found!");
+                    return;
+                }
+                if (mNetworkProfile.equals(Phone.APN_TYPE_DEFAULT)) {
+                    mNetworkInterface = null;
+                    Log.d(TAG, "###### network interface = " + mNetworkInterface + "   ###");
+                }else {
+                    Log.d(TAG, "bind socket to interface:" + mNetworkInterface + "/" + mNetworkProfile+", apn="+mNetworkApn);
+                }
+                break;
+            case Phone.APN_REQUEST_STARTED:
+                found = true;
+                Log.d(TAG, "### APN_REQUEST_STARTED ###");
+                break;
+
+            case Phone.APN_TYPE_NOT_AVAILABLE:
+
+                Log.d(TAG, "## APN_TYPE_NOT_AVAILABLE ##" );
+                break;
+
+            case Phone.APN_REQUEST_FAILED:
+                Log.w(TAG, "Cannot establish data connection");
+                break;
+
+            default:
+                Log.w(TAG, "Unhandled status: " + result);
+                break;
+
             }
-            if(socket.isConnected())
-            {
-                Log.i(TAG, " ##### connect to server ####");
-            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start browser connection!!", e);
+        }
+*/
             /*
             Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -163,7 +355,303 @@ public class SEHomeActivity extends Activity
             Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT).show();
         }
     }
+    void createSocket()
+    {
+         try {
+                AndroidHttpClient androidHttpClient = AndroidHttpClient.newInstance("Opera/9.26");
+                //HttpHost targetHost = new HttpHost("wap.qidian.cn", 80);
+                HttpHost proxy = new HttpHost("10.0.0.172", 80);
+                androidHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                HttpGet httpGet = new HttpGet("http://221.219.99.68");
+                //androidHttpClient.getParams().setParameter("X-Online-Host", "wap.qidian.cn");
+                HttpResponse response = androidHttpClient.execute(httpGet);
+                if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+                {
+                    Log.i(TAG, "## get error ##");
+                }
+                else
+                {
+                    Log.i(TAG, "## get Ok ##");
+                    Header[] httpHeader = response.getAllHeaders();
+                    for(Header hd : httpHeader)
+                    {
+                        String n = hd.getName();
+                        String v = hd.getValue();
+                        Log.i(TAG, "#### " + n + " = " + v + " ###");
+                    }
+                    HttpEntity httpEntity = response.getEntity();
+                    int contentSize = (int)httpEntity.getContentLength();
+                    Log.i(TAG, "### content size = " + contentSize + " ######");
+                    byte[] content = new byte[contentSize];
+                    InputStream inputStream = httpEntity.getContent();
+                    inputStream.read(content, 0, contentSize);
+                    String str = new String(content);
+                    Log.i(TAG, "###########################");
+                    Log.i(TAG, str);
+                    Log.i(TAG, "###########################");
+                }
+                androidHttpClient.close();
+         }
+         catch(Exception e)
+         {
+             Log.i(TAG, "## exception e = " + e);
+         }
 
+        /*
+            String name = new String("10.0.0.172");
+            Socket socket = null;
+            try {
+                    socket = new Socket(name, 80);
+            }
+            catch(Exception ex)
+            {
+                Log.i(TAG, "#### socket create error ###");
+            }
+
+            if(socket != null && socket.isConnected())
+            {
+                Log.i(TAG, " ##### connect to server ####");
+            }
+            else
+            {
+                Log.i(TAG, "## can not connect to server ###");
+            }
+             /// write and read data
+            OutputStreamWriter out = null;
+            try
+            {
+                OutputStream raw = socket.getOutputStream();
+                OutputStream buffered = new BufferedOutputStream(raw);
+                out = new OutputStreamWriter(buffered, "ASCII");
+                String outData = "GET / HTTP/1.1\r\nHost: wap.qidian.cn\r\nUser-Agent: Opera/9.26\r\nACCEPT-ENCODING:deflate, gzip, x-gzip, identity, *;q=0\r\nACCEPT-CHARSET:iso-8859-1, utf-8, utf-16, *;q=0.1\r\nACCEPT:text/html, text/vnd.wap.wml, text/plain\r\n\r\n";
+                out.write(outData, 0, outData.length());
+            }
+            catch(Exception e)
+            {
+                Log.i(TAG, "##### exception error when write data ###");
+            }
+            finally
+            {
+
+            }
+            Log.i(TAG, "#### write data #####");
+            InputStream inputStream = null;
+            try
+            {
+                inputStream = socket.getInputStream();
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                String str = null;
+                do
+                {
+                    str = in.readLine();
+                    if(str != null)
+                        Log.i(TAG, "### " + str + " ####");
+                } while(str != null);
+            }
+            catch(Exception e)
+            {
+                Log.i(TAG, "#### read data exception " + e + "####");
+            }
+            finally
+            {
+
+            }
+            ///
+            Log.i(TAG, "#### socket close() ####");
+            try {
+
+                if(socket == null)
+                {
+                    socket.close();
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.i(TAG, "### close error ###");
+            }
+        */   
+    }
+    static String[] CARRIER_PROJECTION = { 
+            Carriers.TYPE, 
+            Carriers.APN, 
+            Carriers.PROXY, 
+            Carriers.PORT };
+   static int COL_TYPE = 0;
+    static int COL_APN = 1;
+    static int COL_PROXY = 2;
+    static int COL_PORT = 3;
+    ProfileAttribute mNetworkParam;
+    public class ProfileAttribute
+    {
+        public String mApnName;
+        public String mType;
+        public String mProxyHost;
+        public int mProxyPort = 0;
+        public void reset()
+        {
+            mApnName = "";
+            mType = "";
+            mProxyHost = null;
+            mProxyPort = 0;
+        }
+    }
+    private int getPort(String port) {
+        // Should we use always use default 80??
+        if(port == null || port.length() <= 0) return 80;
+
+        int ret = 0;
+        try {
+            ret = Integer.parseInt(port.trim());
+        }catch(Exception ee) {
+            Log.w(TAG, "Invalid port");
+        }
+        // Should we use always use default 80??
+        return ret > 0 ? ret : 80;
+    }
+
+    void loadNetworkParam()
+    {
+        final String where = "(" + Carriers.TYPE + " = '" + mNetworkProfile + "') AND ( " + Carriers.APN + " = '" + mNetworkApn + "' )";
+        Cursor c = getContentResolver().query(Telephony.Carriers.CONTENT_URI, 
+                CARRIER_PROJECTION, where, null, null) ; 
+        if(c == null)
+        {
+            Log.e(TAG, "****** No proxy############");
+            return;
+        }
+        try {
+            while(c.moveToNext())
+            {
+                String type = c.getString(COL_TYPE);
+                String apn = c.getString(COL_APN);
+                Log.i(TAG, ">>>> type = " + type + ", apn = " + apn + " #####");
+                if(type.equals(mNetworkProfile) && mNetworkApn.equals(apn))
+                {
+                    mNetworkParam = new ProfileAttribute();
+                    mNetworkParam.mType = mNetworkProfile; 
+                    mNetworkParam.mApnName = mNetworkApn; 
+                    mNetworkParam.mProxyHost = c.getString(COL_PROXY);
+                    String port = c.getString(COL_PORT);
+                    Log.d(TAG, ">>>>>>>>>>>>>> proxy="+mNetworkParam.mProxyHost+", port="+port);
+                    mNetworkParam.mProxyPort = getPort(port);
+                    c.close();
+                    //return pa;
+                    return;
+
+                }
+
+            }
+        }
+        catch(Exception e)
+        {
+            Log.i(TAG, " ################## exception e = " + e);
+        }
+        finally {
+            c.close();
+        }
+    }
+    void setupNetwork()
+    {
+
+    }
+    void connect()
+    {
+           ConnectivityManager mConnMgr = (ConnectivityManager) SEHomeActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            int result = mConnMgr.startUsingNetworkFeature(
+                                 ConnectivityManager.TYPE_MOBILE, mNetworkProfile);
+            /*
+            if (mConnectivityListener != null && mServiceHandler != null) {
+                try {
+                    mConnectivityListener.stopListening();
+                    mConnectivityListener.unregisterHandler(mServiceHandler);
+                }catch(Exception ee) {
+                    Log.w(TAG, "Error when removing listener: ", ee);
+                }finally {
+                    Log.d(TAG, "set mConnectivityListener to null", new Throwable());
+                    mConnectivityListener = null;
+                    mServiceHandler = null;
+                }
+            }
+            mServiceHandler = new ServiceHandler();
+            mConnectivityListener = new NetworkConnectivityListener();
+            */
+        try {
+            //mConnectivityListener.registerHandler(mServiceHandler, EVENT_DATA_STATE_CHANGED);
+            //mConnectivityListener.startListening(this);
+
+            boolean found = false;
+            NetworkInfo[] netInfos;
+            switch(result)
+            {
+            case Phone.APN_ALREADY_ACTIVE:
+                netInfos = mConnMgr.getAllNetworkInfo();
+                for(NetworkInfo netInfo : netInfos) {
+                    /*
+                    if(TextUtils.equals(mNetworkProfile, 
+                            netInfo.getApType()) && netInfo.isConnected()) {
+                        found = true;
+                        // remember this for later query
+                        mNetworkApn = netInfo.getExtraInfo();
+                        mNetworkInterface = netInfo.getInterfaceName();
+                        break;
+                    }
+                    */
+                    Log.i(TAG, "#### network info name = " + netInfo.getTypeName() + "####" );
+                }
+                /*
+                if(!found)
+                {
+                    Log.w(TAG, "No matched NetInfo found!");
+                    return;
+                }
+                */
+                if (mNetworkProfile.equals(Phone.APN_TYPE_DEFAULT)) {
+                    mNetworkInterface = null;
+                    Log.d(TAG, "###### network interface = " + mNetworkInterface + "   ###");
+                }else {
+                    Log.d(TAG, "bind socket to interface:" + mNetworkInterface + "/" + mNetworkProfile+", apn="+mNetworkApn);
+                }
+                //createSocket();
+                setupNetwork();
+                break;
+            case Phone.APN_REQUEST_STARTED:
+                netInfos = mConnMgr.getAllNetworkInfo();
+                for(NetworkInfo netInfo : netInfos) {
+                    /*
+                    if(TextUtils.equals(mNetworkProfile, 
+                            netInfo.getApType()) && netInfo.isConnected()) {
+                        found = true;
+                        // remember this for later query
+                        mNetworkApn = netInfo.getExtraInfo();
+                        mNetworkInterface = netInfo.getInterfaceName();
+                        break;
+                    }
+                    */
+                    Log.i(TAG, "#### network info name = " + netInfo.getTypeName() + "####" );
+                }
+
+                Log.d(TAG, "### APN_REQUEST_STARTED ###");
+                break;
+
+            case Phone.APN_TYPE_NOT_AVAILABLE:
+
+                Log.d(TAG, "## APN_TYPE_NOT_AVAILABLE ##" );
+                break;
+
+            case Phone.APN_REQUEST_FAILED:
+                Log.w(TAG, "Cannot establish data connection");
+                break;
+
+            default:
+                Log.w(TAG, "Unhandled status: " + result);
+                break;
+
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start browser connection!!", e);
+        }
+
+    }
     @Override 
     protected void onCreate(Bundle icicle) 
     {
@@ -183,16 +671,18 @@ public class SEHomeActivity extends Activity
                         WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
 
+            /*
             getWindow().setFlags(
                     WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+            */
             if(mRenderView == null)
             {
                 mRenderView = new SERenderView((Context) getApplication(), mSEApp);
                 mRenderView.setMessageHandler(mMsgH);
             }
             setContentView(mRenderView);
+            connect();
             Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
             loader.start();
         }

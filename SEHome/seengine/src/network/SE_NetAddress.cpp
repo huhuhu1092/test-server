@@ -20,7 +20,7 @@
 #include "SE_Log.h"
 SE_NetAddress::SE_NetAddress(const char* ip, uint16_t port)
 {
-    mPort = port;
+    mPort = htons(port);
 	setIp(ip);
 }
 
@@ -62,7 +62,7 @@ void SE_NetAddress::setIp(const char* ip)
 SE_NetAddress::SE_NetAddress(uint32_t ip, uint16_t port)
 {
     mIp = ip;
-    mPort = port;
+    mPort = htons(port);
 }
 bool operator ==(const SE_NetAddress& left, const SE_NetAddress& right)
 {
@@ -93,7 +93,7 @@ bool operator !=(const SE_NetAddress& left, const SE_NetAddress& right)
 {
     return !(left == right);
 }
-bool SE_NetAddress::toString(char* outIp, int size, uint16_t& outPort)
+bool SE_NetAddress::toString(char* outIp, int size, uint16_t& outPort) const
 {
     memset(outIp, 0, size);
     struct in_addr in_ip;

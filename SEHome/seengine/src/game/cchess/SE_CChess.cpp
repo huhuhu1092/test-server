@@ -333,7 +333,7 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
         if(mPointedElement == NULL)
         {
             LOGI("### pointed not element ####\n");
-            mChessApp->connect();
+            //mChessApp->connect();
         }
 	}
 	else if(cursor->getState() == SE_Cursor::MOVE && mPointedElement == mPointedElementPrev)
@@ -501,6 +501,7 @@ void SE_CChess::connect()
 		  fclose(bodyfile);
        curl_easy_cleanup(curl);
    } 
+
 }
 
 void SE_CChess::setOpening(const char* startOpening, int len)
