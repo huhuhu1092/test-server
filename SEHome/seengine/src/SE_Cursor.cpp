@@ -16,6 +16,7 @@ SE_Cursor::SE_Cursor(float sceneWidth, float sceneHeight)
     mSceneWidth = sceneWidth;
 	mSceneHeight = sceneHeight;;
     mState = UP;
+	mDrawable = true;
 }
 SE_Cursor::~SE_Cursor()
 {
@@ -30,21 +31,28 @@ void SE_Cursor::show()
 void SE_Cursor::load(const char* cursorResource)
 {
     if(mCursorScene)
+	{
         delete mCursorScene;
-	mCursorScene = new SE_Scene(SE_2D_SCENE);
-	mCursorScene->setBound(mSceneWidth, mSceneHeight);
-	mCursorScene->create(cursorResource);
-	mCursorScene->setTranslucent(true);
-	//
-	SE_Element* elementRoot = mCursorScene->getRootElement();
-	SE_2DNodeElement* e = (SE_2DNodeElement*)elementRoot->findByName("cursor");
-	e->setMountPoint(mMountPointX, mMountPointY);
-	e->layout();
-	mCursorScene->setBound(mSceneWidth, mSceneHeight);
-	SE_Camera* camera = SE_Camera::create2DSceneCamera(mSceneWidth, mSceneHeight);
-	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
-    SE_CameraID cameraID = cameraManager->add(camera);
-    mCursorScene->setCamera(cameraID);   
+		mCursorScene = NULL;
+	}
+	if(cursorResource)
+	{
+	    mCursorScene = new SE_Scene(SE_2D_SCENE);
+	    mCursorScene->setBound(mSceneWidth, mSceneHeight);
+	    mCursorScene->create(cursorResource);
+	    mCursorScene->setTranslucent(true);
+		//
+		SE_Element* elementRoot = mCursorScene->getRootElement();
+		SE_2DNodeElement* e = (SE_2DNodeElement*)elementRoot->findByName("cursor");
+		e->setMountPoint(mMountPointX, mMountPointY);
+		e->layout();
+		mCursorScene->setBound(mSceneWidth, mSceneHeight);
+		SE_Camera* camera = SE_Camera::create2DSceneCamera(mSceneWidth, mSceneHeight);
+		SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+		SE_CameraID cameraID = cameraManager->add(camera);
+		mCursorScene->setCamera(cameraID);  
+	}
+ 
 }
 void SE_Cursor::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
@@ -74,8 +82,6 @@ SE_Vector2f SE_Cursor::getMountPoint() const
 }
 void SE_Cursor::handleMotionEvent(const SE_MotionEvent& motionEvent)
 {
-	if(!mCursorScene)
-		return;
     float x = motionEvent.getX();
 	float y = motionEvent.getY();
 	bool equal = false;
@@ -87,14 +93,17 @@ void SE_Cursor::handleMotionEvent(const SE_MotionEvent& motionEvent)
 		mState = DOWN;
 	    mMountPointXPrev = x;
 	    mMountPointYPrev = y;
-	    SE_Element* selectedElement = mCursorScene->getPointedElement(x, y);
-		if(selectedElement)
+		if(mCursorScene)
 		{
-		    pointValid = false;
-		}
-		else
-		{
-			pointValid = true;
+			SE_Element* selectedElement = mCursorScene->getPointedElement(x, y);
+			if(selectedElement)
+			{
+				pointValid = false;
+			}
+			else
+			{
+				pointValid = true;
+			}
 		}
 		LOGI(" UP --> DOWN\n");
 	}
@@ -147,6 +156,8 @@ void SE_Cursor::handleMotionEvent(const SE_MotionEvent& motionEvent)
 	    mMountPointY = y;
 	}
 	LOGI("### %f, %f ###\n", mMountPointX, mMountPointY);
+	if(!mCursorScene)
+		return;
 	SE_Element* rootElement = mCursorScene->getRootElement();
 	SE_2DNodeElement* cursorElement = (SE_2DNodeElement*)rootElement->findByName("cursor");
     if(cursorElement && !equal)
@@ -159,11 +170,16 @@ void SE_Cursor::handleMotionEvent(const SE_MotionEvent& motionEvent)
 }
 SE_Vector2f SE_Cursor::getCursorTip() const
 {
-	SE_Element* rootElement = mCursorScene->getRootElement();
-	SE_2DNodeElement* e = (SE_2DNodeElement*)rootElement->findByName("cursorc");
-	float pivotx = e->getPivotX();
-	float pivoty = e->getPivotY();
-    return SE_Vector2f(mMountPointX, mMountPointY - pivoty);
+	if(mCursorScene)
+	{
+	    SE_Element* rootElement = mCursorScene->getRootElement();
+	    SE_2DNodeElement* e = (SE_2DNodeElement*)rootElement->findByName("cursorc");
+	    float pivotx = e->getPivotX();
+	    float pivoty = e->getPivotY();
+        return SE_Vector2f(mMountPointX, mMountPointY - pivoty);
+	}
+	else
+		return SE_Vector2f();
 }
 SE_Vector2f SE_Cursor::getDisplacement() const
 {

@@ -8,6 +8,7 @@
 class SE_Spatial;
 class SE_Primitive;
 class SE_Surface;
+class SE_FontProperty;
 class SE_CharView : public SE_Widget
 {
 public:
@@ -79,6 +80,8 @@ public:
 	void spawn();
 	void layout();
 	SE_Spatial* createSpatial();
+public:
+	void dismiss();
 private:
 	struct _TextProperty
 	{
@@ -90,6 +93,7 @@ private:
 	};
 private:
 	void calculateTextBound(float& outWidth, float& outHeight);
+	bool getProperty(SE_FontProperty& outProperty);
 private:
     SE_StringID mText;
 	std::map<int, _TextProperty> mTextProperty;

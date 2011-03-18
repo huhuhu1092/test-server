@@ -23,7 +23,7 @@ public:
     }
     void start();
     void loadBoard();
-	void loadScene(const char* name, float width, float height);
+	void loadScene(const char* name, float width, float height, bool bShowCuror = true);
 	void setOpening(const char* startOpening, int len);
     void setBoardUnitBound(float width, float height)
     {

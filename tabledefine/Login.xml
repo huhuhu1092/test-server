@@ -1,0 +1,17 @@
+<Element id = "loginroot" pivotx = "0" pivoty = "0">
+    <MountPoint id = "login" x = "184" y = "600" />
+    <MountPoint id = "username" x = "0" y = "20" /> 
+    <Element id = "login" pivotx = "0" pivoty = "0" mountpointref = "login" layer = "1">
+        <Element id = "loginbutton" pivotx = "0" pivoty = "0" width = "82" height = "63" type = "button" layer = "1" canpointed = "0">
+            <Image id = "i1" dataref = "ChessImage.xml/Button/normal" state = "normal" canpointed = "0"/>
+            <Image id = "i2" dataref = "ChessImage.xml/Button/highlighted" state = "highlighted" canpointed = "0"/>
+            <Image id = "i3" dataref = "ChessImage.xml/Button/selected" state = "selected" canpointed = "0"/>
+        </Element>
+        <Element id = "logintext" pivotx = "0" pivoty = "0" width = "82" height = "63" type = "textview" layer = "2" canpointed = "0" text = "strings.xml/c1">
+            <TextProperty id = "q1" style = "normal" color = "255 0 0" size = "32" align = "left" orientation = "horizontal" state = "normal" />
+        </Element>
+    </Element>
+    <Element id = "username" pivotx = "0" pivoty = "0" width = "480" height = "300" mountpointref = "username" type = "textview" layer = "2" canpointed = "1">
+        <TextProperty id = "q1" style = "normal" color = "255 0 0" size = "32" align = "left" orientation = "horizontal" state = "normal" />
+    </Element>
+</Element>

@@ -204,11 +204,13 @@ class SE_LoginElementClickHandler : public SE_ElementClickHandler
 {
 public:
     virtual bool handle(SE_Element* element);
+	SE_CChess* mChessApp;
 };
 bool SE_LoginElementClickHandler::handle(SE_Element* element)
 {
-	SE_Button* loginButton = (SE_Button*)element;
-	LOGI("#### handle click #####\n");
+    SE_Button* loginButton = (SE_Button*)element;
+	LOGI("#### login handle click #####\n");
+    mChessApp->connect();
 	return true;
 }
 ////////////////////////
@@ -253,15 +255,22 @@ private:
 ////////////////////////////////////////////
 void SE_LoginPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)
 {
-	if(cursor->getState() == SE_Cursor::DOWN && pointedElement)
+	if(pointedScene == NULL || pointedElement == NULL)
+		return;
+	if(cursor->getState() == SE_Cursor::DOWN && pointedElement->getName() == "login")
 	{
+		//pointedElement->dismissImmediate();
         pointedElement->setState(SE_Element::SELECTED, true);
-
 	}
-	else if(cursor->getState() == SE_Cursor::CLICKED && pointedElement)
+	else if(cursor->getState() == SE_Cursor::CLICKED && pointedElement->getName() == "login")
 	{
+		//pointedElement->dismissImmediate();
 		pointedElement->setState(SE_Element::NORMAL, true);
 		pointedElement->click();
+	}
+	else
+	{
+		pointedElement->setState(SE_Element::NORMAL, true);
 	}
 }
 ////////////////////
@@ -1082,7 +1091,8 @@ void SE_CChess::handleKing(const _BoardUnitData& src, const _BoardUnitData& dst)
 	}
     doMove(src, dst);
 }
-void SE_CChess::loadScene(const char* sceneName, float width, float height)
+
+void SE_CChess::loadScene(const char* sceneName, float width, float height, bool bShowCursor)
 {
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
     SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
@@ -1097,8 +1107,16 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height)
 	scene->setCamera(cameraID);
 	//end
 	sceneManager->show(sceneID);
-	sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
-	sceneManager->showCursor();
+    if(bShowCursor)
+	{
+	    sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
+	    sceneManager->showCursor();
+	}
+	else
+	{
+        sceneManager->loadCursor(NULL, 100, 100);
+	}
+
     if(mSceneID.isValid())
     {
         sceneManager->dismiss(mSceneID);
@@ -1140,7 +1158,7 @@ SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rec
 }
 void SE_CChess::loadBoard()
 {
-    loadScene("ChessLayout.xml/ChessRoot", mWidth, mHeight);
+    loadScene("ChessLayout.xml/ChessRoot", mWidth, mHeight, false);
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
@@ -1155,12 +1173,13 @@ void SE_CChess::loadBoard()
 }
 void SE_CChess::start()
 {
-    loadScene("Login.xml/loginroot", mWidth, mHeight);
+    loadScene("Login.xml/loginroot", mWidth, mHeight, false);
 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_LoginPointedElementHandler* p = new SE_LoginPointedElementHandler(this);
 	sceneManager->setPointedElementHandler(p);
 	SE_Scene* scene = sceneManager->get(mSceneID);
 	SE_Element* e = scene->findByName("login");
 	SE_LoginElementClickHandler* ech = new SE_LoginElementClickHandler;
+	ech->mChessApp = this;
 	e->setClickHandler(ech);
 }

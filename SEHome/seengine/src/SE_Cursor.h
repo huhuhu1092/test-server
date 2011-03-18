@@ -28,6 +28,14 @@ public:
     void handleMotionEvent(const SE_MotionEvent& motionEvent);
     SE_Vector2f getCursorTip() const;
 	SE_Vector2f getDisplacement() const;
+	void setDrawable(bool s)
+	{
+		mDrawable = s;
+	}
+	bool isDrawable() const
+	{
+		return mDrawable;
+	}
 private:
     SE_Scene* mCursorScene;
     float mPivotX, mPivotY;
@@ -35,5 +43,6 @@ private:
     float mMountPointXPrev, mMountPointYPrev;
     STATE mState;
     float mSceneWidth, mSceneHeight;
+	bool mDrawable;
 };
 #endif

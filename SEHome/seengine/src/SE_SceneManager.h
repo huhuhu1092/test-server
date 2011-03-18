@@ -56,10 +56,24 @@ public:
 		mPointedElementHandler = h;
 	}
 private:
+	struct _PointedData
+	{
+		SE_Scene* pointedScene;
+		SE_Element* pointedElement;
+		_PointedData(SE_Scene* s, SE_Element* e)
+		{
+			pointedScene = s;
+			pointedElement = e;
+		}
+	};
     SE_SceneManager(const SE_SceneManager&);
     SE_SceneManager& operator=(const SE_SceneManager&);
 	//void handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent);
 	void handlePointedElement(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y);
+	_PointedData getPointedData(float x, float y);
+	std::list<SE_Scene*> getMotionEventScene();
+	void handleCursorMotionEvent(const SE_MotionEvent& motionEvent);
+	void handlePointedMotionEvent(const SE_MotionEvent& motionEvent);
 private:
     SE_TreeStructManager<SE_Scene> mScenes;
     typedef std::list<SE_SceneID> _SceneStack;

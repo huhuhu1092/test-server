@@ -71,17 +71,52 @@ void SE_TextView::calculateTextBound(float& outWidth, float& outHeight)
     outWidth = textWidth;
     outHeight = textHeight;
 }
+bool SE_TextView::getProperty(SE_FontProperty& outProperty)
+{
+	SE_FontProperty fontProperty;
+	std::map<int, _TextProperty>::iterator it = mTextProperty.find(getState());
+	if(it != mTextProperty.end())
+	{
+	    fontProperty.fontSize = mTextProperty[getState()].mFontSize;
+        fontProperty.fontStyle = mTextProperty[getState()].mCharStyle;
+        fontProperty.fontColor = mTextProperty[getState()].mFontColor;
+		outProperty = fontProperty;
+		return true;
+	}
+	else
+	{
+	    fontProperty.fontSize = mTextProperty[NORMAL].mFontSize;
+        fontProperty.fontStyle = mTextProperty[NORMAL].mCharStyle;
+        fontProperty.fontColor = mTextProperty[NORMAL].mFontColor;
+		outProperty = fontProperty;
+		return true;
+	}
+}
+void SE_TextView::dismiss()
+{
+	SE_Widget::dismiss();
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	std::vector<SE_Element*> children = getChildren();
+	for(int i = 0 ; i < children.size() ; i++)
+	{
+		SE_Element* e = elementManager->remove(children[i]->getID());
+
+		SE_ASSERT(e == children[i]);
+		elementManager->release(e);
+	}
+    SE_ASSERT(getChildren().size() == 0);
+}
 void SE_TextView::spawn()
 {
-    int charNum = mText.getCharNum(); //unicode char num
-    //std::vector<SE_ImageData*> charImageData;
-    mCharImageData.resize(charNum);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+
+    int charNum = mText.getCharNum(); //unicode char num
+	if(charNum == 0)
+		return;
+    mCharImageData.resize(charNum);
     SE_FontManager* fontManager = SE_Application::getInstance()->getFontManager();
     SE_FontProperty fontProperty;
-	fontProperty.fontSize = mTextProperty[getState()].mFontSize;
-    fontProperty.fontStyle = mTextProperty[getState()].mCharStyle;
-    fontProperty.fontColor = mTextProperty[getState()].mFontColor;
+	getProperty(fontProperty);
     for(int i = 0 ; i < charNum ; i++)
     {
         SE_CharCode c = mText.getCharCode(i);
@@ -98,9 +133,11 @@ void SE_TextView::spawn()
     for(int i = 0 ; i < charNum ; i++)
     {
         SE_CharView* cv = new SE_CharView;
+		cv->setCanPointed(false);
         cv->setImageData(mCharImageData[i]);
         cv->setPivotX(0);
         cv->setPivotY(0);
+		cv->setRenderTargetID(mRenderTarget);
         cv->setMountPoint(startx, starty);
         cv->setWidth(mCharImageData[i]->getWidth());
         cv->setHeight(mCharImageData[i]->getHeight());

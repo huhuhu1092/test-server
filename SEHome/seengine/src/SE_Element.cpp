@@ -86,6 +86,7 @@ SE_Element::SE_Element()
     mRenderQueueSeq =  SE_RQ0;
 	mClickHandler = NULL;
 	mCanPointed = true;
+	mNeedUpdateStateFromParent = true;
 }
 
 SE_Element::~SE_Element()
@@ -359,6 +360,33 @@ void SE_Element::update(SE_ParamValueList& paramValueList)
 {}
 void SE_Element::update(const SE_AddressID& address, const SE_Value& value)
 {}
+void SE_Element::dismissImmediate()
+{
+	std::vector<SE_Element*> children = getChildren();
+    for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		children[i]->dismissImmediate();
+	}
+    SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
+	for(int i = 0 ; i < mSimObjectIDArray.size() ; i++)
+	{
+	    SE_SimObject* simObject = simObjectManager->remove(mSimObjectIDArray[i]);
+		simObjectManager->release(simObject, SE_RELEASE_NO_DELAY);
+	}
+	mSimObjectIDArray.clear();
+    SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+    SE_Spatial* s = spatialManager->remove(mSpatialID);
+    spatialManager->release(s, SE_RELEASE_NO_DELAY);
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	for(int i = 0 ; i < mPrimitiveIDArray.size() ; i++)
+	{
+        resourceManager->removePrimitive(mPrimitiveIDArray[i]);
+	}
+	mPrimitiveIDArray.clear();
+    SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
+    SE_Animation* anim = animManager->remove(mAnimationID);
+	animManager->release(anim, SE_RELEASE_NO_DELAY);
+}
 void SE_Element::dismiss()
 {
 	std::vector<SE_Element*> children = getChildren();
@@ -372,6 +400,7 @@ void SE_Element::dismiss()
 	    SE_SimObject* simObject = simObjectManager->remove(mSimObjectIDArray[i]);
 	    simObjectManager->release(simObject);
 	}
+	mSimObjectIDArray.clear();
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* s = spatialManager->remove(mSpatialID);
     spatialManager->release(s);
@@ -380,6 +409,7 @@ void SE_Element::dismiss()
 	{
         resourceManager->removePrimitive(mPrimitiveIDArray[i]);
 	}
+	mPrimitiveIDArray.clear();
     SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
     SE_Animation* anim = animManager->remove(mAnimationID);
 	animManager->release(anim);
@@ -522,6 +552,14 @@ void SE_Element::setState(int state, bool update)
 		return;
     int oldState = mState;
 	mState = state;
+	std::vector<SE_Element*> children = getChildren();
+	for(int i = 0 ; i < children.size() ; i++)
+	{
+		if(children[i]->needUpdateStateFromParent())
+		{
+		    children[i]->setState(state, false);
+		}
+	}
 	if(!update)
         return;
     onStateChange(mState, oldState);

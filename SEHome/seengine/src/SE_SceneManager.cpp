@@ -27,13 +27,15 @@ SE_SceneManager::~SE_SceneManager()
 }
 void SE_SceneManager::loadCursor(const char* cursorResource, float mx, float my)
 {
-    if(!cursorResource)
-        return;
 	if(mCursor)
 		delete mCursor;
 	mCursor = new SE_Cursor(mWidth, mHeight);
 	mCursor->setMointPoint(mx, my);
 	mCursor->load(cursorResource);
+	if(!cursorResource)
+		mCursor->setDrawable(false);
+	else
+		mCursor->setDrawable(true);
 }
 void SE_SceneManager::showCursor()
 {
@@ -219,14 +221,8 @@ void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_Mot
 	}   
 }
 */
-void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
+std::list<SE_Scene*> SE_SceneManager::getMotionEventScene()
 {
-	if(!mCursor)
-		return;
-	mCursor->handleMotionEvent(motionEvent);
-    SE_Vector2f v = mCursor->getCursorTip();
-	float x = v.x;
-	float y = v.y;
     std::list<SE_Scene*> sceneMotionEvent;
     _SceneStack::iterator it;
     for(it = mStack.begin() ; it != mStack.end() ; it++)
@@ -246,6 +242,12 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
             }
         }
     } 
+	return sceneMotionEvent;
+}
+
+SE_SceneManager::_PointedData SE_SceneManager::getPointedData(float x, float y)
+{
+    std::list<SE_Scene*> sceneMotionEvent = getMotionEventScene();
 	std::list<SE_Scene*>::iterator itScene;
 	SE_SceneRenderSeq sceneRenderSeq = -1;
 	SE_Element* pointedElement = NULL;
@@ -266,7 +268,35 @@ void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 			}
 		}
 	}
-	handlePointedElement(pointedScene, pointedElement, mCursor, x, y);
+	return _PointedData(pointedScene, pointedElement);
+}
+void SE_SceneManager::handleCursorMotionEvent(const SE_MotionEvent& motionEvent)
+{
+	mCursor->handleMotionEvent(motionEvent);
+    SE_Vector2f v = mCursor->getCursorTip();
+	float x = v.x;
+	float y = v.y;
+    _PointedData pd = getPointedData(x, y);
+	handlePointedElement(pd.pointedScene, pd.pointedElement, mCursor, x, y);
+}
+void SE_SceneManager::handlePointedMotionEvent(const SE_MotionEvent& motionEvent)
+{
+    mCursor->handleMotionEvent(motionEvent);
+	SE_Vector2f v = mCursor->getMountPoint();
+	_PointedData pd = getPointedData(motionEvent.getX(), v.y);
+	handlePointedElement(pd.pointedScene, pd.pointedElement, mCursor, v.x, v.y);
+}
+
+void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
+{
+	if(!mCursor->isDrawable())
+	{
+		handlePointedMotionEvent(motionEvent);
+	}
+	else
+	{
+		handleCursorMotionEvent(motionEvent);
+	}
 }
 
 void SE_SceneManager::handlePointedElement(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)

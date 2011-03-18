@@ -247,6 +247,14 @@ public:
 	void setCanPointed(bool b);
 	SE_Element* getCanPointedElement();
 	SE_Element* findByName(const char* name);
+	bool needUpdateStateFromParent()
+	{
+		return mNeedUpdateStateFromParent;
+	}
+	void setNeedUpdateStateFromParent(bool s)
+	{
+		mNeedUpdateStateFromParent = s;
+	}
 	static SE_StringID getStateName(int state);
 	static int getStateFromName(const char* name);
 public:
@@ -264,8 +272,10 @@ public:
 	virtual bool dispatchKeyEvent(const SE_KeyEvent& keyEvent);
     virtual void show();
     virtual void hide();
-    //dismiss will make spatial node remove from spatial manager
+    //dismiss will make spatial node and other resource remove 
+	//the resource will be dismiss delay
     virtual void dismiss();
+	virtual void dismissImmediate();
 	virtual bool click();
     virtual void onStateChange(int newState, int oldState);
 	virtual void justUpdateSpatial(SE_Spatial* spatial) {}
@@ -319,6 +329,7 @@ protected:
     SE_Matrix4f mPostMatrix;
 	SE_ElementClickHandler* mClickHandler;
 	bool mCanPointed;
+	bool mNeedUpdateStateFromParent;
 };
 class SE_2DNodeElement : public SE_Element, public SE_Object
 {

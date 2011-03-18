@@ -22,6 +22,7 @@ void SE_Button::spawn()
 	{
 		SE_2DNodeElement* e = (SE_2DNodeElement*)children[i];
 		e->setCanPointed(false);
+	    e->setNeedUpdateStateFromParent(false);
 		std::string str;
 		std::string strIndex = SE_Util::intToString(i);
 		SE_StringID stateName = e->getStateName(e->getState());
