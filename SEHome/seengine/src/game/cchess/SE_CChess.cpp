@@ -13,19 +13,10 @@
 #include "SE_IO.h"
 #include "SE_Button.h"
 #include "SE_ChessCommand.h"
+#include "SE_TextView.h"
 #include <string>
 #include <map>
 #include <algorithm>
-#include <curl/curl.h>
-#include <stdio.h>
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-  int written = fwrite(ptr, size, nmemb, (FILE *)stream);
-  std::string str((char*)ptr, size);
-  LOGI("## receive data = %s ####\n", str.c_str());
-  return written;
-}
- 
 ///////////////////////////////////////
 static std::map<std::string, SE_CChess::_ChessPieces> nameChessPiecesMap;
 static void initNameChessPiecesMap()
@@ -208,9 +199,38 @@ public:
 };
 bool SE_LoginElementClickHandler::handle(SE_Element* element)
 {
-    SE_Button* loginButton = (SE_Button*)element;
-	LOGI("#### login handle click #####\n");
-    mChessApp->connect();
+	LOGI("#### login handle click : mChessApp = %p #####\n", mChessApp);
+    element->getName().print();
+    if(element->getName() == SE_StringID("login"))
+    {
+        SE_Button* loginButton = (SE_Button*)element;
+        SE_ChessMessage* m = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_LOGIN);
+        SE_Application::getInstance()->postCommand(m);
+    }
+    else if(mChessApp->isUser(element->getName()))
+    {
+        LOGI("### element name = %s ####\n", element->getName().getStr());
+        if(element->getName() == "bb")
+        {
+            SE_ChessMessage* m = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_START);
+            SE_Application::getInstance()->postCommand(m);
+        }
+
+    }
+    else if(element->getName() == "update")
+    {
+        LOGI("#### update ####\n");
+        if(mChessApp->getGameState() == SE_CChess::LOGIN)
+        {
+            SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_GETMESSAGE);
+            SE_Application::getInstance()->postCommand(msg);
+        }
+
+    }
+    //mChessApp->connect();
+    //SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+    //sceneManager->dismiss(mChessApp->getSceneID());
+    //mChessApp->loadBoard();
 	return true;
 }
 ////////////////////////
@@ -257,12 +277,12 @@ void SE_LoginPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 {
 	if(pointedScene == NULL || pointedElement == NULL)
 		return;
-	if(cursor->getState() == SE_Cursor::DOWN && pointedElement->getName() == "login")
+	if(cursor->getState() == SE_Cursor::DOWN)
 	{
 		//pointedElement->dismissImmediate();
         pointedElement->setState(SE_Element::SELECTED, true);
 	}
-	else if(cursor->getState() == SE_Cursor::CLICKED && pointedElement->getName() == "login")
+	else if(cursor->getState() == SE_Cursor::CLICKED)
 	{
 		//pointedElement->dismissImmediate();
 		pointedElement->setState(SE_Element::NORMAL, true);
@@ -404,9 +424,10 @@ SE_CChess::SE_CChess(float boardx, float boardy, float unitw, float unith, COLOR
 		starty -= mBoardUnitHeight;
 	}
 	mAction = CANNOT_MOVE;
-    mGameState = LOGIN;
+    mGameState = LOGOUT;
     mWidth = 0;
     mHeight = 0;
+    mWait = false;
 }
 
 static void getRowCol(const std::string str, int& row, int& col)
@@ -455,64 +476,6 @@ SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 {
 	return mBoardData[row][col].cp;
 }
-void SE_CChess::connect()
-{
-   CURL* curl;
-   CURLcode res;
-   static const char *headerfilename = "C:\\head.out";
-  FILE *headerfile = NULL;
-  static const char *bodyfilename = "C:\\body.out";
-  FILE *bodyfile = NULL;
-
-  curl_global_init(CURL_GLOBAL_ALL);
-   curl = curl_easy_init();
-   if(curl)
-   {
-       curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.5.102/cchess/login");
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "aa aa");
-		  /* no progress meter please */ 
-		  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-		 
-		  /* send all data to this function  */ 
-		  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-
-		 
-		  /* open the files */ 
-		  headerfile = fopen(headerfilename,"w");
-		  if (headerfile == NULL) 
-		  {
-			curl_easy_cleanup(curl);
-			return;
-		  }
-		  bodyfile = fopen(bodyfilename,"w");
-		  if (bodyfile == NULL) 
-		  {
-			curl_easy_cleanup(curl);
-			return;
-          }
- 
-		  /* we want the headers to this file handle */ 
-		  curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, headerfile);
-		 
-		  /*
-		   * Notice here that if you want the actual data sent anywhere else but
-		   * stdout, you should consider using the CURLOPT_WRITEDATA option.  */ 
-		 
-          curl_easy_setopt(curl, CURLOPT_WRITEDATA, bodyfile);
-
-       res = curl_easy_perform(curl);
-       if(CURLE_OK == res)
-       {
-
-       }
-	   		  fclose(headerfile);
-
-		  fclose(bodyfile);
-       curl_easy_cleanup(curl);
-   } 
-
-}
-
 void SE_CChess::setOpening(const char* startOpening, int len)
 {
     if(!startOpening)
@@ -556,6 +519,9 @@ int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 #elif defined(WIN32)
     int cs = min(srcCol, dstCol);
     int cd = max(srcCol, dstCol);
+#else
+    int cs = std::min(srcCol, dstCol);
+    int cd = std::max(srcCol, dstCol);
 #endif
 	int count = 0;
     for(int i = (cs + 1) ; i < cd ; i++)
@@ -576,6 +542,10 @@ int SE_CChess::piecesNumBetweenRow(int col, int srcRow, int dstRow)
 #elif defined(WIN32)
     int rs = min(srcRow, dstRow);
     int rd = max(srcRow, dstRow);
+#else
+    int rs = std::min(srcRow, dstRow);
+    int rd = std::max(srcRow, dstRow);
+
 #endif
 	int count = 0;
     for(int i = (rs + 1) ; i < rd ; i++)
@@ -1127,9 +1097,23 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height, bool
 void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
 {
     _ChessPiecesData cpd = mChessPiecesData[cp.color][cp.cp];
+    if(cpd.cp.color != mPlayerColor[SELF] || mWait)
+    {
+        mAction = CANNOT_MOVE;
+        return;
+    }
     _BoardUnitData dst = getBoardUnitData(rect);
     _BoardUnitData src = mBoardData[cpd.row][cpd.col];
 	(this->*mChessPieceHandler[cp.cp])(src, dst);
+    if(mAction == CAN_MOVE)
+    {
+        mWait = true;
+        char buf[5];
+        memset(buf, 0, 5);
+        snprintf(buf, 4, "%d%d%d%d", src.row, src.col, dst.row, dst.col);
+        mLastStep = buf;
+        LOGI("### last step = %s ####\n", mLastStep);
+    }
 }
 SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rect)
 {
@@ -1158,7 +1142,7 @@ SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rec
 }
 void SE_CChess::loadBoard()
 {
-    loadScene("ChessLayout.xml/ChessRoot", mWidth, mHeight, false);
+    loadScene("ChessLayout.xml/ChessRoot", mWidth, mHeight, true);
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
@@ -1179,7 +1163,123 @@ void SE_CChess::start()
 	sceneManager->setPointedElementHandler(p);
 	SE_Scene* scene = sceneManager->get(mSceneID);
 	SE_Element* e = scene->findByName("login");
+    SE_Element* update = scene->findByName("update");
 	SE_LoginElementClickHandler* ech = new SE_LoginElementClickHandler;
 	ech->mChessApp = this;
 	e->setClickHandler(ech);
+
+    ech = new SE_LoginElementClickHandler;
+	ech->mChessApp = this;
+	update->setClickHandler(ech);
+    mGameState = START;
+}
+SE_Element* SE_CChess::findElement(const char* name)
+{
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_Scene* scene = sceneManager->get(mSceneID);
+    SE_Element* e = NULL;
+    if(scene)
+    {
+	    e = scene->findByName(name);
+    }
+    return e;
+}
+void SE_CChess::addUser(const std::string& str)
+{
+    mUsers.push_back(str);
+}
+void SE_CChess::clearUser()
+{
+    mUsers.clear();
+}
+void SE_CChess::createTextView(SE_2DNodeElement* textList, const std::string& content, float starty)
+{
+    SE_TextView* tv = new SE_TextView;
+    tv->setText(content.c_str());
+    tv->setAlign(SE_Element::NORMAL, SE_TextView::LEFT); 
+    tv->setOrientation(SE_Element::NORMAL, SE_TextView::HORIZONTAL);
+    tv->setFontColor(SE_Element::NORMAL, SE_Vector3i(255, 0, 0));
+    tv->setFontSize(SE_Element::NORMAL, 32);
+    tv->setCharStyle(SE_Element::NORMAL, SE_CharStyle("normal"));
+    tv->setName(content.c_str());
+    tv->setMountPoint(0, starty);
+    tv->setPivotX(0);
+    tv->setPivotY(0);
+    tv->setWidth(textList->getWidth());
+    tv->setHeight(40);
+    tv->setCanPointed(true);
+    tv->setState(SE_Element::NORMAL, false);
+    tv->setSceneRenderSeq(textList->getSceneRenderSeq());
+    tv->setRenderTargetID(textList->getRenderTargetID()); 
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    elementManager->add(textList->getID(), tv, true);
+    SE_LoginElementClickHandler* ech = new SE_LoginElementClickHandler;
+    ech->mChessApp = this;
+	tv->setClickHandler(ech);
+ 
+}
+void SE_CChess::setGameState(GAME_STATE gs)
+{
+    if(mGameState == gs)
+        return;
+    GAME_STATE oldState = mGameState;
+    mGameState = gs;
+    update();
+}
+bool SE_CChess::isUser(const SE_StringID& usr)
+{
+    /*
+    _UserList::iterator it;
+    for(it = mUsers.begin() ; it != mUsers.end() ; it++)
+    {
+        if(*it == std::string(usr.getStr()))
+            break;
+    }
+    if(it != mUsers.end())
+        return true;
+    else
+        return false;
+        */
+    /*
+    _UserList::iterator it = find(mUsers.begin(), mUsers.end(), std::string(usr.getStr()));
+    if(it != mUsers.end())
+        return true;
+    else
+        return false;
+        */
+}
+void SE_CChess::update()
+{
+
+    switch(mGameState)
+    {
+    case LOGIN:
+        {
+            SE_2DNodeElement* textList = (SE_2DNodeElement*)findElement("username"); 
+            textList->clearChildren();    
+            _UserList::iterator it;
+            float starty = 0;
+            for(it = mUsers.begin() ; it != mUsers.end() ; it++)
+            {
+                createTextView(textList, *it, starty);
+                starty += 60;
+            }
+            textList->spawn();
+            textList->layout();
+            textList->updateSpatial();
+        }
+        break;
+    case RUN:
+        {
+            SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+            sceneManager->dismiss(mSceneID);
+            loadBoard();
+        }
+        break;
+    case LOGOUT:
+        break;
+    case START:
+        break;
+    }
+
 }

@@ -111,6 +111,7 @@ void SE_TextView::spawn()
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 
     int charNum = mText.getCharNum(); //unicode char num
+    LOGI("### charNum = %d ###\n", charNum);
 	if(charNum == 0)
 		return;
     mCharImageData.resize(charNum);

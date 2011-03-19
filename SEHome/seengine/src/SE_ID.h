@@ -11,8 +11,8 @@ public:
 	enum ENCODING_TYPE {SE_ASCII, SE_UNICODE, SE_UTF8, SE_UTF16, SE_UTF32};
     SE_StringID();
     ~SE_StringID();
-    SE_StringID(const char* id, ENCODING_TYPE t = SE_ASCII);
-    SE_StringID(const char* id, int size, ENCODING_TYPE t = SE_ASCII);
+    SE_StringID(const char* id, ENCODING_TYPE t = SE_UTF8);
+    SE_StringID(const char* id, int size, ENCODING_TYPE t);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
 	friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);

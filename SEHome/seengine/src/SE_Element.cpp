@@ -427,7 +427,7 @@ void SE_Element::clearChildren()
 	{
 		SE_Element* e = children[i];
 		elementManager->remove(e->getID());
-        elementManager->release(e);
+        elementManager->release(e, SE_RELEASE_NO_DELAY);
 	}
 }
 void SE_Element::setStateURI(int state, const SE_StringID& uri)

@@ -7,19 +7,23 @@ PLATFORM = LinuxPC
 SEENG_DIR = /home/luwei/program/streamserver_git/test-server/SEHome/seengine/src
 OUTNAME = SEDemo
 ## X11 lib define
-X11_LIBS = -lX11 -lXau
+X11_LIBS = -lX11 -lXau -lfreetype
 WS = X11
 X11_INC = /usr/include/X11
+FREETYPE_INC = /usr/include/freetype2
 LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
-               -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib
-PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DANDROID -g
+               -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
+               -L/home/luwei/ProgramFiles/curl/lib
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
 		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \
-	   $(X11_INC) 
+		   /home/luwei/ProgramFiles/curl/include \
+	       $(X11_INC)  \
+		   $(FREETYPE_INC)
 
 PLAT_OBJPATH = $(PLATFORM)/$(WS)
-PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 -lIL $(X11_LIBS)
+PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 -lIL -lcurl $(X11_LIBS)
 INCLUDES += -I$(SDKDIR)/Shell  \
 			-I$(SDKDIR)/Shell/API/KEGL \
 			-I$(SDKDIR)/Shell/OS/LinuxX11 \
@@ -30,6 +34,12 @@ INCLUDES += -I$(SDKDIR)/Shell  \
 			-I$(SEENG_DIR)/animation \
 			-I$(SEENG_DIR)/checkxml \
 			-I$(SEENG_DIR)/tinyxml \
+            -I$(SEENG_DIR)/font \
+			-I$(SEENG_DIR)/game \
+			-I$(SEENG_DIR)/game/cchess \
+			-I$(SEENG_DIR)/network \
+			-I$(SEENG_DIR)/ui \
+            -I$(SEENG_DIR)/test \
             -I$(SEENG_DIR)/bullet \
 			-I$(SEENG_DIR)/bullet/BulletCollision/BroadphaseCollision \
 			-I$(SEENG_DIR)/bullet/BulletCollision/CollisionDispatch \
@@ -48,6 +58,12 @@ VPATH +=  ../ : \
 	  ../animation : \
 	  ../checkxml : \
 	  ../tinyxml : \
+	  ../game : \
+	  ../game/cchess : \
+	  ../ui : \
+	  ../font : \
+	  ../network : \
+	  ../test : \
 	  ../bullet/BulletCollision/BroadphaseCollision : \
 	  ../bullet/BulletCollision/CollisionDispatch : \
 	  ../bullet/BulletCollision/CollisionShapes : \
@@ -157,97 +173,126 @@ SRCS_TINYXML = tinystr.cpp  \
                tinyxmlparser.cpp
 
 
-SRCS_CPP = SE_Buffer.cpp   \
-	SE_DataTransfer.cpp  \
-	SE_ImageData.cpp      \
-	SE_Mesh.cpp           \
-	SE_ResFileHeader.cpp   \
-	SE_Camera.cpp         \
-	SE_File.cpp          \
-	SE_IO.cpp            \
-	SE_MeshSimObject.cpp  \
-	SE_ResourceManager.cpp \
-	SE_TextureCoordData.cpp \
-	SE_Command.cpp         \
-	SE_Geometry3D.cpp    \
-	SE_Log.cpp           \
-	SE_Object.cpp         \
-	SE_SceneManager.cpp    \
-	SE_Texture.cpp          \
-	SE_CommandFactory.cpp  \
-	SE_Geometry.cpp        \
-	SE_MaterialData.cpp    \
-	SE_Quat.cpp   \
-	SE_ShaderProgram.cpp \
-	SE_Time.cpp          \
-	SE_GeometryData.cpp  \
-	SE_Application.cpp    \
-	SE_Common.cpp          \
-	SE_Math.cpp     \
-	SE_RenderManager.cpp  \
-	SE_SimObject.cpp   \
-	SE_Utils.cpp \
-	SE_BoundingVolume.cpp   \
-	SE_CommonNode.cpp    \
-	SE_ID.cpp         \
-	SE_Matrix.cpp     \
-	SE_RenderUnit.cpp  \
-	SE_Spatial.cpp    \
-	SE_ObjectManager.cpp \
-	SE_Vector.cpp \
-	SE_Ase.cpp \
-	SE_SystemCommand.cpp \
-	SE_SystemCommandFactory.cpp \
-	SE_InputEvent.cpp \
-	SE_InputManager.cpp \
-	SE_MotionEventCamera.cpp \
-	SE_SpatialTravel.cpp \
-	SE_AnimationManager.cpp \
-	SE_DelayDestroy.cpp \
-	SE_RenderState.cpp \
-	SE_ShaderProperty.cpp \
-	SE_ParamManager.cpp \
-    SE_Value.cpp \
-    SE_XmlHandler.cpp \
-	SE_Struct.cpp \
-	SE_ImageCodec.cpp \
-	SE_MessageEventCommandDefine.cpp \
-	SE_RenderTarget.cpp \
-	SE_RenderTargetManager.cpp \
-    SE_2DCommand.cpp \
-	SE_ElementManager.cpp \
-	SE_Image.cpp  \
-	SE_ImageTable.cpp \
-	SE_MountPoint.cpp  \
-	SE_StateTable.cpp   \
-	SE_TextureCoordAnimation.cpp \
-    SE_Element.cpp   \
-   	SE_ElementMap.cpp \
-   	SE_ImageMap.cpp  \
-	SE_InterpolateWithKey.cpp \
-	SE_StateMap.cpp   \
-	SE_TableManager.cpp \
-   	SE_URI.cpp \
-    SE_Action.cpp     \
-	SE_AnimationSet.cpp   \
-	SE_Bone.cpp          \
-	SE_ElementKeyFrameAnimation.cpp  \
-	SE_KeyFrameController.cpp  \
-	SE_Sequence.cpp  \
-	SE_SpatialAnimation.cpp \
-    SE_Animation.cpp  \
-	SE_BoneAnimation.cpp  \
-	SE_ColorEffectController.cpp  \
-	SE_Interpolate.cpp   \
-	SE_KeyFrame.cpp      \
-	SE_SkinJointController.cpp \
-    SE_CheckXml.cpp \
-	SEDemo.cpp \
+SRCS_CPP = SE_2DCommand.cpp \
+           SE_2DElement.cpp \
+		   SE_Action.cpp \
+		   SE_Animation.cpp \
+		   SE_AnimationManager.cpp \
+		   SE_AnimationSet.cpp \
+		   SE_Application.cpp \
+		   SE_Ase.cpp \
+		   SE_Bone.cpp \
+		   SE_BoneAnimation.cpp \
+		   SE_BoundingVolume.cpp \
+		   SE_Buffer.cpp \
+		   SE_Button.cpp \
+		   SE_Camera.cpp \
+		   SE_CameraManager.cpp \
+		   SE_CChess.cpp \
+		   SE_ChessCommand.cpp \
+		   SE_CharCode.cpp \
+		   SE_CharCodeDefine.cpp \
+	       SE_CheckXml.cpp \
+	       SE_ColorEffectController.cpp \
+		   SE_Command.cpp \
+		   SE_CommandFactory.cpp \
+		   SE_Common.cpp \
+		   SE_CommonNode.cpp \
+	       SE_Cursor.cpp \
+		   SE_DataTransfer.cpp \
+		   SE_DataValueDefine.cpp \
+		   SE_DelayDestroy.cpp \
+		   SE_DynamicArray.cpp \
+	       SE_Element.cpp \
+		   SE_ElementContent.cpp \
+	       SE_ElementKeyFrameAnimation.cpp \
+		   SE_ElementManager.cpp \
+		   SE_ElementMap.cpp \
+		   SE_ElementSchema.cpp \
+	       SE_File.cpp \
+		   SE_FontManager.cpp \
+	       SE_Game.cpp \
+	       SE_Geometry.cpp \
+	       SE_Geometry3D.cpp \
+		   SE_GeometryData.cpp \
+		   SE_ID.cpp \
+	       SE_ImageCodec.cpp \
+		   SE_ImageData.cpp \
+	       SE_ImageMap.cpp \
+		   SE_ImageTable.cpp \
+		   SE_InputEvent.cpp \
+		   SE_InputEventHandler.cpp \
+	       SE_InputManager.cpp \
+		   SE_Interpolate.cpp \
+	       SE_IO.cpp \
+		   SE_KeyFrame.cpp \
+		   SE_KeyFrameController.cpp \
+		   SE_Layer.cpp \
+	       SE_Log.cpp \
+	       SE_MaterialData.cpp \
+		   SE_Math.cpp \
+		   SE_Matrix.cpp \
+	       SE_Mesh.cpp \
+	       SE_MeshSimObject.cpp \
+		   SE_Message.cpp \
+		   SE_MessageEventCommandDefine.cpp \
+		   SE_MotionEventCamera.cpp \
+		   SE_MountPoint.cpp \
+		   SE_Mutex.cpp \
+		   SE_MessageStream.cpp \
+	       SE_Object.cpp \
+		   SE_ObjectManager.cpp \
+		   SE_ParamManager.cpp \
+		   SE_ParamObserver.cpp \
+		   SE_Primitive.cpp \
+		   SE_PropertySet.cpp \
+		   SE_Quat.cpp \
+		   SE_Renderer.cpp \
+		   SE_RenderManager.cpp \
+	       SE_RenderState.cpp \
+	       SE_RenderTarget.cpp \
+	       SE_RenderTargetManager.cpp \
+	       SE_RenderUnit.cpp \
+		   SE_ResFileHeader.cpp \
+	       SE_ResourceManager.cpp \
+	       SE_Scene.cpp \
+           SE_SceneManager.cpp \
+           SE_Sequence.cpp \
+           SE_ShaderProgram.cpp \
+           SE_ShaderProperty.cpp \
+           SE_SimObject.cpp \
+           SE_SimObjectManager.cpp \
+           SE_SkinJointController.cpp \
+           SE_Spatial.cpp \
+           SE_SpatialAnimation.cpp \
+           SE_SpatialManager.cpp \
+           SE_SpatialTravel.cpp \
+           SE_StateTable.cpp \
+		   SE_Struct.cpp \
+	       SE_SystemCommand.cpp \
+           SE_SystemCommandFactory.cpp \
+           SE_TableManager.cpp \
+           SE_TestCommand.cpp \
+           SE_Texture.cpp \
+           SE_TextureCoordAnimation.cpp \
+           SE_TextureCoordData.cpp \
+           SE_TextView.cpp \
+           SE_Time.cpp \
+           SE_TimeKey.cpp \
+           SE_TreeStructManager.cpp \
+           SE_URI.cpp \
+           SE_Utils.cpp \
+           SE_Value.cpp \
+           SE_Vector.cpp \
+           SE_Widget.cpp \
+           SE_XmlHandler.cpp \
+           SEDemo2D.cpp \
 	PVRShell.cpp \
 	PVRShellAPI.cpp \
 	PVRShellOS.cpp \
-	$(SRCS_TINYXML) \
-	$(SRC_BULLET)
+	$(SRC_BULLET) \
+	$(SRCS_TINYXML) 
+
 SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
 SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
 OBJ_C = $(SRCS_C:.c=.o)

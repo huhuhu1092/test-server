@@ -53,7 +53,6 @@ public:
 	{
 		//mPhysics = NULL;
 		mSelectedSpatial = NULL;
-	    mChessApp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -97,6 +96,9 @@ bool SEDemo::InitApplication()
 	appid.first = 137;
 	appid.second = 18215879;
 	SE_Application::getInstance()->setAppID(appid);
+    
+	SE_CChess* chessapp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
+    SE_Application::getInstance()->addGame("cchess", chessapp);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
@@ -104,10 +106,10 @@ bool SEDemo::InitApplication()
 #ifdef WIN32
 	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
-	c->dataPath = "/home/luwei/model/jme/home/newhome3";
+	c->dataPath = "/home/luwei/model/newhome3";
 #endif
 	c->sceneName = "ChessLayout.xml/ChessRoot";//"TestElement.xml/PFemaleBase";
-	c->chessApp = mChessApp;
+	c->chessApp = chessapp;
 	c->left = 0;
 	c->top = 0;
 #ifdef ROTATE

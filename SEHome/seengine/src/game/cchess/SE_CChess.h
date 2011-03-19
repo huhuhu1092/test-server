@@ -5,6 +5,10 @@
 #include "SE_Geometry3D.h"
 #include "SE_ID.h"
 #include "SE_Game.h"
+#include <list>
+#include <string>
+class SE_Element;
+class SE_2DNodeElement;
 class SE_CChess : public SE_Game
 {
 public:
@@ -15,16 +19,22 @@ public:
     enum STATE {DEAD, ALIVE};
     enum {CAN_MOVE, CANNOT_MOVE};
 	enum COLOR {INVALID_COLOR = -1, RED = 0, BLACK = 1, COLOR_NUM = 2};
-    enum GAME_STATE {LOGIN, RUN, LOGOUT};
+    enum GAME_STATE {START, LOGIN, RUN, LOGOUT};
     SE_CChess(float boardx, float boardy, float unitw, float unith, COLOR selfc , COLOR oppc);
-    GAME_STATE getGameState()
-    {
-        return mGameState;
-    }
     void start();
     void loadBoard();
 	void loadScene(const char* name, float width, float height, bool bShowCuror = true);
 	void setOpening(const char* startOpening, int len);
+    void setGameState(GAME_STATE gs);
+    GAME_STATE getGameState() const
+    {
+        return mGameState;
+    }
+    void setColor(COLOR selfc , COLOR oppc)
+    {
+        mPlayerColor[SELF] = selfc;
+        mPlayerColor[OPPONENT] = oppc;
+    }
     void setBoardUnitBound(float width, float height)
     {
         mBoardUnitWidth = width;
@@ -124,8 +134,18 @@ public:
     {
         return SE_Vector2f(mWidth, mHeight);
     }
-
-    void connect();
+    void addUser(const std::string& usr);
+    void clearUser();
+    bool isUser(const SE_StringID& usr);
+    void update();
+    void clearWait()
+    {
+        mWait = false;
+    }
+    std::string getLastStep()
+    {
+        return mLastStep;
+    }
 public:
 	//for debug; don't use it for other use
 	void check();
@@ -156,6 +176,10 @@ private:
         int row;
         int col;
     };
+    //void addDataFromServer(const std::string& str);
+    //void clearData();
+    SE_Element* findElement(const char* name);
+    void createTextView(SE_2DNodeElement* textList, const std::string& content, float starty);
 private:
     float mBoardUnitWidth;
     float mBoardUnitHeight;
@@ -171,8 +195,13 @@ private:
     CHESSPIECEHANDLER mChessPieceHandler[PIECES_NUM];
 	int mAction;
 	SE_SceneID mSceneID;
-    GAME_STATE mGameState;
     float mWidth;
     float mHeight;
+    GAME_STATE mGameState;
+    //std::list<std::string> mDataFromServer;
+    typedef std::list<std::string> _UserList;
+    std::list<std::string> mUsers;
+    bool mWait;
+    std::string mLastStep;
 };
 #endif

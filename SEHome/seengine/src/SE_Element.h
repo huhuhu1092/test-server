@@ -205,6 +205,10 @@ public:
 	{
 		return mSceneRenderSeq;
 	}
+    SE_RenderTargetID getRenderTargetID() const
+    {
+        return mRenderTarget;
+    }
     void travel(SE_ElementTravel* travel);
 	void setClickHandler(SE_ElementClickHandler* clickHandler)
 	{

@@ -157,6 +157,7 @@ University of Illinois, Urbana-Champaign.
 #include <stdlib.h>
 #include <string.h>
 
+module AP_MODULE_DECLARE_DATA lisp_module;
 /* Work out the version of the apache portable runtime (APR) we're
  * compiling against... with version 1.2.2 some of the interfaces
  * changed a bit. */

@@ -14,20 +14,19 @@ SE_StringID::~SE_StringID()
 }
 SE_StringID::SE_StringID()
 {
-    mType = SE_ASCII;
+    mType = SE_UTF8;
 }
 const char* SE_StringID::getStr() const
 {
     return mStr.c_str();
 }
-SE_StringID::SE_StringID(const char* id, ENCODING_TYPE t) : mType(SE_ASCII)
+SE_StringID::SE_StringID(const char* id, ENCODING_TYPE t) : mType(t)
 {
     if(!id)
 		return;
 	mStr = id;
-    mType = t;
 }
-SE_StringID::SE_StringID(const char* id, int size, ENCODING_TYPE t) : mType(SE_ASCII)
+SE_StringID::SE_StringID(const char* id, int size, ENCODING_TYPE t) : mType(t)
 {
     if(!id)
 		return;

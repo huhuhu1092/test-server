@@ -3967,7 +3967,7 @@ void SE_ResourceManager::loadSequence(const char* sequenceName)
 	SE_SequenceSet* ss = mImpl->mSequenceTable.getItem(SE_StringID(sequenceName));
 	if(ss)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + sequenceName;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + sequenceName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3987,7 +3987,7 @@ void SE_ResourceManager::loadStateTable(const char* stateTableURI)
     SE_StateMachineSet* sms = mImpl->mStateMachineTable.getItem(stateTableURI);
 	if(sms)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateTableURI;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + stateTableURI;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -4006,7 +4006,7 @@ void SE_ResourceManager::loadStateChangeTable(const char* stateChangeTableURI)
 	SE_StateChangeSet* scs = mImpl->mStateChangeTable.getItem(stateChangeTableURI);
 	if(scs)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateChangeTableURI;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + stateChangeTableURI;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -4024,7 +4024,7 @@ void SE_ResourceManager::loadColorEffectController(const char* colorEffectName)
 	SE_ColorEffectControllerSet* cs = mImpl->mColorEffectControllerTable.getItem(SE_StringID(colorEffectName));
 	if(cs)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + colorEffectName;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + colorEffectName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE)

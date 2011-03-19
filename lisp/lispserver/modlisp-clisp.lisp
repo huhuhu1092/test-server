@@ -28,7 +28,7 @@
 ;;; First part adapted from server.cl
 ;;;
 ;;;;;
-
+(load "cchessserver.lisp")
 (defvar *server-count* 0)	; used to name servers
 
 (defun make-socket-server (&key (name (format nil "socket server ~d "
@@ -149,19 +149,19 @@
        (read-sequence content *apache-socket*)
        (push (cons "posted-content" content) header))
      header))))
-(defun handle-login (login-content)
-  (if login-content
-      (progn (format t "~a" login-content) "handle login ok")
-      "handle login error: no login content"
-  )
-)
-(defun posted-content (command)
-  (cdr (assoc "posted-content" command :test #'string=)))
+
+;;(defun handle-login (login-content)
+;;  (if login-content
+;;      (progn (format t "~a" login-content) "handle login ok")
+;;      "handle login error: no login content"
+;;  )
+;;)
+;;(defun posted-content (command)
+;;  (cdr (assoc "posted-content" command :test #'string=)))
 (defun process-apache-command (command)
   (let* ((url-content (cdr (assoc "url" command :test #'string=)))
          (html (cond ((equal url-content "/cchess/fixed") (debug-table command))
-		             ((equal url-content "/cchess/login") (handle-login (posted-content command)))
-                     (t (fixed-html)) 
+		             (t (progn (format t "~a ~%" url-content) (handle-command url-content command))) 
                )
          )
         )

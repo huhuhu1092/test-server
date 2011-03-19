@@ -92,8 +92,10 @@ void SE_SceneManager::hide(const SE_SceneID& id)
 }
 void SE_SceneManager::dismiss(const SE_SceneID& id)
 {
-    mScenes.release(id);
+    SE_Scene* scene = mScenes.remove(id);
+    mScenes.release(scene);
     mStack.remove(id);
+    
 }
 void SE_SceneManager::render(SE_RenderManager& renderManager)
 {

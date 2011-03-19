@@ -5,66 +5,177 @@
 #include "SE_CChess.h"
 #include "SE_Time.h"
 #include "SE_Buffer.h"
-
+#include "SE_Utils.h"
+#include "SE_CChess.h"
 #include <string.h>
+#include <curl/curl.h>
+#include <stdio.h>
+#include <list>
+#include <string>
+static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+  //int written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    std::list<std::string>* dataList = (std::list<std::string> *)stream;
+  std::string str((char*)ptr, size * nmemb);
+  LOGI("## receive data = %s ####\n", str.c_str());
+  dataList->push_back(str);
+  return size * nmemb;
+}
+ 
 
-static const int MSG_HEADER_LEN = (sizeof(unsigned char) + sizeof(short int));
-
-SE_ChessGetNetMessage::SE_ChessGetNetMessage(SE_CChess* chessApp, SE_Application * app) : SE_Command(app)
+SE_ChessMessage::SE_ChessMessage(SE_CChess* chessApp, SE_Application * app, int messageid) : SE_Command(app)
 {
     mChessApp = chessApp;
+    mMessageID = messageid;
 }
-void SE_ChessGetNetMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+void SE_ChessMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-     //mChessApp->read();
-     SE_ChessGetNetMessage* msg = new SE_ChessGetNetMessage(mChessApp, mApp);
-     SE_Application::getInstance()->postCommand(msg);
-}
-////////////////////
-SE_ChessLoginRequest::SE_ChessLoginRequest(const std::string& name, const std::string& password)
-{
-    mName = name;
-    mPassword = password;
-}
-bool SE_ChessLoginRequest::pack(char*& output, int& len)
-{
-    int nameLen = mName.size();
-    int passwordLen = mPassword.size();
-    int dataLen = MSG_HEADER_LEN + sizeof(int) + sizeof(int) + nameLen + passwordLen;
-    char messageId = SE_CHESS_LOGIN;
-    SE_BufferOutput  ss(dataLen, true);
-    ss.writeByte(messageId);
-    ss.writeShort(dataLen);
-    ss.writeString(mName.c_str());
-    ss.writeString(mPassword.c_str());
-    len = dataLen;
-    output = new char[dataLen];
-    memcpy(output, ss.getData(), len);
-    return true;
-}
-bool SE_ChessLoginRequest::unpack(char* input, int len)
-{
-    return true;
-}
-
-SE_ChessLoginReply::SE_ChessLoginReply()
-{}
-bool SE_ChessLoginReply::unpack(char* input, int len)
-{
-    SE_BufferInput inputStream(input, len, true);
-    char msgid;
-    short int dataLen;
-    msgid = inputStream.readByte();
-    dataLen = inputStream.readShort();
-    short count = 0;
-    count = inputStream.readShort();
-    mUsers.resize(count);
-    for(size_t i = 0 ; i < count ; i++)
+    switch(mMessageID)
     {
-        std::string str = inputStream.readString();
-        mUsers[i] = str;
-        LOGI("%s\n", str.c_str());
-    }
-    return true;
-}
+    case SE_CHESS_LOGIN:
+        {
+            STATUS s = login();
+            //mChessApp->addUser("aaaaa");
+            //mChessApp->addUser("bbbb");
+            //mChessApp->setGameState(SE_CChess::LOGIN);
 
+        }
+        break;
+    case SE_CHESS_START:
+        {
+            STATUS s = startGame();
+        }
+        break;
+    case SE_CHESS_GETMESSAGE:
+        {
+           STATUS s =  getMessage();
+        }
+        break;
+    }
+}
+SE_ChessMessage::STATUS SE_ChessMessage::startGame()
+{
+    CURL* curl;
+    CURLcode res;
+    std::list<std::string> headerList;
+    std::list<std::string> bodyList;
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+    if(curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, "http://222.130.194.65/cchess/start");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "aa bb");
+		  /* no progress meter please */ 
+	    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+		 
+		  /* send all data to this function  */ 
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, &headerList);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyList);
+
+        res = curl_easy_perform(curl);
+        if(CURLE_OK == res)
+        {
+            LOGI("###### start ok #######\n");
+            SE_ASSERT(bodyList.size() == 1);
+            std::string body = *bodyList.begin();
+            SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
+            for(int i = 0 ; i < strList.size() ; i++)
+            {
+                LOGI("%s\n", strList[i].c_str());
+            }
+            if(strList[1] == "red")
+            {
+                mChessApp->setColor(SE_CChess::RED, SE_CChess::BLACK);
+            }
+            else
+            {
+                mChessApp->setColor(SE_CChess::BLACK, SE_CChess::RED);
+            }
+            mChessApp->setGameState(SE_CChess::RUN);
+        }
+        curl_easy_cleanup(curl);
+   } 
+   return SE_OK;
+    
+}
+SE_ChessMessage::STATUS SE_ChessMessage::getMessage()
+{
+    CURL* curl;
+    CURLcode res;
+    std::list<std::string> headerList;
+    std::list<std::string> bodyList;
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+    if(curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, "http://222.130.194.65/cchess/getmessage");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "aa getuser");
+		  /* no progress meter please */ 
+	    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+		 
+		  /* send all data to this function  */ 
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, &headerList);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyList);
+
+        res = curl_easy_perform(curl);
+        if(CURLE_OK == res)
+        {
+            LOGI("###### getuser ok #######\n");
+            SE_ASSERT(bodyList.size() == 1);
+            std::string body = *bodyList.begin();
+            SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
+            mChessApp->clearUser();
+            for(int i = 0 ; i < strList.size() ; i++)
+            {
+                LOGI("%s\n", strList[i].c_str());
+                mChessApp->addUser(strList[i]);
+            }
+            //mChessApp->setGameState(SE_CChess::LOGIN);
+            mChessApp->update();
+        }
+        curl_easy_cleanup(curl);
+   } 
+   return SE_OK;
+
+}
+SE_ChessMessage::STATUS SE_ChessMessage::login()
+{
+    CURL* curl;
+    CURLcode res;
+    std::list<std::string> headerList;
+    std::list<std::string> bodyList;
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+    if(curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, "http://222.130.194.65/cchess/login");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "aa aa");
+		  /* no progress meter please */ 
+	    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+		 
+		  /* send all data to this function  */ 
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+        curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, &headerList);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyList);
+
+        res = curl_easy_perform(curl);
+        if(CURLE_OK == res)
+        {
+            LOGI("###### login ok #######\n");
+            SE_ASSERT(bodyList.size() == 1);
+            std::string body = *bodyList.begin();
+            SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
+            for(int i = 0 ; i < strList.size() ; i++)
+            {
+                LOGI("%s\n", strList[i].c_str());
+                mChessApp->addUser(strList[i]);
+            }
+            mChessApp->setGameState(SE_CChess::LOGIN);
+            //mChessApp->update();
+        }
+        curl_easy_cleanup(curl);
+   } 
+   return SE_OK;
+}

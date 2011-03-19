@@ -3,44 +3,26 @@
 #include "SE_ImageData.h"
 #include "SE_Log.h"
 #include <string.h>
-#if defined(WIN32)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-    #include <windows.h>
-    #include <IL/il.h>
-    #include <IL/ilu.h>
-#elif defined(ANDROID)
+
+#if defined(ANDROID)
     #include <SkBitmap.h>
     #include <SkCanvas.h>
     #include <SkString.h>
     #include <SkImageDecoder.h>
     #include <SkStream.h>
+#else
+    #if defined(WIN32)
+        #include <windows.h>
+    #endif
+#include <IL/il.h>
+#include <IL/ilu.h>
 #endif
 
 SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
 {
     int width = 0, height = 0, bpp = 0;
     unsigned char* src = NULL;
-#if defined(WIN32)
-    ILuint	imgId;
-    ilInit();
-    iluInit();
-    ilGenImages(1, &imgId);
-    ilBindImage(imgId);
-
-    wchar_t fileWideChar[512];
-	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
-	MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);
-    if(!ilLoadImage(fileWideChar))
-    {
-        return NULL;
-    }
-    width = ilGetInteger(IL_IMAGE_WIDTH);
-    height = ilGetInteger(IL_IMAGE_HEIGHT);
-    bpp = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
-    src = ilGetData();
-#elif defined(ANDROID)
+#if defined(ANDROID)
     SkFILEStream fileStream(filePath);
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
@@ -72,6 +54,31 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
         delete bitmap;
         return NULL;
     }
+#else
+    ILuint	imgId;
+    ilInit();
+    ilGenImages(1, &imgId);
+    ilBindImage(imgId);
+
+#if defined(WIN32)
+    wchar_t fileWideChar[512];
+	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
+	MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);
+    if(!ilLoadImage(fileWideChar))
+    {
+        return NULL;
+    }
+#else
+    if(!ilLoadImage(filePath))
+    {
+        return NULL;
+    }
+#endif
+    width = ilGetInteger(IL_IMAGE_WIDTH);
+    height = ilGetInteger(IL_IMAGE_HEIGHT);
+    bpp = ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
+    src = ilGetData();
+
 #endif
     int pixelSize = bpp / 8;
     unsigned char* dst = new unsigned char[width * height * pixelSize];

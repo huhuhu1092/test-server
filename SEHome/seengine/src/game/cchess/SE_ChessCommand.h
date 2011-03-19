@@ -6,43 +6,20 @@
 #include "SE_Time.h"
 class SE_Application;
 class SE_CChess;
-#define SE_CHESS_LOGIN 1
-class SE_ChessGetNetMessage : public SE_Command
+
+class SE_ChessMessage : public SE_Command
 {
 public:
-    SE_ChessGetNetMessage(SE_CChess* chessApp, SE_Application * app);
+    enum {SE_CHESS_LOGIN, SE_CHESS_GETMESSAGE, SE_CHESS_START};
+    enum STATUS {SE_OK, SE_ERROR};
+    SE_ChessMessage(SE_CChess* chessApp, SE_Application * app, int messageid);
     void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 private:
+    STATUS login();
+    STATUS getMessage();
+    STATUS startGame();
+private:
     SE_CChess* mChessApp;
-};
-class SE_ChessLoginRequest
-{
-public:
-    SE_ChessLoginRequest(const std::string& name, const std::string& password);
-    //pack mName and mPassword to a char stream.
-    // output is the char stream, len is the length of this char stream
-    //if return value is false output is NULL and len is 0
-    bool pack(char*& output, int& len);
-    //unpack will create mName and mPassword from input char stream;
-    bool unpack(char* input, int len);
-private:
-    std::string mName;
-    std::string mPassword;
-};
-class SE_ChessLoginReply
-{
-public:
-    SE_ChessLoginReply();
-    bool unpack(char* input, int len);
-private:
-    std::vector<std::string> mUsers;
-};
-class SE_ChessPlayWithRequest
-{
-public:
-    SE_ChessPlayWithRequest(const std::string opponent);
-    bool pack(char* output, int& len);
-private:
-    std::string mOpp;
+    int mMessageID;
 };
 #endif
