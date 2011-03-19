@@ -158,7 +158,10 @@ jint se_getMessageItemType(JNIEnv* env, jobject clazz, jint messageIndex, jint i
     SE_Struct* structData = msg->data;
     SE_StructItem* item = structData->getStructItem(itemIndex);
     SE_Value di = item->getDataItem(0);
-    return di.getType();
+    if(di.getType() == SE_Value::ASCII_T || di.getType() == SE_Value::UTF8_T || di.getType() == SE_Value::UNICODE_T || di.getType() == SE_Value::VIRTUALDATA_T)
+        return 8;
+    else
+        return di.getType();
 }
 jint se_getByteMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, jint itemIndex)
 {
@@ -232,6 +235,7 @@ static JNINativeMethod methods[] = {
   {"getMessageNum", "()I", (void*)se_getMessageNum},
   {"getMessageType", "(I)I", (void*)se_getMessageType},
   {"getMessageItemNum", "(I)I", (void*)se_getMessageItemNum},
+  {"getMessageItemType", "(II)I", (void*)se_getMessageItemType},
   {"getByteMessageItem", "(II)I", (void*)se_getByteMessageItem},
   {"getShortMessageItem", "(II)I", (void*)se_getShortMessageItem}, 
   {"getIntMessageItem", "(II)I", (void*)se_getIntMessageItem},

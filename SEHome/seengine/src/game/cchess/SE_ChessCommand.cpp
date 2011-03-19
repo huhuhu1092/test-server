@@ -7,11 +7,16 @@
 #include "SE_Buffer.h"
 #include "SE_Utils.h"
 #include "SE_CChess.h"
+#include "SE_Message.h"
+#include "SE_MessageEventCommandDefine.h"
 #include <string.h>
-#include <curl/curl.h>
 #include <stdio.h>
 #include <list>
 #include <string>
+#if defined(ANDROID)
+#else
+#include <curl/curl.h>
+#endif
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   //int written = fwrite(ptr, size, nmemb, (FILE *)stream);
@@ -142,6 +147,19 @@ SE_ChessMessage::STATUS SE_ChessMessage::getMessage()
 }
 SE_ChessMessage::STATUS SE_ChessMessage::login()
 {
+#if defined(ANDROID)
+    SE_Message* msg = new SE_Message;
+    msg->type = SE_GAME_COMMAND;
+    SE_Struct* gs = new SE_Struct(1) ;
+    SE_StructItem* sitem = new SE_StructItem(1);
+    SE_StdString* stdString = new SE_StdString;
+    stdString->data = "login";
+    sitem->setDataItem(stdString);
+    gs->setStructItem(0, sitem);
+    msg->data = gs;
+    SE_Application::getInstance()->sendMessage(msg);
+#else
+
     CURL* curl;
     CURLcode res;
     std::list<std::string> headerList;
@@ -177,5 +195,6 @@ SE_ChessMessage::STATUS SE_ChessMessage::login()
         }
         curl_easy_cleanup(curl);
    } 
+#endif
    return SE_OK;
 }
