@@ -19,7 +19,7 @@ public:
     enum STATE {DEAD, ALIVE};
     enum {CAN_MOVE, CANNOT_MOVE};
 	enum COLOR {INVALID_COLOR = -1, RED = 0, BLACK = 1, COLOR_NUM = 2};
-    enum GAME_STATE {START, LOGIN, RUN, LOGOUT};
+    enum GAME_STATE {START, LOGIN, RUN, MOVE, LOGOUT};
     SE_CChess(float boardx, float boardy, float unitw, float unith, COLOR selfc , COLOR oppc);
     void start();
     void loadBoard();
@@ -113,6 +113,7 @@ public:
 		r.newposition = mDstMove;
 		return r;
 	}
+    void move(int srcrow, int srccol, int dstrow, int dstcol);
     void step(_ChessPieces cp, const SE_Rect<float>& rect);
     //_ChessPieces getChessPiecesInfoByName(const char* name);
     //SE_StringID getChessPiecesName(const _ChessPieces& cp);
@@ -145,6 +146,13 @@ public:
     std::string getLastStep()
     {
         return mLastStep;
+    }
+    std::string getColorString()
+    {
+        if(mPlayerColor[SELF] == RED)
+            return "red";
+        else 
+            return "black";
     }
 public:
 	//for debug; don't use it for other use

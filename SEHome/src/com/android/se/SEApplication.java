@@ -31,7 +31,12 @@ public class SEApplication
 	public static final int KEY_9 = 17;
 	public static final int KEY_0 = 18;
 	public static final int KEY_NUM = 19;
-
+    public static final int SE_INVALID = 0;
+    public static final int SE_CHAR_T = 1;
+    public static final int SE_SHORT_T = 3;
+    public static final int SE_INT_T = 5;
+    public static final int SE_FLOAT_T = 7;
+    public static final int SE_STRING_T = 8;
     static 
     {
         System.loadLibrary("cse");
@@ -57,7 +62,10 @@ public class SEApplication
     public native int getIntMessageItem(int messageIndex,int itemIndex);
     public native float getFloatMessageItem(int messageIndex,int itemIndex);
     public native String getStringMessageItem(int messageIndex,int itemIndex);
-    
+    public native void runCommand1(String command, String arg1);
+    public native void runCommand2(String command, String arg1, String arg2);
+    public native void runCommand3(String command, String arg1, String arg2, String arg3); 
+
     public native void releaseMessage();
     public native void runOneFrame();
 }

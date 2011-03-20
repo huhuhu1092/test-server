@@ -1,7 +1,9 @@
 #ifndef SE_FUNCTIONDICT_H
 #define SE_FUNCTIONDICT_H
-#include "SE_ParamList.h"
-typedef void (*INTERFACE_FUNC)(SE_ParamList& paramList);
+#include <vector>
+#include <string>
+#include <map>
+typedef void (*INTERFACE_FUNC)(std::vector<std::string>);
 class SE_FunctionDict
 {
 public:

@@ -15,11 +15,12 @@
 #include "SE_Struct.h"
 #include "SE_2DCommand.h"
 #include "SE_CChess.h"
+#include "SE_FunctionDict.h"
+#include "SE_ChessInterface.h"
 #define LOG_TAG "SEJNI"
 //namespace android {
 
 static SE_Application* gApp = NULL;
-static SE_CChess* mChessApp = NULL;
 static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstring datapath, jstring scenename)
 {
     LOGI("## init command ###");
@@ -28,15 +29,18 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstr
         LOGI("## gApp is not null ###");
         return;
     }
-    if(mChessApp == NULL)
-    {
-        mChessApp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
-    }
+    SE_CChess* chessApp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
+    chessApp->setUserName("bb");
+    chessApp->setPassword("bb");
     gApp = SE_Application::getInstance();
+    gApp->addGame("cchess", chessApp);
     SE_Application::SE_APPID appid;
     appid.first = userid0;
     appid.second = userid1;
     gApp->setAppID(appid);
+    SE_FunctionDict* funcDict = gApp->getFunctionDict();
+    funcDict->addFunction("login", SE_Chess_AddUser);
+    funcDict->addFunction("start", SE_Chess_Start);
     gApp->start();
     SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
     gApp->registerCommandFactory("SystemCommand", sf);
@@ -46,7 +50,7 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstr
     const char* scene8 = env->GetStringUTFChars(scenename, NULL);
 	c->dataPath = datapath8;
 	c->sceneName = scene8;
-    c->chessApp = mChessApp;
+    c->chessApp = chessApp;
 	c->left = 0;
 	c->top = 0;
 	c->width = 480;
@@ -218,6 +222,59 @@ jstring se_getStringMessageItem(JNIEnv* env, jobject clazz, jint messageIndex, j
     android::String16 s16(str);
     return env->NewString((const jchar*)s16.string(), s16.size());
 }
+void se_runCommand1(JNIEnv* env, jobject clazz, jstring command, jstring arg1)
+{
+    const char* commandChar8 = env->GetStringUTFChars(command, NULL);
+    const char* argChar8 = env->GetStringUTFChars(arg1, NULL);
+    LOGI("## runCommand1 %s , %s ##", commandChar8, argChar8);
+    std::vector<std::string> args(1);
+    args[0] = argChar8;
+    SE_FunctionDict* funDict = SE_Application::getInstance()->getFunctionDict();
+    INTERFACE_FUNC fn = funDict->find(commandChar8);
+    if(fn)
+    {
+        (*fn)(args);
+    } 
+
+}
+void se_runCommand2(JNIEnv* env, jobject clazz, jstring command, jstring arg1, jstring arg2)
+{
+    const char* commandChar8 = env->GetStringUTFChars(command, NULL);
+    const char* arg1Char8 = env->GetStringUTFChars(arg1, NULL);
+    const char* arg2Char8 = env->GetStringUTFChars(arg2, NULL);
+    LOGI("## runCommand2 %s , %s , %s##", commandChar8, arg1Char8, arg2Char8);
+    std::vector<std::string> args(2);
+    args[0] = arg1Char8;
+    args[1] = arg2Char8;
+    SE_FunctionDict* funDict = SE_Application::getInstance()->getFunctionDict();
+    INTERFACE_FUNC fn = funDict->find(commandChar8);
+    if(fn)
+    {
+        (*fn)(args);
+    } 
+
+}
+void se_runCommand3(JNIEnv* env, jobject clazz, jstring command, jstring arg1, jstring arg2, jstring arg3)
+{
+    const char* commandChar8 = env->GetStringUTFChars(command, NULL);
+    const char* arg1Char8 = env->GetStringUTFChars(arg1, NULL);
+    const char* arg2Char8 = env->GetStringUTFChars(arg2, NULL);
+    const char* arg3Char8 = env->GetStringUTFChars(arg2, NULL);
+
+    LOGI("## runCommand3 %s , %s , %s##", commandChar8, arg1Char8, arg2Char8, arg3Char8);
+    std::vector<std::string> args(3);
+    args[0] = arg1Char8;
+    args[1] = arg2Char8;
+    args[2] = arg3Char8;
+    SE_FunctionDict* funDict = SE_Application::getInstance()->getFunctionDict();
+    INTERFACE_FUNC fn = funDict->find(commandChar8);
+    if(fn)
+    {
+        (*fn)(args);
+    } 
+
+}
+
 void se_releaseMessage(JNIEnv* env, jobject clazz)
 {
     gApp->releaseMessage();
@@ -241,6 +298,9 @@ static JNINativeMethod methods[] = {
   {"getIntMessageItem", "(II)I", (void*)se_getIntMessageItem},
   {"getFloatMessageItem", "(II)F", (void*)se_getFloatMessageItem},
   {"getStringMessageItem", "(II)Ljava/lang/String;", (void*)se_getStringMessageItem},
+  {"runCommand1", "(Ljava/lang/String;Ljava/lang/String;)V", (void*)se_runCommand1},
+  {"runCommand2", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", (void*)se_runCommand2},
+  {"runCommand3", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", (void*)se_runCommand3},
   {"releaseMessage", "()V", (void*)se_releaseMessage},
   {"runOneFrame", "()V", (void*)se_runOneFrame},
 };

@@ -210,9 +210,10 @@ bool SE_LoginElementClickHandler::handle(SE_Element* element)
     else if(mChessApp->isUser(element->getName()))
     {
         LOGI("### element name = %s ####\n", element->getName().getStr());
-        if(element->getName() == "bb")
+        if(element->getName() != mChessApp->getUserName().c_str())
         {
             SE_ChessMessage* m = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_START);
+            m->mOpponentName = element->getName().getStr();
             SE_Application::getInstance()->postCommand(m);
         }
 
@@ -340,6 +341,9 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 				mPointedElement->setMountPoint(result.newposition.x, result.newposition.y);
 				mPointedElement->layout();
 				mPointedElement->updateSpatial(false);
+                mChessApp->setGameState(SE_CChess::MOVE);
+                SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_MOVE);
+                SE_Application::getInstance()->postCommand(msg);
 			}
 			mPointedElement = NULL;
 			mPointedElementPrev = NULL;
@@ -1094,6 +1098,48 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height, bool
 	mSceneID = sceneID;
 
 }
+void SE_CChess::move(int srcrow, int srccol, int dstrow, int dstcol)
+{
+    if(!mWait)
+        return;
+    _BoardUnitData srcUnitData = mBoardData[srcrow][srccol];
+    _BoardUnitData dstUnitData = mBoardData[dstrow][dstcol];
+    _ChessPieces cp = srcUnitData.cp;
+    (this->*mChessPieceHandler[cp.cp])(srcUnitData, dstUnitData);
+    mWait = false;
+	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	SE_Scene* scene = sceneManager->get(getSceneID());
+	SE_ASSERT(scene);
+    std::string srcElementName = getNameByChessPieces(cp);
+    SE_2DNodeElement* pointedElement = (SE_2DNodeElement*)scene->findByName(srcElementName.c_str());
+	SE_CChess::_Result result = getResult();
+	if(result.action == SE_CChess::CANNOT_MOVE)
+	{
+        return;
+	}
+	else
+	{
+		SE_CChess::_ChessPiecesData* removedChess = result.removed;
+		if(removedChess)
+		{
+			SE_CChess::_ChessPieces cp = removedChess->cp;
+			std::string elementName = getNameByChessPieces(cp);
+			SE_Element* element = scene->findByName(elementName.c_str());
+			if(element)
+			{
+				SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+				elementManager->remove(element->getID());
+				elementManager->release(element);
+			}
+		}
+		SE_Vector2f v = getBoardUnitBound();
+		pointedElement->setMountPoint(result.newposition.x, result.newposition.y);
+		pointedElement->layout();
+		pointedElement->updateSpatial(false);
+    }
+
+
+}
 void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
 {
     _ChessPiecesData cpd = mChessPiecesData[cp.color][cp.cp];
@@ -1104,15 +1150,20 @@ void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
     }
     _BoardUnitData dst = getBoardUnitData(rect);
     _BoardUnitData src = mBoardData[cpd.row][cpd.col];
+    int srcrow = src.row;
+    int srccol = src.col;
+    int dstrow = dst.row;
+    int dstcol = dst.col;
 	(this->*mChessPieceHandler[cp.cp])(src, dst);
     if(mAction == CAN_MOVE)
     {
         mWait = true;
-        char buf[5];
-        memset(buf, 0, 5);
-        snprintf(buf, 4, "%d%d%d%d", src.row, src.col, dst.row, dst.col);
+        char buf[512];
+        memset(buf, 0, 512);
+        LOGI("#3# src row = %d, src col = %d, dst row = %d , dst col = %d #\n", srcrow, srccol, dstrow, dstcol);
+        snprintf(buf, 511, "%d%d%d%d", srcrow, srccol, dstrow, dstcol);
         mLastStep = buf;
-        LOGI("### last step = %s ####\n", mLastStep);
+        LOGI("### last step = %s ####\n", mLastStep.c_str());
     }
 }
 SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rect)
@@ -1228,7 +1279,6 @@ void SE_CChess::setGameState(GAME_STATE gs)
 }
 bool SE_CChess::isUser(const SE_StringID& usr)
 {
-    /*
     _UserList::iterator it;
     for(it = mUsers.begin() ; it != mUsers.end() ; it++)
     {
@@ -1239,7 +1289,6 @@ bool SE_CChess::isUser(const SE_StringID& usr)
         return true;
     else
         return false;
-        */
     /*
     _UserList::iterator it = find(mUsers.begin(), mUsers.end(), std::string(usr.getStr()));
     if(it != mUsers.end())
@@ -1279,6 +1328,11 @@ void SE_CChess::update()
     case LOGOUT:
         break;
     case START:
+        break;
+    case MOVE:
+        {
+
+        }
         break;
     }
 

@@ -98,6 +98,8 @@ bool SEDemo::InitApplication()
 	SE_Application::getInstance()->setAppID(appid);
     
 	SE_CChess* chessapp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
+    chessapp->setUserName("aa");
+    chessapp->setPassword("aa");
     SE_Application::getInstance()->addGame("cchess", chessapp);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);

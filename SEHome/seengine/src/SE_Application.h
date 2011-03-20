@@ -25,6 +25,7 @@ class SE_SpatialManager;
 class SE_FontManager;
 class SE_DelayDestroy;
 class SE_Game;
+class SE_FunctionDict;
 class SE_Application
 {
 public:
@@ -75,6 +76,10 @@ public:
         mState = s;
     }
     SE_CommonID createCommonID();
+    SE_FunctionDict* getFunctionDict()
+    {
+        return mFunctionDict;
+    }
     SE_ResourceManager* getResourceManager()
 	{
 		return mResourceManager;
@@ -217,6 +222,7 @@ protected:
 	SE_ParamManager* mParamManager;
 	SE_SpatialManager* mSpatialManager;
 	SE_FontManager* mFontManager;
+    SE_FunctionDict* mFunctionDict;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

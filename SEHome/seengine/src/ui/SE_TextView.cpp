@@ -42,11 +42,11 @@ void SE_CharView::setImageData(SE_Primitive* primitive)
 }
 void SE_CharView::setSurface(SE_Surface* surface)
 {
-    SE_ColorExtractShaderProperty* sp = new SE_ColorExtractShaderProperty;
-    sp->setColorOperationMode(16);
-	surface->setShaderProperty(sp);
-    surface->setProgramDataID(COLOREXTRACT_SHADER);
-	surface->setRendererID(COLOREXTRACT_RENDERER);
+    //SE_ColorExtractShaderProperty* sp = new SE_ColorExtractShaderProperty;
+    //sp->setColorOperationMode(16);
+	//surface->setShaderProperty(sp);
+    surface->setProgramDataID(DEFAULT_SHADER);
+	surface->setRendererID(DEFAULT_RENDERER);
 }
 void SE_CharView::layout()
 {}

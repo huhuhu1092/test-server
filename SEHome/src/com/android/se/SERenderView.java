@@ -21,6 +21,19 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import com.android.se.SEApplication;
+import com.android.se.SEMessageContent;
+import android.net.http.AndroidHttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpHost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.StringEntity;
+import java.io.*;
+
 public class SERenderView extends GLSurfaceView
 {
     private static final String TAG = "SERenderView";
@@ -30,18 +43,18 @@ public class SERenderView extends GLSurfaceView
     private MessageHandler mMsgHandler;
     public interface MessageHandler
     {
-        void handle(String msg);
+        void handle(SEMessageContent msg);
     }
     private class H extends Handler
     {
         public static final int MSG_NAME = 0;
         public void handleMessage(Message msg) 
         {
-            String str;
+            SEMessageContent str;
             switch (msg.what) 
             {
             case MSG_NAME:
-                str = (String)msg.obj;
+                str = (SEMessageContent)msg.obj;
                 if(mMsgHandler != null)
                     mMsgHandler.handle(str);
                 break;
@@ -162,6 +175,50 @@ public class SERenderView extends GLSurfaceView
 
         }
     }
+    void login()
+    {
+         try {
+                AndroidHttpClient androidHttpClient = AndroidHttpClient.newInstance("Opera/9.26");
+                //HttpHost targetHost = new HttpHost("wap.qidian.cn", 80);
+                HttpHost proxy = new HttpHost("10.0.0.172", 80);
+                androidHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                HttpPost httpGet = new HttpPost("http://222.130.193.248/cchess/login");
+                StringEntity sentity = new StringEntity("bb bb");
+                httpGet.setEntity(sentity);
+                HttpResponse response = androidHttpClient.execute(httpGet);
+                if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+                {
+                    Log.i(TAG, "## get error ##");
+                }
+                else
+                {
+                    Log.i(TAG, "## get Ok ##");
+                    Header[] httpHeader = response.getAllHeaders();
+                    for(Header hd : httpHeader)
+                    {
+                        String n = hd.getName();
+                        String v = hd.getValue();
+                        Log.i(TAG, "#### " + n + " = " + v + " ###");
+                    }
+                    HttpEntity httpEntity = response.getEntity();
+                    int contentSize = (int)httpEntity.getContentLength();
+                    Log.i(TAG, "### content size = " + contentSize + " ######");
+                    byte[] content = new byte[contentSize];
+                    InputStream inputStream = httpEntity.getContent();
+                    inputStream.read(content, 0, contentSize);
+                    String str = new String(content);
+                    Log.i(TAG, "###########################");
+                    Log.i(TAG, str);
+                    Log.i(TAG, "###########################");
+                }
+                androidHttpClient.close();
+         }
+         catch(Exception e)
+         {
+             Log.i(TAG, "## exception e = " + e);
+         }
+
+    }
     private class Renderer implements GLSurfaceView.Renderer
     {
         private boolean mInit = false;
@@ -195,11 +252,82 @@ public class SERenderView extends GLSurfaceView
             }
             mApp.runOneFrame();
             int resSize = mApp.getMessageNum();
-            //Log.d(TAGR, TAGF + " message num = " + resSize);
+            //Log.d(TAG, " message num = " + resSize);
             
             if (resSize > 0) 
             {
+                for(int i = 0 ; i < resSize ; i++)
+                {
+                    int t = mApp.getMessageType(i);
+                    if(t == 5)
+                    {
+                        Log.i(TAG, "### get login messsage ####");
+                        int itemNum = mApp.getMessageItemNum(i);
+                        if(itemNum > 0)
+                        {
+                            int itemType = mApp.getMessageItemType(i, 0);
+                            if(itemType == SEApplication.SE_STRING_T)
+                            {
+                                String str = mApp.getStringMessageItem(i, 0);
+                                if(str.equals("login"))
+                                {
+                                    String username = mApp.getStringMessageItem(i, 1);
+                                    String pwd = mApp.getStringMessageItem(i, 2);
+                                    Log.i(TAG, username + " login " + pwd);
+                                    SEMessageContent messageContent = new SEMessageContent();
+                                    messageContent.command = str;
+                                    messageContent.arg1 = username;
+                                    messageContent.arg2 = pwd;
+                                    Message msg = mH.obtainMessage(mH.MSG_NAME, messageContent);
+                                    mH.sendMessage(msg);
 
+                                }
+                                else if(str.equals("start"))
+                                {
+                                    String user = mApp.getStringMessageItem(i, 1);
+                                    String opp = mApp.getStringMessageItem(i, 2);
+                                    Log.i(TAG, user + " start  " + opp);
+                                    SEMessageContent messageContent  = new SEMessageContent();
+                                    messageContent.command = str;
+                                    messageContent.arg1 = user;
+                                    messageContent.arg2 = opp;
+                                    Message msg = mH.obtainMessage(mH.MSG_NAME, messageContent);
+                                    mH.sendMessage(msg);
+                                }
+                                else if(str.equals("move"))
+                                {
+                                    String session = mApp.getStringMessageItem(i, 1);
+                                    String color = mApp.getStringMessageItem(i, 2);
+                                    String movestep = mApp.getStringMessageItem(i, 3);
+                                    Log.i(TAG, session + " : " + color + " : " + movestep);
+                                    SEMessageContent messageContent = new SEMessageContent();
+                                    messageContent.command = "move";
+                                    messageContent.arg1 = session;
+                                    messageContent.arg2 = color;
+                                    messageContent.arg3 = movestep;
+                                    Message msg = mH.obtainMessage(mH.MSG_NAME, messageContent);
+                                    mH.sendMessage(msg);
+                                }
+                            }
+                        }
+                        /*
+                        for(int j = 0  ; j < itemNum ;j++)
+                        {
+                            int itemType = mApp.getMessageItemType(i, j);
+                            switch(itemType)
+                            {
+                            case SEApplication.SE_STRING_T:
+                                {
+                                    String str = mApp.getStringMessageItem(i, j);
+                                    Message msg = mH.obtainMessage(mH.MSG_NAME, str);
+                                    mH.sendMessage(msg);
+                                }
+                                break;
+                            }
+                        }
+                        */
+                    }
+                }
             }
             mApp.releaseMessage();
         }
@@ -213,7 +341,7 @@ public class SERenderView extends GLSurfaceView
         setEGLContextFactory(new SEContextFactory());
         setEGLWindowSurfaceFactory(new SESurfaceFactory());
         setRenderer(mRender);
-        setRenderMode(RENDERMODE_WHEN_DIRTY);
+        //setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
     public void setMessageHandler(MessageHandler h)
     {
