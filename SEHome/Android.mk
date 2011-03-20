@@ -118,10 +118,6 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_MessageEventCommandDefine.cpp \
 				./SE_MotionEventCamera.cpp \
 				./2D/SE_MountPoint.cpp \
-				./network/SE_NetAddress.cpp \
-				./network/SE_Socket.cpp \
-				./network/SE_Mutex.cpp \
-				./network/SE_MessageStream.cpp \
 				./SE_Object.cpp \
 				./SE_ObjectManager.cpp \
 				./SE_ParamManager.cpp \
@@ -166,6 +162,8 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_Utils.cpp \
 				./SE_Value.cpp \
 				./SE_Vector.cpp \
+				./SE_FunctionDict.cpp \
+				./game/cchess/SE_ChessInterface.cpp \
 				./ui/SE_Widget.cpp \
 				./SE_XmlHandler.cpp \
 				./tinyxml/tinystr.cpp \
