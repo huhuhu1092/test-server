@@ -26,6 +26,7 @@
 #include "SE_SpatialManager.h"
 #include "SE_ElementManager.h"
 #include "SE_CChess.h"
+#include "SE_Remote.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -100,6 +101,11 @@ bool SEDemo::InitApplication()
 	SE_CChess* chessapp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
     chessapp->setUserName("aa");
     chessapp->setPassword("aa");
+	SE_Remote remoteInfo;
+	remoteInfo.setServerIP("192.168.5.102");
+	remoteInfo.setServerPort(80);
+	remoteInfo.setNetwork(true, false, false);
+	chessapp->setRemote(remoteInfo);
     SE_Application::getInstance()->addGame("cchess", chessapp);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);

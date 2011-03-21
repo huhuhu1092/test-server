@@ -5,6 +5,7 @@
 #include "SE_Command.h"
 #include "SE_Message.h"
 #include "SE_DelayDestroy.h"
+#include "SE_Mutex.h"
 #include <list>
 #include <string>
 #include <vector>
@@ -228,6 +229,7 @@ protected:
     SE_TimeMS mStartTime;
     SE_TimeMS mPrevTime;
     SE_CommandList mCommandList;
+	SE_Mutex mCommandListMutex;
     SE_CommandFactoryList mCommandFactoryList;
     SE_DelayDestroyList mDelayDestroyList;
     bool mStarted;

@@ -1,9 +1,9 @@
 #ifndef SE_MUTEX_H
 #define SE_MUTEX_H
-#include "SE_Utils.h"
 #include "SE_Common.h"
-#include <memory>
-using namespace std;
+#if defined(SE_HAS_MUTEX)
+#include <pthread.h>
+#endif
 class SE_Mutex
 {
 public:
@@ -14,9 +14,9 @@ public:
 private:
     SE_DECLARE_NONECOPY(SE_Mutex);
 private:
-    class SE_MutexImpl;
-    SE_MutexImpl* mImpl;
-    //auto_ptr<SMutexImpl> mImpl;
+#if defined(SE_HAS_MUTEX)
+    pthread_mutex_t mMutex;
+#endif
 };
 class SE_AutoMutex
 {

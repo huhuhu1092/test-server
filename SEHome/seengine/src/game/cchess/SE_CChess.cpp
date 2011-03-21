@@ -17,6 +17,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <pthread.h>
 ///////////////////////////////////////
 static std::map<std::string, SE_CChess::_ChessPieces> nameChessPiecesMap;
 static void initNameChessPiecesMap()
@@ -1161,7 +1162,11 @@ void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
         char buf[512];
         memset(buf, 0, 512);
         LOGI("#3# src row = %d, src col = %d, dst row = %d , dst col = %d #\n", srcrow, srccol, dstrow, dstcol);
+#if defined(WIN32)
+        _snprintf(buf, 511, "%d%d%d%d", srcrow, srccol, dstrow, dstcol);
+#else
         snprintf(buf, 511, "%d%d%d%d", srcrow, srccol, dstrow, dstcol);
+#endif
         mLastStep = buf;
         LOGI("### last step = %s ####\n", mLastStep.c_str());
     }

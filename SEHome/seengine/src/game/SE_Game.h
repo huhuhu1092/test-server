@@ -1,6 +1,7 @@
 #ifndef SE_GAME_H
 #define SE_GAME_H
 #include <string>
+#include "SE_Remote.h"
 class SE_Game
 {
 public:
@@ -30,9 +31,18 @@ public:
     {
         mSessionName = str;
     }
+    void setRemote(const SE_Remote& remote)
+    {
+        mRemote =remote;
+    }
+    SE_Remote getRemote() const
+    {
+        return mRemote;
+    }
 private:
     std::string mName;
     std::string mPassword;
     std::string mSessionName;
+    SE_Remote mRemote;
 };
 #endif

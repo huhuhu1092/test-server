@@ -214,25 +214,8 @@ private:
 */
 void SE_Application::postCommand(SE_Command* command)
 {
+	SE_AutoMutex m(&mCommandListMutex);
     mCommandList.push_back(command);
-    /*
-    if(mCommandList.empty())
-    {
-        mCommandList.push_back(cw);
-    }
-    else
-    {
-        SE_ComandList::iterator it = find_if(mCommandList.begin(), mCommandList.end(), isPriorityLessThan(command->priority()));
-        if(it != mCommandList.end())
-        {
-            mCommandList.insert(it, cw);
-        }
-        else
-        {
-            mCommandList.push_back(cw);
-        }
-    }
-    */
 }
 void SE_Application::setUpEnv()
 {}
@@ -246,8 +229,10 @@ bool SE_Application::isRemoved(const _CommandWrapper& c)
 void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_CommandList::iterator it;
+	mCommandListMutex.lock();
     SE_CommandList tmpList = mCommandList;
     mCommandList.clear();
+	mCommandListMutex.unlock();
     for(it = tmpList.begin(); it != tmpList.end(); )
     {
         SE_Command* c = *it;
@@ -256,12 +241,6 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
             c->handle(realDelta, simulateDelta);
             delete c;
             tmpList.erase(it++);
-			/*
-            if(it == tmpList.end())
-                break;
-            else
-                --it;
-				*/
         }
 		else
 		{
@@ -270,43 +249,9 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     }
     if(tmpList.empty())
         return;
+	mCommandListMutex.lock();
     mCommandList.splice(mCommandList.begin(), tmpList, tmpList.begin(), tmpList.end()); 
-    /*
-    for(it = tmpList.being(); it != tmpList.end(); it++)
-    {
-        _CommandWrapper c = *it;
-        if(c.command->expire(realDelta, simulateDelta))
-        {
-            c.command->handle(realDelta, simulateDelta);
-            c.canDelete = true;
-        }
-    }
-    tmpList.remove_if(isRemoved);
-    if(tmpList.empty())
-        return;
-    if(mCommandList.empty())
-    {
-        mCommandList.assign(tmpList.begin(), tmpList().end());
-    }
-    else
-    {
-        SE_CommandList::iterator itSrc;
-        SE_CommandList::iterator itDst;
-        for(itSrc = tmpList.begin() ; itSrc != tmpList.end(); itSrc++)
-        {
-            for(itDst = mCommandList.begin() ; itDst != mCommandList.end() ; itDst++)
-            {
-                if(itSrc->command->priority() >= itDst->command->priority())
-                {
-                    break;
-                }
-            }
-            mCommandList.insert(itDst, *itSrc);
-            itSrc->canDestroy = false;
-        } 
-        tmpList.clear();
-    }
-    */
+	mCommandListMutex.unlock();
 }
 
 bool SE_Application::registerCommandFactory(const SE_CommandFactoryID& cfID, SE_CommandFactory* commandFactory)

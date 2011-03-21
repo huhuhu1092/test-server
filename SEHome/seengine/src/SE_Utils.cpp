@@ -697,6 +697,7 @@ std::string SE_Util::intToString(int i)
 	std::string str = buf;
 	return str;
 }
+
 std::string SE_Util::floatToString(float f)
 {
     char buf[20];
