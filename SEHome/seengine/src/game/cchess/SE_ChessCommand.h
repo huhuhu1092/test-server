@@ -5,7 +5,7 @@
 #include "SE_Command.h"
 #include "SE_Time.h"
 #include "SE_Thread.h"
-#include "SE_Remote";
+#include "SE_Remote.h"
 class SE_Application;
 class SE_CChess;
 
@@ -41,7 +41,7 @@ class SE_ChessLoginThread : public SE_Thread
 public:
 	std::string user;
 	std::string pwd;
-	SE_Remote remoteInfo
+	SE_Remote remoteInfo;
 protected:
 	void run();
 };
@@ -69,6 +69,17 @@ class SE_ChessGetMessageThread : public SE_Thread
 public:
     SE_Remote remoteInfo;
     std::string condition;
+    std::string username;
+protected:
+    void run();
+};
+class SE_ChessLogoutThread : public SE_Thread
+{
+public:
+    SE_ChessLogoutThread(bool endquit) : SE_Thread(endquit)
+    {}
+    SE_Remote remoteInfo;
+    std::string username;
 protected:
     void run();
 };

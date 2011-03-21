@@ -16,6 +16,7 @@
 #include "SE_SpatialManager.h"
 #include "SE_FontManager.h"
 #include "SE_DelayDestroy.h"
+#include "SE_ThreadManager.h"
 #include "SE_Game.h"
 #include "SE_FunctionDict.h"
 #include "SE_Log.h"
@@ -47,6 +48,7 @@ SE_Application::SE_Application()
 	mSpatialManager = new SE_SpatialManager;
 	mFontManager =  new SE_FontManager;
     mFunctionDict = new SE_FunctionDict;
+    mThreadManager = new SE_ThreadManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -91,6 +93,8 @@ SE_Application::~SE_Application()
 		delete mFontManager;
     if(mFunctionDict)
         delete mFunctionDict;
+    if(mThreadManager)
+        delete mThreadManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {

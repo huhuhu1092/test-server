@@ -27,6 +27,7 @@
 #include "SE_ElementManager.h"
 #include "SE_CChess.h"
 #include "SE_Remote.h"
+#include "SE_ChessCommand.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -102,7 +103,7 @@ bool SEDemo::InitApplication()
     chessapp->setUserName("aa");
     chessapp->setPassword("aa");
 	SE_Remote remoteInfo;
-	remoteInfo.setServerIP("192.168.5.102");
+	remoteInfo.setServerIP("222.131.189.247");
 	remoteInfo.setServerPort(80);
 	remoteInfo.setNetwork(true, false, false);
 	chessapp->setRemote(remoteInfo);
@@ -148,6 +149,17 @@ bool SEDemo::ReleaseView()
 }
 bool SEDemo::QuitApplication()
 {
+    SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
+    SE_ChessLogoutThread* thread = new SE_ChessLogoutThread(false);
+    thread->username = chessApp->getUserName();
+    thread->remoteInfo = chessApp->getRemote();
+    thread->start();
+    while(!thread->isEnd())
+    {
+        LOGI("### wait for server close response ###\n");
+    }
+    delete thread;
+    LOGI("##### quit OK ###\n");
 	return true;
 }
 /*

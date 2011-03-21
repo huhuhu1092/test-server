@@ -21,89 +21,92 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   //int written = fwrite(ptr, size, nmemb, (FILE *)stream);
     std::list<std::string>* dataList = (std::list<std::string> *)stream;
-  std::string str((char*)ptr, size * nmemb);
-  LOGI("## receive data = %s ####\n", str.c_str());
-  dataList->push_back(str);
-  return size * nmemb;
+    std::string str((char*)ptr, size * nmemb);
+    LOGI("## receive data = %s ####\n", str.c_str());
+    dataList->push_back(str);
+    return size * nmemb;
 }
-
-class _HttpRequset
+template <typename U>
+class _HttpRequest
 {
 public:
-	_HttpRequst(const SE_Remote& remote, const std::string command) : mRemoteInfo(remote), mCommand(command)
+	_HttpRequest(const SE_Remote& remote, const std::string command) : mRemoteInfo(remote), mCommand(command)
 	{
 	}
-	template <typename T>
-	void run(T inputFunc);
+	void run(U* requestHandler)
+    {
+#if defined(ANDROID)
+        requestHandler->sendMessage();
+#else
+        CURL* curl;
+        CURLcode res;
+        std::list<std::string> headerList;
+        std::list<std::string> bodyList;
+        curl_global_init(CURL_GLOBAL_ALL);
+        curl = curl_easy_init();
+        bool retOK = false;
+        if(curl)
+        {
+            LOGI("### server = %s , command = %s ###\n", mRemoteInfo.getServerIP().c_str(), mCommand.c_str());
+            std::string url = std::string("http://") + mRemoteInfo.getServerIP() + mCommand;
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            std::string strContent =  requestHandler->getRequestContent(); 
+            LOGI("#### content = %s #####\n", strContent.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, strContent.c_str());
+              /* no progress meter please */ 
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+             
+              /* send all data to this function  */ 
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+            curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, &headerList);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyList);
+
+            res = curl_easy_perform(curl);
+            if(CURLE_OK == res)
+            {
+                retOK = true;
+                LOGI("##### http requst and response ok ####\n");
+            }
+            curl_easy_cleanup(curl);
+       } 
+        else
+        {
+            LOGI("#### http requset and resonse error ######\n");
+        }
+       if(retOK)
+       {
+           requestHandler->handle(bodyList);
+       }
+#endif
+
+    }
 private:
 	SE_Remote mRemoteInfo;
 	std::string mCommand;
 };
-template <typename T>
-void _HttpRequst::run(T* requestHandler)
-{
-#if defined(ANDROID)
-    requestHandler->sendMessage();
-#else
-    CURL* curl;
-    CURLcode res;
-    std::list<std::string> headerList;
-    std::list<std::string> bodyList;
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
-	bool retOK = false;
-    if(curl)
-    {
-        std::string url = std::string("http://") + remoteInfo.getServerIP() + mCommand;
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        std::string strContent =  requsetHandler->getRequestContent(); 
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, strContent.c_str());
-		  /* no progress meter please */ 
-	    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-		 
-		  /* send all data to this function  */ 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-        curl_easy_setopt(curl,   CURLOPT_WRITEHEADER, &headerList);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bodyList);
-
-        res = curl_easy_perform(curl);
-        if(CURLE_OK == res)
-        {
-			retOK = true;
-			LOGI("##### http requst and response ok ####\n");
-        }
-        curl_easy_cleanup(curl);
-   } 
-	else
-	{
-		LOGI("#### http requset and resonse error ######\n");
-	}
-   if(retOK)
-   {
-	   requestHandler->handle(bodyList);
-   }
-#endif
-}
-class _LoginResponse : public SE_Command
+class _LoginResponseCommand : public SE_Command
 {
 public:
-	_LoginResponse(SE_Application* app) : SE_Command(app)
+	_LoginResponseCommand(SE_Application* app) : SE_Command(app)
 	{}
-    void handle()
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     {
-        SE_CChess* chessApp = SE_Application::getInstance()->getGame("cchess");
+        SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
         if(chessApp)
         {
             std::string body = *response.begin();
             SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
-            for(int i = 0 ; i < strList.size() ; i++)
+            if(strList[0] == "loginresponse")
             {
-                LOGI("%s\n", strList[i].c_str());
-                mChessApp->addUser(strList[i]);
+                for(int i = 0 ; i < strList.size() ; i++)
+                {
+                    LOGI("%s\n", strList[i].c_str());
+                    chessApp->addUser(strList[i]);
+                }
+                chessApp->setGameState(SE_CChess::LOGIN);
+                SE_ChessLoopMessage* msg = new SE_ChessLoopMessage(chessApp, mApp);
+                SE_Application::getInstance()->postCommand(msg);           
             }
-            chessApp->setGameState(SE_CChess::LOGIN);
-            SE_ChessLoopMessage* msg = new SE_ChessLoopMessage(chessApp, mApp);
-            SE_Application::getInstance()->postCommand(msg);           
         }
     }
     std::list<std::string> response;
@@ -121,56 +124,56 @@ public:
 	void handle(std::list<std::string> bodyList)
 	{
          SE_ASSERT(bodyList.size() == 1);
-         _LoginResponseCommand* lrc = new _LoginResponseCommand;
+         _LoginResponseCommand* lrc = new _LoginResponseCommand(SE_Application::getInstance());
          lrc->response = bodyList;
          SE_Application::getInstance()->postCommand(lrc);
 	}
 #if defined(ANDROID)
 	void sendMessage()
 	{
-    SE_Message* msg = new SE_Message;
-    msg->type = SE_GAME_COMMAND;
-    SE_Struct* gs = new SE_Struct(3) ;
-    SE_StructItem* sitem = new SE_StructItem(1);
-    SE_StdString* stdString = new SE_StdString;
-    stdString->data = "login";
-    sitem->setDataItem(stdString);
-    gs->setStructItem(0, sitem);
+        SE_Message* msg = new SE_Message;
+        msg->type = SE_GAME_COMMAND;
+        SE_Struct* gs = new SE_Struct(3) ;
+        SE_StructItem* sitem = new SE_StructItem(1);
+        SE_StdString* stdString = new SE_StdString;
+        stdString->data = "login";
+        sitem->setDataItem(stdString);
+        gs->setStructItem(0, sitem);
 
-    sitem = new SE_StructItem(1);
-    stdString = new SE_StdString;
-    stdString->data = name;
-    sitem->setDataItem(stdString);
-    gs->setStructItem(1, sitem);
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = name;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(1, sitem);
 
-    sitem = new SE_StructItem(1);
-    stdString = new SE_StdString;
-    stdString->data = pwd;
-    sitem->setDataItem(stdString);
-    gs->setStructItem(2, sitem);
-    msg->data = gs;
-    SE_Application::getInstance()->sendMessage(msg);
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = pwd;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(2, sitem);
+        msg->data = gs;
+        SE_Application::getInstance()->sendMessage(msg);
 	}
 #endif
 };
 void SE_ChessLoginThread::run()
 {
-	_HttpRequest logRequst(remoteInfo, "/cchess/login");
-	_LoginRequestHandler lh;
-    lh.name = name;
+    _LoginRequestHandler lh;
+    lh.name = user;
 	lh.pwd = pwd;
+	_HttpRequest<_LoginRequestHandler> logRequst(remoteInfo, "/cchess/login");
 	logRequst.run(&lh);
 }
 //////////////////////////////////////////////
 class _StartResponseCommand : public SE_Command
 {
 public:
-    std::string response;
+    std::list<std::string> response;
     _StartResponseCommand(SE_Application* app) : SE_Command(app)
     {}
-    void handle()
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     {
-        SE_CChess* chessApp = SE_Application::getInstance()->getGame("cchess");
+        SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
         if(chessApp)
         {
             SE_ASSERT(response.size() == 1);
@@ -198,13 +201,13 @@ class _StartRequestHandler
 public:
     std::string self;
     std::string opp;
-    std::string getRequstContent()
+    std::string getRequestContent()
     {
         return self + " " + opp;
     }
     void handle(std::list<std::string> bodyList)
     {
-        _StartResponseCommand* src = new _StartResponseCommand;
+        _StartResponseCommand* src = new _StartResponseCommand(SE_Application::getInstance());
         src->response = bodyList;
         SE_Application::getInstance()->postCommand(src);
     }
@@ -212,48 +215,48 @@ public:
 	void sendMessage()
 	{
         SE_Message* msg = new SE_Message;
-    msg->type = SE_GAME_COMMAND;
-    SE_Struct* gs = new SE_Struct(3) ;
-    SE_StructItem* sitem = new SE_StructItem(1);
-    SE_StdString* stdString = new SE_StdString;
-    stdString->data = "start";
-    sitem->setDataItem(stdString);
-    gs->setStructItem(0, sitem);
+        msg->type = SE_GAME_COMMAND;
+        SE_Struct* gs = new SE_Struct(3) ;
+        SE_StructItem* sitem = new SE_StructItem(1);
+        SE_StdString* stdString = new SE_StdString;
+        stdString->data = "start";
+        sitem->setDataItem(stdString);
+        gs->setStructItem(0, sitem);
 
-    sitem = new SE_StructItem(1);
-    stdString = new SE_StdString;
-    stdString->data = self;
-    sitem->setDataItem(stdString);
-    gs->setStructItem(1, sitem);
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = self;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(1, sitem);
 
-    sitem = new SE_StructItem(2);
-    stdString = new SE_StdString;
-    stdString->data = opp;
-    sitem->setDataItem(stdString);
-    gs->setStructItem(2, sitem);
-    msg->data = gs;
-    SE_Application::getInstance()->sendMessage(msg);
+        sitem = new SE_StructItem(2);
+        stdString = new SE_StdString;
+        stdString->data = opp;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(2, sitem);
+        msg->data = gs;
+        SE_Application::getInstance()->sendMessage(msg);
     }
 #endif
 };
 void SE_ChessStartThread::run()
 {
-    _HttpRequest hr(remoteInfo, "/cchess/start");
     _StartRequestHandler sh;
     sh.self = self;
     sh.opp = opp;
-    hr.run(&hr);
+    _HttpRequest<_StartRequestHandler> hr(remoteInfo, "/cchess/start");
+    hr.run(&sh);
 }
 //////////////////////////////////////////////////
 class _MoveResponseCommand : public SE_Command
 {
 public:
-    std::string response;
+    std::list<std::string> response;
     _MoveResponseCommand(SE_Application* app) : SE_Command(app)
     {}
-    void handle()
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     {
-        SE_CChess* chessApp = SE_Application::getInstance()->getGame("cchess");
+        SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
         if(chessApp)
         {
             SE_ASSERT(response.size() == 1);
@@ -272,25 +275,62 @@ public:
     std::string session;
     std::string color;
     std::string movestep;
-    std::string getRequestContent()
+    std::string getRequestContent() const
     {
         return session + " " + color + " " + movestep;
     }
     void handle(std::list<std::string> bodyList)
     {
-        _MoveResponseCommand* mrc = new _MoveResponseCommand;
+        _MoveResponseCommand* mrc = new _MoveResponseCommand(SE_Application::getInstance());
         mrc->response = bodyList;
         SE_Application::getInstance()->postCommand(mrc);
     }
+#if defined(ANDROID)
+    void sendMessage()
+	{
+        SE_Message* msg = new SE_Message;
+        msg->type = SE_GAME_COMMAND;
+        SE_Struct* gs = new SE_Struct(4) ;
+
+        SE_StructItem* sitem = new SE_StructItem(1);
+        SE_StdString* stdString = new SE_StdString;
+        stdString->data = "move";
+        sitem->setDataItem(stdString);
+        gs->setStructItem(0, sitem);
+
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = session;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(1, sitem);
+
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = color;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(2, sitem);
+
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = movestep;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(3, sitem);
+
+        msg->data = gs;
+        SE_Application::getInstance()->sendMessage(msg);
+
+    }
+#endif
 };
 void SE_ChessMoveThread::run()
 {
-    _HttpRequst hr(remoteInfo, "/cchess/move");
     _MoveRequestHandler mh;
     mh.session = session;
     mh.color = color;
     mh.movestep = movestep;
-    hr.run(&mh);
+ 
+    _HttpRequest<_MoveRequestHandler> hr(remoteInfo, "/cchess/move");
+   hr.run(&mh);
 }
 ///////////////////////////////////////////////////
 class _GetMessageResponseCommand : public SE_Command
@@ -298,9 +338,10 @@ class _GetMessageResponseCommand : public SE_Command
 public:
     _GetMessageResponseCommand(SE_Application* app) : SE_Command(app)
     {}
-    void handle()
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     {
         std::string body = *response.begin();
+        SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
         if(condition == "getuser")
         {
             SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
@@ -310,40 +351,39 @@ public:
                 LOGI("%s\n", strList[i].c_str());
                 chessApp->addUser(strList[i]);
             }
-            //mChessApp->setGameState(SE_CChess::LOGIN);
             chessApp->update();
         }
         else
         {
-                SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " \n");
-                LOGI("## message num = %d ###\n", atoi(strList[0].c_str()));
-                int commandIndex = 1;
-                int i = 1;
-                while(i < strList.size())
+            SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " \n");
+            LOGI("## message num = %d ###\n", atoi(strList[0].c_str()));
+            int commandIndex = 1;
+            int i = 1;
+            while(i < strList.size())
+            {
+                std::string command = strList[commandIndex];
+                if(command == "move")
                 {
-                    std::string command = strList[commandIndex];
-                    if(command == "move")
+                    std::string user = strList[commandIndex + 1];
+                    std::string moveCommand = strList[commandIndex + 2];
+                    int moveInt[4];
+                    for(size_t j = 0 ; j < moveCommand.size() ; j++)
                     {
-                        std::string user = strList[commandIndex + 1];
-                        std::string moveCommand = strList[commandIndex + 2];
-                        int moveInt[4];
-                        for(size_t j = 0 ; j < moveCommand.size() ; j++)
-                        {
-                            moveInt[j] = moveCommand[j] - '0';
-                            LOGI("%d\n", moveInt[j]);
-                        }
-                        chessApp->move(moveInt[0], moveInt[1], moveInt[2],moveInt[3]);
-                        i = commandIndex + 3;
-                        commandIndex = i;
+                        moveInt[j] = moveCommand[j] - '0';
+                        LOGI("%d\n", moveInt[j]);
                     }
-                    else
-                    {
-                        break;
-                    }
-                }           
+                    chessApp->move(moveInt[0], moveInt[1], moveInt[2],moveInt[3]);
+                    i = commandIndex + 3;
+                    commandIndex = i;
+                }
+                else
+                {
+                    break;
+                }
+            }           
         }
     }
-    std::string response;
+    std::list<std::string> response;
     std::string condition;
 };
 class _GetMessageRequestHandler
@@ -351,34 +391,58 @@ class _GetMessageRequestHandler
 public:
     std::string condition;
     std::string username;
-    std::string getRequestContent()
+    std::string getRequestContent() const
     {
         if(condition == "getuser")
         {
-            return "getuser" + " " + username;
+            return std::string("getuser") + " " + username;
         }
         else 
         {
-            return "getallmessage" + " " + username;
+            return std::string("getallmessage") + " " + username;
         }
     }
     void handle(std::list<std::string> bodyList)
     {
 
-            _GetMessageResponseCommand* grc = new _GetMessageResponseCommand;
-            grc->response = bodyList;
-            grc->condition = condition;
+        _GetMessageResponseCommand* grc = new _GetMessageResponseCommand(SE_Application::getInstance());
+        grc->response = bodyList;
+        grc->condition = condition;
+        SE_Application::getInstance()->postCommand(grc);
     }
 };
 void SE_ChessGetMessageThread::run()
 {
-    
-    _HttpRequest hr(remoteInfo, "/cchess/getmessage");
+    LOGI("#### getmessage thread run ###\n");
     _GetMessageRequestHandler mrh;
     mrh.condition = condition;
-
+    mrh.username = username;  
+    _HttpRequest<_GetMessageRequestHandler> hr(remoteInfo, "/cchess/getmessage");
+    hr.run(&mrh);
 }
 //////////////////////////////////////////////
+class _LogoutRequestHandler
+{
+public:
+    std::string username;
+    std::string getRequestContent()
+    {
+        return username;
+    }
+    void handle(std::list<std::string> bodyList)
+    {
+        std::string body = *bodyList.begin();
+        LOGI("#### %s $$$$$\n", body.c_str());
+    }
+};
+void SE_ChessLogoutThread::run()
+{
+    _LogoutRequestHandler lrh;
+    lrh.username = username;
+    _HttpRequest<_LogoutRequestHandler> hr(remoteInfo, "/cchess/logout");
+    hr.run(&lrh);
+}
+/////////////////////////////////////////////////
 static void get_message(SE_CChess* mChessApp)
 {
 #if defined(ANDROID)
@@ -786,7 +850,7 @@ void SE_ChessLoopMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     if(num == 0)
     {
         returnnum = 30;
-        get_message(mChessApp);
+        
     }
     else
     {

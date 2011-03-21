@@ -23,6 +23,7 @@ class SE_RenderTargetManager;
 class SE_CameraManager;
 class SE_ParamManager;
 class SE_SpatialManager;
+class SE_ThreadManager;
 class SE_FontManager;
 class SE_DelayDestroy;
 class SE_Game;
@@ -129,6 +130,10 @@ public:
 	{
 		return mFontManager;
 	}
+    SE_ThreadManager* getThreadManager()
+    {
+        return mThreadManager;
+    }
     void addGame(std::string gameName, SE_Game* game);
     void removeGame(std::string gameName);
     SE_Game* getGame(std::string gameName);
@@ -224,6 +229,7 @@ protected:
 	SE_SpatialManager* mSpatialManager;
 	SE_FontManager* mFontManager;
     SE_FunctionDict* mFunctionDict;
+    SE_ThreadManager* mThreadManager;
     int mFrameNum;
     int mFrameRate;
     SE_TimeMS mStartTime;

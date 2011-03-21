@@ -133,6 +133,7 @@ typedef SE_StringID SE_StateMachineID;
 typedef SE_StringID SE_StateID;
 typedef SE_StringID SE_TriggerID;
 typedef SE_StringID SE_AddressID;
+typedef SE_TreeStructID SE_ThreadID;
 class SE_ID
 {
 public:

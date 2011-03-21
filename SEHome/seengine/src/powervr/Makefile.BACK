@@ -14,7 +14,7 @@ FREETYPE_INC = /usr/include/freetype2
 LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
                -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
                -L/home/luwei/ProgramFiles/curl/lib
-PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -g
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DSE_HAS_MUTEX -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
 		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \
@@ -247,6 +247,7 @@ SRCS_CPP = SE_2DCommand.cpp \
 		   SE_Primitive.cpp \
 		   SE_PropertySet.cpp \
 		   SE_Quat.cpp \
+		   SE_Remote.cpp \
 		   SE_Renderer.cpp \
 		   SE_RenderManager.cpp \
 	       SE_RenderState.cpp \
@@ -277,6 +278,8 @@ SRCS_CPP = SE_2DCommand.cpp \
            SE_TextureCoordAnimation.cpp \
            SE_TextureCoordData.cpp \
            SE_TextView.cpp \
+		   SE_Thread.cpp \
+		   SE_ThreadManager.cpp \
            SE_Time.cpp \
            SE_TimeKey.cpp \
            SE_TreeStructManager.cpp \

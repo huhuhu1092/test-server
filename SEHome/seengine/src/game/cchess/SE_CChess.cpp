@@ -14,6 +14,7 @@
 #include "SE_Button.h"
 #include "SE_ChessCommand.h"
 #include "SE_TextView.h"
+#include "SE_ThreadManager.h"
 #include <string>
 #include <map>
 #include <algorithm>
@@ -204,18 +205,33 @@ bool SE_LoginElementClickHandler::handle(SE_Element* element)
     element->getName().print();
     if(element->getName() == SE_StringID("login"))
     {
-        SE_Button* loginButton = (SE_Button*)element;
-        SE_ChessMessage* m = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_LOGIN);
-        SE_Application::getInstance()->postCommand(m);
+        if(mChessApp->getGameState() != SE_CChess::LOGIN)
+        {
+            LOGI("#### create login thread @@@@@@\n");
+            SE_ChessLoginThread* ggLoginThread = new SE_ChessLoginThread;
+            ggLoginThread->user = mChessApp->getUserName();
+            ggLoginThread->pwd = mChessApp->getPassword();
+            ggLoginThread->remoteInfo = mChessApp->getRemote();
+            SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
+            threadManager->add(ggLoginThread);
+            ggLoginThread->start();
+        }
     }
     else if(mChessApp->isUser(element->getName()))
     {
         LOGI("### element name = %s ####\n", element->getName().getStr());
         if(element->getName() != mChessApp->getUserName().c_str())
         {
-            SE_ChessMessage* m = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_START);
-            m->mOpponentName = element->getName().getStr();
-            SE_Application::getInstance()->postCommand(m);
+            if(mChessApp->getGameState() == SE_CChess::LOGIN)
+            {
+                SE_ChessStartThread* ggStartThread = new SE_ChessStartThread;
+                ggStartThread->remoteInfo = mChessApp->getRemote();
+                ggStartThread->self = mChessApp->getUserName();
+                ggStartThread->opp = element->getName().getStr();
+                SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
+                threadManager->add(ggStartThread);
+                ggStartThread->start();
+            }
         }
 
     }
@@ -224,15 +240,18 @@ bool SE_LoginElementClickHandler::handle(SE_Element* element)
         LOGI("#### update ####\n");
         if(mChessApp->getGameState() == SE_CChess::LOGIN)
         {
-            SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_GETMESSAGE);
-            SE_Application::getInstance()->postCommand(msg);
+            LOGI("### create update thread ####\n");
+            SE_ChessGetMessageThread* ggGetMessageThread = new SE_ChessGetMessageThread;
+            ggGetMessageThread->remoteInfo = mChessApp->getRemote();
+            ggGetMessageThread->condition = "getuser" ;
+            ggGetMessageThread->username = mChessApp->getUserName();
+            SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
+            threadManager->add(ggGetMessageThread);
+
+            ggGetMessageThread->start();
         }
 
     }
-    //mChessApp->connect();
-    //SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    //sceneManager->dismiss(mChessApp->getSceneID());
-    //mChessApp->loadBoard();
 	return true;
 }
 ////////////////////////
@@ -343,8 +362,18 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 				mPointedElement->layout();
 				mPointedElement->updateSpatial(false);
                 mChessApp->setGameState(SE_CChess::MOVE);
-                SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_MOVE);
-                SE_Application::getInstance()->postCommand(msg);
+                //SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_MOVE);
+                //SE_Application::getInstance()->postCommand(msg);
+                SE_ChessMoveThread* moveThread = new SE_ChessMoveThread;
+                moveThread->session = mChessApp->getSessionName();
+                moveThread->color = mChessApp->getColorString();
+                moveThread->remoteInfo = mChessApp->getRemote();
+                moveThread->movestep = mChessApp->getLastStep();
+                SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
+                threadManager->add(moveThread);
+                moveThread->start();
+
+ 
 			}
 			mPointedElement = NULL;
 			mPointedElementPrev = NULL;
@@ -1161,7 +1190,7 @@ void SE_CChess::step(_ChessPieces cp,  const SE_Rect<float>& rect)
         mWait = true;
         char buf[512];
         memset(buf, 0, 512);
-        LOGI("#3# src row = %d, src col = %d, dst row = %d , dst col = %d #\n", srcrow, srccol, dstrow, dstcol);
+        LOGI("### src row = %d, src col = %d, dst row = %d , dst col = %d #\n", srcrow, srccol, dstrow, dstcol);
 #if defined(WIN32)
         _snprintf(buf, 511, "%d%d%d%d", srcrow, srccol, dstrow, dstcol);
 #else
