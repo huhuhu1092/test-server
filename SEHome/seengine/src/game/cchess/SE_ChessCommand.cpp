@@ -96,7 +96,7 @@ public:
         {
             std::string body = *response.begin();
             SE_Util::SplitStringList strList = SE_Util::splitString(body.c_str(), " ");
-            if(strList[0] == "loginresponse")
+            //if(strList[0] == "loginresponse")
             {
                 for(int i = 0 ; i < strList.size() ; i++)
                 {
