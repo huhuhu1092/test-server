@@ -54,9 +54,43 @@ void* SE_Thread::threadFun(void * args)
     }
 	return NULL;
 }
+class _ThreadCommand : public SE_Command
+{
+public:
+    SE_Thread* thread;
+    bool deleteWhenEnd;
+    _ThreadCommand(SE_Application* app) : SE_Command(app)
+    {}
+    ~_ThreadCommand()
+    {
+        if(deleteWhenEnd)
+        {
+            SE_ThreadManager* threadManager = mApp->getThreadManager();
+            LOGI("@@@@ thread = %p @@@@@\n", thread);
+            SE_Thread* tmpThread = threadManager->remove(thread->getID());
+            LOGI("### release tmp thread =%p ###\n", tmpThread);
+            threadManager->release(tmpThread, SE_RELEASE_NO_DELAY);
+            LOGI("### release thread end ###\n");
+        }
+    }
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+    {
+        LOGI("### thread command run %p #####\n", thread);
+        thread->run();
+        LOGI("### thread command run end #####\n");
+    }
+};
 void SE_Thread::start()
 {
+#if defined(SE_HAS_THREAD)
     createThread(&SE_Thread::threadFun, this);
+#else
+    _ThreadCommand* threadCommand = new _ThreadCommand(SE_Application::getInstance());
+    LOGI("### thread this = %p ####\n", this);
+    threadCommand->thread = this;
+    threadCommand->deleteWhenEnd = mIsDeleteAfterEnd;
+    SE_Application::getInstance()->postCommand(threadCommand);
+#endif
 }
 bool SE_Thread::isEnd()
 {

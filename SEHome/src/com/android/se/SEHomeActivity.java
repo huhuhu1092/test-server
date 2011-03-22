@@ -223,10 +223,149 @@ public class SEHomeActivity extends Activity
             }
         }
     }
-    private String proxyIP = "10.0.0.172";
-    private int proxyPort = 80;
-    private String serverURI = "http://222.130.193.248";
+    private class SERemote
+    {
+        public boolean isWifi = true;
+        public String proxyIP =  "10.0.0.172";
+        public int proxyPort = 80;
+        public String serverIP = "192.168.5.102";
+        public int serverPort = 80;
+    }
+    interface SERequestHandler
+    {
+        public String getRequestContent();
+        public void handle(String response);
+    }
+    //private String serverURI = "http://192.168.5.102";
+    //private boolean isWifi = true;
+    private void httpRequest(SERemote remote, String command, SERequestHandler handler)
+    {
+        boolean ret = false;
+        String outStr = new String();
+        try {
+                AndroidHttpClient androidHttpClient = AndroidHttpClient.newInstance("Opera/9.26");
+                if(!remote.isWifi)
+                {
+                    HttpHost proxy = new HttpHost(remote.proxyIP, remote.proxyPort);
+                    androidHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                }
+                String protocol = "http://";
+                String url = protocol + remote.serverIP + command;
+                Log.i(TAG, "#### url = " + url + " #####");
+                HttpPost httpPost = new HttpPost(url);
+                String str = handler.getRequestContent();
+                Log.i(TAG, "### str = " + str + " ###");
+                StringEntity sentity = new StringEntity(str);
+                httpPost.setEntity(sentity);
+                HttpResponse response = androidHttpClient.execute(httpPost);
+                if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+                {
+                    Log.i(TAG, "## get error ##");
+                    ret = false;
+                }
+                else
+                {
+                    Log.i(TAG, "## get Ok ##");
+                    ret = true;
+                    Header[] httpHeader = response.getAllHeaders();
+                    for(Header hd : httpHeader)
+                    {
+                        String n = hd.getName();
+                        String v = hd.getValue();
+                        Log.i(TAG, "#### " + n + " = " + v + " ###");
+                    }
+                    HttpEntity httpEntity = response.getEntity();
+                    int contentSize = (int)httpEntity.getContentLength();
+                    Log.i(TAG, "### content size = " + contentSize + " ######");
+                    byte[] content = new byte[contentSize];
+                    InputStream inputStream = httpEntity.getContent();
+                    inputStream.read(content, 0, contentSize);
+                    String ccstr = new String(content);
+                    outStr = ccstr;
+                    Log.i(TAG, "###########################");
+                    Log.i(TAG, ccstr);
+                    Log.i(TAG, "###########################");
+                }
+                androidHttpClient.close();
+         }
+         catch(Exception e)
+         {
+             Log.i(TAG, "## exception e = " + e);
+         }
+         if(ret)
+         {
+            handler.handle(outStr);
+         }
 
+    }
+    class StartGameRequestHandler implements SERequestHandler
+    {
+        public StartGameRequestHandler(String self, String opp)
+        {
+            Log.i(TAG, self + " " + opp);
+            this.self = self;
+            this.opp = opp;
+        }
+        public String getRequestContent()
+        {
+            return self + " " + opp;
+        }
+        public void handle(String response)
+        {
+            CommandRunnable r = new CommandRunnable();
+            r.command = "start";
+            r.arg1 = response;
+            mRenderView.queueEvent(r);
+        }
+        public String self;
+        public String opp;
+    }
+    class LoginRequestHandler implements SERequestHandler
+    {
+        public LoginRequestHandler(String name, String pwd)
+        {
+            Log.i(TAG, name + " " + pwd);
+            this.username = name;
+            this.pwd = pwd;
+        }
+        public String getRequestContent()
+        {
+            return username + " " + pwd;
+        }
+        public void handle(String response)
+        {
+            CommandRunnable r = new CommandRunnable();
+            r.command = "login";
+            r.arg1 = response;
+            mRenderView.queueEvent(r);
+            hasLogin = true;
+
+        }
+        public String username;
+        public String pwd;
+    }
+    class MoveRequestHandler implements SERequestHandler
+    {
+        public MoveRequestHandler(String session, String color, String movestep)
+        {
+            Log.i(TAG, session + " " + color + " " + movestep);
+            this.session = session;
+            this.color = color;
+            this.movestep = movestep;
+        }
+        public String getRequestContent()
+        {
+            return session + " " + color + " " + movestep;
+        }
+        public void handle(String response)
+        {
+            Log.i(TAG, "move ok");
+        }
+        public String session;
+        public String color;
+        public String movestep;
+    }
+/*
     private void startGame(String arg1, String arg2)
     {
 
@@ -234,8 +373,11 @@ public class SEHomeActivity extends Activity
         String outStr = new String();
          try {
                 AndroidHttpClient androidHttpClient = AndroidHttpClient.newInstance("Opera/9.26");
-                HttpHost proxy = new HttpHost(proxyIP, proxyPort);
-                androidHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                if(!isWifi)
+                {
+                    HttpHost proxy = new HttpHost(proxyIP, proxyPort);
+                    androidHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                }
                 HttpPost httpGet = new HttpPost(serverURI + "/cchess/start");
                 String str = arg1 + " " + arg2;
                 StringEntity sentity = new StringEntity(str);
@@ -281,6 +423,8 @@ public class SEHomeActivity extends Activity
         }
 
     }
+    */
+    /*
     private void move(String session, String color, String movestep)
     {
          try {
@@ -325,31 +469,18 @@ public class SEHomeActivity extends Activity
          }
 
     }
+    */
     private class ApplicationLoader implements Runnable
     {
         ArrayList<ApplicationInfo> mApplicationList = new ArrayList<ApplicationInfo>();
-        public String command = new String();
-        public String arg1 = new String();
-        public String arg2 = new String();
-        public String arg3 = new String();
+        public SERemote remote = new SERemote();
+        public String command;
+        public SERequestHandler handler;
         public void run()
         {
-            Log.i(TAG, "##################start create socket ###################3\n");
-            if(command.equals("login"))
-            {
-                Log.i(TAG, "########## login to server ##############");
-                login(arg1, arg2);
-            }
-            else if(command.equals("start"))
-            {
-                Log.i(TAG, "#### start #####");
-                startGame(arg1, arg2);
-            }
-            else if(command.equals("move"))
-            {
-                Log.i(TAG, "### move ####");
-                move(arg1, arg2, arg3);
-            }
+            Log.i(TAG, "################## handle http request ####################\n");
+            httpRequest(remote, command, handler);
+
         }
     }
     public boolean hasLogin = false;
@@ -371,9 +502,9 @@ public class SEHomeActivity extends Activity
                 if(!tmpLogin)
                 {
                     ApplicationLoader la = new ApplicationLoader();
-                    la.command = "login";
-                    la.arg1 = msg.arg1;
-                    la.arg2 = msg.arg2;
+                    la.command = "/cchess/login";
+                    la.handler = new LoginRequestHandler(msg.arg1, msg.arg2);
+                
                     Thread loader = new Thread(la, "Application Loader");
                     loader.start();
                 }
@@ -384,10 +515,10 @@ public class SEHomeActivity extends Activity
                 Log.e("AAA", "####### start message handle ####");
                 if(tmpLogin)
                 {
+                    Log.e("AAA", msg.arg1 + " " + msg.arg2);
                     ApplicationLoader la = new ApplicationLoader();
-                    la.command = "start";
-                    la.arg1 = msg.arg1;
-                    la.arg2 = msg.arg2;
+                    la.command = "/cchess/start";
+                    la.handler = new StartGameRequestHandler(msg.arg1, msg.arg2);
                     Thread loader = new Thread(la, "Application Loader");
                     loader.start();
 
@@ -399,10 +530,8 @@ public class SEHomeActivity extends Activity
                 String color = msg.arg2;
                 String movestep = msg.arg3;
                 ApplicationLoader la = new ApplicationLoader();
-                la.command = "move";
-                la.arg1 = session;
-                la.arg2 = color;
-                la.arg3 = movestep;
+                la.command = "/cchess/move";
+                la.handler = new MoveRequestHandler(session, color, movestep);
                 Thread loader = new Thread(la, "Application Loader");
                 loader.start();
 
@@ -434,6 +563,10 @@ public class SEHomeActivity extends Activity
             {
                 mSEApp.runCommand1(command, arg1);
             }
+            else if(command.equals("getmessage"))
+            {
+                mSEApp.runCommand1(command, arg1);
+            }
         }
     }
 
@@ -453,6 +586,14 @@ public class SEHomeActivity extends Activity
         r.arg1 = str;
         mRenderView.queueEvent(r);
     }
+    void sendGetMessageCommand(String str)
+    {
+        CommandRunnable r = new CommandRunnable();
+        r.command = "getmessage";
+        r.arg1 = str;
+        mRenderView.queueEvent(r);
+    }
+    /*
     void login(String arg1 , String arg2)
     {
         boolean tmpLogin = false;
@@ -506,80 +647,8 @@ public class SEHomeActivity extends Activity
              sendLoginCommand(outStr);
          }
 
-        /* 
-            String name = new String("10.0.0.172");
-            Socket socket = null;
-            try {
-                    socket = new Socket(name, 80);
-            }
-            catch(Exception ex)
-            {
-                Log.i(TAG, "#### socket create error ###");
-            }
-
-            if(socket != null && socket.isConnected())
-            {
-                Log.i(TAG, " ##### connect to server ####");
-            }
-            else
-            {
-                Log.i(TAG, "## can not connect to server ###");
-            }
-             /// write and read data
-            OutputStreamWriter out = null;
-            try
-            {
-                OutputStream raw = socket.getOutputStream();
-                OutputStream buffered = new BufferedOutputStream(raw);
-                out = new OutputStreamWriter(buffered, "ASCII");
-                String outData = "GET / HTTP/1.1\r\nHost: wap.qidian.cn\r\nUser-Agent: Opera/9.26\r\nACCEPT-ENCODING:deflate, gzip, x-gzip, identity, *;q=0\r\nACCEPT-CHARSET:iso-8859-1, utf-8, utf-16, *;q=0.1\r\nACCEPT:text/html, text/vnd.wap.wml, text/plain\r\n\r\n";
-                out.write(outData, 0, outData.length());
-            }
-            catch(Exception e)
-            {
-                Log.i(TAG, "##### exception error when write data ###");
-            }
-            finally
-            {
-
-            }
-            Log.i(TAG, "#### write data #####");
-            InputStream inputStream = null;
-            try
-            {
-                inputStream = socket.getInputStream();
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-                String str = null;
-                do
-                {
-                    str = in.readLine();
-                    if(str != null)
-                        Log.i(TAG, "### " + str + " ####");
-                } while(str != null);
-            }
-            catch(Exception e)
-            {
-                Log.i(TAG, "#### read data exception " + e + "####");
-            }
-            finally
-            {
-
-            }
-            ///
-            Log.i(TAG, "#### socket close() ####");
-            try {
-
-                if(socket == null)
-                {
-                    socket.close();
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.i(TAG, "### close error ###");
-            }
-        */   
     }
+    */
     static String[] CARRIER_PROJECTION = { 
             Carriers.TYPE, 
             Carriers.APN, 
@@ -668,25 +737,7 @@ public class SEHomeActivity extends Activity
            ConnectivityManager mConnMgr = (ConnectivityManager) SEHomeActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
             int result = mConnMgr.startUsingNetworkFeature(
                                  ConnectivityManager.TYPE_MOBILE, mNetworkProfile);
-            /*
-            if (mConnectivityListener != null && mServiceHandler != null) {
-                try {
-                    mConnectivityListener.stopListening();
-                    mConnectivityListener.unregisterHandler(mServiceHandler);
-                }catch(Exception ee) {
-                    Log.w(TAG, "Error when removing listener: ", ee);
-                }finally {
-                    Log.d(TAG, "set mConnectivityListener to null", new Throwable());
-                    mConnectivityListener = null;
-                    mServiceHandler = null;
-                }
-            }
-            mServiceHandler = new ServiceHandler();
-            mConnectivityListener = new NetworkConnectivityListener();
-            */
         try {
-            //mConnectivityListener.registerHandler(mServiceHandler, EVENT_DATA_STATE_CHANGED);
-            //mConnectivityListener.startListening(this);
 
             boolean found = false;
             NetworkInfo[] netInfos;
@@ -789,9 +840,6 @@ public class SEHomeActivity extends Activity
                 mRenderView.setMessageHandler(mMsgH);
             }
             setContentView(mRenderView);
-            //connect();
-            //Thread loader = new Thread(new ApplicationLoader(), "Application Loader");
-            //loader.start();
         }
     }
     private boolean foundSEData() {
