@@ -9,6 +9,7 @@
 #include "SE_CChess.h"
 #include "SE_Message.h"
 #include "SE_MessageEventCommandDefine.h"
+#include "SE_ThreadManager.h"
 #include <string.h>
 #include <stdio.h>
 #include <list>
@@ -890,12 +891,28 @@ void SE_ChessLoopMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     if(num == 0)
     {
         returnnum = 30;
+        SE_ChessGetMessageThread* t = new SE_ChessGetMessageThread;
+        SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
+        if(chessApp)
+        {
+			LOGI("#### start get message thread ####");
+            t->remoteInfo = chessApp->getRemote();
+            t->condition = "getallmessage";
+            t->username = chessApp->getUserName();
+            SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
+            threadManager->add(t);
+            t->start();
+        }
+        else
+        {
+            delete t;
+        }
     }
     else
     {
         num--;
         returnnum = num;
-   }
+    }
     SE_ChessLoopMessage* msg = new SE_ChessLoopMessage(mChessApp, mApp);
     msg->num = returnnum;
     SE_Application::getInstance()->postCommand(msg);

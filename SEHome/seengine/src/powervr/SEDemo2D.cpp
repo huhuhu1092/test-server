@@ -149,17 +149,22 @@ bool SEDemo::ReleaseView()
 }
 bool SEDemo::QuitApplication()
 {
+#if defined(WIN32)
+#else
     SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
     SE_ChessLogoutThread* thread = new SE_ChessLogoutThread(false);
     thread->username = chessApp->getUserName();
     thread->remoteInfo = chessApp->getRemote();
     thread->start();
-    while(!thread->isEnd())
+	int i = 0 ;
+    while(!thread->isEnd() && i < 100)
     {
         LOGI("### wait for server close response ###\n");
+		i++;
     }
     delete thread;
     LOGI("##### quit OK ###\n");
+#endif
 	return true;
 }
 /*
