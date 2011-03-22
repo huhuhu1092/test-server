@@ -51,3 +51,39 @@ void SE_Chess_Start(std::vector<std::string> arg)
         }
     }
 }
+void SE_Chess_GetMessage(std::vector<std::string> arg)
+{
+    SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
+    if(chessApp)
+    {
+        LOGI("### get message ##\n");
+        std::string message = arg[0];
+        SE_Util::SplitStringList strList = SE_Util::splitString(message.c_str(), " \n");
+        LOGI("## message num = %d ###\n", atoi(strList[0].c_str()));
+        int commandIndex = 1;
+        int i = 1;
+        while(i < strList.size())
+        {
+            std::string command = strList[commandIndex];
+            if(command == "move")
+            {
+                std::string user = strList[commandIndex + 1];
+                std::string moveCommand = strList[commandIndex + 2];
+                int moveInt[4];
+                for(size_t j = 0 ; j < moveCommand.size() ; j++)
+                {
+                    moveInt[j] = moveCommand[j] - '0';
+                    LOGI("%d\n", moveInt[j]);
+                }
+                chessApp->move(moveInt[0], moveInt[1], moveInt[2],moveInt[3]);
+                i = commandIndex + 3;
+                commandIndex = i;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+}

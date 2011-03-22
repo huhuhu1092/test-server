@@ -7,5 +7,6 @@ public class SEMessageContent
     public String arg2 = new String();
     public String arg3 = new String();
     public String arg4 = new String();
+    public int arg5 ;
 }
 
