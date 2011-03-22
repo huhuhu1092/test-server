@@ -157,11 +157,16 @@ public:
 };
 void SE_ChessLoginThread::run()
 {
+    LOGI("### 1 ###\n");
     _LoginRequestHandler lh;
+     LOGI("### 2 ###\n");
     lh.name = user;
 	lh.pwd = pwd;
+     LOGI("### 3 ###\n");
 	_HttpRequest<_LoginRequestHandler> logRequst(remoteInfo, "/cchess/login");
+     LOGI("### 4 ###\n");
 	logRequst.run(&lh);
+     LOGI("### 5 ###\n");
 }
 //////////////////////////////////////////////
 class _StartResponseCommand : public SE_Command
