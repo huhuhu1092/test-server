@@ -103,7 +103,7 @@ bool SEDemo::InitApplication()
     chessapp->setUserName("aa");
     chessapp->setPassword("aa");
 	SE_Remote remoteInfo;
-	remoteInfo.setServerIP("222.131.189.247");
+	remoteInfo.setServerIP("192.168.5.102");
 	remoteInfo.setServerPort(80);
 	remoteInfo.setNetwork(true, false, false);
 	chessapp->setRemote(remoteInfo);

@@ -104,8 +104,7 @@ public:
                     chessApp->addUser(strList[i]);
                 }
                 chessApp->setGameState(SE_CChess::LOGIN);
-                SE_ChessLoopMessage* msg = new SE_ChessLoopMessage(chessApp, mApp);
-                SE_Application::getInstance()->postCommand(msg);           
+          
             }
         }
     }
@@ -192,7 +191,9 @@ public:
             {
                 chessApp->setColor(SE_CChess::BLACK, SE_CChess::RED);
             }
-            chessApp->setGameState(SE_CChess::RUN);        
+            chessApp->setGameState(SE_CChess::RUN);   
+			SE_ChessLoopMessage* msg = new SE_ChessLoopMessage(chessApp, mApp);
+            SE_Application::getInstance()->postCommand(msg); 
         }
     }
 };
@@ -884,7 +885,6 @@ void SE_ChessLoopMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     if(num == 0)
     {
         returnnum = 30;
-        
     }
     else
     {
