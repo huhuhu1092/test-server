@@ -39,13 +39,13 @@ public class SERenderView extends GLSurfaceView
     private static final String TAG = "SERenderView";
     private SEApplication mApp;
     private Renderer mRender = new Renderer();
-    private H mH = new H();
+    public H mH = new H();
     private MessageHandler mMsgHandler;
     public interface MessageHandler
     {
         void handle(SEMessageContent msg);
     }
-    private class H extends Handler
+    public class H extends Handler
     {
         public static final int MSG_NAME = 0;
         public void handleMessage(Message msg) 
