@@ -117,6 +117,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_Message.cpp \
 				./SE_MessageEventCommandDefine.cpp \
 				./SE_MotionEventCamera.cpp \
+				./SE_Mutex.cpp \
 				./2D/SE_MountPoint.cpp \
 				./SE_Object.cpp \
 				./SE_ObjectManager.cpp \
@@ -155,6 +156,8 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./2D/SE_TextureCoordAnimation.cpp \
 				./SE_TextureCoordData.cpp \
 				./ui/SE_TextView.cpp \
+				./SE_Thread.cpp \
+				./SE_ThreadManager.cpp \
 				./SE_Time.cpp \
 				./SE_TimeKey.cpp \
 				./SE_TreeStructManager.cpp \

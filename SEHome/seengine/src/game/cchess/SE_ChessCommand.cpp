@@ -410,6 +410,36 @@ public:
         grc->condition = condition;
         SE_Application::getInstance()->postCommand(grc);
     }
+#if defined(ANDROID)
+    void sendMessage()
+    {
+        SE_Message* msg = new SE_Message;
+        msg->type = SE_GAME_COMMAND;
+        SE_Struct* gs = new SE_Struct(3) ;
+
+        SE_StructItem* sitem = new SE_StructItem(1);
+        SE_StdString* stdString = new SE_StdString;
+        stdString->data = "getmessage";
+        sitem->setDataItem(stdString);
+        gs->setStructItem(0, sitem);
+
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = condition;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(1, sitem);
+
+        sitem = new SE_StructItem(1);
+        stdString = new SE_StdString;
+        stdString->data = username;
+        sitem->setDataItem(stdString);
+        gs->setStructItem(2, sitem);
+
+        msg->data = gs;
+        SE_Application::getInstance()->sendMessage(msg);
+
+    }
+#endif
 };
 void SE_ChessGetMessageThread::run()
 {
@@ -434,6 +464,10 @@ public:
         std::string body = *bodyList.begin();
         LOGI("#### %s $$$$$\n", body.c_str());
     }
+#if defined(ANDROID)
+    void sendMessage()
+    {}
+#endif
 };
 void SE_ChessLogoutThread::run()
 {
