@@ -190,6 +190,7 @@ SRCS_CPP = SE_2DCommand.cpp \
 		   SE_CameraManager.cpp \
 		   SE_CChess.cpp \
 		   SE_ChessCommand.cpp \
+		   SE_ChessInterface.cpp \
 		   SE_CharCode.cpp \
 		   SE_CharCodeDefine.cpp \
 	       SE_CheckXml.cpp \
@@ -293,16 +294,15 @@ SRCS_CPP = SE_2DCommand.cpp \
 	PVRShell.cpp \
 	PVRShellAPI.cpp \
 	PVRShellOS.cpp \
-	$(SRC_BULLET) \
 	$(SRCS_TINYXML) 
 
 SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
 SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
+ALLOBJ += $(subst .cpp,.o, $(SRCS))
 OBJ_C = $(SRCS_C:.c=.o)
 OBJ_CPP = $(SRCS_CPP:.cpp=.o)
 OBJECTS += $(OBJ_C)
 OBJECTS += $(OBJ_CPP)
-
 $(OUTNAME): $(OBJ_C) $(OBJ_CPP) depend
 	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
 
@@ -318,6 +318,7 @@ depend:
 	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
 
 print_info:
+	@echo $(ALLOBJ)
 	@echo $(OBJECTS)
 	@echo $(OBJ_CPP)
 	@echo $(OUTNAME)
@@ -326,5 +327,5 @@ print_info:
 	@echo $(VPATH)
 	@echo $(SRCS)
 clean:
-	$(RM) $(OBJECTS) $(OUTNAME)
+	$(RM) $(OBJECTS) $(ALLOBJ) $(OUTNAME)
 # DO NOT DELETE
