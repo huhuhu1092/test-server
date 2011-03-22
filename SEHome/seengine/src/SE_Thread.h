@@ -7,6 +7,7 @@
 typedef void* (*THREADFUNC)(void*);
 class SE_Thread : public SE_ListStruct<SE_Thread>
 {
+    friend class _ThreadCommand;
 public:
     enum PRIORITY {LOW, NORMAL, HIGHT};
     SE_Thread(bool deleteAfterEnd = true);
