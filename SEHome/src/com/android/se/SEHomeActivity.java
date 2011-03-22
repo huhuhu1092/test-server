@@ -298,6 +298,44 @@ public class SEHomeActivity extends Activity
          }
 
     }
+    static int step = 0;
+    class GetMessageRequestHandler implements SERequestHandler
+    {
+        public GetMessageRequestHandler(String condition, String name)
+        {
+            this.condition = condition;
+            username = name;
+        }
+        public String getRequestContent()
+        {
+            return condition + " " + username;
+        }
+        public void handle(String response)
+        {
+            CommandRunnable r = new CommandRunnable();
+            r.command = "getmessage";
+            r.arg1 = response;
+            mRenderView.queueEvent(r);
+            if(response.contains("move"))
+            {
+                step++;
+                Log.i(TAG, "### get move command ##");
+                //if(step == 2)
+                //    return;
+            }
+            SEMessageContent mc = new SEMessageContent();
+            mc.command = "getmessage";
+            mc.arg1 = "getallmessage";
+            mc.arg2 = "bb";
+            mc.arg5 = 0; 
+            Message msg = mRenderView.mH.obtainMessage(mRenderView.mH.MSG_NAME, mc);
+            mRenderView.mH.sendMessage(msg); 
+
+        }
+        String condition;
+        String username;
+    } 
+
     class StartGameRequestHandler implements SERequestHandler
     {
         public StartGameRequestHandler(String self, String opp)
@@ -316,6 +354,13 @@ public class SEHomeActivity extends Activity
             r.command = "start";
             r.arg1 = response;
             mRenderView.queueEvent(r);
+            SEMessageContent mc = new SEMessageContent();
+            mc.command = "getmessage";
+            mc.arg1 = "getallmessage";
+            mc.arg2 = "bb";
+            mc.arg5 = 0; 
+            Message msg = mRenderView.mH.obtainMessage(mRenderView.mH.MSG_NAME, mc);
+            mRenderView.mH.sendMessage(msg); 
         }
         public String self;
         public String opp;
@@ -488,7 +533,7 @@ public class SEHomeActivity extends Activity
     {
         public void handle(SEMessageContent msg)
         {
-            Log.e("AAAA", "MessageHandler = " + msg);
+            //Log.e("AAAA", "MessageHandler = " + msg);
             boolean tmpLogin = hasLogin;
 
             if(msg.equals("Box07") && mReadAppInfoFinish)
@@ -534,6 +579,28 @@ public class SEHomeActivity extends Activity
                 la.handler = new MoveRequestHandler(session, color, movestep);
                 Thread loader = new Thread(la, "Application Loader");
                 loader.start();
+
+            }
+            else if(msg.command.equals("getmessage"))
+            {
+                if(msg.arg5 == 100)
+                {
+                    ApplicationLoader la = new ApplicationLoader();
+                    la.command = "/cchess/getmessage";
+                    la.handler = new GetMessageRequestHandler(msg.arg1, msg.arg2);
+                    Thread loader = new Thread(la, "Application Loader");
+                    loader.start();
+                }
+                else
+                {
+                    SEMessageContent mc = new SEMessageContent();
+                    mc.command = msg.command;
+                    mc.arg1 = msg.arg1;
+                    mc.arg2 = msg.arg2;
+                    mc.arg5 = msg.arg5 + 1; 
+                    Message msg1 = mRenderView.mH.obtainMessage(mRenderView.mH.MSG_NAME, mc);
+                    mRenderView.mH.sendMessage(msg1);
+                }
 
             }
         }

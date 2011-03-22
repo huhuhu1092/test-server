@@ -41,6 +41,7 @@ static void se_init(JNIEnv* env, jobject clazz, jint userid0, jint userid1, jstr
     SE_FunctionDict* funcDict = gApp->getFunctionDict();
     funcDict->addFunction("login", SE_Chess_AddUser);
     funcDict->addFunction("start", SE_Chess_Start);
+    funcDict->addFunction("getmessage", SE_Chess_GetMessage);
     gApp->start();
     SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
     gApp->registerCommandFactory("SystemCommand", sf);

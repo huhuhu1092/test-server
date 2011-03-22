@@ -662,23 +662,29 @@ bool SE_CChess::canPrivateMoveTo(const _BoardUnitData& src, const _BoardUnitData
     {
         return false;
     }
+    LOGI("#### go to privet 1 ###\n");
 	if(SE_Iabs(src.row - dst.row) > 1)
 		return false;
-	if(SE_Iabs(src.row - dst.row) > 1)
+	if(SE_Iabs(src.col - dst.col) > 1)
 		return false;
 	if(src.cp.color == dst.cp.color)
 		return false;
+    LOGI("#### go to privet 2 ###\n");
+
     _RowCol movePoint[3];
 	movePoint[0].row = src.row;
 	movePoint[0].col = src.col - 1;
 	movePoint[1].row = src.row;
 	movePoint[1].col = src.col + 1;
-	if(mPlayerColor[SELF] == src.cp.color)
+	//if(mPlayerColor[SELF] == src.cp.color)
+    //this is tempory change, please notice!!!!!!!!!
+    if(RED == src.cp.color)
 	{
 	    movePoint[2].row = src.row + 1;
 	    movePoint[2].col = src.col;
 	}
-	else if(mPlayerColor[OPPONENT] == src.cp.color)
+	//else if(mPlayerColor[OPPONENT] == src.cp.color)
+    if(BLACK == src.cp.color)
 	{
 		movePoint[2].row = src.row - 1;
 		movePoint[2].col = src.col;
@@ -696,14 +702,22 @@ bool SE_CChess::canPrivateMoveTo(const _BoardUnitData& src, const _BoardUnitData
 			break;
 		}
 	}
+    LOGI("#### private k = %d ###\n", k);
 	if(k == -1)
 		return false;
 	else
 	{
+        LOGI("%d, %d, %d, %d , %d", mPlayerColor[SELF], mPlayerColor[OPPONENT], src.cp.color, mPlayerBoundary[SELF] , mPlayerBoundary[OPPONENT]);
 		if(mPlayerColor[SELF] == src.cp.color && src.row <= mPlayerBoundary[SELF] && dst.row == src.row)
+        {
+            LOGI("#### goto private 3 ###\n");
 			return false;
+        }
 		if(mPlayerColor[OPPONENT] == src.cp.color && src.row >= mPlayerBoundary[OPPONENT] && dst.row == src.row)
+        {
+            LOGI("### goto private 4 ####\n");
 			return false;
+        }
 		return true;
 	}
 }
@@ -1130,8 +1144,6 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height, bool
 }
 void SE_CChess::move(int srcrow, int srccol, int dstrow, int dstcol)
 {
-    if(!mWait)
-        return;
     _BoardUnitData srcUnitData = mBoardData[srcrow][srccol];
     _BoardUnitData dstUnitData = mBoardData[dstrow][dstcol];
     _ChessPieces cp = srcUnitData.cp;
@@ -1145,10 +1157,12 @@ void SE_CChess::move(int srcrow, int srccol, int dstrow, int dstcol)
 	SE_CChess::_Result result = getResult();
 	if(result.action == SE_CChess::CANNOT_MOVE)
 	{
+        LOGI("#### can not move ####\n");
         return;
 	}
 	else
 	{
+        LOGI("#### can move ###\n");
 		SE_CChess::_ChessPiecesData* removedChess = result.removed;
 		if(removedChess)
 		{
