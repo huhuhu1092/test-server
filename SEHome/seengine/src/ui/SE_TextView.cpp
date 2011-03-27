@@ -108,6 +108,8 @@ void SE_TextView::dismiss()
 }
 void SE_TextView::spawn()
 {
+	if(!mText.isValid())
+		return;
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 
     int charNum = mText.getCharNum(); //unicode char num

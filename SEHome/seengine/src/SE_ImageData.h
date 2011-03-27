@@ -166,15 +166,36 @@ public:
     bool isCompressTypeByHardware();
     int getWidthPower2() const
     {
-        return mWidthPower2;
+		if(isSizePower2())
+		{
+			return mWidth;
+		}
+		else
+		{
+            return mWidthPower2;
+		}
     }
     int getHeightPower2() const
     {
-        return mHeightPower2;
+		if(isSizePower2())
+		{
+			return mHeight;
+		}
+		else
+		{
+            return mHeightPower2;
+		}
     }
     int getBytesPerRowPower2() const
     {
-        return mBytesPerRowPower2;
+		if(isSizePower2())
+		{
+			return mBytesPerRow;
+		}
+		else
+		{
+            return mBytesPerRowPower2;
+		}
     }
     bool isSizePower2() const;
     char* getDataPower2();

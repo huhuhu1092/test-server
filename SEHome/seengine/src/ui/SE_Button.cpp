@@ -40,9 +40,10 @@ void SE_Button::spawn()
 	}
 	if(!element)
         return;
+
+	element->spawn();
 	element->setWidth(mWidth);
 	element->setHeight(mHeight);
-	element->spawn();
 	mElement = element;
 	//mElement->setRectPatchType(SE_PATCH_R3_C3);
 	calculateRect(mPivotX, mPivotY, 0, 0);

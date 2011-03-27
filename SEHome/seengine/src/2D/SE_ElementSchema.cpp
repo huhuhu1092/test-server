@@ -139,7 +139,10 @@ SE_Element* SE_ElementSchema::createElement(SE_ElementManager* elementManager, S
     for(itSchema = children.begin() ; itSchema != children.end() ; itSchema++)
     {
         SE_ElementSchema* es = *itSchema;
-        es->createElement(elementManager, e); 
+		if(es)
+		{
+            es->createElement(elementManager, e); 
+		}
     }
     return root;
 }

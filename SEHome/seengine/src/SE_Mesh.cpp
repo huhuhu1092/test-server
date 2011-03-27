@@ -310,6 +310,15 @@ void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
     int* facets = getFacetArray();
     SE_Vector3i* faceArray = geomData->getFaceArray();
     SE_Vector3f* vertexArray = geomData->getVertexArray();
+	mVertexNum = geomData->getVertexNum();
+	mVertex = new _Vector3f[mVertexNum];
+	for(int i = 0 ; i < mVertexNum ; i++)
+	{
+		mVertex[i].d[0] = vertexArray[i].x;
+		mVertex[i].d[1] = vertexArray[i].y;
+		mVertex[i].d[2] = vertexArray[i].z;
+	}
+	/*
     std::set<int> vertexIndexSet;
     for(int i = 0 ; i < facetNum ; i++)
     {
@@ -329,6 +338,7 @@ void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
         mVertex[i].d[2] = vertexArray[*it].z;
         i++;
     }
+	*/
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
@@ -381,6 +391,16 @@ void SE_Surface::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVerte
         texVertexNum = 0;
 		return;
 	}
+	mTexVertexNum[texIndex]  = texCoordData->getTexVertexNum();
+	mTexVertex[texIndex] = new _Vector2f[mTexVertexNum[texIndex]];
+	for(int i = 0 ; i < mTexVertexNum[texIndex] ; i++)
+	{
+		mTexVertex[texIndex][i].d[0] = texVertexArray[i].x;
+		mTexVertex[texIndex][i].d[1] = texVertexArray[i].y;
+	}
+	texVertex = mTexVertex[texIndex];
+	texVertexNum = mTexVertexNum[texIndex];
+	/*
     int texFaceNum = texCoordData->getTexFaceNum();
     int facetNum = getFacetNum();
     int* facets = getFacetArray();
@@ -401,6 +421,7 @@ void SE_Surface::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVerte
         mTexVertex[texIndex][i].d[1] = texVertexArray[*it].y;
         i++;
     }
+	*/
 }
 void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {

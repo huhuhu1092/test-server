@@ -64,7 +64,12 @@ public:
 	static bool isPower2(int v);
     static wchar_t* utf8ToUnicode(const char* utf8str);
 	typedef std::vector<std::string> SplitStringList;
+	//splitstring will split string which has .xml sufix from other string
+	//for example: "xxx/yyy.xml/zzz" --> "xxx/yyy.xml" "zzz"
     static SplitStringList splitString(const char* path, const char* split);
+	//splitStringRaw will split string from each other whether it contain .xml or not
+	//for example: "xxx/yyy.xml/zzz" --> "xxx" "yyy.xml" "zzz"
+	static SplitStringList splitStringRaw(const char* path, const char* split);
 	static std::string trimLeft(const char* str);
 	static std::string trimRight(const char* str);
 	static std::string trim(const char* str);

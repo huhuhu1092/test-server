@@ -191,5 +191,21 @@ SE_ImageData* SE_FontManager::getImageData(const SE_CharCode& c, const SE_FontPr
             return NULL;
         }
     } 
-    return colorFontMap->getItem(p.fontColor);
+	else
+	{
+		imageData = colorFontMap->getItem(p.fontColor);
+		if(!imageData)
+		{
+            imageData = initChar(charFontMap, c, p.fontSize, p.fontColor);
+            if(imageData)
+            {
+                colorFontMap->setItem(p.fontColor, imageData);
+            }
+            else
+            {
+                delete colorFontMap;
+            }
+		}
+		return imageData;
+	}
 }

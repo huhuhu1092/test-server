@@ -55,7 +55,7 @@ float SE_ParamManager::getFloat(const SE_AddressID& address, bool& ok) const
 std::string SE_ParamManager::getString(const SE_AddressID& address, bool& ok) const
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(address.getStr(), "/");
-	if(!mDataMap.isContain(strList[0].c_str()))
+	if(!mDataMap.isContain(address))
 	{
 		load(strList[0]);
 	}

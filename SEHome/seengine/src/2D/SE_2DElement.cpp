@@ -981,11 +981,26 @@ void SE_ImageElement::initImage()
 	SE_StringID url = getURL();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_ExtractImageStr imageStr = SE_Util::stringToExtractImage(url.getStr());
-	mBaseColor = resourceManager->getImageUnit(imageStr.base.c_str());
-	mRChannel =  resourceManager->getImageUnit(imageStr.red.c_str());
-	mGChannel =  resourceManager->getImageUnit(imageStr.green.c_str());
-	mBChannel =  resourceManager->getImageUnit(imageStr.blue.c_str());
-	mAChannel = resourceManager->getImageUnit(imageStr.alpha.c_str());
+	if(imageStr.base != "")
+	{
+	    mBaseColor = resourceManager->getImageUnit(imageStr.base.c_str());
+	}
+	if(imageStr.red != "")
+	{
+	    mRChannel =  resourceManager->getImageUnit(imageStr.red.c_str());
+	}
+	if(imageStr.green != "")
+	{
+ 	    mGChannel =  resourceManager->getImageUnit(imageStr.green.c_str());
+	}
+	if(imageStr.blue != "")
+	{
+	    mBChannel =  resourceManager->getImageUnit(imageStr.blue.c_str());
+	}
+	if(imageStr.alpha != "")
+	{
+	    mAChannel = resourceManager->getImageUnit(imageStr.alpha.c_str());
+	}
 }
 void SE_ImageElement::update(SE_ParamValueList& paramValueList)
 {

@@ -180,6 +180,42 @@ wchar_t* SE_Util::utf8ToUnicode(const char* utf8str)
 }
 SE_Util::SplitStringList SE_Util::splitString(const char* path, const char* split)
 {
+	SE_Util::SplitStringList strList = splitStringRaw(path, split);
+	int firstStrSufixXml = 0;
+	bool found = false;
+	for(size_t i = 0 ; i < strList.size() ; i++)
+	{
+		std::string::size_type pos = strList[i].find(".xml");
+		if(pos != std::string::npos)
+		{
+			firstStrSufixXml = i;
+			found = true;
+			break;
+		}
+	}
+	if(found)
+	{
+		SE_Util::SplitStringList splitStringList(strList.size() - firstStrSufixXml);
+		std::string strPath;
+		for(size_t i = 0 ; i < firstStrSufixXml ; i++)
+		{
+			strPath += strList[i] + SE_SEP;
+		}
+		strPath += strList[firstStrSufixXml];
+        splitStringList[0] = strPath;
+		for(size_t i = 1 ; i < splitStringList.size() ; i++)
+		{
+			splitStringList[i] = strList[firstStrSufixXml + i];
+		}
+		return splitStringList;
+	}
+	else
+	{
+        return strList;
+	}
+}
+SE_Util::SplitStringList SE_Util::splitStringRaw(const char* path, const char* split)
+{
     std::list<std::string> retList;
     std::vector<std::string> ret;
     if(!path)

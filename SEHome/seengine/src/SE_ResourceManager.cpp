@@ -66,7 +66,7 @@ static int getElementType(const SE_StringID& type)
         return SE_UI_TEXTVIEW;
     }
     else
-        return SE_INVALID;
+        return SE_2D_UI_NODE;
 }
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
