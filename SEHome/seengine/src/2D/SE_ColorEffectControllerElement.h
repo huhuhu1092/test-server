@@ -3,6 +3,7 @@
 #include "SE_Element.h"
 #include "SE_ID.h"
 #include "SE_Common.h"
+#include "SE_Utils.h"
 class SE_TimeKey;
 class SE_Value;
 class SE_Spatial;
@@ -133,5 +134,6 @@ private:
 	SE_ImageDataID mTextureImageDataID[MARK_NUM];
 	SE_ImageElement* mTextureImageElement[MARK_NUM];
 	SE_2DNodeElement* mMergedElement;
+    int mImageWidth, mImageHeight;
 };
 #endif

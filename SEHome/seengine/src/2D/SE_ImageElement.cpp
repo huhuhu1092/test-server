@@ -1,6 +1,13 @@
 #include "SE_ImageElement.h"
 #include "SE_TimeKey.h"
 #include "SE_Value.h"
+#include "SE_Application.h"
+#include "SE_ResourceManager.h"
+#include "SE_Spatial.h"
+#include "SE_SpatialManager.h"
+#include "SE_ShaderProperty.h"
+#include "SE_Mesh.h"
+#include "SE_DataValueDefine.h"
 SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
 {
 	setURI(uri);

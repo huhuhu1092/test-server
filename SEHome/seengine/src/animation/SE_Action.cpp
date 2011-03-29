@@ -6,6 +6,10 @@
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
 #include "SE_ElementSchema.h"
+#include "SE_ImageElement.h"
+#include "SE_SequenceElement.h"
+#include "SE_ColorEffectControllerElement.h"
+#include "SE_ActionElement.h"
 #include <algorithm>
 struct _EqualTest
 {

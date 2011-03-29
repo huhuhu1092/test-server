@@ -7,6 +7,11 @@
 #include "SE_Camera.h"
 #include "SE_CameraManager.h"
 #include "SE_ImageData.h"
+#include "SE_ElementManager.h"
+#include "SE_Mesh.h"
+#include "SE_DataValueDefine.h"
+#include "SE_CommonNode.h"
+#include <math.h>
 SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
 {
     setURI(uri);
@@ -81,7 +86,9 @@ void SE_TextureElement::spawn()
 {
 	SE_ASSERT(getChildren().size() == 0);
 	if(mContentChild)
+    {
 		mContentChild->spawn();
+    }
 }
 void SE_TextureElement::update(const SE_TimeKey& key)
 {

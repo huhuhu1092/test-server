@@ -5,7 +5,7 @@
 #include <list>
 class SE_Value;
 class SE_ParamValueList;
-
+class SE_Action;
 class SE_ActionElement : public SE_2DNodeElement
 {
 public:

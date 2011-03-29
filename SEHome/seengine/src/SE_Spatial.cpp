@@ -161,6 +161,16 @@ void SE_Spatial::setRenderTarget(const SE_RenderTargetID& renderTargetID)
 		s->setRenderTarget(renderTargetID);
 	}
 }
+void SE_Spatial::setRenderTargetSeq(const SE_RenderTargetSeq& seq)
+{
+	mRenderTargetSeq = seq;
+	std::vector<SE_Spatial*> children = getChildren();
+	for(size_t i = 0 ; i < children.size() ; i++)
+	{
+		SE_Spatial* s = children[i];
+		s->setRenderTargetSeq(seq);
+	}
+}
 void SE_Spatial::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {
 	mSceneRenderSeq = seq;

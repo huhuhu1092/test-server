@@ -232,6 +232,25 @@ void SE_Element::setCanPointed(bool b)
 		children[i]->setCanPointed(b);
 	}
 }
+void SE_Element::setRenderTargetSeq(const SE_RenderTargetSeq& seq)
+{
+    mRenderTargetSeq = seq;
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* spatial = spatialManager->get(mSpatialID);
+    if(spatial)
+	{
+		spatial->setRenderTargetSeq(seq);
+	}
+    std::vector<SE_Element*> children = getChildren();
+    if(!children.empty())
+    {
+        for(int i = 0 ; i < children.size() ; i++)
+        {
+            SE_Element* e = children[i];
+            e->setRenderTargetSeq(seq);
+        }
+    }
+}
 void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {
     mSceneRenderSeq = seq;

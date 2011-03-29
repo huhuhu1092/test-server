@@ -1693,7 +1693,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
     SE_ElementSchema* elementSchema = new SE_ElementSchema;
-	elementSchema->seq = indent;
+	elementSchema->seq = parent->seq + SE_Util::intToString(indent);
     bool hasLayer = false;
 	bool hasPivotx = false;
 	bool hasPivoty = false;
@@ -2181,7 +2181,13 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         }
 		pAttribute = pAttribute->Next();
 	}
+    if(!id.isValid())
+    {
+        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
+        id = str.c_str();
+    }
 	imageContent->setID(id);
+    imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);
     imageContent->setState(getElementState(state));
     imageContent->setCanPointed(canpointed);
@@ -2193,6 +2199,7 @@ void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xml
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ActionContent* actionContent = NULL;
+    std::string id;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2203,8 +2210,19 @@ void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xml
 		{
 		    actionContent = new SE_ActionContent(value);
 		}
+        else if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
+    if(id == "")
+    {
+		std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
+        id = str.c_str();
+    }
+    actionContent->setID(id.c_str());
+    actionContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(actionContent);
 }
 void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
@@ -2213,6 +2231,7 @@ void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement*
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_StateTableContent* stateTableContent = NULL;
+    std::string id;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -2223,8 +2242,19 @@ void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement*
 		{
 			stateTableContent = new SE_StateTableContent(value);
 		}
+        else if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
+    if(id == "")
+    {
+        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
+        id = str;
+    }
+    stateTableContent->setID(id.c_str());
+    stateTableContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(stateTableContent);
 }
 void SE_RendererHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)

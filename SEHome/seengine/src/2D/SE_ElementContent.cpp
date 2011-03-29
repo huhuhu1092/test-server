@@ -2,6 +2,12 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_2DElement.h"
+#include "SE_ImageElement.h"
+#include "SE_SequenceElement.h"
+#include "SE_ActionElement.h"
+#include "SE_StateTableElement.h"
+#include "SE_ColorEffectControllerElement.h"
+#include "SE_TextureElement.h"
 #include "SE_ElementSchema.h"
 void SE_ElementContent::clone(SE_ElementContent* src, SE_ElementContent* dst)
 {

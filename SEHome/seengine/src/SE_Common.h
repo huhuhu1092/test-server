@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <string>
 #define SE_ASSERT(x) assert((x))
 typedef int SE_Result;
 #define SE_VALID 1
@@ -136,7 +137,40 @@ public:
 private:
 	int mSeq;
 };
-
+class SE_RenderTargetSeq
+{
+public:
+    SE_RenderTargetSeq(const std::string& str = "")
+    {
+        mSeq = str;
+    }
+	friend bool operator==(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq == r.mSeq;
+	}
+	friend bool operator!=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq != r.mSeq;
+	}
+	friend bool operator<(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq < r.mSeq;
+	}
+	friend bool operator<=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq <= r.mSeq;
+	}
+	friend bool operator>=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq >= r.mSeq;
+	}
+	friend bool operator>(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq > r.mSeq;
+	}
+private:
+    std::string mSeq;
+};
 /////////////////////////
 template <class T>
 class SE_Wrapper

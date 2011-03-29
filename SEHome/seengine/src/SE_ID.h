@@ -108,6 +108,14 @@ public:
 private:
     size_t id[2];
 };
+/*
+class SE_RenderTargetID
+{
+public:
+    std::string renderTargetSeq;
+    SE_TreeStructID id;
+};
+*/
 /////////////////////////////////////////////////////
 typedef SE_StringID SE_ImageDataID;
 typedef SE_CommonID SE_MeshID;

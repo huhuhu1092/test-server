@@ -218,6 +218,10 @@ public:
 	{
 		return mMountPointSet.getMountPoint(id);
 	}
+    SE_MountPointSet getMountPoint() const
+    {
+        return mMountPointSet;
+    }
     void addKeyFrame(const SE_TimeKey& key, SE_ColorEffectFrame* frame);
     SE_ColorEffectFrame* getKeyFrame(const SE_TimeKey& key) const;
     std::vector<SE_TimeKey> getKeys() const;

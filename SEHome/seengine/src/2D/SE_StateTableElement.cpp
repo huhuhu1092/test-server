@@ -1,4 +1,12 @@
 #include "SE_StateTableElement.h"
+#include "SE_ResourceManager.h"
+#include "SE_Application.h"
+#include "SE_Log.h"
+#include "SE_Spatial.h"
+#include "SE_SpatialManager.h"
+#include "SE_ElementManager.h"
+#include "SE_StateTable.h"
+#include "SE_2DElement.h"
 SE_StateTableElement::SE_StateTableElement(const SE_StringID& uri)
 {
 	setURI(uri);
@@ -52,7 +60,7 @@ void SE_StateTableElement::spawn()
 	if(!currState)
 		return;
 	SE_StringID strURI = currState->getDefaultValue();
-	SE_2DNodeElement* e = (SE_2DNodeElement*)getElement(strURI);
+	SE_2DNodeElement* e = (SE_2DNodeElement*)SE_GetElement(strURI);
     e->setMountPoint(0, 0);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	elementManager->add(getID(), e, true);

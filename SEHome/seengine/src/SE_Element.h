@@ -12,6 +12,7 @@
 #include "SE_Primitive.h"
 #include "SE_ObjectManager.h"
 #include <vector>
+#include <string>
 class SE_KeyFrameController;
 class SE_Spatial;
 class SE_Element;
@@ -124,7 +125,7 @@ public:
 	{
 		return mSeqNum;
 	}
-	void setSeqNum(int i) 
+	void setSeqNum(const std::string& i) 
 	{
 		mSeqNum = i;
 	}
@@ -199,12 +200,17 @@ public:
 	{
 		mNextElement = next;
 	}
+    void setRenderTargetSeq(const SE_RenderTargetSeq& seq);
     void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
     void setRenderTargetID(const SE_RenderTargetID& renderTarget);
-	SE_SceneRenderSeq getSceneRenderSeq()
+	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;
 	}
+    SE_RenderTargetSeq getRenderTargetSeq() const
+    {
+        return mRenderTargetSeq;
+    }
     SE_RenderTargetID getRenderTargetID() const
     {
         return mRenderTarget;
@@ -303,7 +309,7 @@ protected:
     int mType;
     int mSpatialType; // spatial type: GEOMETRY, COMMONNODE, BSPNODE, etc.
     int mKeyFrameNum;
-    int mSeqNum;
+    std::string mSeqNum;
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
@@ -327,6 +333,7 @@ protected:
     bool mOwnRenderTargetCamera;
     bool mNeedUpdateTransform;
     SE_SceneRenderSeq mSceneRenderSeq;
+    SE_RenderTargetSeq mRenderTargetSeq;
     int mRenderQueueSeq;
 	SE_Animation* mAnimation;
     SE_Matrix4f mPrevMatrix;

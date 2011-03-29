@@ -4,6 +4,7 @@
 #include "SE_SpatialManager.h"
 #include "SE_Spatial.h"
 #include "SE_Action.h"
+#include "SE_CommonNode.h"
 #include <vector>
 SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 {

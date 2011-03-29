@@ -18,7 +18,6 @@ public:
     SE_Scene(SE_SCENE_TYPE t);
     ~SE_Scene();
     void create(const char* sceneName);
-    //SE_SceneID getID();
     void show();
     void exit();
     void hide();

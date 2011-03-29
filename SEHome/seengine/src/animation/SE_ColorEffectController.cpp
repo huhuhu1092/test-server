@@ -4,6 +4,7 @@
 #include "SE_Image.h"
 #include "SE_Utils.h"
 #include "SE_URI.h"
+#include "SE_ColorEffectControllerElement.h"
 /*
 bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 {

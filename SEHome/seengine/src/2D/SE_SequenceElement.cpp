@@ -1,4 +1,12 @@
 #include "SE_SequenceElement.h"
+#include "SE_Application.h"
+#include "SE_ResourceManager.h"
+#include "SE_Spatial.h"
+#include "SE_SpatialManager.h"
+#include "SE_ImageElement.h"
+#include "SE_ElementManager.h"
+#include "SE_ElementKeyFrameAnimation.h"
+#include "SE_CommonNode.h"
 SE_SequenceElement::SE_SequenceElement(const SE_StringID& uri)
 {
 	setURI(uri);

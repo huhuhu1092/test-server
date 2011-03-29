@@ -1,6 +1,7 @@
 #ifndef SE_ELEMENTCONTENT_H
 #define SE_ELEMENTCONTENT_H
 #include "SE_ID.h"
+#include <string>
 class SE_Element;
 class SE_ElementSchema;
 class SE_ElementContent
@@ -32,6 +33,14 @@ public:
 	{
 		return mContentURI;
 	}
+    void setSeq(const std::string& seq)
+    {
+        mSeq = seq;
+    }
+    std::string getSeq() const
+    {
+        return mSeq;
+    }
     void setCanPointed(bool b)
     {
         mCanPointed = b;
@@ -66,6 +75,7 @@ private:
     int mState;
 	int mRectPatchType;
     bool mCanPointed;
+    std::string mSeq;
 };
 class SE_ImageContent : public SE_ElementContent
 {

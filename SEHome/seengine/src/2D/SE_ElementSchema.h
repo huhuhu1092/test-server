@@ -1,6 +1,7 @@
 #ifndef SE_ELEMENTSCHEMA_H
 #define SE_ELEMENTSCHEMA_H
 #include <list>
+#include <string>
 #include "SE_ID.h"
 #include "SE_TableManager.h"
 #include "SE_Layer.h"
@@ -48,7 +49,7 @@ public:
 	}
 	SE_ElementContent* getContent(int index);
 	void travel(SE_ElementSchemaVisitor* v);
-	int getSeqNum() const
+    std::string getSeqNum() const
 	{
 		return seq;
 	}
@@ -63,7 +64,7 @@ public:
     float pivotx, pivoty;
     float x, y, w, h;
     SE_Layer layer;
-    int seq;
+    std::string seq;
     SE_MountPointID mountPointRef;
     int type;// element type: BUTTON, TEXT, 2D_UI_NODE, etc;
     SE_StringID text;
