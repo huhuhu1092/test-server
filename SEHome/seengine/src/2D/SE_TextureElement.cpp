@@ -12,7 +12,7 @@
 #include "SE_DataValueDefine.h"
 #include "SE_CommonNode.h"
 #include <math.h>
-SE_TextureElement::SE_TextureElement(const SE_StringID& uri)
+SE_TextureElement::SE_TextureElement(const SE_StringID& uri) : mImageData(NULL), mContentChild(NULL), mShareContent(false)
 {
     setURI(uri);
     init();
@@ -35,30 +35,31 @@ SE_Element* SE_TextureElement::clone()
 }
 void SE_TextureElement::init()
 {
-	SE_StringID strURL = getURL();
-	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
-    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
-    mContentChild = (SE_2DNodeElement*)elementSchema->createElement();
     SE_ImageDataID imageDataID = mContentChild->getFullPathName().getStr();
 	SE_ImageData* imageData = resourceManager->getImageData(imageDataID);
 	if(!imageData)
 	{
 		imageData = new SE_ImageData;
 		resourceManager->setImageData(imageDataID, imageData);
+        mImageData = imageData;
+        mImageDataID = imageDataID;
 	}
-    mImageData = imageData;
-    mImageDataID = imageDataID;
-    mContentChild->setMountPoint(0, 0);
-    mContentChild->setOwnRenderTargetCamera(true);
+    else
+    {
+        mImageData = imageData;
+        mImageDataID = imageDataID;
+        mShareContent = true;
+    }
+
 }
 void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 {
+    if(!mContentChild)
+        return;
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_Element* tmpElement = elementManager->remove(mContentChild->getID());
     SE_ASSERT(tmpElement == mContentChild);
-	elementManager->release(mContentChild);
-    //delete mContentChild;
+	elementManager->release(mContentChild, SE_RELEASE_NO_DELAY);
     SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     resourceManager->removeImageData(mImageDataID);
 	SE_RenderTargetManager* rm = SE_Application::getInstance()->getRenderTargetManager();
@@ -71,6 +72,8 @@ void SE_TextureElement::update(SE_ParamValueList& paramValueList)
 }
 void SE_TextureElement::update(const SE_AddressID& address, const SE_Value& value)
 {
+    if(!mContentChild)
+        return;
     SE_2DNodeElement::update(address, value);
 }
 void SE_TextureElement::setImageData(SE_Primitive* primitive)
@@ -84,29 +87,47 @@ void SE_TextureElement::setSurface(SE_Surface* surface)
 }
 void SE_TextureElement::spawn()
 {
-	SE_ASSERT(getChildren().size() == 0);
+    if(mShareContent)
+        return;
+
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	if(mContentChild)
     {
-		mContentChild->spawn();
+        SE_Element* e = elementManager->remove(mContentChild->getID());
+        SE_ASSERT(e == mContentChild);
+        elementManager->release(e, SE_RELEASE_NO_DELAY);
+        SE_ASSERT(getChildren().size() == 0);
     }
+	SE_StringID strURL = getURL();
+	SE_Util::SplitStringList strList = SE_Util::splitString(strURL.getStr(), "/");
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
+    mContentChild = (SE_2DNodeElement*)elementSchema->createElement();
+    mContentChild->setMountPoint(0, 0);
+    mContentChild->setOwnRenderTargetCamera(true);
+    elementManager->add(this, mContentChild);
+	mContentChild->spawn();
 }
 void SE_TextureElement::update(const SE_TimeKey& key)
 {
+    if(mShareCon)
 	if(mContentChild)
 		mContentChild->update(key);
 }
+/*
 void SE_TextureElement::setImage(const SE_ImageDataID& id, SE_ImageData* imageData)
 {
 	mImageDataID = id;
 	mImageData = imageData;
 }
+*/
 void SE_TextureElement::layout()
 {
 	if(!mContentChild)
 	{
 		return;
 	}
-	calculateRect(INVALID_GEOMINFO, INVALID_GEOMINFO, 0, 0);
+	calculateRect(mPivotX, mPivotY, 0, 0);
     mContentChild->layout();
 	mWidth = mContentChild->getWidth();
 	mHeight = mContentChild->getHeight();
