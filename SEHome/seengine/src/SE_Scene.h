@@ -19,8 +19,7 @@ public:
     ~SE_Scene();
     void create(const char* sceneName);
     void show();
-    void exit();
-    void hide();
+    void dismiss();
     void render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager);
     void setCamera(const SE_CameraID& cameraID);
     void setBackground(const SE_Vector4f& color)
@@ -58,8 +57,6 @@ private:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
 private:
-    //void setID(const SE_SceneID& sceneID);
-private:
     //SE_SceneID mID;
     SE_ElementID mRoot;
     SE_CameraID mCamera;
@@ -70,5 +67,7 @@ private:
     SE_SCENE_TYPE mSceneType;
     bool mIsModel;
 	SE_SceneRenderSeq mSceneRenderSeq;
+    bool mIsShow;
+    SE_RenderTargetSeq mRenderTargetSeq;
 };
 #endif

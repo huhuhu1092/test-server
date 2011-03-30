@@ -254,12 +254,14 @@ void SE_Element::setRenderTargetSeq(const SE_RenderTargetSeq& seq)
 void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 {
     mSceneRenderSeq = seq;
+    /*
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
 		spatial->setSceneRenderSeq(seq);
 	}
+    */
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
     {
@@ -272,15 +274,15 @@ void SE_Element::setSceneRenderSeq(const SE_SceneRenderSeq& seq)
 }
 void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 {
-    if(!mRenderTarget.isValid())
+    if(!mRenderTargetID.isValid())
     {
-        mRenderTarget = renderTarget;
+        mRenderTargetID = renderTarget;
     }
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
-		spatial->setRenderTarget(mRenderTarget);
+		spatial->setRenderTarget(mRenderTargetID);
 	}
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
@@ -793,7 +795,7 @@ SE_Spatial* SE_2DNodeElement::createNode()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->createSpatial(mSpatialType);
-	spatial->setRenderTarget(mRenderTarget);
+	spatial->setRenderTarget(mRenderTargetID);
 	spatial->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 	spatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
 	spatial->setNeedUpdateTransform(mNeedUpdateTransform);
@@ -857,7 +859,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         geom->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2, 1));
         geom->setLocalLayer(mLocalLayer);
 	    geom->setElementID(getID());
-	    geom->setRenderTarget(mRenderTarget);
+	    geom->setRenderTarget(mRenderTargetID);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 		geom->setName(getName().getStr());
         mPrimitiveIDArray[0] = primitiveID;
@@ -873,7 +875,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         geom->setLocalTranslate(SE_Vector3f(mLeft + mWidth / 2, mTop + mHeight / 2, 0));
         geom->setLocalLayer(mLocalLayer);
 	    geom->setElementID(getID());
-	    geom->setRenderTarget(mRenderTarget);
+	    geom->setRenderTarget(mRenderTargetID);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 		geom->setName(getName().getStr());
         std::vector<SE_Geometry*> childGeom(meshNum);
@@ -1054,7 +1056,7 @@ void SE_2DNodeElement::write(SE_BufferOutput& outputBuffer)
     outputBuffer.writeFloat(mDeltaLeft);
     outputBuffer.writeFloat(mDeltaTop);
     outputBuffer.writeInt(mKeyFrameNum);
-    outputBuffer.writeInt(mSeqNum);
+	outputBuffer.writeString(mSeqNum.c_str());
     outputBuffer.writeVector3f(mLocalTranslate);
     outputBuffer.writeVector3f(mLocalScale);
     outputBuffer.writeQuat(mLocalRotate);

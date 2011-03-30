@@ -137,6 +137,7 @@ public:
 private:
 	int mSeq;
 };
+/*
 class SE_RenderTargetSeq
 {
 public:
@@ -170,6 +171,49 @@ public:
 	}
 private:
     std::string mSeq;
+};
+*/
+class SE_RenderTargetSeq
+{
+public:
+    SE_RenderTargetSeq(unsigned int i = 0)
+    {
+        mSeq = i;
+    }
+	friend bool operator==(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq == r.mSeq;
+	}
+	friend bool operator!=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq != r.mSeq;
+	}
+	friend bool operator<(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq < r.mSeq;
+	}
+	friend bool operator<=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq <= r.mSeq;
+	}
+	friend bool operator>=(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq >= r.mSeq;
+	}
+	friend bool operator>(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+	{
+		return l.mSeq > r.mSeq;
+	}
+    friend SE_RenderTargetSeq operator-(const SE_RenderTargetSeq& l, const SE_RenderTargetSeq& r)
+    {
+        return SE_RenderTargetSeq(l.mSeq - r.mSeq);
+    }
+    friend SE_RenderTargetSeq operator+(const SE_RenderTargetSeq& l , const SE_RenderTargetSeq& r)
+    {
+        return SE_RenderTargetSeq(l.mSeq + r.mSeq);
+    }
+private:
+    unsigned int mSeq;
 };
 /////////////////////////
 template <class T>

@@ -140,7 +140,7 @@ void SE_TextView::spawn()
         cv->setImageData(mCharImageData[i]);
         cv->setPivotX(0);
         cv->setPivotY(0);
-		cv->setRenderTargetID(mRenderTarget);
+		cv->setRenderTargetID(mRenderTargetID);
         cv->setMountPoint(startx, starty);
         cv->setWidth(mCharImageData[i]->getWidth());
         cv->setHeight(mCharImageData[i]->getHeight());

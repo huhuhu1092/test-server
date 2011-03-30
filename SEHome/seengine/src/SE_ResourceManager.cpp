@@ -1693,7 +1693,14 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
     SE_ElementSchema* elementSchema = new SE_ElementSchema;
-	elementSchema->seq = parent->seq + SE_Util::intToString(indent);
+	if(parent)
+	{
+	    elementSchema->seq = parent->seq + SE_Util::intToString(indent);
+	}
+	else
+	{
+		elementSchema->seq = SE_Util::intToString(indent);
+	}
     bool hasLayer = false;
 	bool hasPivotx = false;
 	bool hasPivoty = false;
@@ -3560,7 +3567,7 @@ class _GetFirstElement : public SE_ObjectManagerVisitor<SE_StringID, SE_ElementS
 public:
 	_GetFirstElement(int i)
 	{
-		minSeqNum = i;
+		minSeqNum = SE_Util::intToString(i);
 	}
 	void visit(const SE_StringID& id , const SE_ElementSchema*  v)
 	{
@@ -3569,7 +3576,7 @@ public:
 			minElementID = id;
 		}
 	}
-	int minSeqNum;
+	std::string minSeqNum;
 	SE_StringID minElementID;
 };
 SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)

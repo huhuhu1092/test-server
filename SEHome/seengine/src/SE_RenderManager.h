@@ -21,7 +21,7 @@ public:
     //void setSceneTranslucent(const SE_SceneRenderSeq& index, bool translucent);
     //void setSceneCamera(const SE_SceneRenderSeq& index, SE_Camera* camera);
     //void setSceneBackground(const SE_SceneRenderSeq& index, const SE_Vector4f& background);
-    void addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq);
+    void addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetSeq& renderTargetSeq, const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq);
     /*
 	void setWorldToViewMatrix(const SE_Matrix4f& m)
 	{
@@ -42,6 +42,7 @@ private:
 	{
         RenderUnitList* mRenderQueue[SE_RQ_NUM];
         SE_RenderTargetID mRenderTargetID;
+        SE_RenderTargetSeq mRenderTargetSeq;
 		_RenderTargetUnit()
 		{
 			for(int i = 0 ; i < SE_RQ_NUM ; i++)
@@ -66,7 +67,7 @@ private:
 	_RenderTargetUnit* findTarget(_SceneRenderUnit* sceneRenderUnit, const SE_RenderTargetID& id);
 	static bool CompareRenderTarget(_RenderTargetUnit* first, _RenderTargetUnit* second)
 	{
-		if(first->mRenderTargetID < second->mRenderTargetID)
+		if(first->mRenderTargetSeq < second->mRenderTargetSeq)
 		    return true;
 	    else
 		    return false;

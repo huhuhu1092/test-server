@@ -8,7 +8,6 @@ class SE_Value;
 class SE_ParamValueList;
 class SE_Primitive;
 class SE_Surface;
-
 class SE_TextureElement : public SE_2DNodeElement
 {
 public:
@@ -22,14 +21,17 @@ public:
     void update(SE_ParamValueList& paramValueList);
 	SE_Spatial* createSpatial();
 	SE_Element* clone();
+    void setRenderTargetID(const SE_RenderTargetID& renderTarget);
+    void setRenderTargetSeq(const SE_RenderTargetSeq& renderTargetSeq);
 protected:
 	void setImageData(SE_Primitive* primitive);
 	void setSurface(SE_Surface* surface);
 	void init();
+	SE_2DNodeElement* createChildContent();
 private:
 	SE_ImageDataID mImageDataID;
 	SE_ImageData* mImageData;
-	SE_RenderTargetID mRenderTargetID;
+	SE_RenderTargetID mContentRenderTargetID;
 	SE_2DNodeElement* mContentChild;
     bool mShareContent;
 };

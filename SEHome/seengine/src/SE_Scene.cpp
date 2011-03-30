@@ -11,13 +11,18 @@
 #include "SE_SpatialTravel.h"
 #include "SE_Geometry3D.h"
 #include "SE_Camera.h"
-SE_Scene::SE_Scene(SE_SCENE_TYPE t)
+#include "SE_TimeKey.h"
+SE_Scene::SE_Scene(SE_SCENE_TYPE t): mRenderTargetSeq(0xFFFFFFFF)
 {
     mWidth = mHeight = 0;
     mIsTranslucent = false;
     mSceneType = t;
 	mIsModel = true;
 	mSceneRenderSeq = -1;
+    mIsShow = false;
+    SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
+    SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
+    mRenderTargetID = renderTargetManager->add(renderTarget);
 }
 SE_Scene::~SE_Scene()
 {
@@ -64,6 +69,9 @@ void SE_Scene::create(const char* sceneName)
     mRoot = elementManager->add(SE_ElementID::NULLID, root, false);
     root->spawn();
     root->layout();
+    root->setRenderTargetID(mRenderTargetID);
+    root->setRenderTargetSeq(mRenderTargetSeq);
+	root->update(SE_TimeKey(0));
 }
 /*
 SE_SceneID SE_Scene::getID()
@@ -73,6 +81,9 @@ SE_SceneID SE_Scene::getID()
 */
 void SE_Scene::show()
 {
+    if(mIsShow)
+        return;
+    mIsShow = true;
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
     SE_Element* rootElement = elementManager->get(mRoot);
     if(rootElement)
@@ -113,27 +124,23 @@ SE_Element* SE_Scene::getRootElement()
     SE_Element* rootElement = elementManager->get(mRoot);
     return rootElement;
 }
-void SE_Scene::exit()
-{}
-void SE_Scene::hide()
+void SE_Scene::dismiss()
 {
-    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    SE_Element* rootElement = elementManager->get(mRoot);
-    if(rootElement)
-        rootElement->hide();
+    mIsShow = false;
+    SE_Spatial* spatial = getRootSpatial();
+    if(spatial)
+    {
+        SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+        SE_Spatial* s = spatialManager->remove(spatial->getID());
+        SE_ASSERT(s == spatial);
+        spatialManager->release(spatial, SE_RELEASE_NO_DELAY);
+    }
 }
 void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager)
 {
-    SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
-    SE_RenderTargetID oldID = mRenderTargetID;
-	if(mRenderTargetID == SE_RenderTargetID::INVALID)
-    {
-        SE_RenderTarget* renderTarget = new SE_FrameBufferTarget;
-        
-        mRenderTargetID = renderTargetManager->add(renderTarget);
-    }        
     SE_Element* rootElement = getRootElement();
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_RenderTargetManager* renderTargetManager = SE_GET_RENDERTARGETMANAGER();
 	SE_Spatial* rootSpatial = NULL;
 	if(rootElement)
 	    rootSpatial = spatialManager->get(rootElement->getSpatialID());
@@ -144,9 +151,8 @@ void SE_Scene::render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderMana
 		{
 			mSceneRenderSeq = seq;
             rootElement->setSceneRenderSeq(seq);
+            rootSpatial->setSceneRenderSeq(seq);
 		}
-		if(oldID == SE_RenderTargetID::INVALID)
-            rootElement->setRenderTargetID(mRenderTargetID);
 	    SE_RenderTarget* renderTarget = renderTargetManager->get(mRenderTargetID);
         renderTarget->setBackground(mBackground);
         if(mIsTranslucent)

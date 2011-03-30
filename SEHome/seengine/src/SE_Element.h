@@ -121,7 +121,7 @@ public:
 	{
 		mOwnRenderTargetCamera = own;
 	}
-    int getSeqNum() const
+	std::string getSeqNum() const
 	{
 		return mSeqNum;
 	}
@@ -200,9 +200,6 @@ public:
 	{
 		mNextElement = next;
 	}
-    void setRenderTargetSeq(const SE_RenderTargetSeq& seq);
-    void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
-    void setRenderTargetID(const SE_RenderTargetID& renderTarget);
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;
@@ -213,7 +210,7 @@ public:
     }
     SE_RenderTargetID getRenderTargetID() const
     {
-        return mRenderTarget;
+        return mRenderTargetID;
     }
     void travel(SE_ElementTravel* travel);
 	void setClickHandler(SE_ElementClickHandler* clickHandler)
@@ -280,6 +277,9 @@ public:
 	virtual SE_Element* clone();
 	virtual bool dispatchMotionEvent(const SE_MotionEvent& motionEvent);
 	virtual bool dispatchKeyEvent(const SE_KeyEvent& keyEvent);
+    virtual void setRenderTargetID(const SE_RenderTargetID& renderTarget);
+    virtual void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
+    virtual void setRenderTargetSeq(const SE_RenderTargetSeq& seq);
     virtual void show();
     virtual void hide();
     //dismiss will make spatial node and other resource remove 
@@ -329,7 +329,7 @@ protected:
     std::vector<SE_SimObjectID> mSimObjectIDArray;
     std::vector<SE_PrimitiveID> mPrimitiveIDArray;
     SE_AnimationID mAnimationID;
-    SE_RenderTargetID mRenderTarget;
+    SE_RenderTargetID mRenderTargetID;
     bool mOwnRenderTargetCamera;
     bool mNeedUpdateTransform;
     SE_SceneRenderSeq mSceneRenderSeq;

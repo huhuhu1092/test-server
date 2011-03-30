@@ -245,7 +245,7 @@ SE_RenderManager::_RenderTargetUnit* SE_RenderManager::findTarget(_SceneRenderUn
 	}
 	return NULL;
 }
-void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq)
+void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq& sceneRenderSeq, const SE_RenderTargetSeq& renderTargetSeq,const SE_RenderTargetID& renderTarget, SE_RENDER_QUEUE rq)
 {
     SE_ASSERT(sceneRenderSeq >= 0 && sceneRenderSeq < SE_MAX_RENDERSCENE_SIZE);
     _SceneRenderUnit* sceneRenderUnit = mSceneRenderUnit[sceneRenderSeq.toInt()];
@@ -254,8 +254,10 @@ void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq&
 	{
 	    rt = new _RenderTargetUnit;
 	    rt->mRenderTargetID = renderTarget;
+        rt->mRenderTargetSeq = renderTargetSeq;
 	    sceneRenderUnit->renderTargetUnit.push_back(rt);
 	}
+    SE_ASSERT(rt->mRenderTargetID == renderTarget, rt->mRenderTargetSeq == renderTargetSeq);
     rt->mRenderQueue[rq]->push_back(ru);
 }
 

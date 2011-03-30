@@ -250,4 +250,9 @@ protected:
     typedef std::map<std::string, SE_Game*> _GameMap;
     _GameMap mGameMap;
 };
+#define SE_GET_RESOURCEMANAGER() SE_Application::getInstance()->getResourceManager()
+#define SE_GET_ELEMENTMANAGER() SE_Application::getInstance()->getElementManager()
+#define SE_GET_SPATIALMANAGER() SE_Application::getInstance()->getSpatialManager()
+#define SE_GET_SCENEMANAGER() SE_Application::getInstance()->getSceneManager()
+#define SE_GET_RENDERTARGETMANAGER() SE_Application::getInstance()->getRenderTargetManager()
 #endif
