@@ -258,7 +258,7 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
     ekEqual.justCompareLayer = false;
     mEndKeyList.remove_if(ekEqual);
 }
-void SE_Action::createElement(SE_ActionElement* parent)
+void SE_Action::createElement(SE_ActionElement* parent, const SE_TimeKey& timeKey)
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	parent->clearMountPoint();
@@ -283,7 +283,7 @@ void SE_Action::createElement(SE_ActionElement* parent)
 			e->setTimeKey(keys[i]);
 			e->setStartKey(actionLayer->startkey);
 			e->setEndKey(actionLayer->endkey);
-			elementManager->add(parent, e);
+			elementManager->add(parent->getID(), e, true);
 			//e->setParent(parent);
 			if(prev)
 			{

@@ -28,6 +28,7 @@
 #include "SE_CChess.h"
 #include "SE_Remote.h"
 #include "SE_ChessCommand.h"
+#include "SE_Scene.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -301,6 +302,11 @@ void SEDemo::handleInput(int width, int height)
 		//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 		//SE_Element* root = elementManager->getRoot();
 		//root->startAnimation();
+		SE_SceneManager* sceneManager = SE_GET_SCENEMANAGER();
+		SE_SceneID sceneID = sceneManager->top();
+		SE_Scene* scene = sceneManager->get(sceneID);
+		SE_Element* root = scene->getRootElement();
+		root->startAnimation();
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))

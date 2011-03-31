@@ -56,9 +56,7 @@ SE_Spatial* SE_ActionElement::createSpatial()
 	if(!mAction)
 		return NULL;
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_CommonNode* node = new SE_CommonNode;
-	node->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
-    node->setLocalLayer(mLocalLayer);
+    SE_Spatial* node = createNode();
 	std::vector<SE_Element*> children = getChildren();
 	std::vector<SE_Element*>::iterator it;
 	for(it = children.begin() ; it != children.end() ; it++)

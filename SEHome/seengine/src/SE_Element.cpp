@@ -436,6 +436,146 @@ void SE_Element::dismiss()
 	animManager->release(anim);
 
 }
+void SE_Element::startAnimation()
+{
+    if(mAnimation)
+    {
+        SE_AnimationManager* animationManager = SE_GET_ANIMATIONMANAGER();
+        SE_Animation* newAnim = mAnimation->clone();
+        SE_AnimationID animID = getAnimationID();
+        SE_Animation* old = animationManager->remove(animID);
+        animationManager->release(old);
+        animID = animationManager->add(newAnim);
+        setAnimationID(animID);
+        newAnim->run();
+    }
+    std::vector<SE_Element*> children = getChildren();
+    for(int i = 0 ; i < children.size() ; i++)
+    {
+        SE_Element* e = children[i];
+        e->startAnimation();
+    }
+}
+void SE_Element::stopAnimation()
+{
+    if(mAnimation)
+    {
+        SE_AnimationManager* animationManager = SE_GET_ANIMATIONMANAGER();
+        SE_Animation* runAnim = animationManager->get(mAnimationID);
+        if(runAnim)
+        {
+            runAnim->pause();
+        }
+    }
+    std::vector<SE_Element*> children = getChildren();
+    for(int i = 0 ; i < children.size() ; i++)
+    {
+        SE_Element* e = children[i];
+        e->stopAnimation();
+    }
+}
+
+void SE_Element::nextFrame()
+{
+    if(mAnimation)
+    {
+        SE_AnimationManager* animationManager = SE_GET_ANIMATIONMANAGER();
+        SE_Animation* runAnim = animationManager->get(mAnimationID);
+        if(runAnim)
+        {
+            int frame = runAnim->getCurrentFrame();
+            std::vector<SE_TimeKey> keys = runAnim->getKeys();
+            std::vector<SE_TimeKey>::iterator it;
+            for(it = keys.begin() ; it != keys.end() ; it++)
+            {
+                if(it->toInt() > (unsigned int)frame)
+                    break;
+            }
+            if(it != keys.end())
+            {
+                runAnim->setCurrentFrame(it->toInt());
+                this->update(*it);
+            }
+            else
+            {
+                it = keys.begin();
+				runAnim->setCurrentFrame(it->toInt());
+                this->update(*it);
+            }
+        }
+    }
+    std::vector<SE_Element*> children = getChildren();
+    for(int i = 0 ; i < children.size() ; i++)
+    {
+        SE_Element* e = children[i];
+        e->nextFrame();
+    }  
+}
+void SE_Element::prevFrame()
+{
+    if(mAnimation)
+    {
+        SE_AnimationManager* animationManager = SE_GET_ANIMATIONMANAGER();
+        SE_Animation* runAnim = animationManager->get(mAnimationID);
+        if(runAnim)
+        {
+            int frame = runAnim->getCurrentFrame();
+            std::vector<SE_TimeKey> keys = runAnim->getKeys();
+            std::vector<SE_TimeKey>::reverse_iterator it;
+            for(it = keys.rbegin() ; it != keys.rend() ; it++)
+            {
+                if(it->toInt() < (unsigned int)frame)
+                    break;
+            }
+            if(it != keys.rend())
+            {
+                it++;
+            }
+            if(it != keys.rend())
+            {
+                runAnim->setCurrentFrame(it->toInt());
+                this->update(*it);
+            }
+            else
+            {
+                it = keys.rbegin();
+				runAnim->setCurrentFrame(it->toInt());
+                this->update(*it);
+            }
+        }
+    }
+    std::vector<SE_Element*> children = getChildren();
+    for(int i = 0 ; i < children.size() ; i++)
+    {
+        SE_Element* e = children[i];
+        e->prevFrame();
+    }
+}
+bool SE_Element::isAnimationEnd()
+{
+    bool end = true;
+    if(mAnimation)
+    {
+        SE_AnimationManager* animationManager = SE_GET_ANIMATIONMANAGER();
+        SE_Animation* runAnim = animationManager->get(mAnimationID);
+        if(runAnim)
+        {
+            if(runAnim->isEnd())
+                end = true;
+            else
+                end = false;
+        }
+    }
+    std::vector<SE_Element*> children = getChildren();
+    for(int i = 0 ; i < children.size() ; i++)
+    {
+        SE_Element* e = children[i];
+        bool el = e->isAnimationEnd();
+        if(el == false && end == true)
+            end = false;
+    }    
+    return end;
+}
 void SE_Element::hide()
 {}
 void SE_Element::show()

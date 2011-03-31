@@ -80,10 +80,7 @@ SE_Spatial* SE_SequenceElement::createSpatial()
 {
 	if(!mSequence)
 		return NULL;
-    SE_CommonNode* node = new SE_CommonNode;
-	node->setLocalTranslate(SE_Vector3f(mLeft , mTop , 0));
-    node->setLocalLayer(mLocalLayer);
-	return node;
+    return createNode();
 }
 void SE_SequenceElement::update(const SE_TimeKey& key)
 {

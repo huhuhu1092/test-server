@@ -144,7 +144,7 @@ void SE_ColorEffectControllerElement::spawn()
 		e->setPivotX(f->getPivotX());
 		e->setPivotY(f->getPivotY());
 		e->setMountPointRef(f->getMountPointRef());
-		elementManager->add(this, e);
+		elementManager->add(this->getID(), e, true);
 		e->spawn();
 	}
 }

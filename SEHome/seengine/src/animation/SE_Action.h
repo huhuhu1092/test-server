@@ -248,6 +248,10 @@ public:
     {
         return mMountPointSet.getMountPoint(id);
     }
+    SE_MountPointSet getMountPoint() const
+    {
+        return mMountPoinstSet;
+    }
     void setPivotX(int pivotx)
     {
         mPivotX = pivotx;
@@ -264,7 +268,7 @@ public:
     {
         return mPivotY;
     }
-    void createElement(SE_ActionElement* parent);
+    void createElement(SE_ActionElement* parent, const SE_TimeKey& timeKey);
 public:
 	class _ActionLayer
 	{

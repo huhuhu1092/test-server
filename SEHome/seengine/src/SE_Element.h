@@ -184,6 +184,7 @@ public:
     {
         mRenderQueueSeq = q;
     }
+	/*
 	SE_Element* getPrev() const
 	{
 		return mPrevElement;
@@ -200,6 +201,7 @@ public:
 	{
 		mNextElement = next;
 	}
+	*/
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;
@@ -262,6 +264,7 @@ public:
 	{
 		mNeedUpdateStateFromParent = s;
 	}
+
 	static SE_StringID getStateName(int state);
 	static int getStateFromName(const char* name);
 public:
@@ -289,6 +292,12 @@ public:
 	virtual bool click();
     virtual void onStateChange(int newState, int oldState);
 	virtual void justUpdateSpatial(SE_Spatial* spatial) {}
+    virtual void startAnimation();
+    virtual void stopAnimation();
+    virtual void nextFrame();
+    virtual void prevFrame();
+    virtual bool isAnimationEnd();
+
 private:
 	class _DeleteURI : public SE_ObjectManagerVisitor<int, SE_URI>
 	{
@@ -323,8 +332,8 @@ protected:
     SE_KeyFrameController* mKeyFrameController;
 	SE_ObjectManager<int , SE_URI> mStateURIManager;
     /////////////
-    SE_Element* mPrevElement;
-    SE_Element* mNextElement;
+    //SE_Element* mPrevElement;
+    //SE_Element* mNextElement;
     SE_SpatialID mSpatialID;
     std::vector<SE_SimObjectID> mSimObjectIDArray;
     std::vector<SE_PrimitiveID> mPrimitiveIDArray;
