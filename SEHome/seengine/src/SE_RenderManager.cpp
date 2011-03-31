@@ -257,7 +257,7 @@ void SE_RenderManager::addRenderUnit(SE_RenderUnit* ru, const SE_SceneRenderSeq&
         rt->mRenderTargetSeq = renderTargetSeq;
 	    sceneRenderUnit->renderTargetUnit.push_back(rt);
 	}
-    SE_ASSERT(rt->mRenderTargetID == renderTarget, rt->mRenderTargetSeq == renderTargetSeq);
+    SE_ASSERT(rt->mRenderTargetID == renderTarget && rt->mRenderTargetSeq == renderTargetSeq);
     rt->mRenderQueue[rq]->push_back(ru);
 }
 

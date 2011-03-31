@@ -56,6 +56,7 @@ LOCAL_C_INCLUDES += bionic \
 LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./2D/SE_2DElement.cpp \
 				./animation/SE_Action.cpp \
+				./2D/SE_ActionElement.cpp \
 				./animation/SE_Animation.cpp \
 				./SE_AnimationManager.cpp \
 				./animation/SE_AnimationSet.cpp \
@@ -74,6 +75,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./font/SE_CharCodeDefine.cpp \
 				./checkxml/SE_CheckXml.cpp \
 				./animation/SE_ColorEffectController.cpp \
+				./2D/SE_ColorEffectControllerElement.cpp \
 				./SE_Command.cpp \
 				./SE_CommandFactory.cpp \
 				./SE_Common.cpp \
@@ -98,6 +100,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_ID.cpp \
 				./SE_ImageCodec.cpp \
 				./SE_ImageData.cpp \
+				./2D/SE_ImageElement.cpp \
 				./2D/SE_ImageMap.cpp \
 				./2D/SE_ImageTable.cpp \
 				./SE_InputEvent.cpp \
@@ -136,6 +139,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_ResourceManager.cpp \
 				./SE_Scene.cpp \
 				./SE_SceneManager.cpp \
+				./2D/SE_SequenceElement.cpp \
 				./animation/SE_Sequence.cpp \
 				./SE_ShaderProgram.cpp \
 				./SE_ShaderProperty.cpp \
@@ -147,12 +151,14 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_SpatialManager.cpp \
 				./SE_SpatialTravel.cpp \
 				./2D/SE_StateTable.cpp \
+				./2D/SE_StateTableElement.cpp \
 				./SE_Struct.cpp \
 				./command/SE_SystemCommand.cpp \
 				./command/SE_SystemCommandFactory.cpp \
 				./2D/SE_TableManager.cpp \
 				./test/SE_TestCommand.cpp \
 				./SE_Texture.cpp \
+				./2D/SE_TextureElement.cpp \
 				./2D/SE_TextureCoordAnimation.cpp \
 				./SE_TextureCoordData.cpp \
 				./ui/SE_TextView.cpp \
