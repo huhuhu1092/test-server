@@ -170,9 +170,13 @@ public:
 		{
 			return mWidth;
 		}
-		else
+		else if(mDataPower2)
 		{
             return mWidthPower2;
+		}
+		else
+		{
+			return mWidth;
 		}
     }
     int getHeightPower2() const
@@ -181,10 +185,12 @@ public:
 		{
 			return mHeight;
 		}
-		else
+		else if(mDataPower2)
 		{
             return mHeightPower2;
 		}
+		else
+			return mHeight;
     }
     int getBytesPerRowPower2() const
     {
@@ -192,10 +198,12 @@ public:
 		{
 			return mBytesPerRow;
 		}
-		else
+		else if(mDataPower2)
 		{
             return mBytesPerRowPower2;
 		}
+		else
+			return mBytesPerRow;
     }
     bool isSizePower2() const;
     char* getDataPower2();

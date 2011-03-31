@@ -24,8 +24,8 @@ char* SE_ImageData::getDataPower2()
     if(size == 0)
         return NULL;
 	char* data = NULL;
-    int starty = (power2Height - mHeight) >> 1;
-    int startx = (power2Width - mWidth) >> 1;
+    int starty = 0;
+    int startx = 0;
 	if(getData() != NULL)
 	{
         data = new char[size];
@@ -33,6 +33,8 @@ char* SE_ImageData::getDataPower2()
             return NULL;
         memset(data, 0, size);
         char* src = getData();
+	    starty = (power2Height - mHeight) >> 1;
+        startx = (power2Width - mWidth) >> 1;
         for(int y = 0 ; y < mHeight ; y++)
         {
             char* ydst = &data[(starty + y) * power2Width * pixelSize];
