@@ -54,6 +54,7 @@ void SE_TextureElement::init()
 	if(!imageData)
 	{
 		imageData = new SE_ImageData;
+		imageData->setIsFliped(true);
 		resourceManager->setImageData(imageDataID, imageData);
         mImageData = imageData;
         mImageDataID = imageDataID;
@@ -145,7 +146,7 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 	SE_TextureTarget* textureTarget = new SE_TextureTarget(mImageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
     mContentRenderTargetID = renderTargetManager->add(textureTarget);
-	textureTarget->setBackground(SE_Vector4f(0, 0, 0, 0));
+	textureTarget->setBackground(SE_Vector4f(1.0, 0, 0, 1.0));
 	mContentChild->setRenderTargetID(mContentRenderTargetID);
 	float ratio = mHeight / mWidth;
 	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
@@ -157,7 +158,7 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 #if defined(ROTATE)
 	camera->create(v, SE_Vector3f(0, -1, 0), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 #else
-	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
+	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 #endif
 	camera->setViewport(0, 0, (int)mWidth, (int)mHeight);
 	mImageData->setWidth((int)mWidth);

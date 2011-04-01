@@ -17,8 +17,8 @@ static void checkGLError()
 static GLuint loadShader(GLenum type, const char* shaderSrc)
 {
 	////debug
-    unsigned char* ttt = (unsigned char*)glGetString(GL_EXTENSIONS);
-	LOGI("#### gl extension: %s #######\n", ttt);
+    //unsigned char* ttt = (unsigned char*)glGetString(GL_EXTENSIONS);
+	//LOGI("#### gl extension: %s #######\n", ttt);
 	////end
     GLuint shader;
     GLint compiled;
