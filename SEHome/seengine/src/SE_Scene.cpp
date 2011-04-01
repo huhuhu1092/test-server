@@ -68,10 +68,10 @@ void SE_Scene::create(const char* sceneName)
     }
     mRoot = elementManager->add(SE_ElementID::NULLID, root, false);
     root->spawn();
+	root->update(SE_TimeKey(0));
     root->layout();
     root->setRenderTargetID(mRenderTargetID);
     root->setRenderTargetSeq(mRenderTargetSeq);
-	root->update(SE_TimeKey(0));
 }
 /*
 SE_SceneID SE_Scene::getID()

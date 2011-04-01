@@ -2,9 +2,11 @@
 #include "SE_Application.h"
 #include "SE_ResourceManager.h"
 #include "SE_SpatialManager.h"
+#include "SE_ElementManager.h"
 #include "SE_Spatial.h"
 #include "SE_Action.h"
 #include "SE_CommonNode.h"
+#include "SE_ElementKeyFrameAnimation.h"
 #include <vector>
 SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 {
@@ -12,6 +14,8 @@ SE_ActionElement::SE_ActionElement(const SE_StringID& uri)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_StringID url = getURL();
 	mAction = resourceManager->getAction(url.getStr());
+    if(mAction)
+        setMountPoint(mAction->getMountPoint());
 }
 SE_Element* SE_ActionElement::clone()
 {
@@ -36,20 +40,21 @@ void SE_ActionElement::update(SE_ParamValueList& paramValueList)
     updateSpatial();
 	spatialManager->release(s);
 }
+void SE_ActionElement::layout()
+{
+    SE_2DNodeElement::layout(); 
+}
 void SE_ActionElement::spawn()
 {
 	if(!mAction)
 		return;
-	mAction->sort();
-	calculateRect(mAction->getPivotX(), mAction->getPivotY(), 0, 0);
-	mAction->createElement(this);
-	std::vector<SE_Element*> children = getChildren();
-	std::vector<SE_Element*>::iterator it;
-	for(it = children.begin() ; it != children.end() ; it++)
-	{
-		SE_Element* e = *it;
-		e->spawn();
-	}
+	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
+	anim->setElement(getID());
+	int frameRate = SE_Application::getInstance()->getFrameRate();
+	SE_TimeKey diff = mAction->getEndKey();
+	SE_TimeMS duration = diff.toInt() * frameRate;
+	anim->setDuration(duration);
+	this->setAnimation(anim);
 }
 SE_Spatial* SE_ActionElement::createSpatial()
 {
@@ -70,6 +75,26 @@ SE_Spatial* SE_ActionElement::createSpatial()
 }
 void SE_ActionElement::update(const SE_TimeKey& key)
 {
+    clearChildren();
+    std::list<SE_Element*> childElement = mAction->createElement(key);
+    SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
+    std::list<SE_Element*>::iterator it;
+    for(it = childElement.begin() ; it != childElement.end() ; it++)
+    {
+        if(*it)
+        {
+            elementManager->add(this->getID(), *it, true);
+        }
+    }
+	std::vector<SE_Element*> children = getChildren();
+	std::vector<SE_Element*>::iterator itChild;
+	for(itChild = children.begin() ; itChild != children.end() ; itChild++)
+	{
+		SE_Element* e = *itChild;
+		e->spawn();
+        e->update(key - e->getTimeKey());
+	}
+    /*
 	_HeadElementList::iterator it;
     for(it = mHeadElementList.begin() ; it != mHeadElementList.end() ; it++)
 	{
@@ -108,4 +133,5 @@ void SE_ActionElement::update(const SE_TimeKey& key)
 			first->update(key - first->getTimeKey());
 		}
 	}
+    */
 }

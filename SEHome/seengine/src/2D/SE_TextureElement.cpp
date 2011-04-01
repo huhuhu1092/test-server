@@ -140,6 +140,8 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
     mRenderTargetID = renderTarget;
     if(mShareContent)
         return;
+    if(mContentRenderTargetID.isValid())
+        return;
 	SE_TextureTarget* textureTarget = new SE_TextureTarget(mImageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
     mContentRenderTargetID = renderTargetManager->add(textureTarget);

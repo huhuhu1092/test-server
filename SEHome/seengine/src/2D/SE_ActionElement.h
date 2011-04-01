@@ -15,14 +15,17 @@ public:
 	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);
     void update(SE_ParamValueList& paramValueList);
+    /*
 	void addHeadElement(SE_Element* e)
 	{
 		mHeadElementList.push_back(e);
 	}
+    */
 	SE_Element* clone();
+    void layout();
 private:
 	SE_Action* mAction;
-	typedef std::list<SE_Element*> _HeadElementList;
-	_HeadElementList mHeadElementList;
+	//typedef std::list<SE_Element*> _HeadElementList;
+	//_HeadElementList mHeadElementList;
 };
 #endif

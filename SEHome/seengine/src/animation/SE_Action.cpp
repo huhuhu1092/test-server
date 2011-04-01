@@ -258,43 +258,68 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
     ekEqual.justCompareLayer = false;
     mEndKeyList.remove_if(ekEqual);
 }
-void SE_Action::createElement(SE_ActionElement* parent, const SE_TimeKey& timeKey)
+
+std::list<SE_Element*> SE_Action::createElement(const SE_TimeKey& timeKey)
 {
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	parent->clearMountPoint();
-	std::vector<SE_MountPoint> mountPoint = mMountPointSet.getMountPoint();
-	for(int i = 0 ; i < mountPoint.size() ; i++)
-	{
-		parent->addMountPoint(mountPoint[i]);
-	}
 	_ActionLayerList::iterator it;
+    std::list<SE_Element*> childElement;
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
 		_ActionLayer* actionLayer = *it;
 		std::vector<SE_TimeKey> keys = actionLayer->sequences.getKeys();
-		SE_Element* prev = NULL;
-		SE_Element* next = NULL;
-		SE_Element* first = NULL;
+        SE_ASSERT(keys.size() > 0);
 		for(int i = 0 ; i < keys.size() ; i++)
 		{
-			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[i]);
-			SE_Element* e = kf->data->createElement();
-			e->setLocalLayer(actionLayer->layer);
-			e->setTimeKey(keys[i]);
-			e->setStartKey(actionLayer->startkey);
-			e->setEndKey(actionLayer->endkey);
-			elementManager->add(parent->getID(), e, true);
-			//e->setParent(parent);
-			if(prev)
-			{
-				prev->setNext(e);
-			}
-			e->setPrev(prev);
-			e->setNext(next);
-			prev = e;
-            if(i == 0)
-				first = e;
+            if(keys[i] > timeKey)
+            {
+                if(i > 0)
+                {
+			        SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[i - 1]);
+			        SE_Element* e = kf->data->createElement();
+			        e->setLocalLayer(actionLayer->layer);
+			        e->setTimeKey(keys[i]);
+		   	        e->setStartKey(actionLayer->startkey);
+			        e->setEndKey(actionLayer->endkey);
+                    childElement.push_back(e);
+                }
+            }
 		}
-		parent->addHeadElement(first);
+        if(timeKey >= keys[keys.size() - 1])
+        {
+           	SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[keys.size() - 1]);
+		    SE_Element* e = kf->data->createElement();
+			e->setLocalLayer(actionLayer->layer);
+			e->setTimeKey(keys[keys.size() - 1]);
+		   	e->setStartKey(actionLayer->startkey);
+			e->setEndKey(actionLayer->endkey);
+            childElement.push_back(e); 
+        }
+        
 	}
+    return childElement;
+}
+SE_TimeKey SE_Action::getStartKey()
+{
+	_ActionLayerList::iterator it;
+    SE_TimeKey startKey(99999);
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+        _ActionLayer* actionLayer = *it;
+        if(actionLayer->startkey < startKey)
+            startKey = actionLayer->startkey;
+    }
+    return startKey;
+}
+SE_TimeKey SE_Action::getEndKey()
+{
+	_ActionLayerList::iterator it;
+    SE_TimeKey endKey(0);
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+        _ActionLayer* actionLayer = *it;
+        if(actionLayer->endkey > endKey)
+            endKey = actionLayer->endkey;
+    }
+    return endKey;
 }

@@ -2512,6 +2512,7 @@ void SE_ActionHandler::handle(SE_ActionMapSet* parent, TiXmlElement* xmlElement,
 		SE_XmlElementCalculus<SE_Action, _ActionContainer> m(pro);
         m.handleXmlChild(action, pChild, i++);
     }      
+    action->sort();
 }
 
 void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElement, unsigned int indent)

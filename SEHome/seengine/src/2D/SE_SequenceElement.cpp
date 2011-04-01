@@ -13,7 +13,15 @@ SE_SequenceElement::SE_SequenceElement(const SE_StringID& uri)
 	SE_StringID url = getURL();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mSequence = resourceManager->getSequence(url.getStr());
-	mCurrentElement = NULL;
+    if(mSequence)
+    {
+        std::vector<SE_MountPoint> mountPoints = mSequence->getMountPoint();
+	    for(int i = 0 ; i < mountPoints.size(); i++)
+	    {
+		    mMountPointSet.addMountPoint(mountPoints[i]);
+	    }
+    }
+	//mCurrentElement = NULL;
 }
 void SE_SequenceElement::update(const SE_AddressID& address, const SE_Value& value)
 {
@@ -39,6 +47,10 @@ void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
     update(0);
     updateSpatial();
 }
+void SE_SequenceElement::layout()
+{
+    SE_2DNodeElement::layout();
+}
 int SE_SequenceElement::getKeyFrameNum()
 {
 	if(!mSequence)
@@ -50,14 +62,16 @@ void SE_SequenceElement::spawn()
 {
 	if(!mSequence)
 		return;
-	calculateRect(mSequence->getPivotX(), mSequence->getPivotY(), 0, 0);
-    mMountPointSet.clearMountPoint();
-	std::vector<SE_MountPoint> mountPoints = mSequence->getMountPoint();
-	for(int i = 0 ; i < mountPoints.size(); i++)
-	{
-		mMountPointSet.addMountPoint(mountPoints[i]);
-	}
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    std::list<SE_Element*> childElement = mSequence->createElement(SE_TimeKey(0));
+    std::list<SE_Element*>::iterator it;
+    for(it = childElement.begin() ; it != childElement.end() ; it++)
+    {
+        SE_Element* e = *it;
+        elementManager->add(this->getID(), e, true);
+        e->spawn();
+    }
+    /*
 	std::vector<SE_TimeKey> keys = mSequence->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
 	{
@@ -68,22 +82,29 @@ void SE_SequenceElement::spawn()
 		elementManager->add(this->getID(), e, true);
 		e->spawn();
 	}
-	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
-	anim->setElement(this);
-	int frameRate = SE_Application::getInstance()->getFrameRate();
-	SE_TimeKey diff = (this->getEndKey() - this->getStartKey());
-	SE_TimeMS duration = diff.toInt() * frameRate;
-	anim->setDuration(duration);
-	this->setAnimation(anim);
+    */
+
 }
 SE_Spatial* SE_SequenceElement::createSpatial()
 {
 	if(!mSequence)
 		return NULL;
-    return createNode();
+	return SE_2DNodeElement::createSpatial();
 }
 void SE_SequenceElement::update(const SE_TimeKey& key)
 {
+    clearChildren();
+    std::list<SE_Element*> childElement = mSequence->createElement(key);
+    std::list<SE_Element*>::iterator it;
+    SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
+    for(it = childElement.begin() ; it != childElement.end() ; it++)
+    {
+        SE_Element* e = *it;
+        elementManager->add(this->getID(), e, true);
+        e->spawn();
+        e->update(key - e->getTimeKey());
+    }
+    /*
 	std::vector<SE_Element*> children = getChildren();
 	if(children.empty())
 		return;
@@ -91,7 +112,6 @@ void SE_SequenceElement::update(const SE_TimeKey& key)
 	SE_Element* first = NULL;
 	SE_Element* second = NULL;
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-	SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	std::vector<SE_Element*>::iterator currIt = children.end();
 	for(it = children.begin() ; it != children.end() ; it++)
@@ -147,5 +167,6 @@ void SE_SequenceElement::update(const SE_TimeKey& key)
 		spatial->updateWorldLayer();
 		spatial->updateWorldTransform();
 		mCurrentElement = (SE_2DNodeElement*)first;
-	}
+	}}
+    */
 }

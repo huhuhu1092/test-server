@@ -21,6 +21,8 @@ public:
     void restore();
     void end();
     void nextFrame(SE_TimeMS realDelta, SE_TimeMS simulateDeltaTime);
+    //if duration == 0, it will player animation for ever, until you 
+    //end the animation by invoke end() function
     void setDuration(SE_TimeMS duration)
     {
         mDuration = duration;

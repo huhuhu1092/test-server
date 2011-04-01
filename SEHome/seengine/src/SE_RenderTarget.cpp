@@ -58,6 +58,7 @@ struct SE_TextureTarget::Impl
 SE_TextureTarget::SE_TextureTarget(SE_ImageData* imageData) : mImageData(imageData)
 {
 	mImpl = new SE_TextureTarget::Impl;
+	mRenderTargetType = TEXTURE;
 }
 SE_TextureTarget::~SE_TextureTarget()
 {

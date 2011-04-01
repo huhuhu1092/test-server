@@ -4,6 +4,8 @@
 #include "SE_ID.h"
 #include "SE_MountPoint.h"
 #include "SE_KeyFrame.h"
+#include <list>
+class SE_Element;
 class SE_Sequence
 {
 public:
@@ -37,6 +39,7 @@ public:
     {
         return mPivotY;
     }
+    std::list<SE_Element*> createElement(const SE_TimeKey& timeKey);
 private:
     int mPivotX;
     int mPivotY;

@@ -8,8 +8,8 @@
 #include "SE_MountPoint.h"
 #include "SE_ColorEffectController.h"
 #include "SE_TimeKey.h"
+#include <list>
 class SE_Element;
-class SE_ActionElement;
 class SE_ActionUnit
 {
 public:
@@ -250,7 +250,7 @@ public:
     }
     SE_MountPointSet getMountPoint() const
     {
-        return mMountPoinstSet;
+        return mMountPointSet;
     }
     void setPivotX(int pivotx)
     {
@@ -268,7 +268,9 @@ public:
     {
         return mPivotY;
     }
-    void createElement(SE_ActionElement* parent, const SE_TimeKey& timeKey);
+    std::list<SE_Element*> createElement(const SE_TimeKey& timeKey);
+    SE_TimeKey getStartKey();
+    SE_TimeKey getEndKey();
 public:
 	class _ActionLayer
 	{

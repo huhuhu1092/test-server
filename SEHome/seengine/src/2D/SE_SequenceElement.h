@@ -9,6 +9,7 @@ class SE_SequenceElement : public SE_2DNodeElement
 public:
 	SE_SequenceElement(const SE_StringID& uri);
     void spawn();
+    void layout();
 	SE_Spatial* createSpatial();
 	void update(const SE_TimeKey& key);
     void update(const SE_AddressID& address, const SE_Value& value);

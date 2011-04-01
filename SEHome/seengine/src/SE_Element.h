@@ -214,6 +214,7 @@ public:
     {
         return mRenderTargetID;
     }
+    SE_Element* getRoot();
     void travel(SE_ElementTravel* travel);
 	void setClickHandler(SE_ElementClickHandler* clickHandler)
 	{

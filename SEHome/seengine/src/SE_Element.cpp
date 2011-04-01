@@ -235,12 +235,14 @@ void SE_Element::setCanPointed(bool b)
 void SE_Element::setRenderTargetSeq(const SE_RenderTargetSeq& seq)
 {
     mRenderTargetSeq = seq;
+    /*
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
 		spatial->setRenderTargetSeq(seq);
 	}
+    */
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
     {
@@ -278,12 +280,14 @@ void SE_Element::setRenderTargetID(const SE_RenderTargetID& renderTarget)
     {
         mRenderTargetID = renderTarget;
     }
+    /*
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->get(mSpatialID);
     if(spatial)
 	{
 		spatial->setRenderTarget(mRenderTargetID);
 	}
+    */
     std::vector<SE_Element*> children = getChildren();
     if(!children.empty())
     {
@@ -725,6 +729,17 @@ void SE_Element::setState(int state, bool update)
         return;
     onStateChange(mState, oldState);
 }
+SE_Element* SE_Element::getRoot()
+{
+    SE_Element* p = this;
+    SE_Element* parent = getParent();
+    while(parent)
+    {
+        p = parent;
+        parent = parent->getParent();
+    }
+    return p;
+}
 SE_Element* SE_Element::findByName(const char* name)
 {
 	SE_StringID str(name);
@@ -936,6 +951,7 @@ SE_Spatial* SE_2DNodeElement::createNode()
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->createSpatial(mSpatialType);
 	spatial->setRenderTarget(mRenderTargetID);
+	spatial->setRenderTargetSeq(mRenderTargetSeq);
 	spatial->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 	spatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
 	spatial->setNeedUpdateTransform(mNeedUpdateTransform);
@@ -1000,6 +1016,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         geom->setLocalLayer(mLocalLayer);
 	    geom->setElementID(getID());
 	    geom->setRenderTarget(mRenderTargetID);
+        geom->setRenderTargetSeq(mRenderTargetSeq);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 		geom->setName(getName().getStr());
         mPrimitiveIDArray[0] = primitiveID;
