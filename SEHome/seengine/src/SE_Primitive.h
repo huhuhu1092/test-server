@@ -306,8 +306,17 @@ private:
         SE_Vector2f tex[16];
     };
     void createGeometryData();
-    _TexCoordSet calculateImageFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
-    _TexCoordSet calculateImageNoFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy);
+    _TexCoordSet calculateImage(SE_RECTPATCH_TYPE t, float startx, float starty, 
+		                        float portionx, float portiony, 
+								float portionw, float portionh, 
+								float power2Width, float power2Height, 
+								float stepx, float stepy, bool isFliped);
+    _TexCoordSet calculateImageNoFliped(SE_RECTPATCH_TYPE t, 
+		                                float startx, float starty, 
+										float portionx, float portiony, 
+										float portionw, float portionh, 
+										float power2Width, float power2Height, 
+										float stepx, float stepy);
     void setTextureCoord(const _TexCoordSet& texCoordSet, int texCoordDataIndex, int v0 , int v1, int v2, int v3);
 private:
     SE_RECTPATCH_TYPE mType;

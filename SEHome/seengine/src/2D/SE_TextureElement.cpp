@@ -156,7 +156,7 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 	SE_Vector3f v(left , top , 10);
 	camera->setLocation(v);
 #if defined(ROTATE)
-	camera->create(v, SE_Vector3f(0, -1, 0), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
+	camera->create(v, SE_Vector3f(0, -1, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 #else
 	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 #endif

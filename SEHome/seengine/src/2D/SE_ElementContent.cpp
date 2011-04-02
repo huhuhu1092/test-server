@@ -31,6 +31,19 @@ void SE_ElementContent::setRectPatchType(const SE_StringID& type)
 	else
 		mRectPatchType = SE_NO_PATCH;
 }
+void SE_ElementContent::setFileType(const SE_StringID& type)
+{
+    if(type == "fillparent")
+    {
+        mFillType == SE_FILL_PARENT;
+    }
+    else if(type == "tileparent")
+    {
+        mFillType = SE_TILE_PARENT;
+    }
+    else
+        mFillType = SE_WRAP_CONTENT;
+}
 ///////////////////////////////////////
 SE_ImageContent::SE_ImageContent(const SE_StringID& imageURI)
 {
@@ -73,6 +86,7 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
     rete->setState(getState());
 	rete->setRectPatchType(getRectPatchType());
     rete->setCanPointed(getCanPointed());
+    rete->setFillType(mFillType);
 	return rete;
 }
 SE_ActionContent::SE_ActionContent(const SE_StringID& actionURI)

@@ -45,5 +45,7 @@ private:
 	SE_ImageUnit mAChannel;
 	SE_ImageUnit mBaseColor;
 	_ImageUnitData mImageUnits[IMG_SIZE];
+    float mImageWidth;
+    float mImageHeight;
 };
 #endif

@@ -68,6 +68,11 @@ public:
 	{
 		return mID;
 	}
+    void setFileType(const SE_StringID& type);
+    SE_2DELEMENT_FILLTYPE getFillType() const
+    {
+        return mFillType;
+    }
 private:
 	SE_StringID mID;
     SE_ElementSchema* mParent;
@@ -76,6 +81,7 @@ private:
 	int mRectPatchType;
     bool mCanPointed;
     std::string mSeq;
+    SE_2DELEMENT_FILLTYPE  mFillType;
 };
 class SE_ImageContent : public SE_ElementContent
 {

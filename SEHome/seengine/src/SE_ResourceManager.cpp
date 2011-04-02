@@ -2152,6 +2152,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	SE_StringID id;
     SE_StringID state;
 	SE_StringID patchType;
+    SE_StringID fillType;
     bool canpointed = true;
 	while(pAttribute)
     {
@@ -2186,6 +2187,10 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
                 LOGI("... parse x value error\n");
             }
         }
+        else if(!strcmp(name, "filltype"))
+        {
+            tileType = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
     if(!id.isValid())
@@ -2193,6 +2198,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
         id = str.c_str();
     }
+    imageContent->setFillType(fillType);
 	imageContent->setID(id);
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);

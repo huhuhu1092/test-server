@@ -16,6 +16,8 @@ SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
     mImageUnits[2].imageUnit = &mGChannel;
 	mImageUnits[3].imageUnit = &mBChannel;
     mImageUnits[4].imageUnit = &mAChannel;
+    mImageWidth = 0;
+    mImageHeight = 0;
     initImage();
 }
 SE_Element* SE_ImageElement::clone()
@@ -212,14 +214,36 @@ void SE_ImageElement::spawn()
 		pivotx = iu.imageRect.pivotx;
 		pivoty = iu.imageRect.pivoty;
 	}
-	mPivotX = pivotx;
-	mPivotY = pivoty;
-	mWidth = width;
-	mHeight = height;
+    mImageWidth = width;
+    mImageHeight = height;
+    SE_ASSERT(mImageWidth != 0);
+    SE_ASSERT(mImaegHeight != 0);
+    if(mFillType == SE_WRAP_CONTENT)
+    {
+	    mPivotX = pivotx;
+	    mPivotY = pivoty;
+	    mWidth = width;
+	    mHeight = height;
+    }
+    else
+    {
+        SE_Element* parent = getParent();
+        SE_ASSERT(parent);
+        mWidth = parent->getWidth();
+        mHeight = parent->getHeight();
+    }
 }
 void SE_ImageElement::layout()
 {
-	SE_2DNodeElement::layout();
+    if(mFillType == SE_WRAP_CONTENT)
+    {
+	    SE_2DNodeElement::layout();
+    }
+    else
+    {
+        setLeft(0);
+        setTop(0);
+    }
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {

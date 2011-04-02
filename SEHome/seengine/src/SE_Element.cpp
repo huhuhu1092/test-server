@@ -763,6 +763,7 @@ SE_2DNodeElement::SE_2DNodeElement()
     mSpatialType = SE_COMMON_NODE_TYPE;
 	mRectPatchType = SE_NO_PATCH;
 	mUpdateFromMountPointID = true;
+    mFillType = SE_WRAP_CONTENT;
 }
 SE_2DNodeElement::~SE_2DNodeElement()
 {
@@ -1006,7 +1007,8 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         mSimObjectIDArray.resize(1);
         mPrimitiveIDArray.resize(1);
 	    SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray, meshNum, OWN);
-        simObject->setPrimitiveType(TRIANGLES_INDEX);
+        //simObject->setPrimitiveType(TRIANGLES_INDEX);
+        
 	    simObject->setName(mFullPathName.getStr());
         SE_SimObjectID simObjectID = simObjectManager->add(simObject);
         geom = new SE_Geometry;
@@ -1039,7 +1041,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         for(int i = 0 ; i < meshNum ; i++)
         {
 	        SE_MeshSimObject* simObject = new SE_MeshSimObject(meshArray[i], OWN);
-            simObject->setPrimitiveType(TRIANGLES_INDEX);
+            //simObject->setPrimitiveType(TRIANGLES_INDEX);
 	        simObject->setName(mFullPathName.getStr());
             SE_SimObjectID simObjectID = simObjectManager->add(simObject);
             childGeom[i] = new SE_Geometry;

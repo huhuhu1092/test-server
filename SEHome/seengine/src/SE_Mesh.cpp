@@ -290,7 +290,7 @@ void SE_Surface::getVertexIndex(int*& index, int& indexNum)
         mIndex[k++] = f.z;
     } 
     index = mIndex;
-    indexNum = indexNum;
+    indexNum = mIndexNum;
 }
 void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
 {

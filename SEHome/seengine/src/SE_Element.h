@@ -355,6 +355,7 @@ protected:
 class SE_2DNodeElement : public SE_Element, public SE_Object
 {
 public:
+    enum FILL_TYPE {FILL, TILE};
     SE_2DNodeElement();
     ~SE_2DNodeElement();
 	void setRect(float left, float top, float width, float height)
@@ -477,6 +478,14 @@ public:
 	{
 		return mRectPatchType;
 	}
+    void setFillType(SE_2DELEMENT_FILLTYPE t )
+    {
+        mFillType = t;
+    }
+    SE_2DELEMENT_FILLTYPE getFillType() const
+    {
+        return mFillType;
+    }
 public:
     virtual void spawn();
     virtual void update(const SE_TimeKey& timeKey);
@@ -512,5 +521,6 @@ protected:
     SE_MountPointID mMountPointID;
 	int mRectPatchType;
 	bool mUpdateFromMountPointID;
+    SE_2DELEMENT_FILLTYPE mFillType;
 };
 #endif

@@ -273,10 +273,16 @@ void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXU
 	}
 	else
 	{
+		/*
         v0 = SE_Vector2f((startx + portionx) / power2Width, 1 - (starty + portiony) / power2Height);
         v1 = SE_Vector2f((startx + portionx + portionw) / power2Width, 1 - (starty + portiony) / power2Height);
         v2 = SE_Vector2f((startx + portionx + portionw) / power2Width, 1 - (starty + portiony + portionh) / power2Height);
-        v3 = SE_Vector2f((startx + portionx) / power2Width, 1 - (starty + portiony + portionh) / power2Height);               
+        v3 = SE_Vector2f((startx + portionx) / power2Width, 1 - (starty + portiony + portionh) / power2Height); 
+		*/
+		v0 = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+		v1 = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+		v2 = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+		v3 = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
 	}
     bool ret = createTexCoordData(this, v0, v1, v2, v3);
     if(!ret)
@@ -429,11 +435,7 @@ SE_BoxPrimitive* SE_BoxPrimitive::clone()
 	return NULL;
 }
 ///////////////////////////////////////////////////
-static SE_Vector2f _r1c3TexVexterData[] = {SE_Vector2f(0, 0), SE_Vector2f(0.33333, 0), SE_Vector2f(0.66666, 0), SE_Vector2f(1.0, 0), SE_Vector2f(1, 1), SE_Vector2f(0.66666, 1), SE_Vector2f(0.33333, 1), SE_Vector2f(0, 1)};
-static SE_Vector2f _r3c1TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(1, 0), SE_Vector2f(1, 0.33333), SE_Vector2f(1, 0.66666), SE_Vector2f(1, 1), SE_Vector2f(0, 1), SE_Vector2f(0, 0.66666), SE_Vector2f(0, 0.33333) };
-static SE_Vector2f _r3c3TexVertexData[] = {SE_Vector2f(0, 0), SE_Vector2f(0.33333, 0), SE_Vector2f(0.66666, 0), SE_Vector2f(1, 0), SE_Vector2f(1, 0.33333), SE_Vector2f(1, 0.66666), SE_Vector2f(1, 1), SE_Vector2f(0.66666, 1), SE_Vector2f(0.33333, 1), SE_Vector2f(0, 1), SE_Vector2f(0, 0.66666), SE_Vector2f(0, 0.33333), SE_Vector2f(0.33333, 0.33333), SE_Vector2f(0.66666, 0.33333), SE_Vector2f(0.66666, 0.66666), SE_Vector2f(0.33333, 0.66666) 
 
-};
 SE_RectPatch::SE_RectPatch(SE_RECTPATCH_TYPE t) : mType(t)
 {
     mSampleMin = 0;
@@ -468,6 +470,7 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
     rectCenter = rect.getCenter();
     rectXAxis = rect.getXAxis();
     rectYAxis = rect.getYAxis();
+    /*
     SE_Vector3f* vertexRectPatch = NULL;
     switch(t)
     {
@@ -489,22 +492,44 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
         return;
     }
     SE_Vector3f v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15;
+    */
+    int geometryNum = 0;
     switch(t)
     {
     case SE_PATCH_R1_C3:
+    case SE_PATCH_R3_C1:
+        geometryNum = 3;
+    case SE_PATCH_R3_C3:
+        geometryNum = 9;
+    }
+    SE_ASSERT(geometryNum != 0);
+    rectPatch->mGeometryData.resize(geometryNum);
+    for(int i = 0 ; i < geometryNum ; i++)
+    {
+        SE_GeometryData* geomData = new SE_GeometryData;
+        SE_Vector3f* v = new SE_Vector3f[4];
+        v[0] = vertex[0];//v0;
+        v[1] = vertex[1];//v1;
+        v[2] = vertex[2];//v6;
+        v[3] = vertex[3];//v7;
+        SE_Vector3i* f = new SE_Vector3i[2];
+        f[0].x = 0;
+        f[0].y = 1;
+        f[0].z = 2;
+        f[1].x = 0;
+        f[1].y = 2;
+        f[1].z = 3;
+        geomData->setVertexArray(v, 4);
+        geomData->setFaceArray(f, 2);
+        rectPatch->mGeometryData[i] = geomData;
+    }
+    switch(t)
+    {
+    case SE_PATCH_R1_C3:
+    case SE_PATCH_R3_C1:
         {
-            rectPatch->mGeometryData.resize(3);
-            float step = (rectExtent[0] * 2) / 3;
+
             /*
-            v0 = rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
-            v1 = v0 + rectXAxis * step;
-            v2 = v0 + rectXAxis * (step * 2);
-            v3 = rectCenter + rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
-            v4 = rectCenter + rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
-            v5 = v4 - rectXAxis * step;
-            v6 = v4 - rectXAxis * (step * 2);
-            v7 =  rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
-            */
             // rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
@@ -556,20 +581,13 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
             geomData->setVertexArray(v, 4);
             geomData->setFaceArray(f, 2);
             rectPatch->mGeometryData[2] = geomData;
+            */
         }
         break;
+    /*
     case SE_PATCH_R3_C1:
         {
             rectPatch->mGeometryData.resize(3);
-            float step = (rectExtent[1] * 2) / 3;
-            v0 = rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
-            v1 = rectCenter + rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
-            v2 = v1 + rectYAxis * step;
-            v3 = v1 + rectYAxis * (step * 2);
-            v4 =  rectCenter + rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
-            v5 = rectCenter - rectXAxis * rectExtent[0] + rectYAxis * rectExtent[1];
-            v6 = v5 - rectYAxis * step;
-            v7 = v5 - rectYAxis * (step * 2);
             //rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
@@ -624,9 +642,11 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
             rectPatch->mGeometryData[2] = geomData;
         }
         break;
+    */
     case SE_PATCH_R3_C3:
         {
-            rectPatch->mGeometryData.resize(9);
+            //rectPatch->mGeometryData.resize(9);
+            /*
             float stepx = (rectExtent[0] * 2) / 3;
             float stepy = (rectExtent[1] * 2) / 3;
             v0 =  rectCenter - rectXAxis * rectExtent[0] - rectYAxis * rectExtent[1];
@@ -645,6 +665,8 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
             v13 = v11 + rectXAxis * (stepx * 2);
             v14 = v13 + rectYAxis * stepy;
             v15 = v14 - rectXAxis * stepx;
+            */
+            /*
             //rect 1
             SE_GeometryData* geomData = new SE_GeometryData;
             SE_Vector3f* v = new SE_Vector3f[4];
@@ -806,6 +828,7 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
             geomData->setVertexArray(v, 4);
             geomData->setFaceArray(f, 2);
             rectPatch->mGeometryData[8] = geomData;
+            */
         }
         break;
     default:
@@ -817,37 +840,75 @@ void SE_RectPatch::create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primiti
     resourceManager->setPrimitive(outPrimitiveID, outPrimitive);
 }
 
-SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
+SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImage(SE_RECTPATCH_TYPE t, float startx, float starty, 
+															  float portionx, float portiony, 
+															  float portionw, float portionh, 
+															  float power2Width, float power2Height, 
+															  float stepx, float stepy, bool isFliped)
 {
     _TexCoordSet texset;
     switch(t)
     {
     case SE_PATCH_R1_C3:
         {
-            texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
-            texset.tex[1] = SE_Vector2f((startx + portionx + stepx) /power2Width, (starty + portiony) / power2Height);
-            texset.tex[2] = SE_Vector2f((startx + portionx + stepx * 2) / power2Width, (starty + portiony) / power2Height);
-            texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
-            texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
-            texset.tex[5] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + portionh) / power2Height);
-            texset.tex[6] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony + portionh) / power2Height);
-            texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+            if(isFliped)
+            {
+				texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[1] = SE_Vector2f((startx + portionx + stepx) /power2Width, (starty + portiony) / power2Height);
+				texset.tex[2] = SE_Vector2f((startx + portionx + stepx * 2) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[5] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[6] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+				
+			}
+			else
+			{
+				texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[1] = SE_Vector2f((startx + portionx + stepx) /power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[2] = SE_Vector2f((startx + portionx + stepx * 2) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[5] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[6] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+				
+			}
         }
         break;
     case SE_PATCH_R3_C1:
         {
-            texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
-            texset.tex[1] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) /power2Height);
-            texset.tex[2] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + stepy) / power2Height);
-            texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
-            texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
-            texset.tex[5] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
-            texset.tex[6] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy * 2) / power2Height);
-            texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy) / power2Height);
+			if(isFliped)
+			{
+				texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[1] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) /power2Height);
+				texset.tex[2] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+				texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[5] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[6] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy * 2) / power2Height);
+				texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy) / power2Height);
+				
+			}
+			else
+			{
+				texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[1] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) /power2Height);
+				texset.tex[2] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + stepy * 2) / power2Height);
+				texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[5] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[6] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[7] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy * 2) / power2Height);
+				
+			}
         }
         break;
     case SE_PATCH_R3_C3:
         {
+			if(isFliped)
+			{
             texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
             texset.tex[1] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony) / power2Height);
             texset.tex[2] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony) / power2Height);
@@ -864,6 +925,28 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RECTPATCH_TYPE 
             texset.tex[13] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + stepy) / power2Height);
             texset.tex[14] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
             texset.tex[15] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+
+			}
+			else
+			{
+				texset.tex[0] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[1] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[2] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[3] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
+				texset.tex[4] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[5] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+				texset.tex[6] = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[7] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[8] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[9] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + portionh) / power2Height);
+				texset.tex[10] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+				texset.tex[11] = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[12] = SE_Vector2f((startx + portionx + stepx)/ power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[13] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + stepy) / power2Height);
+				texset.tex[14] = SE_Vector2f((startx + portionx + 2 * stepx) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+				texset.tex[15] = SE_Vector2f((startx + portionx + stepx) / power2Width, (starty + portiony + 2 * stepy) / power2Height);
+
+			}
         }
         break;
     default:
@@ -873,7 +956,7 @@ SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageFliped(SE_RECTPATCH_TYPE 
 }
 SE_RectPatch::_TexCoordSet SE_RectPatch::calculateImageNoFliped(SE_RECTPATCH_TYPE t, float startx, float starty, float portionx, float portiony, float portionw, float portionh, float power2Width, float power2Height, float stepx, float stepy)
 {
-    _TexCoordSet texset = calculateImageFliped(t, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy);
+    _TexCoordSet texset = calculateImage(t, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy, true);
     for(int i = 0 ; i < 16 ; i++)
     {
         texset.tex[i].y = 1 - texset.tex[i].y;
@@ -946,11 +1029,11 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
     _TexCoordSet texCoordset;
     if(imageData->isFliped())
     {
-        texCoordset = calculateImageFliped(mType, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy); 
+        texCoordset = calculateImage(mType, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy, true); 
     }
     else
     {
-        texCoordset = calculateImageNoFliped(mType, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy);
+        texCoordset = calculateImage(mType, startx, starty, portionx, portiony, portionw, portionh, power2Width, power2Height, stepx, stepy, false);
     }
     switch(mType)
     {
@@ -960,61 +1043,6 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
             setTextureCoord(texCoordset, 0, 0, 1, 6, 7);
             setTextureCoord(texCoordset, 1, 1, 2, 5, 6);
             setTextureCoord(texCoordset, 2, 2, 3, 4, 5);
-            /*
-            //rect 1
-            SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-            SE_Vector2f* texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[0];
-            texVertex[1] = texCoordSet.tex[1];
-            texVertex[2] = texCoordSet.tex[6];
-            texVertex[3] = texCoordSet.tex[7];;
-            SE_Vector3i* texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[0] = texCoordData;
-
-            //rect 2
-            texCoordData = new SE_TextureCoordData;
-            texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[1];
-            texVertex[1] = texCoordSet.tex[2];
-            texVertex[2] = texCoordSet.tex[5];
-            texVertex[3] = texCoordSet.tex[6];;
-            texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[1] = texCoordData;
-
-            //rect 3
-            texCoordData = new SE_TextureCoordData;
-            texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[2];
-            texVertex[1] = texCoordSet.tex[3];
-            texVertex[2] = texCoordSet.tex[4];
-            texVertex[3] = texCoordSet.tex[5];;
-            texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[2] = texCoordData;
-            */
 
         }
         break;
@@ -1024,60 +1052,6 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
             setTextureCoord(texCoordset, 0, 0, 1, 2, 7);
             setTextureCoord(texCoordset, 1, 7, 2, 3, 6);
             setTextureCoord(texCoordset, 2, 6, 3, 4, 5);
-            /*
-            SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-            SE_Vector2f* texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[0];
-            texVertex[1] = texCoordSet.tex[1];
-            texVertex[2] = texCoordSet.tex[2];
-            texVertex[3] = texCoordSet.tex[7];;
-            SE_Vector3i* texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[0] = texCoordData;
-
-            //rect 2;
-            texCoordData = new SE_TextureCoordData;
-            texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[7];
-            texVertex[1] = texCoordSet.tex[2];
-            texVertex[2] = texCoordSet.tex[3];
-            texVertex[3] = texCoordSet.tex[6];;
-            texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[1] = texCoordData;
-
-            //rect 3
-            texCoordData = new SE_TextureCoordData;
-            texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[6];
-            texVertex[1] = texCoordSet.tex[3];
-            texVertex[2] = texCoordSet.tex[4];
-            texVertex[3] = texCoordSet.tex[5];;
-            texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[0] = texCoordData;
-            */
         } 
         break;
     case SE_PATCH_R3_C3:
@@ -1092,25 +1066,6 @@ void SE_RectPatch::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_
             setTextureCoord(texCoordset, 6, 10, 15, 8, 9);
             setTextureCoord(texCoordset, 7, 11, 12, 15, 10);
             setTextureCoord(texCoordset, 8, 12, 13, 14, 15);
-            /*
-            //rect 1
-            SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-            SE_Vector2f* texVertex = new SE_Vector2f[4];
-            texVertex[0] = texCoordSet.tex[0];
-            texVertex[1] = texCoordSet.tex[1];
-            texVertex[2] = texCoordSet.tex[12];
-            texVertex[3] = texCoordSet.tex[11];;
-            SE_Vector3i* texFace = new SE_Vector3i[2];
-            texFace[0].x = 0;
-            texFace[0].y = 1;
-            texFace[0].z = 2;
-            texFace[1].x = 0;
-            texFace[1].y = 2;
-            texFace[1].z = 3;
-            texCoordData.setTexVertexArray(texVertex, 4);
-            texCoordData.setTexFaceArray(texFace, 2); 
-            mTextureCoordData[0] = texCoordData;
-            */
             //
         }
 

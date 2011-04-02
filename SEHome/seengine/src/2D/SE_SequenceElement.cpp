@@ -43,8 +43,8 @@ void SE_SequenceElement::update(SE_ParamValueList& paramValueList)
 	spatialManager->release(s);
     clearChildren();
     spawn();
-    layout();
     update(0);
+    layout();
     updateSpatial();
 }
 void SE_SequenceElement::layout()
