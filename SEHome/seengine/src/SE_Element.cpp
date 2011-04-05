@@ -652,6 +652,16 @@ SE_StringID SE_Element::getURL() const
 	SE_URI uri = getURI(NORMAL);
 	return uri.getURL();
 }
+void SE_Element::setSpatialID(const SE_SpatialID& spatialID)
+{
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_Spatial* spatial = spatialManager->get(spatialID);
+	if(!spatial)
+		return;
+	mSpatialID = spatialID;
+	spatial->setRenderTarget(mRenderTargetID);
+	spatial->setRenderTargetSeq(mRenderTargetSeq);
+}
 void SE_Element::setURI(const SE_StringID& uri)
 {
 	setStateURI(NORMAL, uri);
