@@ -231,6 +231,7 @@ void SE_ImageElement::spawn()
         SE_ASSERT(parent);
         mWidth = parent->getWidth();
         mHeight = parent->getHeight();
+		SE_ASSERT(mWidth > 0 && mHeight > 0);
         mPivotX = 0;
         mPivotY = 0;
         setMountPoint(0, 0);

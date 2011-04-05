@@ -1035,6 +1035,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         geom->setLocalLayer(mLocalLayer);
 	    geom->setElementID(getID());
 	    geom->setRenderTarget(mRenderTargetID);
+		geom->setRenderTargetSeq(mRenderTargetSeq);
 	    geom->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
 		geom->setName(getName().getStr());
         std::vector<SE_Geometry*> childGeom(meshNum);
@@ -1045,6 +1046,8 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
 	        simObject->setName(mFullPathName.getStr());
             SE_SimObjectID simObjectID = simObjectManager->add(simObject);
             childGeom[i] = new SE_Geometry;
+			childGeom[i]->setRenderTarget(mRenderTargetID);
+			childGeom[i]->setRenderTargetSeq(mRenderTargetSeq);
             childGeom[i]->attachSimObject(simObject);
 			spatialManager->add(geom, childGeom[i]);
             mSimObjectIDArray[i] = simObjectID;

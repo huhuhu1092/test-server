@@ -146,7 +146,7 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 	SE_TextureTarget* textureTarget = new SE_TextureTarget(mImageData);
 	SE_RenderTargetManager* renderTargetManager = SE_Application::getInstance()->getRenderTargetManager();
     mContentRenderTargetID = renderTargetManager->add(textureTarget);
-	textureTarget->setBackground(SE_Vector4f(1.0, 0, 0, 1.0));
+	textureTarget->setBackground(SE_Vector4f(0.0, 0, 0, 0.0));
 	mContentChild->setRenderTargetID(mContentRenderTargetID);
 	float ratio = mHeight / mWidth;
 	float angle = 2 * SE_RadianToAngle(atanf(mWidth / 20.0f));
