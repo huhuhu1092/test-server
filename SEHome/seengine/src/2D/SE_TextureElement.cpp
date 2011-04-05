@@ -161,8 +161,8 @@ void SE_TextureElement::setRenderTargetID(const SE_RenderTargetID& renderTarget)
 	camera->create(v, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle, ratio, 1, 50);
 #endif
 	camera->setViewport(0, 0, (int)mWidth, (int)mHeight);
-	mImageData->setWidth((int)mWidth);
-	mImageData->setHeight((int)mHeight);
+	//mImageData->setWidth((int)mWidth);
+	//mImageData->setHeight((int)mHeight);
 	mImageData->setPixelFormat(SE_ImageData::RGBA);
 	SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
 	SE_CameraID cameraID = cameraManager->add(camera);
@@ -186,6 +186,9 @@ void SE_TextureElement::layout()
 {
     if(mShareContent)
     {
+		calculateRect(mPivotX, mPivotY, 0, 0);
+		mWidth = mImageData->getWidth();
+		mHeight = mImageData->getHeight();
         return;
     }
 	if(!mContentChild)
@@ -196,6 +199,8 @@ void SE_TextureElement::layout()
     mContentChild->layout();
 	mWidth = mContentChild->getWidth();
 	mHeight = mContentChild->getHeight();
+	mImageData->setWidth((int)mWidth);
+	mImageData->setHeight((int)mHeight);
 }
 SE_Spatial* SE_TextureElement::createSpatial()
 {

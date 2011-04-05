@@ -31,7 +31,8 @@ SE_RectPrimitive::SE_RectPrimitive(const SE_Rect3D& rect) : mRect3D(rect)
     mGeometryData = NULL;
     mTexCoordData = NULL;
     mMaterialData = NULL;
-
+    mU = 1.0f;
+    mV = 1.0f; 
     //mAdjustedStartX = 0;
     //mAdjustedStartY = 0;
 }

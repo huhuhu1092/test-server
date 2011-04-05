@@ -176,7 +176,6 @@ SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath, bool fliped)
 	ILenum	error;
     ilInit();
 	error = ilGetError();
-    iluInit();
 	error = ilGetError();
     ilGenImages(1, &imgId);
 	error = ilGetError();
