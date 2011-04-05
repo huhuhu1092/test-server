@@ -164,10 +164,10 @@ public:
 	{
 		return mSpatialType;
 	}
-	void setSpatialID(const SE_SpatialID& spatialID);
-	//{
-	//	mSpatialID = spatialID;
-	//}
+	void setSpatialID(const SE_SpatialID& spatialID)
+	{
+		mSpatialID = spatialID;
+	}
     SE_SpatialID getSpatialID() const
     {
         return mSpatialID;
