@@ -1,6 +1,7 @@
 #ifndef SE_ELEMENTCONTENT_H
 #define SE_ELEMENTCONTENT_H
 #include "SE_ID.h"
+#include "SE_Common.h"
 #include <string>
 class SE_Element;
 class SE_ElementSchema;
@@ -68,7 +69,7 @@ public:
 	{
 		return mID;
 	}
-    void setFileType(const SE_StringID& type);
+    void setFillType(const SE_StringID& type);
     SE_2DELEMENT_FILLTYPE getFillType() const
     {
         return mFillType;

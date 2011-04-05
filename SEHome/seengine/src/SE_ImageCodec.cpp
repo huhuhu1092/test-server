@@ -15,7 +15,6 @@
         #include <windows.h>
     #endif
 #include <IL/il.h>
-#include <IL/ilu.h>
 #endif
 
 SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)

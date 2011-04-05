@@ -13,11 +13,14 @@ X11_INC = /usr/include/X11
 FREETYPE_INC = /usr/include/freetype2
 LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
                -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
-               -L/home/luwei/ProgramFiles/curl/lib
+               -L/home/luwei/ProgramFiles/curl/lib \
+			   -L/home/luwei/ProgramFiles/devIL/lib
+
 PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DSE_HAS_MUTEX -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
 		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \
+		   /home/luwei/ProgramFiles/devIL/include \
 		   /home/luwei/ProgramFiles/curl/include \
 	       $(X11_INC)  \
 		   $(FREETYPE_INC)
@@ -176,6 +179,7 @@ SRCS_TINYXML = tinystr.cpp  \
 SRCS_CPP = SE_2DCommand.cpp \
            SE_2DElement.cpp \
 		   SE_Action.cpp \
+		   SE_ActionElement.cpp \
 		   SE_Animation.cpp \
 		   SE_AnimationManager.cpp \
 		   SE_AnimationSet.cpp \
@@ -195,6 +199,7 @@ SRCS_CPP = SE_2DCommand.cpp \
 		   SE_CharCodeDefine.cpp \
 	       SE_CheckXml.cpp \
 	       SE_ColorEffectController.cpp \
+		   SE_ColorEffectControllerElement.cpp \
 		   SE_Command.cpp \
 		   SE_CommandFactory.cpp \
 		   SE_Common.cpp \
@@ -219,6 +224,7 @@ SRCS_CPP = SE_2DCommand.cpp \
 		   SE_ID.cpp \
 	       SE_ImageCodec.cpp \
 		   SE_ImageData.cpp \
+		   SE_ImageElement.cpp \
 	       SE_ImageMap.cpp \
 		   SE_ImageTable.cpp \
 		   SE_InputEvent.cpp \
@@ -260,6 +266,7 @@ SRCS_CPP = SE_2DCommand.cpp \
 	       SE_Scene.cpp \
            SE_SceneManager.cpp \
            SE_Sequence.cpp \
+		   SE_SequenceElement.cpp \
            SE_ShaderProgram.cpp \
            SE_ShaderProperty.cpp \
            SE_SimObject.cpp \
@@ -270,6 +277,7 @@ SRCS_CPP = SE_2DCommand.cpp \
            SE_SpatialManager.cpp \
            SE_SpatialTravel.cpp \
            SE_StateTable.cpp \
+		   SE_StateTableElement.cpp \
 		   SE_Struct.cpp \
 	       SE_SystemCommand.cpp \
            SE_SystemCommandFactory.cpp \
@@ -278,6 +286,7 @@ SRCS_CPP = SE_2DCommand.cpp \
            SE_Texture.cpp \
            SE_TextureCoordAnimation.cpp \
            SE_TextureCoordData.cpp \
+		   SE_TextureElement.cpp \
            SE_TextView.cpp \
 		   SE_Thread.cpp \
 		   SE_ThreadManager.cpp \

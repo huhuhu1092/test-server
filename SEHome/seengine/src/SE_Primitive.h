@@ -77,6 +77,10 @@ private:
 public:
 	//SE_RectPrimitive(const SE_Rect3D& rect);
 	static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+    //u is the normal x coordinate
+    //v is the normal v coordinate
+    //this two value is used to create tile effect 
+    static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID, float u, float v);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
 	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
@@ -99,6 +103,7 @@ private:
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
     static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3);
     static bool createGeometryData(SE_RectPrimitive* rectPrimitive);
+    static void getUVProperty(float uv, int& rectSize, float& floor, float& reminder);
 private:
 	SE_Rect3D mRect3D;
 	SE_ImageData* mImageDataArray[SE_TEXUNIT_NUM];
@@ -110,6 +115,7 @@ private:
 	//SE_Wrapper<SE_GeometryData>* mGeometryData;
 	//SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
+    float mU, mV;
     //SE_ImageDataPortion mImageDataPortion;
    // int mAdjustedStartX;//the x coordinate after change width to power2 width
    // int mAdjustedStartY;//the y coordinate after change height to power2 height

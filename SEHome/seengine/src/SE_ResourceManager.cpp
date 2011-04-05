@@ -2189,7 +2189,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         }
         else if(!strcmp(name, "filltype"))
         {
-            tileType = value;
+            fillType = value;
         }
 		pAttribute = pAttribute->Next();
 	}

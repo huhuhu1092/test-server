@@ -217,7 +217,7 @@ void SE_ImageElement::spawn()
     mImageWidth = width;
     mImageHeight = height;
     SE_ASSERT(mImageWidth != 0);
-    SE_ASSERT(mImaegHeight != 0);
+    SE_ASSERT(mImageHeight != 0);
     if(mFillType == SE_WRAP_CONTENT)
     {
 	    mPivotX = pivotx;
@@ -227,23 +227,18 @@ void SE_ImageElement::spawn()
     }
     else
     {
-        SE_Element* parent = getParent();
+        SE_2DNodeElement* parent = (SE_2DNodeElement*)getParent();
         SE_ASSERT(parent);
         mWidth = parent->getWidth();
         mHeight = parent->getHeight();
+        mPivotX = 0;
+        mPivotY = 0;
+        setMountPoint(0, 0);
     }
 }
 void SE_ImageElement::layout()
 {
-    if(mFillType == SE_WRAP_CONTENT)
-    {
-	    SE_2DNodeElement::layout();
-    }
-    else
-    {
-        setLeft(0);
-        setTop(0);
-    }
+	SE_2DNodeElement::layout();
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {

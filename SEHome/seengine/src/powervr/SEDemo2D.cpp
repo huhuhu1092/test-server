@@ -28,6 +28,7 @@
 #include "SE_CChess.h"
 #include "SE_Remote.h"
 #include "SE_ChessCommand.h"
+#include "SE_Primitive.h"
 #include "SE_Scene.h"
 #include <ctype.h>
 #include <stdarg.h>
@@ -90,11 +91,25 @@ static void doTest()
 	spatialManager->release(s);
 	//spatialManager->check();
 }
+static void debugPrimitive()
+{
+    SE_Primitive* primitive = NULL;
+    SE_PrimitiveID primitiveID;
+    float e[2] = {1, 1};
+
+    SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
+  
+    SE_RectPrimitive::create(rect3D, primitive, primitiveID, 3.2, 3.2);
+
+}
 bool SEDemo::InitApplication()
 {
 	//doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+    //debug
+    debugPrimitive();
+    //end
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
@@ -129,7 +144,7 @@ bool SEDemo::InitApplication()
 	c->width = 480;
 	c->height = 800;
 #endif
-	SE_Application::getInstance()->postCommand(c);
+	//SE_Application::getInstance()->postCommand(c);
 	return true;
 }
 bool SEDemo::InitView()

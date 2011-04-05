@@ -1056,6 +1056,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
         {
         case SE_PATCH_R1_C3:
             {
+                SE_ASSERT(mWidth >= 2 * paddingx);
                 childGeom[0]->setLocalTranslate(SE_Vector3f(-((mWidth - 2 * paddingx) / 2 + paddingx / 2), 0, 0));
                 childGeom[0]->setLocalScale(SE_Vector3f(paddingx / 2, mHeight / 2, 1));
                 childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2 - paddingx, mHeight / 2, 1));
@@ -1065,6 +1066,7 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
             break;
         case SE_PATCH_R3_C1:
             {
+                SE_ASSERT(mHeight >= 2 * paddingy);
                 childGeom[0]->setLocalTranslate(SE_Vector3f(0, ((mHeight - 2 * paddingy) / 2 + paddingy / 2), 0));
                 childGeom[0]->setLocalScale(SE_Vector3f(mWidth / 2, paddingy / 2, 1));
                 childGeom[1]->setLocalScale(SE_Vector3f(mWidth / 2, mHeight / 2 - paddingy, 1));
@@ -1076,6 +1078,8 @@ SE_Spatial* SE_2DNodeElement::createSpatialByImage()
             {
                 float tx = mWidth - 2 * paddingx;
                 float ty = mHeight - 2 * paddingy;
+                SE_ASSERT(tx >= 0);
+                SE_ASSERT(ty >= 0);
                 SE_Vector3f t0(-tx / 2 - paddingx / 2, ty / 2 + paddingy / 2, 0);
                 SE_Vector3f t1(0, ty / 2 + paddingy / 2, 0);
                 SE_Vector3f t2(tx / 2 + paddingx / 2, ty / 2 + paddingy / 2, 0);
