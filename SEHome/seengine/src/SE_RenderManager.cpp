@@ -132,7 +132,11 @@ void SE_RenderManager::draw()
             _RenderTargetUnit* rt = *it;
             SE_RenderTarget* renderTarget = renderTargetManager->get(rt->mRenderTargetID);
 			if(!renderTarget)
+			{
+				std::string str = rt->mRenderTargetID.toString();
+				LOGI("#### render target can not find : %s #####\n", str.c_str());
 				continue;
+			}
             SE_Camera* camera = renderTarget->getCamera();
 		    if(renderTarget->prepare() && camera)
 		    {
