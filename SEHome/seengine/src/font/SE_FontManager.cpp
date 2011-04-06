@@ -125,11 +125,11 @@ SE_ImageData* SE_FontManager::initChar(SE_CharFontMap* charFontMap, const SE_Cha
 		        buf[i * width * 4 + 4 * j + 1] = fontColor.y;
                 buf[i * width * 4 + 4 * j + 2] = fontColor.z;
 		        buf[i * width * 4 + 4 * j + 3] = bitmap.buffer[i * width + j];
-		        LOGI("%d  ", buf[i * width * 4 + 4 * j + 3]);
+		        //LOGI("%d  ", buf[i * width * 4 + 4 * j + 3]);
 	        }
-	        LOGI("\n");
+	        //LOGI("\n");
         }
-        LOGI("\n");
+        //LOGI("\n");
         SE_ImageData* imageData = new SE_ImageData;
         imageData->setWidth(width);
         imageData->setHeight(height);
