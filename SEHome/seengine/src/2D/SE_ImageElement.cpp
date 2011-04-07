@@ -235,6 +235,8 @@ void SE_ImageElement::spawn()
         mPivotX = 0;
         mPivotY = 0;
         setMountPoint(0, 0);
+		mU = mWidth / mImageWidth;
+		mV = mHeight / mImageHeight;
     }
 }
 void SE_ImageElement::layout()

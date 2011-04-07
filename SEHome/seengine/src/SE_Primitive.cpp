@@ -232,7 +232,7 @@ void SE_RectPrimitive::getUVProperty(float uv, int& size, float& floor, float& r
         size = (int)floor + 1;
     
 }
-void SE_RectPrimitive::create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID, float u, float v)
+void SE_RectPrimitive::create(const SE_Rect3D& rect, float u, float v, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
 {
     SE_ASSERT(u >= 1.0 && v >= 1.0);
     if((v < 1.0f || v < 1.0f) || (v == 1.0f && u == 1.0f))

@@ -119,7 +119,7 @@ SE_Spatial* SE_ColorEffectControllerElement::createSpatial()
 {
 	if(mCurrentElement)
 	{
-	    SE_Spatial* node = createNode();
+	    SE_Spatial* node = createNode(mLeft, mTop);
         SE_Spatial* spatial = mCurrentElement->createSpatial();
         SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 		spatialManager->add(node, spatial);

@@ -80,7 +80,7 @@ public:
     //u is the normal x coordinate
     //v is the normal v coordinate
     //this two value is used to create tile effect 
-    static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID, float u, float v);
+    static void create(const SE_Rect3D& rect, float u, float v, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
 	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);

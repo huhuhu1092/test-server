@@ -61,7 +61,7 @@ SE_Spatial* SE_ActionElement::createSpatial()
 	if(!mAction)
 		return NULL;
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-    SE_Spatial* node = createNode();
+    SE_Spatial* node = createNode(mLeft, mTop);
 	std::vector<SE_Element*> children = getChildren();
 	std::vector<SE_Element*>::iterator it;
 	for(it = children.begin() ; it != children.end() ; it++)

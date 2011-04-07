@@ -77,7 +77,7 @@ void SE_Button::layout()
 SE_Spatial* SE_Button::createSpatial()
 {
 	//return SE_Widget::createSpatial();
-	SE_Spatial* parent = createNode();
+	SE_Spatial* parent = createNode(mLeft, mTop);
 	parent->setName(getName().getStr());
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	if(mElement)

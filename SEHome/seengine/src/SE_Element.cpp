@@ -764,6 +764,8 @@ SE_2DNodeElement::SE_2DNodeElement()
 	mRectPatchType = SE_NO_PATCH;
 	mUpdateFromMountPointID = true;
     mFillType = SE_WRAP_CONTENT;
+    mU = 1.0f;
+    mV = 1.0f;
 }
 SE_2DNodeElement::~SE_2DNodeElement()
 {
@@ -846,7 +848,7 @@ SE_Spatial* SE_2DNodeElement::createSpatial()
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-	SE_Spatial* parent = createNode();
+	SE_Spatial* parent = createNode(mLeft, mTop);
 	std::vector<SE_Element*> children = elementManager->getChildren(getID());
 	parent->setName(getName().getStr());
 	for(int i = 0 ; i < children.size() ; i++)
@@ -947,14 +949,14 @@ SE_ImageData* SE_2DNodeElement::createImageData(const SE_ImageDataID& imageDataI
 	}
 	return imageData;
 }
-SE_Spatial* SE_2DNodeElement::createNode()
+SE_Spatial* SE_2DNodeElement::createNode(float left, float top)
 {
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
 	SE_Spatial* spatial = spatialManager->createSpatial(mSpatialType);
 	spatial->setRenderTarget(mRenderTargetID);
 	spatial->setRenderTargetSeq(mRenderTargetSeq);
 	spatial->setOwnRenderTargetCamera(mOwnRenderTargetCamera);
-	spatial->setLocalTranslate(SE_Vector3f(mLeft, mTop, 0));
+	spatial->setLocalTranslate(SE_Vector3f(left, top, 0));
 	spatial->setNeedUpdateTransform(mNeedUpdateTransform);
     spatial->setPrevMatrix(mPrevMatrix);
     spatial->setPostMatrix(mPostMatrix);
@@ -969,9 +971,20 @@ void SE_2DNodeElement::createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& out
     SE_Primitive* primitive = NULL;
     SE_PrimitiveID primitiveID;
 	if(mRectPatchType == SE_NO_PATCH)
-        SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+	{
+	    if(mU == 1.0f && mV == 1.0f)
+		{
+            SE_RectPrimitive::create(rect3D, primitive, primitiveID);
+		}
+        else
+		{
+		    SE_RectPrimitive::create(rect3D, mU, mV, primitive, primitiveID);
+        }
+	}
 	else
+	{
 		SE_RectPatch::create(rect3D, (SE_RECTPATCH_TYPE)mRectPatchType, primitive, primitiveID);
+	}
 	outID = primitiveID;
 	outPrimitive = primitive;
 }

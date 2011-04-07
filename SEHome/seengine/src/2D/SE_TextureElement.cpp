@@ -199,6 +199,7 @@ void SE_TextureElement::layout()
     mContentChild->layout();
 	mWidth = mContentChild->getWidth();
 	mHeight = mContentChild->getHeight();
+	SE_ASSERT(mWidth > 0 && mHeight > 0);
 	mImageData->setWidth((int)mWidth);
 	mImageData->setHeight((int)mHeight);
 }
@@ -210,7 +211,7 @@ SE_Spatial* SE_TextureElement::createSpatial()
     }
     else if(mContentChild)
     {    
-        SE_CommonNode* node = new SE_CommonNode;
+        SE_Spatial* node = new SE_CommonNode;
         std::string nodeStr = std::string(getFullPathName().getStr()) + "_" + "TextureNode";
         node->setName(nodeStr.c_str());
         SE_Spatial* spatial = createSpatialByImage();
