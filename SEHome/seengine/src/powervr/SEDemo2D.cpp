@@ -99,7 +99,7 @@ static void debugPrimitive()
 
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
   
-    SE_RectPrimitive::create(rect3D, primitive, primitiveID, 3.2, 3.2);
+    SE_RectPrimitive::create(rect3D, 3.2, 3.2, primitive, primitiveID);
 
 }
 bool SEDemo::InitApplication()
@@ -129,7 +129,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/newhome3";
 #endif
