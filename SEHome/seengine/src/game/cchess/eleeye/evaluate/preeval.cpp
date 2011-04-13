@@ -24,18 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../pregen.h"
 #include "../position.h"
 #include "preeval.h"
+#include "evaluate_api.h"
 
-#if _WIN32
-
-#include <windows.h>
-extern "C" __declspec(dllexport) void WINAPI PreEvaluate(PositionStruct *lppos, PreEvalStruct *lpPreEval);
-
-#else
-
-#define WINAPI
-extern "C" void WINAPI PreEvaluate(PositionStruct *lppos, PreEvalStruct *lpPreEval);
-
-#endif
 
 /* ElephantEye源程序使用的匈牙利记号约定：
  *

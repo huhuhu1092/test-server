@@ -24,20 +24,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../pregen.h"
 #include "../position.h"
 #include "preeval.h"
-
+#include "evaluate_api.h"
 #if _WIN32
 
 #include <windows.h>
 
-extern "C" __declspec(dllexport) int WINAPI Evaluate(const PositionStruct *lppos, int vlAlpha, int vlBeta);
-extern "C" __declspec(dllexport) const char *WINAPI GetEngineName(void);
 
 #else
 
 #define WINAPI
 
-extern "C" int Evaluate(const PositionStruct *lppos, int vlAlpha, int vlBeta);
-extern "C" const char *GetEngineName(void);
 
 #endif
 

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "hash.h"
 #include "search.h"
 #include "../SE_Pipe.h"
+#include "./evaluate/evaluate_api.h"
 #ifdef _WIN32
   #include <windows.h>
   //const char *const cszLibEvalFile = "EVALUATE.DLL";
@@ -40,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 const int INTERRUPT_COUNT = 4096; // 搜索若干结点后调用中断
-
+/*
 static const char *WINAPI GetEngineName(void) {
   return NULL;
 }
@@ -53,10 +54,11 @@ static int WINAPI Evaluate(const PositionStruct *lppos, int vlAlpha, int vlBeta)
   // 缺省的局面评价过程，只返回子力价值
   return lppos->Material();
 }
-
+*/
 #ifdef _WIN32
 
 inline HMODULE LoadEvalApi(const char *szLibEvalFile) {
+	/*
   HMODULE hModule;  
     wchar_t fileWideChar[512];
 	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
@@ -72,17 +74,25 @@ inline HMODULE LoadEvalApi(const char *szLibEvalFile) {
     Search.Evaluate = (int (WINAPI *)(const PositionStruct *, int, int)) GetProcAddress(hModule, "_Evaluate@12");
   }
   return hModule;
+	*/
+	Search.GetEngineName = &GetEngineName;
+	Search.PreEvaluate = &PreEvaluate;
+	Search.Evaluate = &Evaluate;
+	return NULL;
 }
 
 inline void FreeEvalApi(HMODULE hModule) {
+	/*
   if (hModule != NULL) {
     FreeLibrary(hModule);
-  }
+	}
+	*/
 }
 
 #else
 
 inline void *LoadEvalApi(const char *szLibEvalFile) {
+	/*
   void *hModule;
   hModule = dlopen(szLibEvalFile, RTLD_LAZY);
   if (hModule == NULL) {
@@ -95,12 +105,19 @@ inline void *LoadEvalApi(const char *szLibEvalFile) {
     Search.Evaluate = (int (*)(const PositionStruct *, int, int)) dlsym(hModule, "Evaluate");
   }
   return hModule;
+	*/
+	Search.GetEngineName = &GetEngineName;
+	Search.PreEvaluate = &PreEvaluate;
+	Search.Evaluate = &Evaluate;
+	return NULL;
 }
 
 inline void FreeEvalApi(void *hModule) {
+	/*
   if (hModule != NULL) {
     dlclose(hModule);
-  }
+	}
+	*/
 }
 
 #endif
