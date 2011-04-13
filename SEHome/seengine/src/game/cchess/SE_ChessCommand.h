@@ -83,4 +83,28 @@ public:
 protected:
     void run();
 };
+/////////////////////////////////
+class SE_ChessAICommand
+{
+public:
+    ~SE_ChessAICommand() {}
+    void setCommandLine(const char* command)
+    {
+        mCommandLine = std::string(command) + "\n";
+    }
+    std::string getCommandLine() const
+    {
+        return mCommandLine;
+    }
+private:
+    std::string mCommandLine;
+};
+class SE_ChessAIThread : public SE_Thread
+{
+protected:
+    void run();
+private:
+    //std::list<SE_ChessAICommand> mCommandList;
+    //SE_Mutex mCommandListMutex;
+};
 #endif

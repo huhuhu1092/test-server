@@ -30,6 +30,8 @@
 #include "SE_ChessCommand.h"
 #include "SE_Primitive.h"
 #include "SE_Scene.h"
+#include "SE_Thread.h"
+#include "SE_ThreadManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -69,6 +71,7 @@ private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
 	SE_CChess* mChessApp;
+	SE_ThreadID mChessAIThread;
 };
 static void doTest()
 {
@@ -129,7 +132,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/newhome3";
 #endif
@@ -340,6 +343,11 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+		SE_Thread* chessThread = new SE_ChessAIThread;
+		SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+		SE_ThreadID threadID = threadManager->add(chessThread);
+		mChessAIThread = threadID;
+		chessThread->start();
 		/*
 		if(mSelectedSpatial)
 		{

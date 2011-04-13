@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <list>
 #include <string>
+#include "SE_ChessAI.h"
 #if defined(ANDROID)
 #else
 #include <curl/curl.h>
@@ -917,4 +918,26 @@ void SE_ChessLoopMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     msg->num = returnnum;
     SE_Application::getInstance()->postCommand(msg);
  
+}
+//////////////////////////////////////
+void SE_ChessAIThread::run()
+{
+    /*
+    while(true)
+    {
+        std::list<SE_ChessAICommand> commandList;
+        mCommandListMutex.lock();
+        commandList = mCommandList;
+        mCommandListMutex.unLock();
+        std::list<SE_ChessAICommand>::iterator it;
+        for(it = commandList.begin() ; it != commandList.end() ; it++)
+        {
+            std::string command = it->getCommandLine();
+            pipeInputWrite(command.c_str());
+        }
+    }
+*/
+    LOGI("### start chess AI ####\n");
+    startChessAI();
+    LOGI("### quit chess AI ####\n");
 }
