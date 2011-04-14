@@ -58,6 +58,10 @@ public:
             color = INVALID_COLOR;
             cp = INVALID_PIECE;
         }
+		bool isValid()
+		{
+			return color != INVALID_COLOR && cp != INVALID_PIECE;
+		}
 		_ChessPieces(COLOR p, CHESS_PIECES_TYPE cp)
 		{
 			this->color = p;
@@ -154,6 +158,9 @@ public:
         else 
             return "black";
     }
+	std::string createPositionCode();
+	void sendCommandToChessAI(const char* command);
+
 public:
 	//for debug; don't use it for other use
 	void check();

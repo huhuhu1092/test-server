@@ -36,6 +36,15 @@ private:
     int num;
     SE_CChess* mChessApp;
 };
+class SE_ChessAIResponse : public SE_Command
+{
+public:
+	SE_ChessAIResponse(SE_Application* app);
+	void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+	std::string command;
+	std::string color;
+};
+/////////////////
 class SE_ChessLoginThread : public SE_Thread
 {
 public:

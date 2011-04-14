@@ -343,11 +343,7 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
-		SE_Thread* chessThread = new SE_ChessAIThread;
-		SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
-		SE_ThreadID threadID = threadManager->add(chessThread);
-		mChessAIThread = threadID;
-		chessThread->start();
+
 		/*
 		if(mSelectedSpatial)
 		{

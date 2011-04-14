@@ -21,7 +21,7 @@ struct SE_PipeStruct
 };
 extern void pipeOpen();
 extern bool pipeInputReadLine(char* output);
-extern void pipeInputWrite(char* format, ...);
+extern void pipeInputWrite(const char* format, ...);
 extern bool pipeOutputReadLine(char* output);
-extern void pipeOutputWrite(char* format, ...);
+extern void pipeOutputWrite(const char* format, ...);
 #endif

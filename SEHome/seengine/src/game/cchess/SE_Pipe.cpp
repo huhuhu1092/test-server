@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "SE_Log.h"
+#include "SE_Application.h"
+#include "SE_ChessCommand.h"
 #include "./base/pipe.h"
 #if defined(WIN32)
 const int PATH_SEPERATOR = '\\';
@@ -130,7 +133,7 @@ bool pipeInputReadLine(char* output)
 	else
 		return true;
 }
-void pipeInputWrite(char* format, ...)
+void pipeInputWrite(const char* format, ...)
 {
     char buf[SE_LINE_OUTPUT_MAX_CHAR];
     memset(buf, 0, SE_LINE_OUTPUT_MAX_CHAR);
@@ -152,7 +155,7 @@ bool pipeOutputReadLine(char* output)
 	else
 		return true;
 }
-void pipeOutputWrite(char* format, ...)
+void pipeOutputWrite(const char* format, ...)
 {
     char buf[SE_LINE_OUTPUT_MAX_CHAR];
     memset(buf, 0, SE_LINE_OUTPUT_MAX_CHAR);
@@ -163,6 +166,18 @@ void pipeOutputWrite(char* format, ...)
     buf[SE_LINE_OUTPUT_MAX_CHAR - 1] = 0;
     int size = strlen(buf);
     sepipeStd.WriteToOutputPipe(buf, size);
+	LOGI("### write to pipe output : %s ####\n", buf);
+	std::string command = buf;
+	std::string::size_type pos = command.find("bestmove");
+	if(pos != std::string::npos)
+	{
+		command.erase(pos, 8);
+		std::string str = SE_Util::trim(command.c_str());
+		SE_ChessAIResponse* c = new SE_ChessAIResponse(SE_Application::getInstance());
+	    c->command = str;
+		c->color = "b";
+		SE_Application::getInstance()->postCommand(c);
+	}
 }
 void pipeOpen()
 {

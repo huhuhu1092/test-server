@@ -4,6 +4,7 @@
 #include "SE_Common.h"
 #include "SE_Mutex.h"
 #include "SE_TreeStruct.h"
+#include <string>
 typedef void* (*THREADFUNC)(void*);
 class SE_Thread : public SE_ListStruct<SE_Thread>
 {
@@ -16,6 +17,14 @@ public:
     {
         return mID;
     }
+	void setName(const std::string& name)
+	{
+		mName = name;
+	}
+	std::string getName() const
+	{
+		return mName;
+	}
     void start();
     static pthread_t currentThread();
     static bool isEqual(pthread_t left, pthread_t right);
@@ -34,5 +43,6 @@ private:
     bool mIsThreadRunEnd;
     SE_Mutex mEndStateMutex;
     const bool mIsDeleteAfterEnd;
+	std::string mName;
 };
 #endif
