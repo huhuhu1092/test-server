@@ -101,7 +101,7 @@ private:
 	SE_RectPrimitive(const SE_Rect3D& rect);
 	SE_RectPrimitive(const SE_RectPrimitive&);
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
-    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3);
+    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3,const SE_Vector2f& v4, const SE_Vector2f& v5, const SE_Vector2f& v6, const SE_Vector2f& v7, const SE_Vector2f& v8, int uRectSize, int vRectSize, float uReminder, float vReminder);
     static bool createGeometryData(SE_RectPrimitive* rectPrimitive);
     static void getUVProperty(float uv, int& rectSize, float& floor, float& reminder);
 private:

@@ -72,6 +72,10 @@ static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   
 }
+static std::string createElementContentID(const std::string& parent, const std::string& id, const std::string& type)
+{
+	return parent + "_" + "*" + type + "*" + "_" + id;
+}
 static SE_ImageData* loadRawImage(const char* imageName)
 {
     char* data = NULL;
@@ -2085,7 +2089,6 @@ void SE_TextPropertyHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlE
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-	SE_ImageContent* imageContent = NULL;
 	std::string style;
     std::string align;
     std::string orientation;
@@ -2195,11 +2198,11 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	}
     if(!id.isValid())
     {
-        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str.c_str();
+		id = SE_Util::intToString(indent).c_str();
     }
+	std::string str = createElementContentID(parent->fullPathName.getStr(), id.getStr(), "Image");
     imageContent->setFillType(fillType);
-	imageContent->setID(id);
+	imageContent->setID(str.c_str());
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);
     imageContent->setState(getElementState(state));
@@ -2231,10 +2234,10 @@ void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xml
 	}
     if(id == "")
     {
-		std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str.c_str();
+		id = SE_Util::intToString(indent);
     }
-    actionContent->setID(id.c_str());
+	std::string str = createElementContentID(parent->fullPathName.getStr(), id, "Action");
+    actionContent->setID(str.c_str());
     actionContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(actionContent);
 }
@@ -2261,12 +2264,12 @@ void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement*
         }
 		pAttribute = pAttribute->Next();
 	}
-    if(id == "")
+	if(id == "")
     {
-        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str;
+		id = SE_Util::intToString(indent);
     }
-    stateTableContent->setID(id.c_str());
+	std::string str = createElementContentID(parent->fullPathName.getStr(), id, "State");
+    stateTableContent->setID(str.c_str());
     stateTableContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(stateTableContent);
 }

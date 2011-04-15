@@ -228,15 +228,23 @@ void SE_ImageElement::spawn()
     else
     {
         SE_2DNodeElement* parent = (SE_2DNodeElement*)getParent();
-        SE_ASSERT(parent);
+        if(!parent)
+		{
+			mWidth = mHeight = 0;
+			LOGI("### error: image element's parent is NULL\n");
+			return;
+		}
         mWidth = parent->getWidth();
         mHeight = parent->getHeight();
 		SE_ASSERT(mWidth > 0 && mHeight > 0);
         mPivotX = 0;
         mPivotY = 0;
         setMountPoint(0, 0);
-		mU = mWidth / mImageWidth;
-		mV = mHeight / mImageHeight;
+		if(mFillType == SE_TILE_PARENT)
+		{
+		    mU = mWidth / mImageWidth;
+		    mV = mHeight / mImageHeight;
+		}
     }
 }
 void SE_ImageElement::layout()
