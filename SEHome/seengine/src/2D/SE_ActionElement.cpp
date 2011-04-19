@@ -48,6 +48,9 @@ void SE_ActionElement::spawn()
 {
 	if(!mAction)
 		return;
+	SE_Animation* oldAnim = getAnimation();
+	if(oldAnim)
+		delete oldAnim;
 	SE_ElementKeyFrameAnimation* anim = new SE_ElementKeyFrameAnimation;
 	anim->setElement(getID());
 	int frameRate = SE_Application::getInstance()->getFrameRate();
@@ -59,7 +62,12 @@ void SE_ActionElement::spawn()
 SE_Spatial* SE_ActionElement::createSpatial()
 {
 	if(!mAction)
+	{
+		LOGI("## action element create NULL spatial ##\n");
 		return NULL;
+	}
+	return SE_2DNodeElement::createSpatial();
+	/*
 	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* node = createNode(mLeft, mTop);
 	std::vector<SE_Element*> children = getChildren();
@@ -72,6 +80,7 @@ SE_Spatial* SE_ActionElement::createSpatial()
 		    spatialManager->add(node, spatial);
 	}
 	return node;
+	*/
 }
 void SE_ActionElement::update(const SE_TimeKey& key)
 {

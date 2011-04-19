@@ -34,9 +34,12 @@ SE_StringID SE_ColorEffectFrame::getAddress(const SE_StringID& content)
 }
 */
 ///////////////////////////
-SE_Element* SE_ColorEffect::createElement()
+SE_2DNodeElement* SE_ColorEffect::createElement()
 {
     SE_ColorEffectElement* e = new SE_ColorEffectElement;
+	e->setPivotX(getPivotX());
+	e->setPivotY(getPivotY());
+	e->setMountPointRef(getMountPointRef());
 	e->setBackgroundAddress(mBackgroundID);
     e->setChannelAddress(mChannelID);
     e->setBackgroundAlphaAddress(mBackgroundAlpha);
@@ -71,7 +74,7 @@ SE_ColorEffect::~SE_ColorEffect()
     }
 }
 /////////////
-SE_Element* SE_ColorEffectReload::createElement(const SE_ColorEffectInput& input)
+SE_2DNodeElement* SE_ColorEffectReload::createElement(const SE_ColorEffectInput& input)
 {
 	return NULL;
 }
@@ -91,4 +94,19 @@ SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(const SE_TimeKey& key
 std::vector<SE_TimeKey> SE_ColorEffectController::getKeys() const
 {
 	return mKeySequence.getKeys();
+}
+SE_2DNodeElement* SE_ColorEffectController::createElement(const SE_TimeKey& timeKey)
+{
+	SE_TimeKey key = mKeySequence.getNearestLowerTimeKey(timeKey);
+	if(key != SE_TimeKey::INVALID)
+	{
+		SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
+		SE_2DNodeElement* e = frame->data->createElement();
+		e->setTimeKey(key);
+		return e;
+	}
+	else
+	{
+		return NULL;
+	}
 }

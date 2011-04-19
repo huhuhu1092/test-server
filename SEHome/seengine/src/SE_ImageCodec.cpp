@@ -165,6 +165,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
     imageData->setPixelFormat(pixelFormat);
     imageData->setData(newData);
     imageData->setCompressType(SE_ImageData::RAW);
+	delete bitmap;
     return imageData;
 #endif
 */

@@ -32,17 +32,20 @@ SE_ColorEffectControllerElement::SE_ColorEffectControllerElement(const SE_String
 }
 SE_Element* SE_ColorEffectControllerElement::clone()
 {
+	if(!mColorEffectController)
+		return NULL;
 	SE_ColorEffectControllerElement* element = new SE_ColorEffectControllerElement(getURI());
 	SE_2DNodeElement::clone(this, element);
 	return element;
 }
 void SE_ColorEffectControllerElement::update(SE_ParamValueList& paramValueList)
 {
+	if(!mColorEffectController)
+		return;
     SE_StringID url = getURL();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	mColorEffectController = resourceManager->getColorEffectController(url.getStr());
 	mName = mColorEffectController->getID().getStr();
-	mCurrentElement = NULL;
     clearChildren(); 
     spawn();
     layout();
@@ -50,11 +53,26 @@ void SE_ColorEffectControllerElement::update(SE_ParamValueList& paramValueList)
 }
 void SE_ColorEffectControllerElement::update(const SE_AddressID& address, const SE_Value& value)
 {
+	if(!mColorEffectController)
+		return;
     SE_2DNodeElement::update(address, value);
 }
 
 void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 {
+	if(!mColorEffectController)
+		return;
+	clearChildren();
+	SE_2DNodeElement* element = mColorEffectController->createElement(key);
+	if(!element)
+	{
+		return;
+	}
+	SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
+	elementManager->add(this->getID(), element, true);
+	element->spawn();
+	element->update(key - element->getTimeKey());
+	/*
 	std::vector<SE_Element*> children = getChildren();
 	if(children.empty())
 		return;
@@ -113,28 +131,18 @@ void SE_ColorEffectControllerElement::update(const SE_TimeKey& key)
 		}
 
 		mCurrentElement = (SE_2DNodeElement*)first;
-	}
+		}
+	*/
 }
 SE_Spatial* SE_ColorEffectControllerElement::createSpatial()
 {
-	if(mCurrentElement)
-	{
-	    SE_Spatial* node = createNode(mLeft, mTop);
-        SE_Spatial* spatial = mCurrentElement->createSpatial();
-        SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
-		spatialManager->add(node, spatial);
-		return node;
-	}
-	else
-    {
-        LOGI("### color effect controller < %s > return NULL spatial ####\n", getURL().getStr());
-		return NULL;
-    }
+	return SE_2DNodeElement::createSpatial();
 }
 void SE_ColorEffectControllerElement::spawn()
 {
 	if(!mColorEffectController)
 		return;
+	/*
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	std::vector<SE_TimeKey> keys = mColorEffectController->getKeys();
 	for(int i = 0 ; i < keys.size() ; i++)
@@ -146,12 +154,15 @@ void SE_ColorEffectControllerElement::spawn()
 		e->setMountPointRef(f->getMountPointRef());
 		elementManager->add(this->getID(), e, true);
 		e->spawn();
-	}
+		}
+	*/
 }
 SE_ColorEffectControllerElement::~SE_ColorEffectControllerElement()
 {}
 void SE_ColorEffectControllerElement::layout()
 {
+	if(!mColorEffectController)
+		return;
 	calculateRect(mColorEffectController->getPivotX(), mColorEffectController->getPivotY(), 0, 0);
 	SE_2DNodeElement::layout();
 }
