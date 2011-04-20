@@ -1,24 +1,15 @@
 #ifndef SE_LISTVIEW_H
 #define SE_LISTVIEW_H
 #include "SE_2DNodeElement.h"
-class SE_ListItem : public SE_2DNodeElement
-{
-public:
-    static SE_ListItem* createFromSchema(const char* schema);
-};
-class SE_ListViewDataSource
-{
-public:
-    enum {OK, END_OF_DATASOURCE, WAIT_FOR_UPDATE};	
-	virtual ~SE_ListDataSource() {}
-	virtual int fillItem(SE_ListItem* listItem, unsigned int pos) = 0;
-};
+#include "SE_ListItem.h"
+#include "SE_ListViewDataSource.h"
+
 class SE_ListView : public SE_2DNodeElement
 {
 public:
 	typedef unsigned int INDEX;
 	enum STYLE {HORIZONTAL, VERTICAL};
-	SE_ListView(STYLE s, const char* listItemSchema);
+	SE_ListView(STYLE s, const char* listItemSchema, SE_ListViewDataSource* dataSource = NULL);
 	~SE_ListView();
     void setStyle(STYLE s)
 	{
@@ -44,7 +35,8 @@ public:
 	void update(float deltax, float deltay);
 private:
     enum {SCROLL_TO_TOP, SCROLL_TO_BOTTOM, SCROLL_TO_LEFT,
-	      SCROLL_TO_RIGHT};	
+	      SCROLL_TO_RIGHT};
+	enum LISTITEM_OP {_CURRPOS_ADD, _CURRPOS_SUBTRACT};
     //this struct is used by update
 	//it record the coordinate of list item
 	//when list item update its x, y coordinate
@@ -70,6 +62,9 @@ private:
 	INDEX mCurrPos;
 	int mItemNum = 0;
 	typedef std::list<SE_ListItem*> _ItemList;
+	// the list of item which is in list view
+	// the list item outof list view will not
+	// be in mListItemList
 	_ItemList mListItemList;
 	float mItemWidth;
 	float mItemHeight;

@@ -1,11 +1,13 @@
 #include "SE_ListView.h"
 #include "SE_Math.h"
-SE_ListView::SE_ListView(STYLE s, const char* listItemSchema)
+SE_ListView::SE_ListView(STYLE s, const char* listItemSchema, SE_ListViewDataSource* dataSource)
 {
 	mStyle = s;
+	mDataSource = dataSource;
 	mListItemSchema = listItemSchema;
 	mCurrPos = 0;
 	mItemNum = 0;
+	mItemWidth = mItemHeight = 0;
 }
 SE_ListItem* SE_ListView::createListItem(const char* listItemSchema)
 {
@@ -25,17 +27,26 @@ void SE_ListView::spawn()
 {
 	if(!mDataSource)
 		return;
+	//every time spawn,
+	//it firstly clear its children because it will
+	//create new in child in spawn
 	clearChildren();
 	mListItemList.clear();
 	SE_2DNodeElement::spawn();
+	//create a list item from the list item schema
 	SE_ListItem* listItem = createListItem(mListItemSchema.c_str());
+	//data source will fill item according to item schema
+	//data source will match list item schema
 	int ret = mDataSource->fillItem(listItem, mCurrPos);
 	if(ret != SE_ListViewDataSource::OK)
 	{
 		delete listItem;
 		return;
 	}
+	//spawn the list item
 	listItem->spawn();
+	//list item do layout,
+	//this will get the list item content size
 	listItem->layout();
 	float width = listItem->getWidth();
 	float height = listItem->getHeight();
@@ -44,20 +55,16 @@ void SE_ListView::spawn()
 	{
 		num = calculateItemNum(getWidth(), width);
 	}
-	else if(mStyle == VERTICAL)
+	else
 	{
 		num = claculateItemNum(getHeight(), height);
 	}
-	else
-	{
-		LOGI("## error: list view's style can not support ##\n");
-		return;
-	}
 	SE_ASSERT(num != 0);
+	//set item num which can be seen in list view
 	mItemNum = num;
 	SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
 	elementManager->add(this->getID(), listItem);
-	calculateItemDimension(listItem);
+	setItemDimension(listItem);
 	mCurrPos++;
 	mListItemList.push_back(listItem);
 	float startx = 0;
@@ -70,8 +77,8 @@ void SE_ListView::spawn()
 		{
 		    elementManager->add(this->getID(), listItem);
 		    mListItemList.push_back(listItem);
-		    calculateItemDimension(listItem);
-			calculateItemMountPoint(listItem, startx, starty, width, height);
+		    setItemDimension(listItem);
+		    setItemMountPoint(listItem, startx, starty, width, height);
 		    mCurrPos++;
 		}
 		else
@@ -80,31 +87,45 @@ void SE_ListView::spawn()
 		}
 	}
 }
-void SE_ListView::calculateItemMountPoint(SE_ListItem* listItem, float& startx, float& starty , float itemWidth, float itemHeight)
+void SE_ListView::setItemMountPoint(SE_ListItem* listItem, float& startx, float& starty , float itemWidth, float itemHeight, LISTITEM_OP op)
 {
 	listItem->setMountPoint(startx, starty);
 	if(mStyle == HORIZONTAL)
 	{
-		startx += itemWidth;
+		if(op == _CURRPOS_ADD)
+		{
+		    startx += itemWidth;
+		}
+		else
+		{
+			startx -= itemWidth;
+		}
 	}
-	else if(mStyle == VERTICAL)
+	else
 	{
-		starty += itemHeight;
+		if(op == _CURRPOS_ADD)
+		{
+		    starty += itemHeight;
+		}
+		else
+		{
+		    starty -= itemHeight;	
+		}
 	}
 }
-void SE_ListView::calculateItemDimension(SE_ListItem* listItem)
+void SE_ListView::setItemDimension(SE_ListItem* listItem)
 {
 	if(mStyle == HORIZONTAL)
 	{
 		listItem->setHeight(getHeight());
-	}
-	else if(mStyle == VERTICAL)
-	{
-		listItem->setWidth(getWidth());
+		mItemWidth = listItem->getWidth();
+		mItemHeight = getHeight();
 	}
 	else
 	{
-		SE_ASSERT(0);
+		listItem->setWidth(getWidth());
+		mItemWidth = getWidth();
+		mItemHeight = listItem->getHeight();
 	}
 }
 void SE_ListView::layout()
@@ -124,38 +145,153 @@ SE_Spatial* SE_ListView::createSpatial()
 std::list<SE_ListView::_ListItemData> SE_ListView::clipListItem(std::list<_ListItemData>& itemList)
 {
 }
+
+void SE_ListView::addNewItemScroll(int num , float startx, float starty, LISTITEM_OP op)
+{
+	for(int i = 0 ; i < num ; i++)
+	{
+		SE_ListItem* item = createListItem(mListItemSchema.c_str());
+		int ret = mDataSource->fillItem(item, mCurrPos);
+		if(ret != OK)
+		{
+			delete item;
+		}
+		else
+		{
+			if(LISTITEM_OP == _CURRPOS_ADD)
+			{
+		        mListItemList.push_back(item);
+			}
+			else
+			{
+				mListItemList.push_front(item);
+			}
+	 	    elementManager->add(getID(), item);
+			setItemMountPoint(item, startx, starty, mItemWidth, mItemHeight, op);
+
+			if(LISPITEM_OP == _CURRPOS_ADD)
+			{
+		        mCurrPos++;
+			}
+			else
+			{
+			    mCurrPos--;	
+			}
+		}
+	}	
+}
 //add new item when scroll to left
 //if scroll to left, maybe add some item to the rightest item
-std::list<SE_ListItem*> SE_ListView::addNewItemList(const SE_Vector2f& v)
+//this imply that the style is HORIZONTAL
+void SE_ListView::addNewItemListScrollToLeft(const SE_Vector2f& v)
 {
-	float right = getRight();
+	SE_ASSERT(mStyle == HORIZONTAL);
+	SE_ASSERT(mDataSource != NULL);
+	float right = getWidth();
     if(v.x >= right)
-		return std::list<SE_ListItem*>();
+		return ;
 	float gap = right - v.x;
-	
+	int num = calculateItemNum(gap, mItemWidth);
+	float startx = v.x;
+	float starty = 0;
+    addItemScroll(num, startx, starty, _CURRPOS_SUBTRACT);
 }
+void SE_ListView::addNewItemListScrollToRight(const SE_Vector2f& v)
+{
+    SE_ASSERT(mStyle == HORIZONTAL);
+	SE_ASSERT(mDataSource != NULL);
+	if(v.x <= 0)
+		return;
+	float gap = v.x;
+	int num = calculateItemNum(gap, mItemWidth);
+	float startx = v.x;
+	float starty = 0;
+	addItemScroll(num, startx, starty, _CURRPOS_ADD);
+}
+void SE_ListView::addNewItemListScrollToTop(const SE_Vector2f& v)
+{
+	SE_ASSERT(mStyle == VERTICAL);
+	SE_ASSERT(mDataSource != NULL);
+	if(v.y > getHeight())
+		return;
+	float gap = getHeight() - v.y;
+	int num = calculateItemNum(gap, mItemHeight);
+	float startx = 0;
+	float starty = v.y;
+	addItemScroll(num, startx, starty, _CURRPOS_ADD);
+}
+void SE_ListView::addNewItemListScrollToBottom(const SE_Vector2f& v)
+{
+	SE_ASSERT(mStyle == VERTICAL);
+	SE_ASSERT(mDataSource != NULL);
+	if(v.y <= 0)
+		return;
+	float gap = v.y;
+	int num = calculateItemNum(gap, mItemHeight);
+	float startx = 0;
+	float starty = v.y;
+	addItemScroll(num, startx, starty, _CURRPOS_SUBTRACT);
+}
+SE_Vector2f SE_ListView::getHighestItemPos() const
+{
+	if(mListItemList.empty())
+		return SE_Vector2f();
+	_ItemList::const_reverse_iterator it = mListItemList.rbegin();
+	return SE_Vector2f((*it)->getLeft(), (*it)->getTop());	
+}
+SE_Vector2f SE_ListView::getLowestItemPos() const
+{
+	if(mListItemList.empty())
+		return SE_Vector2f();
+	_ItemList::const_iterator it = mListItem.begin();
+	return SE_Vector2f((*it)->getLeft(), (*it)->getTop());	
+}
+SE_Vector2f SE_ListView::getRightItemPos() const
+{
+    return getHighestItemPos();
+}
+SE_Vector2f SE_ListView::getLeftItemPos() const
+{
+    return getLowestItemPos();
+}
+SE_Vector2f SE_ListView::getTopItemPos() const
+{
+	return getLowestItemPos();
+}
+SE_Vector2f SE_ListView::getBottomItemPos() const
+{
+	return getHighestItemPos();
+}
+
 void SE_ListView::addNewItem(std::list<_ListItemData>& itemList)
 {
 	if(mStyle == HORIZONTAL)
 	{
 		if(mScrollType == SCROLL_TO_LEFT)
 		{
-			SE_Vector2f v = getRightestItemPos();
+			SE_Vector2f v = getRightItemPos();
 			v = v + SE_Vector2f(mItemWidth, 0);
-			std::list<SE_ListItem*> newList = addNewItemList(v);
+			addNewItemListScrollToLeft(v);
 		}
 		else if(mScrollType == SCROLL_TO_RIGHT)
 		{
-			
+			SE_Vector2f v = getLeftItemPos();
+			addNewItemListScrollToRight(v);
 		}
-	}
-	else if(mStyle == VERTICAL)
-	{
-		
 	}
 	else
 	{
-		SE_ASSERT(0);
+	    if(mScrollType == SCROLL_TO_TOP)
+		{
+			SE_Vector2f v = getBottomItemPos();
+			v = v + SE_Vector2f(0, mItemHeight);
+			addNewItemListScrollToTop(v);
+		}
+		else if(mScrollType == SCROLL_TO_BOTTOM)
+		{
+			SE_Vector2f v = getTopItemPos();
+			addNewItemListScrollToBottom(v);
+		}
 	}
 }
 void SE_ListView::update(float deltax, float deltay)
@@ -179,13 +315,9 @@ void SE_ListView::update(float deltax, float deltay)
 		{
 			itCoord->v.x += deltax;
 		}
-		else if(mStyle == VERTICAL)
-		{
-			itCoord->v.y += deltay;
-		}
 		else
 		{
-			SE_ASSERT(0);
+			itCoord->v.y += deltay;
 		}
 	}
 	clipListItem(visibleItemList);
