@@ -116,6 +116,10 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
     imageData->setData((char*)dst);
     imageData->setCompressType(SE_ImageData::RAW);
 	imageData->setIsFliped(fliped);
+#if defined(ANDROID)
+#else
+	ilDeleteImages(1, &imgId);
+#endif
     return imageData;
     /*
 #else
