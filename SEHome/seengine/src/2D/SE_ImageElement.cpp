@@ -18,7 +18,6 @@ SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
     mImageUnits[4].imageUnit = &mAChannel;
     mImageWidth = 0;
     mImageHeight = 0;
-    initImage();
 }
 SE_Element* SE_ImageElement::clone()
 {
@@ -58,7 +57,6 @@ void SE_ImageElement::initImage()
 }
 void SE_ImageElement::update(SE_ParamValueList& paramValueList)
 {
-    initImage();
     spawn();
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* spatial = spatialManager->get(getID());
@@ -197,6 +195,7 @@ void SE_ImageElement::update(const SE_TimeKey& key)
 {}
 void SE_ImageElement::spawn()
 {
+	initImage();
 	SE_ImageUnit iu = mBaseColor;
 	float pivotx, pivoty, width, height;
 	if(iu.imageDataID.isValid())
