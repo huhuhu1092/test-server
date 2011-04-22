@@ -85,12 +85,12 @@ public:
 	//float is delimited by whitespace or tab
 	//user need to delete[] out
 	static void stringToFloatArray(const char* v, float*& out, int& outLen);
-	static void strintToIntArray(const char* v, int*& out, int& len);
+	static void stringToIntArray(const char* v, int*& out, int& len);
 	static int stringToInt(const char* v);
 	static float stringToFloat(const char* v);
     static SE_CharCode stringToCharCode(const char* s, int len);
     static size_t getUtf32LenFromUtf8(const char* src, size_t src_len); 
-    static size_t utf8TolUtf32(const char* src, size_t src_len,
+    static size_t utf8ToUtf32(const char* src, size_t src_len,
                        unsigned int* dst, size_t dst_len);
 };
 

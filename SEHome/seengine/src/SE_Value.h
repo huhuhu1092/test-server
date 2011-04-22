@@ -3,6 +3,7 @@
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
+#include "SE_Log.h"
 #include <wchar.h>
 class SE_VirtualData
 {
@@ -33,6 +34,10 @@ public:
     enum TYPE {INVALID, CHAR_T, UCHAR_T, SHORT_T, USHORT_T, INT_T, UINT_T, FLOAT_T, ASCII_T, UTF8_T, UNICODE_T, \
          VECTOR3F_T, VECTOR4F_T, VECTOR2F_T, VECTOR3I_T, QUAT_T, MATRIX3F_T, MATRIX2F_T, MATRIX4F_T, VIRTUALDATA_T};
 	SE_Value();
+	bool hasSet() const
+	{
+        return mHasSetValue;
+	}
     ~SE_Value();
     SE_Value(const SE_Value&);
     SE_Value& operator=(const SE_Value&);
@@ -78,7 +83,7 @@ public:
     }
     unsigned short getUShort() const
     {
-		SE_ASSERT(type == USHORT_H);
+		SE_ASSERT(type == USHORT_T);
 		if(type != USHORT_T)
 		{
 			SE_PRINT_TYPEERROR_MSG(USHORT_T);
@@ -214,9 +219,26 @@ public:
 			return;
         type = UNICODE_T;
 		SE_ASSERT(data.unicode == NULL);
-        data.unicode = copyString((const char*)v);
+        data.unicode = (wchar_t*)copyString((const char*)v);
 		mHasSetValue = true;
     }
+	const SE_Quat& getQuat() const
+	{
+		SE_ASSERT(type == QUAT_T);
+		if(type != QUAT_T)
+		{
+			SE_PRINT_TYPEERROR_MSG(QUAT_T);
+		}
+		return *data.quat;
+	}
+	void setQuat(const SE_Quat& q)
+	{
+		if(mHasSetValue)
+			return;
+		SE_ASSERT(data.quat == NULL);
+		data.quat = new SE_Quat(q);
+		mHasSetValue = true;
+	}
     const SE_Vector3f& getVector3f() const
     {
 		SE_ASSERT(type == VECTOR3F_T);

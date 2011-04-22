@@ -10,7 +10,7 @@ void SE_Value::clear()
     switch(type)
     {
     case ASCII_T:
-		if(data.ascii())
+		if(data.ascii)
 		{
             delete[] data.ascii;
 			data.ascii = NULL;
@@ -80,7 +80,7 @@ void SE_Value::clear()
 		}
         break;
     case MATRIX4F_T:
-		if(data.4f)
+		if(data.mat4f)
 		{
             delete data.mat4f;
 			data.mat4f = NULL;
@@ -284,7 +284,7 @@ char* SE_Value::copyString(const char* v)
     size_t len = strlen(v);
     char* ascii = new char[len + 1];
     if(!ascii)
-        return;
+        return NULL;
     memset(ascii, 0, len + 1);
     strncpy(ascii, v, len);
     return ascii;	
