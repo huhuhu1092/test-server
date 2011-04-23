@@ -83,6 +83,7 @@ public:
 void SE_Thread::start()
 {
 #if defined(SE_HAS_THREAD)
+	LOGI("############## create thread ############\n");
     createThread(&SE_Thread::threadFun, this);
 #else
     _ThreadCommand* threadCommand = new _ThreadCommand(SE_Application::getInstance());

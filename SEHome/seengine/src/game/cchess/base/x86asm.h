@@ -141,7 +141,7 @@ __forceinline uint32_t Shrd(uint32_t LowLong, uint32_t HighLong, uint32_t Count)
 #pragma warning(default: 4035)
 
 #elif defined(ANDROID)
-int Bsf(uint32_t operand)
+static __inline__ int Bsf(uint32_t operand)
 {
 	uint32_t c = 1;
 	int k = 0;
@@ -152,7 +152,7 @@ int Bsf(uint32_t operand)
 	}
 	return k;
 }
-int Bsr(uint32_t operand)
+static __inline__ int Bsr(uint32_t operand)
 {
 	uint32_t c = 0x80000000;
 	int k = 32;
@@ -163,7 +163,7 @@ int Bsr(uint32_t operand)
 	}
 	return k - 1;
 }
-uint64_t TimeStampCounter(void) {
+static __inline__ uint64_t TimeStampCounter(void) {
 	time_t seconds = time(NULL);
     return 800 * 1024 * 1024 * seconds;
 }

@@ -1361,6 +1361,7 @@ void SE_CChess::loadBoard()
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
 	sceneManager->setPointedElementHandler(h);
+
 	initNameChessPiecesMap();
 	std::string path = std::string(resourceManager->getDataPath()) + SE_SEP + "data" + SE_SEP + "ChessOpening.dat";
 	char* data = NULL;

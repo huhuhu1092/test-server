@@ -53,6 +53,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
         delete bitmap;
         return NULL;
     }
+	LOGI("... image bpp = %d \n", bpp);
 #else
     ILuint	imgId;
     ilInit();
@@ -81,6 +82,7 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
 #endif
     int pixelSize = bpp / 8;
     unsigned char* dst = new unsigned char[width * height * pixelSize];
+	LOGI("... image src = %p \n", src);
 	if(fliped)
 	{
 	    for(int y = height - 1 ; y >= 0 ; y--)
@@ -116,7 +118,9 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath, bool fliped)
     imageData->setData((char*)dst);
     imageData->setCompressType(SE_ImageData::RAW);
 	imageData->setIsFliped(fliped);
+	LOGI("## read image OK ##\n");
 #if defined(ANDROID)
+	delete bitmap;
 #else
 	ilDeleteImages(1, &imgId);
 #endif
