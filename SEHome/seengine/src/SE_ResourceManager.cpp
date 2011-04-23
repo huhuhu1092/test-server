@@ -2196,11 +2196,16 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
     if(!id.isValid())
     {
 		id = SE_Util::intToString(indent).c_str();
+		str = createElementContentID(parent->fullPathName.getStr(), id.getStr(), "Image");
     }
-	std::string str = createElementContentID(parent->fullPathName.getStr(), id.getStr(), "Image");
+	else
+	{
+		str = id.getStr();
+	}
     imageContent->setFillType(fillType);
 	imageContent->setID(str.c_str());
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
@@ -2232,11 +2237,16 @@ void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xml
         }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
     if(id == "")
     {
 		id = SE_Util::intToString(indent);
+	    str = createElementContentID(parent->fullPathName.getStr(), id, "Action");
     }
-	std::string str = createElementContentID(parent->fullPathName.getStr(), id, "Action");
+	else
+	{
+		str = id;
+	}
     actionContent->setID(str.c_str());
     actionContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(actionContent);
@@ -2264,11 +2274,16 @@ void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement*
         }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
 	if(id == "")
     {
 		id = SE_Util::intToString(indent);
+		str = createElementContentID(parent->fullPathName.getStr(), id, "State");
     }
-	std::string str = createElementContentID(parent->fullPathName.getStr(), id, "State");
+	else
+	{
+		str = id;
+	}
     stateTableContent->setID(str.c_str());
     stateTableContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(stateTableContent);
