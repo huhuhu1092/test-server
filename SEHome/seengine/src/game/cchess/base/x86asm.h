@@ -1,5 +1,5 @@
 #include "base.h"
-
+#include <time.h>
 #ifndef X86ASM_H
 #define X86ASM_H
 
@@ -141,7 +141,32 @@ __forceinline uint32_t Shrd(uint32_t LowLong, uint32_t HighLong, uint32_t Count)
 #pragma warning(default: 4035)
 
 #elif defined(ANDROID)
-    
+int Bsf(uint32_t operand)
+{
+	uint32_t c = 1;
+	int k = 0;
+	while(!(c & operand))
+	{
+		c = ( c << 1);
+		k++;
+	}
+	return k;
+}
+int Bsr(uint32_t operand)
+{
+	uint32_t c = 0x80000000;
+	int k = 32;
+	while(!(c & operand))
+	{
+		k--;
+		c =  (c >> 1);
+	}
+	return k - 1;
+}
+uint64_t TimeStampCounter(void) {
+	time_t seconds = time(NULL);
+    return 800 * 1024 * 1024 * seconds;
+}
 #else
 
 static __inline__ int Exchange(volatile int *Target, int Value) {

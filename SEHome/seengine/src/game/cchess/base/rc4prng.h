@@ -33,10 +33,7 @@ struct RC4Struct {
     } Seed;
     timeb tb;
     ftime(&tb);
-#if defined(ANDROID)
-#else
     Seed.qw = TimeStampCounter();
-#endif
     Seed.dw[1] ^= (uint32_t) GetTime();
     Init(&Seed, 8);
   }
