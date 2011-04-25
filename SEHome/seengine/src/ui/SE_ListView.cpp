@@ -18,7 +18,7 @@ SE_ListItem* SE_ListView::createListItem(const char* listItemSchema)
 	return listItem;
 }
 
-int SE_ListView::calculateItemNum(float listViewX, float listItemX)
+Int SE_ListView::calculateItemNum(float listViewX, float listItemX)
 {
 	float x = listViewX / listItemX;
 	return (int)SE_Ceil(x);
@@ -43,8 +43,11 @@ void SE_ListView::spawn()
 		delete listItem;
 		return;
 	}
+	SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
+	elementManager->add(this->getID(), listItem);
 	//spawn the list item
 	listItem->spawn();
+	listItem->update(0);
 	//list item do layout,
 	//this will get the list item content size
 	listItem->layout();
@@ -62,8 +65,6 @@ void SE_ListView::spawn()
 	SE_ASSERT(num != 0);
 	//set item num which can be seen in list view
 	mItemNum = num;
-	SE_ElementManager* elementManager = SE_GET_ELEMENTMANAGER();
-	elementManager->add(this->getID(), listItem);
 	setItemDimension(listItem);
 	mCurrPos++;
 	mListItemList.push_back(listItem);

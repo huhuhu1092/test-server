@@ -39,35 +39,6 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
-static int getElementState(const SE_StringID& state)
-{
-    if(state == "normal")
-        return SE_Element::NORMAL;
-    else if(state == "highlighted")
-        return SE_Element::HIGHLIGHTED;
-    else if(state == "selected")
-        return SE_Element::SELECTED;
-    else if(state == "inactive")
-        return SE_Element::INACTIVE;
-    else if(state == "")
-        return SE_Element::NORMAL;
-	else
-		return SE_Element::INVALID;
-
-}
-static int getElementType(const SE_StringID& type)
-{
-    if(type == "button")
-    {
-        return SE_UI_BUTTON;
-    }
-    else if(type == "textview")
-    {
-        return SE_UI_TEXTVIEW;
-    }
-    else
-        return SE_2D_UI_NODE;
-}
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   

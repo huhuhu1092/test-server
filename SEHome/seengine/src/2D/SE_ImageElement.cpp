@@ -202,53 +202,54 @@ void SE_ImageElement::spawn()
 	{
 		width = iu.imageRect.width;
 		height = iu.imageRect.height;
-		pivotx = iu.imageRect.pivotx;
-		pivoty = iu.imageRect.pivoty;
+		mPivotX = iu.imageRect.pivotx;
+		mPivotY = iu.imageRect.pivoty;
 	}
 	else
 	{
 		iu = mRChannel;
 		width = iu.imageRect.width;
 		height = iu.imageRect.height;
-		pivotx = iu.imageRect.pivotx;
-		pivoty = iu.imageRect.pivoty;
+		mPivotX = iu.imageRect.pivotx;
+		mPivotY = iu.imageRect.pivoty;
 	}
     mImageWidth = width;
     mImageHeight = height;
-    SE_ASSERT(mImageWidth != 0);
-    SE_ASSERT(mImageHeight != 0);
+    if(mImageWidth == 0)
+	{
+		LOGI("## error: SE_ImageElement's image width == 0 ##\n");
+	}
+	if(mImageHeight == 0)
+	{
+		LOGI("## error: SE_ImageElement's image height == 0 ## \n");
+	}
+}
+void SE_ImageElement::layout()
+{
+	//SE_2DNodeElement::layout();
     if(mFillType == SE_WRAP_CONTENT)
     {
-	    mPivotX = pivotx;
-	    mPivotY = pivoty;
-	    mWidth = width;
-	    mHeight = height;
+	    mWidth = mImageWidth;
+	    mHeight = mImageHeight;
     }
     else
     {
         SE_2DNodeElement* parent = (SE_2DNodeElement*)getParent();
-        if(!parent)
-		{
-			mWidth = mHeight = 0;
-			LOGI("### error: image element's parent is NULL\n");
-			return;
-		}
-        mWidth = parent->getWidth();
-        mHeight = parent->getHeight();
-		SE_ASSERT(mWidth > 0 && mHeight > 0);
         mPivotX = 0;
         mPivotY = 0;
         setMountPoint(0, 0);
-		if(mFillType == SE_TILE_PARENT)
+		if(parent)
 		{
-		    mU = mWidth / mImageWidth;
-		    mV = mHeight / mImageHeight;
+            mWidth = parent->getWidth();
+            mHeight = parent->getHeight();
+		    if(mFillType == SE_TILE_PARENT)
+		    {
+		        mU = mWidth / mImageWidth;
+		        mV = mHeight / mImageHeight;
+		    }
 		}
     }
-}
-void SE_ImageElement::layout()
-{
-	SE_2DNodeElement::layout();
+	calculateRect(mPivotX, mPivotY, mWidth, mHeight);
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {
