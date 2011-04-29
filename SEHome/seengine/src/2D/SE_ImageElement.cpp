@@ -215,14 +215,7 @@ void SE_ImageElement::spawn()
 	}
     mImageWidth = width;
     mImageHeight = height;
-    if(mImageWidth == 0)
-	{
-		LOGI("## error: SE_ImageElement's image width == 0 ##\n");
-	}
-	if(mImageHeight == 0)
-	{
-		LOGI("## error: SE_ImageElement's image height == 0 ## \n");
-	}
+	SE_ASSERT(mImageWidth != 0 && mImageHeight != 0);
 }
 void SE_ImageElement::layout()
 {

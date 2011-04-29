@@ -18,7 +18,7 @@ SE_ListItem* SE_ListView::createListItem(const char* listItemSchema)
 	return listItem;
 }
 
-Int SE_ListView::calculateItemNum(float listViewX, float listItemX)
+int SE_ListView::calculateItemNum(float listViewX, float listItemX)
 {
 	float x = listViewX / listItemX;
 	return (int)SE_Ceil(x);
