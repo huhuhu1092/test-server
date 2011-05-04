@@ -54,7 +54,7 @@ public:
 		return seq;
 	}
 	static int getElementType(const SE_StringID& type);
-	static int getELementState(const SE_StringID& state);
+	static int getElementState(const SE_StringID& state);
 private:
     SE_Element* createElement(SE_ElementManager* elementManager, SE_Element* parent);
 	void clear();

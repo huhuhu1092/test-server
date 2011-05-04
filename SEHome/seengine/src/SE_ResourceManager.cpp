@@ -1793,7 +1793,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 		}
         else if(!strcmp(name, "type"))
         {
-            elementSchema->type = getElementType(value);
+			elementSchema->type = SE_ElementSchema::getElementType(value);
         }
         else if(!strcmp(name, "text"))
         {
@@ -1812,7 +1812,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         }
         else if(!strcmp(name, "state"))
         {
-            elementSchema->state = getElementState(value);
+			elementSchema->state = SE_ElementSchema::getElementState(value);
         }
         pAttribute = pAttribute->Next();
     }
@@ -2181,7 +2181,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	imageContent->setID(str.c_str());
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);
-    imageContent->setState(getElementState(state));
+	imageContent->setState(SE_ElementSchema::getElementState(state));
     imageContent->setCanPointed(canpointed);
 	parent->addContent(imageContent);
 }

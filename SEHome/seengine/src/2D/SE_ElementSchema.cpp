@@ -82,7 +82,7 @@ SE_2DNodeElement* SE_ElementSchema::createElement(int type)
     case SE_UI_BUTTON:
         return new SE_Button;
 	case SE_UI_LISTITEM:
-		return new SE_ListItem;
+		return NULL;
 	case SE_UI_LISTVIEW:
 		{
 			return NULL;
@@ -215,7 +215,7 @@ int SE_ElementSchema::getElementType(const SE_StringID& type)
     else
         return SE_2D_UI_NODE;	
 }
-int SE_ElementSchema::getELementState(const SE_StringID& state)
+int SE_ElementSchema::getElementState(const SE_StringID& state)
 {
     if(state == "normal")
         return SE_Element::NORMAL;
