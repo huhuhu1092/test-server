@@ -81,6 +81,12 @@ SE_2DNodeElement* SE_ElementSchema::createElement(int type)
         return new SE_2DNodeElement;
     case SE_UI_BUTTON:
         return new SE_Button;
+	case SE_UI_LISTITEM:
+		return NULL;
+	case SE_UI_LISTVIEW:
+		{
+			return NULL;
+		}
     case SE_UI_TEXTVIEW:
         {
 			SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
@@ -187,4 +193,41 @@ SE_ElementContent* SE_ElementSchema::getContent(int index)
 	}
 	else
 		return NULL;
+}
+int SE_ElementSchema::getElementType(const SE_StringID& type)
+{
+    if(type == "button")
+    {
+        return SE_UI_BUTTON;
+    }
+    else if(type == "textview")
+    {
+        return SE_UI_TEXTVIEW;
+    }
+	else if(type == "listitem")
+	{
+		return SE_UI_LISTITEM;
+	}
+	else if(type == "listview")
+	{
+		return SE_UI_LISTVIEW;
+	}
+    else
+        return SE_2D_UI_NODE;	
+}
+int SE_ElementSchema::getElementState(const SE_StringID& state)
+{
+    if(state == "normal")
+        return SE_Element::NORMAL;
+    else if(state == "highlighted")
+        return SE_Element::HIGHLIGHTED;
+    else if(state == "selected")
+        return SE_Element::SELECTED;
+    else if(state == "inactive")
+        return SE_Element::INACTIVE;
+    else if(state == "")
+        return SE_Element::NORMAL;
+	else
+		return SE_Element::INVALID;
+	
 }

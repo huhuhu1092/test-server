@@ -39,35 +39,6 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
-static int getElementState(const SE_StringID& state)
-{
-    if(state == "normal")
-        return SE_Element::NORMAL;
-    else if(state == "highlighted")
-        return SE_Element::HIGHLIGHTED;
-    else if(state == "selected")
-        return SE_Element::SELECTED;
-    else if(state == "inactive")
-        return SE_Element::INACTIVE;
-    else if(state == "")
-        return SE_Element::NORMAL;
-	else
-		return SE_Element::INVALID;
-
-}
-static int getElementType(const SE_StringID& type)
-{
-    if(type == "button")
-    {
-        return SE_UI_BUTTON;
-    }
-    else if(type == "textview")
-    {
-        return SE_UI_TEXTVIEW;
-    }
-    else
-        return SE_2D_UI_NODE;
-}
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   
@@ -1822,7 +1793,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 		}
         else if(!strcmp(name, "type"))
         {
-            elementSchema->type = getElementType(value);
+			elementSchema->type = SE_ElementSchema::getElementType(value);
         }
         else if(!strcmp(name, "text"))
         {
@@ -1841,7 +1812,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         }
         else if(!strcmp(name, "state"))
         {
-            elementSchema->state = getElementState(value);
+			elementSchema->state = SE_ElementSchema::getElementState(value);
         }
         pAttribute = pAttribute->Next();
     }
@@ -2210,7 +2181,7 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
 	imageContent->setID(str.c_str());
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);
-    imageContent->setState(getElementState(state));
+	imageContent->setState(SE_ElementSchema::getElementState(state));
     imageContent->setCanPointed(canpointed);
 	parent->addContent(imageContent);
 }
