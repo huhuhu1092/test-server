@@ -163,7 +163,6 @@ bool SEDemo::InitView()
 }
 bool SEDemo::ReleaseView()
 {
-	
 	return true;
 }
 bool SEDemo::QuitApplication()

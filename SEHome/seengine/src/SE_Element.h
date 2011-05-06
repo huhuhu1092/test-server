@@ -184,24 +184,7 @@ public:
     {
         mRenderQueueSeq = q;
     }
-	/*
-	SE_Element* getPrev() const
-	{
-		return mPrevElement;
-	}
-    void setPrev(SE_Element* prev)
-	{
-		mPrevElement = prev;
-	}
-	SE_Element* getNext() const
-	{
-		return mNextElement;
-	}
-	void setNext(SE_Element* next)
-	{
-		mNextElement = next;
-	}
-	*/
+
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;
