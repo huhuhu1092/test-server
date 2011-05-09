@@ -1,0 +1,168 @@
+;;; Define :resourcemanager
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun resourcemanager ()
+  (find-or-make-application-window :resourcemanager 'make-resourcemanager))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-resourcemanager
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 60 80 1072 584)) (name :resourcemanager)
+     (title "Resourcemanager") (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex nil "Sans" 9.999683 '(:bold))
+           :form-state :icon
+           :maximize-button t
+           :minimize-button t
+           :name :resourcemanager
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-resourcemanager-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-resourcemanager-widgets ()
+  (list (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 35
+                       :left 13 :name :button5 :on-click
+                       'resourcemanager-load-file-on-click :title "LoadFile" :top 16
+                       :width 117)
+        (make-instance 'my-resourcemanager-outline :font
+                       (make-font-ex nil "Sans" 10 '(:bold)) :height 404 :left 15 :name
+                       :outline1 :range
+                       (list (make-instance 'outline-item :value :top-1 :state :open
+                                            :selected t :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :middle-1
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   (list
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-11
+                                                     :state
+                                                     :open
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-12
+                                                     :state
+                                                     :open
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-13
+                                                     :state
+                                                     :open
+                                                     :range
+                                                     nil)))
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :middle-2
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   (list
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-21
+                                                     :state
+                                                     :open
+                                                     :foreground-color
+                                                     red
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-22
+                                                     :state
+                                                     :open
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-23
+                                                     :state
+                                                     :open
+                                                     :background-color
+                                                     (make-instance
+                                                      'cg.base:light-or-dark-color
+                                                      :hue-symbol
+                                                      'cyan
+                                                      :lightness-when-light
+                                                      255
+                                                      :lightness-when-dark
+                                                      128
+                                                      :base-lightness-when-light
+                                                      0
+                                                      :base-lightness-when-dark
+                                                      0)
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)))))
+                             (make-instance 'outline-item :value :top-2 :state :open
+                                            :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :biff
+                                                   :state
+                                                   :open
+                                                   :background-color
+                                                   cyan
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :boff
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   nil))))
+                       :top 89 :value :top-1 :width 316)
+        (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 35
+                       :left 140 :name :button6 :title "Delete" :top 16 :width 131)
+        (make-instance 'static-text :font (make-font-ex nil "Sans" 10 '(:bold)) :height
+                       26 :left 18 :name :static-text-1 :top 63 :value "Resource" :width
+                       112)
+        (make-instance 'scrolling-static-text :font (make-font-ex nil "Sans" 10 '(:bold))
+                       :height 404 :left 398 :name :scrolling-static-text-1 :top 89
+                       :value "" :width 483)))

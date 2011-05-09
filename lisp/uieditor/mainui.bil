@@ -1,0 +1,203 @@
+;;; Define :mainui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun mainui () (find-or-make-application-window :mainui 'make-mainui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-mainui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 240 74 1060 623)) (name :mainui) (title "Mainui")
+     (border :frame) (child-p nil) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'frame-window
+           :exterior exterior
+           :interior interior
+           :border border
+           :child-p child-p
+           :close-button t
+           :font (make-font-ex nil "Sans" 9.999683 '(:bold))
+           :form-state :normal
+           :maximize-button t
+           :menu (open-menu
+                    (list (make-instance 'menu-item :name :new-item-1 :title "Project"
+                                         :value
+                                         (open-menu
+                                            (list (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-2
+                                                   :title
+                                                   "create"
+                                                   :value
+                                                   'sui-create-project
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
+                                                   nil)
+                                                  (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-3
+                                                   :title
+                                                   "remove"
+                                                   :value
+                                                   nil
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
+                                                   nil))
+                                            'pull-down-menu (screen *system*) :name
+                                            :new-item-1
+                                           :show-help-strings-as-tooltips nil
+                                           :on-click 'funcall-menu-item-with-window
+                                           :justification :left
+                                           :override-native-shortcuts nil)
+                                         :selected nil :available t :event-synonym nil
+                                         :help-string nil))
+                    'menu-bar (screen *system*) :name :default-menu
+                   :show-help-strings-as-tooltips nil
+                   :on-click 'funcall-menu-item
+                   :justification :left
+                   :override-native-shortcuts nil)
+           :minimize-button t
+           :name :mainui
+           :pop-up nil
+           :resizable t
+           :scrollbars t
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-mainui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-mainui-widgets ()
+  (list (make-instance 'outline :font (make-font-ex nil "Sans" 10 '(:bold)) :height 480
+                       :left 14 :name :outline2 :range
+                       (list (make-instance 'outline-item :value :top-1 :state :open
+                                            :selected t :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :middle-1
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   (list
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-11
+                                                     :state
+                                                     :open
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-12
+                                                     :state
+                                                     :open
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-13
+                                                     :state
+                                                     :open
+                                                     :range
+                                                     nil)))
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :middle-2
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   (list
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-21
+                                                     :state
+                                                     :open
+                                                     :foreground-color
+                                                     red
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-22
+                                                     :state
+                                                     :open
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)
+                                                    (make-instance
+                                                     'outline-item
+                                                     :value
+                                                     :bottom-23
+                                                     :state
+                                                     :open
+                                                     :background-color
+                                                     (make-instance
+                                                      'cg.base:light-or-dark-color
+                                                      :hue-symbol
+                                                      'cyan
+                                                      :lightness-when-light
+                                                      255
+                                                      :lightness-when-dark
+                                                      128
+                                                      :base-lightness-when-light
+                                                      0
+                                                      :base-lightness-when-dark
+                                                      0)
+                                                     :available
+                                                     nil
+                                                     :range
+                                                     nil)))))
+                             (make-instance 'outline-item :value :top-2 :state :open
+                                            :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :biff
+                                                   :state
+                                                   :open
+                                                   :background-color
+                                                   cyan
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   :boff
+                                                   :state
+                                                   :open
+                                                   :range
+                                                   nil))))
+                       :top 14 :value :top-1 :width 232)))
