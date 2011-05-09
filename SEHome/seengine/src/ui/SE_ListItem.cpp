@@ -19,6 +19,12 @@ SE_ListItem* SE_ListItem::createFromSchema(const char* schema)
 	{ \
 		imageElement->setBaseColor(iu); \
 	}
+#define SET_TEXT(name, str) \
+	SE_TextElement* textElement = (SE_TextElement*)findByName(name); \
+	if(textElement) \
+    { \
+        textElement->setText(str); \
+	}
 void SE_ListItem::setImage1(const SE_ImageUnit& iu)
 {
     SET_IMAGE("image1", iu);
@@ -37,11 +43,17 @@ void SE_ListItem::setImage4(const SE_ImageUnit& iu)
 }
 void SE_ListItem::setText1(const SE_StringID& str)
 {
-
+    SET_TEXT("text1", str);
 }
 void SE_ListItem::setText2(const SE_StringID& str)
-{}
+{
+	SET_TEXT("text2", str);
+}
 void SE_ListItem::setText3(const SE_StringID& str)
-{}
+{
+	SET_TEXT("text3", str);
+}
 void SE_ListItem::setText4(const SE_StringID& str)
-{}
+{
+	SET_TEXT("text4", str);
+}
