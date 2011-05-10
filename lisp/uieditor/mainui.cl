@@ -7,6 +7,7 @@
 (in-package :common-graphics-user)
 (defun sui-create-project (window)
   (format t "click ~a~%" window)
+  (project-ui)
   )
 (defun sui-delete-project (window)
   (format t "delete project ~a~%" window)

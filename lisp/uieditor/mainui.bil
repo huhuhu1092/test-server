@@ -14,18 +14,18 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-mainui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 240 74 1060 623)) (name :mainui) (title "Mainui")
-     (border :frame) (child-p nil) form-p)
+     (interior (make-box 476 71 1296 620)) (name :mainui) (title "Mainui")
+     (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
            :class 'frame-window
+           :child-p child-p
            :exterior exterior
            :interior interior
            :border border
-           :child-p child-p
            :close-button t
-           :font (make-font-ex nil "Sans" 9.999683 '(:bold))
-           :form-state :normal
+           :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
+           :form-state :icon
            :maximize-button t
            :menu (open-menu
                     (list (make-instance 'menu-item :name :new-item-1 :title "Project"

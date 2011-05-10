@@ -25,8 +25,8 @@
            :interior interior
            :border border
            :close-button t
-           :font (make-font-ex nil "Sans" 9.999683 '(:bold))
-           :form-state :icon
+           :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
+           :form-state :normal
            :maximize-button t
            :minimize-button t
            :name :resourcemanager
