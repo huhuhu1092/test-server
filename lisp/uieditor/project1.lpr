@@ -3,12 +3,15 @@
 (in-package :cg-user)
 
 (define-project :name :project1
-  :modules (list (make-instance 'form-module :name "resourcemanager" :finder-function
+  :modules (list (make-instance 'module :name "basepackage")
+                 (make-instance 'form-module :name "resourcemanager" :finder-function
                                 'resourcemanager :has-pixmap-file nil)
-                 (make-instance 'form-module :name "mainui" :finder-function 'mainui
-                                :has-pixmap-file nil)
                  (make-instance 'form-module :name "project-ui" :finder-function
-                                'project-ui :has-pixmap-file nil))
+                                'project-ui :has-pixmap-file nil)
+                 (make-instance 'form-module :name "testmainui" :finder-function 'form1
+                                :has-pixmap-file nil)
+                 (make-instance 'form-module :name "mainui" :finder-function 'mainui
+                                :has-pixmap-file nil))
   :projects nil
   :libraries nil
   :editable-files nil

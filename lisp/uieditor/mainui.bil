@@ -14,7 +14,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-mainui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 476 71 1296 620)) (name :mainui) (title "Mainui")
+     (interior (make-box 434 69 1254 618)) (name :mainui) (title "Mainui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
@@ -25,7 +25,8 @@
            :border border
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
-           :form-state :icon
+           :form-package-name :common-graphics-user
+           :form-state :normal
            :maximize-button t
            :menu (open-menu
                     (list (make-instance 'menu-item :name :new-item-1 :title "Project"
@@ -87,12 +88,13 @@
            :title-bar t
            :dialog-items (make-mainui-widgets)
            :form-p form-p
-           :form-package-name nil)))
+           :form-package-name :common-graphics-user)))
     owner))
 
 (defun make-mainui-widgets ()
-  (list (make-instance 'outline :font (make-font-ex nil "Sans" 10 '(:bold)) :height 480
-                       :left 14 :name :outline2 :range
+  (list (make-instance 'my-project-management-area-outline :font
+                       (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
+                       :project-management-area :range
                        (list (make-instance 'outline-item :value :top-1 :state :open
                                             :selected t :range
                                             (list (make-instance

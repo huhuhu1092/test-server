@@ -24,16 +24,16 @@
   )
 
 (defun create-project-component ()
-  (mapcar #'(lambda (cd) (make-componet :dirname (component-define-name cd)
+  (mapcar #'(lambda (cd) (make-component :dirname (component-define-name cd)
 					:dirvalue (component-define-value cd)
 					:items nil
-					:comment (component-define-component cd)))
+					:comment (component-define-comment cd)))
 	  *component-define*)
   )
 
 (defun add-project (name path)
-  (when (is-contain-project-name (name)) (error "project's name has contained"))
-  (when (is-contain-project-path (path)) (error "project's path has contained"))
+  (when (is-contain-project-name name) (error "project's name has contained"))
+  (when (is-contain-project-path path) (error "project's path has contained"))
   (let ((project (make-project :name name :path path :components (create-project-component)))) 
     (pushnew project *projects*)
     )
@@ -43,6 +43,7 @@
     (setf *projects* p)
     )
   )
+
 (defun list-project ()
   (copy-list *projects*)
   )
@@ -51,13 +52,13 @@
 ;;  )
 (defun is-contain-project-name (name)
   (dolist (p *projects*)
-    (if (string-equal (project-name p) name) (return-from is-contain-project-name t))
+    (if (string= (project-name p) name) (return-from is-contain-project-name t))
     )
   nil
   )
 (defun is-contain-project-path (path)
   (dolist (p *projects*)
-    (if (string-equal (project-path p) path) (return-from is-contain-project-path t))
+    (if (string= (project-path p) path) (return-from is-contain-project-path t))
     )
   nil
   )
@@ -66,8 +67,8 @@
     (dolist (p *projects*)
       (push (project-name p) name)
       )
+    name
     )
-  name
   )
 (defun list-project-path ()
   (let ((path nil))
@@ -80,19 +81,4 @@
 (defun project-num ()
   (length *projects*)
   )
-;;;;;;;; for test ;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
-(setf a (list-project-path))
-(assert (eql a nil))
-(setf b (list-project-path))
-(assert (equal b nil))
-(assert (equal (project-num) 0))
-
-(add-project "aa" "C:\\ppp")
-(setf a (list-project-path))
-(setf b (list-project-name))
-(assert (string-equal (car a) "C:\\ppp"))
-(assert (string-equal (car b) "aa"))
-(assert (equal (project-num) 1))
-
 

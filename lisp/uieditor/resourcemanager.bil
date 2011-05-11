@@ -15,7 +15,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-resourcemanager
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 60 80 1072 584)) (name :resourcemanager)
+     (interior (make-box 221 83 1233 587)) (name :resourcemanager)
      (title "Resourcemanager") (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
@@ -26,7 +26,7 @@
            :border border
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
-           :form-state :normal
+           :form-state :shrunk
            :maximize-button t
            :minimize-button t
            :name :resourcemanager

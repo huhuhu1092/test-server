@@ -4,5 +4,6 @@
 *.*#
 *.fasl
 *.dxl
+*.bak
 Makefile
 build

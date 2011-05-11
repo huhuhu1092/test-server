@@ -14,18 +14,18 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-project-ui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 517 63 996 232)) (name :project-ui) (title "Project Ui")
+     (interior (make-box 569 258 1048 427)) (name :project-ui) (title "Project Ui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
-           :class 'dialog
+           :class 'project-ui-dialog
            :child-p child-p
            :exterior exterior
            :interior interior
            :border border
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
-           :form-state :normal
+           :form-state :shrunk
            :maximize-button t
            :minimize-button t
            :name :project-ui
@@ -62,6 +62,7 @@
                        :left 71 :name :button8 :on-click 'project-ui-button-ok-on-click
                        :title "OK" :top 124 :width 112)
         (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 35
-                       :left 318 :name :button9 :title "Cancel" :top 130 :width 102)
+                       :left 318 :name :button9 :on-click 'project-ui-cancel-on-click
+                       :title "Cancel" :top 130 :width 102)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        41 :left 338 :name :static-text-6 :top 13 :value "" :width 127)))
