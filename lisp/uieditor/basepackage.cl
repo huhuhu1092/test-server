@@ -9,4 +9,7 @@
 	   :is-contain-project-path
 	   :project-num
 	   ))
-(load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\uieditor.cl")
+#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\uieditor.cl")
+#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\baseinterface.cl")
+#-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/base/uieditor.cl")
+#-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/baseinterface.cl")
