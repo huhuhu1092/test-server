@@ -8,8 +8,12 @@
 	   :is-contain-project-name
 	   :is-contain-project-path
 	   :project-num
+	   :get-project-path
+	   :component-value-and-comment
 	   ))
+(pushnew :debug *features*)
 #+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\uieditor.cl")
+#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\test-uieditor.cl")
 #+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\baseinterface.cl")
 #-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/base/uieditor.cl")
 #-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/baseinterface.cl")

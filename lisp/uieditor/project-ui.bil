@@ -25,7 +25,7 @@
            :border border
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
-           :form-state :shrunk
+           :form-state :normal
            :maximize-button t
            :minimize-button t
            :name :project-ui

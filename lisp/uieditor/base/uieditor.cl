@@ -70,6 +70,11 @@
     name
     )
   )
+(defun get-project-path (projectname)
+  (let ((project (remove-if-not #'(lambda (p) (string= (project-name p) projectname)) *projects*)))
+      (if project (project-path (car project)) nil)
+    )
+  )
 (defun list-project-path ()
   (let ((path nil))
     (dolist (p *projects*)
@@ -82,3 +87,27 @@
   (length *projects*)
   )
 
+(defmethod component-value-and-comment ((p project))
+  (let ((components (project-components p)))
+    (mapcar #'(lambda (c) (cons (component-dirvalue c) (component-comment c))) components)
+    )
+  )
+(defmethod component-value-and-comment ((projectname string))
+  "
+      return is a cons of value and comment for component
+      car is value
+      cdr is comment
+  "
+  (let ((project (remove-if-not #'(lambda (p) (string= (project-name p) projectname)) *projects*)))
+    (component-value-and-comment (car project))
+    )
+  )
+
+(defun clear-project (p)
+  )
+(defun clear-all-project ()
+  (dolist (p *projects*)
+    (clear-project p)
+    )
+  (setf *projects* nil)
+  )
