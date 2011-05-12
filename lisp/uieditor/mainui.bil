@@ -63,6 +63,22 @@
                                                    :event-synonym
                                                    nil
                                                    :help-string
+                                                   nil)
+                                                  (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-4
+                                                   :title
+                                                   "save"
+                                                   :value
+                                                   nil
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
                                                    nil))
                                             'pull-down-menu (screen *system*) :name
                                             :new-item-1
@@ -95,8 +111,108 @@
   (list (make-instance 'my-project-management-area-outline :font
                        (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
                        :project-management-area :on-click
-                       'mainui-project-management-area-on-click :top 14 :value :top-1
-                       :width 232)
+                       'mainui-project-management-area-on-click :range
+                       (list (make-instance 'outline-item :value "aa" :state :closed
+                                            :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "element"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "image"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "imagetable"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "effect"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "action"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "statetable"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)))
+                             (make-instance 'outline-item :value "bb" :state :closed
+                                            :range
+                                            (list (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "element"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "image"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "imagetable"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "effect"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "action"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil)
+                                                  (make-instance
+                                                   'outline-item
+                                                   :value
+                                                   "statetable"
+                                                   :state
+                                                   :closed
+                                                   :range
+                                                   nil))))
+                       :top 14 :value :top-1 :width 232)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
                        :height 41 :left 293 :name :project-path-name :read-only t :top 14
                        :value "" :width 416)

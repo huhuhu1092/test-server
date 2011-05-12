@@ -12,8 +12,15 @@
 	   :component-value-and-comment
 	   ))
 (pushnew :debug *features*)
-#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\uieditor.cl")
-#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\base\\test-uieditor.cl")
-#+mswindows (load "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\baseinterface.cl")
-#-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/base/uieditor.cl")
-#-mswindows (load "~/program/streamserver_git/test-server/lisp/uieditor/baseinterface.cl")
+#+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")
+#+(and mswindows homepc) (defvar *codedirectory* "E:\\programs\\streamserver_git\\test-server\\lisp\\uieditor\\")
+#+linux (defvar *codedirectory* "~/program/streamserver_git/test-server/lisp/uieditor/")
+
+;#+mswindows (load (concatenate 'string *codedirectory* "\\base\\uieditor.cl"))
+;#+mswindows (load (concatenate 'string *codedirectory* "\\base\\test-uieditor.cl"))
+;#+mswindows (load (concatenate 'string *codedirectory* "\\baseinterface.cl"))
+
+
+;#-mswindows (load (concatenate 'vector *codedirectory* "/base/uieditor.cl"))
+;#-mswindows (load (concatenate 'vector *codedirectory* "/base/test-uieditor.cl"))
+;#-mswindows (load (concatenate 'vector *codedirectory* "/baseinterface.cl"))
