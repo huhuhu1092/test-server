@@ -2,14 +2,20 @@
   (:use :common-lisp)
   (:export :add-project
 	   :delete-project
-	   :list-project
-	   :list-project-name
-	   :list-project-path
-	   :is-contain-project-name
-	   :is-contain-project-path
+	   :get-all-project
+	   :find-project
+	   :find-project-by-name
+	   :find-project-by-path
+	   :get-project-name-with-path
+	   :get-project-path-with-name
+	   :get-all-project-name
+	   :get-all-project-path
 	   :project-num
-	   :get-project-path
 	   :component-value-and-comment
+	   :get-project-name
+	   :get-project-path
+	   :clear-project
+	   :clear-all-project
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")
