@@ -26,18 +26,15 @@
   (pop-up-message-dialog window "Warning" string nil "OK")
   )
 (defun print-project-num ()
-  (format t "project num : ~a ~%" (get-project-num))
+  (format t "project num : ~a ~%" (uie:project-num))
   )
 
 (defun add-to-uie-project (dialog name path)
-  (let ((contain-name? (contain-project-name? name))
-	(contain-path? (contain-project-path? path))
+  (let ((project (uie:find-project name path))
         )
-      (if (not (or contain-name? contain-path?)) (progn (add-project name path) t)
-	(progn (if contain-name?
-	           (popup-message-box dialog (format nil "the \"~a\" project name has been added please use another name ~%" name))
-	          (popup-message-box dialog (format nil "the \"~a\" project path has been added please use another path ~%" path))
-		  )
+      (if (null project) (progn (uie:add-project name path) t)
+	(progn (popup-message-box dialog
+				      (format nil "project name \"~a\" , project path \"~a\"  has been added please use another name or path ~%" name path))
 	       nil
 	  )
 	)

@@ -1,0 +1,134 @@
+;;; Define :coloreffect-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun coloreffect-ui ()
+  (find-or-make-application-window :coloreffect-ui 'make-coloreffect-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-coloreffect-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 414 100 1299 601)) (name :coloreffect-ui)
+     (title "Coloreffect Ui") (border :frame) (child-p nil) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :exterior exterior
+           :interior interior
+           :border border
+           :child-p child-p
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :normal
+           :maximize-button t
+           :minimize-button t
+           :name :coloreffect-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-coloreffect-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-coloreffect-ui-widgets ()
+  (list (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       39 :left 22 :name :static-text-34 :top 18 :value "name" :width
+                       125)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 37 :left 163 :name :editable-text-19 :top 20 :value ""
+                       :width 127)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       36 :left 35 :name :static-text-35 :top 106 :value "key" :width 91)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 38 :left 139 :name :editable-text-20 :top 104 :value ""
+                       :width 142)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       41 :left 34 :name :static-text-36 :top 160 :value "background"
+                       :width 92)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 36 :left 139 :name :editable-text-21 :top 160 :value ""
+                       :width 142)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 37
+                       :left 293 :name :button19 :title "Select" :top 159)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       31 :left 33 :name :static-text-37 :top 221 :value "channel" :width
+                       75)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 41 :left 136 :name :editable-text-22 :top 219 :value ""
+                       :width 145)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 31
+                       :left 296 :name :button20 :title "Select" :top 221 :width 77)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       35 :left 35 :name :static-text-38 :top 289 :value
+                       "background-alpha" :width 112)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 35 :left 159 :name :editable-text-23 :top 289 :value ""
+                       :width 131)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       37 :left 477 :name :static-text-39 :top 114 :value "texture"
+                       :width 72)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 37 :left 562 :name :editable-text-24 :top 105 :value ""
+                       :width 106)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 36
+                       :left 691 :name :button21 :title "Select" :top 106 :width 77)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       32 :left 478 :name :static-text-40 :top 169 :value "function"
+                       :width 71)
+        (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 31
+                       :left 563 :name :combo-box-3 :range (list :one :two :three) :top
+                       165 :value :one :width 105)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       34 :left 479 :name :static-text-41 :top 209 :value "alpha" :width
+                       70)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 36 :left 563 :name :editable-text-25 :top 207 :value ""
+                       :width 114)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       38 :left 481 :name :static-text-42 :top 267 :value "color1" :width
+                       68)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 29 :left 564 :name :editable-text-26 :top 260 :value ""
+                       :width 113)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 29
+                       :left 707 :name :button22 :title "Select" :top 260 :width 79)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       38 :left 481 :name :static-text-43 :top 319 :value "color2" :width
+                       71)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 37 :left 562 :name :editable-text-27 :top 320 :value ""
+                       :width 115)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 30
+                       :left 708 :name :button23 :title "Select" :top 327 :width 78)
+        (make-instance 'group-box :contained-widgets
+                       (list :static-text-39 :editable-text-24 :button21 :static-text-40
+                             :combo-box-3 :static-text-41 :editable-text-25
+                             :static-text-42 :editable-text-26 :button22 :static-text-43
+                             :editable-text-27 :button23)
+                       :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 351 :left 462
+                       :name :group-box-5 :title "Mark" :top 86 :width 344)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       31 :left 32 :name :static-text-44 :top 356 :value "mark" :width
+                       107)
+        (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 30
+                       :left 158 :name :combo-box-4 :range (list :one :two :three) :top
+                       356 :value :one :width 132)
+        (make-instance 'group-box :contained-widgets
+                       (list :static-text-35 :editable-text-20 :static-text-36
+                             :editable-text-21 :button19 :static-text-37
+                             :editable-text-22 :button20 :static-text-38
+                             :editable-text-23 :static-text-44 :combo-box-4)
+                       :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 357 :left 21
+                       :name :group-box-4 :title "Frame" :top 80 :width 391)))

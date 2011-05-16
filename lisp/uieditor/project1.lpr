@@ -4,8 +4,10 @@
 
 (define-project :name :project1
   :modules (list (make-instance 'module :name "basepackage")
+                 (make-instance 'module :name "base/filesystem")
                  (make-instance 'module :name "base/uieditor")
                  (make-instance 'module :name "base/test-uieditor")
+                 (make-instance 'module :name "base/test-filesystem")
                  (make-instance 'module :name "baseinterface")
                  (make-instance 'form-module :name "mainui" :finder-function 'mainui
                                 :has-pixmap-file nil)
@@ -14,7 +16,17 @@
                  (make-instance 'form-module :name "project-ui" :finder-function
                                 'project-ui :has-pixmap-file nil)
                  (make-instance 'form-module :name "testmainui" :finder-function 'form1
-                                :has-pixmap-file nil))
+                                :has-pixmap-file nil)
+                 (make-instance 'form-module :name "element-ui" :finder-function
+                                'element-ui :has-pixmap-file nil)
+                 (make-instance 'form-module :name "action-ui" :finder-function
+                                'action-ui :has-pixmap-file nil)
+                 (make-instance 'form-module :name "image-manager-ui" :finder-function
+                                'image-manager-ui :has-pixmap-file nil)
+                 (make-instance 'form-module :name "sequence-ui" :finder-function
+                                'sequence-ui :has-pixmap-file nil)
+                 (make-instance 'form-module :name "coloreffect-ui" :finder-function
+                                'coloreffect-ui :has-pixmap-file nil))
   :projects nil
   :libraries nil
   :editable-files nil

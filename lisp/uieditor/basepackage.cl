@@ -3,6 +3,8 @@
   (:export :add-project
 	   :delete-project
 	   :get-all-project
+	   :get-curr-project
+	   :set-curr-project
 	   :find-project
 	   :find-project-by-name
 	   :find-project-by-path
@@ -10,12 +12,25 @@
 	   :get-project-path-with-name
 	   :get-all-project-name
 	   :get-all-project-path
+	   :get-all-project-name-path
 	   :project-num
 	   :component-value-and-comment
 	   :get-project-name
 	   :get-project-path
-	   :clear-project
-	   :clear-all-project
+	   :delete-project
+	   :delete-all-project
+	   :directory-exist-p
+	   :file-exist-p
+	   :directory-end-with-path-sep
+	   :get-file-path
+	   :get-directory-children-string
+	   :get-directory-children
+	   :create-directory
+	   :last-string-with-path-sep
+	   :concatenate-string-with-path-sep
+	   :contain-name-in-directory?
+	   :tokens
+	   :constituent
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")

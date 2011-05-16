@@ -1,14 +1,7 @@
 (in-package :uie)
-(defmacro deftest (before assert after)
-  "
-    form : (deftest (before-form*) (assert-form*) (after-form*)
-  "
-;;  `(progn ,@before ,@(mapcar #'(lambda (a) `(progn `(format t "test ~a~%" ,a) `(assert ,a))) assert) ,@after)
-  `(progn ,@before ,@(mapcar #'(lambda (a) (list 'progn  `(format t "test : ~a~%" ',a) `(assert ,a) )) assert) ,@after)
 
-  )
 (format t "unit test start~%")
-(deftest ((clear-all-project)) ((= (project-num) 0)) nil)
+(deftest ((delete-all-project)) ((= (project-num) 0)) nil)
 (deftest ((setf a (get-all-project-path))) ((eql a nil)) nil)
 (deftest ((setf b (get-all-project-name))) ((eql b nil)) nil)
 (deftest ((add-project "aa" "C:\\ppp")
@@ -20,8 +13,8 @@
    (string= (get-project-name a) "aa")
    (equal (project-num) 1)
    )
-  ((clear-all-project)))
-(deftest ((clear-all-project)
+  ((delete-all-project)))
+(deftest ((delete-all-project)
 	  (add-project "aa" "C:\\aa")
 	  (add-project "bb" "c:\\bb")
 	  (setf a (find-project "aa" "C:\\aa"))
@@ -44,7 +37,7 @@
    )
   nil
   )
-(deftest  ((clear-all-project)
+(deftest  ((delete-all-project)
 	   (add-project "aa" "kk")
 	   (add-project "aa" "cc")
 	   (add-project "aa" "bb")
@@ -76,6 +69,6 @@
    (equal (set-difference (list "aa" "xx") f :test #'equal) nil) (equal (set-difference (list "kk" "cc" "bb") g :test #'equal) nil) (equal h "aa")
    (equal i "aa") (equal j "aa") (equal k "xx") (equal m "kk") (equal n "cc")
    (equal o "bb") (equal p "bb"))
-  ((clear-all-project))
+  ((delete-all-project))
   )
 (format t "unit test end~%")

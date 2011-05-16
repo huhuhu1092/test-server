@@ -55,7 +55,7 @@
                                                    :title
                                                    "remove"
                                                    :value
-                                                   nil
+                                                   'sui-delete-project
                                                    :selected
                                                    nil
                                                    :available
@@ -111,9 +111,10 @@
   (list (make-instance 'my-project-management-area-outline :font
                        (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
                        :project-management-area :on-click
-                       'mainui-project-management-area-on-click :range
-                       (list (make-instance 'outline-item :value "aa" :state :closed
-                                            :range
+                       'mainui-project-management-area-on-click :on-double-click
+                       'mainui-project-management-area-on-double-click :range
+                       (list (make-instance 'outline-item :value "aa  d:\\model\\tmp"
+                                            :state :closed :range
                                             (list (make-instance
                                                    'outline-item
                                                    :value
@@ -162,8 +163,8 @@
                                                    :closed
                                                    :range
                                                    nil)))
-                             (make-instance 'outline-item :value "bb" :state :closed
-                                            :range
+                             (make-instance 'outline-item :value "bb  d:\\model\\tmp"
+                                            :state :closed :range
                                             (list (make-instance
                                                    'outline-item
                                                    :value

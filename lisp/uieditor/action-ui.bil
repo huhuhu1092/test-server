@@ -1,0 +1,101 @@
+;;; Define :action-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun action-ui () (find-or-make-application-window :action-ui 'make-action-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-action-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 806 176 1482 755)) (name :action-ui) (title "Action Ui")
+     (border :frame) (child-p nil) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :exterior exterior
+           :interior interior
+           :border border
+           :child-p child-p
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :normal
+           :maximize-button t
+           :minimize-button t
+           :name :action-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-action-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-action-ui-widgets ()
+  (list (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       32 :left 18 :name :static-text-13 :top 19 :value "name" :width 72)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 32 :left 100 :name :action-name :top 19 :value "" :width
+                       155)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 51
+                       :left 466 :name :action-add-layer :title "Add Layer" :top 101
+                       :width 175)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       36 :left 27 :name :static-text-23 :top 104 :value "key" :width
+                       111)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 39 :left 157 :name :editable-text-8 :top 101 :value ""
+                       :width 159)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       35 :left 29 :name :static-text-24 :top 149 :value "sequence"
+                       :width 109)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 34 :left 159 :name :editable-text-9 :top 150 :value ""
+                       :width 157)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       28 :left 29 :name :static-text-25 :top 212 :value "coloreffect"
+                       :width 82)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 42 :left 159 :name :editable-text-10 :top 198 :value ""
+                       :width 157)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 35
+                       :left 328 :name :button12 :title "Select" :top 149 :width 85)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 30
+                       :left 328 :name :button13 :title "Select" :top 210 :width 85)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       25 :left 29 :name :static-text-26 :top 262 :value "rotation"
+                       :width 61)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 36 :left 158 :name :rotaion :top 259 :value "" :width 158)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       34 :left 33 :name :static-text-27 :top 319 :value "scale" :width
+                       94)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 38 :left 160 :name :scale :top 315 :value "" :width 156)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       39 :left 33 :name :static-text-28 :top 371 :value "translate"
+                       :width 105)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 38 :left 161 :name :translate :top 372 :value "" :width
+                       155)
+        (make-instance 'group-box :contained-widgets
+                       (list :static-text-23 :editable-text-8 :static-text-24
+                             :editable-text-9 :static-text-25 :editable-text-10 :button12
+                             :button13 :static-text-26 :rotaion :static-text-27 :scale
+                             :static-text-28 :translate)
+                       :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 416 :left 16
+                       :name :group-box-2 :title "AnimationObject" :top 76 :width 425)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 53
+                       :left 466 :name :button14 :title "Prev" :top 224 :width 84)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 50
+                       :left 569 :name :button15 :title "Next" :top 224 :width 81)))
