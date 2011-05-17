@@ -122,3 +122,13 @@
   (declare (ignorable dialog widget))
   
   t)
+
+(defun mainui-button10-on-click (dialog widget)
+  (declare (ignorable dialog widget))
+  ;; NOTE:  Usually it is better to use an on-change function rather
+  ;; than an on-click function.  See the doc pages for those properties.
+  (load "E:\\programs\\test_win32\\Debug\\test_win32.dll")
+  (ff:def-foreign-call (StartUI "StartUI") (c))
+  (StartUI 1)
+  ;;(unload-foreign-library "E:\\programs\\test_win32\\Debug\\test_win32.dll")
+  t)

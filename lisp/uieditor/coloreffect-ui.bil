@@ -15,15 +15,15 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-coloreffect-ui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 414 100 1299 601)) (name :coloreffect-ui)
-     (title "Coloreffect Ui") (border :frame) (child-p nil) form-p)
+     (interior (make-box 195 334 1080 835)) (name :coloreffect-ui)
+     (title "Coloreffect Ui") (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
            :class 'dialog
+           :child-p child-p
            :exterior exterior
            :interior interior
            :border border
-           :child-p child-p
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 12)
            :form-state :normal

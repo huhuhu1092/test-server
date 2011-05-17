@@ -15,7 +15,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-image-manager-ui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 568 133 1410 600)) (name :image-manager-ui)
+     (interior (make-box 632 215 1474 682)) (name :image-manager-ui)
      (title "Image Manager Ui") (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
