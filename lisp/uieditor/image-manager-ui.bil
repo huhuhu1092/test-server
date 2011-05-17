@@ -16,14 +16,14 @@
 (defun make-image-manager-ui
     (&key parent (owner (or parent (screen *system*))) exterior
      (interior (make-box 568 133 1410 600)) (name :image-manager-ui)
-     (title "Image Manager Ui") (border :frame) (child-p nil) form-p)
+     (title "Image Manager Ui") (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
            :class 'dialog
+           :child-p child-p
            :exterior exterior
            :interior interior
            :border border
-           :child-p child-p
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 12)
            :form-state :normal
@@ -44,115 +44,7 @@
 
 (defun make-image-manager-ui-widgets ()
   (list (make-instance 'outline :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 440
-                       :left 15 :name :outline2 :range
-                       (list (make-instance 'outline-item :value :top-1 :state :open
-                                            :selected t :range
-                                            (list (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   :middle-1
-                                                   :state
-                                                   :open
-                                                   :range
-                                                   (list
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-11
-                                                     :state
-                                                     :open
-                                                     :range
-                                                     nil)
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-12
-                                                     :state
-                                                     :open
-                                                     :available
-                                                     nil
-                                                     :range
-                                                     nil)
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-13
-                                                     :state
-                                                     :open
-                                                     :range
-                                                     nil)))
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   :middle-2
-                                                   :state
-                                                   :open
-                                                   :range
-                                                   (list
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-21
-                                                     :state
-                                                     :open
-                                                     :foreground-color
-                                                     red
-                                                     :range
-                                                     nil)
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-22
-                                                     :state
-                                                     :open
-                                                     :available
-                                                     nil
-                                                     :range
-                                                     nil)
-                                                    (make-instance
-                                                     'outline-item
-                                                     :value
-                                                     :bottom-23
-                                                     :state
-                                                     :open
-                                                     :background-color
-                                                     (make-instance
-                                                      'cg.base:light-or-dark-color
-                                                      :hue-symbol
-                                                      'cyan
-                                                      :lightness-when-light
-                                                      255
-                                                      :lightness-when-dark
-                                                      128
-                                                      :base-lightness-when-light
-                                                      0
-                                                      :base-lightness-when-dark
-                                                      0)
-                                                     :available
-                                                     nil
-                                                     :range
-                                                     nil)))))
-                             (make-instance 'outline-item :value :top-2 :state :open
-                                            :range
-                                            (list (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   :biff
-                                                   :state
-                                                   :open
-                                                   :background-color
-                                                   cyan
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   :boff
-                                                   :state
-                                                   :open
-                                                   :range
-                                                   nil))))
-                       :top 15 :value :top-1 :width 308)
+                       :left 15 :name :image-table :top 15 :value :top-1 :width 308)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        35 :left 366 :name :static-text-18 :top 34 :value "x" :width 89)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)

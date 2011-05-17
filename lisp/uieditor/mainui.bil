@@ -112,111 +112,11 @@
                        (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
                        :project-management-area :on-click
                        'mainui-project-management-area-on-click :on-double-click
-                       'mainui-project-management-area-on-double-click :range
-                       (list (make-instance 'outline-item :value "aa  d:\\model\\tmp"
-                                            :state :closed :range
-                                            (list (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "element"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "image"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "imagetable"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "effect"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "action"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "statetable"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)))
-                             (make-instance 'outline-item :value "bb  d:\\model\\tmp"
-                                            :state :closed :range
-                                            (list (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "element"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "image"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "imagetable"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "effect"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "action"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil)
-                                                  (make-instance
-                                                   'outline-item
-                                                   :value
-                                                   "statetable"
-                                                   :state
-                                                   :closed
-                                                   :range
-                                                   nil))))
-                       :top 14 :value :top-1 :width 232)
+                       'mainui-project-management-area-on-double-click :top 14 :value
+                       :top-1 :width 232)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
                        :height 41 :left 293 :name :project-path-name :read-only t :top 14
                        :value "" :width 416)
         (make-instance 'single-item-list :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 439 :left 293 :name :content-list :range
-                       (list :one :two :three) :top 55 :value :one :width 414)))
+                       :height 439 :left 293 :name :content-list :top 55 :value :one
+                       :width 414)))
