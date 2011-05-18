@@ -129,6 +129,8 @@
   ;; than an on-click function.  See the doc pages for those properties.
   (load "E:\\programs\\test_win32\\Debug\\test_win32.dll")
   (ff:def-foreign-call (StartUI "StartUI") (c))
-  (StartUI 1)
-  ;;(unload-foreign-library "E:\\programs\\test_win32\\Debug\\test_win32.dll")
+  (let ((a (StartUI 1)))
+    (print a)
+    )
+  ;;(ff:unload-foreign-library "E:\\programs\\test_win32\\Debug\\test_win32.dll")
   t)
