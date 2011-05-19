@@ -33,6 +33,7 @@
            :constituent
            :parse-xml
            :parse-element-list
+           :parse-image-table
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")
