@@ -1,4 +1,4 @@
-;; -*- lisp-version: "8.2 [Windows] (May 8, 2011 11:53)"; cg: "1.134"; -*-
+;; -*- lisp-version: "8.2 [Windows] (Jan 25, 2010 15:08)"; cg: "1.134"; -*-
 
 (in-package :cg-user)
 
@@ -6,6 +6,7 @@
   :modules (list (make-instance 'module :name "basepackage")
                  (make-instance 'module :name "base/filesystem")
                  (make-instance 'module :name "base/uieditor")
+                 (make-instance 'module :name "base/uiexml")
                  (make-instance 'module :name "baseinterface")
                  (make-instance 'form-module :name "mainui" :finder-function 'mainui
                                 :has-pixmap-file nil)

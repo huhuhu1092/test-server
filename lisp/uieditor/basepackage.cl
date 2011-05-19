@@ -30,7 +30,9 @@
 	   :concatenate-string-with-path-sep
 	   :contain-name-in-directory?
 	   :tokens
-	   :constituent
+           :constituent
+           :parse-xml
+           :parse-element-list
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")
