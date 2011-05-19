@@ -6,7 +6,7 @@
 class SE_MotionEvent
 {
 public:
-	enum TYPE {DOWN, UP, MOVE};
+	enum TYPE {DOWN, UP, MOVE, CANCEL};
 	enum {MOVE_SLOPE = 5};
 	SE_MotionEvent(TYPE t, int x = 0, int y = 0)
 	{
@@ -14,15 +14,15 @@ public:
 		mX = x;
 		mY = y;
 	}
-	int getX()
+	int getX() const
 	{
 		return mX;
 	}
-	int getY()
+	int getY() const
 	{
 		return mY;
 	}
-	TYPE getType()
+	TYPE getType() const
 	{
 		return mMotionType;
 	}
@@ -66,11 +66,11 @@ public:
 				  KEY_NUN
 	          };
 	SE_KeyEvent(TYPE t, CODE k);
-	TYPE getType()
+	TYPE getType() const
 	{
 		return mKeyType;
 	}
-	CODE getCode()
+	CODE getCode() const
 	{
 		return mKeyCode;
 	}

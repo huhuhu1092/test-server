@@ -18,6 +18,14 @@ SE_SimObject::~SE_SimObject()
     if(mPropertySet)
         delete mPropertySet;
 }
+/*
+SE_Spatial* SE_SimObject::getSpatial()
+{
+    SE_Spatial* spatial = SE_Application::getInstance()->getSpatialManager()->findSpatial(mSpatialID)
+	return spatial;
+}
+*/
+
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 {
 	RenderUnitVector v;
@@ -78,3 +86,37 @@ int SE_SimObject::getSurfaceNum()
 void SE_SimObject::getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum)
 {
 }
+void SE_SimObject::setMesh(SE_Mesh** meshArray, int num, SE_OWN_TYPE own)
+{}
+int SE_SimObject::getMeshNum() const
+{
+    return 0;
+}
+SE_Mesh* SE_SimObject::getMesh(int meshIndex)
+{
+    return NULL;
+}
+SE_Vector3f* SE_SimObject::getVertexArray(int meshIndex)
+{
+    return NULL;
+}
+int SE_SimObject::getVertexNum(int meshIndex) const
+{
+    return 0;
+}
+SE_Vector3i* SE_SimObject::getFaceArray(int meshIndex)
+{
+    return NULL;
+}
+int SE_SimObject::getFaceNum(int meshIndex) const
+{
+    return NULL;
+}
+int SE_SimObject::getSurfaceNum(int meshIndex) const
+{
+    return NULL;
+}
+void SE_SimObject::getSurfaceFacet(int meshIndex, int surfaceIndex, int*& facets, int& facetNum)
+{
+}
+

@@ -20,8 +20,9 @@ int main(int argc, char** argv)
 {
     //fd_set rfds;
 
+    SNetAddress na("222.130.194.156", SUtil::Host2NetInt16(10000));
+    //SNetAddress na("127.0.0.1", SUtil::Host2NetInt16(10000));
     //SNetAddress na("192.168.2.184", SUtil::Host2NetInt16(10000));
-    SNetAddress na("127.0.0.1", SUtil::Host2NetInt16(10000));
     SSocketClient client(STREAM, na);
     if(client.getError() != S_NO_ERROR)
         return -1;
@@ -37,8 +38,9 @@ int main(int argc, char** argv)
     {
         unsigned char buffer[258 * 1024];
 
-        //len = client.read(buffer, 258 * 1024);
-        len = ::recv(currSocket,buffer, 258 * 1024, 0);
+        len = client.read(buffer, 258 * 1024);
+        //len = ::recv(currSocket,buffer, 258 * 1024, 0);
+        SLog::msg("### len = %d ###\n", len);
         if(len > 0)
         {
             SLog::msg("len = %d\n", len);

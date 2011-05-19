@@ -79,7 +79,7 @@ public:
     }
     bool isContain(const ID& id) const
     {
-		mTableItems.isContain(id);
+	    return mTableItems.isContain(id);
     }
 	const PROPERTY& getProperty() const
 	{
@@ -131,7 +131,7 @@ public:
     {
         return mTableItems.isContain(id);
     }
-	const PROPERTY& getProperty() const
+	PROPERTY& getProperty() const
 	{
 		return mProperty;
 	}
@@ -149,7 +149,7 @@ public:
 	}
 private:
     SE_ObjectManager<ID, VALUE*> mTableItems;
-	PROPERTY mProperty;
+	mutable PROPERTY mProperty;
 };
 /*
 template <typename ID, typename TABLE, typename IDTRAIT = SE_IDTrait<ID> >

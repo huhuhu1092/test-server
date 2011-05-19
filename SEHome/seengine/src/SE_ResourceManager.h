@@ -6,6 +6,7 @@
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
 #include "SE_Element.h"
+#include "SE_ElementSchema.h"
 #include <string>
 class SE_GeometryData;
 class SE_TextureCoordData;
@@ -18,6 +19,7 @@ class SE_Spatial;
 class SE_Primitive;
 class SE_SkinJointController;
 class SE_StateChangeList;
+class SE_StateMachine;
 class SE_Renderer;
 
 class SE_ResourceManager
@@ -65,17 +67,31 @@ public:
 	SE_Spatial* getScene(const SE_SceneID& sceneID);
 	void setScene(const SE_SceneID& id, SE_Spatial* spatial);
 	void removeScene(const SE_SceneID& id);
+
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */
     void loadBaseData(const char* baseResourceName);
-    void loadScene(const char* sceneName);
-
-	SE_ImageData* loadImage(const char* imageName, bool fliped = true);
+    /*
+     * sceneName can not has sufix .cbf
+     * it will be added automatically
+     * */
+    void loadSceneFromCbf(const char* sceneName);
+    /*
+     * sceneName can not has sufix .xml
+     * it will be added automatically
+     * */
+    void loadSceneFromXml(const char* sceneName);
+	SE_Element* loadScene(const char* sceneName);
+	SE_Element* loadScene(SE_BufferInput& inputBuffer);
+	SE_ImageData* loadImage(const char* imageName, bool fliped = false);
 	void loadShader(const char* shaderFileName);
 	void loadRenderer(const char* rendererFileName);
-    void loadElement(const char* elementResourceName);
+    void loadElementSchema(const char* elementResourceName);
 	void loadImageTable(const char* imageTableName);
+    void loadFontData(const char* fontFileName, char*& outData, int& outLen);
+    void loadFont(const char* fontDefineFileName);
+    void loadString(const char* stringFileName);
 	void travelImageTable(SE_ImageTableVisitor* imageTableTravel,
 		                  SE_ImageMapSetVisitor* imageMapSetTravel,
 						  SE_ImageMapVisitor* imageMapTravel);
@@ -86,8 +102,9 @@ public:
 	void loadStateTable(const char* stateTableURI);
 	void loadStateChangeTable(const char* stateChangeTableURI);
 	SE_StateChangeList* getStateChangeList(const char* stateChangeURI);
+    SE_StringID getString(const char* id);
 	SE_XMLTABLE_TYPE getXmlType(const char* xmlName);
-	SE_Element* getElement(const char* elementURI);
+	SE_ElementSchema* getElementSchema(const char* elementURI);
 	SE_ImageUnit getImageUnit(const char* imageUnitPath);
     SE_Action* getAction(const char* actionPath);
 	SE_Sequence* getSequence(const char* sequencePath);
@@ -102,7 +119,7 @@ public:
     void releaseHardwareResource();
 public:
 	// used to test xml
-	const SE_ElementTable& getElementTable() const;
+	const SE_ElementSchemaTable& getElementSchemaTable() const;
 	const SE_ImageTable& getImageTable() const;
 	const SE_ActionTable& getActionTable() const;
 	const SE_ColorEffectControllerTable& getColorEffectControllerTable() const;

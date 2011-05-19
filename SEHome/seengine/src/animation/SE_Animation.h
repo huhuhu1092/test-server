@@ -2,9 +2,14 @@
 #define SE_ANIMATION_H
 #include "SE_Time.h"
 #include "SE_ID.h"
+#include "SE_TreeStruct.h"
+#include "SE_TimeKey.h"
+#include <vector>
 class SE_Interpolate;
-class SE_Animation
+class SE_Animation;
+class SE_Animation : public SE_ListStruct<SE_Animation>
 {
+	friend class SE_Element;
 public:
     enum RUN_MODE {NOT_REPEAT, REPEAT, ONE_FRAME, REVERSE_NOT_REPEAT, REVERSE_REPEAT, REVERSE_ONE_FRAME};
     enum TIME_MODE {REAL, SIMULATE};
@@ -16,6 +21,8 @@ public:
     void restore();
     void end();
     void nextFrame(SE_TimeMS realDelta, SE_TimeMS simulateDeltaTime);
+    //if duration == 0, it will player animation for ever, until you 
+    //end the animation by invoke end() function
     void setDuration(SE_TimeMS duration)
     {
         mDuration = duration;
@@ -117,6 +124,18 @@ public:
 		mPassedTime = 0;
 		mCurrFrame = -1;
 	}
+	void setCurrentFrame(int f)
+    {
+        mCurrFrame = f;
+    }
+	void setKeys(const std::vector<SE_TimeKey>& keys)
+	{
+		mKeys = keys;
+	}
+	std::vector<SE_TimeKey> getKeys() const
+	{
+		return mKeys;
+	}
 public:
     virtual void update(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
     virtual void onRun();
@@ -135,10 +154,7 @@ protected:
     {
         mPassedTime = passt;
     }
-    void setCurrentFrame(int f)
-    {
-        mCurrFrame = f;
-    }
+
 private:
     void oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 private:
@@ -154,5 +170,6 @@ private:
 	int mFrameNum;
 	int mCurrFrame;
 	SE_TimeMS mTimePerFrame;
+	std::vector<SE_TimeKey> mKeys;
 };
 #endif

@@ -1,0 +1,68 @@
+;;; Define :project-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun project-ui () (find-or-make-application-window :project-ui 'make-project-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-project-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 1008 119 1487 288)) (name :project-ui) (title "Project Ui")
+     (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'project-ui-dialog
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
+           :form-state :normal
+           :maximize-button t
+           :minimize-button t
+           :name :project-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-project-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-project-ui-widgets ()
+  (list (make-instance 'editable-text :font (make-font-ex nil "Sans" 10 '(:bold)) :height
+                       43 :left 110 :name :project-file-name :top 11 :value "" :width
+                       218)
+        (make-instance 'static-text :font (make-font-ex nil "Sans" 10 '(:bold)) :height
+                       41 :left 9 :name :static-text-2 :top 13 :value "Project Name"
+                       :width 101)
+        (make-instance 'static-text :font (make-font-ex nil "Sans" 10 '(:bold)) :height
+                       51 :left 9 :name :static-text-4 :top 64 :value "ProjectPath"
+                       :width 101)
+        (make-instance 'editable-text :font (make-font-ex nil "Sans" 10 '(:bold)) :height
+                       48 :left 110 :name :project-directory :top 67 :value "" :width
+                       218)
+        (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 46
+                       :left 367 :name :button7 :on-click
+                       'project-ui-button-selectpath-on-click :title "SelectPath" :top 69
+                       :width 98)
+        (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 41
+                       :left 71 :name :button8 :on-click 'project-ui-button-ok-on-click
+                       :title "OK" :top 124 :width 112)
+        (make-instance 'button :font (make-font-ex nil "Sans" 10 '(:bold)) :height 35
+                       :left 318 :name :button9 :on-click 'project-ui-cancel-on-click
+                       :title "Cancel" :top 130 :width 102)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       41 :left 338 :name :static-text-6 :top 13 :value "" :width 127)))

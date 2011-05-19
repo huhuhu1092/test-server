@@ -2,174 +2,309 @@
 #include "SE_CommonNode.h"
 #include "SE_Application.h"
 #include "SE_Camera.h"
+#include "SE_Scene.h"
 #include "SE_RenderManager.h"
 #include "SE_ResourceManager.h"
-
-/////////////////////////////////////
-struct SE_SceneManager::SpatialIDMap
+#include "SE_InputEvent.h"
+#include "SE_ElementManager.h"
+#include "SE_Element.h"
+#include "SE_Math.h"
+#include "SE_Cursor.h"
+#include "SE_Log.h"
+SE_SceneManager::SE_SceneManager() : mScenes(SE_SceneManager::SIZE, SE_SceneManager::MAX_SIZE)
 {
-    typedef std::map<SE_SpatialID, SE_Spatial*> Map;
-    Map spatialIDMap;
-	SE_SceneManager* sceneManger;
-	void add(const SE_SpatialID& spatialID, SE_Spatial* spatial)
-	{
-		Map::iterator it = spatialIDMap.find(spatialID);
-		if(it == spatialIDMap.end())
-			spatialIDMap[spatialID] = spatial;
-		else
-		{
-			it->second = spatial;
-		}
-	}
-	void remove(const SE_SpatialID& spatialID)
-	{
-		Map::iterator it = spatialIDMap.find(spatialID);
-		if(it != spatialIDMap.end())
-		    spatialIDMap.erase(it);
-	}
-	void clear()
-	{
-		spatialIDMap.clear();
-	}
-};
-////////////////////////////
-///////////////////////////////////
-class _SpatialIDTravel : public SE_SpatialTravel
-{
-public:
-	enum {ADD_SPATIAL, REMOVE_SPATIAL};
-    int visit(SE_Spatial* spatial)
-	{
-		if(spatial->getSpatialID().isValid())
-		{
-			if(op == ADD_SPATIAL)
-		        spatialIDMap->add(spatial->getSpatialID(), spatial);
-			else if(op == REMOVE_SPATIAL)
-				spatialIDMap->remove(spatial->getSpatialID());
-		}
-		return 0;
-	}
-    int visit(SE_SimObject* simObject)
-	{
-		return 0;
-	}
-	SE_SceneManager::SpatialIDMap* spatialIDMap;
-	int op;
-};
-SE_SceneManager::SE_SceneManager()
-{
-	mSceneRoot = NULL;
-	mSelectedSpatial = NULL;
-    mSpatialIDMap = new SE_SceneManager::SpatialIDMap;
+    mWidth = mHeight = 0;
+	//mPrevX = 0 ;
+	//mPrevY = 0;
+	//mPrevMotionEventType = SE_MotionEvent::UP;
+	mCursor = NULL;
+	//mPointedElement = NULL;
+	mPointedElementHandler = NULL;
 }
 SE_SceneManager::~SE_SceneManager()
 {
-    delete mSceneRoot;
-    delete mSpatialIDMap;
-}
-void SE_SceneManager::renderScene(SE_Camera* camera, SE_RenderManager& renderManager)
-{
-    SE_Matrix4f perspectiveMatrix = camera->getPerspectiveMatrix();
-    renderManager.setPerspectiveMatrix(perspectiveMatrix);
-    renderManager.setWorldToViewMatrix(camera->getWorldToViewMatrix());
-    mSceneRoot->renderScene(camera, &renderManager);
-    renderManager.sort();
-}
-SE_Spatial* SE_SceneManager::getRoot()
-{
-    return mSceneRoot;
-}
-void SE_SceneManager::setRoot(SE_Spatial* root)
-{
-    if(mSceneRoot)
-        delete mSceneRoot;
-    mSceneRoot = root;
-}
-void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
-{
-	if(mSelectedSpatial)
-	{
-		mSelectedSpatial->setSelected(false);
-	}
-	mSelectedSpatial = spatial;
-	if(mSelectedSpatial)
-	    mSelectedSpatial->setSelected(true);
-}
-SE_Spatial* SE_SceneManager::find(const SE_SpatialID& spatialID)
-{
-	SE_ASSERT(mSpatialIDMap);
-	SE_SceneManager::SpatialIDMap::Map::iterator it = mSpatialIDMap->spatialIDMap.find(spatialID);
-	if(it != mSpatialIDMap->spatialIDMap.end())
-		return it->second;
-	else
-		return NULL;
-}
-void SE_SceneManager::createScene(const SE_SceneID& sceneID)
-{
-	if(mSceneRoot != NULL)
-	{
-		delete mSceneRoot;
-	}
-	mSceneRoot = SE_Application::getInstance()->getResourceManager()->getScene(sceneID);
-	updateSpatialIDMap();
-}
-void SE_SceneManager::updateSpatialIDMap()
-{
-    mSpatialIDMap->clear();
-    _SpatialIDTravel addSpatialIDTravel;
-	addSpatialIDTravel.spatialIDMap = mSpatialIDMap;
-	addSpatialIDTravel.op = _SpatialIDTravel::ADD_SPATIAL;
-	if(mSceneRoot)
-	    mSceneRoot->travel(&addSpatialIDTravel, true);    
-}
 
-void SE_SceneManager::addSpatial(SE_Spatial* parent, SE_Spatial* child)
+}
+void SE_SceneManager::loadCursor(const char* cursorResource, float mx, float my)
 {
-	if(!child)
-		return;
-	if(parent == NULL)
+	if(mCursor)
+		delete mCursor;
+	mCursor = new SE_Cursor(mWidth, mHeight);
+	mCursor->setMointPoint(mx, my);
+	mCursor->load(cursorResource);
+	if(!cursorResource)
+		mCursor->setDrawable(false);
+	else
+		mCursor->setDrawable(true);
+}
+void SE_SceneManager::showCursor()
+{
+	mCursor->show();
+}
+SE_SceneID SE_SceneManager::add(SE_Scene* scene)
+{
+    SE_SceneID id = mScenes.add(SE_SceneID::NULLID, scene);
+    return id;
+}
+SE_SceneID SE_SceneManager::top()
+{
+    _SceneStack::iterator it = mStack.begin();
+    if(it != mStack.end())
+    {
+        return *it;
+    }
+    else
+        return SE_SceneID::NULLID;
+}
+SE_Scene* SE_SceneManager::get(const SE_SceneID& id)
+{
+    return mScenes.find(id);
+}
+void SE_SceneManager::pop()
+{
+    mStack.pop_front();
+}
+void SE_SceneManager::rotate()
+{}
+void SE_SceneManager::swap()
+{}
+void SE_SceneManager::show(const SE_SceneID& id)
+{
+    SE_Scene* scene = get(id);
+    if(scene == NULL)
+        return;
+    if(id == top())
+        return;
+    _SceneStack::iterator it;
+    for(it = mStack.begin() ; it != mStack.end() ; it++)
+    {
+        if(id == *it)
+            break;
+    }
+    if(it != mStack.end())
+        mStack.erase(it);
+    mStack.push_front(id);
+    scene->show();
+}
+void SE_SceneManager::hide(const SE_SceneID& id)
+{
+
+}
+void SE_SceneManager::dismiss(const SE_SceneID& id)
+{
+    SE_Scene* scene = mScenes.remove(id);
+    mScenes.release(scene);
+    mStack.remove(id);
+    
+}
+void SE_SceneManager::render(SE_RenderManager& renderManager)
+{
+    std::list<SE_Scene*> sceneNeedRender;
+    _SceneStack::iterator it;
+    for(it = mStack.begin() ; it != mStack.end() ; it++)
+    {
+        SE_SceneID sid = *it;
+        SE_Scene* scene = get(sid);
+        if(scene)
+        {
+            if(scene->isTranslucent())
+            {
+                sceneNeedRender.push_front(scene);
+            }
+            else
+            {
+                sceneNeedRender.push_front(scene);
+                break;
+            }
+        }
+    }    
+    if(sceneNeedRender.size() >= SE_MAX_RENDERSCENE_SIZE)
+    {
+        LOGE("scene size exceed the max size\n");
+        return;
+    }
+    int seq = sceneNeedRender.size() - 1;
+    std::list<SE_Scene*>::iterator itScene;
+    SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
+    for(itScene = sceneNeedRender.begin() ; itScene != sceneNeedRender.end() ; itScene++)
+    {
+        SE_Scene* scene = *itScene;
+        scene->render(seq, renderManager);
+        seq--;
+    }
+	if(mCursor)
 	{
-		if(mSceneRoot)
+	    seq = sceneNeedRender.size();
+		mCursor->render(seq, renderManager);
+	}
+    
+}
+void SE_SceneManager::dispatchKeyEvent(const SE_KeyEvent& keyEvent)
+{
+
+}
+/*
+void SE_SceneManager::handleMotionEvent(SE_Element* pointedElement, const SE_MotionEvent& motionEvent)
+{
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	if(mPrevMotionEventType == SE_MotionEvent::UP && motionEvent.getType() == SE_MotionEvent::DOWN)
+	{
+		mPrevMotionEventType = SE_MotionEvent::DOWN;
+		mPrevX = motionEvent.getX();
+		mPrevY = motionEvent.getY();
+		if(pointedElement)
 		{
-		    mSceneRoot->addChild(child);
-		    child->setParent(mSceneRoot);
+	        mMotionDownElementID = pointedElement->getID();
+	        pointedElement->setState(SE_Element::HIGHLIGHTED, true);
+		}
+		LOGI("#### motion event down ###\n");
+	}
+	else if((mPrevMotionEventType == SE_MotionEvent::DOWN || mPrevMotionEventType == SE_MotionEvent::MOVE)&& 
+		    motionEvent.getType() == SE_MotionEvent::DOWN)
+	{
+        float deltaX = motionEvent.getX() - mPrevX;
+		float deltaY = motionEvent.getY() - mPrevY;
+		if(mPrevMotionEventType == SE_MotionEvent::DOWN && 
+			(SE_Fabs(deltaX) > SE_MotionEvent::MOVE_SLOPE || SE_Fabs(deltaY) > SE_MotionEvent::MOVE_SLOPE))
+		{
+			mPrevMotionEventType = SE_MotionEvent::MOVE;
+		}
+		if(mPrevMotionEventType == SE_MotionEvent::MOVE)
+		{
+			LOGI("#### motion event move ###\n");
+			if(pointedElement)
+			    mMotionMoveElementID = pointedElement->getID();
+			if(mMotionMoveElementID != mMotionDownElementID)
+			{
+				SE_Element* e = elementManager->get(mMotionDownElementID);
+				if(e)
+				{
+					e->setState(SE_Element::NORMAL, true);
+				}
+			}
+			mPrevX = motionEvent.getX();
+			mPrevY = motionEvent.getY();
+		}
+ 	}
+	else if(motionEvent.getType() == SE_MotionEvent::UP && mPrevMotionEventType == SE_MotionEvent::MOVE)
+	{
+		if(pointedElement)
+		    mMotionMoveElementID = pointedElement->getID();
+		mPrevMotionEventType = SE_MotionEvent::UP;
+	    if(mMotionMoveElementID != mMotionDownElementID)
+		{
+			SE_Element* e = elementManager->get(mMotionDownElementID);
+			if(e)
+			{
+				e->setState(SE_Element::NORMAL, true);
+			}
+		}
+	}
+	else if(motionEvent.getType() == SE_MotionEvent::UP && mPrevMotionEventType == SE_MotionEvent::DOWN)
+	{
+		LOGI("#### motion event up ###\n");
+		if(pointedElement)
+            mMotionUpElementID = pointedElement->getID();
+		mPrevMotionEventType = SE_MotionEvent::UP;
+		if(mMotionDownElementID == mMotionUpElementID && pointedElement)
+		{
+			LOGI("#### motion event click ###\n");
+			pointedElement->setState(SE_Element::NORMAL, true);
+			pointedElement->click();
 		}
 		else
 		{
-			mSceneRoot = child;
-			child->setParent(NULL);
+			SE_Element* e = elementManager->get(mMotionDownElementID);
+			if(e)
+			{
+				e->setState(SE_Element::NORMAL, true);
+			}
+		}
+	}   
+}
+*/
+std::list<SE_Scene*> SE_SceneManager::getMotionEventScene()
+{
+    std::list<SE_Scene*> sceneMotionEvent;
+    _SceneStack::iterator it;
+    for(it = mStack.begin() ; it != mStack.end() ; it++)
+    {
+        SE_SceneID sid = *it;
+        SE_Scene* scene = get(sid);
+        if(scene)
+        {
+			if(!scene->isModel())
+            {
+                sceneMotionEvent.push_back(scene);
+            }
+            else
+            {
+                sceneMotionEvent.push_back(scene);
+                break;
+            }
+        }
+    } 
+	return sceneMotionEvent;
+}
+
+SE_SceneManager::_PointedData SE_SceneManager::getPointedData(float x, float y)
+{
+    std::list<SE_Scene*> sceneMotionEvent = getMotionEventScene();
+	std::list<SE_Scene*>::iterator itScene;
+	SE_SceneRenderSeq sceneRenderSeq = -1;
+	SE_Element* pointedElement = NULL;
+	SE_Scene* pointedScene = NULL;
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	for(itScene = sceneMotionEvent.begin() ; itScene != sceneMotionEvent.end(); itScene++)
+	{
+		SE_Scene* scene = *itScene;
+		SE_Element* e = scene->getPointedElement(x, y);
+		if(e)
+		{
+			LOGI("### pointed element = %s ## \n", e->getName().getStr());
+            if(e->getSceneRenderSeq() > sceneRenderSeq)
+			{
+				pointedElement = e;
+				pointedScene = scene;
+				sceneRenderSeq = e->getSceneRenderSeq();
+			}
 		}
 	}
-	else
-	{
-		parent->addChild(child);
-		child->setParent(parent);
-	}
-	_SpatialIDTravel addSpatialIDTravel;
-	addSpatialIDTravel.spatialIDMap = mSpatialIDMap;
-	addSpatialIDTravel.op = _SpatialIDTravel::ADD_SPATIAL;
-	child->travel(&addSpatialIDTravel, true);
+	return _PointedData(pointedScene, pointedElement);
 }
-SE_Spatial* SE_SceneManager::removeSpatial(const SE_SpatialID& spatialID)
+void SE_SceneManager::handleCursorMotionEvent(const SE_MotionEvent& motionEvent)
 {
-	SE_Spatial* spatial = find(spatialID);
-	if(!spatial)
-		return NULL;
-	SE_Spatial* retSpatial = spatial;
-	SE_Spatial* parent = spatial->getParent();
-	if(parent)
+	mCursor->handleMotionEvent(motionEvent);
+    SE_Vector2f v = mCursor->getCursorTip();
+	float x = v.x;
+	float y = v.y;
+    _PointedData pd = getPointedData(x, y);
+	handlePointedElement(pd.pointedScene, pd.pointedElement, mCursor, x, y);
+}
+void SE_SceneManager::handlePointedMotionEvent(const SE_MotionEvent& motionEvent)
+{
+    mCursor->handleMotionEvent(motionEvent);
+	SE_Vector2f v = mCursor->getMountPoint();
+	_PointedData pd = getPointedData(motionEvent.getX(), v.y);
+	handlePointedElement(pd.pointedScene, pd.pointedElement, mCursor, v.x, v.y);
+}
+
+void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
+{
+	if(!mCursor->isDrawable())
 	{
-		parent->removeChild(spatial);
+		handlePointedMotionEvent(motionEvent);
 	}
 	else
 	{
-        mSceneRoot = NULL;
+		handleCursorMotionEvent(motionEvent);
 	}
-	_SpatialIDTravel removeSpatialIDTravel;
-	removeSpatialIDTravel.spatialIDMap = mSpatialIDMap;
-	removeSpatialIDTravel.op = _SpatialIDTravel::REMOVE_SPATIAL;
-	retSpatial->travel(&removeSpatialIDTravel, true);
-	return retSpatial;
 }
-void SE_SceneManager::checkSpatialIDMap()
-{}
+
+void SE_SceneManager::handlePointedElement(SE_Scene* pointedScene, SE_Element* pointedElement, SE_Cursor* cursor, float x, float y)
+{
+	if(mPointedElementHandler)
+	{
+		mPointedElementHandler->handle(pointedScene, pointedElement, cursor , x, y);
+	}
+}

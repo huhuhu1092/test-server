@@ -12,53 +12,26 @@ class SE_TextureCoordData;
 class SE_Primitive
 {
 public:
-	//static SE_PrimitiveID normalizeRectPrimitiveID;
-	//static SE_PrimitiveID normalizeCubePrimitiveID;
+    SE_Primitive();
 	virtual ~SE_Primitive() 
 	{}
 	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum) 
 	{
+        outMesh = NULL;
+        outMeshNum = 0;
 	}
-};
-// primitive contain the data which used by SE_Mesh, so it can not allocate on stack
-// it must be own by some global structure.
-class SE_RectPrimitive : public SE_Primitive
-{
-private:
-	struct _ImageData
-	{
-		SE_ImageData* imageData;
-		SE_OWN_TYPE own;
-		_ImageData()
-		{
-			imageData = NULL;
-			own = NOT_OWN;
-		}
-        ~_ImageData()
-        {
-            if(own == OWN && imageData)
-            {
-                delete imageData;
-                imageData = NULL;
-            }
-        }
-	};
-public:
-	//SE_RectPrimitive(const SE_Rect3D& rect);
-	static void create(const SE_Rect3D& rect, SE_RectPrimitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
-	SE_RectPrimitive* clone();
-	~SE_RectPrimitive();
-    //when imageData's width and height is not power of 2
-    //we need to adjust the texture coordidate
-	void setImageData(SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
-    //void setImagePortion(const SE_ImageDataPortion& portion);
-    void setMaterialData(const SE_MaterialData& materialData)
-	{
-		if(mMaterialData)
-			delete mMaterialData;
-		mMaterialData = new SE_MaterialData;
-		*mMaterialData = materialData;
-	}
+	// index is face index
+    virtual  void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
+				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
+	{}
+    virtual float getPaddingX()
+    {
+        return 0;
+    }
+    virtual float getPaddingY()
+    {
+        return 0;
+    }
 	void setColor(const SE_Vector3f& color)
 	{
 		mColor = color;
@@ -83,6 +56,43 @@ public:
 	{
 		mProgramDataID = programID;
 	}
+protected:
+	SE_Vector3f mColor;
+    int mSampleMin;
+	int mSampleMag;
+	int mWrapS;
+	int mWrapT;
+	SE_ProgramDataID mProgramDataID;
+};
+// primitive contain the data which used by SE_Mesh, so it can not allocate on stack
+// it must be own by some global structure.
+class SE_RectPrimitive : public SE_Primitive
+{
+private:
+	struct _ImageData
+	{
+		SE_ImageData* imageData;
+        SE_ImageDataID imageDataID;
+	};
+public:
+	//SE_RectPrimitive(const SE_Rect3D& rect);
+	static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+    //u is the normal x coordinate
+    //v is the normal v coordinate
+    //this two value is used to create tile effect 
+    static void create(const SE_Rect3D& rect, float u, float v, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+	SE_RectPrimitive* clone();
+	~SE_RectPrimitive();
+	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+    //void setImagePortion(const SE_ImageDataPortion& portion);
+    void setMaterialData(const SE_MaterialData& materialData)
+	{
+		if(mMaterialData)
+			delete mMaterialData;
+		mMaterialData = new SE_MaterialData;
+		*mMaterialData = materialData;
+	}
+
 	//virtual void read(SE_BufferInput& input);
 	//virtual void write(SE_BufferOutput& output);
 	virtual void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
@@ -91,25 +101,24 @@ private:
 	SE_RectPrimitive(const SE_Rect3D& rect);
 	SE_RectPrimitive(const SE_RectPrimitive&);
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
-
+    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3,const SE_Vector2f& v4, const SE_Vector2f& v5, const SE_Vector2f& v6, const SE_Vector2f& v7, const SE_Vector2f& v8, int uRectSize, int vRectSize, float uReminder, float vReminder);
+    static bool createGeometryData(SE_RectPrimitive* rectPrimitive);
+    static void getUVProperty(float uv, int& rectSize, float& floor, float& reminder);
 private:
 	SE_Rect3D mRect3D;
-	//_ImageData mImageDataArray[SE_Texture::TEXUNIT_NUM];
-	//SE_GeometryData* mGeometryData;
-	//SE_TextureCoordData* mTexCoordData;
-	SE_Wrapper<_ImageData>* mImageDataArray[SE_TEXUNIT_NUM];
-	SE_Wrapper<SE_GeometryData>* mGeometryData;
-	SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
+	SE_ImageData* mImageDataArray[SE_TEXUNIT_NUM];
+	SE_GeometryData* mGeometryData;
+    SE_GeometryDataID mGeometryDataID;
+	SE_TextureCoordData* mTexCoordData;
+    SE_TextureCoordDataID mTexCoordDataID;
+	//SE_Wrapper<_ImageData>* mImageDataArray[SE_TEXUNIT_NUM];
+	//SE_Wrapper<SE_GeometryData>* mGeometryData;
+	//SE_Wrapper<SE_TextureCoordData>* mTexCoordData;
 	SE_MaterialData* mMaterialData;
-	SE_Vector3f mColor;
-    int mSampleMin;
-	int mSampleMag;
-	int mWrapS;
-	int mWrapT;
-	SE_ProgramDataID mProgramDataID;
-    SE_ImageDataPortion mImageDataPortion;
-    int mAdjustedStartX;//the x coordinate after change width to power2 width
-    int mAdjustedStartY;//the y coordinate after change height to power2 height
+    float mU, mV;
+    //SE_ImageDataPortion mImageDataPortion;
+   // int mAdjustedStartX;//the x coordinate after change width to power2 width
+   // int mAdjustedStartY;//the y coordinate after change height to power2 height
 };
 
 class SE_BoxPrimitive : public SE_Primitive
@@ -155,7 +164,8 @@ public:
 			}
 		}
 	}
-	void setImageData(FACE_INDEX index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_OWN_TYPE own, 
+	//index is the face index in this primitive
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
 				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID)
 	{
 		if(index < LEFT || index > ALL)
@@ -163,14 +173,14 @@ public:
 		if(index < ALL)
 		{
 			if(mRectPrimitive[index])
-				mRectPrimitive[index]->setImageData(imageData, texUnitType, own, imageDataPortion);
+				mRectPrimitive[index]->setImageData(0, imageData, texUnitType, imageDataPortion);
 		}
 		else
 		{
 			for(int i = LEFT; i < ALL ; i++)
 			{
 				if(mRectPrimitive[i])
-					mRectPrimitive[i]->setImageData(imageData, texUnitType, own, imageDataPortion);
+					mRectPrimitive[i]->setImageData(0, imageData, texUnitType, imageDataPortion);
 			}
 		}
 	}
@@ -271,10 +281,54 @@ private:
 	SE_BoxPrimitive(const SE_Rect3D& rect);
 	SE_BoxPrimitive(const SE_RectPrimitive&);
 	SE_BoxPrimitive& operator=(const SE_RectPrimitive&);
-
 private:
 	SE_RectPrimitive* mRectPrimitive[6];
 	SE_PrimitiveID mRectPrimitiveID[6];
 	SE_Vector3f mScale;
+};
+class SE_RectPatch : public SE_Primitive
+{
+public:
+    SE_RectPatch(SE_RECTPATCH_TYPE t);
+	static void create(const SE_Rect3D& rect, SE_RECTPATCH_TYPE t, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
+    //imageData must from SE_ResourceManager
+    //SE_RectPatch will not own imageData
+    //void setImageData(SE_TEXUNIT_TYPE texUnit, SE_ImageData* imageData, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, 
+				  SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
+	void createMesh(SE_Mesh**& outMesh, int& outMeshNum);
+    float getPaddingX()
+    {
+        return mPaddingX;
+    }
+    
+    float getPaddingY()
+    {
+        return mPaddingY;
+    }
+private:
+    struct _TexCoordSet
+    {
+        SE_Vector2f tex[16];
+    };
+    void createGeometryData();
+    _TexCoordSet calculateImage(SE_RECTPATCH_TYPE t, float startx, float starty, 
+		                        float portionx, float portiony, 
+								float portionw, float portionh, 
+								float power2Width, float power2Height, 
+								float stepx, float stepy, bool isFliped);
+    _TexCoordSet calculateImageNoFliped(SE_RECTPATCH_TYPE t, 
+		                                float startx, float starty, 
+										float portionx, float portiony, 
+										float portionw, float portionh, 
+										float power2Width, float power2Height, 
+										float stepx, float stepy);
+    void setTextureCoord(const _TexCoordSet& texCoordSet, int texCoordDataIndex, int v0 , int v1, int v2, int v3);
+private:
+    SE_RECTPATCH_TYPE mType;
+    SE_ImageData* mImageData[SE_TEXUNIT_NUM];
+    std::vector<SE_TextureCoordData*> mTextureCoordData;
+    std::vector<SE_GeometryData*> mGeometryData;
+    float mPaddingX, mPaddingY;
 };
 #endif

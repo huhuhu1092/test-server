@@ -85,24 +85,23 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
     {
 		if(glIsTexture(texid) == GL_TRUE)
 		{
-			LOGI("### is texture ####\n");
+			//LOGI("### is texture ####\n");
+            glBindTexture(GL_TEXTURE_2D, texid);
+		    return;
 		}
-        glBindTexture(GL_TEXTURE_2D, texid);
-		return;
-		/*
-		GLenum error = glGetError();
-		if(error == GL_NO_ERROR)
-		{
-			return;
-		}
-		else if(error == GL_INVALID_ENUM)
-		{
-			LOGI("### bindtexture error ###\n");
+        else
+        {
+#if defined(ANDROID)
+			LOGI("### rebind texture ###\n");
             glGenTextures(1, &texid);
             checkGLError();
             imageData->setTexID(texid);
+#elif defined(WIN32)
+            glBindTexture(GL_TEXTURE_2D, texid);
+		    return;
+
+#endif
 		}
-		*/
     }
     glBindTexture(GL_TEXTURE_2D, texid);
     checkGLError();
@@ -120,7 +119,11 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
         {
             type = GL_UNSIGNED_SHORT_5_6_5;
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidth(), imageData->getHeight(),0, format, type, imageData->getData());
+		if(!imageData->isSizePower2())
+		{
+			imageData->getDataPower2();
+		}
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, imageData->getWidthPower2(), imageData->getHeightPower2(),0, format, type, imageData->getDataPower2());
         checkGLError();
     }
     else

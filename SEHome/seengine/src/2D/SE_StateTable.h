@@ -41,6 +41,28 @@ private:
 			action = 0;
 		}
 	};
+    class _DeleteData
+	{
+	public:
+		void operator()(_Data& d) const
+		{
+			if(d.action)
+				delete d.action;
+		}
+	};
+	class InvokeTrigger
+	{
+	public:
+		void operator()(_Data& d) const
+		{
+			if(id == d.triggerID)
+			{
+				d.action->action(NULL, NULL, triggerState, SE_StringID::INVALID);
+			}
+		}
+		SE_TriggerID id;
+		SE_State* triggerState;
+	} ;
 	struct _Property
 	{
 		SE_AddressID id;

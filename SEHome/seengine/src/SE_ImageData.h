@@ -74,19 +74,27 @@ public:
     {
         mWidth = 0;
         mHeight = 0;
+        mWidthPower2 = 0;
+        mHeightPower2 = 0;
         mPixelFormat = INVALID;
         mBytesPerRow = 0;
+        mBytesPerRowPower2 = 0;
         mData = 0;
+        mDataPower2 = 0;
         mTexid = 0;
 		mIsFliped = 0;
+        mRealStartX = 0;
+        mRealStartY = 0;
     }
     ~SE_ImageData()
     {
         if(mData)
             delete[] mData;
+        if(mDataPower2)
+            delete[] mDataPower2;
     }
     // the bytes of per pixel
-    int getPixelSize()
+    int getPixelSize() const
     {
         switch(mPixelFormat)
         {
@@ -100,9 +108,9 @@ public:
                 return 0;
         }
     }
-    int getHeight()
+    int getHeight() const
     {return mHeight;}
-    int getWidth()
+    int getWidth() const
     {return mWidth;}
     int getPixelFormat()
     {return mPixelFormat;}
@@ -156,15 +164,71 @@ public:
         return mCompressType == RAW;
     }
     bool isCompressTypeByHardware();
-
+    int getWidthPower2() const
+    {
+		if(isSizePower2())
+		{
+			return mWidth;
+		}
+		else if(mDataPower2)
+		{
+            return mWidthPower2;
+		}
+		else
+		{
+			return mWidth;
+		}
+    }
+    int getHeightPower2() const
+    {
+		if(isSizePower2())
+		{
+			return mHeight;
+		}
+		else if(mDataPower2)
+		{
+            return mHeightPower2;
+		}
+		else
+			return mHeight;
+    }
+    int getBytesPerRowPower2() const
+    {
+		if(isSizePower2())
+		{
+			return mBytesPerRow;
+		}
+		else if(mDataPower2)
+		{
+            return mBytesPerRowPower2;
+		}
+		else
+			return mBytesPerRow;
+    }
+    bool isSizePower2() const;
+    char* getDataPower2();
+    int getRealStartX() const
+    {
+        return mRealStartX;
+    }
+    int getRealStartY() const
+    {
+        return mRealStartY;
+    }
 private:
     int mHeight;
     int mWidth;
+    int mWidthPower2;
+    int mHeightPower2;
+    int mRealStartX;
+    int mRealStartY;
+    int mBytesPerRowPower2;
     int mPixelFormat;
     int mBytesPerRow;
     int mCompressType;
 	bool mIsFliped;
     char* mData;
+    char* mDataPower2;
     GLuint mTexid;
 };
 #endif

@@ -7,7 +7,8 @@
 #include "SE_Common.h"
 #include "SE_Object.h"
 #include "SE_BoundingVolume.h"
-class SE_Camera : public SE_Object
+#include "SE_TreeStruct.h"
+class SE_Camera : public SE_Object, public SE_ListStruct<SE_Camera>
 {
 DECLARE_OBJECT(SE_Camera)
 public:
@@ -62,6 +63,7 @@ public:
 	{
 		return mBoundingVolume;
 	}
+	static SE_Camera* create2DSceneCamera(float width, float height);
 private:
     SE_Frustum mFrustum;
     SE_Rect<int> mViewport;

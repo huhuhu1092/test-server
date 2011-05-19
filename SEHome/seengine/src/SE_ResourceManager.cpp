@@ -15,7 +15,6 @@
 #include "SE_ImageCodec.h"
 #include "SE_SkinJointController.h"
 #include "SE_Bone.h"
-#include "SE_Element.h"
 #include "SE_ImageMap.h"
 #include "SE_XmlHandler.h"
 #include "SE_Action.h"
@@ -25,6 +24,12 @@
 #include "SE_ParamManager.h"
 #include "SE_Renderer.h"
 #include "SE_StateTable.h"
+#include "SE_ElementSchema.h"
+#include "SE_ElementContent.h"
+#include "SE_ElementType.h"
+#include "SE_Element.h"
+#include "SE_SpatialManager.h"
+#include "SE_FontManager.h"
 #include "tinyxml.h"
 #include <map>
 #include <vector>
@@ -37,6 +42,10 @@ struct _MeshData
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   
+}
+static std::string createElementContentID(const std::string& parent, const std::string& id, const std::string& type)
+{
+	return parent + "_" + "*" + type + "*" + "_" + id;
 }
 static SE_ImageData* loadRawImage(const char* imageName)
 {
@@ -342,6 +351,10 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
 		delete[] fragmentShaderBytes;
     }
 }
+static void processElement(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+	
+}
 static void processPrimitive(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
 	/*
@@ -389,6 +402,8 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 break;
 			case SE_RENDERERINFO_ID:
 				processRendererData(inputBuffer, resourceManager);
+		    case SE_ELEMENTINFO_ID:
+			    processElement(inputBuffer, resourceManager);
 				break;
         }
     }
@@ -457,6 +472,8 @@ ResourceMap<TID, T>::~ResourceMap()
         delete data;
     }
 }
+typedef SE_Table<SE_StringID, SE_StringID> SE_StringMap;
+typedef SE_Table<SE_StringID, SE_StringMap*> SE_StringTable;
 ////////////////////
 struct SE_ResourceManager::_Impl
 {
@@ -473,11 +490,12 @@ struct SE_ResourceManager::_Impl
 	SE_ImageTable mImageTable;
     SE_ActionTable mActionTable;
 	SE_SequenceTable mSequenceTable;
-	SE_ElementTable mElementTable;
+	SE_ElementSchemaTable mElementSchemaTable;
 	SE_StateMachineTable mStateMachineTable;
 	SE_StateChangeTable mStateChangeTable;
 	SE_ColorEffectControllerTable mColorEffectControllerTable;
 	SE_ObjectManager<SE_StringID, SE_XMLTABLE_TYPE> mXmlTypeTable;
+    SE_StringTable mStringTable;
     std::string dataPath;
     SE_ResourceManager* resourceManager;
 	SE_Element* mElementRoot;
@@ -491,8 +509,15 @@ struct SE_ResourceManager::_Impl
 class _ElementContainer
 {
 public:
-	SE_ElementMap* elementMap;
+    _ElementContainer()
+    {
+        elementMap = NULL;
+        resourceManager = NULL;
+        impl = NULL;
+    }
+	SE_ElementSchemaMap* elementMap;
 	SE_ResourceManager* resourceManager;
+	SE_ResourceManager::_Impl* impl;
 	std::string xmlName;
 	std::string structid;
 };
@@ -538,68 +563,98 @@ class _ColorEffectControllerContainer
 public:
 	
 };
-class SE_ElementHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_ElementHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-    SE_ElementHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_ElementHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_MountPointHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+/*
+class SE_ButtonHandler : public  SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-    SE_MountPointHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_ButtonHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ImageHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+*/
+class SE_MountPointHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-    SE_ImageHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_MountPointHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ElementActionHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_TextPropertyHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-    SE_ElementActionHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_TextPropertyHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ElementStateTableHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_ImageHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-    SE_ElementStateTableHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_ImageHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
     {}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ShaderHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_ElementActionHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-	SE_ShaderHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+    SE_ElementActionHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ElementStateTableHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+    SE_ElementStateTableHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ShaderHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+	SE_ShaderHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
 	{}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_RendererHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_FontDefineHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-	SE_RendererHandler(_ElementContainer * em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
-	{}
-	virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    SE_FontDefineHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ParamStructHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_StringDefineHandler : public  SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-	SE_ParamStructHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
-	{}
-	virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+    SE_StringDefineHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+    {}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
-class SE_ParamHandler : public SE_XmlElementHandler<SE_Element, _ElementContainer>
+class SE_RendererHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
 {
 public:
-	SE_ParamHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_Element, _ElementContainer>(em)
+	SE_RendererHandler(_ElementContainer * em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
 	{}
-    virtual void handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent);
+	virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ParamStructHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+	SE_ParamStructHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+	{}
+	virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
+};
+class SE_ParamHandler : public SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>
+{
+public:
+	SE_ParamHandler(_ElementContainer* em) : SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>(em)
+	{}
+    virtual void handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent);
 };
 class SE_ImageTableHandler : public SE_XmlElementHandler<SE_ImageMapSet, SE_ResourceManager::_Impl>
 {
@@ -841,19 +896,25 @@ public:
 	_StateChangeTableContainer* elementManager;
 };
 template <>
-class SE_XmlElementHandlerManager<SE_Element, _ElementContainer>
+class SE_XmlElementHandlerManager<SE_ElementSchema, _ElementContainer>
 {
 public:
 	SE_XmlElementHandlerManager(_ElementContainer* em) 
 	{
 		elementManager = em;
 	}
-	SE_XmlElementHandler<SE_Element, _ElementContainer>* getHandler(const char* name)
+	SE_XmlElementHandler<SE_ElementSchema, _ElementContainer>* getHandler(const char* name)
     {
         if(!strcmp(name, "Element"))
 		{
 			return new SE_ElementHandler(elementManager);
 		}
+        /*
+        else if(!strcmp(name, "Button"))
+        {
+            return new SE_ButtonHandler(elementManager);
+        }
+        */
 		else if(!strcmp(name, "Image"))
 		{
 			return new SE_ImageHandler(elementManager);
@@ -882,6 +943,18 @@ public:
 		{
 			return new SE_ParamStructHandler(elementManager);
 		}
+        else if(!strcmp(name, "FontDefine"))
+        {
+            return new SE_FontDefineHandler(elementManager);
+        }
+        else if(!strcmp(name, "String"))
+        {
+            return new SE_StringDefineHandler(elementManager);
+        }
+        else if(!strcmp(name, "TextProperty"))
+        {
+            return new SE_TextPropertyHandler(elementManager);
+        }
 		else if(!strcmp(name, "Param"))
 		{
 			return new SE_ParamHandler(elementManager);
@@ -1595,13 +1668,20 @@ void SE_ImageTableHandler::handle(SE_ImageMapSet* parent, TiXmlElement* xmlEleme
         m.handleXmlChild(imageMap, pChild, i++);
     }
 }
-void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-    SE_Element* element = new SE_Element;
-	element->setSeqNum(indent);
+    SE_ElementSchema* elementSchema = new SE_ElementSchema;
+	if(parent)
+	{
+	    elementSchema->seq = parent->seq + SE_Util::intToString(indent);
+	}
+	else
+	{
+		elementSchema->seq = SE_Util::intToString(indent);
+	}
     bool hasLayer = false;
 	bool hasPivotx = false;
 	bool hasPivoty = false;
@@ -1619,15 +1699,15 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 			std::string fullpathID;
 			if(parent)
 			{
-				fullpathID = std::string(parent->getName().getStr()) + "/" + value;
+				fullpathID = std::string(parent->name.getStr()) + "/" + value;
 			}
 			else
 			{
 				fullpathID = pro->xmlName + "/" + value;
 			}
-			element->setName(id.c_str());
-			element->setFullPathName(fullpathID.c_str());
-			if(element->getName().isValid())
+			elementSchema->name = id.c_str();
+			elementSchema->fullPathName = fullpathID.c_str();
+			if(elementSchema->name.isValid())
 			{
 			    hasid = true;
 			}
@@ -1636,7 +1716,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setLeft(ival);
+                elementSchema->x = ival;
             }
             else
             {
@@ -1647,7 +1727,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setTop(ival);
+                elementSchema->y = ival;
             }
             else
             {
@@ -1658,7 +1738,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setWidth(ival);
+                elementSchema->w = ival;
             }
             else
             {
@@ -1669,7 +1749,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setHeight(ival);
+                elementSchema->h = ival;
             }
             else
             {
@@ -1680,7 +1760,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setLocalLayer(ival);
+                elementSchema->layer = ival;
                 hasLayer = true;
             }
             else
@@ -1692,7 +1772,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setPivotX(ival);
+                elementSchema->pivotx = ival;
             }
             else
             {
@@ -1704,7 +1784,7 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         {
             if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
             {
-                element->setPivotY(ival);
+                elementSchema->pivoty = ival;
             }
             else
             {
@@ -1714,14 +1794,193 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
         }
 		else if(!strcmp(name, "mountpointref"))
 		{
-			element->setMountPointRef(SE_MountPointID(value));
+			elementSchema->mountPointRef = SE_MountPointID(value);
+			hasMountPointRef = true;
+		}
+        else if(!strcmp(name, "type"))
+        {
+			elementSchema->type = SE_ElementSchema::getElementType(value);
+        }
+        else if(!strcmp(name, "text"))
+        {
+            elementSchema->text = value;
+        }
+        else if(!strcmp(name, "canpointed"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->canpointed = ival;
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+        }
+        else if(!strcmp(name, "state"))
+        {
+			elementSchema->state = SE_ElementSchema::getElementState(value);
+        }
+        pAttribute = pAttribute->Next();
+    }
+    if(!hasLayer)
+    {
+        elementSchema->layer = indent;
+    }
+	if(parent == NULL)
+	{
+		if(!hasid)
+		{
+			LOGE("... element error : top element must has id\n");
+		}
+	}
+	if(parent)
+    {
+        parent->addChild(elementSchema);
+        elementSchema->setParent(parent);
+    }
+    else
+    {
+        elementSchema->setParent(NULL);
+		pro->elementMap->setItem(elementSchema->name, elementSchema);
+    }
+    TiXmlNode* currNode = xmlElement;
+	TiXmlNode* pChild = NULL;
+	int i = 1;
+    for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
+    {
+		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
+        m.handleXmlChild(elementSchema, pChild, i++);
+    }
+}
+/*
+void SE_ButtonHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+    SE_ElementSchema* elementSchema = new SE_ElementSchema;
+	elementSchema->seq = indent;
+    elementSchema->type = SE_UI_BUTTON;
+    bool hasLayer = false;
+	bool hasPivotx = false;
+	bool hasPivoty = false;
+	bool hasMountPointRef = false;
+	bool hasid = false;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "id"))
+        {
+			std::string id = value;
+			std::string fullpathID;
+			if(parent)
+			{
+				fullpathID = std::string(parent->name.getStr()) + "/" + value;
+			}
+			else
+			{
+				fullpathID = pro->xmlName + "/" + value;
+			}
+			elementSchema->name = id.c_str();
+			elementSchema->fullPathName = fullpathID.c_str();
+			if(elementSchema->name.isValid())
+			{
+			    hasid = true;
+			}
+        }
+        else if(!strcmp(name, "x"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->x = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "y"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->y = ival;
+            }
+            else
+            {
+                LOGI("... parse y value error\n");
+            }
+        }
+        else if(!strcmp(name, "width"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->w = ival;
+            }
+            else
+            {
+                LOGI("... parse width value error\n");
+            }
+        }
+        else if(!strcmp(name, "height"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->h = ival;
+            }
+            else
+            {
+                LOGI("... parse height value error\n");
+            }
+        }
+        else if(!strcmp(name, "layer"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->layer = ival;
+                hasLayer = true;
+            }
+            else
+            {
+                LOGI("... parse layer value error\n");
+            }
+        }
+        else if(!strcmp(name, "pivotx"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->pivotx = ival;
+            }
+            else
+            {
+                LOGI("... parse pivotx value error\n");
+            }
+			hasPivotx = true;
+        }
+        else if(!strcmp(name, "pivoty"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                elementSchema->pivoty = ival;
+            }
+            else
+            {
+                LOGI("... parse pivoty value error\n");
+            }
+			hasPivoty = true;
+        }
+		else if(!strcmp(name, "mountpointref"))
+		{
+			elementSchema->mountPointRef = SE_MountPointID(value);
 			hasMountPointRef = true;
 		}
         pAttribute = pAttribute->Next();
     }
     if(!hasLayer)
     {
-        element->setLocalLayer(indent);
+        elementSchema->layer = indent;
     }
 	if(parent == NULL)
 	{
@@ -1737,24 +1996,26 @@ void SE_ElementHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, uns
 
 	if(parent)
     {
-        parent->addChild(element);
-        element->setParent(parent);
+        parent->addChild(elementSchema);
+        elementSchema->setParent(parent);
     }
     else
     {
-        element->setParent(NULL);
-		pro->elementMap->setItem(element->getName(), element);
+        elementSchema->setParent(NULL);
+		pro->elementMap->setItem(elementSchema->name, elementSchema);
     }
     TiXmlNode* currNode = xmlElement;
 	TiXmlNode* pChild = NULL;
 	int i = 1;
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
-		SE_XmlElementCalculus<SE_Element, _ElementContainer> m(pro);
-        m.handleXmlChild(element, pChild, i++);
-    }
+		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
+        m.handleXmlChild(elementSchema, pChild, i++);
+    };
+    
 }
-void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+*/
+void SE_MountPointHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1798,15 +2059,81 @@ void SE_MountPointHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, 
 	{
 		LOGE("... mount point parent can not be NULL\n");
 	}
-	parent->addMountPoint(mp);
+	parent->mountPointSet.addMountPoint(mp);
 }
-void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_TextPropertyHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	std::string style;
+    std::string align;
+    std::string orientation;
+    std::string state;
+    int size;
+    SE_Vector3i color;
+	while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        int ival = -1;
+        if(!strcmp(name, "style"))
+        {
+            style = value;
+        }
+        else if(!strcmp(name, "color"))
+        {
+            SE_SignColor c = SE_Util::stringToSignColor(value);
+            color.x = c.data[0].value;
+            color.y = c.data[1].value;
+            color.z = c.data[2].value; 
+        }
+        else if(!strcmp(name, "size"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                size = ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "align"))
+        {
+            align = value;
+        }
+        else if(!strcmp(name, "orientation"))
+        {
+            orientation = value;
+        }
+        else if(!strcmp(name, "state"))
+        {
+            state = value;
+        }
+        pAttribute = pAttribute->Next();
+	}
+    SE_TextProperty *p = new SE_TextProperty;
+    p->style = style;
+    p->color = color;
+    p->size = size;
+    p->align = align;
+    p->orientation = orientation;
+    p->state = state;
+    parent->addProperty(p);
+}
+void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ImageContent* imageContent = NULL;
 	SE_StringID id;
+    SE_StringID state;
+	SE_StringID patchType;
+    SE_StringID fillType;
+    bool canpointed = true;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1821,17 +2148,56 @@ void SE_ImageHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
 		{
 			id = value;
 		}
+        else if(!strcmp(name, "state"))
+        {
+            state = value;
+        }
+		else if(!strcmp(name, "patch"))
+		{
+			patchType = value;
+		}
+        else if(!strcmp(name, "canpointed"))
+        {
+            if(pAttribute->QueryIntValue(&ival) == TIXML_SUCCESS)
+            {
+                canpointed = (bool)ival;
+            }
+            else
+            {
+                LOGI("... parse x value error\n");
+            }
+        }
+        else if(!strcmp(name, "filltype"))
+        {
+            fillType = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
-	imageContent->setID(id);
+	std::string str;
+    if(!id.isValid())
+    {
+		id = SE_Util::intToString(indent).c_str();
+		str = createElementContentID(parent->fullPathName.getStr(), id.getStr(), "Image");
+    }
+	else
+	{
+		str = id.getStr();
+	}
+    imageContent->setFillType(fillType);
+	imageContent->setID(str.c_str());
+    imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
+	imageContent->setRectPatchType(patchType);
+	imageContent->setState(SE_ElementSchema::getElementState(state));
+    imageContent->setCanPointed(canpointed);
 	parent->addContent(imageContent);
 }
-void SE_ElementActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_ActionContent* actionContent = NULL;
+    std::string id;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1842,16 +2208,33 @@ void SE_ElementActionHandler::handle(SE_Element* parent, TiXmlElement* xmlElemen
 		{
 		    actionContent = new SE_ActionContent(value);
 		}
+        else if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
+    if(id == "")
+    {
+		id = SE_Util::intToString(indent);
+	    str = createElementContentID(parent->fullPathName.getStr(), id, "Action");
+    }
+	else
+	{
+		str = id;
+	}
+    actionContent->setID(str.c_str());
+    actionContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(actionContent);
 }
-void SE_ElementStateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
 	SE_StateTableContent* stateTableContent = NULL;
+    std::string id;
 	while(pAttribute)
     {
 		const char* name = pAttribute->Name();
@@ -1862,11 +2245,27 @@ void SE_ElementStateTableHandler::handle(SE_Element* parent, TiXmlElement* xmlEl
 		{
 			stateTableContent = new SE_StateTableContent(value);
 		}
+        else if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
+	if(id == "")
+    {
+		id = SE_Util::intToString(indent);
+		str = createElementContentID(parent->fullPathName.getStr(), id, "State");
+    }
+	else
+	{
+		str = id;
+	}
+    stateTableContent->setID(str.c_str());
+    stateTableContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(stateTableContent);
 }
-void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_RendererHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1893,7 +2292,7 @@ void SE_RendererHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, un
 	SE_RendererID rid = SE_ID::createRendererID(rendererID.c_str());
 	resourceManager->setRenderer(rid, renderer);
 }
-void SE_ParamStructHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ParamStructHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1914,11 +2313,11 @@ void SE_ParamStructHandler::handle(SE_Element* parent, TiXmlElement* xmlElement,
 	int i = 1;
     for(pChild = currNode->FirstChild() ; pChild != NULL ; pChild = pChild->NextSibling())
     {
-		SE_XmlElementCalculus<SE_Element, _ElementContainer> m(pro);
+		SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(pro);
         m.handleXmlChild(parent, pChild, i++);
     }
 }
-void SE_ParamHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_ParamHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -1953,7 +2352,67 @@ void SE_ParamHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsig
 		paramManager->setString(id.c_str(), paramValue.c_str());
 	}
 }
-void SE_ShaderHandler::handle(SE_Element* parent, TiXmlElement* xmlElement, unsigned int indent)
+void SE_StringDefineHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	std::string shaderID;
+    SE_FontManager* fontManager = SE_Application::getInstance()->getFontManager();
+	SE_StringID id;
+    SE_StringID data;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        if(!strcmp(name, "id"))
+        {
+            id = value;
+        }
+        else if(!strcmp(name, "data"))
+        {
+            data.set(value, SE_StringID::SE_UTF8);
+        }
+        pAttribute = pAttribute->Next();
+    }
+	SE_StringMap* stringMap = pro->impl->mStringTable.getItem(pro->xmlName.c_str()); 
+    stringMap->setItem(id, data);
+}
+void SE_FontDefineHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
+{
+    if(!xmlElement)
+        return;
+    TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
+	std::string shaderID;
+    SE_FontManager* fontManager = SE_Application::getInstance()->getFontManager();
+	std::string style;
+    std::string fileName;
+    std::string format;
+    while(pAttribute)
+    {
+		const char* name = pAttribute->Name();
+		std::string strvalue = SE_Util::trim(pAttribute->Value());
+		const char* value = strvalue.c_str();
+        if(!strcmp(name, "style"))
+        {
+            style = value;
+        }
+        else if(!strcmp(name, "filename"))
+        {
+            fileName = value;
+        }
+        else if(!strcmp(name, "format"))
+        {
+            format = value;
+        }
+    	pAttribute = pAttribute->Next();
+    }
+    SE_CharStyle cs;
+    cs.set(style);
+    fontManager->setStyle(cs, fileName, format);
+}
+void SE_ShaderHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement, unsigned int indent)
 {
     if(!xmlElement)
         return;
@@ -2054,6 +2513,7 @@ void SE_ActionHandler::handle(SE_ActionMapSet* parent, TiXmlElement* xmlElement,
 		SE_XmlElementCalculus<SE_Action, _ActionContainer> m(pro);
         m.handleXmlChild(action, pChild, i++);
     }      
+    action->sort();
 }
 
 void SE_AnimationObjectHandler::handle(SE_Action* parent,  TiXmlElement* xmlElement, unsigned int indent)
@@ -2930,10 +3390,10 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
 }
 static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
-    spatial->setParent(parent);
-	if(parent)
-	    parent->addChild(spatial);
+    //spatial->setParent(parent);
+	spatialManager->add(parent, spatial);
     return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
@@ -3001,7 +3461,16 @@ void SE_ResourceManager::setDataPath(const char* datapath)
 {
 	mImpl->dataPath = datapath;
 }
-void SE_ResourceManager::loadScene(const char* sceneName)
+void SE_ResourceManager::loadSceneFromXml(const char* sceneName)
+{
+
+}
+SE_Element* SE_ResourceManager::loadElement(SE_BufferInput& inputBuffer)
+{
+	
+	return NULL;
+}
+void SE_ResourceManager::loadSceneFromCbf(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
     char* data = NULL;
@@ -3065,9 +3534,16 @@ void SE_ResourceManager::releaseHardwareResource()
         shader->releaseHardwareResource();
     }
 }
-void SE_ResourceManager::loadElement(const char* elementResourceName)
+SE_Element* SE_ResourceManager::loadScene(const char* sceneName)
 {
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + elementResourceName;
+    SE_ElementSchema* es = getElementSchema(sceneName);
+    if(!es)
+        return NULL;
+    return es->createElement();    
+}
+void SE_ResourceManager::loadElementSchema(const char* elementResourceName)
+{
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + elementResourceName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3075,11 +3551,11 @@ void SE_ResourceManager::loadElement(const char* elementResourceName)
 		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
         return;
     }
-	SE_ElementMap* elementMap = mImpl->mElementTable.getItem(elementResourceName);
+	SE_ElementSchemaMap* elementMap = mImpl->mElementSchemaTable.getItem(elementResourceName);
 	if(!elementMap)
 	{
-		elementMap = new SE_ElementMap;
-		mImpl->mElementTable.setItem(elementResourceName, elementMap);
+		elementMap = new SE_ElementSchemaMap;
+		mImpl->mElementSchemaTable.setItem(elementResourceName, elementMap);
 	}
 	else
 	{
@@ -3089,55 +3565,101 @@ void SE_ResourceManager::loadElement(const char* elementResourceName)
 	elementContainer.elementMap = elementMap;
 	elementContainer.resourceManager = this;
 	elementContainer.xmlName = elementResourceName;
-    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&elementContainer);
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&elementContainer);
     m.handleXmlChild(NULL, &doc, 0);
 }
-class _GetFirstElement : public SE_ObjectManagerVisitor<SE_StringID, SE_Element*>
+class _GetFirstElement : public SE_ObjectManagerVisitor<SE_StringID, SE_ElementSchema*>
 {
 public:
 	_GetFirstElement(int i)
 	{
-		minSeqNum = i;
+		minSeqNum = SE_Util::intToString(i);
 	}
-	void visit(const SE_StringID& id , const SE_Element*  v)
+	void visit(const SE_StringID& id , const SE_ElementSchema*  v)
 	{
 		if(v->getSeqNum() < minSeqNum)
 		{
 			minElementID = id;
 		}
 	}
-	int minSeqNum;
+	std::string minSeqNum;
 	SE_StringID minElementID;
 };
-SE_Element* SE_ResourceManager::getElement(const char* elementURI)
+SE_ElementSchema* SE_ResourceManager::getElementSchema(const char* elementURI)
 {
 	SE_Util::SplitStringList strList = SE_Util::splitString(elementURI, "/");
 	if(strList.size() == 0)
 		return NULL;
-	SE_ElementMap* elementMap = mImpl->mElementTable.getItem(strList[0].c_str());
+	SE_ElementSchemaMap* elementMap = mImpl->mElementSchemaTable.getItem(strList[0].c_str());
 	if(!elementMap)
 	{
-		loadElement(strList[0].c_str());
-		elementMap = mImpl->mElementTable.getItem(strList[0].c_str());
+		loadElementSchema(strList[0].c_str());
+		elementMap = mImpl->mElementSchemaTable.getItem(strList[0].c_str());
 	}
 	if(strList.size() == 1)
 	{
         _GetFirstElement gfe(9999);
 	    elementMap->traverse(gfe);
-		SE_Element* e = elementMap->getItem(gfe.minElementID);
-		SE_Element* rete = NULL;;
-		if(e)
-		    rete = e->clone();
-		return rete;
+		SE_ElementSchema* e = elementMap->getItem(gfe.minElementID);
+		return e;
 	}
-	SE_Element* e = elementMap->getItem(strList[1].c_str());
-	SE_Element* rete = NULL;
-	if(e)
-		rete = e->clone();
-	return rete;
+	SE_ElementSchema* e = elementMap->getItem(strList[1].c_str());
+	return e;
+}
+void SE_ResourceManager::loadString(const char* stringFileName)
+{
+	if(!stringFileName)
+		return;
+    SE_StringMap* stringMap = mImpl->mStringTable.getItem(stringFileName);
+    if(stringMap)
+        return;
+	stringMap = new SE_StringMap;
+    mImpl->mStringTable.setItem(SE_StringID(stringFileName), stringMap);
+	std::string fileFullPath = std::string(getDataPath()) + SE_SEP + "string" + SE_SEP + stringFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    ec.impl = mImpl;
+    ec.xmlName = stringFileName;
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
+    m.handleXmlChild(NULL, &doc, 0);
+}
+void SE_ResourceManager::loadFont(const char* fontDefineFileName)
+{
+	if(!fontDefineFileName)
+		return;
+	std::string fileFullPath = std::string(getDataPath()) + SE_SEP + "fonts" + SE_SEP +fontDefineFileName;
+    TiXmlDocument doc(fileFullPath.c_str());
+    doc.LoadFile();
+    if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
+    {
+		LOGI("can not open xml file: %s\n", fileFullPath.c_str());
+        return;
+    }
+	_ElementContainer ec;
+	ec.resourceManager = this;
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
+    m.handleXmlChild(NULL, &doc, 0);
+}
+void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, int& outLen)
+{
+    std::string dataPath = getDataPath();
+    std::string filePath = dataPath + SE_SEP + "fonts" + SE_SEP + fontFileName;
+    char* data = NULL;
+    int len = 0;
+	SE_IO::readFileAll(filePath.c_str(), data, len);
+    outData = data;
+    outLen = len;
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {
+
 	SE_ImageData* imageData = getImageData(SE_ImageDataID(imageName));
 	if(imageData)
 		return imageData;
@@ -3276,7 +3798,7 @@ void SE_ResourceManager::loadShader(const char* shaderFileName)
     }
 	_ElementContainer ec;
 	ec.resourceManager = this;
-    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
 }
 void SE_ResourceManager::loadRenderer(const char* rendererFileName)
@@ -3293,7 +3815,7 @@ void SE_ResourceManager::loadRenderer(const char* rendererFileName)
     }
 	_ElementContainer ec;
 	ec.resourceManager = this;
-    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
 }
 void SE_ResourceManager::loadParam(const char* paramTable)
@@ -3311,7 +3833,7 @@ void SE_ResourceManager::loadParam(const char* paramTable)
 	_ElementContainer ec;
 	ec.resourceManager = this;
 	ec.xmlName = paramTable;
-    SE_XmlElementCalculus<SE_Element, _ElementContainer> m(&ec);
+    SE_XmlElementCalculus<SE_ElementSchema, _ElementContainer> m(&ec);
     m.handleXmlChild(NULL, &doc, 0);
 }
 static SE_XMLTABLE_TYPE getXmlTableType(TiXmlNode* pParent, unsigned int indent = 0)
@@ -3421,7 +3943,24 @@ SE_StateChangeList* SE_ResourceManager::getStateChangeList(const char* stateChan
 		return NULL;
 	return scl->getItem(strList[1].c_str());
 }
-
+SE_StringID SE_ResourceManager::getString(const char* id)
+{
+    SE_Util::SplitStringList stringList = SE_Util::splitString(id, "/");
+    if(stringList.size() < 2)
+    {
+        LOGI("... string path error\n");
+        return SE_StringID::INVALID;
+    }
+    SE_StringMap* stringMap = mImpl->mStringTable.getItem(stringList[0].c_str());
+    if(!stringMap)
+    {
+        loadString(stringList[0].c_str());
+        stringMap = mImpl->mStringTable.getItem(stringList[0].c_str());
+    } 
+    if(!stringMap)
+        return SE_StringID::INVALID;
+    return stringMap->getItem(stringList[1].c_str());
+}
 SE_Action* SE_ResourceManager::getAction(const char* actionPath)
 {
     SE_Util::SplitStringList stringList = SE_Util::splitString(actionPath, "/");  
@@ -3471,7 +4010,7 @@ void SE_ResourceManager::loadSequence(const char* sequenceName)
 	SE_SequenceSet* ss = mImpl->mSequenceTable.getItem(SE_StringID(sequenceName));
 	if(ss)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + sequenceName;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + sequenceName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3491,7 +4030,7 @@ void SE_ResourceManager::loadStateTable(const char* stateTableURI)
     SE_StateMachineSet* sms = mImpl->mStateMachineTable.getItem(stateTableURI);
 	if(sms)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateTableURI;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + stateTableURI;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3510,7 +4049,7 @@ void SE_ResourceManager::loadStateChangeTable(const char* stateChangeTableURI)
 	SE_StateChangeSet* scs = mImpl->mStateChangeTable.getItem(stateChangeTableURI);
 	if(scs)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + stateChangeTableURI;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + stateChangeTableURI;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() ==TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3528,7 +4067,7 @@ void SE_ResourceManager::loadColorEffectController(const char* colorEffectName)
 	SE_ColorEffectControllerSet* cs = mImpl->mColorEffectControllerTable.getItem(SE_StringID(colorEffectName));
 	if(cs)
 		return;
-	std::string fileFullPath = std::string(getLayoutPath()) + "\\" + colorEffectName;
+	std::string fileFullPath = std::string(getLayoutPath()) + SE_SEP + colorEffectName;
     TiXmlDocument doc(fileFullPath.c_str());
     doc.LoadFile();
     if(doc.Error() && doc.ErrorId() == TiXmlBase::TIXML_ERROR_OPENING_FILE)
@@ -3574,9 +4113,9 @@ SE_StateMachine* SE_ResourceManager::getStateMachine(const char* stateTablePath)
 	SE_StateMachine* s = sms->getItem(strList[1].c_str());
 	return s;
 }
-const SE_ElementTable& SE_ResourceManager::getElementTable() const
+const SE_ElementSchemaTable& SE_ResourceManager::getElementSchemaTable() const
 {
-	return mImpl->mElementTable;
+	return mImpl->mElementSchemaTable;
 }
 const SE_ImageTable& SE_ResourceManager::getImageTable() const
 {

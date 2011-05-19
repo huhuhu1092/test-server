@@ -4,6 +4,8 @@
 #include "SE_ID.h"
 #include "SE_MountPoint.h"
 #include "SE_KeyFrame.h"
+#include <list>
+class SE_Element;
 class SE_Sequence
 {
 public:
@@ -12,12 +14,12 @@ public:
         SE_StringID imageref;
         SE_MountPointID mpref;
     };
-    void setFrame(unsigned int key, const _Frame& f);
-	_Frame getFrame(unsigned int) const;
+    void setFrame(const SE_TimeKey& key, const _Frame& f);
+	_Frame getFrame(const SE_TimeKey& key) const;
     SE_MountPoint getMountPoint(const SE_MountPointID& id) const;
 	void addMountPoint(const SE_MountPoint& mp);
 	std::vector<SE_MountPoint> getMountPoint() const;
-	std::vector<unsigned int> getKeys() const
+	std::vector<SE_TimeKey> getKeys() const
 	{
 		return mSequenceFrame.getKeys();
 	}
@@ -37,6 +39,7 @@ public:
     {
         return mPivotY;
     }
+    std::list<SE_Element*> createElement(const SE_TimeKey& timeKey);
 private:
     int mPivotX;
     int mPivotY;

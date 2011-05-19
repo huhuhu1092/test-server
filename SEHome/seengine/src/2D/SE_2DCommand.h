@@ -4,6 +4,7 @@
 #include "SE_Primitive.h"
 #include <string>
 class SE_Application;
+class SE_CChess;
 struct EyeData
 {
 	SE_PrimitiveID leftEyeID;
@@ -18,7 +19,8 @@ public:
     void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
 public:
     std::string dataPath;
-    std::string fileName;
+    std::string sceneName;
+	SE_CChess* chessApp;
 	int left, top, width, height;
 };
 

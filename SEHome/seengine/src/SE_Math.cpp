@@ -31,7 +31,19 @@ float SE_Fabs(float f)
 {
     return fabs(f);
 }
+int SE_Iabs(int i)
+{
+	return abs(i);
+}
 float SE_Tanf(float f)
 {
     return tanf(f);
+}
+float SE_Floor(float x)
+{
+	return floorf(x);
+}
+float SE_Ceil(float x)
+{
+	return ceil(x);
 }

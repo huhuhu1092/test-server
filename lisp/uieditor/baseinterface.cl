@@ -1,0 +1,7 @@
+(in-package :common-graphics-user)
+(defun is-null-string (str)
+  (string= str "")
+  )
+(defun is-not-null-string (str)
+  (not (is-null-string str))
+  )

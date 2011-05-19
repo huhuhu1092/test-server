@@ -1,11 +1,19 @@
 #include "SE_Layer.h"
+#include "SE_Buffer.h"
+#include <stdio.h>
 SE_Layer::SE_Layer()
 {
-    mLayer = 0;
 }
-SE_Layer::SE_Layer(int layer) : mLayer(layer)
+SE_Layer::SE_Layer(int layer) 
 {
-    
+    char buf[10];
+    memset(buf, 0, 10);
+#if defined(WIN32)
+    _snprintf(buf, 9, "%d", layer);
+#else
+    snprintf(buf, 9, "%d", layer);
+#endif
+    mLayer = buf;
 }
 SE_Layer::~SE_Layer()
 {}
@@ -20,23 +28,11 @@ SE_Layer& SE_Layer::operator=(const SE_Layer& layer)
     mLayer = layer.mLayer;
     return *this;
 }
-bool operator==(const SE_Layer& left, const SE_Layer& right)
+void SE_Layer::read(SE_BufferInput& input)
 {
-    return left.mLayer == right.mLayer;
+	mLayer = input.readString();
 }
-bool operator<(const SE_Layer& left, const SE_Layer& right)
+void SE_Layer::write(SE_BufferOutput& output)
 {
-    return left.mLayer < right.mLayer;
-}
-bool operator>(const SE_Layer& left, const SE_Layer& right)
-{
-    return left.mLayer > right.mLayer;
-}
-SE_Layer operator+(const SE_Layer& left, const SE_Layer& right)
-{
-    return SE_Layer(left.mLayer + right.mLayer);
-}
-SE_Layer operator-(const SE_Layer& left, const SE_Layer& right)
-{
-    return SE_Layer(left.mLayer - right.mLayer);
+	output.writeString(mLayer.c_str());
 }

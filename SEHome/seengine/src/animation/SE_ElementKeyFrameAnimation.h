@@ -2,6 +2,7 @@
 #define SE_ELEMENTKEYFRAMEANIMATION_H
 #include "SE_Animation.h"
 class SE_Element;
+class SE_ElementManager;
 class SE_ElementKeyFrameAnimation : public SE_Animation
 {
 public:
@@ -10,15 +11,16 @@ public:
     void onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateDelta, float percent, int frameIndex);
 	void onRun();
     SE_Animation* clone();
-    SE_Element* getElement()
+    void setElement(const SE_ElementID& elementID)
     {
-        return mElement;
+        mElementID = elementID;
     }
-    void setElement(SE_Element* e)
+    SE_ElementID getElement() const
     {
-        mElement = e;
+        return mElementID;
     }
 private:
-    SE_Element* mElement;
+    SE_ElementID mElementID;
+    SE_ElementManager* elementManager;
 };
 #endif

@@ -18,14 +18,16 @@ struct SE_Geometry::_Impl
 
 };
 ///////////////////////////////////////////////
-SE_Geometry::SE_Geometry(SE_Spatial* parent) : SE_Spatial(parent)
+SE_Geometry::SE_Geometry()
 {
     mImpl = new SE_Geometry::_Impl;
 }
+/*
 SE_Geometry::SE_Geometry(SE_SpatialID id, SE_Spatial* parent) : SE_Spatial(id, parent)
 {
     mImpl = new SE_Geometry::_Impl;
 }
+*/
 SE_Geometry::~SE_Geometry()
 {
     delete mImpl;
@@ -43,6 +45,7 @@ void SE_Geometry::detachSimObject(SE_SimObject* go)
 
 void SE_Geometry::write(SE_BufferOutput& output)
 {
+	/*
     output.writeString("SE_Geometry");
     output.writeInt(0);
     output.writeInt(mImpl->attachObject.size());
@@ -52,10 +55,12 @@ void SE_Geometry::write(SE_BufferOutput& output)
         SE_SimObject* obj = *it;
         obj->write(output);
     }
+	*/
     SE_Spatial::write(output);
 }
 void SE_Geometry::read(SE_BufferInput& input)
 {
+	/*
     int attachObjNum = input.readInt();
     SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
     for(int i = 0 ; i < attachObjNum ; i++)
@@ -67,6 +72,7 @@ void SE_Geometry::read(SE_BufferInput& input)
         SE_SimObjectID id = SE_ID::createSimObjectID();
         simObjectManager->set(id, obj);
     }
+	*/
     SE_Spatial::read(input);
 }
 void SE_Geometry::updateRenderState()
@@ -140,7 +146,7 @@ int SE_Geometry::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
 	else
 		return r;
 }
-SE_Spatial::SPATIAL_TYPE SE_Geometry::getSpatialType()
+int SE_Geometry::getSpatialType()
 {
 	return GEOMETRY;
 }
@@ -198,12 +204,12 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         SE_SimObject* so = *it;
         SE_SimObject::RenderUnitVector renderUnitVector = so->createRenderUnit();
         SE_SimObject::RenderUnitVector::iterator itRU;
-        for(itRU = renderUnitVector.begin() ; itRU!= renderUnitVector.end(); itRU++)
+        for(itRU = renderUnitVector.begin() ; itRU != renderUnitVector.end(); itRU++)
         {
 			if(*itRU)
 			{
 				//(*itRU)->setWorldTransform(getWorldTransform().mul(so->getLocalMatrix()));
-				renderManager->addRenderUnit(*itRU, getRenderTarget(), (SE_RenderManager::RENDER_QUEUE)getRenderQueue());
+				renderManager->addRenderUnit(*itRU, getSceneRenderSeq(), getRenderTargetSeq(),getRenderTarget(), (SE_RENDER_QUEUE)getRenderQueue());
 			}
         }
     }
@@ -211,7 +217,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
 	{
 		SE_RenderUnit* ru = createSelectedFrame(this);
 		if(ru != NULL)
-			renderManager->addRenderUnit(ru, SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET,SE_RenderManager::RQ1);
+			renderManager->addRenderUnit(ru, getSceneRenderSeq(), getRenderTargetSeq(),getRenderTarget(),SE_RQ1);
 		else
 		{
             SE_Geometry::_Impl::SimObjectList::iterator it;
@@ -219,7 +225,7 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
             {
                 SE_SimObject* so = *it;
 				SE_RenderUnit* ru = so->createWireRenderUnit();
-				renderManager->addRenderUnit(ru, SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET,SE_RenderManager::RQ1);
+				renderManager->addRenderUnit(ru, getSceneRenderSeq(), getRenderTargetSeq(), getRenderTarget(), SE_RQ1);
 			}
 		}
 	}

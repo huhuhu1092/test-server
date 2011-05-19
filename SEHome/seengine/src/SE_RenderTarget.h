@@ -2,9 +2,11 @@
 #define SE_RENDERTARGET_H
 #include "SE_ID.h"
 #include "SE_Vector.h"
+#include "SE_TreeStruct.h"
 class SE_Camera;
 class SE_ImageData;
-class SE_RenderTarget
+class SE_RenderTarget;
+class SE_RenderTarget : public SE_ListStruct<SE_RenderTarget>
 {
 public:
     enum RENDER_TARGET_TYPE {TEXTURE, RENDERBUFFER, FRAMEBUFFER};
@@ -12,6 +14,7 @@ public:
 	enum CAMERA_TYPE {LOCAL_CAMERA, GLOBAL_CAMERA};
     SE_RenderTarget();
     virtual ~SE_RenderTarget();
+    /*
     SE_RenderTargetID getRenderTarget()
     {
         return mID;
@@ -20,6 +23,7 @@ public:
     {
         mID = id;
     }
+    */
     void setWidth(int w)
     {
         mWidth = w;
@@ -75,6 +79,14 @@ public:
 	{
 		mBackground = bg;
 	}
+    void setClearTarget(bool clearTarget)
+    {
+        mClearTarget = clearTarget;
+    }
+    bool getClearTarget()
+    {
+        return mClearTarget;
+    }
     virtual void create() = 0;
     virtual bool prepare() = 0;
 protected:
@@ -87,6 +99,7 @@ private:
     SE_CameraID mCameraID;
 	CAMERA_TYPE mCameraType;
 	SE_Vector4f mBackground;
+    bool mClearTarget;
 };
 class SE_FrameBufferTarget : public SE_RenderTarget
 {

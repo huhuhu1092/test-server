@@ -1,55 +1,37 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<Element id="lady" layer="1">
-    <MountPoint id = "p1" x = "0" y = "0" />
-    <MountPoint id = "p2" x = "110" y = "0" />
-    <MountPoint id = "p3" x = "171" y = "31" />
-    <MountPoint id = "p4" x = "149" y = "133" />
-    <MountPoint id = "p5" x = "130" y = "310" />
-    <MountPoint id = "p6" x = "219" y = "106" />
-    <MountPoint id = "p7" x = "220" y = "91" />
-    <MountPoint id = "p8" x = "200" y = "80" />
-    <MountPoint id = "p9" x = "238" y = "80" />
-    <MountPoint id = "p10" x = "110" y = "0" />
-    <MountPoint id = "p11" x = "200" y = "70" />
-    <MountPoint id = "p12" x = "238" y = "70" />
-    <MountPoint id = "p13" x = "278" y = "70" />
-    <Element id="body" pivotx="0" pivoty="0" layer="1" mountpointref = "p1" >
-        <Image dataref="ImageTable1.xml/it1/E01" />
+<?xml version="1.0" encoding="UTF-8" ?>																																																
+																																																
+<Element 	id= "	PFemaleBase	" pivotx = "	0 	" pivoty = "	0 	" >																																			
+<MountPoint 	id= "	PFace	" x= "	253 	" y= "	101 	" />																																									
+<MountPoint 	id= "	PUpcolthers	" x= "	242 	" y= "	174 	" />																																									
+<MountPoint 	id= "	PLifthand	" x= "	366 	" y= "	366 	" />																																									
+<MountPoint 	id= "	PRighthand	" x= "	171 	" y= "	306 	" />																																									
+<MountPoint 	id= "	PSkirt	" x= "	226 	" y= "	386 	" />																																									
+<MountPoint 	id= "	PTrousers	" x= "	248 	" y= "	563 	" />																																									
+<MountPoint 	id= "	PShoesScoks	" x= "	261 	" y= "	730 	" />																																									
+<MountPoint 	id= "	PEffact01	" x= "	108 	" y= "	95 	" />																																									
+<MountPoint 	id= "	PEffact02	" x= "	108 	" y= "	374 	" />																																									
+<MountPoint 	id= "	PEffact03	" x= "	108 	" y= "	701 	" />																																									
+<MountPoint 	id= "	PEffact21	" x= "	383 	" y= "	95 	" />																																									
+<MountPoint 	id= "	PEffact22	" x= "	383 	" y= "	374 	" />																																									
+<MountPoint 	id= "	PEffact23	" x= "	383 	" y= "	701 	" />																																								<!--	
+	<Element 	id= "	Face	" pivotx = "	0 	" pivoty = "	0 	" mountpointref = "	PFace	" layer = "	2	" >																																					
+		<Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" />																																													
+    </Element>	
+    -->
+    <Element id = "testButton" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "3" width = "300" height = "129" type = "button">
+        <Image dataref = "CharaterFaceImageDefine.xml/CFace/F001/1" state = "normal" />
+        <Image dataref = "CharaterFaceImageDefine.xml/CFaceaccessories/C001/1" state = "highlighted" />
     </Element>
-    <Element id="head" pivotx="0" pivoty="0" layer="0" mountpointref = "p2">
-        <Image dataref="ImageTable1.xml/it1/E02" />
+    <Element id = "testText" pivotx = "0" pivoty = "0" mountpointref = "PUpcolthers" layer = "4" width = "200" height = "32" type = "textview" text = "strings.xml/c1">
+        <TextProperty id = "q1" style = "normal" color = "255 0 0" size = "16" align = "left" orientation = "horizontal" state = "normal" />
     </Element>
-     <Element id="face" pivotx="0" pivoty="0" layer="2" mountpointref = "p3">
-         <Image dataref="ImageTable1.xml/it1/E03/nian" />
-    </Element>
-     <Element id="yifu" pivotx="0" pivoty="0" layer="3" mountpointref = "p4">
-         <Image dataref="ImageTable1.xml/it1/E04"/>
-    </Element>
-     <Element id="qunzi" pivotx="0" pivoty="0" layer="2" mountpointref = "p5">
-         <Image dataref="ImageTable1.xml/it1/E05" />
-    </Element>
-     <Element id="zui" pivotx="0" pivoty="0" layer="5" mountpointref = "p6">
-         <Image dataref = "ImageTable1.xml/it1/E06"/>
-    </Element>
-     <Element id="bizi" pivotx="0" pivoty="0" layer="5" mountpointref = "p7">
-        <Image dataref="ImageTable1.xml/it1/E07"/>
-    </Element>
-    <Element id="lefteye" pivotx="0" pivoty="0" layer="5" mountpointref = "p8">
-        <Image dataref = "ImageTable1.xml/it1/N01/left" />
-    </Element>
-    <Element id="righteye" pivotx="0" pivoty="0" layer="5" mountpointref = "p9">
-        <Image dataref = "ImageTable1.xml/it1/N01/right" />
-    </Element>
-     <Element id="liuhai" pivotx="0" pivoty="0" layer="4" mountpointref = "p10">
-         <Image dataref="ImageTable1.xml/it1/R01"/>
-    </Element>
-    <Element id="leftmeimao" pivotx="0" pivoty="0" layer="6" mountpointref = "p11">
-        <Image dataref="ImageTable1.xml/it1/B01/left" />
-    </Element>
-    <Element id="rightmeimao" pivotx="238" pivoty="0" layer="6" mountpointref = "p12">
-        <Image dataref="ImageTable1.xml/it1/B01/right" />
-    </Element>
-    <Element id = "testAction" mountpointref = "p13">
-        <Action dataref="TestAction.xml/t1" />
-    </Element>
+    <!--												
+
+    	<Element id = "testAction" mountpointref = "PLifthand" layer = "	4	" >
+       		 <Action dataref="Eye_left_Action.xml/Nfennu:Nfennu" />
+    	</Element>																																																																																																
+   	 <Element id = "testAction" mountpointref = "PRighthand" layer = "	3	" >
+       		 <Action dataref="Eye_right_Action.xml/Nfennu:Nfennu" />
+    	</Element>
+        -->
 </Element>

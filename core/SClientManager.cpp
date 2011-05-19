@@ -5,6 +5,7 @@
 #include "SCommandEvent.h"
 #include "SCommandEventFactory.h"
 #include "SUtil.h"
+#include <string.h>
 #include <map>
 #include <list>
 

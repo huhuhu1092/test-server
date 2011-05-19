@@ -13,6 +13,12 @@
 #include "SE_RenderTargetManager.h"
 #include "SE_CameraManager.h"
 #include "SE_ParamManager.h"
+#include "SE_SpatialManager.h"
+#include "SE_FontManager.h"
+#include "SE_DelayDestroy.h"
+#include "SE_ThreadManager.h"
+#include "SE_Game.h"
+#include "SE_FunctionDict.h"
 #include "SE_Log.h"
 #include <string.h>
 #include <algorithm>
@@ -39,6 +45,10 @@ SE_Application::SE_Application()
 	mRenderTargetManager = new SE_RenderTargetManager;
 	mCameraManager = new SE_CameraManager;
 	mParamManager = new SE_ParamManager;
+	mSpatialManager = new SE_SpatialManager;
+	mFontManager =  new SE_FontManager;
+    mFunctionDict = new SE_FunctionDict;
+    mThreadManager = new SE_ThreadManager;
     mFrameNum = 0;
     mStartTime = 0;
     mPrevTime = 0;
@@ -47,6 +57,8 @@ SE_Application::SE_Application()
     mFpsPrevTime = 0;
     mFpsFrameNum = 0;
 	mObjectCount = 0;
+    mState = PREPARE;
+	mSeqNum = 0;
 }
 SE_Application::~SE_Application()
 {
@@ -75,6 +87,14 @@ SE_Application::~SE_Application()
 		delete mCameraManager;
 	if(mParamManager)
 		delete mParamManager;
+	if(mSpatialManager)
+		delete mSpatialManager;
+	if(mFontManager)
+		delete mFontManager;
+    if(mFunctionDict)
+        delete mFunctionDict;
+    if(mThreadManager)
+        delete mThreadManager;
     SE_CommandFactoryList::iterator it;
     for(it = mCommandFactoryList.begin() ; it != mCommandFactoryList.end() ; it++)
     {
@@ -97,10 +117,14 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     processCommand(realDelta, simulateDelta);
 	mAnimationManager->update(realDelta, simulateDelta);
-    mRenderManager->beginDraw();
-    mSceneManager->renderScene(mCurrentCamera, *mRenderManager);
-    mRenderManager->draw();
-    mRenderManager->endDraw();
+    if(mState == RUNNING)
+    {
+        //mRenderManager->beginDraw();
+        mSceneManager->render(*mRenderManager);
+        mRenderManager->sort();
+        mRenderManager->draw();
+        mRenderManager->endDraw();
+    }
     doDelayDestroy();
 }
 void SE_Application::start()
@@ -131,7 +155,7 @@ void SE_Application::run()
     if(fpsDelta > 1000)
     {
         float fFPS = 1000.0f * mFpsFrameNum /(float)fpsDelta;
-        LOGI("FPS : %f\n", fFPS);
+        //LOGI("FPS : %f\n", fFPS);
         mFpsFrameNum = 0;
         mFpsPrevTime = currTime;
     }
@@ -194,25 +218,8 @@ private:
 */
 void SE_Application::postCommand(SE_Command* command)
 {
+	SE_AutoMutex m(&mCommandListMutex);
     mCommandList.push_back(command);
-    /*
-    if(mCommandList.empty())
-    {
-        mCommandList.push_back(cw);
-    }
-    else
-    {
-        SE_ComandList::iterator it = find_if(mCommandList.begin(), mCommandList.end(), isPriorityLessThan(command->priority()));
-        if(it != mCommandList.end())
-        {
-            mCommandList.insert(it, cw);
-        }
-        else
-        {
-            mCommandList.push_back(cw);
-        }
-    }
-    */
 }
 void SE_Application::setUpEnv()
 {}
@@ -226,8 +233,10 @@ bool SE_Application::isRemoved(const _CommandWrapper& c)
 void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_CommandList::iterator it;
+	mCommandListMutex.lock();
     SE_CommandList tmpList = mCommandList;
     mCommandList.clear();
+	mCommandListMutex.unlock();
     for(it = tmpList.begin(); it != tmpList.end(); )
     {
         SE_Command* c = *it;
@@ -236,12 +245,6 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
             c->handle(realDelta, simulateDelta);
             delete c;
             tmpList.erase(it++);
-			/*
-            if(it == tmpList.end())
-                break;
-            else
-                --it;
-				*/
         }
 		else
 		{
@@ -250,43 +253,9 @@ void SE_Application::processCommand(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     }
     if(tmpList.empty())
         return;
+	mCommandListMutex.lock();
     mCommandList.splice(mCommandList.begin(), tmpList, tmpList.begin(), tmpList.end()); 
-    /*
-    for(it = tmpList.being(); it != tmpList.end(); it++)
-    {
-        _CommandWrapper c = *it;
-        if(c.command->expire(realDelta, simulateDelta))
-        {
-            c.command->handle(realDelta, simulateDelta);
-            c.canDelete = true;
-        }
-    }
-    tmpList.remove_if(isRemoved);
-    if(tmpList.empty())
-        return;
-    if(mCommandList.empty())
-    {
-        mCommandList.assign(tmpList.begin(), tmpList().end());
-    }
-    else
-    {
-        SE_CommandList::iterator itSrc;
-        SE_CommandList::iterator itDst;
-        for(itSrc = tmpList.begin() ; itSrc != tmpList.end(); itSrc++)
-        {
-            for(itDst = mCommandList.begin() ; itDst != mCommandList.end() ; itDst++)
-            {
-                if(itSrc->command->priority() >= itDst->command->priority())
-                {
-                    break;
-                }
-            }
-            mCommandList.insert(itDst, *itSrc);
-            itSrc->canDestroy = false;
-        } 
-        tmpList.clear();
-    }
-    */
+	mCommandListMutex.unlock();
 }
 
 bool SE_Application::registerCommandFactory(const SE_CommandFactoryID& cfID, SE_CommandFactory* commandFactory)
@@ -317,7 +286,7 @@ SE_Command* SE_Application::createCommand(const SE_CommandID& commandID)
     }
 	return NULL;
 }
-bool SE_Application::addDelayDestry(SE_DelayDestroy* dd)
+bool SE_Application::addDelayDestroy(SE_DelayDestroy* dd)
 {
     _FindDelayDestroy fd;
     fd.src = dd;
@@ -333,7 +302,7 @@ void SE_Application::sendMessage(SE_Message* message)
 {
 	mMessageList.push_back(message);
 }
-int SE_Application::getMessageCount()
+size_t SE_Application::getMessageCount()
 {
 	return mMessageList.size();
 }
@@ -359,4 +328,48 @@ SE_Application::_MessageVector SE_Application::getMessage()
 		v[i++] = msg;
 	}
 	return v;
+}
+void SE_Application::addGame(std::string gameName, SE_Game* game)
+{
+    _GameMap::iterator it = mGameMap.find(gameName);
+    if(it == mGameMap.end())
+    {
+        mGameMap.insert(std::pair<std::string, SE_Game*>(gameName, game));
+    }
+    else
+    {
+        SE_Game* g = it->second;
+        SE_DelayDestroy* dd = new SE_DelayDestroyPointer<SE_Game>(g);
+        bool ret = addDelayDestroy(dd);
+        if(!ret)
+        {
+            delete dd;
+        }
+        it->second = game;
+    }
+}
+void SE_Application::removeGame(std::string gameName)
+{
+    _GameMap::iterator it = mGameMap.find(gameName);
+    if(it != mGameMap.end())
+    {
+        SE_Game* game = it->second;
+        mGameMap.erase(it);
+        SE_DelayDestroy* dd = new SE_DelayDestroyPointer<SE_Game>(game);
+        bool ret = addDelayDestroy(dd);
+        if(!ret)
+        {
+            delete dd;
+        }
+    }
+}
+SE_Game* SE_Application::getGame(std::string gameName)
+{
+     _GameMap::iterator it = mGameMap.find(gameName);
+    if(it != mGameMap.end())
+    {
+        return it->second;
+    }   
+    else
+        return NULL;
 }

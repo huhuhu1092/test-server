@@ -1,0 +1,87 @@
+;;; Define :sequence-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun sequence-ui () (find-or-make-application-window :sequence-ui 'make-sequence-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-sequence-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 829 411 1635 846)) (name :sequence-ui) (title "Sequence Ui")
+     (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :normal
+           :maximize-button t
+           :minimize-button t
+           :name :sequence-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-sequence-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-sequence-ui-widgets ()
+  (list (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       34 :left 24 :name :static-text-29 :top 18 :value "name" :width 72)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 34 :left 115 :name :sequence-name :top 18 :value "" :width
+                       178)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       35 :left 38 :name :static-text-30 :top 96 :value "key" :width 66)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 50 :left 117 :name :sequence-key :top 90 :value "" :width
+                       149)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       33 :left 36 :name :static-text-31 :top 162 :value "image" :width
+                       68)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 45 :left 117 :name :sequence-image :top 160 :value ""
+                       :width 149)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 44
+                       :left 293 :name :button16 :title "Select" :top 161 :width 88)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       36 :left 37 :name :static-text-32 :top 227 :value "mirror" :width
+                       78)
+        (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 37
+                       :left 118 :name :sequence-image-mirror :range
+                       (list :one :two :three) :top 226 :value :one :width 148)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       27 :left 37 :name :static-text-33 :top 287 :value "rotation"
+                       :width 67)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 32 :left 119 :name :sequence-rotation :top 282 :value ""
+                       :width 147)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 72
+                       :left 527 :name :button17 :title "Prev" :top 176 :width 98)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 69
+                       :left 668 :name :button18 :title "Next" :top 179 :width 101)
+        (make-instance 'up-down-control :height 31 :left 288 :name :up-down-control-2
+                       :range (list 0 100) :top 282 :value 0 :width 55)
+        (make-instance 'group-box :contained-widgets
+                       (list :static-text-30 :sequence-key :static-text-31
+                             :sequence-image :button16 :static-text-32
+                             :sequence-image-mirror :static-text-33 :sequence-rotation
+                             :up-down-control-2)
+                       :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 326 :left 19
+                       :name :group-box-3 :title "Frame" :top 69 :width 460)))

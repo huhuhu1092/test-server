@@ -1,18 +1,27 @@
 #include "SE_CameraManager.h"
 #include "SE_Camera.h"
-SE_CameraManager::SE_CameraManager()
+SE_CameraManager::SE_CameraManager(): mCameraSet(100, 512)
 {}
 SE_CameraManager::~SE_CameraManager()
 {}
-void SE_CameraManager::setCamera(const SE_CameraID& id, SE_Camera* c)
+SE_CameraID SE_CameraManager::add(SE_Camera* c)
 {
-	mCameraSet.set(id, c);
+	return mCameraSet.add(SE_CameraID::NULLID, c);
+	//mCameraSet.set(id, c);
 }
-SE_Camera* SE_CameraManager::getCamera(const SE_CameraID& id)
+SE_Camera* SE_CameraManager::get(const SE_CameraID& id)
 {
-	return mCameraSet.get(id);
+	return mCameraSet.find(id);
 }
-void SE_CameraManager::removeCamera(const SE_CameraID& id)
+SE_Camera* SE_CameraManager::remove(const SE_CameraID& id)
 {
-	mCameraSet.remove(id);
+	return mCameraSet.remove(id);
+}
+void SE_CameraManager::release(SE_Camera* c, int delay)
+{
+	mCameraSet.release(c, delay);
+}
+void SE_CameraManager::release(const SE_CameraID& c , int delay)
+{
+	mCameraSet.release(c, delay);
 }

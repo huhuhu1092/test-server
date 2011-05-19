@@ -22,6 +22,10 @@
 #include "SE_RenderManager.h"
 #include "SE_ImageMap.h"
 #include "SE_CheckXml.h"
+#include "SE_Scene.h"
+#include "SE_SceneManager.h"
+#include "SE_CameraManager.h"
+#include "SE_CChess.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -36,34 +40,17 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
-	//resourceManager->loadImageTable("ImageTable1.xml");
-	//checkXml();
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
-	//resourceManager->loadElement("TestElement.xml");
-    SE_ElementManager* elementManager = mApp->getElementManager();
-	//elementManager->load("TestElement.xml/PFemaleBase");
-    elementManager->load("ElementCharacterGroup.xml/PFemaleBase");
-    SE_SceneManager* sceneManager = mApp->getSceneManager();
-    elementManager->setViewport(left, top, width, height);
-	elementManager->spawn();
-	elementManager->measure();
-	elementManager->update(0);
-    SE_Spatial* root = elementManager->createSpatial();
-    SE_DepthTestState* rs = new SE_DepthTestState();
-	rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_DISABLE);
-    SE_BlendState* blendRs = new SE_BlendState;
-    blendRs->setBlendProperty(SE_BlendState::BLEND_ENABLE);
-    blendRs->setBlendSrcFunc(SE_BlendState::SRC_ALPHA);
-    blendRs->setBlendDstFunc(SE_BlendState::ONE_MINUS_SRC_ALPHA);
-	root->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
-    root->setRenderState(SE_Spatial::BLENDSTATE, blendRs, OWN);
-	root->updateWorldTransform();
-    root->updateWorldLayer();
-	root->updateRenderState();
-    sceneManager->addSpatial(NULL, root);
-	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
-	renderManager->setBackground(SE_Vector3f(1, 1, 1));
+	resourceManager->loadFont("fontDefine.xml");
+ 	SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
+	sceneManager->setWidth(width);
+	sceneManager->setHeight(height);
+    chessApp->setBound(width, height);
+    //chessApp->start();
+    chessApp->loadBoard();
+	SE_Application::getInstance()->setState(SE_Application::RUNNING);
+
 }
 //////////////
 SE_2DUpdateCameraCommand::SE_2DUpdateCameraCommand(SE_Application* app) : SE_Command(app)
@@ -75,6 +62,7 @@ SE_2DUpdateCameraCommand::~SE_2DUpdateCameraCommand()
 {}
 void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     SE_Vector3f location(0, 0, 10);
 	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	SE_Rect<int> viewport = elementManager->getViewport();
@@ -89,6 +77,7 @@ void SE_2DUpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDel
 	SE_InputManager* inputManager = mApp->getInputManager();
     inputManager->removeMotionEventObserver(NULL);
 	inputManager->addMotionEventOberver(mApp->getCurrentCamera());
+	*/
 }
 ////////////////
 SE_2DRunAllAnimation::SE_2DRunAllAnimation(SE_Application* app) : SE_Command(app)
@@ -100,6 +89,7 @@ class SE_RunAllAnimationTravel : public SE_SpatialTravel
 public:
     int visit(SE_Spatial* spatial)
     {
+		/*
 		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 		SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
 		SE_ElementID elementID = spatial->getElementID();
@@ -119,6 +109,7 @@ public:
 				cloneAnim->run();
 			}
 		}
+		*/
 		return 0;
     }
     int visit(SE_SimObject* simObject)
@@ -128,8 +119,10 @@ public:
 };
 void SE_2DRunAllAnimation::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
 	SE_SceneManager* sceneManager = mApp->getSceneManager();
 	SE_Spatial* root = sceneManager->getRoot();
 	SE_RunAllAnimationTravel rat;
 	root->travel(&rat, true);
+	*/
 }

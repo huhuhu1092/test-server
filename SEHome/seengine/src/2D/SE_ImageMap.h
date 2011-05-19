@@ -19,8 +19,8 @@ struct SE_ImageRect
 	SE_ImageRect()
     {
         x = y = 0;
-        width = height = INVALID_GEOMINFO;
-		pivotx = pivoty = INVALID_GEOMINFO;
+        width = height = 0;
+		pivotx = pivoty = 0;
 		mirrorType = NO_MIRROR;
 		index = 0;
 		c = ALL;

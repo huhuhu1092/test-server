@@ -1,17 +1,28 @@
 #include "SE_SimObjectManager.h"
 #include <string>
-void SE_SimObjectManager::set(const SE_SimObjectID& simObjectID, SE_SimObject* simObject)
+#include <list>
+#include <vector>
+SE_SimObjectID SE_SimObjectManager::add(SE_SimObject* simObject)
 {
-    mSimObjectManager.set(simObjectID, simObject);
+	return mSimObjectManager.add(SE_SimObjectID::NULLID, simObject);
 }
 SE_SimObject* SE_SimObjectManager::get(const SE_SimObjectID& simObjectID)
 {
-    return mSimObjectManager.get(simObjectID);
+    return mSimObjectManager.find(simObjectID);
 }
-void SE_SimObjectManager::remove(const SE_SimObjectID& simObjectID)
+SE_SimObject* SE_SimObjectManager::remove(const SE_SimObjectID& simObjectID)
 {
-    mSimObjectManager.remove(simObjectID);
+    return mSimObjectManager.remove(simObjectID);
 }
+void SE_SimObjectManager::release(const SE_SimObjectID& id, int delay)
+{
+	mSimObjectManager.release(id, delay);
+}
+void SE_SimObjectManager::release(SE_SimObject* simObject, int delay)
+{
+	mSimObjectManager.release(simObject, delay);
+}
+/*
 struct _FindSimObj : public SE_FindObjCondition<SE_SimObject*>
 {
 	bool isSatisfy(SE_SimObject* obj)
@@ -23,10 +34,32 @@ struct _FindSimObj : public SE_FindObjCondition<SE_SimObject*>
 	}
 	std::string objname;
 };
-SE_SimObject* SE_SimObjectManager::findByName(const char* name)
+*/
+class _FindSimObj
 {
+public:
+	void operator()(SE_SimObject* obj)
+	{
+		if(name == obj->getName())
+		{
+			objs.push_back(obj);
+		}
+	}
+	std::string name;
+	std::list<SE_SimObject*> objs;
+};
+std::vector<SE_SimObject*> SE_SimObjectManager::find(const char* name)
+{
+	/*
 	_FindSimObj fo;
 	fo.objname = name;
 	SE_SimObject* ret = mSimObjectManager.find(fo);
+	return ret;
+	*/
+	_FindSimObj fo;
+	fo.name = name;
+	mSimObjectManager.traverseList(fo);
+	std::vector<SE_SimObject*> ret(fo.objs.size());
+	copy(fo.objs.begin(), fo.objs.end(), ret.begin());
 	return ret;
 }

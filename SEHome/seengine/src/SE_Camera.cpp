@@ -1,6 +1,7 @@
 #include "SE_Camera.h"
 #include "SE_Log.h"
 #include "SE_BoundingVolume.h"
+#include <math.h>
 IMPLEMENT_OBJECT(SE_Camera)
 ///////////////
 SE_Camera::~SE_Camera()
@@ -8,6 +9,16 @@ SE_Camera::~SE_Camera()
 	LOGI("### destroctor ~SE_Camera ####\n");
 	if(mBoundingVolume)
 		delete mBoundingVolume;
+}
+SE_Camera* SE_Camera::create2DSceneCamera(float width, float height)
+{
+	SE_Vector3f location(0, 0, 10);
+    float ratio = height / (float)width;
+	float angle = 2 * SE_RadianToAngle(atanf(width / 20.0f));
+    SE_Camera* camera = new SE_Camera;
+	camera->create(location, SE_Vector3f(0, 0, 1), SE_Vector3f(0, 1, 0), angle, ratio, 1, 50);//(location, SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), angle * 2, ratio, 1, 20);
+	camera->setViewport(0, 0, (int)width, (int)height);
+	return camera;
 }
 SE_Camera::SE_Camera()
 {
@@ -88,8 +99,13 @@ void SE_Camera::translateLocal(const SE_Vector3f& translate)
 }
 SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
 {
+#ifdef ROTATE
+	float yp = 1 - ((float)x) / (mViewport.bottom - mViewport.top);
+	float xp = 1 - ((float)y) / (mViewport.right - mViewport.left);
+#else
     float xp = ((float)x) / (mViewport.right - mViewport.left);
     float yp = 1 - ((float)y) / (mViewport.bottom - mViewport.top);
+#endif
     SE_Rect<float> nearRect = mFrustum.getNearPlaneRect();
     float xv = (1 - xp) * nearRect.left + xp * nearRect.right;
     float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;

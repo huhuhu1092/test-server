@@ -34,6 +34,7 @@ SE_TestInitCommand::~SE_TestInitCommand()
 
 void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
+	/*
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
 	//resourceManager->loadImageTable("ImageTable1.xml");
@@ -77,4 +78,5 @@ void SE_TestInitCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     sceneManager->addSpatial(NULL, root);
 	SE_RenderManager* renderManager = SE_Application::getInstance()->getRenderManager();
 	renderManager->setBackground(SE_Vector3f(1, 1, 1));
+	*/
 }

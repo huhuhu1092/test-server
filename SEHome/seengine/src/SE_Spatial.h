@@ -7,6 +7,7 @@
 #include "SE_Layer.h"
 #include "SE_Object.h"
 #include "SE_RenderState.h"
+#include "SE_TreeStruct.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_SimObject;
@@ -14,6 +15,7 @@ class SE_BufferInput;
 class SE_BufferOutput;
 class SE_Camera;
 class SE_RenderManager;
+class SE_Spatial;
 class SE_SpatialTravel
 {
 public:
@@ -21,7 +23,7 @@ public:
     virtual int visit(SE_Spatial* spatial) = 0;
     virtual int visit(SE_SimObject* simObject) = 0;
 };
-class SE_Spatial : public SE_Object
+class SE_Spatial : public SE_Object, public SE_TreeStruct<SE_Spatial>
 {
     DECLARE_OBJECT(SE_Spatial);
 public:
@@ -30,12 +32,11 @@ public:
 	enum SPATIAL_TYPE {NONE, NODE, GEOMETRY};
 	enum RENDER_STATE_TYPE {DEPTHTESTSTATE, BLENDSTATE, RENDERSTATE_NUM};
 	enum RENDER_STATE_SOURCE {INHERIT_PARENT, SELF_OWN};
-    SE_Spatial(SE_Spatial* parent = NULL);
-    SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent = NULL);
+    SE_Spatial();
     virtual ~SE_Spatial();
     const SE_Matrix4f& getWorldTransform();
     SE_Spatial* getParent();
-    SE_Spatial* setParent(SE_Spatial* parent);
+    //SE_Spatial* setParent(SE_Spatial* parent);
     //SE_Vector3f getWorldTranslate();
     //SE_Matrix3f getWorldRotateMatrix();
     //SE_Quat getWorldRotate();
@@ -44,6 +45,7 @@ public:
     SE_Matrix3f getLocalRotateMatrix();
     SE_Quat getLocalRotate();
     SE_Vector3f getLocalScale();
+	/*
     SE_SpatialID getSpatialID()
     {
         return mSpatialID;
@@ -52,6 +54,7 @@ public:
     {
         mSpatialID = spatialID;
     }
+	*/
     void setLocalTranslate(const SE_Vector3f& translate);
     void setLocalRotate(const SE_Quat& rotate);
     void setLocalRotate(const SE_Matrix3f& rotate);
@@ -150,10 +153,7 @@ public:
 	{
 		return (mState & SELECTED_MASK) == SELECTED; 
 	}
-	void setRenderTarget(const SE_RenderTargetID& renderTargetID)
-	{
-		mRenderTargetID = renderTargetID;
-	}
+	void setRenderTarget(const SE_RenderTargetID& renderTargetID);
 	SE_RenderTargetID getRenderTarget()
 	{
 		return mRenderTargetID;
@@ -202,6 +202,24 @@ public:
 	{
 		return mOwnRenderTargetCamera;
 	}
+	void setName(const char* name)
+	{
+		mName = name;
+	}
+	SE_StringID getName() const
+	{
+		return mName;
+	}
+    void setRenderTargetSeq(const SE_RenderTargetSeq& seq);
+	void setSceneRenderSeq(const SE_SceneRenderSeq& seq);
+	SE_SceneRenderSeq getSceneRenderSeq() const
+	{
+		return mSceneRenderSeq;
+	}
+    SE_RenderTargetSeq getRenderTargetSeq() const
+    {
+        return mRenderTargetSeq;
+    }
 	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
 	//dont use getRenderState to get some spatial's renderstate and then 
 	// set it to the other spatial;
@@ -211,9 +229,8 @@ public:
 	{
 		mNeedUpdateTransform = b;
 	}
+	void updateSpatialIDToElement();
 public:
-    virtual void addChild(SE_Spatial* child);
-    virtual void removeChild(SE_Spatial* child);
     virtual void attachSimObject(SE_SimObject* go);
     virtual void detachSimObject(SE_SimObject* go);
     virtual int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
@@ -224,7 +241,7 @@ public:
     virtual void write(SE_BufferOutput& output);
     virtual void read(SE_BufferInput& input);
     virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
-	virtual SPATIAL_TYPE getSpatialType();
+	virtual int getSpatialType();
 protected:
     //void updateWorldTranslate();
     //void updateWorldRotate();
@@ -267,8 +284,6 @@ private:
     SE_Vector3f mWorldScale;
     SE_Quat mWorldRotate;
 
-    SE_Spatial* mParent;
-    SE_SpatialID mSpatialID;
     int mState;
     int mBVType;
     SE_Layer mLocalLayer;
@@ -282,5 +297,8 @@ private:
 	int mRQ;
 	bool mNeedUpdateTransform;
 	bool mOwnRenderTargetCamera;
+	SE_SceneRenderSeq mSceneRenderSeq;
+    SE_RenderTargetSeq mRenderTargetSeq;
+	SE_StringID mName;
 };
 #endif

@@ -3,6 +3,8 @@
 #include "SE_ID.h"
 #include <map>
 #include <vector>
+class SE_BufferInput;
+class SE_BufferOutput;
 //ELementPoint indicate the access point of one element in its element group
 class SE_MountPoint
 {
@@ -48,6 +50,8 @@ public:
 	{
 		return mID.isValid();
 	}
+	void read(SE_BufferInput& input);
+	void write(SE_BufferOutput& output);
 private:
     float mX;
     float mY;
@@ -61,6 +65,8 @@ public:
     void clearMountPoint();
     SE_MountPoint getMountPoint(const SE_MountPointID& mountPointID) const;
     std::vector<SE_MountPoint> getMountPoint() const;
+	void read(SE_BufferInput& input);
+	void write(SE_BufferOutput& output);
 private:
     typedef std::map<SE_MountPointID, SE_MountPoint> _MountPointMap;
     _MountPointMap mMountPointMap;

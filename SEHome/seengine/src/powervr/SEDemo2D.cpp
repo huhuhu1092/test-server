@@ -17,12 +17,21 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-#include "SE_MessageDefine.h"
+#include "SE_MessageEventCommandDefine.h"
 //#include "SE_Physics.h"
 #include "SE_2DCommand.h"
 #include "SE_ElementManager.h"
 #include "SE_AnimationManager.h"
 #include "SE_Animation.h"
+#include "SE_SpatialManager.h"
+#include "SE_ElementManager.h"
+#include "SE_CChess.h"
+#include "SE_Remote.h"
+#include "SE_ChessCommand.h"
+#include "SE_Primitive.h"
+#include "SE_Scene.h"
+#include "SE_Thread.h"
+#include "SE_ThreadManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -61,29 +70,83 @@ private:
 private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
+	SE_CChess* mChessApp;
+	SE_ThreadID mChessAIThread;
 };
+static void doTest()
+{
+	struct testTraverse
+	{
+		void operator()(SE_Spatial* s)
+		{
+			SE_SpatialID id = s->getID();
+		}
+	};
+	SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
+	SE_CommonNode* cn = new SE_CommonNode;
+	for(int i = 0 ; i < 10 ; i++)
+	{
+        SE_Spatial* s = new SE_Spatial;
+		spatialManager->add(cn, s);
+	}
+	SE_SpatialID ii = spatialManager->add(SE_SpatialID::NULLID, cn, false);
+	SE_Spatial* s = spatialManager->remove(ii);
+	spatialManager->release(s);
+	//spatialManager->check();
+}
+static void debugPrimitive()
+{
+    SE_Primitive* primitive = NULL;
+    SE_PrimitiveID primitiveID;
+    float e[2] = {1, 1};
+
+    SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
+  
+    SE_RectPrimitive::create(rect3D, 3.2, 3.2, primitive, primitiveID);
+
+}
 bool SEDemo::InitApplication()
 {
+	//doTest();
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+    //debug
+    debugPrimitive();
+    //end
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
 	SE_Application::getInstance()->setAppID(appid);
+    
+	SE_CChess* chessapp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
+    chessapp->setUserName("aa");
+    chessapp->setPassword("aa");
+	SE_Remote remoteInfo;
+	remoteInfo.setServerIP("192.168.5.102");
+	remoteInfo.setServerPort(80);
+	remoteInfo.setNetwork(true, false, false);
+	chessapp->setRemote(remoteInfo);
+    SE_Application::getInstance()->addGame("cchess", chessapp);
 	SE_SystemCommandFactory* sf = new SE_SystemCommandFactory;
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
-	c->dataPath = "/home/luwei/model/jme/home/newhome3";
+	c->dataPath = "/home/luwei/model/newhome3";
 #endif
-	c->fileName = "TestElement.xml";
+	c->sceneName = "ChessLayout.xml/ChessRoot";//"TestElement.xml/PFemaleBase";
+	c->chessApp = chessapp;
 	c->left = 0;
 	c->top = 0;
+#ifdef ROTATE
+	c->width = 800;
+	c->height = 480;
+#else
 	c->width = 480;
 	c->height = 800;
+#endif
 	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
@@ -100,13 +163,29 @@ bool SEDemo::InitView()
 }
 bool SEDemo::ReleaseView()
 {
-	
 	return true;
 }
 bool SEDemo::QuitApplication()
 {
+#if defined(WIN32)
+#else
+    SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
+    SE_ChessLogoutThread* thread = new SE_ChessLogoutThread(false);
+    thread->username = chessApp->getUserName();
+    thread->remoteInfo = chessApp->getRemote();
+    thread->start();
+	int i = 0 ;
+    while(!thread->isEnd() && i < 100)
+    {
+        LOGI("### wait for server close response ###\n");
+		i++;
+    }
+    delete thread;
+    LOGI("##### quit OK ###\n");
+#endif
 	return true;
 }
+/*
 class SE_RunAllAnimationTravel : public SE_SpatialTravel
 {
 public:
@@ -158,28 +237,37 @@ public:
         return 0;
 	}
 };
+*/
 void SEDemo::handleInput(int width, int height)
 {
     static float prevPointer[2];
     static bool bPressed = false;
+	bool equal = false;
     int buttonState = PVRShellGet(prefButtonState);
     float* pointerLocation = (float*)PVRShellGet(prefPointerLocation);
     /*LOGI("## buttonstate = %d ##\n", buttonState);*/
     if(pointerLocation)
     {
 		//LOGI("### pointer location = %f, %f ###\n", pointerLocation[0], pointerLocation[1]);
+		if(prevPointer[0] == pointerLocation[0] && prevPointer[1] == pointerLocation[1] )
+			equal = true;
         prevPointer[0] = pointerLocation[0];
         prevPointer[1] = pointerLocation[1];
     }
     if((buttonState & ePVRShellButtonLeft))
     {
-		SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
-		if(c)
-		{
-			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
-			c->motionEvent = ke;
-			SE_Application::getInstance()->postCommand(c);
-		}
+	
+	    SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
+	    if(c)
+	    {
+#ifdef ROTATE
+            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+#else
+		    SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
+#endif
+		    c->motionEvent = ke;
+		    SE_Application::getInstance()->postCommand(c);
+	    }
 	    bPressed = 1;
     }
     else if(bPressed)
@@ -187,7 +275,12 @@ void SEDemo::handleInput(int width, int height)
         SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
 		if(c)
 		{
+#ifdef ROTATE
+            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+
+#else
 			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP, prevPointer[0] * width, prevPointer[1] * height);
+#endif	
 			c->motionEvent = ke;
 			SE_Application::getInstance()->postCommand(c);
 		}
@@ -223,13 +316,19 @@ void SEDemo::handleInput(int width, int height)
 	        root->travel(&rat, true);
 		}
 		*/
-		SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-		SE_Element* root = elementManager->getRoot();
+		//SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+		//SE_Element* root = elementManager->getRoot();
+		//root->startAnimation();
+		SE_SceneManager* sceneManager = SE_GET_SCENEMANAGER();
+		SE_SceneID sceneID = sceneManager->top();
+		SE_Scene* scene = sceneManager->get(sceneID);
+		SE_Element* root = scene->getRootElement();
 		root->startAnimation();
         LOGI("## left ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
+		/*
 		if(mSelectedSpatial)
 		{
 		    SE_AnimationID animID = mSelectedSpatial->getAnimationID();
@@ -238,10 +337,13 @@ void SEDemo::handleInput(int width, int height)
 			if(anim)
 		        anim->nextFrame(30, 30);
 		}
+		*/
         LOGI("## right ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
+
+		/*
 		if(mSelectedSpatial)
 		{
 			SE_PauseAllAnimationTravel rat;
@@ -254,13 +356,16 @@ void SEDemo::handleInput(int width, int height)
 	        SE_PauseAllAnimationTravel rat;
 	        root->travel(&rat, true);
 		}
+		*/
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
     {
+		/*
 		SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 		sceneManager->setSelectedSpatial(NULL);
 		mSelectedSpatial = NULL;
+		*/
 	    LOGI("## down ##\n");
     }
 }
@@ -298,7 +403,7 @@ bool SEDemo::RenderScene()
 			LOGI("### msg type = %d ####\n", msg->type);
 			if(msg->type == SE_MSG_SIMOBJECT_NAME)
 			{
-				mSelectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
+				//mSelectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
 			}
 			SE_Struct* structData = msg->data;
 			int structItemSize = structData->getCount();

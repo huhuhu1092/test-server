@@ -38,6 +38,7 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 	else if((mPrevType == SE_MotionEvent::DOWN || mPrevType == SE_MotionEvent::MOVE)&& 
 		    motionEvent->getType() == SE_MotionEvent::DOWN)
 	{
+		/*
         float deltaX = motionEvent->getX() - mPrevX;
 		float deltaY = motionEvent->getY() - mPrevY;
 		if(mPrevType == SE_MotionEvent::DOWN && 
@@ -77,6 +78,7 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 			mPrevX = motionEvent->getX();
 			mPrevY = motionEvent->getY();
 		}
+		*/
  	}
 	else if(motionEvent->getType() == SE_MotionEvent::UP && mPrevType == SE_MotionEvent::MOVE)
 	{
@@ -84,6 +86,7 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 	}
 	else if(motionEvent->getType() == SE_MotionEvent::UP && mPrevType == SE_MotionEvent::DOWN)
 	{
+		/*
 		SE_Ray ray = screenCoordinateToRay(mPrevX, mPrevY);
         SE_FindSpatialCollision spatialCollision(ray);
 		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
@@ -110,5 +113,6 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 			SE_Application::getInstance()->sendMessage(msg);
         }
         clearState();
+		*/
 	}
 }

@@ -20,7 +20,7 @@ public:
     std::vector<float> distance;
     bool intersected; //
 };
-template <class T>
+template <typename T>
 struct SE_Rect
 {
     T left ,right, top, bottom;
@@ -28,12 +28,25 @@ struct SE_Rect
 	{
 		left = right = top = bottom = 0;
 	}
+    bool isContain(T x, T y) const;
 };
+template <typename T>
+bool SE_Rect<T>::isContain(T x, T y) const
+{
+    if(x >= left && x < right && y >= top && y < bottom)
+        return true;
+    else
+        return false;
+}
 class SE_Rect3D
 {
 public:
 	static SE_Rect3D normalizeRect;
     SE_Rect3D();
+    //extent is half of the width or height;
+    //for example: e[0] = 1, e[1] = 1 the vertex will be (-1, -1) 
+    //(1, -1), (1, 1) (-1 , 1)
+    //xAxis and yAxis must normalized
     SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, 
               float e[2]);
     SE_Vector3f getCenter() const;

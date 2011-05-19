@@ -1,0 +1,5 @@
+<Element id = "cursorroot" pivotx = "0" pivoty = "0">
+    <Element id = "cursor" pivotx = "0" pivoty = "0"  layer = "1" >
+        <Image id = "cursorc" dataref = "ChessImage.xml/Cursor/001" state = "normal" canpointed = "0"/>
+    </Element>
+</Element>

@@ -51,7 +51,7 @@ void SE_TextureCoordAnimation::onUpdate(SE_TimeMS realDelta, SE_TimeMS simulateD
         int h = mUnitHeight;
         SE_RectPrimitive* primitive = (SE_RectPrimitive*)resourceManager->getPrimitive(getPrimitiveID());
         SE_ImageData* imageData = resourceManager->getImageData(mImageDataID);
-        primitive->setImageData(imageData, SE_TEXTURE0, NOT_OWN, SE_ImageDataPortion(x, y, w, h));
+        primitive->setImageData(0, imageData, SE_TEXTURE0, SE_ImageDataPortion(x, y, w, h));
         SE_Mesh** meshArray = NULL;
         int meshNum = 0;
         primitive->createMesh(meshArray, meshNum);

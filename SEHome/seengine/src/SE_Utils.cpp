@@ -4,7 +4,11 @@
 #include <string.h>
 #include <list>
 #if defined(WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
     #include <winsock2.h>
+    #include <windows.h>
 #else
     #include <unistd.h>
     #if defined(ANDOIRD)
@@ -175,6 +179,42 @@ wchar_t* SE_Util::utf8ToUnicode(const char* utf8str)
     return buf;
 }
 SE_Util::SplitStringList SE_Util::splitString(const char* path, const char* split)
+{
+	SE_Util::SplitStringList strList = splitStringRaw(path, split);
+	int firstStrSufixXml = 0;
+	bool found = false;
+	for(size_t i = 0 ; i < strList.size() ; i++)
+	{
+		std::string::size_type pos = strList[i].find(".xml");
+		if(pos != std::string::npos)
+		{
+			firstStrSufixXml = i;
+			found = true;
+			break;
+		}
+	}
+	if(found)
+	{
+		SE_Util::SplitStringList splitStringList(strList.size() - firstStrSufixXml);
+		std::string strPath;
+		for(size_t i = 0 ; i < firstStrSufixXml ; i++)
+		{
+			strPath += strList[i] + SE_SEP;
+		}
+		strPath += strList[firstStrSufixXml];
+        splitStringList[0] = strPath;
+		for(size_t i = 1 ; i < splitStringList.size() ; i++)
+		{
+			splitStringList[i] = strList[firstStrSufixXml + i];
+		}
+		return splitStringList;
+	}
+	else
+	{
+        return strList;
+	}
+}
+SE_Util::SplitStringList SE_Util::splitStringRaw(const char* path, const char* split)
 {
     std::list<std::string> retList;
     std::vector<std::string> ret;
@@ -636,6 +676,67 @@ static std::string getParamValue(const std::string& str, std::string::size_type 
 		return BAD_STR;
 	}
 }
+int SE_Util::stringToInt(const char* v)
+{
+    if(!SE_Util::isDigit(v))
+	{
+        LOGI("## error: cannot convert undigit string to int ##\n");
+		return 0;
+	}
+	return atoi(v);
+}
+float SE_Util::stringToFloat(const char* v)
+{
+	if(!SE_Util::isDigit(v))
+	{
+		LOGI("## error: cannot convert undigit string to float ##\n");
+		return 0;
+	}
+	return atof(v);
+}
+void SE_Util::stringToIntArray(const char* v, int*& out, int& len)
+{
+	SE_Util::SplitStringList str = SE_Util::splitStringRaw(v, " \t");
+	if(str.size() == 0)
+	{
+		out = NULL;
+		len = 0;
+		return;
+	}
+	len = str.size();
+	out = new int[len];
+	if(out == NULL)
+	{
+		len = 0;
+		return;
+	}
+	for(int i = 0 ; i < len ; i++)
+	{
+		out[i] = SE_Util::stringToInt(str[i].c_str());
+	}
+}
+void SE_Util::stringToFloatArray(const char* v, float*& out, int& len)
+{
+	SE_Util::SplitStringList str = SE_Util::splitStringRaw(v, " \t");
+	if(str.size() == 0)
+	{
+		len = 0;
+		out = NULL;
+		return;
+	}
+	len = str.size();
+	out = new float[len];
+	if(out == NULL)
+	{
+		len = 0;
+		return;
+	}
+	for(int i = 0 ; i < len ; i++)
+	{
+		out[i] = SE_Util::stringToFloat(str[i].c_str());
+	}
+}
+
 std::string SE_Util::resolveParamString(const char* str)
 {
 	//SE_Util::SplitStringList strList = SE_Util::splitString(str, "/");
@@ -680,4 +781,104 @@ std::string SE_Util::resolveParamString(const char* str)
 		return BAD_STR;
 	else
 		return paramString;
+}
+std::string SE_Util::intToString(int i)
+{
+    char buf[10];
+	memset(buf, 0, 10);
+#if defined(WIN32)
+	_snprintf(buf, 9, "%d", i);
+#else
+	snprintf(buf, 9, "%d", i);
+#endif
+	std::string str = buf;
+	return str;
+}
+
+std::string SE_Util::floatToString(float f)
+{
+    char buf[20];
+	memset(buf, 0, 20);
+#if defined(WIN32)
+	_snprintf(buf, 19, "%f", f);
+#else
+	snprintf(buf, 19, "%f", f);
+#endif
+	std::string str = buf;
+	return str;
+}
+SE_CharCode SE_Util::stringToCharCode(const char* s, int len)
+{
+    enum {SE_UNICODE_MODE, SE_ASCII_MODE};
+    if(s == NULL || len == 0)
+        return SE_CharCode();
+    return SE_CharCode();
+}
+static int utf32_at_internal(const char* cur, size_t *num_read)
+{
+    const char first_char = *cur;
+    if ((first_char & 0x80) == 0) { // ASCII
+        *num_read = 1;
+        return *cur;
+    }
+    cur++;
+    unsigned int mask, to_ignore_mask;
+    size_t num_to_read = 0;
+    unsigned int utf32 = first_char;
+    for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0xFFFFFF80;
+         (first_char & mask);
+         num_to_read++, to_ignore_mask |= mask, mask >>= 1) {
+        // 0x3F == 00111111
+        utf32 = (utf32 << 6) + (*cur++ & 0x3F);
+    }
+    to_ignore_mask |= mask;
+    utf32 &= ~(to_ignore_mask << (6 * (num_to_read - 1)));
+
+    *num_read = num_to_read;
+    return static_cast<int>(utf32);
+}
+size_t SE_Util::getUtf32LenFromUtf8(const char* src, size_t src_len)
+{
+    if (src == NULL || src_len == 0) {
+        return 0;
+    }
+    size_t ret = 0;
+    const char* cur;
+    const char* end;
+    size_t num_to_skip;
+    for (cur = src, end = src + src_len, num_to_skip = 1;
+         cur < end;
+         cur += num_to_skip, ret++) {
+        const char first_char = *cur;
+        num_to_skip = 1;
+        if ((first_char & 0x80) == 0) {  // ASCII
+            continue;
+        }
+        int mask;
+
+        for (mask = 0x40; (first_char & mask); num_to_skip++, mask >>= 1) {
+        }
+    }
+    return ret;    
+}
+size_t SE_Util::utf8ToUtf32(const char* src, size_t src_len, unsigned int* dst, size_t dst_len)
+{
+    if (src == NULL || src_len == 0 || dst == NULL || dst_len == 0) {
+        return 0;
+    }
+
+    const char* cur = src;
+    const char* end = src + src_len;
+    unsigned int* cur_utf32 = dst;
+    const unsigned int* end_utf32 = dst + dst_len;
+    while (cur_utf32 < end_utf32 && cur < end) {
+        size_t num_read;
+        *cur_utf32++ =
+                static_cast<unsigned int>(utf32_at_internal(cur, &num_read));
+        cur += num_read;
+    }
+    if (cur_utf32 < end_utf32) {
+        *cur_utf32 = 0;
+    }
+    return static_cast<size_t>(cur_utf32 - dst);    
 }

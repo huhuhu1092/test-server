@@ -6,7 +6,10 @@
 #include "SEvent.h"
 #include "SCommandEvent.h"
 #include "SWorkingThreadManager.h"
+#include <string.h>
 #include <vector>
+#include <functional>
+#include <algorithm>
 using namespace std;
 #if defined(WIN32)
 #else

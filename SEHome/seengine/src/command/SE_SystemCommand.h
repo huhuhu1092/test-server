@@ -2,7 +2,9 @@
 #define SE_SYSTEMCOMMAND_H
 #include "SE_Command.h"
 #include "SE_Vector.h"
+#include "SE_Value.h"
 #include <string>
+#include <list>
 class SE_Application;
 class SE_Camera;
 class SE_KeyEvent;
@@ -66,5 +68,19 @@ public:
 	SE_AXIS_TYPE axis;
 	SE_Vector3f translate;
 
+};
+/////////////////////////////////
+class SE_FunctionCommand : public SE_Command
+{
+public:
+    SE_FunctionCommand(SE_Application* app);
+    ~SE_FunctionCommand();
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+    void setFunctionName(const char* name);
+    void addParam(const SE_Value& v);
+private:
+    typedef std::list<SE_Value> ParamList;
+    std::string mFuncName;
+    ParamList mParam;
 };
 #endif

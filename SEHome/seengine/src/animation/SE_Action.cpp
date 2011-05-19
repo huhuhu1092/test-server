@@ -1,11 +1,16 @@
 #include "SE_Action.h"
-#include "SE_Element.h"
+#include "SE_2DElement.h"
 #include "SE_ResourceManager.h"
 #include "SE_Application.h"
+#include "SE_ElementManager.h"
 #include "SE_Sequence.h"
 #include "SE_ColorEffectController.h"
+#include "SE_ElementSchema.h"
+#include "SE_ImageElement.h"
+#include "SE_SequenceElement.h"
+#include "SE_ColorEffectControllerElement.h"
+#include "SE_ActionElement.h"
 #include <algorithm>
-
 struct _EqualTest
 {
     bool operator()(const SE_ActionUnit* data)
@@ -31,12 +36,12 @@ SE_Element* SE_SequenceAnimationObject::createElement()
     return element;
 	
 }
-std::vector<unsigned int> SE_SequenceAnimationObject::getKeys() const
+std::vector<SE_TimeKey> SE_SequenceAnimationObject::getKeys() const
 {
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	SE_Sequence* sequence = resourceManager->getSequence(mSequenceFrameRef.getStr());
 	if(!sequence)
-        return std::vector<unsigned int>();
+        return std::vector<SE_TimeKey>();
     return sequence->getKeys();
 }
 /////////
@@ -56,8 +61,9 @@ SE_Element* SE_TextureAnimationObject::createElement()
 	{
 	case SE_ELEMENT_TABLE:
 		{
-			resourceManager->loadElement(strURL.getStr());
-			SE_Element* element = resourceManager->getElement(strURL.getStr());
+			//resourceManager->loadElement(strURL.getStr());
+			SE_ElementSchema* elementSchema = resourceManager->getElementSchema(strURL.getStr());
+            SE_2DNodeElement* element = (SE_2DNodeElement*)elementSchema->createElement();
 			element->setMountPointRef(getMountPointRef());
 			return element;
 		}
@@ -124,19 +130,19 @@ void SE_Action::sort()
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
 		_ActionLayer* al = *it;
-		std::vector<unsigned int> keys = al->sequences.getKeys();
-		std::vector<unsigned int>::iterator it;
-		it = min_element(keys.begin(), keys.end());
+		std::vector<SE_TimeKey> keys = al->sequences.getKeys();
+		std::vector<SE_TimeKey>::iterator it;
+		it = std::min_element(keys.begin(), keys.end());
 		if(it != keys.end())
 			al->startkey = *it;
-		it = max_element(keys.begin(), keys.end());
+		it = std::max_element(keys.begin(), keys.end());
 		if(it != keys.end())
 		    al->endkey = *it;
 		if(al->startkey == al->endkey)
 		{
 			SE_KeyFrame<SE_ActionUnit*>* kf = al->sequences.getKeyFrame(al->endkey);;
 			SE_ActionUnit* au = kf->data;
-			std::vector<unsigned int> keys = au->getKeys();
+			std::vector<SE_TimeKey> keys = au->getKeys();
 			std::sort(keys.begin(), keys.end());
 			if(!keys.empty())
 			{
@@ -252,42 +258,68 @@ void SE_Action::removeEndKey(unsigned int key, const SE_Layer& layer)
     ekEqual.justCompareLayer = false;
     mEndKeyList.remove_if(ekEqual);
 }
-void SE_Action::createElement(SE_ActionElement* parent)
+
+std::list<SE_Element*> SE_Action::createElement(const SE_TimeKey& timeKey)
 {
-	parent->clearMountPoint();
-	std::vector<SE_MountPoint> mountPoint = mMountPointSet.getMountPoint();
-	for(int i = 0 ; i < mountPoint.size() ; i++)
-	{
-		parent->addMountPoint(mountPoint[i]);
-	}
+	SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
 	_ActionLayerList::iterator it;
+    std::list<SE_Element*> childElement;
 	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
 	{
 		_ActionLayer* actionLayer = *it;
-		std::vector<unsigned int> keys = actionLayer->sequences.getKeys();
-		SE_Element* prev = NULL;
-		SE_Element* next = NULL;
-		SE_Element* first = NULL;
+		std::vector<SE_TimeKey> keys = actionLayer->sequences.getKeys();
+        SE_ASSERT(keys.size() > 0);
 		for(int i = 0 ; i < keys.size() ; i++)
 		{
-			SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[i]);
-			SE_Element* e = kf->data->createElement();
-			e->setLocalLayer(actionLayer->layer);
-			e->setTimeKey(keys[i]);
-			e->setStartKey(actionLayer->startkey);
-			e->setEndKey(actionLayer->endkey);
-			parent->addChild(e);
-			e->setParent(parent);
-			if(prev)
-			{
-				prev->setNext(e);
-			}
-			e->setPrev(prev);
-			e->setNext(next);
-			prev = e;
-            if(i == 0)
-				first = e;
+            if(keys[i] > timeKey)
+            {
+                if(i > 0)
+                {
+			        SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[i - 1]);
+			        SE_Element* e = kf->data->createElement();
+			        e->setLocalLayer(actionLayer->layer);
+			        e->setTimeKey(keys[i]);
+		   	        e->setStartKey(actionLayer->startkey);
+			        e->setEndKey(actionLayer->endkey);
+                    childElement.push_back(e);
+                }
+            }
 		}
-		parent->addHeadElement(first);
+        if(timeKey >= keys[keys.size() - 1])
+        {
+           	SE_KeyFrame<SE_ActionUnit*>* kf = actionLayer->sequences.getKeyFrame(keys[keys.size() - 1]);
+		    SE_Element* e = kf->data->createElement();
+			e->setLocalLayer(actionLayer->layer);
+			e->setTimeKey(keys[keys.size() - 1]);
+		   	e->setStartKey(actionLayer->startkey);
+			e->setEndKey(actionLayer->endkey);
+            childElement.push_back(e); 
+        }
+        
 	}
+    return childElement;
+}
+SE_TimeKey SE_Action::getStartKey()
+{
+	_ActionLayerList::iterator it;
+    SE_TimeKey startKey(99999);
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+        _ActionLayer* actionLayer = *it;
+        if(actionLayer->startkey < startKey)
+            startKey = actionLayer->startkey;
+    }
+    return startKey;
+}
+SE_TimeKey SE_Action::getEndKey()
+{
+	_ActionLayerList::iterator it;
+    SE_TimeKey endKey(0);
+	for(it = mActionLayerList.begin() ; it != mActionLayerList.end() ; it++)
+	{
+        _ActionLayer* actionLayer = *it;
+        if(actionLayer->endkey > endKey)
+            endKey = actionLayer->endkey;
+    }
+    return endKey;
 }

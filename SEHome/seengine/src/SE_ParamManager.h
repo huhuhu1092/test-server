@@ -25,9 +25,13 @@ public:
         SE_ParamValue pv(param, v);
         mParamValueList.push_back(pv);
     }
-    void add(std::list<SE_ParamValue>& tmpList)
+    void add(std::vector<SE_ParamValue>& tmpList)
     {
-        mParamValueList.splice(mParamValueList.end(), tmpList);
+		std::vector<SE_ParamValue>::iterator it;
+		for(it = tmpList.begin() ; it != tmpList.end() ; it++)
+		{
+            mParamValueList.push_back(*it);
+		}
     }
     std::vector<SE_ParamValue> getParamValue()
     {

@@ -1,0 +1,43 @@
+;;; Define :form1
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun form1 () (find-or-make-application-window :form1 'make-form1))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-form1
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 486 119 1358 445)) (name :form1) (title "Form1") (border :frame)
+     (child-p nil) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'frame-window
+           :exterior exterior
+           :interior interior
+           :border border
+           :child-p child-p
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :shrunk
+           :maximize-button t
+           :minimize-button t
+           :name :form1
+           :pop-up nil
+           :resizable t
+           :scrollbars t
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-form1-widgets () nil)

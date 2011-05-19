@@ -3,6 +3,7 @@
 #include "SE_Log.h"
 #include "SE_Application.h"
 #include "SE_ParamManager.h"
+#include "SE_Buffer.h"
 SE_URI::SE_URI(const char* str)
 {
 	if(str)
@@ -150,3 +151,12 @@ void SE_URI::parse()
 	}
 }
 
+void SE_URI::read(SE_BufferInput& input)
+{
+	std::string str = input.readString();
+	mURI = str.c_str();
+}
+void SE_URI::write(SE_BufferOutput& output)
+{
+	output.writeString(mURI.getStr());
+}

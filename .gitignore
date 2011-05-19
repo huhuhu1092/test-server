@@ -1,4 +1,9 @@
 *.o
 *~
+*.swp
+*.*#
+*.fasl
+*.dxl
+*.bak
 Makefile
 build

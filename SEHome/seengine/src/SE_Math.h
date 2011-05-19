@@ -17,6 +17,9 @@ extern float SE_Cosf(float radian);
 extern float SE_Tanf(float radian);
 extern float SE_Sqrtf(float f);
 extern float SE_Fabs(float f);
+extern int SE_Iabs(int i);
+extern float SE_Floor(float x);
+extern float SE_Ceil(float x);	
 #ifdef __cplusplus
 }
 #endif

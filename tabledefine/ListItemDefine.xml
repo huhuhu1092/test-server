@@ -1,0 +1,14 @@
+<Element id = "listitem1" pivotx = "0" pivoty = "0" canpointed = "1" type = "listitem" />
+    <MountPoint id = "1" x = "20" y = "20" />
+    <MountPoint id = "2" x = "10" y = "10" />
+    <Element id = "background" pivotx = "0" pivoty = "0" canpointed = "0" layer = "1">
+        <Image id = "b" />
+    </Element>
+    <Element id = "image" pivotx = "0" pivoty = "0" canpointed = "0" layer = "2">
+        <Image id = "ii" />
+    </Element>
+    <Element id= "text" pivotx = "0" pivoty = "0" mountpointref = "2" layer = "2" type = "textview" canpointed = "0" width = "74" height = "24" >
+        <TextProperty	id = "11" style = "normal" color = "200 200 200" size = "22" align = "left" orientation = "horizontal" state = "normal" />
+    </Element>
+</Element>
+

@@ -5,8 +5,9 @@
 #include "SE_Vector.h"
 #include "SE_MountPoint.h"
 #include "SE_TableManager.h"
+#include "SE_TimeKey.h"
 #include "SE_Vector.h"
-class SE_Element;
+class SE_2DNodeElement;
 class SE_ChannelInput
 {
 public:
@@ -44,7 +45,7 @@ class SE_ColorEffectFrame
 public:
     virtual ~SE_ColorEffectFrame()
     {}
-    virtual SE_Element* createElement() {return NULL;}
+    virtual SE_2DNodeElement* createElement() {return NULL;}
 	void setPivotX(float pivotx)
 	{
 		mPivotX = pivotx;
@@ -151,7 +152,7 @@ public:
 	{
 		return mTextureColorData[i]->mTextureID;
 	}
-    SE_Element* createElement();
+    SE_2DNodeElement* createElement();
 private:
     SE_StringID mBackgroundID;
     SE_StringID mChannelID;
@@ -161,7 +162,7 @@ private:
 class SE_ColorEffectReload : public SE_ColorEffectFrame
 {
 public:
-    SE_Element* createElement(const SE_ColorEffectInput& input);
+    SE_2DNodeElement* createElement(const SE_ColorEffectInput& input);
     void setMark(int mark)
     {
         mMark = mark;
@@ -217,10 +218,15 @@ public:
 	{
 		return mMountPointSet.getMountPoint(id);
 	}
-    void addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame);
-    SE_ColorEffectFrame* getKeyFrame(unsigned int key) const;
-    std::vector<unsigned int> getKeys() const;
+    SE_MountPointSet getMountPoint() const
+    {
+        return mMountPointSet;
+    }
+    void addKeyFrame(const SE_TimeKey& key, SE_ColorEffectFrame* frame);
+    SE_ColorEffectFrame* getKeyFrame(const SE_TimeKey& key) const;
+    std::vector<SE_TimeKey> getKeys() const;
 	int getKeyFrameNum();
+	SE_2DNodeElement* createElement(const SE_TimeKey& timeKey);
 private:
     SE_KeyFrameSequence<SE_ColorEffectFrame*> mKeySequence;
 	int mPivotX;

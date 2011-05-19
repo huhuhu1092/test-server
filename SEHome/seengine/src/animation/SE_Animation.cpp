@@ -60,7 +60,7 @@ void SE_Animation::nextFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 }
 void SE_Animation::oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	if(mPassedTime > mDuration)
+	if(mPassedTime > mDuration && mDuration != 0)
     {
 		if(mRunMode == NOT_REPEAT || mRunMode == REVERSE_NOT_REPEAT)
 		{
@@ -72,8 +72,9 @@ void SE_Animation::oneFrame(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 			mPassedTime -= mDuration;
 		}
     }
-
-    float percent = SE_Time::div(mPassedTime, mDuration);
+    float percent = 0;
+    if(mDuration)
+        percent = SE_Time::div(mPassedTime, mDuration);
     if(mInterpolate)
         percent = mInterpolate->calc(percent);
 	SE_TimeMS passedTime = getPassedTime();

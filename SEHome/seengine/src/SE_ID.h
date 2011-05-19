@@ -1,18 +1,18 @@
 #ifndef SE_ID_H
 #define SE_ID_H
 #include <string>
+#include <vector>
+#include "SE_CharCode.h"
 class SE_BufferOutput;
 class SE_BufferInput;
 class SE_StringID
 {
 public:
+	enum ENCODING_TYPE {SE_ASCII, SE_UNICODE, SE_UTF8, SE_UTF16, SE_UTF32};
     SE_StringID();
     ~SE_StringID();
-    SE_StringID(const char* id);
-    SE_StringID(const char* id, int size);
-
-    //SE_StringID(const SE_StringID& id);
-    //SE_StringID& operator=(const SE_StringID& id);
+    SE_StringID(const char* id, ENCODING_TYPE t = SE_UTF8);
+    SE_StringID(const char* id, int size, ENCODING_TYPE t);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
 	friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);
@@ -22,9 +22,21 @@ public:
     const char* getStr() const;
     bool isValid() const;
 	void print() const;
+	int getCharNum();
+	SE_CharCode getCharCode(int i);
+    void set(const char* str, ENCODING_TYPE t)
+    {
+        mStr = str;
+        mType = t;
+        mCharCodeArray.clear();
+    }
 	static SE_StringID INVALID;
 private:
+	void convertToCharCode();
+private:
+	std::vector<SE_CharCode> mCharCodeArray;
 	std::string mStr;
+	ENCODING_TYPE mType;
 };
 class SE_CommonID
 {
@@ -41,6 +53,7 @@ public:
     friend bool operator>(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid);
 	void print() const;
+    std::string toString() const;
 	static SE_CommonID INVALID;
 private:
     unsigned int id[4];
@@ -49,70 +62,107 @@ private:
 class SE_TreeStructID
 {
 public:
-    SE_TreeStructID();
-    SE_TreeStructID(int i0, int i1);
-    bool isValid();
     static SE_TreeStructID INVALID;
-    friend bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    friend bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid);
-    int get(int index) const
+    static SE_TreeStructID NULLID;
+
+    SE_TreeStructID()
+    {
+        id[0] = id[1] = 0xFFFFFFFE;
+    }
+    SE_TreeStructID(size_t i0, size_t i1) 
+    {
+        id[0] = i0;
+        id[1] = i1;
+    }
+    bool isValid() const
+    {
+        return id[0] != INVALID.id[0] && id[1] != INVALID.id[1];
+    }
+    friend bool operator==(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return lid.id[0] == rid.id[0] && lid.id[1] == rid.id[1];
+    }
+    friend bool operator<(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return (lid.id[0] <= rid.id[0]) ? ((lid.id[0] < rid.id[0]) ? true : (lid.id[1] < rid.id[1])) : false;
+    }
+    friend bool operator>(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return (lid.id[0] >= rid.id[0]) ? ((lid.id[0] > rid.id[0]) ? true : (lid.id[1] > rid.id[1])) : false;
+    }
+    friend bool operator!=(const SE_TreeStructID& lid, const SE_TreeStructID& rid)
+    {
+        return !operator==(lid, rid);
+    }
+    size_t get(int index) const
     {
         return id[index];
     }
-    void set(int index, int id)
+    void set(int index, size_t id)
     {
         this->id[index] = id;
     }
+	void write(SE_BufferOutput& output);
+    void read(SE_BufferInput& input);
+    std::string toString() const;
 private:
-    int id[2];
+    size_t id[2];
 };
+/*
+class SE_RenderTargetID
+{
+public:
+    std::string renderTargetSeq;
+    SE_TreeStructID id;
+};
+*/
 /////////////////////////////////////////////////////
 typedef SE_StringID SE_ImageDataID;
 typedef SE_CommonID SE_MeshID;
-typedef SE_CommonID SE_SpatialID;
+//typedef SE_CommonID SE_SpatialID;
+typedef SE_TreeStructID SE_SpatialID;
 typedef SE_CommonID SE_GeometryDataID;
 typedef SE_CommonID SE_TextureCoordDataID;
 typedef SE_CommonID SE_MaterialDataID;
-typedef SE_StringID SE_SceneID;
+typedef SE_TreeStructID SE_SceneID;
 typedef SE_StringID SE_ProgramDataID;
 typedef SE_StringID SE_CommandID;
 typedef SE_StringID SE_CommandFactoryID;
 typedef SE_CommonID SE_PrimitiveID;
-typedef SE_CommonID SE_AnimationID;
-typedef SE_CommonID SE_SimObjectID;
-typedef SE_CommonID SE_ElementID;
+typedef SE_TreeStructID SE_AnimationID;
+typedef SE_TreeStructID SE_SimObjectID;
+typedef SE_TreeStructID SE_ElementID;
 typedef SE_StringID SE_SkinJointControllerID;
 typedef SE_StringID SE_MountPointID;
 typedef SE_StringID SE_RendererID;
-typedef int SE_RenderTargetID;
-typedef SE_CommonID SE_CameraID;
+typedef SE_TreeStructID SE_RenderTargetID;
+typedef SE_TreeStructID SE_CameraID;
 typedef SE_StringID SE_StateMachineID;
 typedef SE_StringID SE_StateID;
 typedef SE_StringID SE_TriggerID;
 typedef SE_StringID SE_AddressID;
+typedef SE_TreeStructID SE_ThreadID;
 class SE_ID
 {
 public:
 	static SE_ImageDataID createImageDataID(const char* str= NULL);
 	static SE_MeshID createMeshID(const char* str = NULL);
-	static SE_SpatialID createSpatialID(const char* str = NULL);
+	//static SE_SpatialID createSpatialID(const char* str = NULL);
 	static SE_GeometryDataID createGeometryDataID(const char* str = NULL);
 	static SE_TextureCoordDataID createTextureCoordDataID(const char* str = NULL);
 	static SE_MaterialDataID createMaterialDataID(const char* str = NULL);
-	static SE_SceneID createSceneID(const char* str = NULL);
+	//static SE_SceneID createSceneID(const char* str = NULL);
 	static SE_ProgramDataID createProgramDataID(const char* str = NULL);
 	static SE_CommandID createCommandID(const char* str = NULL);
 	static SE_CommandFactoryID createCommandFactoryID(const char* str = NULL);
 	static SE_PrimitiveID createPrimitiveID(const char* str = NULL);
-    static SE_AnimationID createAnimationID(const char* str = NULL);
-    static SE_SimObjectID createSimObjectID(const char* str = NULL);
-	static SE_ElementID createElementID(const char* str = NULL);
+    //static SE_AnimationID createAnimationID(const char* str = NULL);
+    //static SE_SimObjectID createSimObjectID(const char* str = NULL);
+	//static SE_ElementID createElementID(const char* str = NULL);
     static SE_SkinJointControllerID createSkinJointControllerID(const char* str = NULL);
 	static SE_MountPointID createMountPointID(const char* str = NULL);
 	static SE_RendererID createRendererID(const char* str = NULL);
-    static SE_CameraID createCameraID(const char* str = NULL);
+    //static SE_CameraID createCameraID(const char* str = NULL);
 };
 ///////////////////////////
 /*

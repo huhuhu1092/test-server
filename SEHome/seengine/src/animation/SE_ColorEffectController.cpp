@@ -1,8 +1,10 @@
 #include "SE_ColorEffectController.h"
-#include "SE_Element.h"
+#include "SE_TimeKey.h"
+#include "SE_2DElement.h"
 #include "SE_Image.h"
 #include "SE_Utils.h"
 #include "SE_URI.h"
+#include "SE_ColorEffectControllerElement.h"
 /*
 bool SE_ColorEffectFrame::isAddress(const SE_StringID& content)
 {
@@ -32,9 +34,12 @@ SE_StringID SE_ColorEffectFrame::getAddress(const SE_StringID& content)
 }
 */
 ///////////////////////////
-SE_Element* SE_ColorEffect::createElement()
+SE_2DNodeElement* SE_ColorEffect::createElement()
 {
     SE_ColorEffectElement* e = new SE_ColorEffectElement;
+	e->setPivotX(getPivotX());
+	e->setPivotY(getPivotY());
+	e->setMountPointRef(getMountPointRef());
 	e->setBackgroundAddress(mBackgroundID);
     e->setChannelAddress(mChannelID);
     e->setBackgroundAlphaAddress(mBackgroundAlpha);
@@ -69,24 +74,39 @@ SE_ColorEffect::~SE_ColorEffect()
     }
 }
 /////////////
-SE_Element* SE_ColorEffectReload::createElement(const SE_ColorEffectInput& input)
+SE_2DNodeElement* SE_ColorEffectReload::createElement(const SE_ColorEffectInput& input)
 {
 	return NULL;
 }
 ////////////////////
-void SE_ColorEffectController::addKeyFrame(unsigned int key, SE_ColorEffectFrame* frame)
+void SE_ColorEffectController::addKeyFrame(const SE_TimeKey& key, SE_ColorEffectFrame* frame)
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* keyframe = new SE_KeyFrame<SE_ColorEffectFrame*>;
     keyframe->data = frame;
     keyframe->key = key;
     mKeySequence.addKeyFrame(keyframe);
 }
-SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(unsigned int key) const
+SE_ColorEffectFrame* SE_ColorEffectController::getKeyFrame(const SE_TimeKey& key) const
 {
     SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
     return frame->data;
 }
-std::vector<unsigned int> SE_ColorEffectController::getKeys() const
+std::vector<SE_TimeKey> SE_ColorEffectController::getKeys() const
 {
 	return mKeySequence.getKeys();
+}
+SE_2DNodeElement* SE_ColorEffectController::createElement(const SE_TimeKey& timeKey)
+{
+	SE_TimeKey key = mKeySequence.getNearestLowerTimeKey(timeKey);
+	if(key != SE_TimeKey::INVALID)
+	{
+		SE_KeyFrame<SE_ColorEffectFrame*>* frame = mKeySequence.getKeyFrame(key);
+		SE_2DNodeElement* e = frame->data->createElement();
+		e->setTimeKey(key);
+		return e;
+	}
+	else
+	{
+		return NULL;
+	}
 }

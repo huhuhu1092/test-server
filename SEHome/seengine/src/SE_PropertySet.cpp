@@ -1,4 +1,5 @@
 #include "SE_PropertySet.h"
+#include <string.h>
 SE_PropertySet::SE_PropertySet()
 {}
 SE_PropertySet::~SE_PropertySet()

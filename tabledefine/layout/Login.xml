@@ -1,0 +1,13 @@
+<Element id = "loginroot" pivotx = "0" pivoty = "0">
+    <MountPoint id = "login" x = "184" y = "666" />
+    <Element id = "login" pivotx = "0" pivoty = "0" mountpointref = "login" layer = "1">
+        <Element id = "loginbutton" pivotx = "0" pivoty = "0" width = "82" height = "63" type = "button" layer = "1" canpointed = "0">
+            <Image dataref = "ChessImage.xml/Button/normal" state = "normal" />
+            <Image dataref = "ChessImage.xml/Button/highlighted" state = "highlighted" />
+            <Image dataref = "ChessImage.xml/Button/selected" state = "selected" />
+        </Element> 
+        <Element id = "logintext" pivotx = "0" pivoty = "0" width = "82" height = "63" type = "textview" layer = "2" canpointed = "0" text = "strings.xml/c1">
+            <TextProperty id = "q1" style = "normal" color = "255 255 255" size = "32" align = "left" orientation = "horizontal" state = "normal" />
+        </Element>
+    </Element>
+</Element>
