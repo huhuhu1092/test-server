@@ -351,6 +351,10 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
 		delete[] fragmentShaderBytes;
     }
 }
+static void processElement(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+	
+}
 static void processPrimitive(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
 	/*
@@ -398,6 +402,8 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 break;
 			case SE_RENDERERINFO_ID:
 				processRendererData(inputBuffer, resourceManager);
+		    case SE_ELEMENTINFO_ID:
+			    processElement(inputBuffer, resourceManager);
 				break;
         }
     }
@@ -3459,7 +3465,11 @@ void SE_ResourceManager::loadSceneFromXml(const char* sceneName)
 {
 
 }
-
+SE_Element* SE_ResourceManager::loadElement(SE_BufferInput& inputBuffer)
+{
+	
+	return NULL;
+}
 void SE_ResourceManager::loadSceneFromCbf(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";

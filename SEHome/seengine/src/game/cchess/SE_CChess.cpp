@@ -1228,7 +1228,7 @@ void SE_CChess::handleKing(const _BoardUnitData& src, const _BoardUnitData& dst)
 void SE_CChess::loadScene(const char* sceneName, float width, float height, bool bShowCursor)
 {
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
+    SE_Scene* scene = new SE_2DScene;
 	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
 	scene->create(sceneName);

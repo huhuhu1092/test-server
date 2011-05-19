@@ -41,7 +41,9 @@ class SE_ElementManager
 public:
     enum {MAX_SIZE = 20000};
     enum {SIZE = 1000};
+	//result: link e with parent, and create element id for e
     SE_ElementID add(const SE_ElementID& parent, SE_Element* e, bool linkToParent);
+	//just link e and parent, will not create element id for e
     void add(SE_Element* parent, SE_Element* e);
     SE_Element* get(const SE_ElementID& id);
     SE_Element* remove(const SE_ElementID& id);

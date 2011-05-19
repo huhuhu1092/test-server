@@ -11,13 +11,15 @@ class SE_MotionEvent;
 class SE_Scene;
 class SE_Element;
 class SE_Spatial;
+class SE_BufferInput;
 class SE_Scene : public SE_ListStruct<SE_Scene>
 {
     friend class SE_SceneManager;
 public:
-    SE_Scene(SE_SCENE_TYPE t);
-    ~SE_Scene();
+    SE_Scene();
+    virtual ~SE_Scene();
     void create(const char* sceneName);
+	void create(SE_BufferInput& inputBuf);
     void show();
     void dismiss();
     void render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager);
@@ -53,10 +55,13 @@ public:
     SE_Element* getRootElement();
 	SE_Spatial* getRootSpatial();
 	SE_Element* findByName(const char* name);
-private:
+protected:
+	virtual SE_Element* createMatrixNode();
+	void createRoot(SE_Element* element);
+protected:
     SE_Scene(const SE_Scene&);
     SE_Scene& operator=(const SE_Scene&);
-private:
+protected:
     //SE_SceneID mID;
     SE_ElementID mRoot;
     SE_CameraID mCamera;
@@ -64,10 +69,15 @@ private:
     bool mIsTranslucent;
     float mWidth, mHeight;// left low corner and width , height
     SE_Vector4f mBackground;
-    SE_SCENE_TYPE mSceneType;
+    //SE_SCENE_TYPE mSceneType;
     bool mIsModel;
 	SE_SceneRenderSeq mSceneRenderSeq;
     bool mIsShow;
     SE_RenderTargetSeq mRenderTargetSeq;
+};
+class SE_2DScene : public SE_Scene
+{
+protected:
+	SE_Element* createMatrixNode();
 };
 #endif
