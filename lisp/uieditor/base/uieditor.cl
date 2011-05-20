@@ -25,6 +25,11 @@
 (defun component-define-comment (cd)
   (caddr cd)
   )
+(defun image-component-name()
+  (let ((item (assoc :image +component-define+)))
+    (cadr item)
+    )
+  )
 
 (defun create-project-component ()
   (mapcar #'(lambda (cd) (make-component :dirname (component-define-name cd)

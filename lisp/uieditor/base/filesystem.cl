@@ -25,6 +25,9 @@
       (if end-of-path-sep-char-p directory-path-string (concatenate 'string directory-path-string +path-sep-str+))
     )
   )
+(defun path-sep-change (str)
+  (substitute +path-sep-char+ #\/ str)
+  )
 (defun get-file-length (file-path-string)
   "
     file-path-name is namestring
