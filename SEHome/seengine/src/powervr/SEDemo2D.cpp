@@ -32,6 +32,8 @@
 #include "SE_Scene.h"
 #include "SE_Thread.h"
 #include "SE_ThreadManager.h"
+#include "SE_MessageStream.h"
+#include "SE_NetDataCommand.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -366,6 +368,16 @@ void SEDemo::handleInput(int width, int height)
 		sceneManager->setSelectedSpatial(NULL);
 		mSelectedSpatial = NULL;
 		*/
+		SE_NetMessage* netMessage = new SE_NetMessage;
+		std::string str = "D:\\model\\tmp\\aa\\image\\\Female_dress_001_M.png";
+		netMessage->len = 3 + str.size();
+		netMessage->data = new unsigned char[netMessage->len];
+		netMessage->data[0] = 0;
+		short s = SE_Util::host2NetInt16(netMessage->len);
+		memcpy(netMessage->data + 1, &s, 2);
+		memcpy(netMessage->data + 3, str.c_str(), str.size());
+		SE_NetDataCommand* netCommand = new SE_NetDataCommand(SE_Application::getInstance(), netMessage);
+		SE_Application::getInstance()->postCommand(netCommand);
 	    LOGI("## down ##\n");
     }
 }

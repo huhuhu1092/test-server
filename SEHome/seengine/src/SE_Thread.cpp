@@ -15,9 +15,10 @@ public:
         threadManager->release(thread, SE_RELEASE_NO_DELAY);
     }
 };
-SE_Thread::SE_Thread(bool deleteAfterEnd) : mIsDeleteAfterEnd(deleteAfterEnd)
+SE_Thread::SE_Thread(bool deleteAfterEnd, const std::string& name) : mIsDeleteAfterEnd(deleteAfterEnd)
 {
     mIsThreadRunEnd = false;
+	mName = name;
 }
 SE_Thread::~SE_Thread()
 {

@@ -1,4 +1,5 @@
 #include "SE_2DCommand.h"
+#include "SE_UieManager.h"
 #include "SE_Application.h"
 #include "SE_SceneManager.h"
 #include "SE_ResourceManager.h"
@@ -26,6 +27,7 @@
 #include "SE_SceneManager.h"
 #include "SE_CameraManager.h"
 #include "SE_CChess.h"
+#include "SE_ThreadManager.h"
 #include <math.h>
 #include <wchar.h>
 #include <string.h>
@@ -50,6 +52,11 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     //chessApp->start();
     chessApp->loadBoard();
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
+	SE_NetAddress na("127.0.0.1", 5999);
+    SE_UieAcceptThread* uieAcceptThread = new SE_UieAcceptThread(na);
+	SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+	threadManager->add(uieAcceptThread);
+	uieAcceptThread->start();
 
 }
 //////////////

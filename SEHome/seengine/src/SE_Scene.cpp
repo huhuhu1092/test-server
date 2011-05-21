@@ -28,13 +28,21 @@ SE_Scene::SE_Scene(): mRenderTargetSeq(0xFFFFFFFF)
 SE_Scene::~SE_Scene()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    elementManager->remove(mRoot);
+    SE_Element* root = elementManager->remove(mRoot);
+	elementManager->release(root);
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
     cameraManager->remove(mCamera);
 }
 SE_Element* SE_Scene::createMatrixNode()
 {
 	return NULL;
+}
+void SE_Scene::setRootElement(SE_Element* e)
+{
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+    SE_Element* root = elementManager->remove(mRoot);
+	elementManager->release(root);
+	createRoot(e);
 }
 void SE_Scene::createRoot(SE_Element* element)
 {
@@ -58,7 +66,7 @@ void SE_Scene::createRoot(SE_Element* element)
 void SE_Scene::create(SE_BufferInput& inputBuf)
 {
 	SE_ResourceManager* resourceManager = SE_GET_RESOURCEMANAGER();
-    SE_Element* element = resourceManager->loadScene(inputBuf);
+    SE_Element* element = resourceManager->loadElement(inputBuf);
     createRoot(element);
 }
 void SE_Scene::create(const char* sceneName)

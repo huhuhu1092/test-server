@@ -20,6 +20,7 @@ public:
     virtual ~SE_Scene();
     void create(const char* sceneName);
 	void create(SE_BufferInput& inputBuf);
+	void setRootElement(SE_Element* e);
     void show();
     void dismiss();
     void render(const SE_SceneRenderSeq& seq, SE_RenderManager& renderManager);

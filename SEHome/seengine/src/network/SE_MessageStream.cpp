@@ -128,70 +128,70 @@ int SE_NetMessageStream::getNextMessage(SE_NetMessage* out)
     SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
     if(mImpl->mMessagePacketList.empty())
         return ret;
-        uint16_t dataLen = mImpl->getDataLen();
-        if(dataLen == 0)
+    uint16_t dataLen = mImpl->getDataLen();
+    if(dataLen == 0)
+    {
+        ret = SE_WAIT_MORE;
+        return ret;
+    }
+    uint8_t* outData = new uint8_t[dataLen];
+    uint8_t* outDataHead = outData;
+    vector<int> offsetBackup(mImpl->mMessagePacketList.size(), 0);
+    mImpl->backupOffset(offsetBackup);
+    SE_NetMessageStreamImpl::SE_NetMessagePacketList::iterator it = mImpl->mMessagePacketList.begin();
+    int leftDataLen = dataLen;
+    unsigned char* dataStart = NULL;
+    int i = 0;
+    for(; it != mImpl->mMessagePacketList.end(); it++, i++)
+    {
+        SE_NetMessagePacket* mp = *it;
+        int currentLen = mp->len - mp->offset;
+        dataStart = mp->mData + mp->offset;
+        if(currentLen >= leftDataLen)
         {
-            ret = SE_WAIT_MORE;
-            return ret;
-        }
-        uint8_t* outData = new uint8_t[dataLen];
-        uint8_t* outDataHead = outData;
-        vector<int> offsetBackup(mImpl->mMessagePacketList.size(), 0);
-        mImpl->backupOffset(offsetBackup);
-        SE_NetMessageStreamImpl::SE_NetMessagePacketList::iterator it = mImpl->mMessagePacketList.begin();
-        int leftDataLen = dataLen;
-        unsigned char* dataStart = NULL;
-        int i = 0;
-        for(; it != mImpl->mMessagePacketList.end(); it++, i++)
-        {
-            SE_NetMessagePacket* mp = *it;
-            int currentLen = mp->len - mp->offset;
-            dataStart = mp->mData + mp->offset;
-            if(currentLen >= leftDataLen)
-            {
-                memcpy(outData, dataStart, leftDataLen);
-                //mp->offset += leftDataLen;
-                offsetBackup[i] += leftDataLen;
-                leftDataLen = 0;
-                break;
-            }
-            else
-            {
-                memcpy(outData, dataStart, currentLen);
-                leftDataLen -= currentLen;
-                //mp->offset += currentLen;
-                offsetBackup[i] += currentLen;
-                outData += currentLen;
-            }
-        }
-        if(leftDataLen == 0)
-        {
-            ret = SE_NO_ERROR;
-            out->data = outDataHead;
-            out->len = dataLen;
-            mImpl->changeOffset(offsetBackup);
+            memcpy(outData, dataStart, leftDataLen);
+            //mp->offset += leftDataLen;
+            offsetBackup[i] += leftDataLen;
+            leftDataLen = 0;
+            break;
         }
         else
         {
-            ret = SE_WAIT_MORE;
+            memcpy(outData, dataStart, currentLen);
+            leftDataLen -= currentLen;
+            //mp->offset += currentLen;
+            offsetBackup[i] += currentLen;
+            outData += currentLen;
         }
-        //delete message packet
-        SE_NetMessageStreamImpl::SE_NetMessagePacketList deleteMessagePackets;
-        for(it = mImpl->mMessagePacketList.begin(); it != mImpl->mMessagePacketList.end(); it++)
+    }
+    if(leftDataLen == 0)
+    {
+        ret = SE_NO_ERROR;
+        out->data = outDataHead;
+        out->len = dataLen;
+        mImpl->changeOffset(offsetBackup);
+    }
+    else
+    {
+        ret = SE_WAIT_MORE;
+    }
+    //delete message packet
+    SE_NetMessageStreamImpl::SE_NetMessagePacketList deleteMessagePackets;
+    for(it = mImpl->mMessagePacketList.begin(); it != mImpl->mMessagePacketList.end(); it++)
+    {
+        SE_NetMessagePacket* data = *it;
+        if(data->isAllConsumed())
         {
-            SE_NetMessagePacket* data = *it;
-            if(data->isAllConsumed())
-            {
-                deleteMessagePackets.push_back(data);
-            }
+            deleteMessagePackets.push_back(data);
         }
-        mImpl->mMessagePacketList.remove_if(canDelete);
-        for(it = deleteMessagePackets.begin() ; it != deleteMessagePackets.end(); it++)
-        {
-            SE_NetMessagePacket* data = *it;
-            delete data;
-        }
-        //end
+    }
+    mImpl->mMessagePacketList.remove_if(canDelete);
+    for(it = deleteMessagePackets.begin() ; it != deleteMessagePackets.end(); it++)
+    {
+        SE_NetMessagePacket* data = *it;
+        delete data;
+    }
+    //end
     return ret;
 }
 int SE_NetMessageStream::addMessagePacket(unsigned char* data, int len, bool own)

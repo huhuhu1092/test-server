@@ -402,9 +402,10 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 break;
 			case SE_RENDERERINFO_ID:
 				processRendererData(inputBuffer, resourceManager);
-		    case SE_ELEMENTINFO_ID:
-			    processElement(inputBuffer, resourceManager);
 				break;
+		    //case SE_ELEMENTINFO_ID:
+			//    processElement(inputBuffer, resourceManager);
+			//	break;
         }
     }
 }
@@ -3656,6 +3657,40 @@ void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, 
 	SE_IO::readFileAll(filePath.c_str(), data, len);
     outData = data;
     outLen = len;
+}
+SE_ImageData* SE_ResourceManager::loadImageWithFullPath(const char* imageDataPath, bool fliped)
+{
+    SE_ImageData* imageData = getImageData(SE_ImageDataID(imageDataPath));
+	if(imageData)
+		return imageData;
+	std::string str(imageDataPath);
+	size_t pos = str.find('.');
+    std::string ext = str.substr(pos + 1);
+	int imageType = -1;
+    if(ext == "raw")
+    {
+        imageType = SE_ImageData::RAW; // image data type
+    }
+    else if(ext == "png")
+    {
+        imageType = SE_ImageData::PNG;
+    }
+	else if(ext == "tga")
+	{
+		imageType = SE_ImageData::TGA;
+	}
+    else if(ext == "jpg" || ext == "jpeg")
+    {
+        imageType = SE_ImageData::JPEG;
+    }
+	if(imageType == -1)
+		return NULL;;
+	imageData = ::loadImage(imageDataPath, imageType, fliped);
+	if(imageData)
+	{
+		setImageData(imageDataPath, imageData);
+	}
+	return imageData;
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {

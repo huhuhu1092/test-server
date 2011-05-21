@@ -11,7 +11,7 @@ class SE_Thread : public SE_ListStruct<SE_Thread>
     friend class _ThreadCommand;
 public:
     enum PRIORITY {LOW, NORMAL, HIGHT};
-    SE_Thread(bool deleteAfterEnd = true);
+	SE_Thread(bool deleteAfterEnd = true, const std::string& name = "");
     virtual ~SE_Thread();
     pthread_t id() const
     {
