@@ -49,7 +49,8 @@
 	   :image-y
 	   :image-mirror
 	   :image-width
-	   :image-height
+           :image-height
+           :component-tag
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")

@@ -30,7 +30,11 @@
     (cadr item)
     )
   )
-
+(defun component-tag (name)
+  (let ((component (find-if #'(lambda (c) (string= (second c) name)) +component-define+)))
+    (if component (first component) nil)
+    )
+  )
 (defun create-project-component ()
   (mapcar #'(lambda (cd) (make-component :dirname (component-define-name cd)
 					:dirvalue (component-define-value cd)
