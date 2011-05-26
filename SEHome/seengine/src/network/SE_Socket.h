@@ -30,8 +30,11 @@ public:
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
     int close();
+	void setNoneBlock();
+	bool isNoneBlock();
 private:
     SE_SOCKET_TYPE mSocket;
+	bool mIsNoneBlock;
 };
 struct SE_ClientProp
 {

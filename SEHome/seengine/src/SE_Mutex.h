@@ -11,6 +11,18 @@ public:
     ~SE_Mutex();
     bool lock();
     bool unlock();
+#if defined(SE_HAS_MUTEX)
+	pthread_mutex_t* getMutex()
+	{
+		return &mMutex;
+	}
+#else
+	SE_Mutex* getMutex()
+	{
+		return NULL;
+	}
+#endif
+
 private:
     SE_DECLARE_NONECOPY(SE_Mutex);
 private:

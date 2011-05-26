@@ -1,3 +1,4 @@
+#include "SE_Timer.h"
 SE_Timer::SE_Timer(SE_TimeMS frameRate)
 {
 	mStartTime = 0;

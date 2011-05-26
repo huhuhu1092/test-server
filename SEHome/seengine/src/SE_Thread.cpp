@@ -131,7 +131,7 @@ void SE_QueueThread::run()
 	mTimer.start();
 	while(!mExit)
 	{
-		SE_Timer::PairTime pt = mTimer.step();
+		SE_Timer::TimePair pt = mTimer.step();
 	    process(pt.realTimeDelta, pt.simulateTimeDelta);
 	}
 }

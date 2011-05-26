@@ -1,4 +1,5 @@
 #include "SE_Mutex.h"
+#include "SE_Log.h"
 /////////////////////////////////
 
 SE_Mutex::SE_Mutex()
@@ -49,5 +50,5 @@ void SE_MutexCondition::wait()
 		LOGE("### condition mutex is NULL ####\n");
 		return;
 	}
-    pthread_cond_wait(&mCond, mMutex);
+    pthread_cond_wait(&mCond, mMutex->getMutex());
 }

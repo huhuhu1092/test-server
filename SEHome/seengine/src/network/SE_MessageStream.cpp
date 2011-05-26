@@ -1,5 +1,5 @@
 #include "SE_MessageStream.h"
-#include "SE_Mutex.h"
+//#include "SE_Mutex.h"
 #include "SE_Utils.h"
 #include "SE_Log.h"
 #include "SE_Common.h"
@@ -20,11 +20,11 @@ public:
     void backupOffset(vector<int>& offsetBackup);
     void changeOffset(vector<int>& offsetBackup);
     SE_NetMessagePacketList mMessagePacketList;
-    SE_Mutex mMessagePacketListMutex;
+    //SE_Mutex mMessagePacketListMutex;
 };
 SE_NetMessageStream::SE_NetMessageStreamImpl::~SE_NetMessageStreamImpl()
 {
-    SE_AutoMutex mutex(&mMessagePacketListMutex);
+    //SE_AutoMutex mutex(&mMessagePacketListMutex);
     SE_NetMessagePacketList::iterator it;
     for(it = mMessagePacketList.begin() ; it != mMessagePacketList.end() ; it++)
     {
@@ -114,18 +114,8 @@ SE_NetMessageStream::~SE_NetMessageStream()
 {}
 int SE_NetMessageStream::getNextMessage(SE_NetMessage* out)
 {
-    /*
-    if(mHead == NULL)
-        return WAIT_MORE;
-    SMessagePacket* p = mHead;
-    unsigned char* dataStart = p->mData + offset;
-    if(dataStart == (p->mData + len))    
-    {
-        mHead = p->mNext;
-    }
-    */
     int ret = SE_WAIT_MORE;
-    SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    //SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
     if(mImpl->mMessagePacketList.empty())
         return ret;
     uint16_t dataLen = mImpl->getDataLen();
@@ -210,7 +200,7 @@ int SE_NetMessageStream::addMessagePacket(unsigned char* data, int len, bool own
     }
     newPacket->len = len;
     //mImpl->mMessagePacketListMutex.lock();
-    SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    //SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
     mImpl->mMessagePacketList.push_back(newPacket);
     //mImpl->mMessagePacketListMutex.unlock();
     return SE_NO_ERROR;
@@ -219,7 +209,7 @@ int SE_NetMessageStream::getMessagePacketCount()
 {
     int count = 0;
     //mImpl->mMessagePacketListMutex.lock();
-    SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    //SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
     count = mImpl->mMessagePacketList.size();
     //mImpl->mMessagePacketListMutex.unlock();
     return count;

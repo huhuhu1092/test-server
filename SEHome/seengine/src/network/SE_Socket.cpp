@@ -39,10 +39,12 @@ SE_Socket::SE_Socket(SE_SOCKET_TYPE fd)
 {
     SE_ASSERT(fd > 0);
     mSocket = fd;
+	mIsNoneBlock = false;
 }
 SE_Socket::SE_Socket()
 {
     mSocket = (SE_SOCKET_TYPE)INVALID_SOCKET;
+	mIsNoneBlock = false;
 }
 SE_Socket::~SE_Socket()
 {
@@ -138,6 +140,20 @@ int SE_Socket::read(unsigned char* outBuffer, int size)
 	SE_ASSERT(totalRead == (size - nleft));
     return size - nleft;
 }
+void SE_Socket::setNoneBlock()
+{
+	mIsNoneBlock = true;
+#if defined(WIN32)
+    u_long iMode = 1;
+    ioctlsocket((SOCKET)mSocket, FIONBIO, &iMode);
+#else
+    fcntl(mSocket, F_SETFL, O_NONBLOCK );
+#endif
+}
+bool SE_Socket::isNoneBlock()
+{
+	return mIsNoneBlock;
+}
 //////////////////////////////////////////////
 SE_SocketServer::SE_SocketServer(int transferType, const SE_NetAddress& address) : mError(SE_NO_ERROR)
 {
@@ -215,12 +231,6 @@ SE_ClientProp SE_SocketServer::accept()
         mError = SE_ACCEPT_ERROR;
         return SE_ClientProp();
     }
-#if defined(WIN32)
-    u_long iMode = 1;
-    ioctlsocket(clientSocket, FIONBIO, &iMode);
-#else
-    fcntl(clientSocket, F_SETFL, O_NONBLOCK );
-#endif
     SE_Socket c((SE_SOCKET_TYPE)clientSocket);
     SE_ClientProp ss(c, SE_NetAddress(clientAddr.sin_addr.s_addr, clientAddr.sin_port));
     return ss;

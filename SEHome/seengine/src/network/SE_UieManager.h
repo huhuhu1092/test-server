@@ -15,17 +15,33 @@ protected:
 private:
     SE_SocketServer* mServer;
 };
-class SE_UieClientThread : public SE_Thread
+class SE_UieClientWriteThread;
+class SE_UieClientReadThread : public SE_Thread
 {
 public:
     SE_UieClientThread(const SE_ClientProp& clientProp);
 	~SE_UieClientThread();
-	void addOutputMessage(int len, char* data, bool own);
+	void setWriteThread(SE_UieClientWriteThread* t);
 protected:
     void run();
 private:
     SE_ClientProp mClientProp;
 	SE_NetMessageStream mInputStream;
+	SE_UieClientWriteThread* mWriteThread;
+};
+class SE_UieClientWriteThread : public SE_Thread
+{
+public:
+	SE_UieClientWriteThread(const SE_ClientProp& clientProp);
+	~SE_UieClientWriteThread();
+    void addOutputMessage(int len, char* data, bool own);
+protected:
+    void run();
+private:
+	SE_ClientProp mClientProp;
 	SE_NetMessageStream mOutputStream;
+	SE_Mutex mOutputStreamMutex;
+	SE_Condition mOutputStreamCond;
+	bool mExit;
 };
 #endif
