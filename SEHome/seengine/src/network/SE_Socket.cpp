@@ -91,7 +91,7 @@ int SE_Socket::send(const unsigned char* data, int size)
 int SE_Socket::read(unsigned char* outBuffer, int size)
 {
     int nleft;
-    int nread;
+    int nread = 0;
     unsigned char* ptr = outBuffer;
     nleft = size;
     int totalRead = 0;
@@ -135,6 +135,7 @@ int SE_Socket::read(unsigned char* outBuffer, int size)
         ptr += nread;
         totalRead += nread;
     }
+	SE_ASSERT(totalRead == (size - nleft));
     return size - nleft;
 }
 //////////////////////////////////////////////

@@ -3,8 +3,9 @@
 #include <memory>
 using namespace std ;
 // the first byte of data is the messageID
-struct SE_NetMessage
+class SE_NetMessage
 {
+public:
     SE_NetMessage()
     {
         data = NULL;

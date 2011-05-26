@@ -32,5 +32,17 @@ public:
 private:
     SE_Mutex* mSource;
 };
-
+class SE_MutexCondition
+{
+public:
+    SE_MutexCondition();
+    void signal();
+    void wait();
+	void setMutex(SE_Mutex* m);
+private:
+    SE_Mutex* mMutex;
+#if defined(SE_HAS_MUTEX)
+    pthread_cond_t mCond;
+#endif
+};
 #endif

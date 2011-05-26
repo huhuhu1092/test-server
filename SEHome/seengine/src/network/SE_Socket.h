@@ -23,7 +23,10 @@ public:
     {
         return mSocket;
     }
-
+    //return the num read from socket
+	//if return is 0, it indicate the socket is closed
+	//if return is greater than 0, it read content
+	//if return is -1 , the socket read has error.
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
     int close();

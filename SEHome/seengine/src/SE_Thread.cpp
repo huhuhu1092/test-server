@@ -109,3 +109,90 @@ void SE_Thread::reset()
     mEndStateMutex.unlock();
 
 }
+///////////////////////
+SE_QueueThread::SE_QueueThread()
+{
+    mCanAddCommand = true;
+	mExit = false;
+	mCommandQueueCondition.setMutex(&mCommandQueueMutex);
+}
+bool SE_QueueThread::postCommand(SE_Command* c)
+{
+	if(!canAddCommand())
+		return false;
+	mCommandQueueMutex.lock();
+	mCommandQueue.push_back(c);
+	mCommandQueueCondition.signal();
+	mCommandQueueMutex.unlock();
+	return true;
+}
+void SE_QueueThread::run()
+{
+	mTimer.start();
+	while(!mExit)
+	{
+		SE_Timer::PairTime pt = mTimer.step();
+	    process(pt.realTimeDelta, pt.simulateTimeDelta);
+	}
+}
+void SE_QueueThread::setExit(bool e)
+{
+	SE_AutoMutex m(&mExitMutex);
+	mExit = e;
+}
+bool SE_QueueThread::isExit()
+{
+	SE_AutoMutex m(&mExitMutex);
+	return mExit;
+}
+SE_QueueThread::~SE_QueueThread()
+{
+	SE_AutoMutex m(&mCommandQueueMutex);
+	std::list<SE_Command*>::iterator it;
+	for(it = mCommandQueue.begin();  it != mCommandQueue.end() ; it++)
+	{
+		delete *it;
+	}
+}
+void SE_QueueThread::process(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    std::list<SE_Command*>::iterator it;
+	std::list<SE_Command*> tmpList;
+	mCommandQueueMutex.lock();
+	if(mCommandQueue.empty())
+	{
+		mCommandQueueCondition.wait();
+	}
+    tmpList = mCommandQueue;
+    mCommandQueue.clear();
+  	mCommandQueueMutex.unlock();
+    for(it = tmpList.begin(); it != tmpList.end(); )
+    {
+        SE_Command* c = *it;
+        if(c->expire(realDelta, simulateDelta))
+        {
+            c->handle(realDelta, simulateDelta);
+            delete c;
+            tmpList.erase(it++);
+        }
+		else
+		{
+			it++;
+		}
+    }
+    if(tmpList.empty())
+        return;
+	mCommandQueueMutex.lock();
+    mCommandQueue.splice(mCommandQueue.begin(), tmpList, tmpList.begin(), tmpList.end()); 
+	mCommandQueueMutex.unlock();
+}
+void SE_QueueThread::setCanAddCommand(bool b)
+{
+	SE_AutoMutex m(&mCanAddCommandMutex);
+	mCanAddCommand = b;
+}
+bool SE_QueueThread::canAddCommand()
+{
+	SE_AutoMutex m(&mCanAddCommandMutex);
+    return mCanAddCommand;
+}
