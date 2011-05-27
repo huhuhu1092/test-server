@@ -88,7 +88,20 @@ int SE_Socket::send(const unsigned char* data, int size)
         ptr += nwritten;
         totalWritten += nwritten;
     }
-    return size;
+    return totalWritten;
+}
+int SE_Socket::readRaw(unsigned char* outBuffer, int size)
+{
+	int nread = ::recv((SOCKET)mSocket, (char*)outBuffer, size, 0);
+#if defined(WIN32)
+	if(nread == SOCKET_ERROR)
+	{
+		return -1;
+	}
+	else
+		return nread;
+#else
+#endif
 }
 int SE_Socket::read(unsigned char* outBuffer, int size)
 {
@@ -102,6 +115,7 @@ int SE_Socket::read(unsigned char* outBuffer, int size)
         //SLog::msg("#### read num = %d #########\n", nread);
 #if defined(WIN32)
         nread = ::recv((SOCKET)mSocket, (char*)ptr, nleft, 0);
+		LOGI("## read socket num : %d ###\n", nread);
         if(nread == SOCKET_ERROR)
         {
             if(totalRead == 0)

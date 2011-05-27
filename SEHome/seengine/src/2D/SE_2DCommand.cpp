@@ -50,13 +50,13 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 	sceneManager->setHeight(height);
     chessApp->setBound(width, height);
     //chessApp->start();
-    chessApp->loadBoard();
+    //chessApp->loadBoard();
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
-	//SE_NetAddress na("127.0.0.1", 5999);
-    //SE_UieAcceptThread* uieAcceptThread = new SE_UieAcceptThread(na);
-	//SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
-	//threadManager->add(uieAcceptThread);
-	//uieAcceptThread->start();
+	SE_NetAddress na("127.0.0.1", 5999);
+    SE_UieAcceptThread* uieAcceptThread = new SE_UieAcceptThread(na);
+	SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+	threadManager->add(uieAcceptThread);
+	uieAcceptThread->start();
 
 }
 //////////////

@@ -22,19 +22,23 @@ SE_NetDataCommand::~SE_NetDataCommand()
 }
 void SE_NetDataCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-	SE_ASSERT(mMsg->len > 3);
+	SE_ASSERT(mMsg->len >= 3);
 	int id = mMsg->data[0];
 	unsigned short dataLen = 0;
 	memcpy(&dataLen, mMsg->data + 1, 2);
     dataLen = SE_Util::net2HostInt16(dataLen);
 	int realDataLen = dataLen - 3;
-	std::string str((char*)mMsg->data + 3, realDataLen);
+	std::string str;
+	if(realDataLen > 0)
+	{
+		str.assign((char*)mMsg->data + 3, realDataLen);
+	}
 	for(int i = 0 ; i < mMsg->len ; i++)
 	{
 		LOGI("%d\n", mMsg->data[i]);
 	}
 	LOGI("### msg len = %d , str = %s ###\n", mMsg->len, str.c_str());
-	if(id == 0)
+	if(id == 0 && str.size() > 0)
 	{
 		SE_ImageUnit iu;
 		SE_ResourceManager* resourceManager = SE_GET_RESOURCEMANAGER();
@@ -65,5 +69,8 @@ void SE_NetDataCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 		//end
 		sceneManager->show(sceneID);
 	}
-	
+	else
+	{
+
+	}
 }

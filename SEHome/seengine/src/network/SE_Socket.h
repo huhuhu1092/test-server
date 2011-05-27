@@ -23,12 +23,14 @@ public:
     {
         return mSocket;
     }
-    //return the num read from socket
+    //return the num read from none block socket
 	//if return is 0, it indicate the socket is closed
 	//if return is greater than 0, it read content
 	//if return is -1 , the socket read has error.
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
+	//if there has no data for reading, it will clock process
+	int readRaw(unsigned char* outBuffer, int size);
     int close();
 	void setNoneBlock();
 	bool isNoneBlock();

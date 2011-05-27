@@ -217,7 +217,7 @@ int SE_NetMessageStream::getMessagePacketCount()
 void SE_NetMessageStream::mapMessagePacket(SE_NetMessagePacketFunctor& functor, bool clearPacketList)
 {
     //SLog::msg("map lock start\n");
-    SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
+    //SE_AutoMutex mutex(&mImpl->mMessagePacketListMutex);
     //SLog::msg("map lock end\n");
     SE_NetMessageStreamImpl::SE_NetMessagePacketList::iterator it;
     for(it = mImpl->mMessagePacketList.begin() ; it != mImpl->mMessagePacketList.end(); it++)

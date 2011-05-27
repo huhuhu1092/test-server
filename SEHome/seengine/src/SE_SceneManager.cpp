@@ -291,13 +291,16 @@ void SE_SceneManager::handlePointedMotionEvent(const SE_MotionEvent& motionEvent
 
 void SE_SceneManager::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 {
-	if(!mCursor->isDrawable())
+	if(mCursor)
 	{
-		handlePointedMotionEvent(motionEvent);
-	}
-	else
-	{
-		handleCursorMotionEvent(motionEvent);
+	    if(!mCursor->isDrawable())
+	    {
+		    handlePointedMotionEvent(motionEvent);
+	    }
+	    else
+	    {
+		    handleCursorMotionEvent(motionEvent);
+	    }
 	}
 }
 

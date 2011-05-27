@@ -34,6 +34,7 @@
 #include "SE_ThreadManager.h"
 #include "SE_MessageStream.h"
 #include "SE_NetDataCommand.h"
+#include "SE_UieManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -344,21 +345,13 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
-
-		/*
-		if(mSelectedSpatial)
+        SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+		std::vector<SE_Thread*> threadV = threadManager->find("uiewritethread");
+		if(threadV.size() > 0)
 		{
-			SE_PauseAllAnimationTravel rat;
-			mSelectedSpatial->travel(&rat, true);
+			SE_UieClientWriteThread* t = (SE_UieClientWriteThread*)threadV[0];
+			t->addOutputMessage(1, (unsigned char*)"aa", 2);
 		}
-		else
-		{
-            SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	        SE_Spatial* root = sceneManager->getRoot();
-	        SE_PauseAllAnimationTravel rat;
-	        root->travel(&rat, true);
-		}
-		*/
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
