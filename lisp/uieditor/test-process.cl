@@ -1,4 +1,89 @@
 (defconstant +EXIT+ 0)
+(defstruct xqueue
+  data
+  lock
+  gate
+  )
+(defstruct xevent
+  id
+  data-len
+  data
+  )
+(defstruct socket-rw-block
+  read-queue
+  write-queue
+  sock
+  )
+;;tag is :read or :write
+(defun enqueue (tag queue item)
+  (cond ((eql tag :read)
+	 (mp:with-process-lock ((xqueue-lock queue))
+			       (setf (xqueue-data queue) (concatenate 'vector (xqueue-data queue) item)) 
+			       )
+	 )
+	((eql tag :write)
+	 (mp:with-process-lock ((xqueue-lock queue))
+			       (setf (xqueue-data queue) (nconc (xqueue-data queue) (list item)))
+			       (mp:open-gate (xqueue-gate queue))
+			       )
+	 )
+	(t (error "tag is not :read or :write"))
+	)
+  )
+(defun dequeue (tag queue)
+  (cond ((eql tag :read)
+	 (mp:with-process-lock ((xqueue-lock queue))
+			       (multiple-value-bind (e newdata) (get-event (xqueue-data queue))
+						    (setf (xqueue-data queue) newdata)
+						    e
+						    )
+			       )
+	 )
+	((eql tag :write)
+	 (mp:with-process-lock ((xqueue-lock queue))
+			       (let ((e (pop (xqueue-data queue))))
+				 (if (null (xqueue-data queue)) (mp:close-gate (xqueue-gate queue)))
+				 e
+				 
+				 )
+			       )
+	 )
+	(t (error "tag is not :read or write"))
+	)
+  )
+(defun queue-null-p (queue)
+  (mp:with-process-lock ((xqueue-lock queue))
+			(null (xqueue-data queue))
+			)
+  )
+(defun reader-process-fun (socket-block mainprocess)
+    (loop (let* ((buffer (make-array 1024 :element-type '(unsigned-byte 8) :initial-element 0))
+	      (len (read-sequence buffer (socket-rw-block-sock socket-block) :partial-fill t)))
+	  (enqueue :read (socket-rw-block-read-queue socket-block) (subseq buffer 0 len))
+	  )
+	(let ((e (dequeue :read (socket-rw-block-read-queue socket-block))))
+	  (when e
+	    (let ((ret (handle-xevent e mainprocess)))
+	      (if (= ret +EXIT+) (return))
+		    )
+		)
+	  )
+	)
+    )
+(defun writer-process-fun (socket-block mainprocess)
+    (loop
+    (if (queue-null-p (socket-rw-block-write-queue socket-block))
+	(mp:process-wait "wait for write data" #'mp:gate-open-p (xqueue-gate (socket-rw-block-write-queue socket-block)))
+      )
+    (let* ((queue (socket-rw-block-write-queue socket-block))
+	   (event (dequeue :write queue))
+	   )
+          (if (null event) (error "event is null"))
+          (when (equal (xevent-id event) +EXIT+) (return))
+	  (write-event (socket-rw-block-sock socket-block) event)
+	   )
+   )
+  )
 (defun reverse-tree (l)
   (cond ((null l) nil)
         ((atom l) l)
@@ -13,42 +98,7 @@
 	   )
 	)
   )
-(defstruct read-queue
-  data
-  lock
-  gate
-  )
-(defstruct write-queue
-  data
-  lock
-  gate
-  )
-(defstruct xevent
-  id
-  data-len
-  data
-  )
-(defun write-queue-null-p (xq)
-  (mp:with-process-lock ((write-queue-lock xq))
-			(null (write-queue-data xq))
-			)
-  )
-(defun write-queue-add (xq event)
-  (mp:with-process-lock ((write-queue-lock xq))
-			(setf (write-queue-data xq) (nconc (write-queue-data xq) (list event)))
-			(mp:open-gate (write-queue-gate xq))
-			)
-  )
-(defun write-queue-pop (xq)
-  (mp:with-process-lock ((write-queue-lock xq))
-			(pop (write-queue-data xq))
-			)
-  )
-(defun read-queue-add (xq data-v)
-  (mp:with-process-lock ((read-queue-lock xq))
-			(setf (read-queue-data xq) (concatenate 'vector (read-queue-data xq) data-v))
-			)
-  )
+
 (defun get-event (data)
   #+debug (format t "get-event: data len = ~a ~%" (length data))
   (let ((len (length data)))
@@ -75,69 +125,21 @@
     )
     )
   )
-(defun read-queue-pop (xq)
-  (mp:with-process-lock ((read-queue-lock xq))
-			(let* ((data (read-queue-data xq)))
-			  (multiple-value-bind (e new-data) (get-event data)
-					       (setf (read-queue-data xq) new-data)
-					       e
-					       )
-			  )
-			)
-  )
-(defstruct socket-reader
-  sock
-  queue
-  )
-(defstruct socket-writer
-  sock
-  queue
-  )
 (defun write-event (sock event)
-  (let ((total-len (+ (xevent-data-len event) 3))
+  (let* ((total-len (+ (xevent-data-len event) 3))
 	(header (make-array 3 :element-type '(unsigned-byte 8) :initial-element 0))
+	(len-net (HostToNetShort total-len))
 	)
     #+debug (format t "##write total len = ~a ~%" total-len)
     (setf (aref header 0) (xevent-id event))
-    (setf (aref header 1) (ldb (byte 8 0) total-len))
-    (setf (aref header 2) (ldb (byte 8 8) total-len))
+    (setf (aref header 1) (ldb (byte 8 0) len-net))
+    (setf (aref header 2) (ldb (byte 8 8) len-net))
     (let ((data (concatenate 'vector header (xevent-data event))))
+      (print data)
       (write-sequence data sock)
+      (force-output sock)
       )
     )
-  )
-(defun writer-process-fun (socker-writer-instance)
-  (loop
-    (if (write-queue-null-p (socket-writer-queue socket-writer-instance))
-       (mp:process-wait "wait for write data" #'mp:gate-open-p (write-queue-gate queue)))
-    (let* ((queue (socket-writer-queue socket-writer-instance))
-	       (event (write-queue-pop queue))
-	       )
-          (when (equal (xevent-id event) +EXIT+) (return))
-	  (write-event (socket-writer-sock socket-writer-instance) event)
-	      
-	   )
-   )
-  )
-(defun push-event-to-writer (event)
-  
-  )
-(defun create-writer-process (name sock)
- 
-  )
-(defun reader-process-fun (socket-reader-instance mainprocess)
-  (loop (let* ((buffer (make-array 1024 :element-type '(unsigned-byte 8) :initial-element 0))
-	      (len (read-sequence buffer (socket-reader-sock socket-reader-instance) :partial-fill t)))
-	  (xqueue-add (socket-reader-queue socket-reader-instance ) (subseq buffer 0 len))
-	  )
-	(let ((e (xqueue-pop (socket-reader-queue socket-reader-instance))))
-	  (when e
-	    (let ((ret (handle-xevent e mainprocess)))
-	      (if (= ret +EXIT+) (return))
-		    )
-		)
-	  )
-	)
   )
 (defun handle-xevent (event mainprocess)
   (let ((id (xevent-id event)))
@@ -152,34 +154,6 @@
     (mp:process-run-function name #'reader-process-fun sr mainprocess)
     )
   )
-(defun add-event (e)
-  (mp:with-process-lock (*event-queue-lock*)
-			(push e *event-queue*)
-			)
-  )
-(defun pop-event ()
-  (mp:with-process-lock (*event-queue-lock*)
-			(let ((e (car (last *event-queue*))))
-			  (when e (setf *event-queue* (subseq *event-queue* 0 (- (length *event-queue*) 1))) e)
-			  )
-			)
-  )
-(defun my-handle-data (e)
-  (format t "data = ~a ~%" e)
-  (when (= e 3) (setf *exit* 2))
-  )
-
-(defun my-loop ()
-  (loop (when (= *exit* 2) (return-from my-loop 1))
-	(sleep 3)
-	(let ((e (pop-event)))
-	  (if e (my-handle-data e))
-	  )
-	)
-  )
-(defun create-my-loop ()
-  (mp:process-run-function "test" #'my-loop)
-  )
 
 (defun read-data-from-socket (sock)
   (let* ((buffer (make-array 1024 :element-type '(unsigned-byte 8) :initial-element 0))
@@ -188,9 +162,8 @@
       (subseq buffer 0 num)
     )
   )
-(defparameter *sock-read* nil)
+(defparameter *sock-block* nil)
 (defun connect-to-tcp-server (server-ip server-port)
-  (let (sock-read)
     (mp:process-run-function "createsocketreader" #'(lambda (ip port)
 						      (let ((s (socket:with-pending-connect
 								(sys:with-timeout (10 (error "connect failed"))
@@ -198,17 +171,16 @@
 												      :remote-port server-port
 												      :type :stream
 												      :address-family :internet)))))
-							(setf sock-read s)
-							#+debug (setf *sock-read* s)
-							#+debug (format *terminal-io* "create socket reader ~%")
-							(create-reader-process "socketreader" s mp:*current-process*)
+							(setf *sock-block* (make-socket-rw-block :sock s :read-queue (make-xqueue :data nil :lock (mp:make-process-lock :name "readlock") :gate (mp:make-gate nil)) :write-queue (make-xqueue :data nil :lock (mp:make-process-lock :name "writelock") :gate (mp:make-gate nil))))
+			
+							#+debug (format t "create socket reader ~%")
+							(create-reader-process "socketreader" *sock-block* nil)
+							(create-writer-process "socketwriter" *sock-block* nil)
 							)
 						      )
 			     server-ip
 			     server-port
 			     )
-    sock-read
-    )
   )
 (defun test-connect  (server-ip server-port)
   (let* ((s (socket:with-pending-connect
@@ -217,9 +189,9 @@
 						  :remote-port server-port
 						  :type :stream
 						  :address-family :internet))))
-	  (sr (make-socket-reader :sock s
-				:queue (make-read-queue :data nil :lock (mp:make-process-lock) :gate (mp:make-gate nil)))))
-    (reader-process-fun sr nil)
-    s
+	 )
+    (setf *sock-block* (make-socket-rw-block :sock s :read-queue (make-xqueue :data nil :lock (mp:make-process-lock :name "readlock") :gate (mp:make-gate nil)) :write-queue (make-xqueue :data nil :lock (mp:make-process-lock :name "writelock") :gate (mp:make-gate nil))))
+    (enqueue :write (socket-rw-block-write-queue *sock-block*) (make-xevent :id 1 :data-len 2 :data "aa"))
+    (writer-process-fun *sock-block* nil)
     )
   )
