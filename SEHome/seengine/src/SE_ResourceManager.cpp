@@ -3423,8 +3423,7 @@ void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID,
     if(vertexShader == NULL || fragmentShader == NULL)
         return;
 	SE_ShaderProgram* shaderProgram = (SE_ShaderProgram*)SE_Object::create(shaderClassName);
-	shaderProgram->create(vertexShader, fragmentShader);
-	//new SE_ShaderProgram(vertexShader, fragmentShader);
+	shaderProgram->setSource(vertexShader, fragmentShader);
     mImpl->shaderMap.set(programDataID, shaderProgram);
 
 }
