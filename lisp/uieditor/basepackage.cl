@@ -30,7 +30,27 @@
 	   :concatenate-string-with-path-sep
 	   :contain-name-in-directory?
 	   :tokens
-	   :constituent
+           :constituent
+           :parse-xml
+           :parse-element-list
+           :parse-image-table
+	   :imagetable-id
+	   :imageitem-id
+	   :image-id
+	   :imageitem-images
+	   :imagetable-imageitems
+	   :get-image-item
+	   :imageitem-image-file-path
+	   :clear-imagetablelist
+	   :image-component-name
+	   :path-sep-change
+	   :get-image
+	   :image-x
+	   :image-y
+	   :image-mirror
+	   :image-width
+           :image-height
+           :component-tag
 	   ))
 (pushnew :debug *features*)
 #+(and mswindows officepc) (defvar *codedirectory* "C:\\myprogram\\simpleengine\\test-server\\lisp\\uieditor\\")

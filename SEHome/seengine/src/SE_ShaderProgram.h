@@ -13,6 +13,7 @@ public:
     virtual ~SE_ShaderProgram();
     virtual void releaseHardwareResource();
 	void create(char* vertexShader, char* fragmentShader);
+    void setSource(char* vertexShaderSrc, char* fragmentShaderSrc);
     GLuint getHandler();
     void recreate();
     bool initOK();

@@ -1356,7 +1356,7 @@ SE_CChess::_BoardUnitData SE_CChess::getBoardUnitData( const SE_Rect<float>& rec
 }
 void SE_CChess::loadBoard()
 {
-    loadScene("UI/Chess/ChessLayout.xml/ChesssGameInterface", mWidth, mHeight, false);
+    loadScene("UI/Chess/ChessLayout.xml/ChesssGameInterface", mWidth, mHeight, true);
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);

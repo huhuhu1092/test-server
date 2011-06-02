@@ -14,7 +14,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-element-ui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 822 61 1652 406)) (name :element-ui) (title "Element Ui")
+     (interior (make-box 480 42 1310 387)) (name :element-ui) (title "Element Ui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner

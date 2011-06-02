@@ -14,7 +14,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-mainui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 694 214 1514 763)) (name :mainui) (title "Mainui")
+     (interior (make-box 504 94 1324 643)) (name :mainui) (title "Mainui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
@@ -118,8 +118,9 @@
                        :height 41 :left 293 :name :project-path-name :read-only t :top 14
                        :value "" :width 416)
         (make-instance 'single-item-list :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 439 :left 293 :name :content-list :top 55 :value :one
-                       :width 414)
+                       :height 439 :left 293 :name :content-list :on-click
+                       'mainui-content-list-on-click :on-double-click
+                       'mainui-content-list-on-double-click :top 55 :width 414)
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 47
                        :left 731 :name :button10 :on-click 'mainui-button10-on-click
                        :title "Preview" :top 156 :width 65)))

@@ -6,6 +6,7 @@
   :modules (list (make-instance 'module :name "basepackage")
                  (make-instance 'module :name "base/filesystem")
                  (make-instance 'module :name "base/uieditor")
+                 (make-instance 'module :name "base/uiexml")
                  (make-instance 'module :name "baseinterface")
                  (make-instance 'form-module :name "mainui" :finder-function 'mainui
                                 :has-pixmap-file nil)

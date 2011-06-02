@@ -5,3 +5,5 @@
 (defun is-not-null-string (str)
   (not (is-null-string str))
   )
+(load "E:\\programs\\uipreview\\Debug\\uipreview.dll")
+(ff:def-foreign-call (HostToNetShort "HostToNetShort") (s))

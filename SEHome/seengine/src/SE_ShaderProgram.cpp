@@ -65,21 +65,11 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
 {
 #ifdef GLES_20
     init(vertexShaderSrc, fragmentShaderSrc);
-    int vertexShaderSrcLen = strlen(vertexShaderSrc);
-    int fragmentShaderSrcLen = strlen(fragmentShaderSrc);
-    mVertexShaderSrc = new char[vertexShaderSrcLen + 1];
-    mFragmentShaderSrc = new char[fragmentShaderSrcLen + 1];
-    strncpy(mVertexShaderSrc, vertexShaderSrc, vertexShaderSrcLen);
-    strncpy(mFragmentShaderSrc, fragmentShaderSrc, fragmentShaderSrcLen);
-    mVertexShaderSrc[vertexShaderSrcLen] = '\0';
-    mFragmentShaderSrc[fragmentShaderSrcLen] = '\0';
+    setSource(vertexShaderSrc, fragmentShaderSrc);
 #endif
 }
-
-void SE_ShaderProgram::create(char* vertexShaderSrc, char* fragmentShaderSrc)
+void SE_ShaderProgram::setSource(char* vertexShaderSrc, char* fragmentShaderSrc)
 {
-#ifdef GLES_20
-    init(vertexShaderSrc, fragmentShaderSrc);
 	if(mVertexShaderSrc)
 		delete[] mVertexShaderSrc;
 	if(mFragmentShaderSrc)
@@ -92,6 +82,14 @@ void SE_ShaderProgram::create(char* vertexShaderSrc, char* fragmentShaderSrc)
     strncpy(mFragmentShaderSrc, fragmentShaderSrc, fragmentShaderSrcLen);
     mVertexShaderSrc[vertexShaderSrcLen] = '\0';
     mFragmentShaderSrc[fragmentShaderSrcLen] = '\0';
+    
+}
+
+void SE_ShaderProgram::create(char* vertexShaderSrc, char* fragmentShaderSrc)
+{
+#ifdef GLES_20
+    init(vertexShaderSrc, fragmentShaderSrc);
+    setSource(vertexShaderSrc, fragmentShaderSrc);
 #endif
 }
 GLuint SE_ShaderProgram::getHandler()

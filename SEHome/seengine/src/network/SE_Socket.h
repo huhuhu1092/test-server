@@ -3,51 +3,40 @@
 #include "SE_Common.h"
 #include "SE_NetAddress.h"
 #if defined(WIN32)
-#ifndef _WIN32_WINNT            // Specifies that the minimum required platform is Windows Vista.
-#define _WIN32_WINNT 0x0600     // Change this to the appropriate value to target other versions of Windows.
-#endif
-
-#undef _INC_WINDOWS
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-
-
-//#include <windows.h>
-
-//typedef SOCKET SE_SOCKET_TYPE;
-typedef int socklen_t;
+typedef void* SE_SOCKET_TYPE;
 #else
-typedef int SOCKET;
-const int SOCKET_ERROR = -1;
-const int INVALID_SOCKET = -1;
+typedef int SE_SOCKET_TYPE;
 #endif
 enum {SE_STREAM, SE_DATAGRAM};
 enum {SE_NO_ERROR, SE_CREATE_ERROR, SE_BIND_ERROR, SE_LISTEN_ERROR, SE_CONNECT_ERROR, SE_ACCEPT_ERROR};
 class SE_Socket
 {
 public:
-	SE_Socket(SOCKET fd);
-    SE_Socket()
-    {
-        mSocket = INVALID_SOCKET;
-    }
+	SE_Socket(SE_SOCKET_TYPE fd);
+    SE_Socket();
     ~SE_Socket();
-    void setSocket(SOCKET fd)
+    void setSocket(SE_SOCKET_TYPE fd)
     {
         mSocket = fd;
     }
-    SOCKET getSocket() const
+    SE_SOCKET_TYPE getSocket() const
     {
         return mSocket;
     }
-
+    //return the num read from none block socket
+	//if return is 0, it indicate the socket is closed
+	//if return is greater than 0, it read content
+	//if return is -1 , the socket read has error.
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
+	//if there has no data for reading, it will clock process
+	int readRaw(unsigned char* outBuffer, int size);
     int close();
+	void setNoneBlock();
+	bool isNoneBlock();
 private:
-    SOCKET mSocket;
+    SE_SOCKET_TYPE mSocket;
+	bool mIsNoneBlock;
 };
 struct SE_ClientProp
 {
@@ -84,10 +73,6 @@ public:
     int send(const unsigned char* data, int size);
     int read(unsigned char* outBuffer, int size);
     int getError();
-    SOCKET getSocket()
-    {
-        return mRemote.getSocket();
-    }
 private:
     SE_Socket mRemote;
     int mError;

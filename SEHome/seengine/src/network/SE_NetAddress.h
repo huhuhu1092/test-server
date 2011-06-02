@@ -4,7 +4,7 @@
 class SE_NetAddress
 {
 public:
-    //ip address and port which is network order int
+    //ip address and port host order
     SE_NetAddress(const char* ip, uint16_t port);
     SE_NetAddress(uint32_t ip, uint16_t port);
     SE_NetAddress()
