@@ -61,6 +61,7 @@ import android.provider.Telephony.MessageSummary;
 import android.provider.Telephony.MmsSms.Folder;
 import android.os.Handler;
 import android.text.Layout;
+import android.os.SystemProperties;
 import java.util.TimeZone;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -106,6 +107,7 @@ public class StaticWallpaper extends WallpaperService {
     private int mPaddingBottom;
     private MmsDataGetter mMmsDataGetter;
     private Drawable mBgDrawable;
+   
     private class StaticWallpaperHandler extends Handler
     {
         public void handleMessage(Message msg)
@@ -174,6 +176,18 @@ public class StaticWallpaper extends WallpaperService {
             return md;
 
         }
+    }
+    private boolean isInLockScreen()
+    {
+        final String keyguard_sysprop_key = "sys.keyguard.showing";
+        int c = SystemProperties.getInt(keyguard_sysprop_key, -1);
+        Log.i(TAG, "#### keyguard = " + c + " #####");
+        if(c == 1)
+        {
+            return true;
+        }
+        else
+            return false;
     }
 	public class MmsDBObserver extends ContentObserver{
     	public MmsDBObserver() 
@@ -387,12 +401,12 @@ public class StaticWallpaper extends WallpaperService {
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
         private WallpaperObserver mReceiver;
+        private KeyguardHideObserver mKeyguardReceiver;
         Drawable mBackground;
         float mXOffset;
         float mYOffset;
         String mTsStr = "TSTS";
-        public Handler mH
-        = new Handler() {
+        public Handler mH = new Handler() {
             public void handleMessage(Message msg)
             {
                 switch(msg.what)
@@ -432,13 +446,21 @@ public class StaticWallpaper extends WallpaperService {
                 System.gc();
             }
         }
-
+        class KeyguardHideObserver extends BroadcastReceiver 
+        {
+            public void onReceive(Context context, Intent intent) {
+                drawFrame();
+            }
+        }
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
             mReceiver = new WallpaperObserver();
             registerReceiver(mReceiver, filter);
+            mKeyguardReceiver = new KeyguardHideObserver();
+            IntentFilter keyguardFilter = new IntentFilter("oms.action.keyguard.hide");
+            registerReceiver(mKeyguardReceiver, keyguardFilter);
             updateWallpaper();
             surfaceHolder.setSizeFromLayout();
             dumpCurrentThread("Engine onCreate");
@@ -448,6 +470,7 @@ public class StaticWallpaper extends WallpaperService {
         public void onDestroy() {
             super.onDestroy();
             unregisterReceiver(mReceiver);
+            unregisterReceiver(mKeyguardReceiver);
         }
 
         @Override
@@ -629,7 +652,7 @@ public class StaticWallpaper extends WallpaperService {
                         background.draw(c);
                     }
                     Log.i("StaticWallpaper", "#### xPixels " + xPixels + ", yPixels " + yPixels);
-                    if(mMmsData != null && (mMmsData.count > 0))
+                    if(mMmsData != null && (mMmsData.count > 0) && isInLockScreen())
                     {
                         c.translate(-xPixels, -yPixels);
                         drawTextBackground(c);
