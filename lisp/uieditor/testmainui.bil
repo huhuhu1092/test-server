@@ -15,14 +15,14 @@
 (defun make-form1
     (&key parent (owner (or parent (screen *system*))) exterior
      (interior (make-box 486 119 1358 445)) (name :form1) (title "Form1") (border :frame)
-     (child-p nil) form-p)
+     (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
            :class 'frame-window
+           :child-p child-p
            :exterior exterior
            :interior interior
            :border border
-           :child-p child-p
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 12)
            :form-state :shrunk

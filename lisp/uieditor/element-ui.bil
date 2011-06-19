@@ -50,30 +50,32 @@
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        29 :left 6 :name :static-text-8 :top 59 :value "type" :width 97)
         (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 28
-                       :left 119 :name :element-type :range (list :one :two :three) :top
-                       59 :value :one :width 166)
+                       :left 119 :name :element-type :range
+                       (list :image-element :action-element :state-element
+                             :coloreffect-element)
+                       :top 59 :value :image-element :width 166)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        25 :left 6 :name :static-text-9 :top 104 :value "left" :width 97)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 33 :left 122 :name :element-left :top 96 :value "" :width
-                       163)
+                       :height 33 :left 119 :name :element-left :top 96 :value "" :width
+                       166)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        29 :left 6 :name :static-text-10 :top 152 :value "top" :width 97)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 34 :left 123 :name :element-top :top 147 :value "" :width
-                       162)
+                       :height 34 :left 119 :name :element-top :top 147 :value "" :width
+                       166)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        30 :left 4 :name :static-text-11 :top 198 :value "width" :width
                        99)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 33 :left 124 :name :element-width :top 195 :value ""
-                       :width 161)
+                       :height 33 :left 119 :name :element-width :top 195 :value ""
+                       :width 166)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        34 :left 5 :name :static-text-12 :top 245 :value "height" :width
                        98)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 34 :left 128 :name :element-height :top 245 :value ""
-                       :width 157)
+                       :height 34 :left 119 :name :element-height :top 245 :value ""
+                       :width 166)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        26 :left 416 :name :static-text-14 :top 20 :value "layer" :width
                        64)
@@ -107,4 +109,6 @@
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 33
                        :left 41 :name :button11 :title "Undo" :top 296 :width 106)
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 33
-                       :left 210 :name :button24 :title "Redo" :top 296 :width 102)))
+                       :left 210 :name :button24 :title "Redo" :top 296 :width 102)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 31
+                       :left 694 :name :button25 :title "..." :top 175 :width 58)))
