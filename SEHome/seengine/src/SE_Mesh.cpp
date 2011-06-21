@@ -318,27 +318,6 @@ void SE_Surface::getVertex(_Vector3f*& vertex, int & vertexNum)
 		mVertex[i].d[1] = vertexArray[i].y;
 		mVertex[i].d[2] = vertexArray[i].z;
 	}
-	/*
-    std::set<int> vertexIndexSet;
-    for(int i = 0 ; i < facetNum ; i++)
-    {
-        SE_Vector3i f = faceArray[facets[i]];
-        vertexIndexSet.insert(f.x);
-        vertexIndexSet.insert(f.y);
-        vertexIndexSet.insert(f.z);
-    }
-    mVertexNum = vertexIndexSet.size();
-    mVertex = new _Vector3f[mVertexNum];
-    std::set<int>::iterator it;
-    int i = 0;
-    for(it = vertexIndexSet.begin() ; it != vertexIndexSet.end() ; it++)
-    {
-        mVertex[i].d[0] = vertexArray[*it].x;
-        mVertex[i].d[1] = vertexArray[*it].y;
-        mVertex[i].d[2] = vertexArray[*it].z;
-        i++;
-    }
-	*/
     vertex = mVertex;
     vertexNum = mVertexNum;
 }
@@ -400,28 +379,46 @@ void SE_Surface::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVerte
 	}
 	texVertex = mTexVertex[texIndex];
 	texVertexNum = mTexVertexNum[texIndex];
-	/*
-    int texFaceNum = texCoordData->getTexFaceNum();
+}
+SE_VertexBuffer SE_Surface::createPosTex0VertexBuffer()
+{
+    SE_GeometryData* geomData = getGeometryData();
     int facetNum = getFacetNum();
     int* facets = getFacetArray();
-    std::set<int> texVertexIndex;
-    for(int i = 0 ; i < facetNum ; i++)
-    {
-        SE_Vector3i f = texFaceArray[facets[i]];
-        texVertexIndex.insert(f.x);
-        texVertexIndex.insert(f.y);
-    }
-    mTexVertexNum[texIndex] = texVertexIndex.size();
-    mTexVertex[texIndex] = new _Vector2f[mTexVertexNum[texIndex]];
-    std::set<int>::iterator it;
-    int i = 0;
-    for(it = texVertexIndex.begin() ; it != texVertexIndex.end() ; it++)
-    {
-        mTexVertex[texIndex][i].d[0] = texVertexArray[*it].x;
-        mTexVertex[texIndex][i].d[1] = texVertexArray[*it].y;
-        i++;
-    }
-	*/
+    SE_Vector3i* faceArray = geomData->getFaceArray();
+    SE_Vector3f* vertexArray = geomData->getVertexArray();
+    SE_Texture* tex = getTexture();
+	SE_ASSERT(tex != NULL);
+    SE_TextureUnit* texUnit = tex->getTextureUnit(0);
+    SE_ASSERT(texUnit != NULL);
+    SE_TextureCoordData* texCoordData = texUnit->getTextureCoordData();
+	SE_ASSERT(texCoordData != NULL);
+    SE_Vector3i* texFaceArray = texCoordData->getTexFaceArray();
+    SE_Vector2f* texVertexArray = texCoordData->getTexVertexArray();
+	std::list<SE_VertexFormat::PosTex0> vertexDataList;
+	std::list<SE_Vector3i> indexDataList;
+	for(int i = 0 ; i < facetNum ; i++)
+	{
+		int faceIndex = facets[i];
+		SE_Vector3i posFace = faceArray[faceIndex];
+		SE_Vector3i texFace = texFaceArray[faceIndex];
+		SE_VertexFormat::PosTex0 v0, v1, v2;
+		v0.pos[0] = vertexArray[posFace.x].x;
+		v0.pos[1] = vertexArray[posFace.x].y;
+		v0.pos[2] = vertexArray[posFace.x].z;
+		v0.tex0[0] = texVertexArray[texFace.x].x;
+		v0.tex0[1] = texVertexArray[texFace.x].y;
+	}
+}
+SE_VertexBuffer SE_Surface::getVertexData(SE_VertexFormat::TYPE t)
+{
+	switch(t)
+	{
+	case SE_VertexFormat::POSITION_TEX0:
+
+		break;
+	}
+	return SE_VertexBuffer();
 }
 void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {
