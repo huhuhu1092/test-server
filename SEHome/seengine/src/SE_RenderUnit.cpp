@@ -490,8 +490,9 @@ void SE_TriSurfaceRenderUnit::draw()
 	renderer->setMatrix(this);
 	renderer->setImage(this);
 	renderer->setColor(this);
-	renderer->setVertex(this);
-	renderer->setTexVertex(this);
+	//renderer->setVertex(this);
+	//renderer->setTexVertex(this);
+    renderer->setVertexBuffer(this);
 	renderer->setDrawMode(this);
 	renderer->draw();
 	renderer->end();

@@ -4,6 +4,7 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+#include "SE_VertexBuffer.h"
 #include <string.h>
 class SE_TextureCoordData;
 class SE_GeometryData;
@@ -108,23 +109,10 @@ public:
 private:
     SE_TextureUnit** mTexUnitArray;
 };
-class SE_VertexFormat
-{
-public:
-	enum TYPE {POSITION, POSITION_COLOR, POSITION_TEX0, POSITION_TEX0_TEX1, 
-	      POSITION_TEX0_TEX1_COLOR, POSITION_TEX0_NORMAL,
-		  POSITION_TEX0_TEX1_NORMAL, POSITION_TEX0_TEX1_NORMAL_COLOR
-	};
-	struct PosTex0
-	{
-		_Vector3f pos;
-		_Vector2f tex0;
-	}
-};
 class SE_VertexBuffer
 {
 public:
-	void* vertexData;
+	float* vertexData;
 	int vertexDataNum;
 	int* indexData;
 	int indexNum;
@@ -235,6 +223,10 @@ public:
         mFaceVertexNum = 0;
     }
     void getVertexIndexInGeometryData(int*& outArray , int& outNum);
+private:
+    typedef std::list<SE_VertexFormat::PosTex0> VertexDataList;
+    int addVertexData(SE_VertexFormat::PosTex0 v, VertexDataList& vertexDataList);
+    SE_VertexBuffer createPosTex0VertexBuffer();
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
