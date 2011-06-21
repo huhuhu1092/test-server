@@ -12,6 +12,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Message;
+import android.os.SystemClock;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -27,6 +28,8 @@ import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.OutOfMemoryError;
+import java.io.BufferedInputStream;
+import android.net.Uri;
 public class SpeedWallpaper extends WallpaperService {
 	private static final String TAG = "SpeedWallpaper";
     private static void dumpCurrentThread(String str)
@@ -45,7 +48,24 @@ public class SpeedWallpaper extends WallpaperService {
     			return false;
     	}
     }
+    public interface IImage {
+        static final int THUMBNAIL_TARGET_SIZE = 320;
+        static final int MINI_THUMB_TARGET_SIZE = 96;
+        static final int THUMBNAIL_MAX_NUM_PIXELS = 512 * 384;
+        static final int MINI_THUMB_MAX_NUM_PIXELS = 128 * 128;
+        static final int UNCONSTRAINED = -1;
 
+        public static final boolean ROTATE_AS_NEEDED = true;
+        public static final boolean NO_ROTATE = false;
+
+        public abstract Uri fullSizeImageUri();
+
+        // Get metadata of the image
+        public abstract long getDateTaken();
+
+        // Get the bitmap of the mini thumbnail.
+        public abstract Bitmap miniThumbBitmap();
+    }
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
         private static final int KK_EVENT_UPDATE = 1;
@@ -55,7 +75,7 @@ public class SpeedWallpaper extends WallpaperService {
         float mXOffset;
         float mYOffset;
         int mPictureIndex = 0;
-        private String mPicturePathName = "/sdcard/thumb";
+        private String mPicturePathName = "/sdcard/Pictures";//"/sdcard/thumb";
         private String[] mFileList;
         boolean mNeedUpdate = true;
         boolean mRectInit = false;
@@ -63,13 +83,19 @@ public class SpeedWallpaper extends WallpaperService {
         int mRectHeight;
         int mCurrentRectWidth;
         int mCurrentRectHeight;
-        int mUpdateFrequency = 2;//unit seconds
-        int mDuration = 60;//unit seconds;
+        int mFrameRate = 30;// 30 frame per second
+        int mUpdateFrequency = 1;//1 frame
+        int mDuration = 60 * mFrameRate;//;
         int mXStep;
         int mYStep;
         int mPassedTime = 0;
         int mClientWidth;
         int mClientHeight;
+        long mStartTime;
+        long mPauseTime;
+        long mTotalDuration;
+        boolean mFirstUpdate = true;
+        long mPrevTime;
         ColorMatrix mColorMatrix = new ColorMatrix();
         SharedPreferences mSharedPref;
         WallpaperDataListener mDataListener = new WallpaperDataListener();
@@ -80,8 +106,16 @@ public class SpeedWallpaper extends WallpaperService {
         		{
         		case KK_EVENT_UPDATE:
         		{
+        			if(mFirstUpdate)
+        			{
+        				mFirstUpdate = false;
+        				mPrevTime = SystemClock.uptimeMillis();
+        			}
+        			long currTime = SystemClock.uptimeMillis();
+        			long fd = currTime - mPrevTime;
+        			mPrevTime = currTime;
         			mPassedTime += mUpdateFrequency;
-        			Log.i(TAG, "#### passed time = " + mPassedTime + " ###");
+        			//Log.i(TAG, "#### passed time = " + mPassedTime + " ###");
                     updateWallpaper();
                     drawFrame();
                     updateAnimationData();
@@ -89,6 +123,25 @@ public class SpeedWallpaper extends WallpaperService {
                     {
             		    sendUpdateMessage();
                     }
+                    //Log.i(TAG, "### fd = " + fd + " ####");
+                    
+                	try {
+                	    Thread.sleep(15);
+                	} catch (InterruptedException e) {
+                		Log.i(TAG, "## thread sleep error ####");
+                	}
+                	
+                    /*
+                    if(fd < 30)
+                    {
+                    	Log.i(TAG, "### fd = " + fd + " ####");
+                    	try {
+                    	    Thread.sleep(30 - fd);
+                    	} catch (InterruptedException e) {
+                    		Log.i(TAG, "## thread sleep error ####");
+                    	}
+                    }
+                    */
         		}
         		break;
         	    default:
@@ -117,6 +170,51 @@ public class SpeedWallpaper extends WallpaperService {
                 System.gc();
             }
         }
+        
+        public int computeSampleSize(BitmapFactory.Options options,
+                int minSideLength, int maxNumOfPixels) {
+            int initialSize = computeInitialSampleSize(options, minSideLength,
+                    maxNumOfPixels);
+
+            int roundedSize;
+            if (initialSize <= 8) {
+                roundedSize = 1;
+                while (roundedSize < initialSize) {
+                    roundedSize <<= 1;
+                }
+            } else {
+                roundedSize = (initialSize + 7) / 8 * 8;
+            }
+
+            return roundedSize;
+        }
+
+        private int computeInitialSampleSize(BitmapFactory.Options options,
+                int minSideLength, int maxNumOfPixels) {
+            double w = options.outWidth;
+            double h = options.outHeight;
+
+            int lowerBound = (maxNumOfPixels == IImage.UNCONSTRAINED) ? 1 :
+                    (int) Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
+            int upperBound = (minSideLength == IImage.UNCONSTRAINED) ? 128 :
+                    (int) Math.min(Math.floor(w / minSideLength),
+                    Math.floor(h / minSideLength));
+
+            if (upperBound < lowerBound) {
+                // return the larger one when there is no overlapping zone.
+                return lowerBound;
+            }
+
+            if ((maxNumOfPixels == IImage.UNCONSTRAINED) &&
+                    (minSideLength == IImage.UNCONSTRAINED)) {
+                return 1;
+            } else if (minSideLength == IImage.UNCONSTRAINED) {
+                return lowerBound;
+            } else {
+                return upperBound;
+            }
+        }
+
         private void readPictureName() {
             File pictureDir = new File(mPicturePathName);
             if(!pictureDir.exists())
@@ -133,7 +231,7 @@ public class SpeedWallpaper extends WallpaperService {
         void sendUpdateMessage()
         {
         	Message msg = Message.obtain(mH, KK_EVENT_UPDATE);
-            mH.sendMessageDelayed(msg, mUpdateFrequency * 1000);
+            mH.sendMessageDelayed(msg, 0);
         }
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -178,6 +276,9 @@ public class SpeedWallpaper extends WallpaperService {
         	else
         	{
                 drawFrame();
+                //long startTime = SystemClock.uptimeMillis();
+                //mStartTime += (startTime - mPauseTime);
+                mStartTime = SystemClock.uptimeMillis();
         	}
         	if(visible)
         	{
@@ -187,6 +288,7 @@ public class SpeedWallpaper extends WallpaperService {
         	else
         	{
         		mNeedUpdate = false;
+        		mPauseTime = SystemClock.uptimeMillis();
         		mH.removeMessages(KK_EVENT_UPDATE);
         	}
         	Log.i(TAG , "onVisibilityChanged");
@@ -235,11 +337,19 @@ public class SpeedWallpaper extends WallpaperService {
         }
         void updateAnimationData()
         {
-            if(mPassedTime > mDuration)
+            if(mPassedTime > mDuration || (mCurrentRectWidth > mRectWidth) || (mCurrentRectHeight > mRectHeight))
             {
             	mPassedTime = 0;
             	mCurrentRectWidth = mClientWidth;
             	mCurrentRectHeight = mClientHeight;
+            	/*
+            	mTotalDuration += mDuration;
+            	long currTime = SystemClock.uptimeMillis();
+            	long dr = currTime - mStartTime;
+            	long f = mTotalDuration / (dr / 1000);
+            	Log.i(TAG, "### fps = " + f + " #####");
+            	*/
+
             }
             else
             {
@@ -248,7 +358,7 @@ public class SpeedWallpaper extends WallpaperService {
             }
         }
         void updateWallpaper() {
-			if(mFileList.length > 0 && ((mPassedTime > mDuration) || !mRectInit))
+			if(mFileList.length > 0 && ((mPassedTime > mDuration) || !mRectInit) || (mCurrentRectWidth > mRectWidth) || (mCurrentRectHeight > mRectHeight))
 			{
     			if(mPictureIndex >= mFileList.length)
     			{
@@ -264,9 +374,24 @@ public class SpeedWallpaper extends WallpaperService {
     				try {
     				    is = new FileInputStream(f);
     				    Log.i(TAG, "#### size : " + is.available() + " ####");
-    					//BitmapFactory.Options op = new BitmapFactory.Options();
-    					//op.inSampleSize = 4;
-    				    Bitmap bmp = BitmapFactory.decodeStream(is, null, null);
+    					BitmapFactory.Options op = new BitmapFactory.Options();
+    					op.inPreferredConfig = Bitmap.Config.RGB_565;
+    					op.inScaled = false;
+    					op.inJustDecodeBounds = true;
+    					op.inDither = true;
+    				    BufferedInputStream bufferedInput = new BufferedInputStream(is, 16384);
+    				    if (bufferedInput != null) {
+    				        op.inSampleSize = 4;//computeSampleSize(bufferedInput, 1024, 768);
+    				    } else {
+    				        return;
+    				    }
+    					Log.i(TAG, "### inSampleSize = " + op.inSampleSize + " ####");
+    				    ////
+    					is = new FileInputStream(f);
+    				    bufferedInput = new BufferedInputStream(is, 16384);
+    				    op.inDither = false;
+    		            op.inJustDecodeBounds = false;
+    				    Bitmap bmp = BitmapFactory.decodeStream(bufferedInput, null, op);
     				    if(bmp != null)
     				    {
     				    	Log.i(TAG, "## bmp width, height " + bmp.getWidth() + ", " + bmp.getHeight());
@@ -296,17 +421,15 @@ public class SpeedWallpaper extends WallpaperService {
     			}
     			mPictureIndex++;
 			}
-			/*
-            synchronized (mLock) {
-            	try {
-                    mBackground = mWallpaperManager.getFastDrawable();
-                } catch (RuntimeException e) {
-                    Log.w("ImageWallpaper", "Unable to load wallpaper!", e);
-                }
-            }
-            */
         }
-
+        private int computeSampleSize(InputStream stream, int maxResolutionX, int maxResolutionY) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(stream, null, options);
+                int maxNumOfPixels = maxResolutionX * maxResolutionY;
+                int minSideLength = Math.min(maxResolutionX, maxResolutionY) / 2;
+                return computeSampleSize(options, minSideLength, maxNumOfPixels);
+            }
         void drawFrame() {
             SurfaceHolder sh = getSurfaceHolder();
             Canvas c = sh.lockCanvas();
@@ -320,10 +443,11 @@ public class SpeedWallpaper extends WallpaperService {
                     final int bh = (background == null) ? 0 : background.getIntrinsicHeight();
                     if(!mRectInit)
                     {
-                    	mRectWidth = dw + dw / 2;
-                    	mRectHeight = dh + dh / 2;
-                    	mXStep = (int)Math.ceil(((((double)dw) / 2) / mDuration) * mUpdateFrequency);
-                    	mYStep = (int)Math.ceil(((((double)dh) / 2) / mDuration) * mUpdateFrequency);
+                    	mRectWidth = dw + dw / 32;
+                    	mRectHeight = dh + dh / 32;
+                    	float ratio = ((float)bw) / bh;
+                    	mXStep = (int)Math.ceil(((((double)dw) / 32) / mDuration) * mUpdateFrequency * ratio);
+                    	mYStep = (int)Math.ceil(((((double)dh) / 32) / mDuration) * mUpdateFrequency);
                     	mCurrentRectWidth = dw;
                     	mCurrentRectHeight = dh;
                     	mClientWidth = dw;
@@ -337,7 +461,7 @@ public class SpeedWallpaper extends WallpaperService {
                         c.translate(-deltax / 2, -deltay / 2);
                     	//c.drawColor(0xff000000);
                         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-                        p.setColorFilter(new ColorMatrixColorFilter(mColorMatrix));
+                        //p.setColorFilter(new ColorMatrixColorFilter(mColorMatrix));
                         //p.setAlpha(128);
                         //p.setColor(0xff000000);
                     	Rect srcr = new Rect(0, 0, bw, bh);
