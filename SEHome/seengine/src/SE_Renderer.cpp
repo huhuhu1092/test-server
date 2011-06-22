@@ -294,7 +294,7 @@ void SE_Renderer::draw()
     if(mPrimitiveType == TRIANGLES)
     {
         //glDrawArrays(GL_TRIANGLES, 0, mVertexNum);
-        glDrawElements(GL_TRIANGLES, mVertexBuffer.indexNum, GL_UNSIGNED_BYTE, mVertexBuffer.indexData);
+        glDrawElements(GL_TRIANGLES, mVertexBuffer.indexNum, GL_UNSIGNED_INT, mVertexBuffer.indexData);
     }
     else if(mPrimitiveType == TRIANGLE_STRIP)
     {
