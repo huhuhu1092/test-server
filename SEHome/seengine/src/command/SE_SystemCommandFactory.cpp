@@ -1,5 +1,6 @@
 #include "SE_SystemCommandFactory.h"
 #include "SE_SystemCommand.h"
+#include "SE_ID.h"
 /*
 class SE_CreateInitAppCommand : public SE_CreateCommandFunc
 {

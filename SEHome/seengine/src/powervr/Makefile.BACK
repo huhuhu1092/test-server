@@ -16,7 +16,7 @@ LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
                -L/home/luwei/ProgramFiles/curl/lib \
 			   -L/home/luwei/ProgramFiles/devIL/lib
 
-PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DSE_HAS_MUTEX -g
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DSE_HAS_MUTEX -DROTATE -g
 
 PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
 		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \

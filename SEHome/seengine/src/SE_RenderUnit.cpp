@@ -12,6 +12,7 @@
 #include "SE_Spatial.h"
 #include "SE_Renderer.h"
 #include "SE_DataValueDefine.h"
+#include "SE_ID.h"
 #include <vector>
 /////////////////////////////////
 SE_RenderUnit::SE_RenderUnit()
