@@ -89,6 +89,7 @@ public:
     virtual void setTexVertex(SE_RenderUnit* renderUnit);
     virtual void setDrawMode(SE_RenderUnit* renderUnit);
 	virtual void begin(SE_ShaderProgram* shaderProgram);
+	virtual void setVertexBuffer(SE_RenderUnit* renderUnit);
 private:
 	SE_SimpleSurfaceShaderProgram* mShaderProgram;
 };

@@ -12,7 +12,7 @@ public:
 	{
 		_Vector3f pos;
 		_Vector2f tex0;
-	}
+	};
 };
 class SE_VertexBuffer
 {

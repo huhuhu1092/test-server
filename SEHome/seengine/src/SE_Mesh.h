@@ -6,6 +6,7 @@
 #include "SE_ImageData.h"
 #include "SE_VertexBuffer.h"
 #include <string.h>
+#include <list>
 class SE_TextureCoordData;
 class SE_GeometryData;
 class SE_MaterialData;
@@ -109,21 +110,7 @@ public:
 private:
     SE_TextureUnit** mTexUnitArray;
 };
-class SE_VertexBuffer
-{
-public:
-	float* vertexData;
-	int vertexDataNum;
-	int* indexData;
-	int indexNum;
-	SE_VertexBuffer()
-	{
-		vertexData = NULL;
-		vertexDataNum = 0;
-		indexData = NULL;
-		indexNum = 0;
-	}
-};
+
 class SE_Surface
 {
 public:
@@ -151,7 +138,7 @@ public:
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
 	void setShaderProperty(SE_ShaderProperty* sp);
-	SE_VertexBuffer getVertexData(SE_VertexFormat::TYPE t);
+	SE_VertexBuffer getVertexBuffer(SE_VertexFormat::TYPE t);
 	SE_ShaderProperty* getShaderProperty()
 	{
 		return mShaderProperty;

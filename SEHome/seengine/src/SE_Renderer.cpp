@@ -294,7 +294,7 @@ void SE_Renderer::draw()
     if(mPrimitiveType == TRIANGLES)
     {
         //glDrawArrays(GL_TRIANGLES, 0, mVertexNum);
-        glDrawElements(GL_TRIANGLES, mVertexBuffer.indexNum, GL_UNSINGED_INT, mVertexBuffer.indexData);
+        glDrawElements(GL_TRIANGLES, mVertexBuffer.indexNum, GL_UNSIGNED_BYTE, mVertexBuffer.indexData);
     }
     else if(mPrimitiveType == TRIANGLE_STRIP)
     {
@@ -466,7 +466,7 @@ void SE_SimpleSurfaceRenderer::setVertexBuffer(SE_RenderUnit* renderUnit)
     int vertex_size = vertex_pos_size + vertex_tex0_size;
     glVertexAttribPointer(mBaseShaderProgram->getPositionAttributeLoc(), vertex_pos_size, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), vb.vertexData);
     glEnableVertexAttribArray(mBaseShaderProgram->getPositionAttributeLoc());
-    glVertexAttribPointer(mShaderProgram->getTexCoordAttributeLoc(), vertex_tex0_size, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), vb.VertexData + vertex_tex0_offset);
+    glVertexAttribPointer(mShaderProgram->getTexCoordAttributeLoc(), vertex_tex0_size, GL_FLOAT, GL_FALSE, vertex_size * sizeof(float), vb.vertexData + vertex_tex0_offset);
 	glEnableVertexAttribArray(mShaderProgram->getTexCoordAttributeLoc());
     mVertexBuffer = vb;
 
