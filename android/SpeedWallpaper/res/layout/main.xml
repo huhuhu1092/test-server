@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/backgroundview"
+    android:paddingBottom="4dip" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    <LinearLayout android:id="@+id/linearLayout1" android:orientation="horizontal" android:layout_height="wrap_content" android:layout_width="match_parent">
+        <TextView android:id="@+id/textView1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceLarge" android:text="@string/freq" android:layout_weight="0" android:layout_gravity="center_vertical"></TextView>
+        <EditText android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="1" android:layout_gravity="right" android:id="@+id/frequency">
+            <requestFocus></requestFocus>
+        </EditText>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent" android:orientation="vertical">
+        <LinearLayout android:id="@+id/linearLayout3" android:layout_height="wrap_content" android:layout_width="match_parent">
+            <TextView android:id="@+id/textView2" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceLarge" android:text="@string/duration"></TextView>
+            <EditText android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="1" android:id="@+id/duration"></EditText>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/LinearLayout1" android:layout_height="wrap_content" android:layout_width="match_parent">
+        <Button android:text="@string/ok" android:layout_height="wrap_content" android:layout_width="wrap_content" android:onClick="setLiveWallpaper"></Button>
+        <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/cancel" android:id="@+id/cancel"></Button>
+    </LinearLayout>
+
+</LinearLayout>

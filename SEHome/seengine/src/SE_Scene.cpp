@@ -12,11 +12,12 @@
 #include "SE_Geometry3D.h"
 #include "SE_Camera.h"
 #include "SE_TimeKey.h"
-SE_Scene::SE_Scene(SE_SCENE_TYPE t): mRenderTargetSeq(0xFFFFFFFF)
+#include "SE_Buffer.h"
+SE_Scene::SE_Scene(): mRenderTargetSeq(0xFFFFFFFF)
 {
     mWidth = mHeight = 0;
     mIsTranslucent = false;
-    mSceneType = t;
+    //mSceneType = t;
 	mIsModel = true;
 	mSceneRenderSeq = -1;
     mIsShow = false;
@@ -27,45 +28,34 @@ SE_Scene::SE_Scene(SE_SCENE_TYPE t): mRenderTargetSeq(0xFFFFFFFF)
 SE_Scene::~SE_Scene()
 {
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    elementManager->remove(mRoot);
+    SE_Element* root = elementManager->remove(mRoot);
+	elementManager->release(root);
     SE_CameraManager* cameraManager = SE_Application::getInstance()->getCameraManager();
     cameraManager->remove(mCamera);
 }
-void SE_Scene::create(const char* sceneName)
+SE_Element* SE_Scene::createMatrixNode()
 {
-    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-    SE_Element* element = resourceManager->loadScene(sceneName);
-    SE_Element* root = NULL;
+	return NULL;
+}
+void SE_Scene::setRootElement(SE_Element* e)
+{
     SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
-    if(mSceneType == SE_2D_SCENE)
-    {
-        root = new SE_2DNodeElement;
-		root->setCanPointed(false);
-
-
-#ifdef ROTATE
-	    SE_Vector4f c1(0, -1, 0, 0);
-        SE_Vector4f c2(-1, 0, 0, 0);
-        SE_Vector4f c3(0, 0, 1, 0);
-        SE_Vector4f c4(mWidth / 2, mHeight / 2, 0, 1);
-#else
-        SE_Vector4f c1(1, 0, 0, 0);
-        SE_Vector4f c2(0, -1, 0, 0);
-        SE_Vector4f c3(0, 0, 1, 0);
-        SE_Vector4f c4(-mWidth / 2, mHeight / 2, 0, 1);
-#endif
-        SE_Matrix4f localM;
-        localM.setColumn(0, c1);
-        localM.setColumn(1, c2);
-        localM.setColumn(2, c3);
-        localM.setColumn(3, c4);
-        root->setPostMatrix(localM);
-		elementManager->add(root, element);
-    }
-    else
-    {
-        root = element;
-    }
+    SE_Element* root = elementManager->remove(mRoot);
+	elementManager->release(root);
+	createRoot(e);
+}
+void SE_Scene::createRoot(SE_Element* element)
+{
+    SE_Element* root = createMatrixNode();
+    SE_ElementManager* elementManager = SE_Application::getInstance()->getElementManager();
+	if(root)
+	{
+        elementManager->add(root, element);
+	}
+	else
+	{
+		root = element;
+	}
     mRoot = elementManager->add(SE_ElementID::NULLID, root, false);
     root->spawn();
 	root->update(SE_TimeKey(0));
@@ -73,12 +63,19 @@ void SE_Scene::create(const char* sceneName)
     root->setRenderTargetID(mRenderTargetID);
     root->setRenderTargetSeq(mRenderTargetSeq);
 }
-/*
-SE_SceneID SE_Scene::getID()
+void SE_Scene::create(SE_BufferInput& inputBuf)
 {
-    return mID;
+	SE_ResourceManager* resourceManager = SE_GET_RESOURCEMANAGER();
+    SE_Element* element = resourceManager->loadElement(inputBuf);
+    createRoot(element);
 }
-*/
+void SE_Scene::create(const char* sceneName)
+{
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    SE_Element* element = resourceManager->loadScene(sceneName);
+    createRoot(element);
+}
+
 void SE_Scene::show()
 {
     if(mIsShow)
@@ -227,9 +224,27 @@ bool SE_Scene::dispatchMotionEvent(const SE_MotionEvent& motionEvent)
 {
 	return false;
 }
-/*
-void SE_Scene::setID(const SE_SceneID& sceneID)
+////////////////
+SE_Element* SE_2DScene::createMatrixNode()
 {
-    mID = sceneID;
+    SE_2DNodeElement* root = new SE_2DNodeElement;
+	root->setCanPointed(false);
+#ifdef ROTATE
+    SE_Vector4f c1(0, -1, 0, 0);
+    SE_Vector4f c2(-1, 0, 0, 0);
+    SE_Vector4f c3(0, 0, 1, 0);
+    SE_Vector4f c4(mWidth / 2, mHeight / 2, 0, 1);
+#else
+    SE_Vector4f c1(1, 0, 0, 0);
+    SE_Vector4f c2(0, -1, 0, 0);
+    SE_Vector4f c3(0, 0, 1, 0);
+    SE_Vector4f c4(-mWidth / 2, mHeight / 2, 0, 1);
+#endif
+    SE_Matrix4f localM;
+    localM.setColumn(0, c1);
+    localM.setColumn(1, c2);
+    localM.setColumn(2, c3);
+    localM.setColumn(3, c4);
+    root->setPostMatrix(localM);
+	return root;
 }
-*/

@@ -80,7 +80,7 @@ public:
     //u is the normal x coordinate
     //v is the normal v coordinate
     //this two value is used to create tile effect 
-    static void create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID, float u, float v);
+    static void create(const SE_Rect3D& rect, float u, float v, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID);
 	SE_RectPrimitive* clone();
 	~SE_RectPrimitive();
 	void setImageData(int index, SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion = SE_ImageDataPortion::INVALID);
@@ -101,7 +101,7 @@ private:
 	SE_RectPrimitive(const SE_Rect3D& rect);
 	SE_RectPrimitive(const SE_RectPrimitive&);
 	SE_RectPrimitive& operator=(const SE_RectPrimitive&);
-    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3);
+    static bool createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3,const SE_Vector2f& v4, const SE_Vector2f& v5, const SE_Vector2f& v6, const SE_Vector2f& v7, const SE_Vector2f& v8, int uRectSize, int vRectSize, float uReminder, float vReminder);
     static bool createGeometryData(SE_RectPrimitive* rectPrimitive);
     static void getUVProperty(float uv, int& rectSize, float& floor, float& reminder);
 private:

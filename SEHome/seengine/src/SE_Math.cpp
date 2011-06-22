@@ -39,3 +39,11 @@ float SE_Tanf(float f)
 {
     return tanf(f);
 }
+float SE_Floor(float x)
+{
+	return floorf(x);
+}
+float SE_Ceil(float x)
+{
+	return ceil(x);
+}

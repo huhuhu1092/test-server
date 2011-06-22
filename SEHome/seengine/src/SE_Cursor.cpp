@@ -37,7 +37,7 @@ void SE_Cursor::load(const char* cursorResource)
 	}
 	if(cursorResource)
 	{
-	    mCursorScene = new SE_Scene(SE_2D_SCENE);
+	    mCursorScene = new SE_2DScene;
 	    mCursorScene->setBound(mSceneWidth, mSceneHeight);
 	    mCursorScene->create(cursorResource);
 	    mCursorScene->setTranslucent(true);

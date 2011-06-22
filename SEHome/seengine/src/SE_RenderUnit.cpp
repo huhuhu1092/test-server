@@ -473,20 +473,27 @@ void SE_TriSurfaceRenderUnit::draw()
 	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
 	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
 	if(!shaderProgram)
+	{
+		LOGI("### can not find shader program : %s ####\n", spID.getStr());
 		return;
+	}
 	shaderProgram->use();
 	const SE_RendererID rendererID = mSurface->getRendererID();
 	SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer(rendererID);
 	if(!renderer)
+	{
+		LOGI("### can not find renderer : %s ####\n", rendererID.getStr());
 		return;
+	}
 	renderer->begin(shaderProgram);
 	renderer->setSurface(mSurface);
 	renderer->setPrimitiveType(mPrimitiveType);
 	renderer->setMatrix(this);
 	renderer->setImage(this);
 	renderer->setColor(this);
-	renderer->setVertex(this);
-	renderer->setTexVertex(this);
+	//renderer->setVertex(this);
+	//renderer->setTexVertex(this);
+    renderer->setVertexBuffer(this);
 	renderer->setDrawMode(this);
 	renderer->draw();
 	renderer->end();

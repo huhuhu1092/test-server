@@ -256,4 +256,5 @@ protected:
 #define SE_GET_SCENEMANAGER() SE_Application::getInstance()->getSceneManager()
 #define SE_GET_RENDERTARGETMANAGER() SE_Application::getInstance()->getRenderTargetManager()
 #define SE_GET_ANIMATIONMANAGER() SE_Application::getInstance()->getAnimationManager()
+#define SE_GET_THREADMANAGER() SE_Application::getInstance()->getThreadManager();
 #endif

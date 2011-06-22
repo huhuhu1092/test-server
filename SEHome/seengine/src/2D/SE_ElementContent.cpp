@@ -9,6 +9,7 @@
 #include "SE_ColorEffectControllerElement.h"
 #include "SE_TextureElement.h"
 #include "SE_ElementSchema.h"
+#include "SE_Log.h"
 void SE_ElementContent::clone(SE_ElementContent* src, SE_ElementContent* dst)
 {
 	dst->mContentURI = src->mContentURI;
@@ -82,6 +83,10 @@ SE_Element* SE_ImageContent::createElement(float mpx, float mpy)
 		colorEffectControllerElement->setMountPoint(mpx, mpy);
 		rete = colorEffectControllerElement;
 	}
+	else
+	{
+		LOGI("### invalid table type ####\n");
+	}
     rete->setName(getID().getStr());
     rete->setState(getState());
 	rete->setRectPatchType(getRectPatchType());
@@ -111,6 +116,8 @@ SE_Element* SE_ActionContent::createElement(float mpx, float mpy)
 	SE_ActionElement* e = new SE_ActionElement(getURI());
 	e->setMountPoint(mpx, mpy);
     e->setState(getState());
+	e->setCanPointed(getCanPointed());
+	e->setName(getID().getStr());
 	return e;
 }
 SE_StateTableContent::SE_StateTableContent(const SE_StringID& stateTableURI)
@@ -128,6 +135,8 @@ SE_Element* SE_StateTableContent::createElement(float mpx, float mpy)
 	SE_StateTableElement* e = new SE_StateTableElement(getURI());
 	e->setMountPoint(mpx, mpy);
     e->setState(getState());
+	e->setName(getID().getStr());
+	e->setCanPointed(getCanPointed());
 	return e;
 }
 

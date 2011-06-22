@@ -36,6 +36,15 @@ private:
     int num;
     SE_CChess* mChessApp;
 };
+class SE_ChessAIResponse : public SE_Command
+{
+public:
+	SE_ChessAIResponse(SE_Application* app);
+	void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+	std::string command;
+	std::string color;
+};
+/////////////////
 class SE_ChessLoginThread : public SE_Thread
 {
 public:
@@ -82,5 +91,29 @@ public:
     std::string username;
 protected:
     void run();
+};
+/////////////////////////////////
+class SE_ChessAICommand
+{
+public:
+    ~SE_ChessAICommand() {}
+    void setCommandLine(const char* command)
+    {
+        mCommandLine = std::string(command) + "\n";
+    }
+    std::string getCommandLine() const
+    {
+        return mCommandLine;
+    }
+private:
+    std::string mCommandLine;
+};
+class SE_ChessAIThread : public SE_Thread
+{
+protected:
+    void run();
+private:
+    //std::list<SE_ChessAICommand> mCommandList;
+    //SE_Mutex mCommandListMutex;
 };
 #endif

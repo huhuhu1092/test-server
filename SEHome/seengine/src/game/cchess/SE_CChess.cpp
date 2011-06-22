@@ -15,6 +15,7 @@
 #include "SE_ChessCommand.h"
 #include "SE_TextView.h"
 #include "SE_ThreadManager.h"
+#include "SE_Pipe.h"
 #include <string>
 #include <map>
 #include <algorithm>
@@ -361,10 +362,12 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
 				mPointedElement->setMountPoint(result.newposition.x, result.newposition.y);
 				mPointedElement->layout();
 				mPointedElement->updateSpatial(false);
+				std::string posStr = mChessApp->createPositionCode();
+				std::string c = std::string("position fen ") + posStr;
+				mChessApp->sendCommandToChessAI(c.c_str());
+				mChessApp->sendCommandToChessAI("go time 300 increment 0");
+				/*
                 mChessApp->setGameState(SE_CChess::MOVE);
-                //SE_ChessMessage* msg = new SE_ChessMessage(mChessApp, SE_Application::getInstance(), SE_ChessMessage::SE_CHESS_MOVE);
-                //SE_Application::getInstance()->postCommand(msg);
-                SE_ChessMoveThread* moveThread = new SE_ChessMoveThread;
                 moveThread->session = mChessApp->getSessionName();
                 moveThread->color = mChessApp->getColorString();
                 moveThread->remoteInfo = mChessApp->getRemote();
@@ -372,7 +375,7 @@ void SE_ChessPointedElementHandler::handle(SE_Scene* pointedScene, SE_Element* p
                 SE_ThreadManager* threadManager = SE_Application::getInstance()->getThreadManager();
                 threadManager->add(moveThread);
                 moveThread->start();
-
+                */
  
 			}
 			mPointedElement = NULL;
@@ -506,6 +509,115 @@ static int getChessPiece(const std::string& str)
 	else
 		return SE_CChess::INVALID_PIECE;
 }
+static std::string getPieceCode(SE_CChess::_ChessPieces cp)
+{
+	if(cp.color == SE_CChess::RED)
+	{
+		switch(cp.cp)
+		{
+		case SE_CChess::ROOK1:
+		case SE_CChess::ROOK2:
+			return "R";
+		case SE_CChess::HORSE1:
+		case SE_CChess::HORSE2:
+			return "N";
+		case SE_CChess::ELEPHANT1:
+		case SE_CChess::ELEPHANT2:
+			return "B";
+		case SE_CChess::KING:
+			return "K";
+		case SE_CChess::CANNON1:
+		case SE_CChess::CANNON2:
+			return "C";
+		case SE_CChess::KNIGHT1:
+		case SE_CChess::KNIGHT2:
+			return "A";
+		case SE_CChess::PRIVATE1:
+		case SE_CChess::PRIVATE2:
+		case SE_CChess::PRIVATE3:
+		case SE_CChess::PRIVATE4:
+		case SE_CChess::PRIVATE5:
+			return "P";
+		}
+	}
+	else if(cp.color == SE_CChess::BLACK)
+	{
+		switch(cp.cp)
+		{
+		case SE_CChess::ROOK1:
+		case SE_CChess::ROOK2:
+			return "r";
+		case SE_CChess::HORSE1:
+		case SE_CChess::HORSE2:
+			return "n";
+		case SE_CChess::ELEPHANT1:
+		case SE_CChess::ELEPHANT2:
+			return "b";
+		case SE_CChess::KING:
+			return "k";
+		case SE_CChess::CANNON1:
+		case SE_CChess::CANNON2:
+			return "c";
+		case SE_CChess::KNIGHT1:
+		case SE_CChess::KNIGHT2:
+			return "a";
+		case SE_CChess::PRIVATE1:
+		case SE_CChess::PRIVATE2:
+		case SE_CChess::PRIVATE3:
+		case SE_CChess::PRIVATE4:
+		case SE_CChess::PRIVATE5:
+			return "p";
+		}
+	}
+	return "";
+}
+std::string SE_CChess::createPositionCode()
+{
+	std::list<std::string> positionStrList;
+    for(int i = 0 ; i < ROW_NUM ; i++)
+	{
+	    int spNum = 0;
+		std::string rowStr;
+	    for(int j = 0 ; j < COL_NUM; j++)
+		{
+		    _BoardUnitData& bud = mBoardData[i][j];
+			if(!mBoardData[i][j].cp.isValid())
+				spNum++;
+			else
+			{
+				std::string pieceStr = getPieceCode(mBoardData[i][j].cp);
+				SE_ASSERT(pieceStr != "");
+				if(spNum > 0)
+				{
+					pieceStr = SE_Util::intToString(spNum) + pieceStr;
+				}
+				spNum = 0;
+				rowStr += pieceStr;
+			}
+		}
+		if(spNum > 0)
+		{
+			rowStr += SE_Util::intToString(spNum);
+		}
+		positionStrList.push_front(rowStr);
+	}
+	std::string ret;
+	std::list<std::string>::iterator it;
+	for(it = positionStrList.begin() ; it != positionStrList.end() ; it++)
+	{
+		ret += *it;
+		ret += "/";
+	}
+	ret.erase(ret.size() - 1);
+	ret += " b - - 0 1";
+	LOGI("#### position code : %s ######\n", ret.c_str());
+	return ret;
+}
+void SE_CChess::sendCommandToChessAI(const char* command)
+{
+	std::string str = std::string(command) + "\n";
+	pipeInputWrite(str.c_str());
+}
 SE_CChess::_ChessPieces SE_CChess::getChessPieces(int row, int col)
 {
 	return mBoardData[row][col].cp;
@@ -544,6 +656,9 @@ void SE_CChess::setOpening(const char* startOpening, int len)
 			mChessPiecesData[currColor][piece].cp = SE_CChess::_ChessPieces((COLOR)currColor, (CHESS_PIECES_TYPE)piece);
 		}
 	}
+	sendCommandToChessAI("ucci");
+	sendCommandToChessAI("setoption usebook false");
+	
 }
 int SE_CChess::piecesNumBetweenCol(int row, int srcCol, int dstCol)
 {
@@ -676,15 +791,15 @@ bool SE_CChess::canPrivateMoveTo(const _BoardUnitData& src, const _BoardUnitData
 	movePoint[0].col = src.col - 1;
 	movePoint[1].row = src.row;
 	movePoint[1].col = src.col + 1;
-	//if(mPlayerColor[SELF] == src.cp.color)
+	if(mPlayerColor[SELF] == src.cp.color)
     //this is tempory change, please notice!!!!!!!!!
-    if(RED == src.cp.color)
+    //if(RED == src.cp.color)
 	{
 	    movePoint[2].row = src.row + 1;
 	    movePoint[2].col = src.col;
 	}
-	//else if(mPlayerColor[OPPONENT] == src.cp.color)
-    if(BLACK == src.cp.color)
+	else if(mPlayerColor[OPPONENT] == src.cp.color)
+    //if(BLACK == src.cp.color)
 	{
 		movePoint[2].row = src.row - 1;
 		movePoint[2].col = src.col;
@@ -1113,7 +1228,7 @@ void SE_CChess::handleKing(const _BoardUnitData& src, const _BoardUnitData& dst)
 void SE_CChess::loadScene(const char* sceneName, float width, float height, bool bShowCursor)
 {
     SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-    SE_Scene* scene = new SE_Scene(SE_2D_SCENE);
+    SE_Scene* scene = new SE_2DScene;
 	scene->setBackground(SE_Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 	scene->setBound(width, height);
 	scene->create(sceneName);
@@ -1246,6 +1361,7 @@ void SE_CChess::loadBoard()
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
     SE_ChessPointedElementHandler* h = new SE_ChessPointedElementHandler(this);
 	sceneManager->setPointedElementHandler(h);
+
 	initNameChessPiecesMap();
 	std::string path = std::string(resourceManager->getDataPath()) + SE_SEP + "data" + SE_SEP + "ChessOpening.dat";
 	char* data = NULL;
@@ -1253,6 +1369,13 @@ void SE_CChess::loadBoard()
 	SE_IO::readFileAll(path.c_str(), data, len);
 	setOpening(data, len);
 	delete[] data;
+	////create ChessAI
+    SE_Thread* chessThread = new SE_ChessAIThread;
+	chessThread->setName("chessAI Thread");
+	SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+	SE_ThreadID threadID = threadManager->add(chessThread);
+	chessThread->start();
+	///
 }
 void SE_CChess::start()
 {

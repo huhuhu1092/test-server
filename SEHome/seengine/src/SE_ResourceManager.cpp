@@ -39,38 +39,13 @@ struct _MeshData
     SE_Mesh* mesh;
     SE_MeshTransfer* meshTransfer;
 };
-static int getElementState(const SE_StringID& state)
-{
-    if(state == "normal")
-        return SE_Element::NORMAL;
-    else if(state == "highlighted")
-        return SE_Element::HIGHLIGHTED;
-    else if(state == "selected")
-        return SE_Element::SELECTED;
-    else if(state == "inactive")
-        return SE_Element::INACTIVE;
-    else if(state == "")
-        return SE_Element::NORMAL;
-	else
-		return SE_Element::INVALID;
-
-}
-static int getElementType(const SE_StringID& type)
-{
-    if(type == "button")
-    {
-        return SE_UI_BUTTON;
-    }
-    else if(type == "textview")
-    {
-        return SE_UI_TEXTVIEW;
-    }
-    else
-        return SE_2D_UI_NODE;
-}
 static SE_ImageData* loadCommonCompressImage(const char* imageName, bool fliped)
 {
 	return SE_ImageCodec::load(imageName, fliped);   
+}
+static std::string createElementContentID(const std::string& parent, const std::string& id, const std::string& type)
+{
+	return parent + "_" + "*" + type + "*" + "_" + id;
 }
 static SE_ImageData* loadRawImage(const char* imageName)
 {
@@ -376,6 +351,10 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
 		delete[] fragmentShaderBytes;
     }
 }
+static void processElement(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
+{
+	
+}
 static void processPrimitive(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
 	/*
@@ -424,6 +403,9 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
 			case SE_RENDERERINFO_ID:
 				processRendererData(inputBuffer, resourceManager);
 				break;
+		    //case SE_ELEMENTINFO_ID:
+			//    processElement(inputBuffer, resourceManager);
+			//	break;
         }
     }
 }
@@ -1818,7 +1800,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
 		}
         else if(!strcmp(name, "type"))
         {
-            elementSchema->type = getElementType(value);
+			elementSchema->type = SE_ElementSchema::getElementType(value);
         }
         else if(!strcmp(name, "text"))
         {
@@ -1837,7 +1819,7 @@ void SE_ElementHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElemen
         }
         else if(!strcmp(name, "state"))
         {
-            elementSchema->state = getElementState(value);
+			elementSchema->state = SE_ElementSchema::getElementState(value);
         }
         pAttribute = pAttribute->Next();
     }
@@ -2085,7 +2067,6 @@ void SE_TextPropertyHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlE
     if(!xmlElement)
         return;
     TiXmlAttribute* pAttribute = xmlElement->FirstAttribute();
-	SE_ImageContent* imageContent = NULL;
 	std::string style;
     std::string align;
     std::string orientation;
@@ -2193,16 +2174,21 @@ void SE_ImageHandler::handle(SE_ElementSchema* parent, TiXmlElement* xmlElement,
         }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
     if(!id.isValid())
     {
-        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str.c_str();
+		id = SE_Util::intToString(indent).c_str();
+		str = createElementContentID(parent->fullPathName.getStr(), id.getStr(), "Image");
     }
+	else
+	{
+		str = id.getStr();
+	}
     imageContent->setFillType(fillType);
-	imageContent->setID(id);
+	imageContent->setID(str.c_str());
     imageContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	imageContent->setRectPatchType(patchType);
-    imageContent->setState(getElementState(state));
+	imageContent->setState(SE_ElementSchema::getElementState(state));
     imageContent->setCanPointed(canpointed);
 	parent->addContent(imageContent);
 }
@@ -2229,12 +2215,17 @@ void SE_ElementActionHandler::handle(SE_ElementSchema* parent, TiXmlElement* xml
         }
 		pAttribute = pAttribute->Next();
 	}
+	std::string str;
     if(id == "")
     {
-		std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str.c_str();
+		id = SE_Util::intToString(indent);
+	    str = createElementContentID(parent->fullPathName.getStr(), id, "Action");
     }
-    actionContent->setID(id.c_str());
+	else
+	{
+		str = id;
+	}
+    actionContent->setID(str.c_str());
     actionContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(actionContent);
 }
@@ -2261,12 +2252,17 @@ void SE_ElementStateTableHandler::handle(SE_ElementSchema* parent, TiXmlElement*
         }
 		pAttribute = pAttribute->Next();
 	}
-    if(id == "")
+	std::string str;
+	if(id == "")
     {
-        std::string str = std::string(parent->fullPathName.getStr()) + "_" + SE_Util::intToString(indent);
-        id = str;
+		id = SE_Util::intToString(indent);
+		str = createElementContentID(parent->fullPathName.getStr(), id, "State");
     }
-    stateTableContent->setID(id.c_str());
+	else
+	{
+		str = id;
+	}
+    stateTableContent->setID(str.c_str());
     stateTableContent->setSeq(parent->seq + SE_Util::intToString(indent));
 	parent->addContent(stateTableContent);
 }
@@ -3427,8 +3423,7 @@ void SE_ResourceManager::setShaderProgram(const SE_ProgramDataID& programDataID,
     if(vertexShader == NULL || fragmentShader == NULL)
         return;
 	SE_ShaderProgram* shaderProgram = (SE_ShaderProgram*)SE_Object::create(shaderClassName);
-	shaderProgram->create(vertexShader, fragmentShader);
-	//new SE_ShaderProgram(vertexShader, fragmentShader);
+	shaderProgram->setSource(vertexShader, fragmentShader);
     mImpl->shaderMap.set(programDataID, shaderProgram);
 
 }
@@ -3470,7 +3465,11 @@ void SE_ResourceManager::loadSceneFromXml(const char* sceneName)
 {
 
 }
-
+SE_Element* SE_ResourceManager::loadElement(SE_BufferInput& inputBuffer)
+{
+	
+	return NULL;
+}
 void SE_ResourceManager::loadSceneFromCbf(const char* sceneName)
 {
     std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
@@ -3657,6 +3656,40 @@ void SE_ResourceManager::loadFontData(const char* fontFileName, char*& outData, 
 	SE_IO::readFileAll(filePath.c_str(), data, len);
     outData = data;
     outLen = len;
+}
+SE_ImageData* SE_ResourceManager::loadImageWithFullPath(const char* imageDataPath, bool fliped)
+{
+    SE_ImageData* imageData = getImageData(SE_ImageDataID(imageDataPath));
+	if(imageData)
+		return imageData;
+	std::string str(imageDataPath);
+	size_t pos = str.find('.');
+    std::string ext = str.substr(pos + 1);
+	int imageType = -1;
+    if(ext == "raw")
+    {
+        imageType = SE_ImageData::RAW; // image data type
+    }
+    else if(ext == "png")
+    {
+        imageType = SE_ImageData::PNG;
+    }
+	else if(ext == "tga")
+	{
+		imageType = SE_ImageData::TGA;
+	}
+    else if(ext == "jpg" || ext == "jpeg")
+    {
+        imageType = SE_ImageData::JPEG;
+    }
+	if(imageType == -1)
+		return NULL;;
+	imageData = ::loadImage(imageDataPath, imageType, fliped);
+	if(imageData)
+	{
+		setImageData(imageDataPath, imageData);
+	}
+	return imageData;
 }
 SE_ImageData* SE_ResourceManager::loadImage(const char* imageName, bool fliped)
 {

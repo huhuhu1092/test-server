@@ -1,0 +1,126 @@
+;;; Define :mainui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun mainui () (find-or-make-application-window :mainui 'make-mainui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-mainui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 504 94 1324 643)) (name :mainui) (title "Mainui")
+     (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'frame-window
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
+           :form-package-name :common-graphics-user
+           :form-state :normal
+           :maximize-button t
+           :menu (open-menu
+                    (list (make-instance 'menu-item :name :new-item-1 :title "Project"
+                                         :value
+                                         (open-menu
+                                            (list (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-2
+                                                   :title
+                                                   "create"
+                                                   :value
+                                                   'sui-create-project
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
+                                                   nil)
+                                                  (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-3
+                                                   :title
+                                                   "remove"
+                                                   :value
+                                                   'sui-delete-project
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
+                                                   nil)
+                                                  (make-instance
+                                                   'menu-item
+                                                   :name
+                                                   :new-item-4
+                                                   :title
+                                                   "save"
+                                                   :value
+                                                   nil
+                                                   :selected
+                                                   nil
+                                                   :available
+                                                   t
+                                                   :event-synonym
+                                                   nil
+                                                   :help-string
+                                                   nil))
+                                            'pull-down-menu (screen *system*) :name
+                                            :new-item-1
+                                           :show-help-strings-as-tooltips nil
+                                           :on-click 'funcall-menu-item-with-window
+                                           :justification :left
+                                           :override-native-shortcuts nil)
+                                         :selected nil :available t :event-synonym nil
+                                         :help-string nil))
+                    'menu-bar (screen *system*) :name :default-menu
+                   :show-help-strings-as-tooltips nil
+                   :on-click 'funcall-menu-item
+                   :justification :left
+                   :override-native-shortcuts nil)
+           :minimize-button t
+           :name :mainui
+           :pop-up nil
+           :resizable t
+           :scrollbars t
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-mainui-widgets)
+           :form-p form-p
+           :form-package-name :common-graphics-user)))
+    owner))
+
+(defun make-mainui-widgets ()
+  (list (make-instance 'my-project-management-area-outline :font
+                       (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
+                       :project-management-area :on-click
+                       'mainui-project-management-area-on-click :on-double-click
+                       'mainui-project-management-area-on-double-click :top 14 :value
+                       :top-1 :width 232)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 41 :left 293 :name :project-path-name :read-only t :top 14
+                       :value "" :width 416)
+        (make-instance 'single-item-list :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 439 :left 293 :name :content-list :on-click
+                       'mainui-content-list-on-click :on-double-click
+                       'mainui-content-list-on-double-click :top 55 :width 414)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 47
+                       :left 731 :name :button10 :on-click 'mainui-button10-on-click
+                       :title "Preview" :top 156 :width 65)))

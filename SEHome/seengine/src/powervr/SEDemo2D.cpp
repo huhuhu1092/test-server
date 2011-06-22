@@ -30,6 +30,11 @@
 #include "SE_ChessCommand.h"
 #include "SE_Primitive.h"
 #include "SE_Scene.h"
+#include "SE_Thread.h"
+#include "SE_ThreadManager.h"
+#include "SE_MessageStream.h"
+#include "SE_NetDataCommand.h"
+#include "SE_UieManager.h"
 #include <ctype.h>
 #include <stdarg.h>
 #ifdef WIN32
@@ -69,6 +74,7 @@ private:
 	//SE_Physics* mPhysics;
     SE_Spatial* mSelectedSpatial;
 	SE_CChess* mChessApp;
+	SE_ThreadID mChessAIThread;
 };
 static void doTest()
 {
@@ -99,7 +105,7 @@ static void debugPrimitive()
 
     SE_Rect3D rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, -1, 0), e);
   
-    SE_RectPrimitive::create(rect3D, primitive, primitiveID, 3.2, 3.2);
+    SE_RectPrimitive::create(rect3D, 3.2, 3.2, primitive, primitiveID);
 
 }
 bool SEDemo::InitApplication()
@@ -160,7 +166,6 @@ bool SEDemo::InitView()
 }
 bool SEDemo::ReleaseView()
 {
-	
 	return true;
 }
 bool SEDemo::QuitApplication()
@@ -340,20 +345,13 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameUP))
     {
-		/*
-		if(mSelectedSpatial)
+        SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
+		std::vector<SE_Thread*> threadV = threadManager->find("uiewritethread");
+		if(threadV.size() > 0)
 		{
-			SE_PauseAllAnimationTravel rat;
-			mSelectedSpatial->travel(&rat, true);
+			SE_UieClientWriteThread* t = (SE_UieClientWriteThread*)threadV[0];
+			t->addOutputMessage(1, (unsigned char*)"aa", 2);
 		}
-		else
-		{
-            SE_SceneManager* sceneManager = SE_Application::getInstance()->getSceneManager();
-	        SE_Spatial* root = sceneManager->getRoot();
-	        SE_PauseAllAnimationTravel rat;
-	        root->travel(&rat, true);
-		}
-		*/
   	    LOGI("## up ##\n");
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameDOWN))
@@ -363,6 +361,16 @@ void SEDemo::handleInput(int width, int height)
 		sceneManager->setSelectedSpatial(NULL);
 		mSelectedSpatial = NULL;
 		*/
+		SE_NetMessage* netMessage = new SE_NetMessage;
+		std::string str = "D:\\model\\tmp\\aa\\image\\\Female_dress_001_M.png";
+		netMessage->len = 3 + str.size();
+		netMessage->data = new unsigned char[netMessage->len];
+		netMessage->data[0] = 0;
+		short s = SE_Util::host2NetInt16(netMessage->len);
+		memcpy(netMessage->data + 1, &s, 2);
+		memcpy(netMessage->data + 3, str.c_str(), str.size());
+		SE_NetDataCommand* netCommand = new SE_NetDataCommand(SE_Application::getInstance(), netMessage);
+		SE_Application::getInstance()->postCommand(netCommand);
 	    LOGI("## down ##\n");
     }
 }

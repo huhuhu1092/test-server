@@ -1,0 +1,114 @@
+;;; Define :element-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun element-ui () (find-or-make-application-window :element-ui 'make-element-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-element-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 480 42 1310 387)) (name :element-ui) (title "Element Ui")
+     (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :normal
+           :maximize-button t
+           :minimize-button t
+           :name :element-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-element-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-element-ui-widgets ()
+  (list (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 27 :left 119 :name :element-name :top 19 :value "" :width
+                       166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       27 :left 6 :name :static-text-7 :top 19 :value "name" :width 97)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       29 :left 6 :name :static-text-8 :top 59 :value "type" :width 97)
+        (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 28
+                       :left 119 :name :element-type :range
+                       (list :image-element :action-element :state-element
+                             :coloreffect-element)
+                       :top 59 :value :image-element :width 166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       25 :left 6 :name :static-text-9 :top 104 :value "left" :width 97)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 33 :left 119 :name :element-left :top 96 :value "" :width
+                       166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       29 :left 6 :name :static-text-10 :top 152 :value "top" :width 97)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 34 :left 119 :name :element-top :top 147 :value "" :width
+                       166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       30 :left 4 :name :static-text-11 :top 198 :value "width" :width
+                       99)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 33 :left 119 :name :element-width :top 195 :value ""
+                       :width 166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       34 :left 5 :name :static-text-12 :top 245 :value "height" :width
+                       98)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 34 :left 119 :name :element-height :top 245 :value ""
+                       :width 166)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       26 :left 416 :name :static-text-14 :top 20 :value "layer" :width
+                       64)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 27 :left 480 :name :element-layer :top 19 :value "" :width
+                       170)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       30 :left 417 :name :static-text-15 :top 66 :value "can pointed"
+                       :width 85)
+        (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 30
+                       :left 519 :name :element-can-pointed :range
+                       (list :one :two :three) :top 66 :value :one :width 119)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       37 :left 418 :name :static-text-16 :top 110 :value "text" :width
+                       84)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 41 :left 519 :name :element-text :top 106 :value "" :width
+                       183)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       33 :left 421 :name :static-text-22 :top 173 :value "resource-uri"
+                       :width 98)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 41 :left 529 :name :resource-uri :top 165 :value "" :width
+                       156)
+        (make-instance 'up-down-control :height 27 :left 659 :name :up-down-control-1
+                       :range (list 0 100) :top 19 :value 0 :width 34)
+        (make-instance 'check-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 28
+                       :left 425 :name :check-box-1 :title "hide" :top 228 :width 119)
+        (make-instance 'check-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 21
+                       :left 425 :name :check-box-2 :title "freeze" :top 275 :width 132)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 33
+                       :left 41 :name :button11 :title "Undo" :top 296 :width 106)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 33
+                       :left 210 :name :button24 :title "Redo" :top 296 :width 102)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 31
+                       :left 694 :name :button25 :title "..." :top 175 :width 58)))

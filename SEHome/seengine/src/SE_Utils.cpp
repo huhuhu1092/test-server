@@ -676,6 +676,67 @@ static std::string getParamValue(const std::string& str, std::string::size_type 
 		return BAD_STR;
 	}
 }
+int SE_Util::stringToInt(const char* v)
+{
+    if(!SE_Util::isDigit(v))
+	{
+        LOGI("## error: cannot convert undigit string to int ##\n");
+		return 0;
+	}
+	return atoi(v);
+}
+float SE_Util::stringToFloat(const char* v)
+{
+	if(!SE_Util::isDigit(v))
+	{
+		LOGI("## error: cannot convert undigit string to float ##\n");
+		return 0;
+	}
+	return atof(v);
+}
+void SE_Util::stringToIntArray(const char* v, int*& out, int& len)
+{
+	SE_Util::SplitStringList str = SE_Util::splitStringRaw(v, " \t");
+	if(str.size() == 0)
+	{
+		out = NULL;
+		len = 0;
+		return;
+	}
+	len = str.size();
+	out = new int[len];
+	if(out == NULL)
+	{
+		len = 0;
+		return;
+	}
+	for(int i = 0 ; i < len ; i++)
+	{
+		out[i] = SE_Util::stringToInt(str[i].c_str());
+	}
+}
+void SE_Util::stringToFloatArray(const char* v, float*& out, int& len)
+{
+	SE_Util::SplitStringList str = SE_Util::splitStringRaw(v, " \t");
+	if(str.size() == 0)
+	{
+		len = 0;
+		out = NULL;
+		return;
+	}
+	len = str.size();
+	out = new float[len];
+	if(out == NULL)
+	{
+		len = 0;
+		return;
+	}
+	for(int i = 0 ; i < len ; i++)
+	{
+		out[i] = SE_Util::stringToFloat(str[i].c_str());
+	}
+}
+
 std::string SE_Util::resolveParamString(const char* str)
 {
 	//SE_Util::SplitStringList strList = SE_Util::splitString(str, "/");

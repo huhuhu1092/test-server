@@ -8,6 +8,7 @@ class SE_Value;
 class SE_ParamValueList;
 class SE_Primitive;
 class SE_Surface;
+class SE_ImageDataElement;
 class SE_TextureElement : public SE_2DNodeElement
 {
 public:
@@ -27,12 +28,12 @@ protected:
 	void setImageData(SE_Primitive* primitive);
 	void setSurface(SE_Surface* surface);
 	void init();
-	SE_2DNodeElement* createChildContent();
+	SE_2DNodeElement* createChildContent(const SE_StringID& strURL);
 private:
 	SE_ImageDataID mImageDataID;
 	SE_ImageData* mImageData;
 	SE_RenderTargetID mContentRenderTargetID;
 	SE_2DNodeElement* mContentChild;
-    bool mShareContent;
+	SE_ImageDataElement* mImageDataElement;
 };
 #endif

@@ -18,7 +18,6 @@ SE_ImageElement::SE_ImageElement(const SE_StringID& uri)
     mImageUnits[4].imageUnit = &mAChannel;
     mImageWidth = 0;
     mImageHeight = 0;
-    initImage();
 }
 SE_Element* SE_ImageElement::clone()
 {
@@ -58,7 +57,6 @@ void SE_ImageElement::initImage()
 }
 void SE_ImageElement::update(SE_ParamValueList& paramValueList)
 {
-    initImage();
     spawn();
     SE_SpatialManager* spatialManager = SE_Application::getInstance()->getSpatialManager();
     SE_Spatial* spatial = spatialManager->get(getID());
@@ -197,49 +195,54 @@ void SE_ImageElement::update(const SE_TimeKey& key)
 {}
 void SE_ImageElement::spawn()
 {
+	initImage();
 	SE_ImageUnit iu = mBaseColor;
 	float pivotx, pivoty, width, height;
 	if(iu.imageDataID.isValid())
 	{
 		width = iu.imageRect.width;
 		height = iu.imageRect.height;
-		pivotx = iu.imageRect.pivotx;
-		pivoty = iu.imageRect.pivoty;
+		mPivotX = iu.imageRect.pivotx;
+		mPivotY = iu.imageRect.pivoty;
 	}
 	else
 	{
 		iu = mRChannel;
 		width = iu.imageRect.width;
 		height = iu.imageRect.height;
-		pivotx = iu.imageRect.pivotx;
-		pivoty = iu.imageRect.pivoty;
+		mPivotX = iu.imageRect.pivotx;
+		mPivotY = iu.imageRect.pivoty;
 	}
     mImageWidth = width;
     mImageHeight = height;
-    SE_ASSERT(mImageWidth != 0);
-    SE_ASSERT(mImageHeight != 0);
+	SE_ASSERT(mImageWidth != 0 && mImageHeight != 0);
+}
+void SE_ImageElement::layout()
+{
+	//SE_2DNodeElement::layout();
     if(mFillType == SE_WRAP_CONTENT)
     {
-	    mPivotX = pivotx;
-	    mPivotY = pivoty;
-	    mWidth = width;
-	    mHeight = height;
+	    mWidth = mImageWidth;
+	    mHeight = mImageHeight;
     }
     else
     {
         SE_2DNodeElement* parent = (SE_2DNodeElement*)getParent();
-        SE_ASSERT(parent);
-        mWidth = parent->getWidth();
-        mHeight = parent->getHeight();
-		SE_ASSERT(mWidth > 0 && mHeight > 0);
         mPivotX = 0;
         mPivotY = 0;
         setMountPoint(0, 0);
+		if(parent)
+		{
+            mWidth = parent->getWidth();
+            mHeight = parent->getHeight();
+		    if(mFillType == SE_TILE_PARENT)
+		    {
+		        mU = mWidth / mImageWidth;
+		        mV = mHeight / mImageHeight;
+		    }
+		}
     }
-}
-void SE_ImageElement::layout()
-{
-	SE_2DNodeElement::layout();
+	calculateRect(mPivotX, mPivotY, mWidth, mHeight);
 }
 SE_Spatial* SE_ImageElement::createSpatial()
 {

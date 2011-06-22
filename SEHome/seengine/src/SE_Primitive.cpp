@@ -91,7 +91,7 @@ bool SE_RectPrimitive::createGeometryData(SE_RectPrimitive* rectPrimitive)
 	rectPrimitive->mGeometryData = geomData;
     return true;
 }
-bool SE_RectPrimitive::createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3)
+bool SE_RectPrimitive::createTexCoordData(SE_RectPrimitive* rectPrimitive, const SE_Vector2f& v0, const SE_Vector2f& v1, const SE_Vector2f& v2, const SE_Vector2f& v3, const SE_Vector2f& v4, const SE_Vector2f& v5, const SE_Vector2f& v6, const SE_Vector2f& v7, const SE_Vector2f& v8, int uRectSize, int vRectSize, float uReminder, float vReminder)
 {
     SE_Vector2f* texVertex = NULL;
     int texVertexNum = 0;
@@ -121,28 +121,23 @@ bool SE_RectPrimitive::createTexCoordData(SE_RectPrimitive* rectPrimitive, const
     }
     else
     {
-        texVertex = new SE_Vector2f[8];
+		texVertexNum = 9;
+        texVertex = new SE_Vector2f[9];
         if(!texVertex)
         {
             delete[] texFaces;
             return false;
         }
-        texVertexNum = 8;
         texVertex[0] = v0;
         texVertex[1] = v1;
         texVertex[2] = v2;
         texVertex[3] = v3;
-        float uFloor, vFloor;
-        float uReminder, vReminder;
-        int uRectSize, vRectSize;
-        getUVProperty(rectPrimitive->mU, uRectSize, uFloor, uReminder);
-        getUVProperty(rectPrimitive->mV, vRectSize, vFloor, vReminder);
-        float stepx = v1.x - v0.x;
-        float stepy = v0.y - v3.y;
-        texVertex[4] = SE_Vector2f(v0.x + stepx * uReminder, v0.y);
-        texVertex[5] = SE_Vector2f(v0.x + stepx * uReminder, v2.y);
-        texVertex[6] = SE_Vector2f(v3.y + stepy * vReminder, v0.x);
-        texVertex[7] = SE_Vector2f(v3.y + stepy * vReminder, v1.x);
+        texVertex[4] = v4;
+		texVertex[5] = v5;
+		texVertex[6] = v6;
+		texVertex[7] = v7;
+		texVertex[8] = v8;
+		
         int k = 0;
         for(int i = 0 ; i < vRectSize - 1; i++)
         {
@@ -182,25 +177,75 @@ bool SE_RectPrimitive::createTexCoordData(SE_RectPrimitive* rectPrimitive, const
         }  
         if(vReminder != 0.0f)
         {
-            texFaces[k].x = 3;
-            texFaces[k].y = 6;
-            texFaces[k].z = 2;
-            k++;
-            texFaces[k].x = 6;
-            texFaces[k].y = 7;
-            texFaces[k].z = 2;
-            k++;
+            for(int j = 0 ; j < uRectSize - 1 ; j++)
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 6;
+                texFaces[k].z = 2;
+                k++;
+                texFaces[k].x = 6;
+                texFaces[k].y = 7;
+                texFaces[k].z = 2;
+                k++;
+            }
+            if(uReminder != 0.0f)
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 6;
+                texFaces[k].z = 5;
+                k++;
+                texFaces[k].x = 6;
+                texFaces[k].y = 8;
+                texFaces[k].z = 5;
+                k++;
+            }
+            else
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 6;
+                texFaces[k].z = 2;
+                k++;
+                texFaces[k].x = 6;
+                texFaces[k].y = 7;
+                texFaces[k].z = 2;
+                k++;
+            }
         }      
         else
         {
-            texFaces[k].x = 3;
-            texFaces[k].y = 0;
-            texFaces[k].z = 2;
-            k++;
-            texFaces[k].x = 0;
-            texFaces[k].y = 1;
-            texFaces[k].z = 2;
-            k++;
+            for(int j = 0 ; j < uRectSize - 1 ; j++)
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 0;
+                texFaces[k].z = 2;
+                k++;
+                texFaces[k].x = 0;
+                texFaces[k].y = 1;
+                texFaces[k].z = 2;
+                k++;
+            }
+            if(uReminder != 0.0f)
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 0;
+                texFaces[k].z = 5;
+                k++;
+                texFaces[k].x = 0;
+                texFaces[k].y = 4;
+                texFaces[k].z = 5;
+                k++;
+            }
+            else
+            {
+                texFaces[k].x = 3;
+                texFaces[k].y = 0;
+                texFaces[k].z = 2;
+                k++;
+                texFaces[k].x = 0;
+                texFaces[k].y = 1;
+                texFaces[k].z = 2;
+                k++;
+            }
         }
         SE_ASSERT(k == faceNum);
 
@@ -232,7 +277,7 @@ void SE_RectPrimitive::getUVProperty(float uv, int& size, float& floor, float& r
         size = (int)floor + 1;
     
 }
-void SE_RectPrimitive::create(const SE_Rect3D& rect, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID, float u, float v)
+void SE_RectPrimitive::create(const SE_Rect3D& rect, float u, float v, SE_Primitive*& outPrimitive, SE_PrimitiveID& outPrimitiveID)
 {
     SE_ASSERT(u >= 1.0 && v >= 1.0);
     if((v < 1.0f || v < 1.0f) || (v == 1.0f && u == 1.0f))
@@ -417,45 +462,6 @@ SE_RectPrimitive* SE_RectPrimitive::clone()
      }
 	 return primitive;
 }
-/*
-void SE_RectPrimitive::setImagePortion(const SE_ImageDataPortion& portion)
-{
-    if(mTexCoordData)
-    {
-        SE_TextureCoordData* texCoordData = mTexCoordData->getPtr();
-        memcpy(texFaces, texCoordData->getTexFaceArray, sizeof(SE_Vector3i) * 2);
-        mTexCoordData->dec();
-        if(mTexCoordData->getNum() == 0)
-        {
-            delete mTexCoordData;
-            mTexCoordData = NULL;
-        }
-    }
-    SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
-    SE_Vector2f* texVertex = new SE_Vector2f[4];
-    if(!portion.isValid())
-    {
-        texVertex[0] = SE_Vector2f(startx / (float)power2Width, starty / (float)power2Height);
-        texVertex[1] = SE_Vector2f(1 - startx / (float)power2Width, starty / (float)power2Height);
-        texVertex[2] = SE_Vector2f(1 - startx / (float)power2Width, 1 - starty / (float)power2Height);
-        texVertex[3] = SE_Vector2f(startx / (float)power2Width, 1 - starty / (float)power2Height);
-    }
-    else
-    {
-        int portionx = imageDataPortion.getX();
-        int portiony = imageDataPortion.getY();
-        int portionw = imageDataPortion.getWidth();
-        int portionh = imageDataPortion.getHeight();
-        texVertex[0] = SE_Vector2f((startx + portionx) / (float)power2Width, (power2Height - (starty + height - portionh - portiony)) / (float)power2Height);
-        texVertex[1] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - (starty + height - portionh - portiony)) / (float)power2Height);
-        texVertex[2] = SE_Vector2f((startx + portionx + portionw) / (float)power2Width, (power2Height - starty - portiony) / (float)portion2Height);
-        texVertex[3] = SE_Vector2f((startx + portionx) / (float)power2Width,  (power2Height - starty - portiony) / (float)portion2Height);
-    }
-    texCoordData->setTexVertexArray(texVertex, 4);
-    texCoordData->setTexFaceArray(texFaces, 2);
-    mTexCoordData  = new SE_Wrapper<SE_TextureCoordData>(texCoordData, SE_Wrapper<SE_TextureCoordData>::NOT_ARRAY);
-}
-*/
 void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXUNIT_TYPE texUnitType, SE_ImageDataPortion imageDataPortion)
 {
 	if(texUnitType >= SE_TEXUNIT_NUM || texUnitType < SE_TEXTURE0)
@@ -464,7 +470,7 @@ void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXU
     {
         return;
     }
-    SE_Vector2f v0, v1, v2, v3;    
+    SE_Vector2f v0, v1, v2, v3, v4, v5, v6, v7, v8;    
     float startx = 0, starty = 0;
     int portionx = 0;
     int portiony = 0;
@@ -511,7 +517,32 @@ void SE_RectPrimitive::setImageData(int index , SE_ImageData* imageData, SE_TEXU
 		v2 = SE_Vector2f((startx + portionx + portionw) / power2Width, (starty + portiony) / power2Height);
 		v3 = SE_Vector2f((startx + portionx) / power2Width, (starty + portiony) / power2Height);
 	}
-    bool ret = createTexCoordData(this, v0, v1, v2, v3);
+	float uFloor = 0, vFloor = 0;
+    float uReminder = 0, vReminder = 0;
+    int uRectSize = 0, vRectSize = 0;	
+	if(mU > 1.0f || mV > 1.0f)
+	{
+
+        getUVProperty(mU, uRectSize, uFloor, uReminder);
+        getUVProperty(mV, vRectSize, vFloor, vReminder);
+		float stepx = v1.x - v0.x;
+		float stepy = SE_Fabs(v0.y - v3.y);
+		v4 = SE_Vector2f(v0.x + stepx * uReminder, v0.y);
+	    v5 = SE_Vector2f(v0.x + stepx * uReminder, v3.y);
+		if(imageData->isFliped())
+		{
+		    v6 = SE_Vector2f(v0.x, v0.y + stepy * vReminder);
+		    v7 = SE_Vector2f(v1.x, v0.y + stepy * vReminder);
+			v8 = SE_Vector2f(v0.x + stepx * uReminder, v0.y + stepy * vReminder);
+		}
+		else
+		{
+			v6 = SE_Vector2f(v0.x, v0.y - stepy * vReminder);
+			v7 = SE_Vector2f(v1.x, v0.y - stepy * vReminder);
+			v8 = SE_Vector2f(v0.x + stepx * uReminder, v0.y - stepy * vReminder);
+		}
+	}
+    bool ret = createTexCoordData(this, v0, v1, v2, v3, v4, v5, v6, v7, v8, uRectSize, vRectSize, uReminder, vReminder);
     if(!ret)
         return;
     mImageDataArray[texUnitType] = imageData; 
@@ -532,10 +563,12 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     surface->setGeometryData(mGeometryData);
     surface->setMaterialData(mMaterialData);
     surface->setTexture(texture.get());
-    int facetNum = 2;
-    int* facet = new int[2];
-    facet[0] = 0;
-    facet[1] = 1;
+	int facetNum = mGeometryData->getFaceNum();
+    int* facet = new int[facetNum];
+	for(int i = 0 ; i < facetNum ; i++)
+	{
+        facet[i] = i;
+	}
     surface->setFacets(facet, facetNum);
     surface->setColor(mColor);
     surface->setProgramDataID(mProgramDataID);

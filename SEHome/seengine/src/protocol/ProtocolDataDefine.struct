@@ -1,0 +1,39 @@
+struct ElementTransfer
+{
+    byte type;
+    string name
+    float left;
+    float top;
+    float width;
+    float height;
+    byte layer;
+    byte canpointed;
+    byte state;
+    string uri;
+    int numchildren;
+    int childoffset
+    int numsibling;
+    int siblingoffset; 
+};
+
+struct ImageTableTransfer
+{
+    string name;
+    int imageItemNum;
+    int imageItemOffset;
+};
+struct ImageItemTransfer
+{
+    string name;
+    string path;
+    int imagePieceNum;
+    int imagePieceOffset;
+};
+struct ImagePieceTransfer
+{
+    float x;
+    float y;
+    float width;
+    float height;
+    byte mirror;
+};

@@ -22,6 +22,26 @@ public:
     void update(const SE_AddressID& address, const SE_Value& value);
     void update(SE_ParamValueList& paramValueList);
 	SE_Element* clone();
+	void setBaseColor(const SE_ImageUnit& iu)
+	{
+		mBaseColor = iu;
+	}
+	void setBChannel(const SE_ImageUnit& iu)
+	{
+		mBChannel = iu;
+	}
+	void setGChannel(const SE_ImageUnit& iu)
+	{
+		mGChannel = iu;
+	}
+	void setRChannel(const SE_ImageUnit& iu)
+	{
+		mRChannel = iu;
+	}
+	void setAChannel(const SE_ImageUnit& iu)
+	{
+		mAChannel = iu;
+	}
 protected:
 	bool isValid();
 	virtual void setImageData(SE_Primitive* primitive);

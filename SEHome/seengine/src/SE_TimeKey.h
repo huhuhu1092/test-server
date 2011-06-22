@@ -52,6 +52,7 @@ public:
 	}
     void read(SE_BufferInput& input);
 	void write(SE_BufferOutput& output);
+    static SE_TimeKey INVALID;
 private:
 	unsigned int mKey;
 };

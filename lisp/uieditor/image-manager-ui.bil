@@ -1,0 +1,95 @@
+;;; Define :image-manager-ui
+ 
+(in-package :common-graphics-user)
+
+;; The finder-function, which returns the window if it already
+;; exists, and otherwise creates and returns it.
+;; Call this function if you need only one copy of this window,
+;; and that window is a non-owned top-level window.
+(defun image-manager-ui ()
+  (find-or-make-application-window :image-manager-ui 'make-image-manager-ui))
+ 
+;; The maker-function, which always creates a new window.
+;; Call this function if you need more than one copy,
+;; or the single copy should have a parent or owner window.
+;; (Pass :owner to this function; :parent is for compatibility.)
+(defun make-image-manager-ui
+    (&key parent (owner (or parent (screen *system*))) exterior
+     (interior (make-box 146 34 1345 557)) (name :image-manager-ui)
+     (title "Image Manager Ui") (border :frame) (child-p t) form-p)
+  (let ((owner
+         (make-window name :owner owner
+           :class 'dialog
+           :child-p child-p
+           :exterior exterior
+           :interior interior
+           :border border
+           :close-button t
+           :font (make-font-ex :swiss "Arial / ANSI" 12)
+           :form-state :icon
+           :maximize-button t
+           :minimize-button t
+           :name :image-manager-ui
+           :pop-up nil
+           :resizable t
+           :scrollbars nil
+           :state :normal
+           :system-menu t
+           :title title
+           :title-bar t
+           :dialog-items (make-image-manager-ui-widgets)
+           :form-p form-p
+           :form-package-name nil)))
+    owner))
+
+(defun make-image-manager-ui-widgets ()
+  (list (make-instance 'outline :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 440
+                       :left 23 :name :image-table :on-click
+                       'image-manager-ui-image-table-on-click :top 58 :value :top-1
+                       :width 308)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       35 :left 375 :name :static-text-18 :top 77 :value "x" :width 89)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 39 :left 477 :name :image-x :top 73 :value "" :width 143)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       36 :left 378 :name :static-text-19 :top 127 :value "y" :width 86)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 36 :left 478 :name :image-y :top 127 :value "" :width 142)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       38 :left 374 :name :static-text-20 :top 173 :value "width" :width
+                       90)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 38 :left 478 :name :image-width :top 173 :value "" :width
+                       142)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       38 :left 374 :name :static-text-21 :top 229 :value "height" :width
+                       90)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 41 :left 478 :name :image-height :top 226 :value "" :width
+                       142)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       36 :left 375 :name :static-text-17 :top 285 :value "image" :width
+                       80)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 40 :left 481 :name :path :top 289 :value "" :width 426)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       25 :left 25 :name :static-text-45 :top 17 :value "image-path"
+                       :width 81)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 31 :left 119 :name :image-path-name :read-only t :top 11
+                       :value "" :width 362)
+        (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
+                       23 :left 380 :name :static-text-46 :top 357 :value "mirror" :width
+                       61)
+        (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
+                       :height 36 :left 481 :name :image-mirror :top 344 :value "")
+        (make-instance 'group-box :contained-widgets
+                       (list :static-text-18 :image-x :static-text-19 :image-y
+                             :static-text-20 :image-width :static-text-21 :image-height
+                             :static-text-17 :path :static-text-46 :image-mirror)
+                       :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 442 :left 365
+                       :name :group-box-1 :title "Property" :top 56 :width 607)
+        (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 44
+                       :left 1011 :name :image-preview :on-click
+                       'image-manager-ui-image-preview-on-click :title "Preview" :top 198
+                       :width 105)))

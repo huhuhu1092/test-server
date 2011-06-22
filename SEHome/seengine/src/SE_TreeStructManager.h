@@ -61,13 +61,6 @@ public:
 	template <typename CONDITION>
 	std::vector<T*> remove_if(CONDITION condition)
 	{
-        /*
-		struct _NodeData
-		{
-			_Node* node;
-			size_t index;
-		};
-        */
 #if defined(WIN32)
         std::list<_NodeData> removedNode;
 #else

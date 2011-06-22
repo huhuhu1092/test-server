@@ -24,11 +24,11 @@ LOCAL_PATH:= $(LOCAL_PATH)/seengine/src/
 
 include $(CLEAR_VARS)
 
-# If SEDemo.apk is installed, libquake.so will be, too
+# If SEDemo.apk is installed, libcse.so will be, too
 # (via LOCAL_REQUIRED_MODULES, above).
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_CFLAGS += -g -DGLES_20 -DDEBUG
+LOCAL_CFLAGS += -g -DGLES_20 -DDEBUG -DSE_HAS_THREAD -DSE_HAS_MUTEX
 LOCAL_C_INCLUDES += bionic \
 					external/stlport/stlport \
 					external/freetype/include \
@@ -53,6 +53,24 @@ LOCAL_C_INCLUDES += bionic \
                     $(TOP_LOCAL_PATH)/seengine/src/checkxml \
                     $(TOP_LOCAL_PATH)/seengine/src/ui \
                     $(TOP_LOCAL_PATH)/seengine/src/network 
+
+CHESS_SRC := ./game/cchess/eleeye/book.cpp \
+             ./game/cchess/eleeye/eleeye.cpp \
+             ./game/cchess/eleeye/genmoves.cpp \
+             ./game/cchess/eleeye/hash.cpp \
+             ./game/cchess/eleeye/movesort.cpp \
+             ./game/cchess/eleeye/position.cpp \
+             ./game/cchess/eleeye/pregen.cpp \
+             ./game/cchess/eleeye/search.cpp \
+             ./game/cchess/eleeye/ucci.cpp \
+             ./game/cchess/eleeye/evaluate/evaluate.cpp \
+             ./game/cchess/eleeye/evaluate/preeval.cpp \
+	     ./game/cchess/SE_CChess.cpp \
+	     ./game/cchess/SE_ChessAI.cpp \
+	     ./game/cchess/SE_ChessCommand.cpp \
+	     ./game/cchess/SE_ChessInterface.cpp \
+             ./game/cchess/SE_Pipe.cpp
+
 LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./2D/SE_2DElement.cpp \
 				./animation/SE_Action.cpp \
@@ -69,8 +87,6 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./ui/SE_Button.cpp \
 				./SE_Camera.cpp \
 				./SE_CameraManager.cpp \
-				./game/cchess/SE_CChess.cpp \
-				./game/cchess/SE_ChessCommand.cpp \
 				./font/SE_CharCode.cpp \
 				./font/SE_CharCodeDefine.cpp \
 				./checkxml/SE_CheckXml.cpp \
@@ -100,6 +116,7 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_ID.cpp \
 				./SE_ImageCodec.cpp \
 				./SE_ImageData.cpp \
+				./2D/SE_ImageDataElement.cpp \
 				./2D/SE_ImageElement.cpp \
 				./2D/SE_ImageMap.cpp \
 				./2D/SE_ImageTable.cpp \
@@ -172,14 +189,14 @@ LOCAL_SRC_FILES:= ./2D/SE_2DCommand.cpp \
 				./SE_Value.cpp \
 				./SE_Vector.cpp \
 				./SE_FunctionDict.cpp \
-				./game/cchess/SE_ChessInterface.cpp \
 				./ui/SE_Widget.cpp \
 				./SE_XmlHandler.cpp \
 				./tinyxml/tinystr.cpp \
 				./tinyxml/tinyxml.cpp \
 				./tinyxml/tinyxmlerror.cpp \
 				./tinyxml/tinyxmlparser.cpp \
-                ./jni/android_se_jni.cpp
+                                ./jni/android_se_jni.cpp \
+                                $(CHESS_SRC)
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \

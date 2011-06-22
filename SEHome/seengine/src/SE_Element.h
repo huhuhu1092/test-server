@@ -184,24 +184,7 @@ public:
     {
         mRenderQueueSeq = q;
     }
-	/*
-	SE_Element* getPrev() const
-	{
-		return mPrevElement;
-	}
-    void setPrev(SE_Element* prev)
-	{
-		mPrevElement = prev;
-	}
-	SE_Element* getNext() const
-	{
-		return mNextElement;
-	}
-	void setNext(SE_Element* next)
-	{
-		mNextElement = next;
-	}
-	*/
+
 	SE_SceneRenderSeq getSceneRenderSeq() const
 	{
 		return mSceneRenderSeq;
@@ -507,7 +490,7 @@ protected:
 	// if pivoty == INVALID_GEOMINFO mPivotY will not be changed
 	//if width == INVALID_GEOMINFO || height == INVALID_GEOMINFO , error will be raised
 	void calculateRect(float pivotx, float pivoty, float width, float height);
-	SE_Spatial* createNode();
+	SE_Spatial* createNode(float left, float top);
 	SE_Spatial* createSpatialByImage();
 	SE_Spatial* createRectPatchSpatial();
 	void createPrimitive(SE_PrimitiveID& outID, SE_Primitive*& outPrimitive);
@@ -522,5 +505,7 @@ protected:
 	int mRectPatchType;
 	bool mUpdateFromMountPointID;
     SE_2DELEMENT_FILLTYPE mFillType;
+	float mU;
+	float mV;
 };
 #endif

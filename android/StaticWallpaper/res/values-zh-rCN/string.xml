@@ -1,0 +1,24 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- General -->
+    <skip />
+    <!-- Application name -->
+    <string name="wallpapers">Static Wallpapers</string>
+
+    <!-- Wallpapers showing smoke, clouds, water, plasmas -->
+    <string name="wallpaper_staticwallpaper">消息壁纸</string>
+
+    <string name="author">LuWei</string>
+    <string name="staticwallpaper_desc"> 显示短信息的壁纸</string>
+
+    <!-- button label -->
+    <string name="ok">OK</string>
+
+    <!-- overlay text -->
+    <string name="taptochange">Tap to change</string>
+    <string name="sms_header1">您有 </string>
+    <string name="sms_header2"> 条未读短信</string>
+    <string name="sms_header3"> 条未读短信</string>
+    <string name="sms_sender1">发送者是 :</string>
+    <string name="sms_sender2">发送者分别是 :</string>
+    <string name="test">测试</string>
+</resources>

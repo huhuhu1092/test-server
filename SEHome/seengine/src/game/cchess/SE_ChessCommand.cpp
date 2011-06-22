@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <list>
 #include <string>
+#include "SE_ChessAI.h"
 #if defined(ANDROID)
 #else
 #include <curl/curl.h>
@@ -168,6 +169,39 @@ void SE_ChessLoginThread::run()
      LOGI("### 4 ###\n");
 	logRequst.run(&lh);
      LOGI("### 5 ###\n");
+}
+SE_ChessAIResponse::SE_ChessAIResponse(SE_Application* app) : SE_Command(app)
+{}
+static int getNum(char c)
+{
+	int num = 0;
+	if(c <= 'i' && c >= 'a')
+	{
+		num = c - 'a';
+	}
+	else
+	{
+		num = c - '0';
+	}
+	return num;
+}
+void SE_ChessAIResponse::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+	LOGI("#### get command : %s ####\n", command.c_str());
+	SE_CChess* chessApp = (SE_CChess*)SE_Application::getInstance()->getGame("cchess");
+    if(chessApp)
+    {
+		char step[4];
+		step[0] = command[0];
+		step[1] = command[1];
+		step[2] = command[2];
+		step[3] = command[3];
+		int srccol = getNum(step[0]);
+		int srcrow = getNum(step[1]);
+		int dstcol = getNum(step[2]);
+		int dstrow = getNum(step[3]);
+		chessApp->move(srcrow, srccol, dstrow, dstcol);
+	}
 }
 //////////////////////////////////////////////
 class _StartResponseCommand : public SE_Command
@@ -917,4 +951,11 @@ void SE_ChessLoopMessage::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     msg->num = returnnum;
     SE_Application::getInstance()->postCommand(msg);
  
+}
+//////////////////////////////////////
+void SE_ChessAIThread::run()
+{
+    LOGI("### start chess AI ####\n");
+    startChessAI();
+    LOGI("### quit chess AI ####\n");
 }
