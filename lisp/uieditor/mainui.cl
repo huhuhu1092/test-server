@@ -6,7 +6,8 @@
 
 (in-package :common-graphics-user)
 (defclass my-project-management-area-outline (outline) ())
-
+(defclass project-single-item-list (single-item-list) ())
+(defclass project-single-item-list-pane (single-item-list-pane) ())
 (defgeneric handle-outline-item-click (item widget dialog) (:documentation "handle outline item click"))
 (defclass pbase-outline-item (outline-item) ((name :initarg :name :initform nil :accessor pbase-outline-item-name)))
 (defclass project-outline-item (pbase-outline-item) ())
@@ -46,6 +47,26 @@
     (set-contentlist-window dialog file-list))
          
   )
+(defgeneric handle-list-item (item-value component) (:documentation "handle click on single item list"))
+(defgeneric create-project-item-list-menu (component) (:documentation "create project item list"))
+(defmethod create-project-item-list-menu ((component (eql :element)))
+  (list (make-instance 'menu-item :title "Create" :value #'(lambda (window) (element-ui))) 
+        (make-instance 'menu-item :title "View" :value 'view))
+  )
+(defmethod handle-list-item (item-value (component (eql :element)))
+  #+debug (format t "item = ~a ~%" item-value)
+  (unless item-value (create-project-item-list-menu component))
+  )
+(defmethod widget-device ((dialog-item project-single-item-list) dialog)
+  (declare (ignorable dialog))
+  'project-single-item-list-pane)
+
+(defmethod shortcut-commands ((window project-single-item-list-pane) menu)
+  (declare (ignorable menu))
+  (let ((si (value (dialog-item window))))
+    (handle-list-item si (uie:component-tag *curr-component*))
+    )
+  )
 (defun set-curr-project (item)
     (let* ((project-name (value item))
            (tokens (extract-project-name-path project-name)))
@@ -71,7 +92,7 @@
     (let ((selected-item (selected-outline-item widget))
           )
       #+debug (format t "project name : ~a ~a ~%" selected-item widget)
-      (handle-outline-item-click selected-item widget dialog)
+      (when selected-item (handle-outline-item-click selected-item widget dialog))
     )
   )
 (defun sui-create-project (window)
@@ -186,5 +207,5 @@
   ;; NOTE:  Usually it is better to use an on-change function rather
   ;; than an on-click function.  See the doc pages for those properties.
   #+debug (format t "content list: ~a ~%" (value widget))
-  (process-click-content-list (value widget) (uie:component-tag *curr-component*))
+  (when (value widget) (process-click-content-list (value widget) (uie:component-tag *curr-component*)))
   t)

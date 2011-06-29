@@ -86,8 +86,8 @@
                        30 :left 417 :name :static-text-15 :top 66 :value "can pointed"
                        :width 85)
         (make-instance 'combo-box :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 30
-                       :left 519 :name :element-can-pointed :range
-                       (list :one :two :three) :top 66 :value :one :width 119)
+                       :left 519 :name :element-can-pointed :range (list :false :true)
+                       :top 66 :value :false :width 119)
         (make-instance 'static-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height
                        37 :left 418 :name :static-text-16 :top 110 :value "text" :width
                        84)
@@ -111,4 +111,6 @@
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 33
                        :left 210 :name :button24 :title "Redo" :top 296 :width 102)
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 31
-                       :left 694 :name :button25 :title "..." :top 175 :width 58)))
+                       :left 694 :name :button25 :title "..." :top 175 :width 58)
+        (make-instance 'default-button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :left
+                       634 :name :create :title "Create" :top 297 :width 94)))
