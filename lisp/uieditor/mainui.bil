@@ -26,7 +26,7 @@
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
            :form-package-name :common-graphics-user
-           :form-state :normal
+           :form-state :shrunk
            :maximize-button t
            :menu (open-menu
                     (list (make-instance 'menu-item :name :new-item-1 :title "Project"

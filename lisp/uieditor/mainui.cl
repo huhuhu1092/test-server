@@ -5,6 +5,9 @@
 ;;; the *.bil file having the same name as this *.cl file.
 
 (in-package :common-graphics-user)
+;;;; test for Grapher begin
+
+;;;; test for Grapher end
 (defclass my-project-management-area-outline (outline) ())
 (defclass project-single-item-list (single-item-list) ())
 (defclass project-single-item-list-pane (single-item-list-pane) ())
@@ -32,7 +35,9 @@
 (defun extract-project-name-path (project-name)
   (uie:tokens project-name #'uie:constituent 0)
   )
-
+(defun create-element-graph ()
+  t
+  )
 (defmethod handle-outline-item-click ((item pitem-outline-item) widget dialog)
   (declare (ignorable widget dialog))
   (set-textarea dialog (value (parent item)))
@@ -48,14 +53,24 @@
          
   )
 (defgeneric handle-list-item (item-value component) (:documentation "handle click on single item list"))
-(defgeneric create-project-item-list-menu (component) (:documentation "create project item list"))
-(defmethod create-project-item-list-menu ((component (eql :element)))
-  (list (make-instance 'menu-item :title "Create" :value #'(lambda (window) (element-ui))) 
-        (make-instance 'menu-item :title "View" :value 'view))
+(defgeneric create-project-item-list-menu (item component) (:documentation "create project item list"))
+(defmethod create-project-item-list-menu (item (component (eql :element)))
+  (if (null item)
+      (list (make-instance 'menu-item :title "Create" :value #'(lambda (window) (element-ui))) 
+            (make-instance 'menu-item :title "View" :value 'view))
+    (list (make-instance 'menu-item :title "Edit" :value #'(lambda (window) (create-element-graph)))
+          (make-instance 'menu-item :title "View" :value #'(lambda (window) (create-element-graph))))
+    )
   )
+
 (defmethod handle-list-item (item-value (component (eql :element)))
   #+debug (format t "item = ~a ~%" item-value)
-  (unless item-value (create-project-item-list-menu component))
+  (create-project-item-list-menu item-value component)
+  )
+(defmethod handle-list-item (item-value component)
+  (if (null component)
+      (format t "list item type is nil~%")
+    )
   )
 (defmethod widget-device ((dialog-item project-single-item-list) dialog)
   (declare (ignorable dialog))
