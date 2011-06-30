@@ -18,6 +18,7 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
+import android.graphics.Canvas;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 public class PhotoGLRenderer implements GLSurfaceView.Renderer {
-	private String mPicturePathName = "/sdcard/thumb";
+	private String mPicturePathName = "/sdcard/test/data";
 	private String[] mFileList;
 	private Bitmap mPicture1;
 	private Bitmap mPicture2;
@@ -76,9 +77,9 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
 				try {
 				    is = new FileInputStream(f);
 				    Log.i(TAG, "#### size : " + is.available() + " ####");
-					//BitmapFactory.Options op = new BitmapFactory.Options();
-					//op.inSampleSize = 4;
-				    bmp = BitmapFactory.decodeStream(is, null, null);
+					BitmapFactory.Options op = new BitmapFactory.Options();
+					op.inSampleSize = 4;
+				    bmp = BitmapFactory.decodeStream(is, null, op);
 				    if(bmp != null)
 				    {
 				    	Log.i(TAG, "## bmp width, height " + bmp.getWidth() + ", " + bmp.getHeight());
@@ -113,9 +114,11 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
 	}
     public PhotoGLRenderer(Context context) {
         mContext = context;
+        /*
         mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
                 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         mTriangleVertices.put(mTriangleVerticesData).position(0);
+        */
         readPictureName();
         ByteBuffer vbb = ByteBuffer.allocateDirect(mIndexData.length*4);
         vbb.order(ByteOrder.nativeOrder());
@@ -139,7 +142,7 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
     		long currTime = SystemClock.uptimeMillis();
     		long span = currTime - mPrevTime;
     		mPrevTime = currTime;
-    		Log.i(TAG, "### time span = " + span + " ####");
+    		//Log.i(TAG, "### time span = " + span + " ####");
     	}
     	if(mCurrAlpha > 1.0f)
     	{
@@ -198,12 +201,33 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         // Ignore the passed-in GL10 interface, and use the GLES20
         // class's static methods instead.
-        GLES20.glViewport(0, 0, width, height);
-        float ratio = (float) width / height;
-        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        GLES20.glViewport(0, 0, 1068, 712);//width, height);
+        float w = (float)width;
+        float h = (float)height;
+        Matrix.orthoM(mProjMatrix, 0, -w /2, w / 2, -h / 2, h / 2, 1, 7);
+        float[] vertexData = {
+        		-w / 2, -h / 2, -2, 0.0f, 1.0f,
+                w / 2, -h / 2, -2, 1.0f, 1.0f,
+                
+                w / 2,  h / 2, -2, 1.0f,  0.0f,
+                -w / 2, h / 2, -2, 0.0f, 0.0f
+        };
+        mTriangleVerticesData = vertexData;
+        mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
+                * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mTriangleVertices.put(mTriangleVerticesData).position(0);
+        //float ratio = (float) width / height;
+        //Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
     private void loadTexture(Bitmap bmp, int textureid)
     {
+    	if(GLES20.glIsTexture(textureid))
+    	{
+    		int[] tex = new int[1];
+    		Log.i(TAG, "### delete prev texture ####");
+    		tex[0] = textureid;
+    		GLES20.glDeleteTextures(1, tex, 0);
+    	}
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid);
 
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
@@ -287,7 +311,8 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
         */
 
         
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        //Matrix.setLookAtM(mVMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 1, 0, 0, 0, 0f, 1.0f, 0.0f);
     }
 
     private int loadShader(int shaderType, String source) {
@@ -349,7 +374,9 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
     private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private final float[] mTriangleVerticesData = {
+    private float[] mTriangleVerticesData;
+    /*
+    = {
             // X, Y, Z, U, V
     		4.0f, -4.0f, 0, 0.0f, 0.0f,
             -4.0f, -4.0f, 0, 1.0f, 0.0f,
@@ -357,6 +384,7 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
             -4.0f,  4.0f, 0, 1.0f,  1.0f,
             4.0f, 4.0f, 0, 0.0f, 1.0f
             };
+            */
     private final int[] mIndexData = {
     		0, 1, 2,
     		0, 2, 3
