@@ -9,8 +9,8 @@ namespace oms
 	{
 	public:
 		enum RF {RELATIVE_RF, ABSOLUTE_RF};
+		enum {VISIBLE_MASK = 0x1, COLLISION_MASK = 0x2, COLLISION_MASK = 0x4, MOVE_MASK = 0x8};
 		Node();
-		Node(const Node& n, CopyOp = SHALLOW);
 		virtual sp<Group> asGroup();
 		virtual sp<GeomNode> asGeomNode();
 	    virtual void accept(NodeVisitor& nv);
@@ -18,29 +18,29 @@ namespace oms
 		virtual void ascend(NodeVisitor& nv);
 		virtual void updateWorldTransform();
 		virtual void updateRenderState();
-		virtual void addChild(sp<Node> node);
-		virtual void removeChild (sp<Node> node);
-		virtual void addChild(sp<Drawalbe> drawable);
-		virtual void removeChild(sp<Drawable> drawable);
+		virtual void addChild(sp<Node>& node);
+		virtual void removeChild (sp<Node>& node);
+		virtual void addChild(sp<Drawalbe>& drawable);
+		virtual void removeChild(sp<Drawable>& drawable);
 		typedef std::vector< sp<Group> > ParentList;
 		ParentList getParents();
 		sp<Group> getParent();
 		int getNumParents();
 		NodePathList getParentNodePaths(const Node* haltTraverseAtNode = 0) const;
 		Matrix getWorldMatrix() const;
-		void setUpdateCallback(NodeCallback* nc);
-		NodeCallback* getUpdateCallback();
-		void addUpdateCallback(NodeCallback* nc);
-		void removeUpdateCallback(NodeCallback* nc);
+		void setUpdateCallback(sp<NodeCallback>& nc);
+		sp<NodeCallback> getUpdateCallback();
+		void addUpdateCallback(sp<NodeCallback>& nc);
+		void removeUpdateCallback(sp<NodeCallback>& nc);
 		
-		void setEventCallback(NodeCallback* nc);
-		NodeCallback* getEventCallback();
-		void addEventCallback(NodeCallback* nc);
-		void removeEventCallback(NodeCallback* nc);
-		void setCullCallback(NodeCallback* nc);
-		NodeCallback* getCullCallback();
-		void addCullCallback(NodeCallback* nc);
-		void removeCullCallback(NodeCallback* nc);
+		void setEventCallback(sp<NodeCallback>& nc);
+		sp<NodeCallback> getEventCallback();
+		void addEventCallback(sp<NodeCallback>& nc);
+		void removeEventCallback(sp<NodeCallback>& nc);
+		void setCullCallback(sp<NodeCallback>& nc);
+		sp<NodeCallback> getCullCallback();
+		void addCullCallback(sp<NodeCallback>& nc);
+		void removeCullCallback(sp<NodeCallback>& nc);
 
 		bool isNeedUpdateTraversal() const;
 		bool isNeedCullTraversal() const;
@@ -53,24 +53,34 @@ namespace oms
 		typedef uint_t NodeMask;
 		NodeMask getNodeMask() const;
 
-		void setBoundingVolume(BoundingVolume* bv);
-		BoundingVolume* getBoundingVolume() const;
+		void setBoundingVolume(sp<BoundingVolume> bv);
+		sp<BoundingVolume> getBoundingVolume() const;
 
 		void setLocalTranslate(const Vector3f& v);
 		void setLocalRotate(const Quat& v);
-		void setLocalRotate(const Matrix4f& m);
+		void setLocalRotate(const Matrix3f& m);
+		//scale along axis
+		void setLocalScale(const Vector3f& v);
 		//
 		void preMatrix(const Matrix4f& m);
 		void postMatrix(const Matrix4f& m);
 		void clearPreMatrix();
 		void clearPostMatrix();
-		//scale along axis
-		void setLocalScale(const Vector3f& v);
-        //scale along arbitrary vector
-		void setLocalScale(const Matrix4f& m);
+
 		void setRefFrame(RF r);
 		RF getRefFrame();
-		
+	private:
+		OMS_DECALRE_NO_COPY(Node);
+	private:
+		RF mRefFrame;
+		Vector3f mLocalTranslate;
+		Vector3f mLocalScale;
+		Matrix3f mLocalRotate;
+		std::list<Matrix4f> mPreMatrix;
+		std::list<Matrix4f> mPostMatrix;
+		Matrix4f mWorldTransform;
+		sp<BoundingVolume> mBoundingVolume;
+		NodeMask mNodeMask;
 	};
 }
 #endif
