@@ -5,10 +5,13 @@ namespace oms
 	class ResourceLoader
 	{
 	public:
-		ResourceLoader(InputBuffer& inputBuffer);
-		virtual void read();
+		ResourceLoader(InputBuffer& inputBuffer, ResourceManager* resourceManager) : mInputBuffer(inputBuffer), mResourceManager(resourceManager)
+        {}
+        virtual ~ResourceLoader() {}
+		virtual void read() = 0;
 	private:
-		InputBuffer& mInputBuffer
+		InputBuffer& mInputBuffer;
+        ResourceManager* mResourceManager;
 	};
 }
 #endif

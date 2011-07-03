@@ -19,6 +19,8 @@ namespace oms
 		ResourceLoader* getResourceLoader(const ResourceType& resourceType);
 		void setResource(const ResourceType& resourcdType, const ResourceID& resourceID, Resource* res);
 		Resource* getResource(const ResourceType& resourceType , const ResourceID& resourceID);
+        Resource* removeResource(const ResourceType& resourceType, const ResourceID& resourcdID);
+        void releaseResource(Resource* res);
     private:
 		std::string mDataPath;
 	};
