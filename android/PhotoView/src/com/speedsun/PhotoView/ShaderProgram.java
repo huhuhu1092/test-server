@@ -1,11 +1,12 @@
 package com.speedsun.PhotoView;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
-import android.opengl.Matrix;
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.nio.FloatBuffer;
 public class ShaderProgram 
 {
+	private final static String TAG = "ShaderProgram";
 	private String mVertexShaderSrc = null;
 	private String mFragmentShaderSrc = null;
 	private int mProgram = -1;
@@ -18,9 +19,9 @@ public class ShaderProgram
     public final static int SP_VALUE_TYPE_MATRIX4 = 2;
     public final static int SP_VALUE_TYPE_INT = 3;
     public final static int SP_VALUE_TYPE_INT_ARRAY = 4;
-    public Matrix4
+    public static class Matrix4
     {
-        float[] m = new float[16];
+        public float[] m = new float[16];
     }
     protected ShaderProperty[] mBaseShaderPropertyArray = new ShaderProperty[]{
         new ShaderProperty("maPosition",SP_VAR_TYPE_ATTRIBUTE,SP_VALUE_TYPE_FLOAT_ARRAY),
@@ -30,6 +31,10 @@ public class ShaderProgram
         new ShaderProperty("muTex2", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
         new ShaderProperty("muTex3", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
         new ShaderProperty("muTex4", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
+        new ShaderProperty("muTex5", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
+        new ShaderProperty("muTex6", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
+        new ShaderProperty("muTex7", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
+        new ShaderProperty("muTex8", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_INT),
         new ShaderProperty("muAlpha", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_FLOAT),
         new ShaderProperty("muInverseWidth", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_FLOAT), 
         new ShaderProperty("muInverseHeight", SP_VAR_TYPE_UNIFORM, SP_VALUE_TYPE_FLOAT)
@@ -58,7 +63,7 @@ public class ShaderProgram
         }
     }
     private ArrayList<ShaderProperty> mShaderPropertyArray = new ArrayList<ShaderProperty>();
-    private HashMap<String, ShaderHandle> mShaderPropertyMap = new HashMap<String, int>();
+    private HashMap<String, ShaderHandle> mShaderPropertyMap = new HashMap<String, ShaderHandle>();
     protected void initShaderProperty()
     {
         for(int i = 0 ; i < mBaseShaderPropertyArray.length ; i++)
@@ -88,9 +93,12 @@ public class ShaderProgram
     public void linkProperty(String pname)
     {
         ShaderProperty sp = getShaderProperty(pname);
+        if(sp == null)
+        	throw new RuntimeException("can not get " + pname);
         if(sp.varType == SP_VAR_TYPE_ATTRIBUTE)
         {
             int handle = GLES20.glGetAttribLocation(mProgram, pname);
+            Log.i(TAG, "## mProgram = " + mProgram + ", pname = " + pname + " ####");
             checkGlError("glGetAttribLocation " + pname);
             if (handle == -1) 
             {
@@ -100,7 +108,7 @@ public class ShaderProgram
         }
         else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
-            int handle = muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, pname);
+            int handle = GLES20.glGetUniformLocation(mProgram, pname);
             checkGlError("glGetUniformLocation " + pname);
             if (handle == -1) {
                 throw new RuntimeException("Could not get uniform location for " + pname);
@@ -115,6 +123,7 @@ public class ShaderProgram
     public void use()
     {
         GLES20.glUseProgram(mProgram);
+        checkGlError("glUseProgram");
     }
     private ShaderHandle getHandle(String pname)
     {
@@ -126,12 +135,12 @@ public class ShaderProgram
         }
         return handle;
     }
-    public boolean setProperty(String pname, float v);
+    public boolean setProperty(String pname, Float v)
     {
         ShaderProperty sp = getShaderProperty(pname);
         ShaderHandle handle = getHandle(pname);
         if(handle == null)
-            return false;
+        	throw new RuntimeException("can not get handle " + pname);
         if(sp.varType == SP_VAR_TYPE_ATTRIBUTE)
         {
             if(sp.valueType == SP_VALUE_TYPE_FLOAT)
@@ -141,14 +150,15 @@ public class ShaderProgram
             else
                 throw new RuntimeException("shader variable value type error");
         }
-        else if(sp.varType == SP_TYPE_UNIFORM)
+        else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
             if(sp.valueType == SP_VALUE_TYPE_FLOAT)
             {
-                GLES20.glUniform1f(handle.handle, v);
+                GLES20.glUniform1f(handle.handle, v.floatValue());
+                checkGlError("glUniform1f " + pname);
             }
             else
-                throw new RuntimeException("shader variable value type error");
+                throw new RuntimeException("shader variable value type error " + pname);
         }
         else
         {
@@ -162,17 +172,20 @@ public class ShaderProgram
         ShaderProperty sp = getShaderProperty(pname);
         ShaderHandle handle = getHandle(pname);
         if(handle == null)
-            return false;
+        	throw new RuntimeException("can not get handle " + pname);
         if(sp.varType == SP_VAR_TYPE_ATTRIBUTE)
         {
-            if(sp.valueType == SP_VALUE_TYPE_FLOAT)
+            if(sp.valueType == SP_VALUE_TYPE_FLOAT_ARRAY)
             {
                 GLES20.glVertexAttribPointer(handle.handle, size, type, normalize, stride , buffer);
+                checkGlError("glVertexAttribPointer " + pname);
+                GLES20.glEnableVertexAttribArray(handle.handle);
+                checkGlError("glEnableVertexAttribArray " + pname);
             }
             else
                 throw new RuntimeException("shader variable value type error");
         }
-        else if(sp.varType == SP_TYPE_UNIFORM)
+        else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
             throw new RuntimeException("shader variable value type error");
         }
@@ -182,21 +195,22 @@ public class ShaderProgram
         }
         return true;
     }
-    public boolean serProperty(String pname, int v)
+    public boolean setProperty(String pname, Integer v)
     {
         ShaderProperty sp = getShaderProperty(pname);
         ShaderHandle handle = getHandle(pname);
         if(handle == null)
-            return false;
+            throw new RuntimeException("can not get handle " + pname);
         if(sp.varType == SP_VAR_TYPE_ATTRIBUTE)
         {
             throw new RuntimeException("shader variable value type error");
         }
-        else if(sp.varType == SP_TYPE_UNIFORM)
+        else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
-            if(sp.valueType == SP_VALUE_TYPE_FLOAT)
+            if(sp.valueType == SP_VALUE_TYPE_INT)
             {
-                GLES20.glUniform1i(handle.handle, v);
+                GLES20.glUniform1i(handle.handle, v.intValue());
+                checkGlError("glUniform1i " + pname);
             }
             else
                 throw new RuntimeException("shader variable value type error");
@@ -218,11 +232,12 @@ public class ShaderProgram
         {
             throw new RuntimeException("shader variable value type error");
         }
-        else if(sp.varType == SP_TYPE_UNIFORM)
+        else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
             if(sp.valueType == SP_VALUE_TYPE_MATRIX4)
             {
                 GLES20.glUniformMatrix4fv(handle.handle, 1, transpose, m.m, 0);
+                checkGlError("glUniformMatrix4fv " + pname);
             }
             else
                 throw new RuntimeException("shader variable value type error");
@@ -234,7 +249,8 @@ public class ShaderProgram
         return true;
 
     }
-    public boolean setMatrixArray(String pname, boolean transpose, ShaderProgram.Matrix4[] m, int offset, int count)
+    public boolean setMatrixArray(String pname, boolean transpose, 
+    		                      ShaderProgram.Matrix4[] m, int offset, int count)
     {
         ShaderProperty sp = getShaderProperty(pname);
         ShaderHandle handle = getHandle(pname);
@@ -244,11 +260,20 @@ public class ShaderProgram
         {
             throw new RuntimeException("shader variable value type error");
         }
-        else if(sp.varType == SP_TYPE_UNIFORM)
+        else if(sp.varType == SP_VAR_TYPE_UNIFORM)
         {
             if(sp.valueType == SP_VALUE_TYPE_MATRIX4)
             {
-                GLES20.glUniformMatrix4fv(handle.handle, count, transpose, m.m, offset);
+            	float[] data = new float[m.length * 16];
+            	for(int i = 0 ; i < m.length ; i++)
+            	{
+            		for(int j = 0 ; j < 16 ; j++)
+            		{
+            			data[i * 16 + j] = m[i].m[j];
+            		}
+            	}
+                GLES20.glUniformMatrix4fv(handle.handle, count, transpose, data, offset);
+                checkGlError("glUniformMatrix4fv " + pname);
             }
             else
                 throw new RuntimeException("shader variable value type error");

@@ -1,13 +1,103 @@
 package com.speedsun.PhotoView;
+import android.util.Log;
 import android.graphics.Bitmap;
-public class ImageLoader {
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+
+
+public class ImageLoader 
+{
+	private final static String TAG = "ImageLoader";
 	private String mImagePath;
+	private String[] mFileList;
+	private int mPictureIndex = 0;
     public ImageLoader(String imagePath)
     {
     	mImagePath = imagePath;
+    	readPictureName();
+    }
+    private class PictureNameFilter implements FilenameFilter
+    {
+    	public boolean accept(File dir, String name) {
+    		if(name.endsWith("jpeg") || name.endsWith("jpg") || name.endsWith("png") ||
+    				name.endsWith("JPEG") || name.endsWith("JPG") || name.endsWith("PNG"))
+    			return true;
+    		else
+    			return false;
+    	}
+    }
+    private void readPictureName()
+    {
+        File pictureDir = new File(mImagePath);
+        if(!pictureDir.exists())
+        	return;
+        String[] fileList = pictureDir.list(new PictureNameFilter());
+        if(fileList == null)
+        {
+        	Log.i(TAG, "## has no file in " + mImagePath + " ####");
+        	return;
+        }
+        Log.i(TAG, "### picture num = " + fileList.length + " ####");
+        mFileList = fileList;
     }
     public Bitmap getNextImage()
     {
-    	return null;
+		Bitmap bmp = null;
+		if(mFileList.length > 0)
+		{
+			if(mPictureIndex >= mFileList.length)
+			{
+				mPictureIndex = 0;
+			}
+			String fn = mFileList[mPictureIndex];
+			String path = mImagePath + "/" + fn;
+			File f = new File(path);
+			Log.i(TAG, "current image = " + path);
+
+			if(f.exists())
+			{
+				InputStream is = null;
+				try {
+				    is = new FileInputStream(f);
+				    Log.i(TAG, "#### size : " + is.available() + " ####");
+					BitmapFactory.Options op = new BitmapFactory.Options();
+					op.inSampleSize = 4;
+				    bmp = BitmapFactory.decodeStream(is, null, op);
+				    if(bmp != null)
+				    {
+				    	Log.i(TAG, "## bmp width, height " + bmp.getWidth() + ", " + bmp.getHeight());
+
+				    }
+				} catch (FileNotFoundException e){
+					Log.i(TAG, "file name found: " + path);
+				} catch (IOException e) {
+					Log.i(TAG, "IO error");
+				} catch (OutOfMemoryError e){
+					Log.i(TAG, "#### out of memory ####");
+					BitmapFactory.Options op = new BitmapFactory.Options();
+					op.inSampleSize = 4;
+					bmp = BitmapFactory.decodeStream(is, null, op);
+				} finally {
+					try {
+					    if(is != null)
+				            is.close();
+					} catch (IOException e) {
+						
+					}
+				}
+				
+			}
+		}
+		mPictureIndex++;
+	    return bmp;
     }
 }
