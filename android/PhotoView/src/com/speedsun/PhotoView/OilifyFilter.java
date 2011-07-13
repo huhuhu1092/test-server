@@ -1,14 +1,15 @@
 package com.speedsun.PhotoView;
 import android.graphics.Bitmap;
-
+import android.util.Log;
 public class OilifyFilter 
 {
+	private static final String TAG = "OilifyFilter";
 	private Bitmap mSrcBmp;
 	private int[] mSrcBmpBuffer;
 	private int[] mDstBmpBuffer;
 	private int mMaskSize;
 	private int mExponent;
-	private byte[] mIntensityBuffer;
+	private int[] mIntensityBuffer;
 	private int[] sqr_lut;
     public OilifyFilter(Bitmap srcBmp, int maskSize, int exponent)
     {
@@ -17,18 +18,59 @@ public class OilifyFilter
     	mExponent = exponent;
     	mSrcBmpBuffer = new int[mSrcBmp.getWidth() * mSrcBmp.getHeight()];
     	mDstBmpBuffer = new int[mSrcBmp.getWidth() * mSrcBmp.getHeight()];
-    	mSrcBmp.getPixels(mSrcBmpBuffer, 0, 0, 0, 0, mSrcBmp.getWidth(), mSrcBmp.getHeight());
+    	mSrcBmp.getPixels(mSrcBmpBuffer, 0, mSrcBmp.getWidth(), 0, 0, mSrcBmp.getWidth(), mSrcBmp.getHeight());
     }
-    private byte rgbLuminance(int r, int g, int b)
+    public void filter()
+    {
+    	mIntensityBuffer = createIntensityBuffer();
+    	oilify();
+    }
+    public Bitmap getFiltedBitmap()
+    {
+    	Bitmap bmp = Bitmap.createBitmap(mDstBmpBuffer, 0, mSrcBmp.getWidth(), mSrcBmp.getWidth(), mSrcBmp.getHeight(),
+    			Bitmap.Config.ARGB_8888);
+    	return bmp;
+    }
+    private float fast_powf (float x, int y)
+    {
+      float value;
+      float[] x_pow = new float[8];
+      int  y_uint = y;
+      int  bitmask;
+      int   i;
+
+      if ((y_uint & 0x01) != 0)
+        value = x;
+      else
+        value = 1.0f;
+
+      x_pow[0] = x;
+
+      for (bitmask = 0x02, i = 1;
+           bitmask <= y_uint;
+           bitmask <<= 1, i++)
+        {
+          /*  x_pow[i] == x_pow[i-1]^2 == x^(2^i)  */
+
+          x_pow[i] = x_pow[i - 1] * x_pow[i - 1];
+
+          if ((y_uint & bitmask) != 0)
+            value *= x_pow[i];
+        }
+
+      return value;
+    }
+
+    private int rgbLuminance(int r, int g, int b)
     {
     	float v = r * 0.2126f + g * 0.7152f + b * 0.0722f;
-    	return (byte)v;
+    	return (int)v;
     }
-    private byte[] createIntensityBuffer()
+    private int[] createIntensityBuffer()
     {
     	int width = mSrcBmp.getWidth();
     	int height = mSrcBmp.getHeight();
-    	byte[] buffer = new byte[width * height];
+    	int[] buffer = new int[width * height];
     	for(int i = 0 ; i < height ; i++)
     	{
     		for(int j = 0 ; j < width ; j++)
@@ -62,65 +104,67 @@ public class OilifyFilter
     		throw new RuntimeException("index exceed");
     	}
     }
-private void weighted_average_color (int    hist[],
-            int    hist_rgb[][],
-            float  exponent,
-            int[] dest,
-            int    bpp, int x, int y)
-{
-    int   i, b;
-    int   hist_max = 1;
-    int   exponent_int = 0;
-    float div = 0.000001f;
-    float[] color = new float[]{ 0.0f, 0.0f, 0.0f, 0.0f };
-
-    for (i = 0; i < HISTSIZE; i++)
-        hist_max = Math.max(hist_max, hist[i]);
-
-    if ((exponent - Math.floor (exponent)) < 0.001 && exponent <= 255.0)
-        exponent_int = (int) exponent;
-
-    for (i = 0; i < HISTSIZE; i++)
-    {
-        float ratio = (float) hist[i] / (float) hist_max;
-        float weight;
-
-        if (exponent_int != 0)
-            weight = fast_powf (ratio, exponent_int);
-        else
-            weight = pow (ratio, exponent);
-
-        if (hist[i] > 0)
-            for (b = 0; b < bpp; b++)
-                color[b] += weight * (float) hist_rgb[b][i] / (float) hist[i];
- 
-        div += weight;
-    }
-    int intv = 0;
-    for (b = 0; b < bpp; b++)
-    {
-        int c = (int) (color[b] / div);
-
-        byte v = CLAMP0255 (c);
-        switch(b)
-        {
-        case 0:
-            intv |= (v << 24) & 0xFF000000;
-            break;
-        case 1:
-        	intv |= (v << 16) & 0x00FF0000;
-        	break;
-        case 2:
-        	intv |= (v << 8) & 0x0000FF00;
-        	break;
-        case 3:
-        	intv |= v & 0x000000FF;
-        	break;
-        default:
-        	throw new RuntimeException("bpp error");
-        }
-    }
-}
+	private void weighted_average_color (int    hist[],
+	            int    hist_rgb[][],
+	            float  exponent,
+	            int[] dest,
+	            int    bpp, int x, int y)
+	{
+	    int   i, b;
+	    int   hist_max = 1;
+	    int   exponent_int = 0;
+	    float div = 0.000001f;
+	    float[] color = new float[]{ 0.0f, 0.0f, 0.0f, 0.0f };
+	    int width = mSrcBmp.getWidth();
+	    int height = mSrcBmp.getHeight();
+	    for (i = 0; i < HISTSIZE; i++)
+	        hist_max = Math.max(hist_max, hist[i]);
+	
+	    if ((exponent - Math.floor (exponent)) < 0.001 && exponent <= 255.0)
+	        exponent_int = (int) exponent;
+	
+	    for (i = 0; i < HISTSIZE; i++)
+	    {
+	        float ratio = (float) hist[i] / (float) hist_max;
+	        float weight;
+	    
+	        if (exponent_int != 0)
+	            weight = fast_powf (ratio, exponent_int);
+	        else
+	            weight = (float)Math.pow ((double)ratio, (double)exponent);
+	
+	        if (hist[i] > 0)
+	            for (b = 0; b < bpp; b++)
+	                color[b] += weight * (float) hist_rgb[b][i] / (float) hist[i];
+	 
+	        div += weight;
+	    }
+	    int intv = 0;
+	    for (b = 0; b < bpp; b++)
+	    {
+	        int c = (int) (color[b] / div);
+	
+	        int v = clamp (c, 0 , 255);
+	        switch(b)
+	        {
+	        case 0:
+	            intv |= (v << 24) & 0xFF000000;
+	            break;
+	        case 1:
+	        	intv |= (v << 16) & 0x00FF0000;
+	        	break;
+	        case 2:
+	        	intv |= (v << 8) & 0x0000FF00;
+	        	break;
+	        case 3:
+	        	intv |= v & 0x000000FF;
+	        	break;
+	        default:
+	        	throw new RuntimeException("bpp error");
+	        }
+	    }
+	    dest[y * width + x] = intv;
+	}
     private void oilify()
     {
     	int width = mSrcBmp.getWidth();
@@ -141,6 +185,7 @@ private void weighted_average_color (int    hist[],
     	}
     	for(int y = 0 ; y < height ; y++)
     	{
+    		Log.i(TAG, "y = " + y);
     		for(int x = 0 ; x < width ; x++)
     		{
     			for(int n = 0 ; n < HISTSIZE ; n++)
@@ -172,7 +217,7 @@ private void weighted_average_color (int    hist[],
     					
     				}
     			}
-    			weighted_average_color (hist, hist_rgb, mExponent, mSrcBmpBuffer, 4, x, y);
+    			weighted_average_color (hist, hist_rgb, mExponent, mDstBmpBuffer, 4, x, y);
     		}
     	}
     }
