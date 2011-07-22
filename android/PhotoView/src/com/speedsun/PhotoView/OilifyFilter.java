@@ -1,6 +1,7 @@
 package com.speedsun.PhotoView;
 import android.graphics.Bitmap;
 import android.util.Log;
+import java.util.ArrayList;
 public class OilifyFilter 
 {
 	private static final String TAG = "OilifyFilter";
@@ -93,17 +94,117 @@ public class OilifyFilter
     	switch(index)
     	{
     	case 0:
-    		return (argb >> 24) & 0xFF;
+    		return (argb >> 24) & 0xFF; //a
     	case 1:
-    		return (argb >> 16) & 0xFF;
+    		return (argb >> 16) & 0xFF; //r
     	case 2:
-    		return (argb >> 8) &0xFF;
+    		return (argb >> 8) &0xFF; //g
     	case 3:
-    		return argb & 0xFF;
+    		return argb & 0xFF; //b
     	default:
     		throw new RuntimeException("index exceed");
     	}
     }
+    ////////////////////////////////
+    private static class Point
+    {
+    	public int x;
+    	public int y;
+    	public int color;
+    	public Point(int x, int y ,int c)
+    	{
+    		this.x = x;
+    		this.y = y;
+    		this.color = c;
+    	}
+    	
+    }
+    private static class Bucket
+    {
+    	public ArrayList<Point> colors = new ArrayList<Point>();
+    }
+    private final static int BUCKET_SIZE = 8;
+    private void setColor(Bucket[] buckets, int[] dst, int x, int y)
+    {
+    	//Log.i(TAG, "set color x = "  + x + ", y = " + y);
+    	int max = 0;
+    	int index = -1;
+    	for(int i = 0 ; i < buckets.length ; i++)
+    	{
+    		if(buckets[i].colors.size() > max)
+    		{
+    			max = buckets[i].colors.size();
+    			index = i;
+    		}
+    	}
+    	if(index == -1)
+    		throw new RuntimeException("setColor index == -1 error");
+    	int r = 0, g = 0 , b = 0 ;
+    	for(int i = 0 ;  i < buckets[index].colors.size(); i++)
+    	{
+    		r += getGray(buckets[index].colors.get(i).color, 1);
+    		g += getGray(buckets[index].colors.get(i).color, 2);
+    		b += getGray(buckets[index].colors.get(i).color, 3);
+    	}
+    	r = r / buckets[index].colors.size();
+    	g = g / buckets[index].colors.size();
+    	b = b / buckets[index].colors.size();
+	    int width = mSrcBmp.getWidth();
+	    int height = mSrcBmp.getHeight();
+        dst[y * width + x] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+    }
+    private void oilify()
+    {
+    	int width = mSrcBmp.getWidth();
+    	int height = mSrcBmp.getHeight();
+    	int radius = mMaskSize / 2;
+    	int radius_square = radius * radius;
+    	Bucket[] buckets = new Bucket[BUCKET_SIZE];
+    	int x1 = 0;
+    	int y1 = 0;
+    	int x2 = width - 1;
+    	int y2 = height - 1;
+    	boolean init = true;
+		for(int n = 0 ; n < BUCKET_SIZE ; n++)
+			buckets[n] = new Bucket();
+    	for(int y = 0 ; y < height ; y++)
+    	{
+    		Log.i(TAG, "y = " + y);
+    		for(int x = 0 ; x < width ; x++)
+    		{
+    			for(int n = 0 ; n < BUCKET_SIZE ; n++)
+    				buckets[n].colors.clear();
+    			int mask_x1 = clamp((x - radius), x1, x2);
+    			int mask_y1 = clamp((y - radius), y1, y2);
+    			int mask_x2 = clamp((x + radius), x1, x2);
+    			int mask_y2 = clamp((y + radius), y1, y2);
+                if(init)
+                {
+	    			for(int mask_y = mask_y1 ; mask_y < mask_y2 ; mask_y++)
+	    			{
+	    				for(int mask_x = mask_x1 ; mask_x < mask_x2 ; mask_x++)
+	    				{
+	    					int inten = mIntensityBuffer[mask_y * width + mask_x];
+	    					int index = inten / 32;
+	    					Bucket bucket = buckets[index];
+	    					bucket.colors.add(new Point(mask_x, mask_y, mSrcBmpBuffer[mask_y * width + mask_x]));
+	    				}
+	    			}
+                }
+                else
+                {
+                	
+                	if(y % 2 == 0)
+                	{
+                		
+                	}
+                }
+    		    setColor(buckets, mDstBmpBuffer, x, y);
+    		}
+    	}
+    }
+    ////////////////////////////////////////////////
+    /*
 	private void weighted_average_color (int    hist[],
 	            int    hist_rgb[][],
 	            float  exponent,
@@ -221,5 +322,6 @@ public class OilifyFilter
     		}
     	}
     }
+    */
     
 }

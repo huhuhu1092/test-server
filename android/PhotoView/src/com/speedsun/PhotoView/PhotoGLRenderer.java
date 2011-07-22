@@ -48,7 +48,7 @@ public class PhotoGLRenderer implements GLSurfaceView.Renderer {
         //loadTexture(mPicture2, mTextureID2, GLES20.GL_TEXTURE1);
         mNeedUpdateRenderTarget = true;
         */
-		OilifyFilter of = new OilifyFilter(mPicture1, 16, 8);
+		OilifyFilter of = new OilifyFilter(mPicture1, 10, 8);
 		of.filter();
 		Bitmap bmp = of.getFiltedBitmap();
 		Log.i(TAG, "################# get bmp ###################");
