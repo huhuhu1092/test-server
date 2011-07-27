@@ -14,7 +14,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-mainui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 504 94 1324 643)) (name :mainui) (title "Mainui")
+     (interior (make-box 236 255 1056 804)) (name :mainui) (title "Mainui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner
@@ -26,7 +26,7 @@
            :close-button t
            :font (make-font-ex :swiss "Arial / ANSI" 10 '(:bold))
            :form-package-name :common-graphics-user
-           :form-state :normal
+           :form-state :shrunk
            :maximize-button t
            :menu (open-menu
                     (list (make-instance 'menu-item :name :new-item-1 :title "Project"
@@ -108,19 +108,20 @@
     owner))
 
 (defun make-mainui-widgets ()
-  (list (make-instance 'my-project-management-area-outline :font
+  (list (make-instance 'project-single-item-list :font
+                       (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 439 :left 293 :name
+                       :content-list :on-click 'mainui-content-list-on-click
+                       :on-double-click 'mainui-content-list-on-double-click :top 55
+                       :width 414)
+        (make-instance 'my-project-management-area-outline :font
                        (make-font-ex nil "Sans" 10 '(:bold)) :height 480 :left 14 :name
                        :project-management-area :on-click
                        'mainui-project-management-area-on-click :on-double-click
                        'mainui-project-management-area-on-double-click :top 14 :value
                        :top-1 :width 232)
         (make-instance 'editable-text :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 41 :left 293 :name :project-path-name :read-only t :top 14
+                       :height 31 :left 293 :name :project-path-name :read-only t :top 14
                        :value "" :width 416)
-        (make-instance 'single-item-list :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12)
-                       :height 439 :left 293 :name :content-list :on-click
-                       'mainui-content-list-on-click :on-double-click
-                       'mainui-content-list-on-double-click :top 55 :width 414)
         (make-instance 'button :font (make-font-ex nil "Î¢ÈíÑÅºÚ / Default" 12) :height 47
                        :left 731 :name :button10 :on-click 'mainui-button10-on-click
                        :title "Preview" :top 156 :width 65)))

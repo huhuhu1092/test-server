@@ -4,7 +4,9 @@
 #include "SE_ID.h"
 #include "SE_Common.h"
 #include "SE_ImageData.h"
+#include "SE_VertexBuffer.h"
 #include <string.h>
+#include <list>
 class SE_TextureCoordData;
 class SE_GeometryData;
 class SE_MaterialData;
@@ -108,6 +110,7 @@ public:
 private:
     SE_TextureUnit** mTexUnitArray;
 };
+
 class SE_Surface
 {
 public:
@@ -135,40 +138,11 @@ public:
     void setColor(const SE_Vector3f& color);
     void setProgramDataID(const SE_ProgramDataID& programID);
 	void setShaderProperty(SE_ShaderProperty* sp);
+	SE_VertexBuffer getVertexBuffer(SE_VertexFormat::TYPE t);
 	SE_ShaderProperty* getShaderProperty()
 	{
 		return mShaderProperty;
 	}
-	/*
-	void setTextureMode(int mode)
-	{
-		mShaderColorOperation.setTextureMode(mode);
-	}
-	int getTextureMode()
-	{
-		return mShaderColorOperation.getTextureMode();
-	}
-	void getRealTexModeColorOp(int* hasTexture, int num, int& outTexMode, int& outColorOp)
-	{
-		return mShaderColorOperation.getTextureModeColorOp(hasTexture, num, outTexMode, outColorOp); 
-	}
-	void setColorOperation(int op)
-	{
-		mShaderColorOperation.setColorOperationMode(op);
-	}
-	int getColorOperation()
-	{
-		return mShaderColorOperation.getColorOperationMode();
-	}
-	SE_Vector3f getMarkColor(int index)
-	{
-		return mMarkColor[index];
-	}
-	void setMarkColor(int index, const SE_Vector3f& c)
-	{
-		mMarkColor[index] = c;
-	}
-	*/
 	int getSampleMin()
     {
         return mSampleMin;
@@ -236,21 +210,10 @@ public:
         mFaceVertexNum = 0;
     }
     void getVertexIndexInGeometryData(int*& outArray , int& outNum);
-	/*
-	void setTexCoordIndex(int texIndex, int indexHasTexCoord)
-	{
-		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-			return;
-		mTexCoordIndex[texIndex] = indexHasTexCoord;
-	}
-	int getTexCoordIndex(int texIndex)
-	{
-		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-			return SE_TEXTURE0;
-		return mTexCoordIndex[texIndex];
-	}
-
-	*/
+private:
+    typedef std::list<SE_VertexFormat::PosTex0> VertexDataList;
+    int addVertexData(SE_VertexFormat::PosTex0 v, VertexDataList& vertexDataList);
+    SE_VertexBuffer createPosTex0VertexBuffer();
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
@@ -281,10 +244,7 @@ private:
     int* mIndexInGeometryData;
     int mIndexInGeometryDataNum;
 	SE_ShaderProperty* mShaderProperty;
-	//int mTextureMode;
-	//SE_Vector3f mMarkColor[4];
-	//int mTexCoordIndex[SE_TEXUNIT_NUM];
-	//SE_ShaderColorOperation mShaderColorOperation;
+    SE_VertexBuffer mVertexBuffer;
 };
 // SE_Mesh and SE_Surface , SE_Texture , SE_TextureUnit are the wrapper class 
 // about the data they use. So they will not release the pointer they own.

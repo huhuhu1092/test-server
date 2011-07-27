@@ -4,6 +4,7 @@
 #include "SE_Buffer.h"
 #include "SE_Common.h"
 #include "SE_ResourceManager.h"
+#include "SE_ID.h"
 #include <string>
 SE_MeshTransfer::~SE_MeshTransfer()
 {

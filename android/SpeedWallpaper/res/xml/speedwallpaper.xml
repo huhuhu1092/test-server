@@ -1,0 +1,6 @@
+<wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:author="@string/author"
+    android:description="@string/speedwallpaper_desc"
+    android:thumbnail="@drawable/speedwallpaper_thumb"
+    android:settingsActivity="com.speedsun.wallpaper.SpeedWallpaperSetting"
+/>

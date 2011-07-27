@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <!-- Application name -->
+    <string name="wallpapers">SpeedWallpaper</string>
+
+    <!-- Wallpapers showing smoke, clouds, water, plasmas -->
+    <string name="speedwallpaper">speed wallpaper</string>
+    <string name="ok"> OK </string>
+    <string name="author">Luwei</string>
+    <string name="freq">UpdateFreqency(unit: second)</string>
+    <string name="duration">Duration(unit: second)</string>
+    <string name="speedwallpaper_desc">change wallpaper.</string>
+    <string name="cancel">Cancel</string>
+</resources>

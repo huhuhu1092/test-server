@@ -3,6 +3,7 @@
 #include "SE_Common.h"
 #include "SE_Object.h"
 #include "SE_Vector.h"
+#include "SE_VertexBuffer.h"
 class SE_ImageData;
 class SE_ShaderProgram;
 class SE_Surface;
@@ -34,6 +35,7 @@ public:
 	virtual void begin(SE_ShaderProgram* shaderProgram);
     virtual void draw();
 	virtual void end();
+    virtual void setVertexBuffer(SE_RenderUnit* renderUnit);
 	void setPrimitiveType(int primitiveType)
 	{
 		mPrimitiveType = primitiveType;
@@ -62,6 +64,7 @@ protected:
 	_Vector2f* mTexVertex;
 	int mHasTexCoord[SE_TEXUNIT_NUM];
 	int mHasTexture[SE_TEXUNIT_NUM];
+    SE_VertexBuffer mVertexBuffer;
 };
 class SE_ColorExtractRenderer : public SE_Renderer
 {
@@ -86,6 +89,7 @@ public:
     virtual void setTexVertex(SE_RenderUnit* renderUnit);
     virtual void setDrawMode(SE_RenderUnit* renderUnit);
 	virtual void begin(SE_ShaderProgram* shaderProgram);
+	virtual void setVertexBuffer(SE_RenderUnit* renderUnit);
 private:
 	SE_SimpleSurfaceShaderProgram* mShaderProgram;
 };

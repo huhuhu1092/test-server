@@ -5,8 +5,12 @@
 ;;; the *.bil file having the same name as this *.cl file.
 
 (in-package :common-graphics-user)
-(defclass my-project-management-area-outline (outline) ())
+;;;; test for Grapher begin
 
+;;;; test for Grapher end
+(defclass my-project-management-area-outline (outline) ())
+(defclass project-single-item-list (single-item-list) ())
+(defclass project-single-item-list-pane (single-item-list-pane) ())
 (defgeneric handle-outline-item-click (item widget dialog) (:documentation "handle outline item click"))
 (defclass pbase-outline-item (outline-item) ((name :initarg :name :initform nil :accessor pbase-outline-item-name)))
 (defclass project-outline-item (pbase-outline-item) ())
@@ -31,7 +35,9 @@
 (defun extract-project-name-path (project-name)
   (uie:tokens project-name #'uie:constituent 0)
   )
-
+(defun create-element-graph ()
+  t
+  )
 (defmethod handle-outline-item-click ((item pitem-outline-item) widget dialog)
   (declare (ignorable widget dialog))
   (set-textarea dialog (value (parent item)))
@@ -45,6 +51,36 @@
     (setf *curr-component* (value item))
     (set-contentlist-window dialog file-list))
          
+  )
+(defgeneric handle-list-item (item-value component) (:documentation "handle click on single item list"))
+(defgeneric create-project-item-list-menu (item component) (:documentation "create project item list"))
+(defmethod create-project-item-list-menu (item (component (eql :element)))
+  (if (null item)
+      (list (make-instance 'menu-item :title "Create" :value #'(lambda (window) (element-ui))) 
+            (make-instance 'menu-item :title "View" :value 'view))
+    (list (make-instance 'menu-item :title "Edit" :value #'(lambda (window) (create-element-graph)))
+          (make-instance 'menu-item :title "View" :value #'(lambda (window) (create-element-graph))))
+    )
+  )
+
+(defmethod handle-list-item (item-value (component (eql :element)))
+  #+debug (format t "item = ~a ~%" item-value)
+  (create-project-item-list-menu item-value component)
+  )
+(defmethod handle-list-item (item-value component)
+  (if (null component)
+      (format t "list item type is nil~%")
+    )
+  )
+(defmethod widget-device ((dialog-item project-single-item-list) dialog)
+  (declare (ignorable dialog))
+  'project-single-item-list-pane)
+
+(defmethod shortcut-commands ((window project-single-item-list-pane) menu)
+  (declare (ignorable menu))
+  (let ((si (value (dialog-item window))))
+    (handle-list-item si (uie:component-tag *curr-component*))
+    )
   )
 (defun set-curr-project (item)
     (let* ((project-name (value item))
@@ -71,7 +107,7 @@
     (let ((selected-item (selected-outline-item widget))
           )
       #+debug (format t "project name : ~a ~a ~%" selected-item widget)
-      (handle-outline-item-click selected-item widget dialog)
+      (when selected-item (handle-outline-item-click selected-item widget dialog))
     )
   )
 (defun sui-create-project (window)
@@ -186,5 +222,5 @@
   ;; NOTE:  Usually it is better to use an on-change function rather
   ;; than an on-click function.  See the doc pages for those properties.
   #+debug (format t "content list: ~a ~%" (value widget))
-  (process-click-content-list (value widget) (uie:component-tag *curr-component*))
+  (when (value widget) (process-click-content-list (value widget) (uie:component-tag *curr-component*)))
   t)

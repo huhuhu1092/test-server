@@ -14,7 +14,7 @@
 ;; (Pass :owner to this function; :parent is for compatibility.)
 (defun make-sequence-ui
     (&key parent (owner (or parent (screen *system*))) exterior
-     (interior (make-box 829 411 1635 846)) (name :sequence-ui) (title "Sequence Ui")
+     (interior (make-box 808 354 1614 789)) (name :sequence-ui) (title "Sequence Ui")
      (border :frame) (child-p t) form-p)
   (let ((owner
          (make-window name :owner owner

@@ -12,6 +12,7 @@
 #include "SE_Spatial.h"
 #include "SE_Renderer.h"
 #include "SE_DataValueDefine.h"
+#include "SE_ID.h"
 #include <vector>
 /////////////////////////////////
 SE_RenderUnit::SE_RenderUnit()
@@ -492,6 +493,7 @@ void SE_TriSurfaceRenderUnit::draw()
 	renderer->setColor(this);
 	renderer->setVertex(this);
 	renderer->setTexVertex(this);
+    //renderer->setVertexBuffer(this);
 	renderer->setDrawMode(this);
 	renderer->draw();
 	renderer->end();
