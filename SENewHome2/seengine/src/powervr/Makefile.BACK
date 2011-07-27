@@ -1,0 +1,305 @@
+PLAT_CC  = gcc
+PLAT_CPP = g++
+PLAT_AR  = ar
+RM = rm -f
+SDKDIR = /home/luwei/program/powervr/SDKPackage
+PLATFORM = LinuxPC
+SEENG_DIR = /home/luwei/program/streamserver_git/test-server/SENewHome2/seengine/src
+OUTNAME = SEDemo
+## X11 lib define
+X11_LIBS = -lX11 -lXau -lfreetype
+WS = X11
+X11_INC = /usr/include/X11
+FREETYPE_INC = /usr/include/freetype2
+LIBDIR_FLAGS = -Wl,--rpath-link=$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
+               -L$(SDKDIR)/Builds/OGLES2/$(PLATFORM)/Lib \
+			   -L$(SDKDIR)/Utilities/PVRTexLib/Linux \
+               -L/home/luwei/ProgramFiles/curl/lib \
+			   -L/home/luwei/ProgramFiles/devIL/lib
+
+PLAT_CFLAGS = -DBUILD_OGLES2 -DDEBUG -DGLES_20 -DSE_HAS_MUTEX -DROTATE -g
+
+PLAT_INC = $(SDKDIR)/Builds/OGLES2/Include \
+		   $(SDKDIR)/Utilities/PVRTexLib \
+		   /home/luwei/sourcecode/DevIL/devil-1.7.8/include \
+		   /home/luwei/ProgramFiles/devIL/include \
+		   /home/luwei/ProgramFiles/curl/include \
+	       $(X11_INC)  \
+		   $(FREETYPE_INC)
+
+PLAT_OBJPATH = $(PLATFORM)/$(WS)
+PLAT_LINK = $(LIBDIR_FLAGS) -lEGL -lGLESv2 -lPVRTexLib -lIL -lcurl $(X11_LIBS)
+INCLUDES += -I$(SDKDIR)/Shell  \
+			-I$(SDKDIR)/Shell/API/KEGL \
+			-I$(SDKDIR)/Shell/OS/LinuxX11 \
+			-I$(SEENG_DIR) \
+			-I$(SEENG_DIR)/export \
+			-I$(SEENG_DIR)/command \
+			-I$(SEENG_DIR)/2D \
+			-I$(SEENG_DIR)/animation \
+			-I$(SEENG_DIR)/checkxml \
+			-I$(SEENG_DIR)/tinyxml \
+            -I$(SEENG_DIR)/font \
+			-I$(SEENG_DIR)/game \
+			-I$(SEENG_DIR)/game/cchess \
+			-I$(SEENG_DIR)/network \
+			-I$(SEENG_DIR)/ui \
+            -I$(SEENG_DIR)/test \
+            -I$(SEENG_DIR)/bullet \
+			-I$(SEENG_DIR)/bullet/BulletCollision/BroadphaseCollision \
+			-I$(SEENG_DIR)/bullet/BulletCollision/CollisionDispatch \
+            -I$(SEENG_DIR)/bullet/BulletCollision/CollisionShapes \
+            -I$(SEENG_DIR)/bullet/BulletCollision/NarrowPhaseCollision \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/ConstraintSolver \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/Dynamics \
+            -I$(SEENG_DIR)/bullet/BulletDynamics/Vehicle \
+            -I$(SEENG_DIR)/bullet/LinearMath \
+			$(addprefix -I, $(PLAT_INC))
+
+VPATH +=  ../ : \
+	  ../command : \
+	  ../export : \
+	  ../2D : \
+	  ../animation : \
+	  ../checkxml : \
+	  ../tinyxml : \
+	  ../game : \
+	  ../game/cchess : \
+	  ../ui : \
+	  ../font : \
+	  ../network : \
+	  ../test : \
+	  ../bullet/BulletCollision/BroadphaseCollision : \
+	  ../bullet/BulletCollision/CollisionDispatch : \
+	  ../bullet/BulletCollision/CollisionShapes : \
+	  ../bullet/BulletCollision/NarrowPhaseCollision : \
+	  ../bullet/BulletDynamics/ConstraintSolver : \
+	  ../bullet/BulletDynamics/Dynamics : \
+	  ../bullet/BulletDynamics/Vehicle : \
+	  ../bullet/LinearMath : \
+	  $(SDKDIR)/Shell            : \
+	  $(SDKDIR)/Shell/API/KEGL   : \
+	  $(SDKDIR)/Shell/OS/LinuxX11
+DEPEND_FLAG = $(PLAT_CFLAGS) $(INCLUDES)
+##SRC_LUA = lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c  ldump.c lfunc.c  lgc.c linit.c liolib.c llex.c \
+##	  lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c lstring.c lstrlib.c ltable.c ltablib.c ltm.c \
+##	  lundump.c lvm.c lzio.c print.c
+SRC_BULLET =  btAlignedAllocator.cpp \
+	          btGeometryUtil.cpp \
+	          btQuickprof.cpp \
+	          btSerializer.cpp \
+	 btAxisSweep3.cpp \
+	 btBroadphaseProxy.cpp \
+	 btCollisionAlgorithm.cpp \
+	 btDispatcher.cpp \
+	 btMultiSapBroadphase.cpp \
+	 btOverlappingPairCache.cpp \
+	 btSimpleBroadphase.cpp \
+	 btDbvtBroadphase.cpp \
+	 btQuantizedBvh.cpp \
+	 btDbvt.cpp \
+	 btCollisionDispatcher.cpp \
+	 btCollisionObject.cpp \
+	 btCollisionWorld.cpp \
+	 btCompoundCollisionAlgorithm.cpp \
+	 btConvexConcaveCollisionAlgorithm.cpp \
+	 btConvexConvexAlgorithm.cpp \
+	 btConvexPlaneCollisionAlgorithm.cpp \
+	 btDefaultCollisionConfiguration.cpp \
+	 btEmptyCollisionAlgorithm.cpp \
+	  btManifoldResult.cpp \
+	  btSimulationIslandManager.cpp \
+	  btSphereBoxCollisionAlgorithm.cpp \
+	  btSphereSphereCollisionAlgorithm.cpp \
+	  btSphereTriangleCollisionAlgorithm.cpp \
+	  btUnionFind.cpp \
+	  SphereTriangleDetector.cpp \
+	  btActivatingCollisionAlgorithm.cpp \
+	  btBoxBoxCollisionAlgorithm.cpp \
+	  btBoxBoxDetector.cpp \
+	  btBoxShape.cpp \
+	  btBvhTriangleMeshShape.cpp \
+	  btCapsuleShape.cpp \
+	  btCollisionShape.cpp \
+	  btCompoundShape.cpp \
+	  btConcaveShape.cpp \
+	  btConeShape.cpp \
+	  btConvexHullShape.cpp \
+	  btConvexInternalShape.cpp \
+	  btConvexShape.cpp \
+	  btConvexTriangleMeshShape.cpp \
+	  btCylinderShape.cpp \
+	  btEmptyShape.cpp \
+	  btHeightfieldTerrainShape.cpp \
+	  btMinkowskiSumShape.cpp \
+	  btMultiSphereShape.cpp \
+	  btOptimizedBvh.cpp \
+	  btPolyhedralConvexShape.cpp \
+	  btSphereShape.cpp \
+	  btStaticPlaneShape.cpp \
+	  btStridingMeshInterface.cpp \
+	  btTetrahedronShape.cpp \
+	  btTriangleBuffer.cpp \
+	  btTriangleCallback.cpp \
+	  btTriangleIndexVertexArray.cpp \
+	  btTriangleMesh.cpp \
+	  btTriangleMeshShape.cpp \
+	  btUniformScalingShape.cpp \
+	 btContinuousConvexCollision.cpp \
+	 btConvexCast.cpp \
+	 btGjkConvexCast.cpp \
+	 btGjkEpaPenetrationDepthSolver.cpp \
+	 btGjkPairDetector.cpp \
+	 btMinkowskiPenetrationDepthSolver.cpp \
+	 btPersistentManifold.cpp \
+	 btRaycastCallback.cpp \
+	 btSubSimplexConvexCast.cpp \
+	 btVoronoiSimplexSolver.cpp \
+	 btGjkEpa2.cpp \
+	btConeTwistConstraint.cpp \
+	btContactConstraint.cpp \
+	btGeneric6DofConstraint.cpp \
+	btHingeConstraint.cpp \
+	btPoint2PointConstraint.cpp \
+	btSequentialImpulseConstraintSolver.cpp \
+	btSolve2LinearConstraint.cpp \
+	btTypedConstraint.cpp \
+	btContinuousDynamicsWorld.cpp \
+	btDiscreteDynamicsWorld.cpp \
+	btRigidBody.cpp \
+	btSimpleDynamicsWorld.cpp \
+	Bullet-C-API.cpp \
+	btRaycastVehicle.cpp \
+	btWheelInfo.cpp 
+
+SRCS_TINYXML = tinystr.cpp  \
+			   tinyxml.cpp  \
+               tinyxmlerror.cpp \
+               tinyxmlparser.cpp
+
+
+SRCS_CPP = SE_Animation.cpp \
+		   SE_AnimationManager.cpp \
+		   SE_AnimationSet.cpp \
+		   SE_Application.cpp \
+		   SE_Ase.cpp \
+		   SE_BipedAnimation.cpp \
+		   SE_BipedController.cpp \
+		   SE_Bone.cpp \
+		   SE_BoundingVolume.cpp \
+		   SE_Buffer.cpp \
+		   SE_Camera.cpp \
+		   SE_Command.cpp \
+		   SE_CommandFactory.cpp \
+		   SE_Common.cpp \
+		   SE_CommonNode.cpp \
+		   SE_DataTransfer.cpp \
+		   SE_DataValueDefine.cpp \
+		   SE_DelayDestroy.cpp \
+		   SE_DynamicArray.cpp \
+	       SE_File.cpp \
+	       SE_Geometry.cpp \
+	       SE_Geometry3D.cpp \
+		   SE_GeometryData.cpp \
+		   SE_ID.cpp \
+	       SE_ImageCodec.cpp \
+		   SE_ImageData.cpp \
+	       SE_ImageMap.cpp \
+		   SE_InputEvent.cpp \
+	       SE_InputManager.cpp \
+		   SE_Interpolate.cpp \
+	       SE_IO.cpp \
+		   SE_KeyFrame.cpp \
+		   SE_KeyFrameController.cpp \
+		   SE_Layer.cpp \
+		   SE_LoadThread.cpp \
+	       SE_Log.cpp \
+		   SE_LodNode.cpp \
+	       SE_MaterialData.cpp \
+		   SE_Math.cpp \
+		   SE_Matrix.cpp \
+	       SE_Mesh.cpp \
+	       SE_MeshSimObject.cpp \
+		   SE_Message.cpp \
+		   SE_MessageDefine.cpp \
+		   SE_MotionEventCamera.cpp \
+		   SE_MountPoint.cpp \
+		   SE_Mutex.cpp \
+		   SE_NewGeometry.cpp \
+	       SE_Object.cpp \
+		   SE_ObjectManager.cpp \
+		   SE_Primitive.cpp \
+		   SE_PropertySet.cpp \
+		   SE_Quat.cpp \
+		   SE_Renderer.cpp \
+		   SE_RenderManager.cpp \
+	       SE_RenderState.cpp \
+	       SE_RenderTarget.cpp \
+	       SE_RenderTargetManager.cpp \
+	       SE_RenderUnit.cpp \
+		   SE_ResFileHeader.cpp \
+	       SE_ResourceManager.cpp \
+	       SE_Scene.cpp \
+           SE_SceneManager.cpp \
+           SE_ShaderProgram.cpp \
+           SE_ShaderProperty.cpp \
+           SE_SimObject.cpp \
+           SE_SimObjectManager.cpp \
+           SE_SkinJointController.cpp \
+           SE_Spatial.cpp \
+           SE_SpatialAnimation.cpp \
+           SE_SpatialTravel.cpp \
+		   SE_Struct.cpp \
+	       SE_SystemCommand.cpp \
+           SE_SystemCommandFactory.cpp \
+           SE_Texture.cpp \
+           SE_TextureCoordAnimation.cpp \
+           SE_TextureCoordData.cpp \
+		   SE_Thread.cpp \
+		   SE_ThreadManager.cpp \
+           SE_Time.cpp \
+		   SE_Timer.cpp \
+           SE_TreeStructManager.cpp \
+           SE_Utils.cpp \
+		   SE_UserCommand.cpp \
+           SE_Vector.cpp \
+		   SE_VertexBuffer.cpp \
+           SEDemo.cpp \
+	PVRShell.cpp \
+	PVRShellAPI.cpp \
+	PVRShellOS.cpp \
+	$(SRCS_TINYXML) 
+
+SRCS = $(shell for d in $(SRCS_C) ; do find ../ -name $$d ; done)
+SRCS += $(shell for d in $(SRCS_CPP) ; do find ../ -name $$d ; done)
+ALLOBJ += $(subst .cpp,.o, $(SRCS))
+OBJ_C = $(SRCS_C:.c=.o)
+OBJ_CPP = $(SRCS_CPP:.cpp=.o)
+OBJECTS += $(OBJ_C)
+OBJECTS += $(OBJ_CPP)
+$(OUTNAME): $(OBJ_C) $(OBJ_CPP) depend
+	$(PLAT_CPP) -o $(OUTNAME) $(OBJECTS) $(PLAT_LINK)
+
+%.o: %.c
+	$(PLAT_CC) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+%.o: %.cpp
+	@echo $<
+	@echo $@
+	$(PLAT_CPP) -c $(PLAT_CFLAGS) $(INCLUDES) $< -o $@
+
+depend: 
+	makedepend -- $(DEPEND_FLAG) -- $(SRCS)
+
+print_info:
+	@echo $(ALLOBJ)
+	@echo $(OBJECTS)
+	@echo $(OBJ_CPP)
+	@echo $(OUTNAME)
+	@echo $(INCLUDES)
+	@echo $(PLAT_CFLAGS)
+	@echo $(VPATH)
+	@echo $(SRCS)
+clean:
+	$(RM) $(OBJECTS) $(ALLOBJ) $(OUTNAME)
+# DO NOT DELETE
