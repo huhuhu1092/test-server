@@ -288,7 +288,11 @@ SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath)
 	error = ilGetError();
     ilBindImage(imgId);
 	error = ilGetError();
+#ifdef WIN32
+	if(!ilLoadImage(filePath))
+#else
     if(!ilLoadImage((const char*)filePath))
+#endif
     {
 		error = ilGetError();
         return NULL;
