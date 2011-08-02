@@ -239,6 +239,7 @@ protected:
     int mState;
     size_t mSeqNum; 
     SE_DelayDestroyList mDelayDestroyList;
+    SE_Mutex mDelayDestroyListMutex;
 #ifdef ANDROID
     void (*mJavaCallback)(const char*, const char*);
     SE_AssetManager* mAssetManager;

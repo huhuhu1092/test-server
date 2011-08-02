@@ -162,6 +162,7 @@ public:
     SE_Spatial* find(const SE_SpatialID& spatialID);
 	SE_Spatial* removeSpatial(const SE_SpatialID& spatialID);
 	void releaseVBO();
+    void setSelectedSpatial(SE_Spatial* spatial);
 private:
     typedef std::list<SE_Scene*> _SceneList;
 private:

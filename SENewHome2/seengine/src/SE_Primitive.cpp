@@ -388,21 +388,22 @@ void SE_RectPrimitive::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     surface->setFacets(facet, facetNum);
     surface->setColor(mColor);
     surface->setProgramDataID(mProgramDataID);
-    surface->setSampleMin(mSampleMin);
-    surface->setSampleMag(mSampleMag);
-    surface->setWrapS(mWrapS);
-    surface->setWrapT(mWrapT);
+
     for(int i = 0 ; i < SE_TEXUNIT_NUM ; i++)
     {
-        SE_TextureUnit* texUnit = new SE_TextureUnit();
-        texUnit->setImageDataNum(1);
         if(mImageDataArray[i])
-         {
+        {
+			SE_TextureUnit* texUnit = new SE_TextureUnit();
+			texUnit->setSampleMin(mSampleMin);
+            texUnit->setSampleMag(mSampleMag);
+            texUnit->setWrapS(mWrapS);
+            texUnit->setWrapT(mWrapT);
+            texUnit->setImageDataNum(1);
             mImageData = mImageDataArray[i]->getPtr()->imageData;
             texUnit->setImageData(i, mImageData);
+			texUnit->setTextureCoordData(mTexCoordData->getPtr());
+            texture->setTextureUnit(i, texUnit);
         }        
-        texUnit->setTextureCoordData(mTexCoordData->getPtr());
-        texture->setTextureUnit(i, texUnit);
     }
     mesh->setSurface(0, surface.get());
     mesh->setTexture(0, texture.get());
@@ -623,7 +624,7 @@ SE_Spatial* SE_UserObject::create(SE_Scene* scene, SE_Spatial* parent)
     if(!blendState)
     {
         blendState = new SE_BlendState();
-        mGeometry->setRenderState(SE_Spatial::BLENDSTATE, blendState, OWN);     
+        mGeometry->setRenderState(SE_Spatial::BLENDSTATE, blendState);     
     }
     if(mNeedBlending)
     {
@@ -638,7 +639,7 @@ SE_Spatial* SE_UserObject::create(SE_Scene* scene, SE_Spatial* parent)
     if(!depthTestState)
     {
         depthTestState = new SE_DepthTestState();
-        mGeometry->setRenderState(SE_Spatial::DEPTHTESTSTATE, depthTestState, OWN);
+        mGeometry->setRenderState(SE_Spatial::DEPTHTESTSTATE, depthTestState);
     }
     if(mNeedDepthTest)
     {
@@ -684,11 +685,12 @@ void SE_UserObject::createMesh(SE_Mesh**& outMesh, int& outMeshNum)
     surface->setColor(mColor);
     surface->setProgramDataID(mProgramDataID);
     surface->setRendererID(mRendererID);
-    surface->setSampleMin(mSampleMin);
-    surface->setSampleMag(mSampleMag);
-    surface->setWrapS(mWrapS);
-    surface->setWrapT(mWrapT);
+
     SE_TextureUnit* texUnit = new SE_TextureUnit();
+	texUnit->setSampleMin(mSampleMin);
+    texUnit->setSampleMag(mSampleMag);
+    texUnit->setWrapS(mWrapS);
+    texUnit->setWrapT(mWrapT);
     texUnit->setImageDataNum(1);
     if(mImageData)
     {

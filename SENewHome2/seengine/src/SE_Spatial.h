@@ -7,6 +7,7 @@
 #include "SE_Layer.h"
 #include "SE_Object.h"
 #include "SE_RenderState.h"
+#include "SE_RefBase.h"
 class SE_BoundingVolume;
 class SE_Spatial;
 class SE_SimObject;
@@ -152,14 +153,7 @@ public:
 	{
 		return (mState & SELECTED_MASK) == SELECTED; 
 	}
-	void setRenderTarget(const SE_RenderTargetID& renderTargetID)
-	{
-		mRenderTargetID = renderTargetID;
-	}
-	SE_RenderTargetID getRenderTarget()
-	{
-		return mRenderTargetID;
-	}
+
 	void setRenderQueue(int rq)
 	{
 		mRQ = rq;
@@ -197,15 +191,7 @@ public:
 	{
 		return mAnimationID;
 	}
-	void setElementID(const SE_ElementID& eid)
-	{
-		mElementID = eid;
-	}
-	SE_ElementID getElementID()
-	{
-		return mElementID;
-	}
-	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own);
+	void setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs);
 	//dont use getRenderState to get some spatial's renderstate and then 
 	// set it to the other spatial;
 	SE_RenderState* getRenderState(RENDER_STATE_TYPE type);
@@ -236,7 +222,7 @@ public:
     virtual void showAllNode();
     virtual void hideAllNode();
     virtual void read(SE_BufferInput& input);
-    virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
+    virtual void renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType);
 	virtual SPATIAL_TYPE getSpatialType();
     virtual void setAlpha(float alpha);
     virtual SE_Vector3f getCenter();
@@ -251,6 +237,7 @@ protected:
 	std::string mGroupName;
 private:
     bool mRemovable;
+	/*
 	struct _RenderStateData
 	{
 		SE_OWN_TYPE own;
@@ -266,17 +253,18 @@ private:
 				delete renderState;
 		}
 	};
+	*/
 	struct _RenderStateProperty
 	{
-        SE_Wrapper<_RenderStateData>* renderData;
+        //SE_Wrapper<_RenderStateData>* renderData;
+		SE_sp<SE_RenderState> renderState;
 		RENDER_STATE_SOURCE renderSource;
 		_RenderStateProperty()
 		{
-			renderData = NULL;
+			//renderData = NULL;
 			renderSource = INHERIT_PARENT;
 		}
 	};
-
     SE_Vector3f mLocalTranslate;
     SE_Vector3f mLocalScale;
     SE_Quat mLocalRotate;
@@ -292,11 +280,10 @@ private:
     SE_Layer mLocalLayer;
     SE_Layer mWorldLayer;
 	_RenderStateProperty mRenderState[RENDERSTATE_NUM];
+    //SE_sp<SE_RenderState> mRenderState[RENDERSTATE_NUM];
     SE_Matrix4f mPrevMatrix;
     SE_Matrix4f mPostMatrix;
 	SE_AnimationID mAnimationID;
-	SE_ElementID mElementID;
-	SE_RenderTargetID mRenderTargetID;
 	int mRQ;
     SE_SimObject *mAttachedSimObject;
     SE_Scene* mScene;

@@ -21,7 +21,7 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-#include "SE_2DCommand.h"
+//#include "SE_2DCommand.h"
 #include "SE_Bone.h"
 #include "SE_BipedAnimation.h"
 #include "SE_SkinJointController.h"
@@ -68,7 +68,7 @@ public:
 private:
 	void handleInput(int width, int height);
 private:
-	EyeData eyeData;
+	//EyeData eyeData;
 };
 bool SEDemo::InitApplication()
 {

@@ -21,7 +21,6 @@ SE_Spatial::SE_Spatial(SE_Spatial* parent)
     setVisible(true);
     setCollisionable(true);
 	mSpatialID = SE_ID::createSpatialID();
-	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
     mAttachedSimObject = NULL;
 }
@@ -41,7 +40,6 @@ SE_Spatial::SE_Spatial(SE_SpatialID spatialID, SE_Spatial* parent)
     setMovable(true);
     setVisible(true);
     setCollisionable(true);
-	mRenderTargetID = SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET;
 	mRQ = SE_RenderManager::RQ0;
     mAttachedSimObject = NULL;
 }
@@ -49,6 +47,7 @@ SE_Spatial::~SE_Spatial()
 {
     if(mWorldBoundingVolume)
         delete mWorldBoundingVolume;
+	/*
 	for(int i = 0 ; i < RENDERSTATE_NUM ; i++)
 	{
 		_RenderStateProperty* p = &mRenderState[i];
@@ -59,6 +58,7 @@ SE_Spatial::~SE_Spatial()
 				delete p->renderData;
 		}
 	}
+	*/
 }
 SE_Spatial::SPATIAL_TYPE SE_Spatial::getSpatialType()
 {
@@ -95,11 +95,12 @@ void SE_Spatial::setRenderStateSource(RENDER_STATE_TYPE type, RENDER_STATE_SOURC
 		return;
 	mRenderState[type].renderSource = rsSource;
 }
-void SE_Spatial::setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_OWN_TYPE own)
+void SE_Spatial::setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs)
 {
 	if(type < 0 || type >= RENDERSTATE_NUM)
 		return;
 	_RenderStateProperty* p = &mRenderState[type];
+	/*
 	SE_Wrapper<_RenderStateData>* pRenderStateData = p->renderData;
 	if(pRenderStateData)
 	{
@@ -111,7 +112,8 @@ void SE_Spatial::setRenderState(RENDER_STATE_TYPE type, SE_RenderState* rs, SE_O
 	rsd->own = own;
 	rsd->renderState = rs;
 	pRenderStateData = new SE_Wrapper<_RenderStateData>(rsd, SE_Wrapper<_RenderStateData>::NOT_ARRAY);
-	p->renderData = pRenderStateData;
+	*/
+	p->renderState = rs;
 	p->renderSource = SELF_OWN;
 }
 SE_RenderState* SE_Spatial::getRenderState(RENDER_STATE_TYPE type)
@@ -119,10 +121,13 @@ SE_RenderState* SE_Spatial::getRenderState(RENDER_STATE_TYPE type)
     if(type < 0 || type >= RENDERSTATE_NUM)
 		return NULL;
 	_RenderStateProperty* p = &mRenderState[type];
+	return p->renderState.get();
+	/*
 	SE_Wrapper<_RenderStateData>* renderData = p->renderData;
 	if(!renderData)
 		return NULL;
 	return renderData->getPtr()->renderState;
+	*/
 }
 void SE_Spatial::updateRenderState()
 {
@@ -131,23 +136,12 @@ void SE_Spatial::updateRenderState()
 	for(int i = 0 ; i < RENDERSTATE_NUM ; i++)
 	{
 		_RenderStateProperty* parentRenderProperty = &mParent->mRenderState[i];
-		SE_Wrapper<_RenderStateData>* parentRenderStateData = parentRenderProperty->renderData;
+		//SE_Wrapper<_RenderStateData>* parentRenderStateData = parentRenderProperty->renderData;
 		_RenderStateProperty* pRenderProperty = &mRenderState[i];
-		if(pRenderProperty->renderSource == INHERIT_PARENT && parentRenderStateData)
+		SE_RenderState* parentRenderState = parentRenderProperty->renderState.get();
+		if(pRenderProperty->renderSource == INHERIT_PARENT && parentRenderState)
 		{
-			if(!pRenderProperty->renderData)
-			{
-				pRenderProperty->renderData = parentRenderStateData;
-				parentRenderStateData->inc();
-			}
-			else
-			{
-				pRenderProperty->renderData->dec();
-				if(pRenderProperty->renderData->getNum() == 0)
-					delete pRenderProperty->renderData;
-				pRenderProperty->renderData = parentRenderStateData;
-				parentRenderStateData->inc();
-			}
+			pRenderProperty->renderState = parentRenderState;
 		}
 	}
 }
@@ -346,7 +340,7 @@ void SE_Spatial::write(SE_BufferOutput& output)
 	mPostMatrix.getSequence(m, 16);
 	output.writeFloatArray(m, 16);
 }
-void SE_Spatial::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+void SE_Spatial::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {}
 SE_Spatial* SE_Spatial::getRoot()
 {

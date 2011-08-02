@@ -225,12 +225,18 @@ void SE_Renderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
 	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
 	renderUnit->getTexImageID(texIndex, imageDataIDArray, imageDataIDNum);
 	renderUnit->getTexImage(texIndex, imageDataArray, imageDataNum);
+	SE_Texture* texture = mSurface->getTexture();
+	SE_TextureUnit* texUnit = NULL;
+	if(texture)
+	{
+		texUnit = texture->getTextureUnit(texIndex);
+	}
 	if(imageDataIDNum > 0)
 	{
 		if(imageDataIDNum == 1)
 		{
 			SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[0]);
-			loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+			loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)texUnit->getWrapS(), (SE_WRAP_TYPE)texUnit->getWrapT(), (SE_SAMPLE_TYPE)texUnit->getSampleMin(), (SE_SAMPLE_TYPE)texUnit->getSampleMag());
 			hasTexture = true;
 		}
 		else
@@ -239,7 +245,7 @@ void SE_Renderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
             for(int i = 0; i < imageDataIDNum; ++i)
             {
                 SE_ImageData* imageData = resourceManager->getImageData(imageDataIDArray[i]);
-			    loadTexture2D(i, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+			    loadTexture2D(i, imageData, (SE_WRAP_TYPE)texUnit->getWrapS(), (SE_WRAP_TYPE)texUnit->getWrapT(), (SE_SAMPLE_TYPE)texUnit->getSampleMin(), (SE_SAMPLE_TYPE)texUnit->getSampleMag());
 			    hasTexture = true;
             }
 
@@ -252,7 +258,7 @@ void SE_Renderer::setImage(int texIndex, SE_RenderUnit* renderUnit)
 			SE_ImageData* imageData = imageDataArray[0];
 			if(imageData)
 			{
-				loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)mSurface->getWrapS(), (SE_WRAP_TYPE)mSurface->getWrapT(), (SE_SAMPLE_TYPE)mSurface->getSampleMin(), (SE_SAMPLE_TYPE)mSurface->getSampleMag());
+				loadTexture2D(texIndex, imageData, (SE_WRAP_TYPE)texUnit->getWrapS(), (SE_WRAP_TYPE)texUnit->getWrapT(), (SE_SAMPLE_TYPE)texUnit->getSampleMin(), (SE_SAMPLE_TYPE)texUnit->getSampleMag());
 				hasTexture = true;
 			}
 

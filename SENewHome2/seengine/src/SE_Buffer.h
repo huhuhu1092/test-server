@@ -1,6 +1,7 @@
 #ifndef SE_BUFFER_H
 #define SE_BUFFER_H
 #include <string>
+#include <list>
 class SE_Vector2f;
 class SE_Vector3f;
 class SE_Vector4f;
@@ -62,6 +63,7 @@ public:
     SE_Quat readQuat();
     //this is the string ended by '\0', user need to release the memory returned
     std::string readString();
+    std::string readString(int len);
     char* readBytes(int len);
     bool readBytes(char* out, int len);
 
@@ -73,11 +75,14 @@ public:
     {
         mOffset = 0;
     }
+	void pushLocation();
+	int popLocation();
 private:
     char* mData;
     int mLen;
     int mOffset;
     bool mNetOrder;
     bool mOwn;
+	std::list<int> mLocationStack;
 };
 #endif

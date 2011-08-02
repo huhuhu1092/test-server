@@ -3,6 +3,7 @@
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
 #include "SE_Utils.h"
+#include "SE_Log.h"
 #include <string.h>
 SE_BufferOutput::SE_BufferOutput(bool netOrder)
 {
@@ -191,6 +192,21 @@ bool SE_BufferInput::hasMore()
 {
     return mOffset < mLen;
 }
+void SE_BufferInput::pushLocation()
+{
+	mLocationStack.push_back(mOffset);
+}
+int SE_BufferInput::popLocation()
+{
+	if(mLocationStack.empty())
+	{
+		LOGI("## buffer input poplocation error ##\n");
+		return -1;
+	}
+	int location = mLocationStack.back();
+	mLocationStack.pop_back();
+	return mOffset - location;
+}
 char SE_BufferInput::readByte()
 {
     return mData[mOffset++];
@@ -305,9 +321,25 @@ SE_Quat SE_BufferInput::readQuat()
     SE_Vector4f v = readVector4f();
     return SE_Quat(v.x, v.y, v.z, v.w);
 }
+std::string SE_BufferInput::readString(int len)
+{
+    char* data = new char[len + 1];
+    if(data)
+    {
+        memset(data, 0, len + 1);
+        readBytes(data, len);
+        std::string ret(data);
+        delete[] data;
+        return ret;
+    }
+    else
+        return std::string();    
+}
 std::string SE_BufferInput::readString()
 {
     int len = readInt();
+    return readString(len);
+    /*
     char* data = new char[len + 1];
     if(data)
     {
@@ -319,6 +351,7 @@ std::string SE_BufferInput::readString()
     }
     else
         return std::string();
+        */
 }
 bool SE_BufferInput::readBytes(char* out, int len)
 {

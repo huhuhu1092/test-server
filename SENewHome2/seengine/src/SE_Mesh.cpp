@@ -17,7 +17,10 @@ SE_TextureUnit::SE_TextureUnit()
     mImageDataIDNum = 0;
 	mImageDataArray = NULL;
 	mImageDataNum = 0;
-
+	mSampleMin = NEAREST;
+    mSampleMag = NEAREST;
+    mWrapS = REPEAT;
+    mWrapT = REPEAT;
 }
 SE_TextureUnit::~SE_TextureUnit()
 {
@@ -37,10 +40,7 @@ SE_Surface::SE_Surface()
     mMaterialData = NULL;
     mFacetArray = NULL;
     mFacetNum = NULL;
-	mSampleMin = NEAREST;
-    mSampleMag = NEAREST;
-    mWrapS = REPEAT;
-    mWrapT = REPEAT;
+
 	mVertex = NULL;
 	mVertexNum = 0;
 	memset(mTexVertex, 0, sizeof(_Vector2f*) * SE_TEXUNIT_NUM);

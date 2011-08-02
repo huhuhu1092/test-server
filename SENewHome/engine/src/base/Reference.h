@@ -25,7 +25,7 @@ namespace oms
 		RefBase(const RefBase& ref);
 		RefBase& operator=(const RefBase& ref);		
 	private:
-		int32_t mRefCount;
+		volatile int32_t mRefCount;
 		Mutex* mMutex;
 	};
 	template <typename T>

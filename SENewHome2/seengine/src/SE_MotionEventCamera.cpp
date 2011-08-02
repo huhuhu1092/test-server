@@ -117,98 +117,9 @@ void SE_MotionEventCamera::onMotionEvent(SE_MotionEvent* motionEvent)
 	}
 	else if(motionEvent->getType() == SE_MotionEvent::UP && mPrevType == SE_MotionEvent::DOWN)
 	{
-#if 0
-
-        SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
-		//SE_SkinJointController* skinJointController = resourceManager->getSkinJointController("objLoft07");
-        //SE_SkinJointController* skinJointController = resourceManager->getSkinJointController("man_head");
-        SE_SkeletonController *sk = resourceManager->getSkeletonController(SE_SKELETONCONTROLLER);
-
-        if(sk)
-        {
-            int bipedControllerNum = sk->mSkeletonController.size();
-            for(int c = 0; c < bipedControllerNum; ++c)
-            {
-                SE_BipedController *bipedController = sk->mSkeletonController[c];
-                if(bipedController)
-                {
-
-                    int animNum = bipedController->bipAndObjInfo.size();
-
-                    for(int i = 0; i < animNum; ++i)
-                    {
-
-
-                        SE_AnimationManager* animManager = SE_Application::getInstance()->getAnimationManager();
-		            SE_SimObjectManager* simObjectManager = SE_Application::getInstance()->getSimObjectManager();
-		                //SE_SimObject* simobj = simObjectManager->findByName("objLoft07");
-                            SE_SimObject* simobj = simObjectManager->findByName(bipedController->bipAndObjInfo[i]->objHasBiped.c_str());
-
-	                    for(int j = 0; j < simobj->getSurfaceNum(); ++j)
-                            {
-                                simobj->getMesh()->getSurface(j)->setProgramDataID("skeletalanimation_shader");        
-                                simobj->getMesh()->getSurface(j)->setRendererID("skeletalanimation_renderer");
-			    
-                            }
-
-		            SE_Spatial* spatial = simobj->getSpatial();
-
-                        SE_BipedAnimation* anim = (SE_BipedAnimation*)animManager->getAnimation(spatial->getAnimationID());
-
-                        if(anim)
-                        {
-                            if(anim->getAnimState() == SE_Animation::RUNNING)
-                            {
-                                continue;
-                            }
-                        }
-                        
-                        anim = new SE_BipedAnimation();
-                    
-                        
-		            anim->setRunMode(SE_Animation::NOT_REPEAT);
-		            anim->setTimeMode(SE_Animation::SIMULATE);
-		            anim->setDuration(1000);
-		            anim->setSimObject(simobj);		            
-                            anim->setSkinJointController(bipedController);
-
-                            //set play mode with SHADER
-                            anim->setPlayMode(SE_Animation::GPU_SKELETON_SHADER);
-                            //anim->setPlayMode(SE_Animation::CPU_NO_SHADER);
-
-		                
-		            animManager->removeAnimation(spatial->getAnimationID());
-		            SE_AnimationID animID = animManager->addAnimation(anim);
-		            spatial->setAnimationID(animID);
-		            anim->run();
-                    }
-                }
-            }
-        }
-        else
-        {
-            SE_AddNewCbfCommand* c1 = (SE_AddNewCbfCommand*)SE_Application::getInstance()->createCommand("SE_AddNewCbfCommand");
-
-            //set rotate angle per ticket
-#ifndef ANDROID
-            c1->dataPath = "e:\\model\\newhome3";
-#else
-            c1->dataPath = "/sdcard/sedemo/";
-#endif
-
-            //set spatialid. this is minute hand spatial
-            c1->mCbfFileNameID = "man";            
-
-            //post this command to command queue
-            SE_Application::getInstance()->postCommand(c1);
-        }
-
-flushScreen();
-
-#if 0
 		SE_Ray ray = screenCoordinateToRay(mPrevX, mPrevY);
         SE_FindSpatialCollision spatialCollision(ray);
-		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getRoot();
+		SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getMainScene()->getRoot();
 		root->travel(&spatialCollision, true);
 		SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
 		SE_SimObject* so = spatialCollision.getCollisionObject();
@@ -232,8 +143,6 @@ flushScreen();
 			msg->data = sestruct;
 			SE_Application::getInstance()->sendMessage(msg);
         }
-#endif
-#endif
         clearState();
 	}
 }

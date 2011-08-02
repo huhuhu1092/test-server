@@ -30,7 +30,7 @@ public:
     SE_LodNode(SE_SpatialID id, SE_Spatial* parent = NULL);
     ~SE_LodNode();
     SE_Vector3f getCenter();
-    void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
+    void renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType);
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
     void addRange(float min, float max, int index);

@@ -1,6 +1,7 @@
 #ifndef SE_RENDERSTATE_H
 #define SE_RENDERSTATE_H
-class SE_RenderState
+#include "SE_RefBase.h"
+class SE_RenderState : public SE_RefBase
 {
 public:
 	virtual ~SE_RenderState() {}

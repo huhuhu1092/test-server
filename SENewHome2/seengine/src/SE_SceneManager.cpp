@@ -213,7 +213,7 @@ void SE_Scene::renderScene(SE_RenderManager& renderManager)
 {
     if(mCamera)
     {
-        mSceneRoot->renderScene(mCamera, &renderManager);
+        mSceneRoot->renderScene(mCamera, &renderManager, SE_PART_CULL);
     }
     //renderManager.sort();
 }
@@ -798,4 +798,12 @@ void SE_SceneManager::setMainScene(const SE_StringID& name)
 	{
 		mMainScene = scene;
 	}
+}
+void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
+{
+    SE_Scene* scene = spatial->getScene();
+    if(scene)
+    {
+        scene->setSelectedSpatial(spatial);
+    }
 }

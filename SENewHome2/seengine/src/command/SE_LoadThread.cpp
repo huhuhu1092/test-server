@@ -32,7 +32,7 @@ void SE_LoadThread::run()
 		rootScene->updateWorldLayer();
 		SE_DepthTestState* rs = new SE_DepthTestState();
 		rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_ENABLE);
-		rootScene->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
+		rootScene->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs);
 		rootScene->updateRenderState();
 
         //SE_BlendState *rs_blend = new SE_BlendState();

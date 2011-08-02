@@ -119,22 +119,25 @@ int SE_CommonNode::travel(SE_SpatialTravel* spatialTravel, bool travelAlways)
     }
     return ret;
 }
-void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+void SE_CommonNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {
 	if(!isVisible())
 		return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
-    if(bv)
+    SE_CULL_TYPE currCullType = SE_PART_CULL;
+    if(bv && cullType == SE_PART_CULL)
     {
         int culled = camera->cullBV(*bv);
         if(culled == SE_FULL_CULL)
             return;
+        else
+            currCullType = (SE_CULL_TYPE)culled;
     }
     std::list<SE_Spatial*>::iterator it;
     for(it = mImpl->children.begin() ; it != mImpl->children.end() ; it++)
     {
         SE_Spatial* s = *it;
-        s->renderScene(camera, renderManager);
+        s->renderScene(camera, renderManager, currCullType);
     }
 
 }

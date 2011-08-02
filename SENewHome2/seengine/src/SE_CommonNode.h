@@ -22,7 +22,7 @@ public:
 	void updateRenderState();
     void updateWorldLayer();
     int travel(SE_SpatialTravel* spatialTravel, bool travelAways);
-	void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
+	void renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType);
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
     virtual void showAllNode();

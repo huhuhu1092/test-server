@@ -674,7 +674,7 @@ void SE_SetObjectRenderStateCommand::handle(SE_TimeMS realDelta, SE_TimeMS simul
     if(!blendState)
     {
         blendState = new SE_BlendState();
-        spatial->setRenderState(SE_Spatial::BLENDSTATE, blendState, OWN);     
+        spatial->setRenderState(SE_Spatial::BLENDSTATE, blendState);     
     }
     if(mIsBlending)
     {
@@ -689,7 +689,7 @@ void SE_SetObjectRenderStateCommand::handle(SE_TimeMS realDelta, SE_TimeMS simul
     if(!depthTestState)
     {
         depthTestState = new SE_DepthTestState();
-        spatial->setRenderState(SE_Spatial::DEPTHTESTSTATE, depthTestState, OWN);
+        spatial->setRenderState(SE_Spatial::DEPTHTESTSTATE, depthTestState);
     }
     if(mDepthTest)
     {

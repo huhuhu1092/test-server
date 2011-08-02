@@ -17,7 +17,7 @@ public:
 	void updateRenderState();
     void updateBoundingVolume();
     int travel(SE_SpatialTravel* spatialTravel, bool travalAways);
-    void renderScene(SE_Camera* camera, SE_RenderManager* renderManager);
+    void renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType);
     void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
 	SPATIAL_TYPE getSpatialType();

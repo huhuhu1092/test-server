@@ -183,7 +183,7 @@ void SE_RenderManager::drawOneFrame()
         }
         for(int j = 0 ; j < RQ_NUM ; j++)
         {
-			RenderUnitList* ruList = &sceneUnit->mRenderQueue[i];
+			RenderUnitList* ruList = &sceneUnit->mRenderQueue[j];
 			RenderUnitList::iterator it;
 			for(it = ruList->begin() ; it != ruList->end(); it++)
 			{

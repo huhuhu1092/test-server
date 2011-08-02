@@ -94,6 +94,39 @@ public:
     {
         return mImageDataIDNum > 1 || mImageDataNum > 1;
     }
+	int getSampleMin()
+    {
+        return mSampleMin;
+    }
+    int getSampleMag()
+    {
+        return mSampleMag;
+    }
+    int getWrapS()
+    {
+        return mWrapS;
+    }
+    int getWrapT()
+    {
+        return mWrapT;
+    }
+    
+    void setSampleMin(int min)
+    {
+        mSampleMin = min;
+    }
+    void setSampleMag(int mag)
+    {
+        mSampleMag = mag;
+    }
+    void setWrapS(int wraps)
+    {
+        mWrapS = wraps;
+    }
+    void setWrapT(int wrapt)
+    {
+        mWrapT = wrapt;
+    }
 private:
     SE_TextureCoordData* mTexCoord;
     SE_ImageDataID* mImageDataIDArray;
@@ -101,6 +134,11 @@ private:
 
 	SE_ImageData** mImageDataArray;
 	int mImageDataNum;
+	int mSampleMin;
+    int mSampleMag;
+    int mWrapS;
+    int mWrapT;
+
 };
 class SE_Texture
 {
@@ -128,11 +166,9 @@ public:
     void getVertexIndex(int*& index, int& indexNum);
 	void getVertex(_Vector3f*& vertex, int & vertexNum);
 	void getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
-
     void getFaceVertex(_Vector3f*& vertex, int& vertexNUm);
-	void getFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
+    void getFaceTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum);
     void getVertexTangent(_Vector3f*& vertexTangent, int& vertexTangentNum);
-
     SE_ProgramDataID getProgramDataID();
 	SE_RendererID getRendererID();
 	void setRendererID(const SE_RendererID& id);
@@ -243,69 +279,6 @@ public:
         mBipedController = controller;
     }
 
-	/*
-	void setTextureMode(int mode)
-	{
-		mShaderColorOperation.setTextureMode(mode);
-	}
-	int getTextureMode()
-	{
-		return mShaderColorOperation.getTextureMode();
-	}
-	void getRealTexModeColorOp(int* hasTexture, int num, int& outTexMode, int& outColorOp)
-	{
-		return mShaderColorOperation.getTextureModeColorOp(hasTexture, num, outTexMode, outColorOp); 
-	}
-	void setColorOperation(int op)
-	{
-		mShaderColorOperation.setColorOperationMode(op);
-	}
-	int getColorOperation()
-	{
-		return mShaderColorOperation.getColorOperationMode();
-	}
-	SE_Vector3f getMarkColor(int index)
-	{
-		return mMarkColor[index];
-	}
-	void setMarkColor(int index, const SE_Vector3f& c)
-	{
-		mMarkColor[index] = c;
-	}
-	*/
-	int getSampleMin()
-    {
-        return mSampleMin;
-    }
-    int getSampleMag()
-    {
-        return mSampleMag;
-    }
-    int getWrapS()
-    {
-        return mWrapS;
-    }
-    int getWrapT()
-    {
-        return mWrapT;
-    }
-    
-    void setSampleMin(int min)
-    {
-        mSampleMin = min;
-    }
-    void setSampleMag(int mag)
-    {
-        mSampleMag = mag;
-    }
-    void setWrapS(int wraps)
-    {
-        mWrapS = wraps;
-    }
-    void setWrapT(int wrapt)
-    {
-        mWrapT = wrapt;
-    }
     void clearVertexInfo()
     {
         if(mVertex)
@@ -374,10 +347,7 @@ private:
     SE_Vector3f mColor;
     SE_ProgramDataID mProgramDataID;
 	SE_RendererID mRendererID;
-	int mSampleMin;
-    int mSampleMag;
-    int mWrapS;
-    int mWrapT;
+
 	_Vector3f* mVertex;
 	int mVertexNum;
 

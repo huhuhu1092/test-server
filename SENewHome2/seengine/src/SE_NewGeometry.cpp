@@ -260,16 +260,19 @@ static SE_RenderUnit* createSelectedFrame(SE_NewGeometry* spatial)
     }
     return ru;
 }
-void SE_NewGeometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+void SE_NewGeometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {
     if(!isVisible())
         return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
-    if(bv)
+	SE_CULL_TYPE currCullType = SE_PART_CULL;
+    if(bv && cullType == SE_PART_CULL)
     {
         int culled = camera->cullBV(*bv);
         if(culled == SE_FULL_CULL)
             return;
+		else
+		    currCullType = (SE_CULL_TYPE)culled;
     }
     SE_NewGeometry::_Impl::SimObjectList::iterator it;
     for(it = mImpl->attachObject.begin() ; it != mImpl->attachObject.end() ; it++)
@@ -306,7 +309,7 @@ void SE_NewGeometry::renderScene(SE_Camera* camera, SE_RenderManager* renderMana
     for(; itchild != mImplchild->children.end() ; itchild++)
     {
         SE_Spatial* s = *itchild;
-        s->renderScene(camera, renderManager);
+        s->renderScene(camera, renderManager, currCullType);
     }
 }
 

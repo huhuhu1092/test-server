@@ -207,12 +207,12 @@ static SE_RenderUnit* createSelectedFrame(SE_Geometry* spatial)
 	}
 	return ru;
 }
-void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {
 	if(!isVisible())
 		return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
-    if(bv)
+    if(bv && cullType == SE_PART_CULL)
     {
         int culled = camera->cullBV(*bv);
         if(culled == SE_FULL_CULL)
@@ -297,13 +297,13 @@ SE_Spatial *SE_Geometry::clone(SE_SimObject *srcobj)
     //set render state
     SE_DepthTestState* rs = new SE_DepthTestState();
     rs->setDepthTestProperty(SE_DepthTestState::DEPTHTEST_ENABLE);
-    dest->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs, OWN);
+    dest->setRenderState(SE_Spatial::DEPTHTESTSTATE, rs);
 
     SE_BlendState *rs_blend = new SE_BlendState();
     rs_blend->setBlendProperty(SE_BlendState::BLEND_ENABLE);
     rs_blend->setBlendDstFunc(SE_BlendState::ZERO);
     rs_blend->setBlendSrcFunc(SE_BlendState::ONE);   
-    dest->setRenderState(SE_Spatial::BLENDSTATE,rs_blend,OWN);
+    dest->setRenderState(SE_Spatial::BLENDSTATE,rs_blend);
 
 
     dest->attachSimObject(destobj);

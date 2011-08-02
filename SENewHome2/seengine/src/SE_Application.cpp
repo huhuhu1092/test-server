@@ -133,6 +133,7 @@ SE_Application::~SE_Application()
 }
 void SE_Application::doDelayDestroy()
 {
+    mDelayDestroyListMutex.lock();
     SE_DelayDestroyList::iterator it;
     for(it = mDelayDestroyList.begin() ; it != mDelayDestroyList.end() ; it++)
     {
@@ -141,6 +142,7 @@ void SE_Application::doDelayDestroy()
         delete dd;
     }
     mDelayDestroyList.clear();
+    mDelayDestroyListMutex.unlock();
 }
 void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
@@ -295,12 +297,15 @@ bool SE_Application::addDelayDestroy(SE_DelayDestroy* dd)
 {
     _FindDelayDestroy fd;
     fd.src = dd;
+    mDelayDestroyListMutex.lock();
     SE_DelayDestroyList::iterator it = find_if(mDelayDestroyList.begin(), mDelayDestroyList.end(), fd);
     if(it != mDelayDestroyList.end())
     {
+        mDelayDestroyListMutex.unlock();
         return false;
     }
     mDelayDestroyList.push_back(dd);
+    mDelayDestroyListMutex.unlock();
     return true;
 }
 

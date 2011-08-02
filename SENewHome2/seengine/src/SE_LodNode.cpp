@@ -59,16 +59,19 @@ void SE_LodNode::removeRange(float min, float max, int index)
     _IsRemoved r(min, max, index);
     mRangeData.remove_if(r);
 }
-void SE_LodNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
+void SE_LodNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {
 	if(!isVisible())
 		return;
     SE_BoundingVolume* bv = getWorldBoundingVolume();
-    if(bv)
+	SE_CULL_TYPE currCullType = SE_PART_CULL;
+    if(bv && cullType == SE_PART_CULL)
     {
         int culled = camera->cullBV(*bv);
         if(culled == SE_FULL_CULL)
             return;
+		else
+			currCullType = (SE_CULL_TYPE)culled;
     }
     SE_Vector3f center = getCenter();
     SE_Vector3f distance = camera->getLocation() - center;
@@ -90,7 +93,7 @@ void SE_LodNode::renderScene(SE_Camera* camera, SE_RenderManager* renderManager)
     SE_Spatial* s = getSpatialByIndex(index);
     if(s)
     {
-        s->renderScene(camera, renderManager);
+        s->renderScene(camera, renderManager, currCullType);
     } 
 }
 void SE_LodNode::write(SE_BufferOutput& output)
