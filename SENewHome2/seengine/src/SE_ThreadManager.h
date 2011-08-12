@@ -12,7 +12,7 @@ public:
     SE_ThreadID add(SE_Thread* thread);
     SE_Thread* remove(SE_ThreadID id);
     void release(SE_Thread* thread, int delay = SE_RELEASE_DELAY);
-	std::vector<SE_Thread*> find(const char* name);
+    std::vector<SE_Thread*> find(const char* name);
 private:
     SE_TreeStructManager<SE_Thread> mThreadManager;
 };

@@ -1,6 +1,7 @@
 #include "SE_RenderTargetManager.h"
 #include "SE_RenderTarget.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 SE_RenderTargetID SE_RenderTargetManager::SE_FRAMEBUFFER_TARGET = 0;
 SE_RenderTargetID SE_RenderTargetManager::SE_INVALID_RENDERTARGET = -1;
 SE_RenderTargetManager::SE_RenderTargetManager()

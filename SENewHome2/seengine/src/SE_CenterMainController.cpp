@@ -9,6 +9,8 @@
 #include "SE_MotionEventController.h"
 #include "SE_InputManager.h"
 
+#include "SE_MemLeakDetector.h"
+
 
 SE_CenterMainController::SE_CenterMainController(bool objOnTable) 
 {
@@ -44,7 +46,16 @@ SE_CenterMainController::SE_CenterMainController(bool objOnTable)
 }
 
 SE_CenterMainController::~SE_CenterMainController()
-{}
+{
+    std::vector<SE_MotionEventSEObjectController*>::iterator it;
+    it = mCenterControllers.begin();
+    for(;it != mCenterControllers.end();it++)
+    {
+        SE_MotionEventSEObjectController *c = *it;
+        delete c;
+    }
+    mCenterControllers.clear();    
+}
 
 SE_MotionEventSEObjectController* SE_CenterMainController::findController(const char *controllerName)
 {

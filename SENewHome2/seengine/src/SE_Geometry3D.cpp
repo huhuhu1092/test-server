@@ -1,6 +1,7 @@
 #include "SE_Geometry3D.h"
 #include "SE_Math.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 static float e[2] = {1, 1};
 SE_Rect3D SE_Rect3D::normalizeRect = SE_Rect3D(SE_Vector3f(0, 0, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), e);
 SE_Rect3D::SE_Rect3D()
@@ -40,26 +41,26 @@ void SE_Rect3D::getVertex(SE_Vector3f* v) const
 }
 void SE_Rect3D::getFaces(SE_Vector3i* faces) const
 {
-	faces[0].x = 0;
-	faces[0].y = 1;
-	faces[0].z = 2;
-	faces[1].x = 2;
-	faces[1].y = 3;
-	faces[1].z = 0;
+    faces[0].x = 0;
+    faces[0].y = 1;
+    faces[0].z = 2;
+    faces[1].x = 2;
+    faces[1].y = 3;
+    faces[1].z = 0;
 }
 void SE_Rect3D::setCenter(const SE_Vector3f& center)
 {
-	mCenter = center;
+    mCenter = center;
 }
 void SE_Rect3D::setAxis(const SE_Vector3f& xAxis, const SE_Vector3f& yAxis)
 {
-	mAxis[0] = xAxis;
-	mAxis[1] = yAxis;
+    mAxis[0] = xAxis;
+    mAxis[1] = yAxis;
 }
 void SE_Rect3D::setExtent(float e[2])
 {
-	mExtent[0] = e[0];
-	mExtent[1] = e[1];
+    mExtent[0] = e[0];
+    mExtent[1] = e[1];
 }
 /////////////////////
 
@@ -90,8 +91,8 @@ SE_Vector3f SE_Segment::getDirection() const
 ///////////////
 SE_Plane::SE_Plane()
 {
-	mNormal.set(0, 0, 0);
-	mDistance = 0;
+    mNormal.set(0, 0, 0);
+    mDistance = 0;
 }
 SE_Plane::SE_Plane(const SE_Vector3f& normal, float d) : mNormal(normal), mDistance(d)
 {
@@ -114,8 +115,8 @@ SE_Plane SE_Plane::transform(const SE_Matrix4f& m)
 {
     SE_Vector4f v(mNormal, -mDistance);
     SE_Vector4f out = m.map(v);
-	SE_Vector3f n = out.xyz();
-	return SE_Plane(n.normalize(), out.w / n.length());
+    SE_Vector3f n = out.xyz();
+    return SE_Plane(n.normalize(), out.w / n.length());
 }
 void SE_Plane::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2)
 {
@@ -170,10 +171,10 @@ SE_Ray::SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end)
 SE_Ray::SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized)
 {
     mOrigin = org;
-	if(!normalized)
+    if(!normalized)
         mDir = dir.normalize();
-	else 
-		mDir = dir;
+    else 
+        mDir = dir;
 }
 SE_Vector3f SE_Ray::getOrigin() const
 {
@@ -214,19 +215,19 @@ void SE_Triangle::set(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vec
 SE_IntersectResult SE_Triangle::intersect(const SE_Ray& ray) const
 {
     SE_Vector3f origin, dir;
-	SE_Vector3f normal;
-	float d;
-	SE_Vector3f p0, p1, p2;
-	SE_Plane plane;
-	SE_Vector3f p; /*the intersection of ray and plane*/
-	float t;
-	float nvDot; /*normal and dir dot*/
-	SE_Vector3f r, q1, q2;
-	SE_Matrix2f inverseM; /*matrix computed by q1, q2*/
-	SE_Vector2f v; /*vector computed by r and q1, q2*/
-	SE_Vector2f bc; /*barycentric coordinate w1, w2*/
-	float w0; /*barycentric coordiate w0 */
-	float data[4];
+    SE_Vector3f normal;
+    float d;
+    SE_Vector3f p0, p1, p2;
+    SE_Plane plane;
+    SE_Vector3f p; /*the intersection of ray and plane*/
+    float t;
+    float nvDot; /*normal and dir dot*/
+    SE_Vector3f r, q1, q2;
+    SE_Matrix2f inverseM; /*matrix computed by q1, q2*/
+    SE_Vector2f v; /*vector computed by r and q1, q2*/
+    SE_Vector2f bc; /*barycentric coordinate w1, w2*/
+    float w0; /*barycentric coordiate w0 */
+    float data[4];
     SE_IntersectResult ret;
     plane.set(mP0, mP1, mP2);
     if(isCollinear())
@@ -325,7 +326,7 @@ void SE_Frustum::set(float fovAngle, float ratio, float n, float f)
 SE_Rect<float> SE_Frustum::getNearPlaneRect() const
 {
     SE_Rect<float> out;
-	float fovRadian, e;
+    float fovRadian, e;
     fovRadian = SE_AngleToRadian(mFovAngle);
     e = 1.0 / SE_Tanf(fovRadian / 2);
     out.left = - mNear / e;
@@ -347,8 +348,8 @@ SE_Matrix4f SE_Frustum::getPerspectiveMatrix() const
     r = nearrect.right;
     b = nearrect.bottom;
     t = nearrect.top;
-	/*
-	out.set(0, 0, 2  / (r - l));
+    /*
+    out.set(0, 0, 2  / (r - l));
     out.set(0, 1,  0);
     out.set(0, 2,  0);
     out.set(0, 3, -(r + l) / (r - l));
@@ -364,7 +365,7 @@ SE_Matrix4f SE_Frustum::getPerspectiveMatrix() const
     out.set(3, 1, 0);
     out.set(3, 2, 0);
     out.set(3, 3, 1);
-	*/
+    */
     out.set(0, 0, (2 * n) / (r - l));
     out.set(0, 1,  0);
     out.set(0, 2,  (r + l) / (r - l));
@@ -432,7 +433,7 @@ void SE_Sphere::mostSeparatedPointsOnAABB(int* min , int* max, SE_Vector3f* poin
     int minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
     SE_Vector3f xAxisDir, yAxisDir, zAxisDir;
     int i;
-	float dist2x, dist2y, dist2z;
+    float dist2x, dist2y, dist2z;
     for(i = 1 ; i < numPoint ; i++)
     {
         if(points[i].x < points[minx].x)
@@ -482,7 +483,7 @@ void SE_Sphere::sphereFromDistantPoints(SE_Vector3f* points, int pointNum)
 void SE_Sphere::sphereOfSphereAndPoint(const SE_Vector3f& point)
 {
     SE_Vector3f d, tmp1, tmp2;
-	float dist2;
+    float dist2;
     d = point - mCenter;
     dist2 = d.lengthSquare();
     if(dist2 > mRadius * mRadius)
@@ -554,7 +555,7 @@ SE_IntersectResult SE_Sphere::intersect(const SE_Ray& ray) const
 
 SE_Plane_Side SE_Sphere::whichSide(const SE_Plane& plane) const
 {
-	return SE_NEGATIVE;
+    return SE_NEGATIVE;
 }
 SE_IntersectResult SE_Sphere::intersect(const SE_Sphere& sphere) const
 {
@@ -579,7 +580,7 @@ SE_AABB::SE_AABB(const SE_Vector3f& min, const SE_Vector3f& max) : mMin(min), mM
 {}
 void SE_AABB::createFromPoints(SE_Vector3f* points, int num)
 {
-	int i;
+    int i;
     SE_Vector3f min = points[0];
     SE_Vector3f max = points[0];
     for(i = 1 ; i < num ; i++)
@@ -637,7 +638,7 @@ SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray) const
     SE_IntersectResult ret;
     float tmin = -SE_FLT_MAX;
     float tmax = SE_FLT_MAX;
-	float t1, t2;
+    float t1, t2;
     SE_Vector3f dir = ray.getDirection();
     SE_Vector3f origin = ray.getOrigin(); 
     for(int i = 0 ; i < 3 ; i++)
@@ -683,7 +684,7 @@ SE_IntersectResult SE_AABB::intersect(const SE_Ray& ray) const
     ret.distance[0] = tmin;
     ret.intersectPoint.resize(1);
     ret.intersectPoint[0] = origin + dir.mul(tmin);
-	return ret;
+    return ret;
 }
 SE_IntersectResult SE_AABB::intersect(const SE_Plane& plane) const
 {
@@ -693,7 +694,7 @@ SE_IntersectResult SE_AABB::intersect(const SE_Plane& plane) const
     float r = extent.x * SE_Fabs(normal.x) + extent.y * SE_Fabs(normal.y) + extent.z * SE_Fabs(normal.z);
     float s = normal.dot(center) - plane.getDistance();
     SE_IntersectResult ret;
-	if(SE_Fabs(s) <= r)
+    if(SE_Fabs(s) <= r)
         ret.intersected = true;
     else
         ret.intersected = false;
@@ -702,20 +703,20 @@ SE_IntersectResult SE_AABB::intersect(const SE_Plane& plane) const
 }
 SE_Plane_Side SE_AABB::whichSide(const SE_Plane& plane) const
 {
-	SE_IntersectResult ret = intersect(plane);
-	if(ret.intersected)
-		return SE_OTHER;
-	SE_Vector3f center = getCenter();
-	return plane.whichSide(center);
+    SE_IntersectResult ret = intersect(plane);
+    if(ret.intersected)
+        return SE_OTHER;
+    SE_Vector3f center = getCenter();
+    return plane.whichSide(center);
 }
 void SE_AABB::set(const SE_Vector3f& min, const SE_Vector3f& max)
 {
-	mMin = min;
-	mMax = max;
+    mMin = min;
+    mMax = max;
 }
 void SE_AABB::getEdge(SE_Segment edge[12])
 {
-	SE_Vector3f p0, p1;
+    SE_Vector3f p0, p1;
     //edge 1
     p0.x = mMin.x;
     p0.y = mMin.y;
@@ -724,7 +725,7 @@ void SE_AABB::getEdge(SE_Segment edge[12])
     p1.x = mMax.x;
     p1.y = mMin.y;
     p1.z = mMin.z;
-	edge[0].set(p0, p1);
+    edge[0].set(p0, p1);
     //edge 2
     p0.x = mMax.x;
     p0.y = mMin.y;
@@ -733,7 +734,7 @@ void SE_AABB::getEdge(SE_Segment edge[12])
     p1.x = mMax.x;
     p1.y = mMin.y;
     p1.z = mMax.z;
-	edge[1].set(p0, p1);
+    edge[1].set(p0, p1);
 
     //edge 3
     p0.x = mMax.x;
@@ -833,7 +834,7 @@ void SE_AABB::getEdge(SE_Segment edge[12])
     p1.x = mMin.x;
     p1.y = mMin.y;
     p1.z = mMax.z;
-	edge[11].set(p0, p1);
+    edge[11].set(p0, p1);
 }
 /////////////////////////////////////////////////
 SE_OBB::SE_OBB()
@@ -906,7 +907,7 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
     SE_Vector3f centerDistV, t;
     SE_Vector3f obbAxis[3];
     float obbExtent[3];
-	SE_IntersectResult ret;
+    SE_IntersectResult ret;
     obb.getAxis(obbAxis);
     obb.getExtent(obbExtent);
     for(i = 0 ; i < 3 ; i++)
@@ -993,7 +994,7 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
     rb = obbExtent[0] * AbsR(2 ,  1) + obbExtent[1] * AbsR(2 , 0);
     if(SE_Fabs(t.d[1] * R(0, 2) - t.d[0] * R(1 ,  2)) > (ra + rb))
         return ret;
-	ret.intersected = true;
+    ret.intersected = true;
     return ret;
 
 
@@ -1001,27 +1002,27 @@ SE_IntersectResult SE_OBB::intersect(const SE_OBB& obb) const
 
 SE_IntersectResult SE_OBB::intersect(const SE_Ray& ray) const
 {
-	return SE_IntersectResult();
+    return SE_IntersectResult();
 }
 SE_Plane_Side SE_OBB::whichSide(const SE_Plane& plane) const
 {
-	return SE_NEGATIVE;
+    return SE_NEGATIVE;
 }
 void SE_OBB::set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3])
 {
-	mCenter = center;
-	for(int i = 0 ; i < 3 ; i++)
-	{
-	    mAxis[i] = axis[i];
-		mExtent[i] = extent[3];
-	}
+    mCenter = center;
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        mAxis[i] = axis[i];
+        mExtent[i] = extent[3];
+    }
 }
 float SE_GeometryIntersect::pointAABBDistanceSquare(const SE_Vector3f& point, const SE_AABB& aabb)
 {
     float sqDist = 0.0f;
     int i;
-	const SE_Vector3f& min = aabb.getMin();
-	const SE_Vector3f& max = aabb.getMax();
+    const SE_Vector3f& min = aabb.getMin();
+    const SE_Vector3f& max = aabb.getMax();
     for(i = 0 ; i < 3 ; i++)
     {
         float v = point.d[i];
@@ -1032,37 +1033,37 @@ float SE_GeometryIntersect::pointAABBDistanceSquare(const SE_Vector3f& point, co
 }
 int SE_GeometryIntersect::sphereAABB(const SE_Sphere& sphere, const SE_AABB& aabb)
 {
-	float sqDist = pointAABBDistanceSquare(sphere.getCenter(), aabb);
+    float sqDist = pointAABBDistanceSquare(sphere.getCenter(), aabb);
     return sqDist <= sphere.getRadius() * sphere.getRadius();
 }
 int SE_GeometryIntersect::movingSphereStaticAABB(const SE_Sphere& sphere, const SE_AABB& aabb, 
-		                             const SE_Vector3f& endPoint, SE_Vector3f* out)
+                                     const SE_Vector3f& endPoint, SE_Vector3f* out)
 {
-	SE_Sphere s;
+    SE_Sphere s;
     SE_Vector3f midDir;
     float r, interval;
-	midDir = (endPoint - sphere.getCenter()).mul(0.5);
-	s.set(sphere.getCenter() + midDir, midDir.length() + sphere.getRadius());
-	if(!SE_GeometryIntersect::sphereAABB(s, aabb))
+    midDir = (endPoint - sphere.getCenter()).mul(0.5);
+    s.set(sphere.getCenter() + midDir, midDir.length() + sphere.getRadius());
+    if(!SE_GeometryIntersect::sphereAABB(s, aabb))
         return 0;
-	interval = (endPoint - sphere.getCenter()).length();
+    interval = (endPoint - sphere.getCenter()).length();
     if(interval < 2.0f)
     {
         *out = sphere.getCenter();
         return 1;
     }
-	if(movingSphereStaticAABB(sphere, aabb, s.getCenter(), out))
+    if(movingSphereStaticAABB(sphere, aabb, s.getCenter(), out))
         return 1;
     return movingSphereStaticAABB(s, aabb, endPoint, out);
 }
 int SE_GeometryIntersect::movingSphereStaticPlane(const SE_Sphere& sphere, const SE_Plane& plane, const SE_Vector3f& dirOfSphere, SE_Vector3f* out)
 {
-	SE_Vector3f planeNormal = plane.getNormal();
-	float planeD = plane.getDistance();
-	float dist = planeNormal.dot(sphere.getCenter()) - planeD;
-	if(SE_Fabs(dist) <= sphere.getRadius())
+    SE_Vector3f planeNormal = plane.getNormal();
+    float planeD = plane.getDistance();
+    float dist = planeNormal.dot(sphere.getCenter()) - planeD;
+    if(SE_Fabs(dist) <= sphere.getRadius())
     {
-		*out = sphere.getCenter();
+        *out = sphere.getCenter();
         return 1;
     }
     else
@@ -1074,11 +1075,11 @@ int SE_GeometryIntersect::movingSphereStaticPlane(const SE_Sphere& sphere, const
         }
         else
         {
-			float r = dist >0.0f ? sphere.getRadius() : -sphere.getRadius();
+            float r = dist >0.0f ? sphere.getRadius() : -sphere.getRadius();
             float t = (r - dist) / denom;
             if(t >= 0.0f && t <= 1.0f)
-			{
-				*out = dirOfSphere.mul(t) + sphere.getCenter() - planeNormal.mul(r);
+            {
+                *out = dirOfSphere.mul(t) + sphere.getCenter() - planeNormal.mul(r);
                 return 1;
             }
             else
@@ -1091,71 +1092,100 @@ int SE_GeometryIntersect::movingSphereStaticPlane(const SE_Sphere& sphere, const
 int SE_GeometryIntersect::movingOBBStaticAABB(const SE_OBB obb, const SE_AABB& aabb, SE_AXIS_TYPE axis, float dist, SE_OBB* out)
 {
     SE_Vector3f moveDir;
-	SE_Vector3f obbAxis[3];
-	obb.getAxis(obbAxis);
+    SE_Vector3f obbAxis[3];
+    obb.getAxis(obbAxis);
     switch(axis)
     {
     case SE_AXIS_X:
         moveDir = obbAxis[0].mul(dist);
         break;
     case SE_AXIS_Y:
-		moveDir = obbAxis[1].mul(dist);
+        moveDir = obbAxis[1].mul(dist);
         break;
     case SE_AXIS_Z:
-		moveDir = obbAxis[2].mul(dist);
+        moveDir = obbAxis[2].mul(dist);
         break;
     }
-	SE_Vector3f endCenter = obb.getCenter() + moveDir;
-	SE_Vector3f aabbCenter = aabb.getCenter();
-	SE_Vector3f aabbExtent = aabb.getExtent();
-	SE_OBB aabbObb;
-	SE_Vector3f aabbObbAxis[3];
-	aabbObbAxis[0].set(1, 0, 0);
-	aabbObbAxis[1].set(0, 1, 0);
-	aabbObbAxis[2].set(0, 0, 1);
-	float aabbObbExtent[3];
-	aabbObbExtent[0] = SE_Fabs(aabbExtent.x / 2);
-	aabbObbExtent[1] = SE_Fabs(aabbExtent.y / 2);
-	aabbObbExtent[2] = SE_Fabs(aabbExtent.z / 2);
-	aabbObb.set(aabbCenter, aabbObbAxis, aabbObbExtent);
-	SE_Vector3f distV = endCenter - obb.getCenter();
-	SE_Vector3f mid = distV.mul(0.5);
-	SE_Vector3f obbWithEndCenter = obb.getCenter() + mid;
-	SE_Vector3f obbWithEndAxis[3];
-	obb.getAxis(obbWithEndAxis);
-	float obbWithEndExtent[3];
-	obb.getExtent(obbWithEndExtent);
-	int index = 0;
-	switch(axis)
-	{
-	case SE_AXIS_X:
-		index = 0;
-		break;
-	case SE_AXIS_Y:
-		index = 1;
-		break;
-	case SE_AXIS_Z:
-		index = 2;
-		break;
-	}
-	float moveAxisExtent = distV.length() + 2 * obbWithEndExtent[index];
-	obbWithEndExtent[index] = moveAxisExtent / 2;
-	SE_OBB obbWithEnd;
-	obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
-	SE_IntersectResult ret = aabbObb.intersect(obbWithEnd);
-	if(!ret.intersected)
-		return 0;
-	float interval = distV.length();
-	if(interval <= 2.0f)
-	{
-		*out = obb;
-		return 1;
-	}
-	if(movingOBBStaticAABB(obb, aabb, axis, dist / 2, out))
-		return 1;
-	obb.getAxis(obbWithEndAxis);
-	obb.getExtent(obbWithEndExtent);
-	obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
-	return movingOBBStaticAABB(obbWithEnd, aabb, axis, dist / 2, out);
+    SE_Vector3f endCenter = obb.getCenter() + moveDir;
+    SE_Vector3f aabbCenter = aabb.getCenter();
+    SE_Vector3f aabbExtent = aabb.getExtent();
+    SE_OBB aabbObb;
+    SE_Vector3f aabbObbAxis[3];
+    aabbObbAxis[0].set(1, 0, 0);
+    aabbObbAxis[1].set(0, 1, 0);
+    aabbObbAxis[2].set(0, 0, 1);
+    float aabbObbExtent[3];
+    aabbObbExtent[0] = SE_Fabs(aabbExtent.x / 2);
+    aabbObbExtent[1] = SE_Fabs(aabbExtent.y / 2);
+    aabbObbExtent[2] = SE_Fabs(aabbExtent.z / 2);
+    aabbObb.set(aabbCenter, aabbObbAxis, aabbObbExtent);
+    SE_Vector3f distV = endCenter - obb.getCenter();
+    SE_Vector3f mid = distV.mul(0.5);
+    SE_Vector3f obbWithEndCenter = obb.getCenter() + mid;
+    SE_Vector3f obbWithEndAxis[3];
+    obb.getAxis(obbWithEndAxis);
+    float obbWithEndExtent[3];
+    obb.getExtent(obbWithEndExtent);
+    int index = 0;
+    switch(axis)
+    {
+    case SE_AXIS_X:
+        index = 0;
+        break;
+    case SE_AXIS_Y:
+        index = 1;
+        break;
+    case SE_AXIS_Z:
+        index = 2;
+        break;
+    }
+    float moveAxisExtent = distV.length() + 2 * obbWithEndExtent[index];
+    obbWithEndExtent[index] = moveAxisExtent / 2;
+    SE_OBB obbWithEnd;
+    obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
+    SE_IntersectResult ret = aabbObb.intersect(obbWithEnd);
+    if(!ret.intersected)
+        return 0;
+    float interval = distV.length();
+    if(interval <= 2.0f)
+    {
+        *out = obb;
+        return 1;
+    }
+    if(movingOBBStaticAABB(obb, aabb, axis, dist / 2, out))
+        return 1;
+    obb.getAxis(obbWithEndAxis);
+    obb.getExtent(obbWithEndExtent);
+    obbWithEnd.set(obbWithEndCenter, obbWithEndAxis, obbWithEndExtent);
+    return movingOBBStaticAABB(obbWithEnd, aabb, axis, dist / 2, out);
 
+}
+float SE_GeometryIntersect::pointDistance(const SE_Vector3f& p1, const SE_Vector3f& p2)
+{
+    SE_Vector3f t = p1 - p2;
+    return t.length();
+}
+void SE_GeometryIntersect::pointDistanceToLine(const SE_Vector3f& point, const SE_Vector3f& start, const SE_Vector3f& dir, float& distance, SE_Vector3f& intersectPoint)
+{
+    SE_Vector3f ps = point - start;
+    SE_Vector3f projV = dir.mul((ps.dot(dir) / dir.dot(dir)));
+    float distSquare = ps.dot(ps) - projV.dot(projV);
+    distance = SE_Sqrtf(distSquare);
+    float t = ps.dot(dir);
+    intersectPoint = start + projV;
+    /*
+    SE_Vector3f dirNormalize = dir.normalize();
+    if(t > 0)
+    {
+        intersectPoint = start + dirNormalize * projV.length();
+    }
+    else if(t == 0)
+    {
+        intersectPoint = start;
+    }
+    else
+    {
+        intersectPoint = start - dirNormalize * projV.length();
+    }
+    */
 }

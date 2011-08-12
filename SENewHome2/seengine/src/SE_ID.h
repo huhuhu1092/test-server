@@ -14,17 +14,17 @@ public:
     //SE_StringID(const SE_StringID& id);
     //SE_StringID& operator=(const SE_StringID& id);
     friend bool operator==(const SE_StringID& id1, const SE_StringID& id2);
-	friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
+    friend bool operator!=(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator<(const SE_StringID& id1, const SE_StringID& id2);
     friend bool operator>(const SE_StringID& id1, const SE_StringID& id2);
     void write(SE_BufferOutput& output);
     SE_StringID& read(SE_BufferInput& input);
     const char* getStr() const;
     bool isValid() const;
-	void print() const;
-	static SE_StringID INVALID;
+    void print() const;
+    static SE_StringID INVALID;
 private:
-	std::string mStr;
+    std::string mStr;
 };
 class SE_CommonID
 {
@@ -40,9 +40,9 @@ public:
     friend bool operator<(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator>(const SE_CommonID& lid, const SE_CommonID& rid);
     friend bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid);
-	void print() const;
-	static SE_CommonID INVALID;
-    unsigned int* getID();
+    void print() const;
+    static SE_CommonID INVALID;
+    unsigned int* getID(); 
 private:
     unsigned int id[4];
 
@@ -78,25 +78,25 @@ typedef SE_CommonID SE_VertexBufferID;
 class SE_ID
 {
 public:
-	static SE_ImageDataID createImageDataID(const char* str);
-	static SE_MeshID createMeshID(const char* str);
-	static SE_SpatialID createSpatialID();
-	static SE_GeometryDataID createGeometryDataID(const char* str);
-	static SE_TextureCoordDataID createTextureCoordDataID(const char* str);
-	static SE_MaterialDataID createMaterialDataID(const char * str);
-	static SE_SceneID createSceneID();
-	static SE_ProgramDataID createProgramDataID(const char* str);
-	static SE_CommandID createCommandID(const char* str);
-	static SE_CommandFactoryID createCommandFactoryID(const char* str);
-	static SE_PrimitiveID createPrimitiveID();
+    static SE_ImageDataID createImageDataID(const char* str);
+    static SE_MeshID createMeshID(const char* str);
+    static SE_SpatialID createSpatialID();
+    static SE_GeometryDataID createGeometryDataID(const char* str);
+    static SE_TextureCoordDataID createTextureCoordDataID(const char* str);
+    static SE_MaterialDataID createMaterialDataID(const char * str);
+    static SE_SceneID createSceneID();
+    static SE_ProgramDataID createProgramDataID(const char* str);
+    static SE_CommandID createCommandID(const char* str);
+    static SE_CommandFactoryID createCommandFactoryID(const char* str);
+    static SE_PrimitiveID createPrimitiveID();
     static SE_AnimationID createAnimationID();
     static SE_SimObjectID createSimObjectID();
-	static SE_ElementID createElementID(const char* str);
+    static SE_ElementID createElementID(const char* str);
     static SE_SkinJointControllerID createSkinJointControllerID(const char* str);
     static SE_SkeletonControllerID createSkeletonControllerID(const char* str);
-	static SE_MountPointID createMountPointID(const char* str);
-	static SE_RendererID createRendererID(const char* str);
-	static SE_VertexBufferID createVertexBufferID();
+    static SE_MountPointID createMountPointID(const char* str);
+    static SE_RendererID createRendererID(const char* str);
+    static SE_VertexBufferID createVertexBufferID();
 };
 class SE_TreeStructID
 {
@@ -141,7 +141,7 @@ public:
     {
         this->id[index] = id;
     }
-	void write(SE_BufferOutput& output);
+    void write(SE_BufferOutput& output);
     void read(SE_BufferInput& input);
     std::string toString() const;
 private:

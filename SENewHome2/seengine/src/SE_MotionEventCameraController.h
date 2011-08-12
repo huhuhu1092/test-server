@@ -14,10 +14,10 @@ class SE_MotionEventCameraController : public SE_MotionEventSEObjectController
 {
 DECLARE_OBJECT(SE_MotionEventCameraController)
 public:
-	SE_MotionEventCameraController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventCameraController();
-	void onMotionEvent(SE_MotionEvent* motionEvent);
-	void clearState();  
+    SE_MotionEventCameraController(SE_MotionEventController* c = NULL);
+    virtual ~SE_MotionEventCameraController();
+    void onMotionEvent(SE_MotionEvent* motionEvent);
+    void clearState();  
 
     enum CameraPos
     {
@@ -86,9 +86,9 @@ public:
         mOnTable = onTable;
     }
 private:
-	SE_MotionEvent::TYPE mPrevType;
-	float mPrevX;
-	float mPrevY;
+    SE_MotionEvent::TYPE mPrevType;
+    float mPrevX;
+    float mPrevY;
 
 
     void pitchMove();
@@ -97,24 +97,24 @@ private:
     bool mOnTable;
 
 
-	void roundCamera(float angle);//helper function for round camera
+    void roundCamera(float angle);//helper function for round camera
 
     void flushScreen();
 
-	void setCameraToAxis();
+    void setCameraToAxis();
     
 
-	SE_Vector3f mCenter; // save round center
+    SE_Vector3f mCenter; // save round center
 
-	float mAngleRounded; //total angle per move action
+    float mAngleRounded; //total angle per move action
 
-	bool mDone; //camera being auto round
+    bool mDone; //camera being auto round
 
-	bool mSaved;
+    bool mSaved;
 
-	float mNeedRoundAngle; //camera should auto-round this angle to get to correct position 
+    float mNeedRoundAngle; //camera should auto-round this angle to get to correct position 
 
-	float mRadius;    
+    float mRadius;    
 
     enum MotionStatus
     {
@@ -125,11 +125,11 @@ private:
     MotionStatus mMotionStatus;    
 
     CameraPos mCameraPos;
-	
-	SE_Vector3f mCameraTranslateStartPos;
+    
+    SE_Vector3f mCameraTranslateStartPos;
     float mCurrCameraAngle;
 
-	SE_Vector3f mTargetPos;
+    SE_Vector3f mTargetPos;
     SE_Vector3f mTargetZ;
 
     SE_Vector3f mBackupStartPos;

@@ -20,6 +20,7 @@
 #include "SE_ThreadManager.h"
 #include "SE_LoadThread.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 SE_InitAppCommand::SE_InitAppCommand(SE_Application* app) : SE_Command(app)
 {}
 SE_InitAppCommand::~SE_InitAppCommand()
@@ -136,22 +137,6 @@ void SE_InitAppCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 
 ////////////////////////////////////////////////////////
 
-SE_UpdateCameraCommand::SE_UpdateCameraCommand(SE_Application* app) : SE_Command(app)
-{}
-SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
-{}
-void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
-{
-    SE_Camera* c = mApp->getCurrentCamera();
-    if(c)
-    {
-        SE_Vector3f location = c->getLocation();
-        SE_Vector3f zAxis = c->getAxisZ();
-        SE_Vector3f up(0, 0, 1);       
-        c->create(location, zAxis, up, 60.0f,((float)height)/ width, 1.0f, 1000.0f);
-        c->setViewport(0, 0, width, height); 
-    }
-}
 ////////////////////////////////////////////////////////
 SE_KeyEventCommand::SE_KeyEventCommand(SE_Application* app) : SE_Command(app)
 {
@@ -230,15 +215,61 @@ SE_InitCameraCommand::SE_InitCameraCommand(SE_Application* app) : SE_Command(app
 {}
 SE_InitCameraCommand::~SE_InitCameraCommand()
 {}
+#if defined (WIN32)
 void SE_InitCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
     {
     SE_Vector3f location(80,0,93);
-    SE_Vector3f zAxis(1, 0, 0);   
-    SE_Vector3f up(0, 0, 1);
-    SE_Camera* c = mApp->getCurrentCamera();
-    c->create(location, zAxis, up, 60.0f,((float)height)/ width, 1.0f, 1000.0f);
+	SE_Vector3f zAxis(1, 0, 0);	
+	SE_Vector3f up(0, 0, 1);
+	SE_Camera* c = mApp->getCurrentCamera();
+	c->create(location, zAxis, up, 60.0f,((float)height)/ width, 1.0f, 1000.0f);
     c->setViewport(0, 0, width, height);
 }
+#else
+void SE_InitCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    SE_Camera* c = mApp->getCurrentCamera();
+    c->create(mLocation, mAxisZ, mUp, mFov,((float)height)/ width, mNear, mFar);
+    c->setViewport(0, 0, width, height);
+}
+#endif
+
+
+#if defined (WIN32)
+SE_UpdateCameraCommand::SE_UpdateCameraCommand(SE_Application* app) : SE_Command(app)
+{}
+SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
+{}
+void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    SE_Camera* c = mApp->getCurrentCamera();
+    if(c)
+    {
+        SE_Vector3f location = c->getLocation();
+        SE_Vector3f zAxis = c->getAxisZ();
+        SE_Vector3f up(0, 0, 1);        
+        c->create(location, zAxis, up, 60.0f,((float)height)/ width, 1.0f, 1000.0f);
+        c->setViewport(0, 0, width, height);  
+    }
+}
+#else
+SE_UpdateCameraCommand::SE_UpdateCameraCommand(SE_Application* app) : SE_Command(app)
+{}
+SE_UpdateCameraCommand::~SE_UpdateCameraCommand()
+{}
+void SE_UpdateCameraCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    SE_Camera* c = mApp->getCurrentCamera();
+    if(c)
+    {
+       SE_Vector3f location = c->getLocation();
+       SE_Vector3f zAxis = c->getAxisZ();
+       SE_Vector3f up = c->getAxisY();
+       c->create(location, zAxis, up, mFov,((float)mHeight)/ mWidth, mNear, mFar);
+       c->setViewport(0, 0, mWidth, mHeight);
+    }
+}
+#endif
 
 SE_SetCameraCommand::SE_SetCameraCommand(SE_Application* app) : SE_Command(app)
 {
@@ -273,7 +304,7 @@ SE_SetFrustumCommand::~SE_SetFrustumCommand()
 
 void SE_SetFrustumCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
-    mCamera->setFrustum(mFov, mRatio, mNear, mFar);
+	mCamera->setFrustum(mFov, mRatio, mNear, mFar);
 }
 
 SE_RotateLocalCommand_I::SE_RotateLocalCommand_I(SE_Application* app) : SE_Command(app)

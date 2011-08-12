@@ -29,8 +29,6 @@ public:
 
 	//rotate axis
 	SE_AXIS_TYPE mAxis;
-
-	bool mAffectGroup;
 private:
 	//Not used, now
 	SE_Vector3f mRotateVector;
@@ -52,9 +50,6 @@ public:
 	float mScaledX;
 	float mScaledY;
 	float mScaledZ;
-
-	bool mAffectGroup;
-
 };
 
 class SE_TranslateSpatialCommand : public SE_Command
@@ -72,9 +67,6 @@ public:
 	float mTranslatedX;
 	float mTranslatedY;
 	float mTranslatedZ;
-
-	bool mAffectGroup;
-
 };
 
 class SE_ResetSpatialCommand : public SE_Command
@@ -358,5 +350,68 @@ public:
 
 	//the object need be clone
 	std::string mObjectName;
+};
+
+class SE_RotateSpatialByNameCommand : public SE_Command
+{
+public:
+    SE_RotateSpatialByNameCommand(SE_Application* app);
+    ~SE_RotateSpatialByNameCommand();
+    virtual void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:	
+    std::string mSpatialName;
+
+	//rotate angle
+	float mRotateAngle;
+
+	//rotate axis
+	SE_AXIS_TYPE mAxis;	
+private:
+	//Not used, now
+	SE_Vector3f mRotateVector;
+
+};
+
+//The spatial will scale in X,Y or Z axis.
+class SE_ScaleSpatialByNameCommand : public SE_Command
+{
+public:
+    SE_ScaleSpatialByNameCommand(SE_Application* app);
+    ~SE_ScaleSpatialByNameCommand();
+    virtual void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:
+	//Spatialid
+    
+    std::string mSpatialName;
+
+	float mScaledX;
+	float mScaledY;
+	float mScaledZ;
+};
+
+class SE_TranslateSpatialByNameCommand : public SE_Command
+{
+public:
+    SE_TranslateSpatialByNameCommand(SE_Application* app);
+    ~SE_TranslateSpatialByNameCommand();
+    virtual void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:
+
+    std::string mSpatialName;
+
+	float mTranslatedX;
+	float mTranslatedY;
+	float mTranslatedZ;
+};
+
+class SE_ResetSpatialByNameCommand : public SE_Command
+{
+public:
+    SE_ResetSpatialByNameCommand(SE_Application* app);
+    ~SE_ResetSpatialByNameCommand();
+    virtual void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:
+	//Spatialid
+    std::string mSpatialName;    
 };
 #endif

@@ -2,6 +2,7 @@
 #include "SE_Animation.h"
 #include "SE_Application.h"
 #include <list>
+#include "SE_MemLeakDetector.h"
 SE_AnimationManager::~SE_AnimationManager()
 {
     _AnimationMap::iterator it;
@@ -34,7 +35,7 @@ void SE_AnimationManager::removeAnimation(const SE_AnimationID& animID)
         SE_Animation* anim = it->second;
         anim->end();
         delete anim;
-		mAnimationMap.erase(it);
+        mAnimationMap.erase(it);
     }
 }
 SE_Animation*  SE_AnimationManager::getAnimation(const SE_AnimationID& animID)

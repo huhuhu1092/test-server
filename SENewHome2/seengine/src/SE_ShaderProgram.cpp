@@ -3,50 +3,51 @@
 #include "SE_Common.h"
 #include "SE_Mesh.h"
 #include <string.h>
+#include "SE_MemLeakDetector.h"
 static void checkGLError()
 {
-	/*
+    /*
     GLenum error = glGetError();
     if(error != GL_NO_ERROR)
     {
         LOGI("### gl error = %d ####\n", error);
         SE_ASSERT(0);
     }
-	*/
+    */
 }
 static GLuint loadShader(GLenum type, const char* shaderSrc)
 {
     GLuint shader;
     GLint compiled;
-	/*const char* shaderString[] = {shaderSrc, 0};*/
+    /*const char* shaderString[] = {shaderSrc, 0};*/
     LOGI("#### start load shader ##\n");
     shader = glCreateShader(type);
     if(shader == 0)
         return 0;
 
     glShaderSource(shader, 1, &shaderSrc, 0);
-	checkGLError();
+    checkGLError();
     glCompileShader(shader);
     LOGI("### compile ok ####\n");
-	checkGLError();
+    checkGLError();
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-	checkGLError();
+    checkGLError();
     if(!compiled)
     {
         GLint infoLen = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-		checkGLError();
-		if(infoLen > 1)
-		{
-			char* infoLog = new char[sizeof(char) * infoLen];
-			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
-			checkGLError();
-			LOGI("Error compiling shader: \n%s\n", infoLog);
-			delete[] infoLog;
-		}
-		glDeleteShader(shader);
-		checkGLError();
-		return 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+        checkGLError();
+        if(infoLen > 1)
+        {
+            char* infoLog = new char[sizeof(char) * infoLen];
+            glGetShaderInfoLog(shader, infoLen, 0, infoLog);
+            checkGLError();
+            LOGI("Error compiling shader: \n%s\n", infoLog);
+            delete[] infoLog;
+        }
+        glDeleteShader(shader);
+        checkGLError();
+        return 0;
     }
     return shader;
 }
@@ -56,7 +57,7 @@ SE_ShaderProgram::SE_ShaderProgram()
     mShaderProgramObject = -1;
     mHasInit = false;
     m_a_position_loc = -1;
-	m_u_wvp_matrix_loc = -1;
+    m_u_wvp_matrix_loc = -1;
     mVertexShaderSrc = NULL;
     mFragmentShaderSrc = NULL;
 }
@@ -71,10 +72,10 @@ SE_ShaderProgram::SE_ShaderProgram(char* vertexShaderSrc, char* fragmentShaderSr
 }
 void SE_ShaderProgram::setSource(char* vertexShaderSrc, char* fragmentShaderSrc)
 {
-	if(mVertexShaderSrc)
-		delete[] mVertexShaderSrc;
-	if(mFragmentShaderSrc)
-		delete[] mFragmentShaderSrc;
+    if(mVertexShaderSrc)
+        delete[] mVertexShaderSrc;
+    if(mFragmentShaderSrc)
+        delete[] mFragmentShaderSrc;
     int vertexShaderSrcLen = strlen(vertexShaderSrc);
     int fragmentShaderSrcLen = strlen(fragmentShaderSrc);
     mVertexShaderSrc = new char[vertexShaderSrcLen + 1];
@@ -147,36 +148,36 @@ void SE_ShaderProgram::init(char* vertexShaderSrc, char* fragmentShaderSrc)
         return ;
     }
     glAttachShader(programObject, vertexShader);
-	checkGLError();
+    checkGLError();
     glAttachShader(programObject, fragmentShader);
-	checkGLError();
+    checkGLError();
     glLinkProgram(programObject);
-	checkGLError();
+    checkGLError();
     glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
-	checkGLError();
+    checkGLError();
     if(!linked)
     {
         GLint infoLen = 0;
-	    glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
-		checkGLError();
-	    if(infoLen > 1)
-	    {
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+        checkGLError();
+        if(infoLen > 1)
+        {
             char* infoLog = new char[sizeof(char) * infoLen];
-	        glGetProgramInfoLog(programObject, infoLen, 0, infoLog);
-			checkGLError();
-	        LOGI("Error linking program: \n%s\n", infoLog);
-	        delete[] infoLog;
-	    }
-	    glDeleteProgram(programObject);
-		checkGLError();
+            glGetProgramInfoLog(programObject, infoLen, 0, infoLog);
+            checkGLError();
+            LOGI("Error linking program: \n%s\n", infoLog);
+            delete[] infoLog;
+        }
+        glDeleteProgram(programObject);
+        checkGLError();
         mHasInit = false;
-	    return;
+        return;
     }
     LOGI("### link shader OK ####\n");
     glDeleteShader(vertexShader);
-	checkGLError();
+    checkGLError();
     glDeleteShader(fragmentShader);
-	checkGLError();
+    checkGLError();
     mShaderProgramObject = programObject;
     mHasInit = true;
 #endif
@@ -188,7 +189,7 @@ void SE_ShaderProgram::use()
         return;
     link();
     glUseProgram(mShaderProgramObject);
-	checkGLError();
+    checkGLError();
 #endif
 }
 SE_ShaderProgram::~SE_ShaderProgram()
@@ -206,7 +207,7 @@ void SE_ShaderProgram::link()
 {
 #ifdef GLES_20
     m_a_position_loc = glGetAttribLocation(mShaderProgramObject, "a_position");
-	m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
+    m_u_wvp_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_wvp_matrix");
 #ifdef DEBUG0
     LOGI("### m_a_position_loc = %d ###\n", m_a_position_loc);
     LOGI("### m_u_wvp_matrix_loc = %d ###\n", m_u_wvp_matrix_loc);
@@ -223,17 +224,17 @@ SE_SimpleSurfaceShaderProgram::SE_SimpleSurfaceShaderProgram()
 {
     m_a_tex_coord_loc = -1;
     m_u_texture_loc = -1;
-	m_u_shading_mode_loc = -1; 
+    m_u_shading_mode_loc = -1; 
     m_u_color_loc = -1;
 }
 void SE_SimpleSurfaceShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
-	m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
-	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
-	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
+    SE_ShaderProgram::link();
+    m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
+    m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
+    m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
+    m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
     m_u_alpha_loc = glGetUniformLocation(mShaderProgramObject, "u_alpha");
 #endif
 }
@@ -248,29 +249,29 @@ SE_ColorExtractShaderProgram::~SE_ColorExtractShaderProgram()
 void SE_ColorExtractShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord0_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
+    SE_ShaderProgram::link();
+    m_a_tex_coord0_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
     m_a_tex_coord1_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord1");
     m_a_tex_coord2_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord2");
     m_a_tex_coord3_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord3");
-	m_u_texture0_loc = glGetUniformLocation(mShaderProgramObject, "u_texture0");
+    m_u_texture0_loc = glGetUniformLocation(mShaderProgramObject, "u_texture0");
     m_u_texture1_loc = glGetUniformLocation(mShaderProgramObject, "u_texture1");
     m_u_texture2_loc = glGetUniformLocation(mShaderProgramObject, "u_texture2");
     m_u_texture3_loc = glGetUniformLocation(mShaderProgramObject, "u_texture3");
-	m_u_tex0_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex0_coord_index");
-	m_u_tex1_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex1_coord_index");
-	m_u_tex2_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex2_coord_index");
-	m_u_tex3_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_index");
-	m_u_tex_combine_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_tex_combine_mode");
-	m_u_color_op_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_color_op_mode");
-	m_u_colora_loc = glGetUniformLocation(mShaderProgramObject, "u_colora");
-	m_u_colorr_loc = glGetUniformLocation(mShaderProgramObject, "u_colorr");
-	m_u_colorg_loc = glGetUniformLocation(mShaderProgramObject, "u_colorg");
-	m_u_colorb_loc = glGetUniformLocation(mShaderProgramObject, "u_colorb");
-	m_u_rchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_rchannelindex");
+    m_u_tex0_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex0_coord_index");
+    m_u_tex1_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex1_coord_index");
+    m_u_tex2_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex2_coord_index");
+    m_u_tex3_coord_index_loc = glGetUniformLocation(mShaderProgramObject, "u_tex3_coord_index");
+    m_u_tex_combine_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_tex_combine_mode");
+    m_u_color_op_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_color_op_mode");
+    m_u_colora_loc = glGetUniformLocation(mShaderProgramObject, "u_colora");
+    m_u_colorr_loc = glGetUniformLocation(mShaderProgramObject, "u_colorr");
+    m_u_colorg_loc = glGetUniformLocation(mShaderProgramObject, "u_colorg");
+    m_u_colorb_loc = glGetUniformLocation(mShaderProgramObject, "u_colorb");
+    m_u_rchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_rchannelindex");
     m_u_gchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_gchannelindex");
-	m_u_bchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_bchannelindex");
-	m_u_achannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_achannelindex");
+    m_u_bchannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_bchannelindex");
+    m_u_achannelindex_loc = glGetUniformLocation(mShaderProgramObject, "u_achannelindex");
 #endif
 }
 GLint SE_ColorExtractShaderProgram::getTextureCoordAttributeLoc(int index)
@@ -278,9 +279,9 @@ GLint SE_ColorExtractShaderProgram::getTextureCoordAttributeLoc(int index)
     GLint ret = -1;
     switch(index)
     {
-	case 0:
-		ret = m_a_tex_coord0_loc;
-		break;
+    case 0:
+        ret = m_a_tex_coord0_loc;
+        break;
     case 1:
         ret = m_a_tex_coord1_loc;
         break;
@@ -291,7 +292,7 @@ GLint SE_ColorExtractShaderProgram::getTextureCoordAttributeLoc(int index)
         ret = m_a_tex_coord3_loc;
         break;
     default:
-		break;
+        break;
     }
     return ret;
 }
@@ -300,9 +301,9 @@ GLint SE_ColorExtractShaderProgram::getTextureUniformLoc(int index)
     GLint ret = -1;
     switch(index)
     {
-	case 0:
-		ret = m_u_texture0_loc;
-		break;
+    case 0:
+        ret = m_u_texture0_loc;
+        break;
     case 1:
         ret = m_u_texture1_loc;
         break;
@@ -313,75 +314,75 @@ GLint SE_ColorExtractShaderProgram::getTextureUniformLoc(int index)
         ret = m_u_texture3_loc;
         break;
     default:
-		break;
+        break;
     }
     return ret;
 }
 GLint SE_ColorExtractShaderProgram::getTexCoordIndexUniformLoc(int index)
 {
-	GLint ret = -1;
-	switch(index)
-	{
-	case 0:
-		ret = m_u_tex0_coord_index_loc;
-		break;
-	case 1:
-		ret = m_u_tex1_coord_index_loc;
-		break;
-	case 2:
-		ret = m_u_tex2_coord_index_loc;
-		break;
-	case 3:
-		ret = m_u_tex3_coord_index_loc;
-		break;
-	}
-	return ret;
+    GLint ret = -1;
+    switch(index)
+    {
+    case 0:
+        ret = m_u_tex0_coord_index_loc;
+        break;
+    case 1:
+        ret = m_u_tex1_coord_index_loc;
+        break;
+    case 2:
+        ret = m_u_tex2_coord_index_loc;
+        break;
+    case 3:
+        ret = m_u_tex3_coord_index_loc;
+        break;
+    }
+    return ret;
 }
 GLint SE_ColorExtractShaderProgram::getMarkColorUniformLoc(int index)
 {
-	GLint ret = -1;
-	switch(index)
-	{
-	case 0:
-		ret = m_u_colora_loc;
-		break;
-	case 1:
-		ret = m_u_colorr_loc;
-		break;
-	case 2:
-		ret = m_u_colorg_loc;
-		break;
-	case 3:
-		ret = m_u_colorb_loc;
-		break;
-	}
-	return ret;
+    GLint ret = -1;
+    switch(index)
+    {
+    case 0:
+        ret = m_u_colora_loc;
+        break;
+    case 1:
+        ret = m_u_colorr_loc;
+        break;
+    case 2:
+        ret = m_u_colorg_loc;
+        break;
+    case 3:
+        ret = m_u_colorb_loc;
+        break;
+    }
+    return ret;
 }
 GLint SE_ColorExtractShaderProgram::getColorChannelIndexUniformLoc(int index)
 {
-	GLint ret = -1;
-	switch(index)
-	{
-	case 0:
-		ret = m_u_rchannelindex_loc;
-		break;
-	case 1:
-		ret = m_u_gchannelindex_loc;
-		break;
-	case 2:
-		ret = m_u_bchannelindex_loc;
-		break;
-	case 3:
-		ret = m_u_achannelindex_loc;
-		break;
-	}
-	return ret;
+    GLint ret = -1;
+    switch(index)
+    {
+    case 0:
+        ret = m_u_rchannelindex_loc;
+        break;
+    case 1:
+        ret = m_u_gchannelindex_loc;
+        break;
+    case 2:
+        ret = m_u_bchannelindex_loc;
+        break;
+    case 3:
+        ret = m_u_achannelindex_loc;
+        break;
+    }
+    return ret;
 }
 /////////////////////////////////////////////
 IMPLEMENT_OBJECT(SE_ColorEffectShaderProgram)
 SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
 {
-	m_a_tex_coord0 = -1;
+    m_a_tex_coord0 = -1;
     m_u_texture_background = -1;
     m_u_texture_channel = -1;
     m_u_texture_texr = -1;
@@ -409,8 +410,8 @@ SE_ColorEffectShaderProgram::SE_ColorEffectShaderProgram()
 void SE_ColorEffectShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord0 = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
+    SE_ShaderProgram::link();
+    m_a_tex_coord0 = glGetAttribLocation(mShaderProgramObject, "a_tex_coord0");
     m_u_texture_background = glGetUniformLocation(mShaderProgramObject, "u_texture_background");
     m_u_texture_channel = glGetUniformLocation(mShaderProgramObject, "u_texture_channel");
     m_u_texture_texr = glGetUniformLocation(mShaderProgramObject, "u_texture_texr");
@@ -444,7 +445,7 @@ SE_FadeInOutShaderProgram::SE_FadeInOutShaderProgram(char* vertexShaderSrc, char
 {
     m_a_tex_coord_loc = -1;
     m_u_texture_loc = -1;
-	m_u_shading_mode_loc = -1; 
+    m_u_shading_mode_loc = -1; 
     m_u_color_loc = -1;
 }
 SE_FadeInOutShaderProgram::~SE_FadeInOutShaderProgram()
@@ -455,11 +456,11 @@ SE_FadeInOutShaderProgram::SE_FadeInOutShaderProgram()
 void SE_FadeInOutShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
-	m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
-	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
-	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
+    SE_ShaderProgram::link();
+    m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
+    m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
+    m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
+    m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
     m_u_alpha_loc = glGetUniformLocation(mShaderProgramObject, "u_alpha");    
 #endif
 }
@@ -471,7 +472,7 @@ SE_SkeletalAnimationShaderProgram::SE_SkeletalAnimationShaderProgram(char* verte
 {
     m_a_tex_coord_loc = -1;
     m_u_texture_loc = -1;
-	m_u_shading_mode_loc = -1; 
+    m_u_shading_mode_loc = -1; 
     m_u_color_loc = -1;
 }
 SE_SkeletalAnimationShaderProgram::~SE_SkeletalAnimationShaderProgram()
@@ -482,11 +483,11 @@ SE_SkeletalAnimationShaderProgram::SE_SkeletalAnimationShaderProgram()
 void SE_SkeletalAnimationShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
-	m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
-	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
-	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
+    SE_ShaderProgram::link();
+    m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
+    m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
+    m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
+    m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
     m_u_alpha_loc = glGetUniformLocation(mShaderProgramObject, "u_alpha");
 
 
@@ -505,7 +506,7 @@ SE_SimpleLightingShaderProgram::SE_SimpleLightingShaderProgram(char* vertexShade
 {
     m_a_tex_coord_loc = -1;
     m_u_texture_loc = -1;
-	m_u_shading_mode_loc = -1; 
+    m_u_shading_mode_loc = -1; 
     m_u_color_loc = -1;
     m_u_lightPos_loc = -1;
     m_u_eyePos_loc = -1;
@@ -524,11 +525,11 @@ SE_SimpleLightingShaderProgram::SE_SimpleLightingShaderProgram()
 void SE_SimpleLightingShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_ShaderProgram::link();
-	m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
-	m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
-	m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
-	m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
+    SE_ShaderProgram::link();
+    m_a_tex_coord_loc = glGetAttribLocation(mShaderProgramObject, "a_tex_coord");
+    m_u_texture_loc = glGetUniformLocation(mShaderProgramObject, "u_texture");
+    m_u_shading_mode_loc = glGetUniformLocation(mShaderProgramObject, "u_shading_mode");
+    m_u_color_loc = glGetUniformLocation(mShaderProgramObject, "u_color");
     m_u_lightPos_loc = glGetUniformLocation(mShaderProgramObject, "u_lightPos");
     m_u_eyePos_loc = glGetUniformLocation(mShaderProgramObject, "u_eyePos"); 
     u_m2w_matrix_loc = glGetUniformLocation(mShaderProgramObject, "u_m2w_matrix"); 
@@ -557,7 +558,7 @@ SE_NormalMapShaderProgram::SE_NormalMapShaderProgram()
 void SE_NormalMapShaderProgram::link()
 {
 #ifdef GLES_20
-	SE_SimpleLightingShaderProgram::link();	
+    SE_SimpleLightingShaderProgram::link();    
 
     //Normal map
     m_u_vertex_tangent_loc = glGetAttribLocation(mShaderProgramObject, "a_vert_tangent");

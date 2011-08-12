@@ -28,10 +28,10 @@ public:
     SE_Vector3i* getFaceArray();
     int getFaceNum();
     void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
-	void onClick();
+    void onClick();
     RenderUnitVector createRenderUnit();
-	SE_RenderUnit* createWireRenderUnit();
-	SE_Mesh* getMesh();
+    SE_RenderUnit* createWireRenderUnit();
+    SE_Mesh* getMesh();
     void setMesh(SE_Mesh* mesh, SE_OWN_TYPE own);
     void setAlpha(float alpha);
     virtual SE_SimObject *clone();
@@ -42,7 +42,7 @@ private:
     SE_Mesh* mMesh;
     SE_MeshID mMeshID;
     SE_OWN_TYPE mOwnMesh;
-	bool mSelected;
+    bool mSelected;
     int mCloneNum;
 };
 #endif

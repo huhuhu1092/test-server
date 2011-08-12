@@ -55,6 +55,14 @@ public:
     {
         mSpatialID = spatialID;
     }
+	void setSpatialName(const char* name)
+	{
+		mSpatialName = name;
+	}
+	const char* getSpatialName()  const
+	{
+		return mSpatialName.c_str();
+	}
     void setLocalTranslate(const SE_Vector3f& translate);
     void setLocalRotate(const SE_Quat& rotate);
     void setLocalRotate(const SE_Matrix3f& rotate);
@@ -287,5 +295,6 @@ private:
 	int mRQ;
     SE_SimObject *mAttachedSimObject;
     SE_Scene* mScene;
+	std::string mSpatialName;
 };
 #endif

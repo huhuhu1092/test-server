@@ -21,12 +21,12 @@
 #include "SE_CommonNode.h"
 #include "SE_DataValueDefine.h"
 #include "SE_Mesh.h"
-
+#include "SE_MemLeakDetector.h"
 #define TIMER
 
 IMPLEMENT_OBJECT(SE_MotionEventCameraController)
 
-#define USE_OBJONTABLE_MODE
+//#define USE_OBJONTABLE_MODE
 const float fovy = 60.0;
 SE_MotionEventCameraController::SE_MotionEventCameraController(SE_MotionEventController* c ) : SE_MotionEventSEObjectController(c)
 {
@@ -35,7 +35,7 @@ SE_MotionEventCameraController::SE_MotionEventCameraController(SE_MotionEventCon
     mPrevX = 0;
     mPrevY = 0;
 
-    mIsAnimating = false;
+    mIsAnimating = false; 
     //add by guohua
     mDone = false;
     mRadius = 120.0;
@@ -269,15 +269,15 @@ void SE_MotionEventCameraController::onMotionEvent(SE_MotionEvent* motionEvent)
             }
 
             SE_Message* msg = new SE_Message;
-			msg->type = SE_MSG_SIMOBJECT_NAME;
-			SE_Struct* sestruct = new SE_Struct(1);
-			SE_StructItem* sitem = new SE_StructItem(1);
-			SE_StdString* stdString = new SE_StdString;
-			stdString->data = so->getName();
-			sitem->setDataItem(stdString);
-			sestruct->setStructItem(0, sitem);
-			msg->data = sestruct;
-			SE_Application::getInstance()->sendMessage(msg);
+            msg->type = SE_MSG_SIMOBJECT_NAME;
+            SE_Struct* sestruct = new SE_Struct(1);
+            SE_StructItem* sitem = new SE_StructItem(1);
+            SE_StdString* stdString = new SE_StdString;
+            stdString->data = so->getName();
+            sitem->setDataItem(stdString);
+            sestruct->setStructItem(0, sitem);
+            msg->data = sestruct;
+            SE_Application::getInstance()->sendMessage(msg);
         } 
 #endif
 

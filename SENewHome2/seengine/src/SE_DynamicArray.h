@@ -7,8 +7,8 @@ public:
     enum {SE_NO_ERROR, SE_OVERFLOW, SE_INDEX_ERROR};
     //size must > 1
     SE_DynamicArray(size_t size, size_t maxSize);
-	SE_DynamicArray(const SE_DynamicArray& right);
-	SE_DynamicArray& operator=(const SE_DynamicArray& right);
+    SE_DynamicArray(const SE_DynamicArray& right);
+    SE_DynamicArray& operator=(const SE_DynamicArray& right);
     ~SE_DynamicArray();
     T& operator[](size_t index);
     const T& operator[](size_t index) const;
@@ -29,7 +29,7 @@ public:
         return mError;
     }
     void expand();
-	
+    
 private:
     T* mArray;
     size_t mSize;
@@ -104,35 +104,35 @@ const T& SE_DynamicArray<T>::operator[](size_t index) const
 template <typename T>
 SE_DynamicArray<T>::SE_DynamicArray(const SE_DynamicArray& right)
 {
-	mSize = right.size;
-	mMaxSize = right.size;
-	mError = right.mError;
-	mInvalid = right.mInvalid;
-	mArray = new T[mSize];
-	if(!mArray)
-		return;
-	for(size_t i = 0 ; i < mSize ; i++)
-	{
-		mArray[i] = right.mArray[i];
-	}
+    mSize = right.size;
+    mMaxSize = right.size;
+    mError = right.mError;
+    mInvalid = right.mInvalid;
+    mArray = new T[mSize];
+    if(!mArray)
+        return;
+    for(size_t i = 0 ; i < mSize ; i++)
+    {
+        mArray[i] = right.mArray[i];
+    }
 }
 template <typename T>
 SE_DynamicArray<T>& SE_DynamicArray<T>::operator=(const SE_DynamicArray& right)
 {
-	T* newArray = new T[right.mSize];
+    T* newArray = new T[right.mSize];
     if(!newArray)
-		return *this;
-	if(mArray)
-		delete[] mArray;
-	mArray = newArray;
-	mSize = right.mSize;
-	mMaxSize = right.mMaxSize;
-	mError = right.mError;
-	mInvalid = right.mInvalid;
-	for(size_t i = 0 ; i < mSize ; i++)
-	{
-		mArray[i] = right.mArray[i];
-	}
+        return *this;
+    if(mArray)
+        delete[] mArray;
+    mArray = newArray;
+    mSize = right.mSize;
+    mMaxSize = right.mMaxSize;
+    mError = right.mError;
+    mInvalid = right.mInvalid;
+    for(size_t i = 0 ; i < mSize ; i++)
+    {
+        mArray[i] = right.mArray[i];
+    }
     return *this;
 }
 #endif

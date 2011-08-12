@@ -1,4 +1,5 @@
 #include "SE_Struct.h"
+#include "SE_MemLeakDetector.h"
 SE_DataItem::SE_DataItem(SE_DataItem::DATA_ITEM_TYPE type)
 {
     this->type = type;
@@ -460,9 +461,9 @@ void SE_StructItem::setDataItem(const SE_Matrix4f& v, int index)
 }
 void SE_StructItem::setDataItem(SE_VirtualData* data, int index)
 {
-	SE_DataItem di(SE_DataItem::VIRTUALDATA_ITEM);
-	di.data.virtualData = data;
-	SET_DATA_ITEM(di, index);
+    SE_DataItem di(SE_DataItem::VIRTUALDATA_ITEM);
+    di.data.virtualData = data;
+    SET_DATA_ITEM(di, index);
 }
 ////////////////////////////
 SE_Struct::SE_Struct(int structItemSize) : mStructItems(structItemSize, (SE_StructItem *)NULL)

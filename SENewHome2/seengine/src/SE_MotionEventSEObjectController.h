@@ -52,8 +52,8 @@ public:
 protected:
     
     SE_MotionEvent::TYPE mPrevType;
-	float mPrevX;
-	float mPrevY;
-	SE_MotionEventController* mMotionEventController;
+    float mPrevX;
+    float mPrevY;
+    SE_MotionEventController* mMotionEventController;
 };
 #endif

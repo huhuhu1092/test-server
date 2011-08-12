@@ -10,14 +10,15 @@
 static void outputString(const char* buf, int size)
 {
 #if defined(WIN32)
-	wchar_t wbuf[512];
-	memset(wbuf, 0, 512 * sizeof(wchar_t));
+    wchar_t wbuf[512];
+    memset(wbuf, 0, 512 * sizeof(wchar_t));
     _snwprintf(wbuf, 512, L"%S", buf);
-	OutputDebugString(wbuf);
+    OutputDebugString(wbuf);
 #else
     fprintf(stderr, "%s", buf);
 #endif
 }
+#include "SE_MemLeakDetector.h"
 void LOGE(const char* fmt, ...)
 {
     va_list ap;
@@ -27,7 +28,7 @@ void LOGE(const char* fmt, ...)
     vsnprintf(buf, 4096, fmt, ap);
     buf[4096 - 1] = '\0';
     va_end(ap);
-	outputString(buf, strlen(buf));
+    outputString(buf, strlen(buf));
     exit(-1);
 }
 void LOGI(const char* fmt, ...)

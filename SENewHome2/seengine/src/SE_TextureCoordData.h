@@ -48,13 +48,13 @@ public:
         texFaceArray = tfa;
         texFaceNum = num;
     }
-	/**************  add for particle    ***************/
-	void setParticleTexVertexArray(SE_Vector2f* tva, int num)
+    /**************  add for particle    ***************/
+    void setParticleTexVertexArray(SE_Vector2f* tva, int num)
     {
         texVertexArray = tva;
         texVertexNum = num;
     }
-	/**************  add for particle    ***************/
+    /**************  add for particle    ***************/
     void setParticleTexFaceArray(SE_Vector3i* tfa, int num)
     {
         texFaceArray = tfa;

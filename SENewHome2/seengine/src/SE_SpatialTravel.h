@@ -12,47 +12,47 @@ public:
     SE_FindSpatialCollision(const SE_Ray& ray);
     ~SE_FindSpatialCollision();
     int visit(SE_Spatial* spatial);
-	int visit(SE_SimObject* so);
-	SE_SimObject* getCollisionObject();
-	SE_Spatial* getCollisionSpatial();
+    int visit(SE_SimObject* so);
+    SE_SimObject* getCollisionObject();
+    SE_Spatial* getCollisionSpatial();
 private:
-	struct CollisionResult
-	{
-		SE_Spatial* spatial;
-		SE_SimObject* simObject;
-		float distance;
-		CollisionResult()
-		{
-			spatial = NULL;
-			simObject = NULL;
-			distance = SE_FLT_MAX;
-		}
-	};
-	CollisionResult mResult;
-	CollisionResult mMinResult;
-	//std::list<CollisionResult> mCollisionResult;
-    SE_Ray mRay;	
+    struct CollisionResult
+    {
+        SE_Spatial* spatial;
+        SE_SimObject* simObject;
+        float distance;
+        CollisionResult()
+        {
+            spatial = NULL;
+            simObject = NULL;
+            distance = SE_FLT_MAX;
+        }
+    };
+    CollisionResult mResult;
+    CollisionResult mMinResult;
+    //std::list<CollisionResult> mCollisionResult;
+    SE_Ray mRay;    
 };
 class SE_MovingSphereStaticSpatialIntersect : public SE_SpatialTravel
 {
 public:
-	SE_MovingSphereStaticSpatialIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint);
-	int visit(SE_Spatial* spatial);
-	int visit(SE_SimObject* so);
+    SE_MovingSphereStaticSpatialIntersect(const SE_Sphere& sphere, const SE_Vector3f& endPoint);
+    int visit(SE_Spatial* spatial);
+    int visit(SE_SimObject* so);
 public:
-	SE_Vector3f location;
-	bool intersected;
+    SE_Vector3f location;
+    bool intersected;
 private:
-	SE_Sphere sphere;
-	SE_Vector3f endPoint;
+    SE_Sphere sphere;
+    SE_Vector3f endPoint;
 };
 class SE_MovingSpatialIntersect : public SE_SpatialTravel
 {
 public:
-	SE_MovingSpatialIntersect(SE_Spatial* s);
+    SE_MovingSpatialIntersect(SE_Spatial* s);
     int visit(SE_Spatial* spatial);
-	int visit(SE_SimObject* so);
+    int visit(SE_SimObject* so);
 private:
-	SE_Spatial* moveSpatial;
+    SE_Spatial* moveSpatial;
 };
 #endif

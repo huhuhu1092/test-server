@@ -1,32 +1,33 @@
 #include "SE_Camera.h"
 #include "SE_Log.h"
 #include "SE_BoundingVolume.h"
+#include "SE_MemLeakDetector.h"
 IMPLEMENT_OBJECT(SE_Camera)
 ///////////////
 SE_Camera::~SE_Camera()
 {
-	LOGI("### destroctor ~SE_Camera ####\n");
-	if(mBoundingVolume)
-		delete mBoundingVolume;
+    LOGI("### destroctor ~SE_Camera ####\n");
+    if(mBoundingVolume)
+        delete mBoundingVolume;
 }
 SE_Camera::SE_Camera()
 {
     mChanged = true;
-	mBoundingVolume = NULL;
+    mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
 {
-	create(location, target, fov, ratio, near, far);
+    create(location, target, fov, ratio, near, far);
     mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {
-	create(location, xAxis, yAxis, zAxis, fov, ratio, near, far);
+    create(location, xAxis, yAxis, zAxis, fov, ratio, near, far);
     mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& yAxis, float fov, float ratio, float near, float far)
 {
-	create(location, zAxis, yAxis, fov, ratio, near, far);
+    create(location, zAxis, yAxis, fov, ratio, near, far);
     mBoundingVolume = NULL;
 }
 SE_Rect<int> SE_Camera::getViewport() const
@@ -97,14 +98,14 @@ SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
 }
 void SE_Camera::getFrustumPlanes(SE_Plane planes[6]) const
 {
-	if(!mChanged)
-	{
-		for(int i = 0 ; i < 6 ; i++)
-		{
-			planes[i] = mPlanes[i];
-		}
-		return;
-	}
+    if(!mChanged)
+    {
+        for(int i = 0 ; i < 6 ; i++)
+        {
+            planes[i] = mPlanes[i];
+        }
+        return;
+    }
     SE_Plane lplanes[6];
     lplanes[0] = mFrustum.getLeftPlane();
     lplanes[1] = mFrustum.getRightPlane();
@@ -118,59 +119,59 @@ void SE_Camera::getFrustumPlanes(SE_Plane planes[6]) const
     for(int i = 0 ; i < 6 ; i++)
     {
         SE_Plane p = lplanes[i].transform(vtom);
-		planes[i].set(p.getNormal().neg(), p.getDistance());
-		mPlanes[i] = planes[i];
+        planes[i].set(p.getNormal().neg(), p.getDistance());
+        mPlanes[i] = planes[i];
     }
 #ifdef DEBUG
-	/*
-	SE_Plane nplanes[6];
-	SE_Vector3f NearLeftBottom, NearLeftTop, NearRightBottom, NearRightTop,
-		        FarLeftBottom, FarLeftTop, FarRightBottom, FarRightTop;
-	SE_Vector3f tmp1;
-	SE_Vector3f tmp[4];
-	SE_Rect<float> nearplane = mFrustum.getNearPlaneRect();
-	tmp[0] = mAxisZ.mul(-mFrustum.getNear());
-	tmp[1] = mAxisX.mul(nearplane.left);
-	tmp[2] = mAxisY.mul(nearplane.bottom);
-	tmp[3] = mLocation;
-	NearLeftBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
-	tmp1 = tmp[0] + tmp[1] + tmp[2];
-	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
-	FarLeftBottom = mLocation + tmp1;
-
-	tmp[1] = mAxisX.mul(nearplane.left);
-	tmp[2] = mAxisY.mul(nearplane.top);
-	NearLeftTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    /*
+    SE_Plane nplanes[6];
+    SE_Vector3f NearLeftBottom, NearLeftTop, NearRightBottom, NearRightTop,
+                FarLeftBottom, FarLeftTop, FarRightBottom, FarRightTop;
+    SE_Vector3f tmp1;
+    SE_Vector3f tmp[4];
+    SE_Rect<float> nearplane = mFrustum.getNearPlaneRect();
+    tmp[0] = mAxisZ.mul(-mFrustum.getNear());
+    tmp[1] = mAxisX.mul(nearplane.left);
+    tmp[2] = mAxisY.mul(nearplane.bottom);
+    tmp[3] = mLocation;
+    NearLeftBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
     tmp1 = tmp[0] + tmp[1] + tmp[2];
-	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
-	FarLeftTop = mLocation + tmp1;
+    tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+    FarLeftBottom = mLocation + tmp1;
 
-	tmp[1] = mAxisX.mul(nearplane.right);
-	tmp[2] = mAxisY.mul(nearplane.bottom);
-	NearRightBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    tmp[1] = mAxisX.mul(nearplane.left);
+    tmp[2] = mAxisY.mul(nearplane.top);
+    NearLeftTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
     tmp1 = tmp[0] + tmp[1] + tmp[2];
-	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
-	FarRightBottom = mLocation + tmp1;
+    tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+    FarLeftTop = mLocation + tmp1;
 
-	tmp[1] = mAxisX.mul(nearplane.right);
-	tmp[2] = mAxisY.mul(nearplane.top);
-	NearRightTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    tmp[1] = mAxisX.mul(nearplane.right);
+    tmp[2] = mAxisY.mul(nearplane.bottom);
+    NearRightBottom = tmp[0] + tmp[1] + tmp[2] + tmp[3];
+    tmp1 = tmp[0] + tmp[1] + tmp[2];
+    tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+    FarRightBottom = mLocation + tmp1;
 
-	tmp1 = tmp[0] + tmp[1] + tmp[2];
-	tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
-	FarRightTop = mLocation + tmp1;
+    tmp[1] = mAxisX.mul(nearplane.right);
+    tmp[2] = mAxisY.mul(nearplane.top);
+    NearRightTop = tmp[0] + tmp[1] + tmp[2] + tmp[3];
 
-	nplanes[0].set(NearLeftBottom, mLocation, NearLeftTop);
-	nplanes[1].set(NearRightTop, mLocation, NearRightBottom);
-	nplanes[2].set(mLocation, NearLeftBottom, NearRightBottom);
-	nplanes[3].set(mLocation, NearRightTop, NearLeftTop);
-	nplanes[4].set(NearLeftBottom, NearRightBottom, NearRightTop);
-	nplanes[5].set(FarLeftBottom, FarLeftTop, FarRightTop);
+    tmp1 = tmp[0] + tmp[1] + tmp[2];
+    tmp1 = tmp1.mul(mFrustum.getFar() / mFrustum.getNear());
+    FarRightTop = mLocation + tmp1;
+
+    nplanes[0].set(NearLeftBottom, mLocation, NearLeftTop);
+    nplanes[1].set(NearRightTop, mLocation, NearRightBottom);
+    nplanes[2].set(mLocation, NearLeftBottom, NearRightBottom);
+    nplanes[3].set(mLocation, NearRightTop, NearLeftTop);
+    nplanes[4].set(NearLeftBottom, NearRightBottom, NearRightTop);
+    nplanes[5].set(FarLeftBottom, FarLeftTop, FarRightTop);
     for(int i = 0 ; i < 6 ; i++)
     {
         planes[i] = nplanes[i];
     }
-	*/
+    */
 #endif
 }
 void SE_Camera::setLocation(const SE_Vector3f& loc)
@@ -207,7 +208,7 @@ void SE_Camera::rotateLocal(const SE_Quat& rotate)
     SE_Vector4f worldxAxis = vtom.map(SE_Vector4f(localxAxis, 0));
     SE_Vector4f worldyAxis = vtom.map(SE_Vector4f(localyAxis, 0));
     //SE_Vector4f worldzAxis = vtom.map(SE_Vector4f(localzAxis, 0));
-	SE_Vector4f worldzAxis(worldxAxis.xyz().cross(worldyAxis.xyz()), 0);
+    SE_Vector4f worldzAxis(worldxAxis.xyz().cross(worldyAxis.xyz()), 0);
     mAxisX = worldxAxis.normalize().xyz();
     mAxisY = worldyAxis.normalize().xyz();
     mAxisZ = worldzAxis.normalize().xyz();
@@ -265,7 +266,7 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, co
 }
 SE_Matrix4f SE_Camera::getPerspectiveMatrix() const
 {
-	return mFrustum.getPerspectiveMatrix();
+    return mFrustum.getPerspectiveMatrix();
 }
 void SE_Camera::onKeyEvent(SE_KeyEvent* keyEvent)
 {}

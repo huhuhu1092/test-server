@@ -1,4 +1,5 @@
 #include "SE_ImageData.h"
+#include "SE_MemLeakDetector.h"
 SE_ImageDataPortion SE_ImageDataPortion::INVALID = SE_ImageDataPortion(0, 0, 0, 0);
 ////////////////////////////////
 bool SE_ImageData::isCompressTypeByHardware()

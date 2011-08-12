@@ -6,8 +6,8 @@
 #include "SE_ImageData.h"
 #include "SE_VertexBuffer.h"
 #include "SE_Quat.h"
-#include <string.h>
 #include "SE_KeyFrame.h"
+#include <string.h>
 #include <list>
 class SE_TextureCoordData;
 class SE_GeometryData;
@@ -23,17 +23,8 @@ public:
     {
         mTexCoord = texCoordData;
     }
-    void setImageDataID(SE_ImageDataID* imageIDArray, int num)
-    {
-		if(mImageDataArray)
-		{
-			delete[] mImageDataArray;
-			mImageDataArray = NULL;
-			mImageDataNum = 0;
-		}
-        mImageDataIDArray = imageIDArray;
-        mImageDataIDNum = num;
-    }
+	void setTextureCoordDataID(const SE_TextureCoordDataID& id);
+    void setImageDataID(SE_ImageDataID* imageIDArray, int num);
 	void setImageDataNum(int num)
 	{
 		if(num <= 0)
@@ -138,6 +129,7 @@ private:
     int mSampleMag;
     int mWrapS;
     int mWrapT;
+	SE_TextureCoordDataID mTextureCoordDataID;
 
 };
 class SE_Texture
@@ -323,31 +315,19 @@ public:
     {
         mVertexBuffer = vb;
     }
-	/*
-	void setTexCoordIndex(int texIndex, int indexHasTexCoord)
-	{
-		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-			return;
-		mTexCoordIndex[texIndex] = indexHasTexCoord;
-	}
-	int getTexCoordIndex(int texIndex)
-	{
-		if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-			return SE_TEXTURE0;
-		return mTexCoordIndex[texIndex];
-	}
-
-	*/
+	void setMaterialDataID(const SE_MaterialDataID& id);
+	void setVertexBufferID(const SE_VertexBufferID& id);
 private:
     SE_Texture* mTexture;
     SE_MaterialData* mMaterialData;
+	SE_MaterialDataID mMaterialDataID;
     int* mFacetArray;
     int mFacetNum;
     SE_GeometryData* mGeometryData;
     SE_Vector3f mColor;
     SE_ProgramDataID mProgramDataID;
 	SE_RendererID mRendererID;
-
+    SE_VertexBufferID mVertexBufferID;
 	_Vector3f* mVertex;
 	int mVertexNum;
 
@@ -377,7 +357,7 @@ private:
     std::string mCurrentBipedControllerID;
     SE_BipedController *mBipedController;
 
-SE_Vector3f mLightPos;
+    SE_Vector3f mLightPos;
 
     int mVboID[VBO_TYPECOUNT];
     bool mUseVbo;
@@ -400,6 +380,7 @@ public:
 	{
         return mGeometryData;
 	}
+	
     SE_Vector3f getColor()
     {
         return mColor;
@@ -434,6 +415,7 @@ public:
     {
         mGeometryData = geomData;
     }
+	void setGeometryDataID(const SE_GeometryDataID& id);
     void clearVertexInfo();
     std::list<SE_KeyFrame<SE_NewTransform>*> mKeyFrames;
 private:
@@ -443,5 +425,6 @@ private:
     SE_Texture** mTextureArray;
     int mTextureNum;
     SE_Vector3f mColor;
+	SE_GeometryDataID mGeometryDataID;
 };
 #endif

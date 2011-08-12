@@ -2,7 +2,7 @@
 #include "SE_SystemCommandFactory.h"
 #include "SE_SystemCommand.h"
 #include "SE_UserCommand.h"
-
+#include "SE_MemLeakDetector.h"
 /*
 class SE_CreateInitAppCommand : public SE_CreateCommandFunc
 {
@@ -15,19 +15,15 @@ public:
 class SE_CreateUpdateCameraCommand : public SE_CreateCommandFunc
 {
 public:
-	SE_Command* create(SE_Application* app, const SE_CommandID& id)
-	{
-		return new SE_UpdateCameraCommand(app);
-	}
+    SE_Command* create(SE_Application* app, const SE_CommandID& id)
+    {
+        return new SE_UpdateCameraCommand(app);
+    }
 };
 */
 SE_SystemCommandFactory::SE_SystemCommandFactory()
-{	
+{    
     SE_CommandEntry* systemCommandEntry[33];
-    for(int i = 0 ; i < 33 ; i++)
-    {
-        systemCommandEntry[i] = NULL;
-    }
     systemCommandEntry[0] = new SE_CommandEntry(SE_CommandID("SE_InitAppCommand"), new SE_CommandCreateFunc<SE_InitAppCommand>);
     //systemCommandEntry[1] = new SE_CommandEntry(SE_CommandID("SE_InitCameraCommand"), new SE_CommandCreateFunc<SE_InitCameraCommand>);
     systemCommandEntry[2] = new SE_CommandEntry(SE_CommandID("SE_UpdateCameraCommand"), new SE_CommandCreateFunc<SE_UpdateCameraCommand>);

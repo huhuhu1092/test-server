@@ -1,6 +1,7 @@
 #include "SE_Object.h"
 #include "SE_Buffer.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 /*
 SE_Object::ObjProperty::ObjProperty()
 {
@@ -64,4 +65,25 @@ SE_Object* SE_Object::create(const char* className)
 SE_Object::~SE_Object()
 {
 
+}
+
+void SE_Object::factoryRelease()
+{
+    if(mObjectCreateMap)
+    {
+        ObjectCreateMap::iterator it = mObjectCreateMap->begin();
+        for(;it != mObjectCreateMap->end();)
+        {
+            SE_ObjectCreateFunc *func = it->second;
+            delete func;
+
+            mObjectCreateMap->erase(it++);
+            
+        }
+        mObjectCreateMap->clear();
+
+        delete mObjectCreateMap;
+        mObjectCreateMap = NULL;
+
+    }
 }

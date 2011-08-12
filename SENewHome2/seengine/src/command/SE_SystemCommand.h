@@ -19,6 +19,7 @@ public:
     std::string fileName; // the prefix of the file
 };
 
+#if defined (WIN32)
 //////////////////////////////////////
 class SE_UpdateCameraCommand : public SE_Command
 {
@@ -30,6 +31,7 @@ public:
     int width;
     int height;
 };
+#endif
 ///////////////////////////////////////
 class SE_KeyEventCommand : public SE_Command
 {
@@ -87,6 +89,21 @@ public:
     float mFar;
 };
 
+#ifdef ANDROID
+class SE_UpdateCameraCommand : public SE_Command
+{
+public:
+    SE_UpdateCameraCommand(SE_Application* app);
+    ~SE_UpdateCameraCommand();
+    void handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta);
+public:
+    int mWidth;
+    int mHeight;
+    float mFov;
+    float mNear;
+    float mFar;
+};
+#endif
 class SE_SetCameraCommand : public SE_Command
 {
 public:

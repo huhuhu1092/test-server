@@ -8,6 +8,8 @@
 #include "SE_Math.h"
 #include "SE_Log.h"
 #include "SE_Common.h"
+#include "SE_ResourceManager.h"
+#include "SE_Application.h"
 #include <string.h>
 #include <set>
 SE_TextureUnit::SE_TextureUnit()
@@ -31,7 +33,40 @@ SE_TextureUnit::~SE_TextureUnit()
     }
 	if(mImageDataArray)
 		delete[] mImageDataArray;
-
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->unregisterRes(SE_ResourceManager::TEXCOORD_RES, &mTextureCoordDataID);
+}
+void SE_TextureUnit::setTextureCoordDataID(const SE_TextureCoordDataID& id)
+{
+	mTextureCoordDataID = id;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::TEXCOORD_RES, &mTextureCoordDataID);
+}
+void SE_TextureUnit::setImageDataID(SE_ImageDataID* imageIDArray, int num)
+{
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	if(mImageDataArray)
+	{
+		delete[] mImageDataArray;
+		mImageDataArray = NULL;
+		mImageDataNum = 0;
+	}
+	if(mImageDataIDArray)
+	{
+		for(int i = 0 ; i < mImageDataIDNum ; i++)
+		{
+			resourceManager->unregisterRes(SE_ResourceManager::IMAGE_RES, &mImageDataIDArray[i]);
+		}
+		delete[] mImageDataIDArray;
+		mImageDataIDArray = NULL;
+		mImageDataIDNum = 0;
+	}
+    mImageDataIDArray = imageIDArray;
+    mImageDataIDNum = num;
+	for(int i = 0 ; i < mImageDataIDNum; i++)
+	{
+		resourceManager->registerRes(SE_ResourceManager::IMAGE_RES, &mImageDataIDArray[i]);
+	}
 }
 //////////
 SE_Surface::SE_Surface()
@@ -107,6 +142,11 @@ SE_Surface::~SE_Surface()
     {
         delete[] mTangentArray;
     }
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->unregisterRes(SE_ResourceManager::MATERIAL_RES, &mMaterialDataID);
+	resourceManager->unregisterRes(SE_ResourceManager::SHADER_RES, &mProgramDataID);
+	resourceManager->unregisterRes(SE_ResourceManager::RENDERER_RES, &mRendererID);
+	resourceManager->registerRes(SE_ResourceManager::VERTEXBUFFER_RES, &mVertexBufferID);
 }
 void SE_Surface::setShaderProperty(SE_ShaderProperty* sp)
 {
@@ -535,10 +575,26 @@ void SE_Surface::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVerte
 void SE_Surface::setProgramDataID(const SE_ProgramDataID& programID)
 {
     mProgramDataID = programID;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::SHADER_RES, &mProgramDataID);
 }
 void SE_Surface::setRendererID(const SE_RendererID& id)
 {
 	mRendererID = id;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::RENDERER_RES, &mRendererID);
+}
+void SE_Surface::setMaterialDataID(const SE_MaterialDataID& id)
+{
+	mMaterialDataID = id;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::MATERIAL_RES, &mMaterialDataID);
+}
+void SE_Surface::setVertexBufferID(const SE_VertexBufferID& id)
+{
+	mVertexBufferID = id;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::VERTEXBUFFER_RES, &mVertexBufferID);
 }
 ///////
 SE_Texture::SE_Texture()
@@ -595,6 +651,8 @@ SE_Mesh::~SE_Mesh()
     }
     delete[] mSurfaceArray;
     delete[] mTextureArray;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::GEOM_RES, &mGeometryDataID);
 }
 void SE_Mesh::clearVertexInfo()
 {
@@ -603,4 +661,10 @@ void SE_Mesh::clearVertexInfo()
         SE_Surface* surface = mSurfaceArray[i];
         surface->clearVertexInfo();
     }
+}
+void SE_Mesh::setGeometryDataID(const SE_GeometryDataID& id)
+{
+	mGeometryDataID = id;
+	SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	resourceManager->registerRes(SE_ResourceManager::GEOM_RES, &mGeometryDataID);
 }

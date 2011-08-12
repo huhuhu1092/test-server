@@ -6,6 +6,8 @@
 #include "SE_ResourceManager.h"
 #include <string>
 #include "SE_Log.h"
+#include "SE_Application.h"
+#include "SE_MemLeakDetector.h"
 SE_MeshTransfer::~SE_MeshTransfer()
 {
     if(mSurfaceTransferArray)
@@ -17,12 +19,8 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
 {
     SE_Mesh* mesh = new SE_Mesh(mSurfaceNum, mTexNum);
     mesh->setGeometryData(resourceManager->getGeometryData(mGeomDataID));
+	mesh->setGeometryDataID(mGeomDataID);
     mesh->mKeyFrames = mKeyFrames;
-    if(mTexNum == 0)
-    {        
-        mesh->setTexture(0,NULL);
-    }
-
     if(mSurfaceNum == 0)
     {
         mesh->setSurface(0, NULL); 
@@ -36,6 +34,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
             SE_TextureUnitTransfer* texUnitTransfer = textureTransfer->getTextureUnit(j);
 			SE_TextureUnit* texUnit = new SE_TextureUnit();
             texUnit->setTextureCoordData(resourceManager->getTextureCoordData(texUnitTransfer->getTexCoordDataID()));
+			texUnit->setTextureCoordDataID(texUnitTransfer->getTexCoordDataID());
             SE_ImageDataID* imageDataArray = new SE_ImageDataID[texUnitTransfer->getImageDataNum()];
             for(int n = 0 ; n < texUnitTransfer->getImageDataNum() ; n++)
             {
@@ -54,6 +53,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
         SE_SurfaceTransfer* surfaceTransfer = &mSurfaceTransferArray[i];
         SE_Surface* surface = new SE_Surface;
         surface->setMaterialData(resourceManager->getMaterialData(surfaceTransfer->getMaterialDataID()));
+		surface->setMaterialDataID(surfaceTransfer->getMaterialDataID());
         surface->setProgramDataID(surfaceTransfer->getProgramDataID());
 		surface->setRendererID(surfaceTransfer->getRendererID());
         int*  facetArray= new int[surfaceTransfer->getFacetNum()];
@@ -66,6 +66,7 @@ SE_Mesh* SE_MeshTransfer::createMesh(SE_ResourceManager* resourceManager)
 
         //set vertex buffer
         surface->setVertexBuffer(resourceManager->getVertexBuffer(mVbID));
+		surface->setVertexBufferID(mVbID);
         mesh->setSurface(i, surface); 
     }
     return mesh;

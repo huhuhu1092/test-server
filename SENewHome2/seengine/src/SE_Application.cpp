@@ -16,6 +16,7 @@
 #include <string.h>
 #include <algorithm>
 #include "SE_Mutex.h"
+#include "SE_Config.h"
 /*#include "ParticleSystem/SE_ParticlePointEmitter.h"
 #include "ParticleSystem/SE_ParticleBoxEmitter.h"
 #include "SE_ParticleLinearForceAffector.h"
@@ -89,7 +90,7 @@ SE_Application::SE_Application()
 	mObjectCount = 0;
     mState = PREPARE;
 	mSeqNum = 0;
-
+    mConfig = NULL;
 }
 SE_Application::~SE_Application()
 {
@@ -157,6 +158,36 @@ void SE_Application::update(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
         mRenderManager->draw();
         mRenderManager->endDraw();
     }
+	if(mConfig)
+	{
+		int printRenderInfo = mConfig->getInt("OutputRenderInfo", 0);
+		if(printRenderInfo)
+		{
+			LOGI("#############################################################################\n");
+			LOGI("### total surface num = %d, total vertex num = %d , total face num = %d ##\n", 
+				SE_Application::getInstance()->getStatistics().renderSurfaceNum,
+				SE_Application::getInstance()->getStatistics().renderVertexNum, 
+				SE_Application::getInstance()->getStatistics().renderFaceNum
+				);
+			std::list<SE_Application::RenderUnitStatistics*>::iterator ruStatIt;
+			SE_Application::Statistics& stat = SE_Application::getInstance()->getStatistics();
+			for(ruStatIt = stat.renderUnitData.begin() ; ruStatIt != stat.renderUnitData.end(); ruStatIt++)
+			{
+				SE_Application::RenderUnitStatistics* rus = *ruStatIt;
+				LOGI("## surface name = %s, vertex num = %d, face num = %d ##\n", 
+					rus->name.c_str(), rus->vertexNum, rus->faceNum);
+			}
+			LOGI("## texture num = %d ##\n", stat.textureList.size());
+			std::list<SE_Application::TexUseData>::iterator texIt;
+			for(texIt = stat.textureList.begin() ; 
+				texIt != stat.textureList.end() ; 
+				texIt++)
+			{
+				LOGI("## texture : %s , num = %d\n", texIt->name.c_str(), texIt->num);
+			}
+			LOGI("#############################################################################\n");
+		}
+	}
     doDelayDestroy();
 }
 void SE_Application::start()
@@ -368,4 +399,10 @@ SE_Application::_MessageVector SE_Application::getMessage()
 		v[i++] = msg;
 	}
 	return v;
+}
+void SE_Application::setConfig(const char* configFilePath)
+{
+	if(mConfig)
+		delete mConfig;
+	mConfig = new SE_Config(configFilePath);
 }

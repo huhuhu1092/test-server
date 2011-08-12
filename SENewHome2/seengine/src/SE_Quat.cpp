@@ -1,6 +1,7 @@
 #include "SE_Quat.h"
 #include "SE_Math.h"
 #include <math.h>
+#include "SE_MemLeakDetector.h"
 const SE_Quat SE_Quat::IDENTITY = SE_Quat(0, 0, 0, 1);
 SE_Quat::SE_Quat(float angle, const SE_Vector3f& axis)
 {
@@ -10,8 +11,8 @@ void SE_Quat::set(float angle, const SE_Vector3f& axis)
 {
     if(axis.isZero())
     {
-	    identity();
-	    return;
+        identity();
+        return;
     }
     SE_Vector3f axisNorm = axis.normalize();
     float radian = SE_AngleToRadian(angle) / 2;
@@ -41,7 +42,7 @@ SE_Quat SE_Quat::inverse() const
     float len = length();
     if(len == 0)
     {
-	    return IDENTITY;
+        return IDENTITY;
     }
     return SE_Quat(conj.x / len, conj.y / len, conj.z / len, conj.w / len);
 }

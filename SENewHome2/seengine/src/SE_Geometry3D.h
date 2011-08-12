@@ -24,15 +24,15 @@ template <class T>
 struct SE_Rect
 {
     T left ,right, top, bottom;
-	SE_Rect()
-	{
-		left = right = top = bottom = 0;
-	}
+    SE_Rect()
+    {
+        left = right = top = bottom = 0;
+    }
 };
 class SE_Rect3D
 {
 public:
-	static SE_Rect3D normalizeRect;
+    static SE_Rect3D normalizeRect;
     SE_Rect3D();
     SE_Rect3D(const SE_Vector3f& center, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, 
               float e[2]);
@@ -40,14 +40,14 @@ public:
     SE_Vector3f getXAxis() const;
     SE_Vector3f getYAxis() const;
     void getExtent(float out[2]) const;
-	// v is array of 4 element
+    // v is array of 4 element
     void getVertex(SE_Vector3f* v) const;
-	//faces is array of 2 element
+    //faces is array of 2 element
     void getFaces(SE_Vector3i* faces) const;
-	void setCenter(const SE_Vector3f& center);
-	//xAxis must perpendicular with yAxis
-	void setAxis(const SE_Vector3f& xAxis, const SE_Vector3f& yAxis);
-	void setExtent(float e[2]);
+    void setCenter(const SE_Vector3f& center);
+    //xAxis must perpendicular with yAxis
+    void setAxis(const SE_Vector3f& xAxis, const SE_Vector3f& yAxis);
+    void setExtent(float e[2]);
 private:
     SE_Vector3f mCenter;
     SE_Vector3f mAxis[2];
@@ -58,16 +58,16 @@ class SE_Segment
 public:
     SE_Segment();
     SE_Segment(const SE_Vector3f& start, const SE_Vector3f& end);
-	//if dir is normalized , the len is the length of dir. otherwise len == 1.0
+    //if dir is normalized , the len is the length of dir. otherwise len == 1.0
     SE_Segment(const SE_Vector3f& start, const SE_Vector3f& dir, float len);
     SE_Vector3f getStart() const;
     SE_Vector3f getEnd() const;
     SE_Vector3f getDirection() const;
-	void set(const SE_Vector3f& p0, const SE_Vector3f& p1)
-	{
-		mStart = p0;
-		mEnd = p1;
-	}
+    void set(const SE_Vector3f& p0, const SE_Vector3f& p1)
+    {
+        mStart = p0;
+        mEnd = p1;
+    }
 
 private:
     SE_Vector3f mStart;
@@ -79,7 +79,7 @@ class SE_Plane
      * n * x - d = 0;
      * */
 public:
-	SE_Plane();
+    SE_Plane();
     SE_Plane(const SE_Vector3f& normal, float d);
     SE_Plane(const SE_Vector3f& p0, const SE_Vector3f& p1, const SE_Vector3f& p2);
     void set(const SE_Vector3f& normal, float d);
@@ -98,7 +98,7 @@ class SE_Ray
 public:
     SE_Ray();
     SE_Ray(const SE_Vector3f& start, const SE_Vector3f& end);
-	// normalized indicate that whether dir is normalized.
+    // normalized indicate that whether dir is normalized.
     SE_Ray(const SE_Vector3f& org, const SE_Vector3f& dir, bool normalized);
     SE_Vector3f getOrigin() const;
     SE_Vector3f getDirection() const;
@@ -153,7 +153,7 @@ class SE_Sphere
 public:
     SE_Sphere();
     SE_Sphere(const SE_Vector3f& center, float r);
-	void set(const SE_Vector3f& center, float r);
+    void set(const SE_Vector3f& center, float r);
     void createFromPoints(SE_Vector3f* points, int num);
     SE_Vector3f getCenter() const;
     float getRadius() const;
@@ -176,7 +176,7 @@ class SE_AABB
 public:
     SE_AABB();
     SE_AABB(const SE_Vector3f& min, const SE_Vector3f& max);
-	void set(const SE_Vector3f& min, const SE_Vector3f& max);
+    void set(const SE_Vector3f& min, const SE_Vector3f& max);
     void createFromPoints(SE_Vector3f* points, int num);
     SE_Vector3f getMin() const;
     SE_Vector3f getMax() const;
@@ -186,7 +186,7 @@ public:
     SE_IntersectResult intersect(const SE_Ray& ray) const;
     SE_IntersectResult intersect(const SE_Plane& plane) const;
     SE_Plane_Side whichSide(const SE_Plane& plane) const;
-	void getEdge(SE_Segment edge[12]);
+    void getEdge(SE_Segment edge[12]);
 private:
     SE_Vector3f mMin;
     SE_Vector3f mMax;
@@ -195,7 +195,7 @@ class SE_OBB
 {
 public:
     SE_OBB();
-	void set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3]);
+    void set(const SE_Vector3f& center, SE_Vector3f axis[3], float extent[3]);
     void createFromPoints(SE_Vector3f* points, int num);
     void createFromAABB(const SE_AABB& aabb);
     void getBoxVertex(SE_Vector3f out[8]) const;
@@ -214,11 +214,13 @@ private:
 class SE_GeometryIntersect
 {
 public:
-	static int movingSphereStaticAABB(const SE_Sphere& sphere, const SE_AABB& aabb, 
-		                             const SE_Vector3f& endPoint, SE_Vector3f* out);
-	static int sphereAABB(const SE_Sphere& sphere, const SE_AABB& aabb);
-	static float pointAABBDistanceSquare(const SE_Vector3f& point, const SE_AABB& aabb);
-	static int movingSphereStaticPlane(const SE_Sphere& sphere, const SE_Plane& plane, const SE_Vector3f& dirOfSphere, SE_Vector3f* out);
-	static int movingOBBStaticAABB(const SE_OBB obb, const SE_AABB& aabb, SE_AXIS_TYPE axis, float dist, SE_OBB* out);
+    static int movingSphereStaticAABB(const SE_Sphere& sphere, const SE_AABB& aabb, 
+                                     const SE_Vector3f& endPoint, SE_Vector3f* out);
+    static int sphereAABB(const SE_Sphere& sphere, const SE_AABB& aabb);
+    static float pointAABBDistanceSquare(const SE_Vector3f& point, const SE_AABB& aabb);
+    static int movingSphereStaticPlane(const SE_Sphere& sphere, const SE_Plane& plane, const SE_Vector3f& dirOfSphere, SE_Vector3f* out);
+    static int movingOBBStaticAABB(const SE_OBB obb, const SE_AABB& aabb, SE_AXIS_TYPE axis, float dist, SE_OBB* out);
+    static float pointDistance(const SE_Vector3f& p1, const SE_Vector3f& p2);
+    static void pointDistanceToLine(const SE_Vector3f& point, const SE_Vector3f& start, const SE_Vector3f& dir, float& distance, SE_Vector3f& intersectPoint);
 };
 #endif

@@ -6,7 +6,7 @@
 #include <string.h>
 
 SE_AssetManager::SE_AssetManager() {
-    mAssetManager = new android::AssetManager();
+   mAssetManager = new android::AssetManager();
 }
 
 SE_AssetManager::SE_AssetManager(android::AssetManager* am) {

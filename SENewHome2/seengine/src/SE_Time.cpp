@@ -6,10 +6,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 #endif
+#include "SE_MemLeakDetector.h"
 SE_TimeMS SE_Time::getCurrentTimeMS()
 {
 #if defined(WIN32)
-	//return GetTickCount();
+    //return GetTickCount();
     time_t clock;
     struct tm tm;
     SYSTEMTIME wtm;
@@ -18,7 +19,7 @@ SE_TimeMS SE_Time::getCurrentTimeMS()
     tm.tm_mon = wtm.wMonth - 1;
     tm.tm_mday = wtm.wDay;
     tm.tm_hour = wtm.wHour;
-	tm.tm_min  = wtm.wMinute;
+    tm.tm_min  = wtm.wMinute;
     tm.tm_sec = wtm.wSecond;
     tm.tm_isdst = -1;
     clock = mktime(&tm);
@@ -33,7 +34,7 @@ SE_TimeMS SE_Time::getCurrentTimeMS()
 SE_TimeUS SE_Time::getCurrentTimeUS()
 {
 #if defined(WIN32)
-	//return GetTickCount();
+    //return GetTickCount();
     time_t clock;
     struct tm tm;
     SYSTEMTIME wtm;
@@ -42,7 +43,7 @@ SE_TimeUS SE_Time::getCurrentTimeUS()
     tm.tm_mon = wtm.wMonth - 1;
     tm.tm_mday = wtm.wDay;
     tm.tm_hour = wtm.wHour;
-	tm.tm_min  = wtm.wMinute;
+    tm.tm_min  = wtm.wMinute;
     tm.tm_sec = wtm.wSecond;
     tm.tm_isdst = -1;
     clock = mktime(&tm);

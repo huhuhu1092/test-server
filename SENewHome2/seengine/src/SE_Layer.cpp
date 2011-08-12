@@ -1,4 +1,5 @@
 #include "SE_Layer.h"
+#include "SE_MemLeakDetector.h"
 SE_Layer::SE_Layer()
 {
     mLayer = 0;

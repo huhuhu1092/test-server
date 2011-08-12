@@ -1,20 +1,21 @@
 #include "SE_File.h"
 #include "SE_Buffer.h"
+#include "SE_MemLeakDetector.h"
 SE_File::SE_File(const char* name, IO_TYPE type) : mFile(0)
 {
     if(name == NULL)
         return;
     FILE* f = 0;
-	if(type == WRITE)
-	{
-	    f = fopen(name, "wb");
-		mType = WRITE;
-	}
-	else
-	{
-		f = fopen(name, "rb");
-		mType = READ;
-	}
+    if(type == WRITE)
+    {
+        f = fopen(name, "wb");
+        mType = WRITE;
+    }
+    else
+    {
+        f = fopen(name, "rb");
+        mType = READ;
+    }
     if(f == NULL)
         return;
     mFile = f;
@@ -37,8 +38,8 @@ void SE_File::write(SE_BufferOutput& output)
 bool SE_File::isExist(const char* filePath)
 {
     FILE* f = fopen(filePath, "rb");
-	if(!f)
-		return false;
-	else
-		return true;
+    if(!f)
+        return false;
+    else
+        return true;
 }

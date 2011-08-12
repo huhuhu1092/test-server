@@ -8,7 +8,7 @@ class SE_CenterMainController
 {
 public:
     SE_CenterMainController(bool objOnTable);
-    ~SE_CenterMainController();
+    virtual ~SE_CenterMainController();
 
     void setCurrentController(const char *controllerName)
     {

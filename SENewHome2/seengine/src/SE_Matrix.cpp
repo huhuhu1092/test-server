@@ -3,7 +3,7 @@
 #include "SE_Math.h"
 #include "SE_Common.h"
 #include <string.h>
-
+#include "SE_MemLeakDetector.h"
 const SE_Matrix2f SE_Matrix2f::IDENTITY = SE_Matrix2f(1.0f, 0.0f, 0.0f, 1.0f);
 SE_Matrix2f::SE_Matrix2f()
 {
@@ -13,7 +13,7 @@ SE_Matrix2f::SE_Matrix2f(float d[4])
 {
     for(int i = 0 ; i < 4 ; i++)
     {
-	    this->d[i] = d[i];
+        this->d[i] = d[i];
     }
 }
 SE_Matrix2f::SE_Matrix2f(float m00, float m01, float m10, float m11)
@@ -34,20 +34,29 @@ float SE_Matrix2f::operator()(int row, int column)
 {
     return d[row * 2 + column];
 }
+bool SE_Matrix2f::operator ==(const SE_Matrix2f& right) const
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        if(this->d[i] != right.d[i])
+            return false;
+    }
+    return true;
+}
 SE_Matrix2f::SE_Matrix2f(const SE_Matrix2f& rm)
 {
     for(int i = 0 ; i < 4 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
 }
 SE_Matrix2f& SE_Matrix2f::operator=(const SE_Matrix2f& rm)
 {
     if(this == &rm)
-	    return *this;
+        return *this;
     for(int i = 0 ; i < 4 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
     return *this;
 }
@@ -86,7 +95,7 @@ SE_Matrix2f SE_Matrix2f::inverse() const
     float det = this->det();
     if(det == 0.0f)
     {
-        return IDENTITY;	
+        return IDENTITY;    
     }
     return SE_Matrix2f(m11 / det, -m01 / det, -m10 / det, m00 / det);
 }
@@ -109,8 +118,8 @@ float SE_Matrix2f::det() const
 
 ////////////////////////////
 const SE_Matrix3f SE_Matrix3f::IDENTITY = SE_Matrix3f(1.0f, 0.0f, 0.0f,
-	                                              0.0f, 1.0f, 0.0f,
-						      0.0f, 0.0f, 1.0f);
+                                                  0.0f, 1.0f, 0.0f,
+                              0.0f, 0.0f, 1.0f);
 SE_Matrix3f::SE_Matrix3f()
 {
     memset(d, 0, sizeof(float) * 9);
@@ -119,7 +128,7 @@ SE_Matrix3f::SE_Matrix3f(float d[9])
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	    this->d[i] = d[i];
+        this->d[i] = d[i];
     }
 }
 SE_Matrix3f::SE_Matrix3f(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
@@ -152,16 +161,16 @@ SE_Matrix3f::SE_Matrix3f(const SE_Matrix3f& rm)
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
 }
 SE_Matrix3f& SE_Matrix3f::operator=(const SE_Matrix3f& rm)
 {
     if(this == &rm)
-	    return *this;
+        return *this;
     for(int i = 0 ; i < 9 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
     return *this;
 }
@@ -169,12 +178,21 @@ float SE_Matrix3f::operator()(int row, int column)
 {
     return d[row * 3 + column];
 }
+bool SE_Matrix3f::operator ==(const SE_Matrix3f& right) const
+{
+    for(int i = 0 ; i < 9 ; i++)
+    {
+        if(this->d[i] != right.d[i])
+            return false;
+    }
+    return true;
+}
 SE_Matrix3f SE_Matrix3f::mulScalar(float f) const
 {
     SE_Matrix3f ret;
     for(int i = 0 ; i < 9 ; i++)
     {
-	    ret.d[i] = d[i] * f;
+        ret.d[i] = d[i] * f;
     }
     return ret;
 }
@@ -183,12 +201,12 @@ SE_Matrix3f SE_Matrix3f::mul(const SE_Matrix3f& rm) const
     SE_Matrix3f ret;
     for(int i = 0 ; i < 3 ; i++)
     {
-	    SE_Vector3f r = getRow(i);
-	    for(int j = 0 ; j < 3 ; j++)
-	    {
-	        SE_Vector3f c = rm.getColumn(j);
-	        ret.d[i * 3 + j] = r.dot(c);
-	    }
+        SE_Vector3f r = getRow(i);
+        for(int j = 0 ; j < 3 ; j++)
+        {
+            SE_Vector3f c = rm.getColumn(j);
+            ret.d[i * 3 + j] = r.dot(c);
+        }
     }
     return ret;
 }
@@ -221,8 +239,8 @@ SE_Vector3f SE_Matrix3f::map(const SE_Vector3f& v) const
     SE_Vector3f ret;
     for(int i = 0 ; i < 3 ; i++)
     {
-	    SE_Vector3f r = getRow(i);
-	    ret.d[i] = r.dot(v);
+        SE_Vector3f r = getRow(i);
+        ret.d[i] = r.dot(v);
     }
     return ret;
 }
@@ -246,28 +264,28 @@ bool SE_Matrix3f::isZero() const
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	    if(d[i] != 0.0f)
-	        return false;
+        if(d[i] != 0.0f)
+            return false;
     }
     return true;
 }
 SE_Matrix3f SE_Matrix3f::subtract(const SE_Matrix3f& rm) const
 {
     return SE_Matrix3f(m00 - rm.m00, m01 - rm.m01, m02 - rm.m02,
-	               m10 - rm.m10, m11 - rm.m11, m12 - rm.m12,
-		       m20 - rm.m20, m21 - rm.m21, m22 - rm.m22);
+                   m10 - rm.m10, m11 - rm.m11, m12 - rm.m12,
+               m20 - rm.m20, m21 - rm.m21, m22 - rm.m22);
 }
 SE_Matrix3f SE_Matrix3f::add(const SE_Matrix3f& rm) const
 {
     return SE_Matrix3f(m00 + rm.m00, m01 + rm.m01, m02 + rm.m02,
-	               m10 + rm.m10, m11 + rm.m11, m12 + rm.m12,
-		       m20 + rm.m20, m21 + rm.m21, m22 + rm.m22);
+                   m10 + rm.m10, m11 + rm.m11, m12 + rm.m12,
+               m20 + rm.m20, m21 + rm.m21, m22 + rm.m22);
 }
 SE_Matrix3f SE_Matrix3f::transpose() const
 {
     return SE_Matrix3f(m00, m10, m20,
-	               m01, m11, m21,
-		       m02, m12, m22);
+                   m01, m11, m21,
+               m02, m12, m22);
 }
 SE_Matrix3f SE_Matrix3f::inverse() const
 {
@@ -276,7 +294,7 @@ SE_Matrix3f SE_Matrix3f::inverse() const
     SE_Matrix3f adjMT;
     if(det == 0.0f)
     {
-	    return SE_Matrix3f();
+        return SE_Matrix3f();
     }
     adjM.m00 = m11 * m22 - m12 * m21;
     adjM.m01 = -(m10 * m22 - m12 * m20);
@@ -319,7 +337,7 @@ void SE_Matrix3f::getSequence(float out[9]) const
 {
     for(int i = 0 ; i < 9 ; i++)
     {
-	    out[i] = d[i];
+        out[i] = d[i];
     }
 }
 void SE_Matrix3f::setColumn(const SE_Vector3f& c0, const SE_Vector3f& c1, const SE_Vector3f& c2)
@@ -389,7 +407,7 @@ void SE_Matrix3f::setRotateFromAxis(float angle, const SE_Vector3f& axis)
     if(axis.isZero())
     {
         identity();
-	return;
+    return;
     }
     float radian = SE_AngleToRadian(angle);
     SE_Vector3f n = axis.normalize();
@@ -481,32 +499,32 @@ SE_Quat SE_Matrix3f::toQuat()
 
 ///////////////////////////////////////////////////////
 const SE_Matrix4f SE_Matrix4f::IDENTITY = SE_Matrix4f(SE_Vector4f(1, 0, 0, 0),
-	                                              SE_Vector4f(0, 1, 0, 0),
-						      SE_Vector4f(0, 0, 1, 0),
-						      SE_Vector4f(0, 0, 0, 1));
+                                                  SE_Vector4f(0, 1, 0, 0),
+                              SE_Vector4f(0, 0, 1, 0),
+                              SE_Vector4f(0, 0, 0, 1));
 SE_Matrix4f::SE_Matrix4f()
 {
     memset(d, 0, sizeof(float) * 16);
-	identity();
+    identity();
 }
 SE_Matrix4f::SE_Matrix4f(float d[16], int sequence)
 {
-	if(sequence == ROW_SEQUENCE)
-	{
+    if(sequence == ROW_SEQUENCE)
+    {
         for(int i = 0 ; i < 16 ; i++)
         {
-	        this->d[i] = d[i];
+            this->d[i] = d[i];
         }
-	}
-	else
-	{
-		for(int i = 0 ; i < 16 ; i += 4)
-		{
-			int column = i / 4;
-			SE_Vector4f v(d[i], d[i + 1], d[i + 2], d[i + 3]);
+    }
+    else
+    {
+        for(int i = 0 ; i < 16 ; i += 4)
+        {
+            int column = i / 4;
+            SE_Vector4f v(d[i], d[i + 1], d[i + 2], d[i + 3]);
             setColumn(column, v);
-		}
-	}
+        }
+    }
 }
 SE_Matrix4f::SE_Matrix4f(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_Vector4f& r2, const SE_Vector4f& r3)
 {
@@ -534,7 +552,7 @@ SE_Matrix4f::SE_Matrix4f(const SE_Matrix4f& rm)
 {
     for(int i = 0 ; i < 16 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
 }
 SE_Matrix4f::SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t)
@@ -544,16 +562,25 @@ SE_Matrix4f::SE_Matrix4f(const SE_Matrix3f& m, const SE_Vector3f& t)
 SE_Matrix4f& SE_Matrix4f::operator=(const SE_Matrix4f& rm)
 {
     if(this == &rm)
-	    return *this;
+        return *this;
     for(int i = 0 ; i < 16 ; i++)
     {
-	    d[i] = rm.d[i];
+        d[i] = rm.d[i];
     }
     return *this;
 }
 float SE_Matrix4f::operator()(int row, int column)
 {
     return d[row * 4 + column];
+}
+bool SE_Matrix4f::operator ==(const SE_Matrix4f& right) const
+{
+    for(int i = 0 ; i < 16 ; i++)
+    {
+        if(this->d[i] != right.d[i])
+            return false;
+    }
+    return true;
 }
 float SE_Matrix4f::det() const
 {
@@ -573,7 +600,7 @@ SE_Vector4f SE_Matrix4f::map(const SE_Vector4f& v) const
     SE_Vector4f ret;
     for(int i = 0 ; i < 4 ; i++)
     {
-	    SE_Vector4f r = getRow(i);
+        SE_Vector4f r = getRow(i);
         ret.d[i] = r.dot(v);
     }
     return ret;
@@ -587,41 +614,41 @@ SE_Matrix4f SE_Matrix4f::inverse() const
     float det = this->det();
     if(det == 0.0f)
     {
-	    return IDENTITY;
+        return IDENTITY;
     }
     SE_Vector4f lastRow = getRow(3);
     if(lastRow.x == 0.0f && lastRow.y == 0.0f && lastRow.z == 0.0f && lastRow.w == 1.0f)
     {
-	    SE_Matrix3f rs = toMatrix3f();
-	    SE_Vector3f t = getTranslate();
-	    SE_Matrix3f inverseRs = rs.inverse();
-	    t = inverseRs.map(t);
-	    t = t.neg();
-	    SE_Matrix4f ret;
-	    ret.set(inverseRs, t);
-	    return ret;
+        SE_Matrix3f rs = toMatrix3f();
+        SE_Vector3f t = getTranslate();
+        SE_Matrix3f inverseRs = rs.inverse();
+        t = inverseRs.map(t);
+        t = t.neg();
+        SE_Matrix4f ret;
+        ret.set(inverseRs, t);
+        return ret;
     }
     else
     {
-	    SE_Matrix4f adjM;
-	    for(int i = 0 ; i < 4 ; i++)
-	    {
-	        for(int j = 0 ; j < 4 ; j++)
-	        {
-		        SE_Matrix3f coffM = cofactorM(i, j);
-		        float coffDet = coffM.det();
-		        if(((i + j) % 2) == 0)
-		        {
-		            adjM.d[i * 4 + j] = coffDet / det;
-		        }
-		        else
-		        {
-		            adjM.d[i * 4 + j] = -coffDet / det;
-		        }
-	        }
-	    }
-	    SE_Matrix4f ret = adjM.transpose();
-	    return ret;
+        SE_Matrix4f adjM;
+        for(int i = 0 ; i < 4 ; i++)
+        {
+            for(int j = 0 ; j < 4 ; j++)
+            {
+                SE_Matrix3f coffM = cofactorM(i, j);
+                float coffDet = coffM.det();
+                if(((i + j) % 2) == 0)
+                {
+                    adjM.d[i * 4 + j] = coffDet / det;
+                }
+                else
+                {
+                    adjM.d[i * 4 + j] = -coffDet / det;
+                }
+            }
+        }
+        SE_Matrix4f ret = adjM.transpose();
+        return ret;
     }
 }
 SE_Matrix3f SE_Matrix4f::cofactorM(int row, int column) const
@@ -648,8 +675,8 @@ SE_Matrix4f SE_Matrix4f::transpose() const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 4 ; i++)
     {
-	    SE_Vector4f v = getRow(i);
-	    ret.setColumn(i, v);
+        SE_Vector4f v = getRow(i);
+        ret.setColumn(i, v);
     }
     return ret;
 }
@@ -671,16 +698,16 @@ SE_Matrix4f SE_Matrix4f::add(const SE_Matrix4f& rm) const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	    ret.d[i] = d[i] + rm.d[i];
+        ret.d[i] = d[i] + rm.d[i];
     }
-	return ret;
+    return ret;
 }
 SE_Matrix4f SE_Matrix4f::subtract(const SE_Matrix4f& rm) const
 {
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	    ret.d[i] = d[i] - rm.d[i];
+        ret.d[i] = d[i] - rm.d[i];
     }
     return ret;
 }
@@ -689,7 +716,7 @@ SE_Matrix4f SE_Matrix4f::mulScalar(float f) const
     SE_Matrix4f ret;
     for(int i = 0 ; i < 16 ; i++)
     {
-	    ret.d[i] = d[i] * f;
+        ret.d[i] = d[i] * f;
     }
     return ret;
 }
@@ -734,7 +761,7 @@ void SE_Matrix4f::setRow(const SE_Vector4f& r0, const SE_Vector4f& r1, const SE_
     SE_Vector4f vr[] = {r0, r1, r2, r3};
     for(int i = 0 ; i < 4 ; i++)
     {
-	    setRow(i, vr[i]);
+        setRow(i, vr[i]);
     }
 }
 void SE_Matrix4f::setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const SE_Vector4f& c2, const SE_Vector4f& c3)
@@ -742,7 +769,7 @@ void SE_Matrix4f::setColumn(const SE_Vector4f& c0, const SE_Vector4f& c1, const 
     SE_Vector4f cr[] = {c0, c1, c2, c3};
     for(int i = 0 ; i < 4 ; i++)
     {
-	    setColumn(i, cr[i]);
+        setColumn(i, cr[i]);
     }
 }
 void  SE_Matrix4f::set(const SE_Matrix3f& rotate, const SE_Vector3f& scale, const SE_Vector3f& translate)
@@ -776,10 +803,10 @@ void SE_Matrix4f::getColumnSequence(float out[16]) const
     out[8] = m02;
     out[9] = m12;
     out[10] = m22;
-	out[11] = m32;
+    out[11] = m32;
 
-	out[12] = m03;
-	out[13] = m13;
-	out[14] = m23;
-	out[15] = m33;
+    out[12] = m03;
+    out[13] = m13;
+    out[14] = m23;
+    out[15] = m33;
 }

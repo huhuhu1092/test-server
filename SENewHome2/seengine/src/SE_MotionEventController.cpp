@@ -10,13 +10,13 @@
 #include "SE_Message.h"
 #include "SE_MessageDefine.h"
 #include "SE_Camera.h"
-
+#include "SE_MemLeakDetector.h"
 IMPLEMENT_OBJECT(SE_MotionEventController)
 SE_MotionEventController::SE_MotionEventController()
 {
     mPrevType = SE_MotionEvent::UP;
-	mPrevX = 0;
-	mPrevY = 0;
+    mPrevX = 0;
+    mPrevY = 0;
 
     mCurrentController = NULL;
     mDoNotReset = NULL;
@@ -79,9 +79,9 @@ SE_MotionEventController::~SE_MotionEventController()
 
 void SE_MotionEventController::clearState()
 {
-	mPrevType = SE_MotionEvent::UP;
-	mPrevX = 0;
-	mPrevY = 0;
+    mPrevType = SE_MotionEvent::UP;
+    mPrevX = 0;
+    mPrevY = 0;
 
     // Do not reset mTargetType for autoxxx 
 
@@ -91,11 +91,11 @@ void SE_MotionEventController::onMotionEvent(SE_MotionEvent* motionEvent)
 {
     if(motionEvent == NULL)
     {
-		return;
+        return;
     }
 
-	if(mPrevType ==  SE_MotionEvent::UP && motionEvent->getType() == SE_MotionEvent::DOWN)
-	{
+    if(mPrevType ==  SE_MotionEvent::UP && motionEvent->getType() == SE_MotionEvent::DOWN)
+    {
 
         mPrevType = SE_MotionEvent::DOWN;
 
@@ -104,7 +104,7 @@ void SE_MotionEventController::onMotionEvent(SE_MotionEvent* motionEvent)
 
         dispatchMotionEventToAll(motionEvent);
      
-	}
+    }
     else if((mPrevType == SE_MotionEvent::DOWN || mPrevType == SE_MotionEvent::MOVE)&& 
                 motionEvent->getType() == SE_MotionEvent::DOWN)
     {
@@ -177,22 +177,22 @@ const char *SE_MotionEventController::getCurrentGeometryName(float screenX,float
     SE_Camera *camera = SE_Application::getInstance()->getCurrentCamera();
     SE_Ray ray = camera->screenCoordinateToRay(screenX, screenY);
     SE_FindSpatialCollision spatialCollision(ray);
-	SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getTopScene()->getRoot();
-	root->travel(&spatialCollision, true);
-	SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
-	SE_SimObject *so = spatialCollision.getCollisionObject();
-	if(collisionSpatial)
-	{
+    SE_Spatial* root = SE_Application::getInstance()->getSceneManager()->getTopScene()->getRoot();
+    root->travel(&spatialCollision, true);
+    SE_Spatial* collisionSpatial = spatialCollision.getCollisionSpatial();
+    SE_SimObject *so = spatialCollision.getCollisionObject();
+    if(collisionSpatial)
+    {
         SE_Application::getInstance()->getSceneManager()->getTopScene()->setSelectedSpatial(collisionSpatial);
-		//collisionSpatial->setSelected(true);
-	}
+        //collisionSpatial->setSelected(true);
+    }
 
     if(so)
     {
         LOGI("## selected object = %s ####\n", so->getName());
         SE_Vector3f loc = so->getSpatial()->getLocalTranslate();
         LOGI("## object location is x = %f y = %f z = %f ###\n",loc.x,loc.y,loc.z);
-        return so->getName();
+        return so->getName(); 
     }
     else
     {

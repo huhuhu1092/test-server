@@ -12,15 +12,15 @@ public:
     bool lock();
     bool unlock();
 #if defined(SE_HAS_MUTEX)
-	pthread_mutex_t* getMutex()
-	{
-		return &mMutex;
-	}
+    pthread_mutex_t* getMutex()
+    {
+        return &mMutex;
+    }
 #else
-	SE_Mutex* getMutex()
-	{
-		return NULL;
-	}
+    SE_Mutex* getMutex()
+    {
+        return NULL;
+    }
 #endif
 
 private:
@@ -50,7 +50,7 @@ public:
     SE_MutexCondition();
     void signal();
     void wait();
-	void setMutex(SE_Mutex* m);
+    void setMutex(SE_Mutex* m);
 private:
     SE_Mutex* mMutex;
 #if defined(SE_HAS_MUTEX)

@@ -1,6 +1,7 @@
 #include "SE_Vector.h"
 #include "SE_Math.h"
 #include <math.h>
+#include "SE_MemLeakDetector.h"
 int SE_IsEqual(float a, float b)
 {
     if(fabs(a - b) <= SE_FLOAT_EQUAL_EPSILON)
@@ -86,8 +87,8 @@ SE_Vector3f SE_Math::calculateTangentSpaceVector(
     SE_Vector3f tangentCross = tangent.cross(binormal);
     if (tangentCross.dot(normal) < 0.0f)
     {
-	    tangent = tangent.neg();
-	    binormal = binormal.neg();
+        tangent = tangent.neg();
+        binormal = binormal.neg();
     }
 
     return tangent;

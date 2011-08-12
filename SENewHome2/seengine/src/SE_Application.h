@@ -5,12 +5,14 @@
 #include "SE_Command.h"
 #include "SE_Message.h"
 #include "SE_DelayDestroy.h"
+#include "SE_Utils.h"
 #ifdef ANDROID
 #include "SE_AssetManager.h"
 #endif
 #include <list>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "SE_Mutex.h"
 //#include "SE_ParticleSystemManager.h"
 class SE_CommandFactory;
@@ -24,6 +26,7 @@ class SE_AnimationManager;
 class SE_SimObjectManager;
 class SE_RenderTargetManager;
 class SE_ThreadManager;
+class SE_Config;
 class SE_Application
 {
 public:
@@ -34,6 +37,92 @@ public:
 		int first;
 		int second;
 	};
+	struct RenderUnitStatistics
+	{
+		int vertexNum;
+		int faceNum;
+		std::string name;
+		RenderUnitStatistics()
+		{
+			vertexNum = 0;
+			faceNum = 0;
+		}
+	};
+	struct TexUseData
+	{
+		std::string name;
+		int num;
+		TexUseData(const char* name)
+		{
+			this->name = name;
+			num = 1;
+		}
+	};
+    struct Statistics
+    {
+        int renderVertexNum;
+        int renderFaceNum;
+        int renderSurfaceNum;
+		std::list<RenderUnitStatistics*> renderUnitData;
+		std::list<TexUseData> textureList;
+		RenderUnitStatistics* currRenderUnitData;
+        Statistics()
+        {
+            clear();
+        }
+		void setCurrentRenderUnit(const char* name)
+		{
+            RenderUnitStatistics* ru = new RenderUnitStatistics;
+			ru->name = name;
+			currRenderUnitData = ru;
+			renderUnitData.push_back(ru);
+		}
+		void setCurrentVertexNum(int num)
+		{
+			currRenderUnitData->vertexNum = num;
+		}
+		void setCurrentFaceNum(int num)
+		{
+			currRenderUnitData->faceNum = num;
+		}
+        void clear()
+        {
+            renderVertexNum = 0;
+            renderFaceNum = 0;
+            renderSurfaceNum = 0;
+			for_each(renderUnitData.begin(), renderUnitData.end(), SE_DeleteObject());
+			renderUnitData.clear();
+			currRenderUnitData = NULL;
+			textureList.clear();
+        }
+        void addVertexNum(int num)
+        {
+            renderVertexNum += num;
+        }
+        void addFaceNum(int num)
+        {
+            renderFaceNum += num;
+        }
+        void addSurfaceNum(int num)
+        {
+            renderSurfaceNum += num;
+        }
+		void setTexture(const char* name)
+		{
+			std::list<TexUseData>::iterator it;
+			for(it = textureList.begin() ; 
+				it != textureList.end();
+				it++)
+			{
+				if(it->name == std::string(name))
+				{
+					it->num++;
+					return;
+				}
+			}
+			textureList.push_back(TexUseData(name));
+		}
+    };
     int getState() const
     {
         return mState;
@@ -73,6 +162,10 @@ public:
 	{
 		return mFrameRate;
 	}
+    Statistics& getStatistics()
+    {
+        return mRenderStatistics;
+    }
     SE_CommonID createCommonID();
     SE_ResourceManager* getResourceManager()
 	{
@@ -128,6 +221,11 @@ public:
 	size_t getSeqNum()
 	{
 		return mSeqNum++;
+	}
+	void setConfig(const char* configFilePath);
+	SE_Config* getConfig()
+	{
+        return mConfig;
 	}
 #ifdef ANDROID
     void setJavaCallback(void (*javaCallback)(const char*, const char*))
@@ -238,8 +336,10 @@ protected:
     static SE_Application* mInstance;
     int mState;
     size_t mSeqNum; 
+	SE_Config* mConfig;
     SE_DelayDestroyList mDelayDestroyList;
     SE_Mutex mDelayDestroyListMutex;
+    Statistics mRenderStatistics;
 #ifdef ANDROID
     void (*mJavaCallback)(const char*, const char*);
     SE_AssetManager* mAssetManager;

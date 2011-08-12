@@ -35,7 +35,7 @@ public:
     SE_ImageDataID getImageDataID(int index)
     {
         if(index < 0 || index >= mImageDataNum)
-			return SE_ImageDataID::INVALID;
+            return SE_ImageDataID::INVALID;
         return mImageDataIDArray[index];
     }
     // this is the texture unit type: TEXTURE0, TEXTURE1, ... TEXTURE8,etc.
@@ -129,10 +129,10 @@ public:
     {
         return mProgramDataID;
     }
-	SE_RendererID getRendererID()
-	{
-		return mRendererID;
-	}
+    SE_RendererID getRendererID()
+    {
+        return mRendererID;
+    }
     int getFacetNum()
     {
         return mFacetNum;
@@ -186,10 +186,10 @@ public:
     {
         mProgramDataID = pid;
     }
-	void setRendererID(const SE_RendererID& id)
-	{
-		mRendererID = id;
-	}
+    void setRendererID(const SE_RendererID& id)
+    {
+        mRendererID = id;
+    }
     void setFacets(int* facets, int num)
     {
         mFacetArray = facets;
@@ -199,7 +199,7 @@ private:
     int mTexIndex;
     SE_MaterialDataID mMaterialDataID;
     SE_ProgramDataID mProgramDataID;
-	SE_RendererID mRendererID;
+    SE_RendererID mRendererID;
     int mFacetNum;
     int* mFacetArray;
     int mSampleMin;

@@ -22,17 +22,17 @@ class SE_SimObject : public SE_Object
 public:
     typedef std::vector<SE_RenderUnit*> RenderUnitVector;
     SE_SimObject(SE_Spatial* parent = NULL);
-	void setSpatial(SE_Spatial* parent)
-	{
-		mSpatial = parent;
-	}
-	SE_Spatial* getSpatial()
-	{
-		return mSpatial;
-	}
+    void setSpatial(SE_Spatial* parent)
+    {
+        mSpatial = parent;
+    }
+    SE_Spatial* getSpatial()
+    {
+        return mSpatial;
+    }
     virtual ~SE_SimObject();
     virtual RenderUnitVector createRenderUnit();
-	virtual SE_RenderUnit* createWireRenderUnit();
+    virtual SE_RenderUnit* createWireRenderUnit();
     virtual void doTransform(const SE_Matrix4f& m);
     virtual void doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate);
     virtual void read(SE_BufferInput& input);
@@ -43,28 +43,28 @@ public:
     virtual int getFaceNum();
     virtual int getSurfaceNum();
     virtual void getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum);
-	virtual void onClick();
-	virtual SE_Mesh* getMesh();
+    virtual void onClick();
+    virtual SE_Mesh* getMesh();
     virtual void setMesh(SE_Mesh*, SE_OWN_TYPE own);
     virtual void setAlpha(float alpha);
     virtual SE_SimObject *clone();    
 public:
-	const char* getName()
-	{
-		return mName.c_str();
-	}
-	void setName(const char* name)
-	{
-		mName = name;
-	}
-	void setID(const SE_SimObjectID& simObjID)
-	{
-		mID = simObjID;
-	}
-	SE_SimObjectID getID()
-	{
-		return mID;
-	}
+    const char* getName()
+    {
+        return mName.c_str();
+    }
+    void setName(const char* name)
+    {
+        mName = name;
+    }
+    void setID(const SE_SimObjectID& simObjID)
+    {
+        mID = simObjID;
+    }
+    SE_SimObjectID getID()
+    {
+        return mID;
+    }
     // SE_SimObject will own the state . it will delete the mState
     void setPropertySet(SE_PropertySet* pro)
     {
@@ -76,23 +76,23 @@ public:
     {
         return mPropertySet;
     }
-	void setLocalMatrix(const SE_Matrix4f& localMatrix)
-	{
-		mLocalMatrix = localMatrix;
-	}
-	SE_Matrix4f getLocalMatrix()
-	{
-		return mLocalMatrix;
-	}
-	//this function is call by SE_Geometry. you can not invoke this function
-	void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* rs)
-	{
-		mRenderState[type] = rs;
-	}
-	SE_RenderState** getRenderState()
-	{
-		return mRenderState;
-	}
+    void setLocalMatrix(const SE_Matrix4f& localMatrix)
+    {
+        mLocalMatrix = localMatrix;
+    }
+    SE_Matrix4f getLocalMatrix()
+    {
+        return mLocalMatrix;
+    }
+    //this function is call by SE_Geometry. you can not invoke this function
+    void setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* rs)
+    {
+        mRenderState[type] = rs;
+    }
+    SE_RenderState** getRenderState()
+    {
+        return mRenderState;
+    }
     //if world matrix is set , we will use this matrix be world transform
     //and will not use spatial's world transform . 
     void setWorldMatrix(const SE_Matrix4f& m)
@@ -120,7 +120,14 @@ public:
     {
         return mPrimitiveType;
     }
-
+    SE_Vector3f getCenter() const 
+    {
+        return mCenter;
+    }
+    void setCenter(const SE_Vector3f& c)
+    {
+        mCenter = c;
+    }
     bool hasBone()
     {
         return mHasBone;
@@ -154,16 +161,16 @@ public:
 
 
 private:
-	std::string mName;
-	SE_SimObjectID mID;
-	SE_Spatial* mSpatial;
+    std::string mName;
+    SE_SimObjectID mID;
+    SE_Spatial* mSpatial;
     SE_PropertySet* mPropertySet;
-	SE_Matrix4f mLocalMatrix;
-	SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];
+    SE_Matrix4f mLocalMatrix;
+    SE_RenderState* mRenderState[SE_Spatial::RENDERSTATE_NUM];
     SE_Matrix4f mWorldMatrix;
     bool mUseWorldMatrix;
     SE_PRIMITIVE_TYPE mPrimitiveType;
-
+    SE_Vector3f mCenter;
     bool mHasBone;
     SE_BipedController *mBipControllerAP;
     SE_SkeletonUnit *mSuAP;

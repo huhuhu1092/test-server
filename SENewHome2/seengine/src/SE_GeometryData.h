@@ -34,7 +34,7 @@ public:
     void setVertexArray(SE_Vector3f* va, int num, bool own = true);
     void setFaceArray(SE_Vector3i* fa, int num, bool own = true);
     void setNormalArray(SE_Vector3f* na, int num, bool own = true);
-	/**************  add for particle    ***************/
+    /**************  add for particle    ***************/
     void setParticleVertexArray(SE_Vector3f* va, int num, bool own = true);
     void setParticleFaceArray(SE_Vector3i* fa, int num, bool own = true);
 
@@ -46,12 +46,12 @@ private:
 private:
     SE_Vector3f* vertexArray;
     int vertexNum;
-	bool mOwnVertex;
+    bool mOwnVertex;
     SE_Vector3i* faceArray;
     int faceNum;
-	bool mOwnFace;
+    bool mOwnFace;
     SE_Vector3f* normalArray;
     int normalNum;
-	bool mOwnNormal;
+    bool mOwnNormal;
 };
 #endif

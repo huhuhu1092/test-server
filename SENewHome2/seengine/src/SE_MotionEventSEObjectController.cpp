@@ -4,17 +4,24 @@
 #include "SE_Application.h"
 #include "SE_SimObject.h"
 #include "SE_SimObjectManager.h"
-
+#include "SE_MemLeakDetector.h"
 
 SE_MotionEventSEObjectController::SE_MotionEventSEObjectController(SE_MotionEventController* c)
 {
     mObject = NULL;
-	mMotionEventController = c;
+    mMotionEventController = c;
 }
 
 SE_MotionEventSEObjectController::~SE_MotionEventSEObjectController()
 {
-    mObjects.clear();
+    std::vector<SE_SimObject*>::iterator it;
+    it = mObjects.begin();
+    for(;it != mObjects.end();)
+    {
+        SE_SimObject *c = *it;
+        delete c;
+    }
+    mObjects.clear();    
 }
 
 
@@ -101,14 +108,14 @@ void SE_MotionEventSEObjectController::clearState()
 
 void SE_MotionEventSEObjectController::sendObjectName()
 {
-	SE_Message* msg = new SE_Message;
-	msg->type = SE_MSG_SIMOBJECT_NAME;
-	SE_Struct* sestruct = new SE_Struct(1);
-	SE_StructItem* sitem = new SE_StructItem(1);
-	SE_StdString* stdString = new SE_StdString;
-	stdString->data = getObjName();
-	sitem->setDataItem(stdString);
-	sestruct->setStructItem(0, sitem);
-	msg->data = sestruct;
-	SE_Application::getInstance()->sendMessage(msg);
+    SE_Message* msg = new SE_Message;
+    msg->type = SE_MSG_SIMOBJECT_NAME;
+    SE_Struct* sestruct = new SE_Struct(1);
+    SE_StructItem* sitem = new SE_StructItem(1);
+    SE_StdString* stdString = new SE_StdString;
+    stdString->data = getObjName();
+    sitem->setDataItem(stdString);
+    sestruct->setStructItem(0, sitem);
+    msg->data = sestruct;
+    SE_Application::getInstance()->sendMessage(msg);
 }

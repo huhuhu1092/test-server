@@ -13,12 +13,14 @@
 
 #else
 #include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
 #include "PVRTexLib.h"
 using namespace pvrtexlib;
 #endif
 
 #include <GLES2/gl2ext.h>
-
+#include "SE_MemLeakDetector.h"
 
 
 
@@ -140,8 +142,8 @@ void conver24To32(unsigned char *dst, const unsigned char *src, unsigned int wid
     {    
         *(dst++) = src[0]; /* R */    
         *(dst++) = src[1]; /* G */    
-        *(dst++) = src[2]; /* B */    
-        *(dst++) = 0xFF; /*A*/		
+        *(dst++) = src[2]; /* B */        
+        *(dst++) = 0xFF; /*A*/        
         src += 3;  
     }
 }
@@ -155,17 +157,18 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath,int type)
         return loadPvrtc(filePath,type);
     }
 
-#if !defined(ANDROID)
-    ILuint	imgId;
-	ILenum	error;
+#if defined(WIN32)
+    ILuint    imgId;
+    ILenum    error;
     ilInit();
+    iluInit();
     ilGenImages(1, &imgId);
     ilBindImage(imgId);
 #if defined(WIN32)
     wchar_t fileWideChar[512];
-	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
-	MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);
-    if(!ilLoadImage(fileWideChar))
+    memset(fileWideChar, 0, sizeof(wchar_t) * 512);
+    MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);    
+    if(!ilLoadImage(fileWideChar))    
     {
         return NULL;
     }
@@ -182,12 +185,12 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath,int type)
     unsigned char* src = ilGetData();
     int pixelSize = bpp / 8;
     unsigned char* dst = new unsigned char[width * height * pixelSize];
-	for(int y = height - 1 ; y >= 0 ; y--)
-	{
-		unsigned char* srcData = src + y * width * pixelSize;
-		unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
-		memcpy(dstData, srcData, width * pixelSize);
-	}
+    for(int y = height - 1 ; y >= 0 ; y--)
+    {
+        unsigned char* srcData = src + y * width * pixelSize;
+        unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
+        memcpy(dstData, srcData, width * pixelSize);
+    }   
 
     //memcpy(dst, src, width * height * pixelSize);
     SE_ImageData* imageData = new SE_ImageData;
@@ -279,22 +282,20 @@ SE_ImageData* SE_ImageCodec::load(const char* filePath,int type)
 }
 SE_ImageData* SE_ImageCodec::load(const wchar_t* filePath)
 {
-#if !defined(ANDROID)
-    ILuint	imgId;
-	ILenum	error;
+#if defined(WIN32)
+    ILuint    imgId;
+    ILenum    error;
     ilInit();
-	error = ilGetError();
+    error = ilGetError();
+    iluInit();
+    error = ilGetError();
     ilGenImages(1, &imgId);
-	error = ilGetError();
+    error = ilGetError();
     ilBindImage(imgId);
-	error = ilGetError();
-#ifdef WIN32
+    error = ilGetError();
     if(!ilLoadImage(filePath))
-#else
-    if(!ilLoadImage((const char*)filePath))
-#endif
     {
-		error = ilGetError();
+        error = ilGetError();
         return NULL;
     }
     int width = ilGetInteger(IL_IMAGE_WIDTH);
@@ -414,11 +415,11 @@ SE_ImageData* SE_ImageCodec::load(SkBitmap* bitmap)
     int internalformat = getInternalFormat(config);
     int type = getType(config);
     #ifdef MRVL_BGRA_HACK
-	internalformat = reverseRGBA(internalformat, type);
+    internalformat = reverseRGBA(internalformat, type);
     #endif
     if (checkFormat(config, internalformat, type))
         return NULL;
-    bitmap->lockPixels();
+bitmap->lockPixels();
     const int w = bitmap->width();
     const int h = bitmap->height();
     const int r = bitmap->rowBytes();
@@ -429,15 +430,15 @@ SE_ImageData* SE_ImageCodec::load(SkBitmap* bitmap)
     imageData->setHeight(h);
     if (internalformat == GL_RGBA)
     {
-	imageData->setPixelFormat(SE_ImageData::RGBA);
-	imageData->setBytesPerRow(w * 4);
+    imageData->setPixelFormat(SE_ImageData::RGBA);
+    imageData->setBytesPerRow(w * 4);
     } else if (internalformat == GL_RGB)
     {
-	imageData->setPixelFormat(SE_ImageData::RGB);
-	imageData->setBytesPerRow(w * 3);
+    imageData->setPixelFormat(SE_ImageData::RGB);
+    imageData->setBytesPerRow(w * 3);
     } else
     {
-	return NULL;
+    return NULL;
     }
     char* newData = (char*)malloc(h * r);
     if(newData)
@@ -587,9 +588,9 @@ SE_ImageData* SE_ImageCodec::loadPvrtc(const char *filePath,int type)
     FILE *fp = fopen(filePath, "rb");
     PVR_Header h;
 
-    fread(&h.dwHeaderSize, sizeof(unsigned int), 1, fp);
+    fread(& h.dwHeaderSize, sizeof(unsigned int), 1, fp);
 
-    fread(&h.dwHeight, h.dwHeaderSize - sizeof(unsigned int), 1, fp);
+    fread(& h.dwHeight, h.dwHeaderSize - sizeof(unsigned int), 1, fp);
 
     // format info
     width = h.dwWidth;
@@ -635,7 +636,7 @@ SE_ImageData* SE_ImageCodec::loadPvrtc(const char *filePath,int type)
     }
     LOGI("\n\n\nLoad [%s] pvr file success!!!!\n\n\n\n\n",filePath);
     fclose(fp);
-
+   
 
     SE_ImageData* imageData = new SE_ImageData;
 
@@ -650,16 +651,17 @@ SE_ImageData* SE_ImageCodec::loadPvrtc(const char *filePath,int type)
 
 SE_ImageData* SE_ImageCodec::loadARGB(const char* filePath)
 {
-#if !defined(ANDROID)
-    ILuint	imgId;
-	ILenum	error;
+#if defined(WIN32)
+    ILuint    imgId;
+    ILenum    error;
     ilInit();
+    iluInit();
     ilGenImages(1, &imgId);
     ilBindImage(imgId);
 #if defined(WIN32)
     wchar_t fileWideChar[512];
-	memset(fileWideChar, 0, sizeof(wchar_t) * 512);
-	MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);    
+    memset(fileWideChar, 0, sizeof(wchar_t) * 512);
+    MultiByteToWideChar(CP_ACP, 0, filePath, -1, fileWideChar, 511);    
     if(!ilLoadImage(fileWideChar))    
     {
         return NULL;
@@ -677,12 +679,12 @@ SE_ImageData* SE_ImageCodec::loadARGB(const char* filePath)
     unsigned char* src = ilGetData();
     int pixelSize = bpp / 8;
     unsigned char* dst = new unsigned char[width * height * pixelSize];
-	for(int y = height - 1 ; y >= 0 ; y--)
-	{
-		unsigned char* srcData = src + y * width * pixelSize;
-		unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
-		memcpy(dstData, srcData, width * pixelSize);
-	}
+    for(int y = height - 1 ; y >= 0 ; y--)
+    {
+        unsigned char* srcData = src + y * width * pixelSize;
+        unsigned char* dstData = dst + (height - 1 - y) * width * pixelSize;
+        memcpy(dstData, srcData, width * pixelSize);
+    }
 
     unsigned char *des32 = NULL;
 
@@ -702,6 +704,7 @@ SE_ImageData* SE_ImageCodec::loadARGB(const char* filePath)
             des32= new unsigned char[width * height * 4];
             memset(des32,0,sizeof(des32));
             conver24To32(des32,dst,width,height);
+            delete dst;
         }
         break;
     case 4:

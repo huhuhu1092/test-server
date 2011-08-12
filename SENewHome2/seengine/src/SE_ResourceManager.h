@@ -19,9 +19,12 @@ class SE_VertexBuffer;
 class SE_ResourceManager
 {
 public:
-	SE_ResourceManager();
+    SE_ResourceManager();
     SE_ResourceManager(const char* dataPath);
     ~SE_ResourceManager();
+    enum RES_TYPE {GEOM_RES, TEXCOORD_RES, IMAGE_RES, MATERIAL_RES,
+                   SHADER_RES, RENDERER_RES, PRIMITIVE_RES, SKINJOINT_RES,
+                   SKELETON_RES, VERTEXBUFFER_RES, CAMRERAPOS_RES};
     SE_GeometryData* getGeometryData(const SE_GeometryDataID& geomID);
     void setGeometryData(const SE_GeometryDataID& geomID, SE_GeometryData* data);
     void removeGeometryData(const SE_GeometryDataID& geomID);
@@ -46,21 +49,21 @@ public:
     void setShaderProgram(const SE_ProgramDataID& programDataID, const char* shaderClassName, char* vertexShader, char* fragmentShader);
     void removeShaderProgram(const SE_ProgramDataID& programDataID);
     
-	SE_Primitive* getPrimitive(const SE_PrimitiveID& primitveID);
-	void setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive);
-	void removePrimitive(const SE_PrimitiveID& primitiveID);
+    SE_Primitive* getPrimitive(const SE_PrimitiveID& primitveID);
+    void setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive);
+    void removePrimitive(const SE_PrimitiveID& primitiveID);
 
     SE_SkinJointController* getSkinJointController(const SE_SkinJointControllerID& id);
     void setSkinJointController(const SE_SkinJointControllerID& id, SE_SkinJointController* c);
     void removeSkinJointController(const SE_SkinJointControllerID& id);
-    
+
     SE_SkeletonController* getSkeletonController(const SE_SkeletonControllerID& id);
     void setSkeletonController(const SE_SkeletonControllerID& id, SE_SkeletonController* c);
     void removeSkeletonController(const SE_SkeletonControllerID& id);
     
     SE_Renderer* getRenderer(const SE_RendererID& rendererID);
-	void setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer);
-	void removeRenderer(const SE_RendererID& rendererID);
+    void setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer);
+    void removeRenderer(const SE_RendererID& rendererID);
 
     SE_CameraPositionList* getCameraPositionList(const SE_CameraPositionID& id);
     void setCameraPositionList(const SE_CameraPositionID& id, SE_CameraPositionList* c);
@@ -70,6 +73,8 @@ public:
     void setVertexBuffer(const SE_VertexBufferID& vbID, SE_VertexBuffer* data);
     void removeImageData(const SE_VertexBufferID& vbID);
 
+    bool registerRes(RES_TYPE type, void* id);
+    bool unregisterRes(RES_TYPE type, void* id);
     /*
      * base data contains: geometry data, texture coord data, material data, image data and mesh data
      * */

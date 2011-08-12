@@ -3,6 +3,7 @@
 #include "SE_Common.h"
 #include "SE_VertexBuffer.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 
 int SE_VertexBuffer::addVertexData(SE_VertexFormat::Pos v)
 {

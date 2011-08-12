@@ -14,13 +14,15 @@
 #include "SE_DataValueDefine.h"
 #include <vector>
 #include "SE_VertexBuffer.h"
+#include "SE_MemLeakDetector.h"
 /////////////////////////////////
 SE_RenderUnit::SE_RenderUnit()
 {
-	memset(mHasTexCoord, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	memset(mHasTexture, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	//memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
-	//mColorBlendMode = SE_TEXTURE0_MODE;
+    memset(mHasTexCoord, 0, sizeof(int) * SE_TEXUNIT_NUM);
+    memset(mHasTexture, 0, sizeof(int) * SE_TEXUNIT_NUM);
+    mDistance = 0;
+    //memset(mTexCoordIndex, 0, sizeof(int) * SE_TEXUNIT_NUM);
+    //mColorBlendMode = SE_TEXTURE0_MODE;
 }
 SE_RenderUnit::~SE_RenderUnit()
 {}
@@ -31,17 +33,17 @@ void SE_RenderUnit::getTexImage(int texIndex, SE_ImageData**& imageDataArray, in
 {}
 void SE_RenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
 {
-	vertex = NULL;
-	vertexNum = 0;
+    vertex = NULL;
+    vertexNum = 0;
 }
 void SE_RenderUnit::getTexVertex(int texIndex, _Vector2f*& texVertex, int& texVertexNum)
 {
-	texVertex = NULL;
-	texVertexNum = 0;
+    texVertex = NULL;
+    texVertexNum = 0;
 }
 SE_Surface* SE_RenderUnit::getSurface()
 {
-	return NULL;
+    return NULL;
 }
 SE_MaterialData* SE_RenderUnit::getMaterialData()
 {
@@ -53,31 +55,34 @@ SE_Vector3f SE_RenderUnit::getColor()
 }
 SE_ProgramDataID SE_RenderUnit::getShaderProgramID() const
 {
-	return SE_ProgramDataID("");
+    return SE_ProgramDataID("");
 }
 void SE_RenderUnit::setRenderState(SE_Spatial::RENDER_STATE_TYPE type, SE_RenderState* renderState, SE_OWN_TYPE own)
 {
-	if(type < 0 || type >= SE_Spatial::RENDERSTATE_NUM)
-		return;
-	SE_PointerOwner<SE_RenderState>* p = &mRenderState[type];
-	if(p->own == OWN && p->ptr)
-		delete p->ptr;
-	p->own = own;
-	p->ptr = renderState;
+    if(type < 0 || type >= SE_Spatial::RENDERSTATE_NUM)
+        return;
+    SE_PointerOwner<SE_RenderState>* p = &mRenderState[type];
+    if(p->own == OWN && p->ptr)
+        delete p->ptr;
+    p->own = own;
+    p->ptr = renderState;
 }
 void SE_RenderUnit::applyRenderState()
 {
-	if(!mRenderState)
-		return;
-	for(int i = 0 ; i < SE_Spatial::RENDERSTATE_NUM ; i++)
-	{
-		SE_RenderState* rs = mRenderState[i].ptr;
-		if(rs)
-			rs->apply();
-	}
+    if(!mRenderState)
+        return;
+    for(int i = 0 ; i < SE_Spatial::RENDERSTATE_NUM ; i++)
+    {
+        SE_RenderState* rs = mRenderState[i].ptr;
+        if(rs)
+            rs->apply();
+    }
 }
 void SE_RenderUnit::draw()
-{}
+{
+	SE_Application::getInstance()->getStatistics().addSurfaceNum(1);
+	SE_Application::getInstance()->getStatistics().setCurrentRenderUnit(mName.c_str());
+}
 #ifdef DEBUG0
 static int texSize = 0;
 #endif
@@ -94,7 +99,7 @@ SE_TriSurfaceRenderUnit::SE_TriSurfaceRenderUnit(SE_Surface* surface)
 }
 SE_Surface* SE_TriSurfaceRenderUnit::getSurface()
 {
-	return mSurface;
+    return mSurface;
 }
 void SE_TriSurfaceRenderUnit::getImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {
@@ -106,13 +111,13 @@ void SE_TriSurfaceRenderUnit::getImage(int texIndex, SE_ImageData**& imageDataAr
         return;
     }
     SE_TextureUnit* texUnit = tex->getTextureUnit(texIndex);
-	if(!texUnit)
-	{
-		imageDataArray = NULL;
-		imageDataNum = 0;
-		return;
-	}
-	texUnit->getImageData(imageDataArray, imageDataNum);
+    if(!texUnit)
+    {
+        imageDataArray = NULL;
+        imageDataNum = 0;
+        return;
+    }
+    texUnit->getImageData(imageDataArray, imageDataNum);
 }
 void SE_TriSurfaceRenderUnit::getImageDataID(int texIndex, SE_ImageDataID*& imageIDArray, int& imageIDNum)
 {
@@ -124,34 +129,34 @@ void SE_TriSurfaceRenderUnit::getImageDataID(int texIndex, SE_ImageDataID*& imag
         return;
     }
     SE_TextureUnit* texUnit = tex->getTextureUnit(texIndex);
-	if(!texUnit)
-	{
-		imageIDArray = NULL;
-		imageIDNum = 0;
-		return;
-	}
+    if(!texUnit)
+    {
+        imageIDArray = NULL;
+        imageIDNum = 0;
+        return;
+    }
     imageIDNum = texUnit->getImageDataIDNum();
     imageIDArray = texUnit->getImageDataID();    
 
 }
 void SE_TriSurfaceRenderUnit::getTexImageID(int texIndex, SE_ImageDataID*& imageDataIDArray, int& imageDataIDNum)
 {
-	if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-	{
-		imageDataIDArray = NULL;
-		imageDataIDNum = 0;
-		return;
-	}
+    if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
+    {
+        imageDataIDArray = NULL;
+        imageDataIDNum = 0;
+        return;
+    }
     return getImageDataID(texIndex, imageDataIDArray, imageDataIDNum);
 }
 void SE_TriSurfaceRenderUnit::getTexImage(int texIndex, SE_ImageData**& imageDataArray, int& imageDataNum)
 {
-	if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
-	{
-		imageDataArray = NULL;
-		imageDataNum = 0;
-		return;
-	}
+    if(texIndex < SE_TEXTURE0 || texIndex >= SE_TEXUNIT_NUM)
+    {
+        imageDataArray = NULL;
+        imageDataNum = 0;
+        return;
+    }
     getImage(texIndex, imageDataArray, imageDataNum);
 }
 void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
@@ -160,7 +165,7 @@ void SE_TriSurfaceRenderUnit::getVertex(_Vector3f*& vertex, int & vertexNum)
     {
         vertex = mVertex;
         vertexNum = mVertexNum;
-		SE_ASSERT(0);
+        SE_ASSERT(0);
         return;
     }
     SE_GeometryData* geomData = mSurface->getGeometryData();
@@ -202,26 +207,26 @@ SE_Vector3f SE_TriSurfaceRenderUnit::getColor()
 }
 SE_ProgramDataID SE_TriSurfaceRenderUnit::getShaderProgramID() const
 {
-	return mSurface->getProgramDataID();
+    return mSurface->getProgramDataID();
 }
 SE_TriSurfaceRenderUnit::~SE_TriSurfaceRenderUnit()
 {
-	if(mVertex)
+    if(mVertex)
         delete[] mVertex;
-	if(mTexVertex)
+    if(mTexVertex)
         delete[] mTexVertex;
 }
 
 void SE_TriSurfaceRenderUnit::getTexVertex(int index, _Vector2f*& texVertex, int& texVertexNum)
 {
-	if(mPrimitiveType == TRIANGLES)
+    if(mPrimitiveType == TRIANGLES)
     {
         mSurface->getFaceTexVertex(index, texVertex, texVertexNum);
     }
     else if(mPrimitiveType == TRIANGLE_STRIP || mPrimitiveType == TRIANGLE_FAN || mPrimitiveType == TRIANGLES_INDEX)
     {
         mSurface->getTexVertex(index, texVertex, texVertexNum);
-	}
+    }
 }
 
 void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgram)
@@ -231,61 +236,60 @@ void SE_TriSurfaceRenderUnit::setTexColorBlendMode(SE_ShaderProgram* shaderProgr
 void SE_TriSurfaceRenderUnit::draw()
 {
     if(mPrimitiveType != TRIANGLES &&
-	   mPrimitiveType != TRIANGLE_STRIP && 
-	   mPrimitiveType != TRIANGLE_FAN &&
-	   mPrimitiveType != TRIANGLES_INDEX)
+       mPrimitiveType != TRIANGLE_STRIP && 
+       mPrimitiveType != TRIANGLE_FAN &&
+       mPrimitiveType != TRIANGLES_INDEX)
     {
         return;
     }
-	const SE_ProgramDataID& spID = mSurface->getProgramDataID();
-	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
-	if(!shaderProgram)
-		return;
-	shaderProgram->use();
-	const SE_RendererID rendererID = mSurface->getRendererID();
-	SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer(rendererID);
-	if(!renderer)
-		return;
-
-	renderer->begin(shaderProgram);
-	renderer->setMatrix(this);
-	renderer->setPrimitiveType(mPrimitiveType);
-	renderer->setSurface(mSurface);
-	renderer->setImage(this);
-	renderer->setColor(this);
+    const SE_ProgramDataID& spID = mSurface->getProgramDataID();
+    SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(spID);
+    if(!shaderProgram)
+        return;
+    shaderProgram->use();
+    const SE_RendererID rendererID = mSurface->getRendererID();
+    SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer(rendererID);
+    if(!renderer)
+        return;
+	SE_RenderUnit::draw();
+    renderer->begin(shaderProgram);
+    renderer->setMatrix(this);
+    renderer->setPrimitiveType(mPrimitiveType);
+    renderer->setSurface(mSurface);
+    renderer->setImage(this);
+    renderer->setColor(this);
 
     if(!mSurface->getVertexBuffer())
     {
 #ifdef DEBUG0
         LOGI("\n\n renderUnit -> vb is NULL\n\n");
 #endif
-	renderer->setVertex(this);
-	renderer->setTexVertex(this);
+        renderer->setVertex(this);
+        renderer->setTexVertex(this);
     }
     else
     {
-
         renderer->setVertexBuffer(this);
     }
-	renderer->setDrawMode(this);
-	renderer->draw();
-	renderer->end();
+    renderer->setDrawMode(this);
+    renderer->draw();
+    renderer->end();
     //float matrixData[16];
     //m.getColumnSequence(matrixData);
     //glUniformMatrix4fv(shaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
     //checkGLError();
     //shaderProgram->use();
-	/*
-	_Vector3f* vertex = NULL;
-	int vertexNum = 0;
-	int* indexArray = NULL;
-	int indexNum = 0;
+    /*
+    _Vector3f* vertex = NULL;
+    int vertexNum = 0;
+    int* indexArray = NULL;
+    int indexNum = 0;
     setImageAndColor(shaderProgram);
     setVertex(shaderProgram, vertex, vertexNum, indexArray, indexNum);
-	setTexVertex(shaderProgram, vertexNum);
+    setTexVertex(shaderProgram, vertexNum);
     setTexColorBlendMode(shaderProgram);
 #ifdef DEBUG0
-	LOGI("### vertexNum = %d #####\n", vertexNum);
+    LOGI("### vertexNum = %d #####\n", vertexNum);
 #endif
     if(mPrimitiveType == TRIANGLES)
     {
@@ -304,45 +308,45 @@ void SE_TriSurfaceRenderUnit::draw()
         glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, indexArray);
     }
     //checkGLError();
-	*/
+    */
 
 }
 //////////////////////////////////
 SE_LineSegRenderUnit::SE_LineSegRenderUnit(SE_Segment* seg, int num, const SE_Vector3f& color)
 {
-	mSegmentNum = num;
-	mSegments = NULL;
-	if(num > 0)
-	{
-		mSegments = new SE_Segment[num];
-	}
-	for(int i = 0 ; i < num;  i++)
-	{
-		mSegments[i] = seg[i];
-	}
-	mColor = color;
+    mSegmentNum = num;
+    mSegments = NULL;
+    if(num > 0)
+    {
+        mSegments = new SE_Segment[num];
+    }
+    for(int i = 0 ; i < num;  i++)
+    {
+        mSegments[i] = seg[i];
+    }
+    mColor = color;
 }
 SE_LineSegRenderUnit::~SE_LineSegRenderUnit()
 {
     if(mSegments)
-		delete[] mSegments;
+        delete[] mSegments;
 }
 void SE_LineSegRenderUnit::draw()
 {
-	if(!mSegments)
-		return;
-	SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(DEFAULT_SHADER);
+    if(!mSegments)
+        return;
+    SE_ShaderProgram* shaderProgram = SE_Application::getInstance()->getResourceManager()->getShaderProgram(DEFAULT_SHADER);
     if(!shaderProgram)
-		return;
-	shaderProgram->use();
-	SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer("lineseg_renderer");
-	if(!renderer)
-		return;
-	renderer->begin(shaderProgram);
-	renderer->setMatrix(this);
-	renderer->setColor(this);
-	renderer->setVertex(this);
-	renderer->setDrawMode(this);
-	renderer->draw();
-	renderer->end();
+        return;
+    shaderProgram->use();
+    SE_Renderer* renderer = SE_Application::getInstance()->getResourceManager()->getRenderer("lineseg_renderer");
+    if(!renderer)
+        return;
+    renderer->begin(shaderProgram);
+    renderer->setMatrix(this);
+    renderer->setColor(this);
+    renderer->setVertex(this);
+    renderer->setDrawMode(this);
+    renderer->draw();
+    renderer->end();
 }

@@ -11,81 +11,86 @@
 #include "SE_RenderTarget.h"
 #include "SE_RenderTargetManager.h"
 #include <string.h>
-
+#include "SE_MemLeakDetector.h"
 SE_RenderManager::SE_RenderManager()
 {
-    mUseDrawDepthOnlyOp = false;
-    mCurrentScene = -1;
+	mCurrentScene = -1;
+	mRenderSortType = SORT_BY_DISTANCE;
 }
-static bool _CompareRenderUnit(SE_RenderUnit* left, SE_RenderUnit* right)
+struct _CompareRenderUnit
 {
-	SE_ProgramDataID leftProgramID = left->getShaderProgramID();
-	SE_ProgramDataID rightProgramID = right->getShaderProgramID();
-    SE_ImageDataID* leftImageDataArray = NULL;
-    int leftImageDataArrayNum = 0;
-    SE_ImageDataID* rightImageDataArray = NULL;
-    int rightImageDataArrayNum = 0;
-    const SE_Layer& leftLayer = left->getLayer();
-    const SE_Layer& rightLayer = right->getLayer();
-    if(leftLayer < rightLayer)
-        return true;
-    if(leftLayer > rightLayer)
-        return false;
-	if(leftProgramID < rightProgramID)
-		return true;
-	if(leftProgramID > rightProgramID)
-		return false;
-    left->getTexImageID(SE_TEXTURE0,leftImageDataArray, leftImageDataArrayNum);
-    right->getTexImageID(SE_TEXTURE0,rightImageDataArray, rightImageDataArrayNum);
-    if(leftImageDataArray == NULL && rightImageDataArray != NULL)
-        return true;
-    if(leftImageDataArray != NULL && rightImageDataArray == NULL)
-        return false;
-    if(leftImageDataArray == NULL && rightImageDataArray == NULL)
+	SE_RenderManager::RENDER_SORT_TYPE type;
+    bool operator()(SE_RenderUnit* left, SE_RenderUnit* right)
 	{
-		SE_ImageData** leftBaseColorImage = NULL;
-        int leftBaseColorImageNum;
-        SE_ImageData** rightBaseColorImage = NULL;
-        int rightBaseColorImageNum;
-		left->getTexImage(SE_TEXTURE0, leftBaseColorImage, leftBaseColorImageNum);
-		right->getTexImage(SE_TEXTURE0, rightBaseColorImage, rightBaseColorImageNum);
-		if(leftBaseColorImageNum > 0 && rightBaseColorImageNum == 0)
-			return false;
-		if(leftBaseColorImageNum == 0 && rightBaseColorImageNum > 0)
-			return true;
-		if(leftBaseColorImageNum == 0 && rightBaseColorImageNum == 0)
-			return false;
-        SE_ImageData* leftImageData = leftBaseColorImage[0];
-		SE_ImageData* rightImageData = rightBaseColorImage[0];
-		return leftImageData < rightImageData;
+		if(type == SE_RenderManager::SORT_BY_DISTANCE)
+		{
+		    if(left->getDistanceToCamera() < right->getDistanceToCamera())
+			    return true;
+		    else
+			    return false;
+		}
+		else if(type == SE_RenderManager::SORT_BY_RESOURCE)
+		{
+			SE_ProgramDataID leftProgramID = left->getShaderProgramID();
+			SE_ProgramDataID rightProgramID = right->getShaderProgramID();
+			SE_ImageDataID* leftImageDataArray = NULL;
+			int leftImageDataArrayNum = 0;
+			SE_ImageDataID* rightImageDataArray = NULL;
+			int rightImageDataArrayNum = 0;
+			const SE_Layer& leftLayer = left->getLayer();
+			const SE_Layer& rightLayer = right->getLayer();
+			if(leftLayer < rightLayer)
+				return true;
+			if(leftLayer > rightLayer)
+				return false;
+			if(leftProgramID < rightProgramID)
+				return true;
+			if(leftProgramID > rightProgramID)
+				return false;
+			left->getTexImageID(SE_TEXTURE0,leftImageDataArray, leftImageDataArrayNum);
+			right->getTexImageID(SE_TEXTURE0,rightImageDataArray, rightImageDataArrayNum);
+			if(leftImageDataArray == NULL && rightImageDataArray != NULL)
+				return true;
+			if(leftImageDataArray != NULL && rightImageDataArray == NULL)
+				return false;
+			if(leftImageDataArray == NULL && rightImageDataArray == NULL)
+			{
+				SE_ImageData** leftBaseColorImage = NULL;
+				int leftBaseColorImageNum;
+				SE_ImageData** rightBaseColorImage = NULL;
+				int rightBaseColorImageNum;
+				left->getTexImage(SE_TEXTURE0, leftBaseColorImage, leftBaseColorImageNum);
+				right->getTexImage(SE_TEXTURE0, rightBaseColorImage, rightBaseColorImageNum);
+				if(leftBaseColorImageNum > 0 && rightBaseColorImageNum == 0)
+					return false;
+				if(leftBaseColorImageNum == 0 && rightBaseColorImageNum > 0)
+					return true;
+				if(leftBaseColorImageNum == 0 && rightBaseColorImageNum == 0)
+					return false;
+				SE_ImageData* leftImageData = leftBaseColorImage[0];
+				SE_ImageData* rightImageData = rightBaseColorImage[0];
+				return leftImageData < rightImageData;
+			}
+			if(leftImageDataArray[0] < rightImageDataArray[0])
+				return true;
+			else
+				return false;
+		}
 	}
-    if(leftImageDataArray[0] < rightImageDataArray[0])
-        return true;
-    else
-        return false;
-}
-
+};
 void SE_RenderManager::sort()
 {
-    /*
-	mRenderTargetList.sort(SE_RenderManager::CompareRenderTarget);
-	std::list<_RenderTargetUnit*>::iterator it;
-	for(it = mRenderTargetList.begin() ; it != mRenderTargetList.end() ; it++)
-	{
-		_RenderTargetUnit* rt = *it;
-        for(int i = 0 ; i < RQ_NUM ; i++)
-        {
-            RenderUnitList* ruList = rt->mRenderQueue[i];
-            ruList->sort(_CompareRenderUnit) ;
-        }
-	}*/
+	_CompareRenderUnit cru;
+	cru.type = mRenderSortType;
     for(int i = 0 ; i < SE_MAX_SCENE_SIZE ; i++)
     {
         _SceneUnit* sceneUnit = &mSceneUnits[i];
+		if(sceneUnit->mRenderTarget == NULL || sceneUnit->mCamera == NULL)
+			continue;
         for(int j = 0 ; j < RQ_NUM ; j++)
         {
             RenderUnitList* ruList = &sceneUnit->mRenderQueue[j];
-            ruList->sort(_CompareRenderUnit);
+            ruList->sort(cru);
         } 
     }
 }
@@ -140,18 +145,12 @@ SE_RenderManager::~SE_RenderManager()
 void SE_RenderManager::beginDraw()
 {
     clear();
+	SE_Application::getInstance()->getStatistics().clear();
 }
 void SE_RenderManager::endDraw()
 {}
-void SE_RenderManager::drawDepthBufferOnly(bool db)
-{
-    if(db)
-        SE_Renderer::colorMask(false, false, false, false);
-    else
-        SE_Renderer::colorMask(true, true, true, true);
 
-}
-void SE_RenderManager::drawOneFrame()
+void SE_RenderManager::draw()
 {
 #ifdef DEBUG
 	int renderUnitNum = 0;
@@ -197,85 +196,6 @@ void SE_RenderManager::drawOneFrame()
             }
         }
     }
-
-}
-void SE_RenderManager::draw()
-{
-    if(mUseDrawDepthOnlyOp)
-    {
-        drawDepthBufferOnly(true);
-        drawOneFrame();
-        drawDepthBufferOnly(false);
-    }
-    drawOneFrame();
-    /*
-#ifdef DEBUG
-	int renderUnitNum = 0;
-#endif
-    for(int i = 0 ; i < SE_MAX_SCENE_SIZE ; i++)
-    {
-        _SceneUnit* sceneUnit = &mSceneUnits[i];
-        SE_RenderTarget* renderTarget = sceneUnit->mRenderTarget;
-        SE_Camera* camera = sceneUnit->mCamera;
-        if(renderTarget == NULL || camera == NULL)
-        {
-            //LOGI("render target is null or camera is null, not draw this scene\n");
-            continue;
-        }
-        if(!renderTarget->prepare())
-        {
-            //LOGI("render target prepare failed\n");
-            continue;
-        }
-        SE_Matrix4f m = camera->getPerspectiveMatrix().mul(camera->getWorldToViewMatrix());
-		SE_Rect<int> rect = camera->getViewport();
-		if((rect.right - rect.left) == 0 || (rect.bottom - rect.top) == 0)
-			continue;
-		SE_Renderer::setViewport(0, 0, rect.right - rect.left, rect.bottom - rect.top);
-////////////////////////////////////////
-        if(mUseDrawDepthOnlyOp)
-        {
-            drawDepthBufferOnly(true);
-            for(int j = 0 ; j < RQ_NUM ; j++)
-            {
-			    RenderUnitList* ruList = &sceneUnit->mRenderQueue[i];
-		   	    RenderUnitList::iterator it;
-			    for(it = ruList->begin() ; it != ruList->end(); it++)
-			    {
-				    SE_RenderUnit* ru = *it;
-				    ru->setViewToPerspectiveMatrix(m);
-				    ru->applyRenderState();
-				    ru->draw();
-#ifdef DEBUG
-		            renderUnitNum++;
-#endif
-                }
-            }
-        }
- /////////////////////////////////////////////////////////
-        drawDepthBufferOnly(false);
-        if(renderTarget->isClearTargetColor())
-        {
-			SE_Renderer::setClearColor(sceneUnit->mBgColor);
-			SE_Renderer::clear(SE_Renderer::SE_COLOR_BUFFER | SE_Renderer::SE_DEPTH_BUFFER);
-        }
-        for(int j = 0 ; j < RQ_NUM ; j++)
-        {
-			RenderUnitList* ruList = &sceneUnit->mRenderQueue[i];
-			RenderUnitList::iterator it;
-			for(it = ruList->begin() ; it != ruList->end(); it++)
-			{
-				SE_RenderUnit* ru = *it;
-				ru->setViewToPerspectiveMatrix(m);
-				ru->applyRenderState();
-				ru->draw();
-#ifdef DEBUG
-		        renderUnitNum++;
-#endif
-            }
-        }
-    }
-    */
     /*
 	if(mRenderTargetList.empty())
 		return;

@@ -2,12 +2,13 @@
 #include "SE_Buffer.h"
 #include "SE_Spatial.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 IMPLEMENT_OBJECT(SE_SimObject)
 SE_SimObject::SE_SimObject(SE_Spatial* spatial)
 {
-	mSpatial = spatial;
+    mSpatial = spatial;
     mPropertySet = NULL;
-	memset(mRenderState , 0, sizeof(SE_RenderState*) * SE_Spatial::RENDERSTATE_NUM);
+    memset(mRenderState , 0, sizeof(SE_RenderState*) * SE_Spatial::RENDERSTATE_NUM);
     mLocalMatrix.identity();
     mWorldMatrix.identity();
     mUseWorldMatrix = false;
@@ -24,16 +25,16 @@ SE_SimObject::~SE_SimObject()
 }
 SE_SimObject::RenderUnitVector SE_SimObject::createRenderUnit()
 {
-	RenderUnitVector v;
-	return v;
+    RenderUnitVector v;
+    return v;
 }
 SE_RenderUnit* SE_SimObject::createWireRenderUnit()
 {
-	return NULL;
+    return NULL;
 }
 SE_Mesh* SE_SimObject::getMesh()
 {
-	return NULL;
+    return NULL;
 }
 SE_Vector3f SE_SimObject::localToWorld(const SE_Vector3f& v)
 {
@@ -53,33 +54,33 @@ void SE_SimObject::setAlpha(float alpha)
 {}
 void SE_SimObject::read(SE_BufferInput& input)
 {
-	mName = input.readString();
+    mName = input.readString();
 }
 void SE_SimObject::write(SE_BufferOutput& output)
 {
-	output.writeString(mName.c_str());
+    output.writeString(mName.c_str());
 }
 SE_Vector3f* SE_SimObject::getVertexArray()
 {
-	return 0;
+    return 0;
 }
 void SE_SimObject::onClick()
 {}
 int SE_SimObject::getVertexNum()
 {
-	return 0;
+    return 0;
 }
 SE_Vector3i* SE_SimObject::getFaceArray()
 {
-	return 0;
+    return 0;
 }
 int SE_SimObject::getFaceNum()
 {
-	return 0;
+    return 0;
 }
 int SE_SimObject::getSurfaceNum()
 {
-	return 0;
+    return 0;
 }
 void SE_SimObject::getSurfaceFacet(int surfaceIndex, int*& facets, int& faceNum)
 {

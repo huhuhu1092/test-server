@@ -15,10 +15,12 @@
 #include "SE_Spatial.h"
 #include "SE_BoundingVolume.h"
 #include "SE_Geometry3D.h"
+#include "SE_MemLeakDetector.h"
+#include "SE_Utils.h"
 IMPLEMENT_OBJECT(SE_MeshSimObject)
 SE_MeshSimObject::SE_MeshSimObject(SE_Spatial* spatial) : SE_SimObject(spatial), mWorldGeomData(NULL), mMesh(NULL), mOwnMesh(NOT_OWN)
 {
-	mSelected = false;
+    mSelected = false;
     mCloneNum = 0;
 }
 
@@ -35,7 +37,7 @@ SE_MeshSimObject::SE_MeshSimObject(const SE_MeshID& meshID ) : mWorldGeomData(NU
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(meshID);
     if(meshTransfer)
     {
-		mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
+        mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
         mOwnMesh = OWN;
         mWorldGeomData = new SE_GeometryData;
     } 
@@ -51,7 +53,7 @@ SE_MeshSimObject::~SE_MeshSimObject()
 }
 SE_Mesh* SE_MeshSimObject::getMesh()
 {
-	return mMesh;
+    return mMesh;
 }
 void SE_MeshSimObject::setMesh(SE_Mesh* mesh, SE_OWN_TYPE own)
 {
@@ -74,53 +76,53 @@ void SE_MeshSimObject::doTransform(const SE_Matrix4f& m)
         return;
     SE_ASSERT(mWorldGeomData);
     SE_GeometryData* localMeshGeomData = mMesh->getGeometryData();
-	SE_Matrix4f worldM = m.mul(getLocalMatrix());
+    SE_Matrix4f worldM = m.mul(getLocalMatrix());
     SE_GeometryData::transform(localMeshGeomData, worldM, mWorldGeomData);    
 }
 void SE_MeshSimObject::onClick()
 {
-	mSelected = true;
+    mSelected = true;
 }
 void SE_MeshSimObject::doTransform(const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate)
 {
-	SE_Matrix4f m;
-	m.set(rotate.toMatrix3f(), scale, translate);
-	doTransform(m);
+    SE_Matrix4f m;
+    m.set(rotate.toMatrix3f(), scale, translate);
+    doTransform(m);
     //SE_GeometryData::transform(localMeshGeomData, scale, rotate, translate, mWorldGeomData);
 }
 void SE_MeshSimObject::read(SE_BufferInput& input)
 {
-	if(mMesh && mOwnMesh == OWN)
-	{
-		delete mMesh;
-		mMesh = NULL;
-		mOwnMesh = NOT_OWN;
-	}
-	if(mWorldGeomData)
-	{
-		delete mWorldGeomData;
-		mWorldGeomData = NULL;
-	}
+    if(mMesh && mOwnMesh == OWN)
+    {
+        delete mMesh;
+        mMesh = NULL;
+        mOwnMesh = NOT_OWN;
+    }
+    if(mWorldGeomData)
+    {
+        delete mWorldGeomData;
+        mWorldGeomData = NULL;
+    }
     mMeshID.read(input);
     SE_MeshTransfer* meshTransfer = SE_Application::getInstance()->getResourceManager()->getMeshTransfer(mMeshID);
     if(!meshTransfer)
-	{
-		mMeshID = SE_MeshID::INVALID;
+    {
+        mMeshID = SE_MeshID::INVALID;
         return;
-	}
-	mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
+    }
+    mMesh = meshTransfer->createMesh(SE_Application::getInstance()->getResourceManager());
     if(mMesh)
     {
         mOwnMesh = OWN;
         mWorldGeomData = new SE_GeometryData;
     }
-	SE_SimObject::read(input);
+    SE_SimObject::read(input);
 }
 void SE_MeshSimObject::write(SE_BufferOutput& output)
 {
     output.writeString("SE_MeshSimObject");
     mMeshID.write(output);
-	SE_SimObject::write(output);
+    SE_SimObject::write(output);
 }
 int SE_MeshSimObject::getSurfaceNum()
 {
@@ -182,10 +184,13 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
     ruv.resize(surfaceNum, NULL);
     for(int i = 0 ; i < surfaceNum ; i++)
     {
+        std::string indexStr = SE_Util::intToString(i);
+        std::string renderUnitName = std::string(getName()) + "_" + indexStr;
         SE_Surface* surface = mMesh->getSurface(i);
         SE_TriSurfaceRenderUnit* tsru = new SE_TriSurfaceRenderUnit(surface);
+		tsru->setName(renderUnitName.c_str());
         tsru->setLayer(getSpatial()->getWorldLayer());
-		tsru->setPrimitiveType(getPrimitiveType());
+        tsru->setPrimitiveType(getPrimitiveType());
         if(!isUseWorldMatrix())
         {
             tsru->setWorldTransform(getSpatial()->getWorldTransform().mul(getLocalMatrix()));
@@ -194,11 +199,11 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
         {
             tsru->setWorldTransform(getWorldMatrix());
         }
-		SE_RenderState** rs = getRenderState();
-		for(int j = 0 ; j < SE_Spatial::RENDERSTATE_NUM ; j++)
-		{
-			tsru->setRenderState((SE_Spatial::RENDER_STATE_TYPE)j, rs[j], NOT_OWN);
-		}
+        SE_RenderState** rs = getRenderState();
+        for(int j = 0 ; j < SE_Spatial::RENDERSTATE_NUM ; j++)
+        {
+            tsru->setRenderState((SE_Spatial::RENDER_STATE_TYPE)j, rs[j], NOT_OWN);
+        }
         ruv[i] = tsru;
     }
     return ruv;
@@ -207,21 +212,21 @@ SE_SimObject::RenderUnitVector SE_MeshSimObject::createRenderUnit()
 SE_RenderUnit* SE_MeshSimObject::createWireRenderUnit()
 {
     int faceNum = getFaceNum();
-	int vertexNum = getVertexNum();
-	SE_Vector3f* vertex = getVertexArray();
-	SE_Vector3i* faces = getFaceArray();
-	SE_Segment* seg = new SE_Segment[faceNum * 3];
-	int n = 0 ;
-	for(int i = 0 ; i < faceNum ; i++)
-	{
-		SE_Vector3i* f = &faces[i];
+    int vertexNum = getVertexNum();
+    SE_Vector3f* vertex = getVertexArray();
+    SE_Vector3i* faces = getFaceArray();
+    SE_Segment* seg = new SE_Segment[faceNum * 3];
+    int n = 0 ;
+    for(int i = 0 ; i < faceNum ; i++)
+    {
+        SE_Vector3i* f = &faces[i];
         seg[n++].set(vertex[f->x], vertex[f->y]);
         seg[n++].set(vertex[f->y], vertex[f->z]);
-		seg[n++].set(vertex[f->z], vertex[f->x]);
-	}
+        seg[n++].set(vertex[f->z], vertex[f->x]);
+    }
     SE_RenderUnit* ru = new SE_LineSegRenderUnit(seg, faceNum * 3, SE_Vector3f(0, 1, 0));
-	delete[] seg;
-	return ru;
+    delete[] seg;
+    return ru;
 }
 
 SE_SimObject * SE_MeshSimObject::clone()

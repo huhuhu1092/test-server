@@ -13,6 +13,11 @@ class SE_RenderManager
 public:
     enum RENDER_QUEUE {RQ0, RQ1, RQ2, RQ3, RQ4, RQ5, RQ6, RQ7, RQ_NUM};
 	enum {RENDERTARGET_SIZE = 8};
+	enum RENDER_SORT_TYPE
+	{
+		SORT_BY_RESOURCE,
+		SORT_BY_DISTANCE
+	};
     SE_RenderManager();
     ~SE_RenderManager();
     void beginDraw();
@@ -20,20 +25,6 @@ public:
     void draw();
     void sort();
     void addRenderUnit(SE_RenderUnit* ru, RENDER_QUEUE rq);
-    /*
-	void setWorldToViewMatrix(const SE_Matrix4f& m)
-	{
-		mWorldToViewMatrix = m;
-	}
-	void setPerspectiveMatrix(const SE_Matrix4f& m)
-	{
-		mPerspectiveMatrix = m;
-	}
-	void setBackground(const SE_Vector3f& background)
-	{
-		mBackground = background;
-	} 
- */   
     bool setCurrentScene(int index)
     {
         if(index < 0 || index >= SE_MAX_SCENE_SIZE)
@@ -51,6 +42,14 @@ public:
     SE_Camera* getCurrentCamera() const;
     void setCurrentBackgroundColor(const SE_Vector4f& c);
     SE_Vector4f getCurrentBackgroundColor() const;
+	void setRenderSortType(RENDER_SORT_TYPE t)
+	{
+		mRenderSortType = t;
+	}
+	RENDER_SORT_TYPE getRenderSortType() const
+	{
+		return mRenderSortType;
+	}
 private:
     typedef std::list<SE_RenderUnit*> RenderUnitList;
 	struct _SceneUnit
@@ -85,12 +84,10 @@ private:
 	}
     */
 	void clear();
-    void drawDepthBufferOnly(bool db);
-    void drawOneFrame();
 private:
     _SceneUnit mSceneUnits[SE_MAX_SCENE_SIZE];
     int mCurrentScene;
-    bool mUseDrawDepthOnlyOp;
+	RENDER_SORT_TYPE mRenderSortType;
     //SE_Matrix4f mWorldToViewMatrix;
     //SE_Matrix4f mPerspectiveMatrix;
 	//SE_Vector3f mBackground;

@@ -45,6 +45,10 @@ void SE_Renderer::setMatrix(SE_RenderUnit* renderUnit)
     m.getColumnSequence(matrixData);
     glUniformMatrix4fv(mBaseShaderProgram->getWorldViewPerspectiveMatrixUniformLoc(), 1, 0, matrixData); 
 }
+static void setTextureStat(SE_ImageData* imageData)
+{
+	SE_Application::getInstance()->getStatistics().setTexture(imageData->getName());
+}
 void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE wrapS, SE_WRAP_TYPE wrapT, SE_SAMPLE_TYPE min, SE_SAMPLE_TYPE mag)
 {
     if(imageData == NULL)
@@ -52,6 +56,17 @@ void SE_Renderer::loadTexture2D(int index, SE_ImageData* imageData, SE_WRAP_TYPE
         //LOGI("### can not load texture: ###\n");
         return;
     }
+	//setTextureStat(imageData);
+	//for debug
+	/*
+	if(std::string(imageData->getName()) != "home_basedata.cbf\\demo_TV00CompleteMap.pvr")
+	{
+		return;
+	    //SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+	    ///imageData = resourceManager->getImageData("home_basedata.cbf\\demo_TV00CompleteMap.pvr");
+	}
+	*/
+	//end
     glEnable(GL_TEXTURE_2D);
     //checkGLError();
 	GLenum texType = GL_TEXTURE0;
@@ -390,6 +405,13 @@ void SE_Renderer::reset()
 	}
         mVertexBuffer = NULL;
 }
+static void setStatistics(int vertexNum, int faceNum)
+{
+	SE_Application::getInstance()->getStatistics().addVertexNum(vertexNum);
+	SE_Application::getInstance()->getStatistics().addFaceNum(faceNum);
+	SE_Application::getInstance()->getStatistics().setCurrentVertexNum(vertexNum);
+	SE_Application::getInstance()->getStatistics().setCurrentFaceNum(faceNum);
+}
 void SE_Renderer::draw()
 {    
     if(mPrimitiveType == TRIANGLES)
@@ -397,11 +419,12 @@ void SE_Renderer::draw()
         if(mVertexBuffer)
         {            
             glDrawElements(GL_TRIANGLES, mVertexBuffer->indexNum, GL_UNSIGNED_SHORT, mVertexBuffer->indexData); 
-            
+			setStatistics(mVertexBuffer->vertexDataNum / mVertexBuffer->getVertexDataSize(), mVertexBuffer->indexNum / 3);
         }
         else
         {            
             glDrawArrays(GL_TRIANGLES, 0, mVertexNum);
+            setStatistics(mVertexNum, mVertexNum / 3);
         }
     }
     else if(mPrimitiveType == TRIANGLE_STRIP)

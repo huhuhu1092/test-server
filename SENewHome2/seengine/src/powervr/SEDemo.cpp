@@ -1,7 +1,6 @@
 #include "PVRShell.h"
 #include <stdio.h>
 #include <math.h>
-
 #include "SE_Mesh.h"
 #include "SE_Ase.h"
 #include "SE_ResourceManager.h"
@@ -21,14 +20,18 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-//#include "SE_2DCommand.h"
+#include "SE_Physics.h"
+#include "SE_2DCommand.h"
 #include "SE_Bone.h"
 #include "SE_BipedAnimation.h"
 #include "SE_SkinJointController.h"
 #include "SE_BipedController.h"
 #include "SE_SimObjectManager.h"
 #include "SE_AnimationManager.h"
-
+#include "SE_TableManager.h"
+#include "SE_Config.h"
+#include "SE_IO.h"
+#include "SE_Buffer.h"
 #include <ctype.h>
 #include <stdarg.h>
 #include "SE_TextureCoordData.h"
@@ -40,6 +43,7 @@
 #include "SE_MotionEventSimObjectController.h"
 
 #ifdef WIN32
+#include <windows.h>
 #else
 #include <stdint.h>
 #endif
@@ -48,6 +52,8 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include "SE_MemLeakDetector.h"
+
 #define SCREEN_WIDTH  480
 #define SCREEN_HEIGHT 800
 static void drawScene(int width, int height)
@@ -59,6 +65,7 @@ class SEDemo : public PVRShell
 public:
 	SEDemo()
 	{
+		mPhysics = NULL;
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -68,12 +75,34 @@ public:
 private:
 	void handleInput(int width, int height);
 private:
-	//EyeData eyeData;
+	SE_Physics* mPhysics;
+	EyeData eyeData;
 };
+static void test()
+{
+	SE_Vector3f start(20, 0, 0);
+	float t = 1;//SE_Cosf(3.1415 * 45 / 180.0f);
+	SE_Vector3f dir(t, t, t);
+	SE_Vector3f point(-t, -t, 3);
+	SE_Vector3f intersectP;
+	float dist = 0;
+	SE_GeometryIntersect::pointDistanceToLine(point, start, dir, dist, intersectP);
+}
 bool SEDemo::InitApplication()
 {
 	//PVRShellSet(prefWidth, SCREEN_WIDTH);
 	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+    /*
+	SE_ImageTableManager tableManager;
+    SE_ImageTableSet* imageSet = new SE_ImageTableSet;
+	tableManager.setTableSet(SE_StringID("test1"), imageSet);
+	SE_ImageTable* imageTable = new SE_ImageTable;
+	imageSet->setTable(SE_StringID("test2"), imageTable);
+	imageTable->setItem(SE_StringID("test3"), SE_StringID("testid.png"));
+	SE_StringID value;
+	bool ret = tableManager.getValue("test1/test2/test3", value);
+    */
+	test();
 	SE_Application::SE_APPID appid;
 	appid.first = 137;
 	appid.second = 18215879;
@@ -82,11 +111,28 @@ bool SEDemo::InitApplication()
 	SE_Application::getInstance()->registerCommandFactory("SystemCommand", sf);
 	//SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
     //c->data = &eyeData;
+#ifdef WIN32
+	TCHAR path[MAX_PATH];
+	memset(path, 0, sizeof(TCHAR) * MAX_PATH);
+	GetCurrentDirectory(MAX_PATH - 1, path);
+	int pathLen = wcslen(path);
+	TCHAR filePath[MAX_PATH];
+    memset(filePath, 0, sizeof(TCHAR) * MAX_PATH);
+	wchar_t* dst = wcsncpy(filePath, path, MAX_PATH - 1);
+    TCHAR* fileName = TEXT("\\baseconfig.cfg");
+	wcsncpy(dst + pathLen, fileName, 20); 
+	DWORD dwNum = WideCharToMultiByte(CP_OEMCP,NULL,filePath,-1,NULL,0,NULL,FALSE);
+	char* filePathAscii = new char[dwNum];
+	WideCharToMultiByte (CP_OEMCP,NULL, filePath,-1, filePathAscii, dwNum,NULL,FALSE);
+	//SE_Config config(filePathAscii);
+	SE_Application::getInstance()->setConfig(filePathAscii);
+#endif
 	SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "c:\\model\\ceshi";//"D:\\model\\jme\\home\\newhome3";
+	std::string str = SE_Application::getInstance()->getConfig()->getString("datapath", "error");
+	c->dataPath = str.c_str();//"c:\\model\\ceshi";//"D:\\model\\jme\\home\\newhome3";
 #else
-	c->dataPath = "/home/luwei/model/ceshi";
+	c->dataPath = "/home/luwei/model/jme/home/newhome3";
 #endif
 	c->fileName = "home";
 	SE_Application::getInstance()->postCommand(c);
@@ -111,6 +157,15 @@ bool SEDemo::InitView()
 	SE_InitCameraCommand* c = (SE_InitCameraCommand*)SE_Application::getInstance()->createCommand("SE_InitCameraCommand");
 	c->width = dwCurrentWidth;
 	c->height = dwCurrentHeight;
+	SE_Vector3f location(80,0,93);
+    SE_Vector3f zAxis(1, 0, 0);   
+    SE_Vector3f up(0, 0, 1);
+	c->mLocation = location;
+	c->mAxisZ = zAxis;
+	c->mUp = up;
+	c->mNear = 1.0f;
+	c->mFar = 1000.0f;
+	c->mFov = 60;
     c->setCondition(new _CameraSetCondition);
 	SE_Application::getInstance()->postCommand(c);
 	return true;
@@ -122,6 +177,38 @@ bool SEDemo::ReleaseView()
 }
 bool SEDemo::QuitApplication()
 {
+    SE_ResourceManager* resourceManager = SE_Application::getInstance()->getResourceManager();
+    if(!resourceManager)
+    {
+        return false;
+    }
+
+    resourceManager->releaseHardwareResource();
+    resourceManager->unLoadScene();
+
+
+    SE_SceneManager *sceneManager = SE_Application::getInstance()->getSceneManager();
+    if(!sceneManager)
+    {
+        return false;
+    }
+    else
+    {
+        sceneManager->getMainScene()->unLoadScene();
+    }
+
+    SE_SimObjectManager *simobjectManager = SE_Application::getInstance()->getSimObjectManager();
+    if(!simobjectManager)
+    {
+        return false;
+    }
+    else
+    {
+        simobjectManager->unLoadScene();
+    }
+
+
+    delete SE_Application::getInstance();
 	return true;
 }
 static SE_Vector3f startPos;
@@ -164,9 +251,23 @@ void SEDemo::handleInput(int width, int height)
     }
     if(PVRShellIsKeyPressed(PVRShellKeyNameLEFT))
     {
+		SE_Spatial* selectedSpatial = SE_Application::getInstance()->getSceneManager()->getSelectedSpatial();
+		if(selectedSpatial)
+		{
+			SE_Scene* scene = SE_Application::getInstance()->getSceneManager()->getMainScene();
+			SE_Spatial* root = scene->getRoot();
+			root->hideAllNode();
+			selectedSpatial->setVisible(true);
+		}
+		else
+		{
+
+		}
+#if 0
         SE_SimObject * src = SE_Application::getInstance()->getSimObjectManager()->findByName("pvrborder_basedata.cbf\\\\Box001");
         
         SE_Spatial *dest = src->getSpatial()->clone(src);
+#endif
 #if 0
 		SE_TranslateSpatialCommand *c = (SE_TranslateSpatialCommand*)SE_Application::getInstance()->createCommand("SE_TranslateSpatialCommand");
 		c->mObjectName = "group_basedata.cbf\\Box001";
@@ -345,7 +446,10 @@ void SEDemo::handleInput(int width, int height)
     }
     else if(PVRShellIsKeyPressed(PVRShellKeyNameRIGHT))
     {
-
+		            SE_Scene* scene = SE_Application::getInstance()->getSceneManager()->getMainScene();
+			SE_Spatial* root = scene->getRoot();
+			root->showAllNode();
+#if 0
 		SE_DeleteObjectCommand* c1 = (SE_DeleteObjectCommand*)SE_Application::getInstance()->createCommand("SE_DeleteObjectCommand");
 
         //set rotate angle per ticket
@@ -365,6 +469,7 @@ void SEDemo::handleInput(int width, int height)
 
 		//SE_UnLoadSceneCommand* c1 = (SE_UnLoadSceneCommand*)SE_Application::getInstance()->createCommand("SE_UnLoadSceneCommand");
         //SE_Application::getInstance()->postCommand(c1);
+#endif
 #if 0
 		if(pu == NULL )
 		{
@@ -402,7 +507,7 @@ void SEDemo::handleInput(int width, int height)
         controller->getCameraController()->returnToBack();
         */
 
-        
+#if 0
         SE_AddNewCbfCommand* c2 = (SE_AddNewCbfCommand*)SE_Application::getInstance()->createCommand("SE_AddNewCbfCommand");
 
         //set rotate angle per ticket
@@ -415,7 +520,7 @@ void SEDemo::handleInput(int width, int height)
         //post this command to command queue
         SE_Application::getInstance()->postCommand(c2);
         
-    
+#endif
         
 
     }
@@ -790,4 +895,3 @@ PVRShell* NewDemo()
 {
 	return new SEDemo();
 }
-

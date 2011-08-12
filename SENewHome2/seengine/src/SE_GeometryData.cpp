@@ -2,17 +2,18 @@
 #include "SE_Vector.h"
 #include "SE_Matrix.h"
 #include "SE_Quat.h"
+#include "SE_MemLeakDetector.h"
 SE_GeometryData::SE_GeometryData()
 {
     vertexArray = NULL;
     vertexNum = 0;
-	mOwnVertex = true;
+    mOwnVertex = true;
     faceArray = NULL;
     faceNum = 0;
-	mOwnFace = true;
+    mOwnFace = true;
     normalArray = NULL;
     normalNum = 0;
-	mOwnNormal = true;
+    mOwnNormal = true;
 }
 SE_GeometryData::~SE_GeometryData()
 {
@@ -30,7 +31,7 @@ SE_Vector3f* SE_GeometryData::getNormals()
 }
 int SE_GeometryData::getNormalsNum()
 {
-	return 0;
+    return 0;
 }
 
 void SE_GeometryData::setVertexArray(SE_Vector3f* va, int num, bool own)
@@ -39,7 +40,7 @@ void SE_GeometryData::setVertexArray(SE_Vector3f* va, int num, bool own)
         delete[] vertexArray;
     vertexArray = va;
     vertexNum = num;
-	mOwnVertex = own;
+    mOwnVertex = own;
 }
 void SE_GeometryData::setFaceArray(SE_Vector3i* fa, int num, bool own)
 {
@@ -47,21 +48,21 @@ void SE_GeometryData::setFaceArray(SE_Vector3i* fa, int num, bool own)
         delete[] faceArray;
     faceArray = fa;
     faceNum = num;
-	mOwnFace = own;
+    mOwnFace = own;
 }
 /**************  add for particle    ***************/
 void SE_GeometryData::setParticleVertexArray(SE_Vector3f* va, int num, bool own)
 {
     vertexArray = va;
     vertexNum = num;
-	mOwnVertex = own;
+    mOwnVertex = own;
 }
 /**************  add for particle    ***************/
 void SE_GeometryData::setParticleFaceArray(SE_Vector3i* fa, int num, bool own)
 {
     faceArray = fa;
     faceNum = num;
-	mOwnFace = own;
+    mOwnFace = own;
 }
 void SE_GeometryData::setNormalArray(SE_Vector3f* na, int num, bool own)
 {
@@ -69,7 +70,7 @@ void SE_GeometryData::setNormalArray(SE_Vector3f* na, int num, bool own)
         delete[] normalArray;
     normalArray = na;
     normalNum = num;
-	mOwnNormal = own;
+    mOwnNormal = own;
 }
 void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_GeometryData* dst)
 {
@@ -90,7 +91,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
         }
         vertexNum = src->vertexNum;
     }
-	/*
+    /*
     if(src->faceArray)
     {
         faces = new SE_Vector3i[src->faceNum];
@@ -100,7 +101,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
         }
         faceNum = src->faceNum;
     }
-	*/
+    */
     if(src->normalArray)
     {
         SE_Matrix3f t = m.toMatrix3f();
@@ -117,7 +118,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Matrix4f& m, SE_G
         }
     }
     dst->setVertexArray(vertex, vertexNum);
-	dst->setFaceArray(src->faceArray, src->faceNum, false);
+    dst->setFaceArray(src->faceArray, src->faceNum, false);
     dst->setNormalArray(normal, normalNum);
 }
 void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, const SE_Quat& rotate, const SE_Vector3f& translate, SE_GeometryData* dst)
@@ -140,7 +141,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         }
         vertexNum = src->vertexNum;
     }
-	/*
+    /*
     if(src->faceArray)
     {
         faces = new SE_Vector3i[src->faceNum];
@@ -150,7 +151,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         }
         faceNum = src->faceNum;
     }
-	*/
+    */
     if(src->normalArray)
     {
         SE_Matrix3f t;
@@ -171,7 +172,7 @@ void SE_GeometryData::transform(SE_GeometryData* src, const SE_Vector3f& scale, 
         }
     }
     dst->setVertexArray(vertex, vertexNum);
-	dst->setFaceArray(src->faceArray, src->faceNum, false);
+    dst->setFaceArray(src->faceArray, src->faceNum, false);
     dst->setNormalArray(normal, normalNum);
 }
 

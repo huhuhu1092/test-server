@@ -2,6 +2,7 @@
 #include "SE_Application.h"
 #include "SE_ThreadManager.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 class _DeleteThreadCommand : public SE_Command
 {
 public:
@@ -18,7 +19,7 @@ public:
 SE_Thread::SE_Thread(bool deleteAfterEnd, const std::string& name) : mIsDeleteAfterEnd(deleteAfterEnd)
 {
     mIsThreadRunEnd = false;
-	mName = name;
+    mName = name;
 }
 SE_Thread::~SE_Thread()
 {
@@ -53,7 +54,7 @@ void* SE_Thread::threadFun(void * args)
         t->threadid = thread->getID();
         SE_Application::getInstance()->postCommand(t);
     }
-	return NULL;
+    return NULL;
 }
 class _ThreadCommand : public SE_Command
 {
@@ -84,7 +85,7 @@ public:
 void SE_Thread::start()
 {
 #if defined(SE_HAS_THREAD)
-	LOGI("############## create thread ############\n");
+    LOGI("############## create thread ############\n");
     createThread(&SE_Thread::threadFun, this);
 #else
     _ThreadCommand* threadCommand = new _ThreadCommand(SE_Application::getInstance());
@@ -113,59 +114,59 @@ void SE_Thread::reset()
 SE_QueueThread::SE_QueueThread()
 {
     mCanAddCommand = true;
-	mExit = false;
-	mCommandQueueCondition.setMutex(&mCommandQueueMutex);
+    mExit = false;
+    mCommandQueueCondition.setMutex(&mCommandQueueMutex);
 }
 bool SE_QueueThread::postCommand(SE_Command* c)
 {
-	if(!canAddCommand())
-		return false;
-	mCommandQueueMutex.lock();
-	mCommandQueue.push_back(c);
-	mCommandQueueCondition.signal();
-	mCommandQueueMutex.unlock();
-	return true;
+    if(!canAddCommand())
+        return false;
+    mCommandQueueMutex.lock();
+    mCommandQueue.push_back(c);
+    mCommandQueueCondition.signal();
+    mCommandQueueMutex.unlock();
+    return true;
 }
 void SE_QueueThread::run()
 {
-	mTimer.start();
-	while(!mExit)
-	{
-		SE_Timer::TimePair pt = mTimer.step();
-	    process(pt.realTimeDelta, pt.simulateTimeDelta);
-	}
+    mTimer.start();
+    while(!mExit)
+    {
+        SE_Timer::TimePair pt = mTimer.step();
+        process(pt.realTimeDelta, pt.simulateTimeDelta);
+    }
 }
 void SE_QueueThread::setExit(bool e)
 {
-	SE_AutoMutex m(&mExitMutex);
-	mExit = e;
+    SE_AutoMutex m(&mExitMutex);
+    mExit = e;
 }
 bool SE_QueueThread::isExit()
 {
-	SE_AutoMutex m(&mExitMutex);
-	return mExit;
+    SE_AutoMutex m(&mExitMutex);
+    return mExit;
 }
 SE_QueueThread::~SE_QueueThread()
 {
-	SE_AutoMutex m(&mCommandQueueMutex);
-	std::list<SE_Command*>::iterator it;
-	for(it = mCommandQueue.begin();  it != mCommandQueue.end() ; it++)
-	{
-		delete *it;
-	}
+    SE_AutoMutex m(&mCommandQueueMutex);
+    std::list<SE_Command*>::iterator it;
+    for(it = mCommandQueue.begin();  it != mCommandQueue.end() ; it++)
+    {
+        delete *it;
+    }
 }
 void SE_QueueThread::process(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 {
     std::list<SE_Command*>::iterator it;
-	std::list<SE_Command*> tmpList;
-	mCommandQueueMutex.lock();
-	if(mCommandQueue.empty())
-	{
-		mCommandQueueCondition.wait();
-	}
+    std::list<SE_Command*> tmpList;
+    mCommandQueueMutex.lock();
+    if(mCommandQueue.empty())
+    {
+        mCommandQueueCondition.wait();
+    }
     tmpList = mCommandQueue;
     mCommandQueue.clear();
-  	mCommandQueueMutex.unlock();
+      mCommandQueueMutex.unlock();
     for(it = tmpList.begin(); it != tmpList.end(); )
     {
         SE_Command* c = *it;
@@ -175,24 +176,24 @@ void SE_QueueThread::process(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
             delete c;
             tmpList.erase(it++);
         }
-		else
-		{
-			it++;
-		}
+        else
+        {
+            it++;
+        }
     }
     if(tmpList.empty())
         return;
-	mCommandQueueMutex.lock();
+    mCommandQueueMutex.lock();
     mCommandQueue.splice(mCommandQueue.begin(), tmpList, tmpList.begin(), tmpList.end()); 
-	mCommandQueueMutex.unlock();
+    mCommandQueueMutex.unlock();
 }
 void SE_QueueThread::setCanAddCommand(bool b)
 {
-	SE_AutoMutex m(&mCanAddCommandMutex);
-	mCanAddCommand = b;
+    SE_AutoMutex m(&mCanAddCommandMutex);
+    mCanAddCommand = b;
 }
 bool SE_QueueThread::canAddCommand()
 {
-	SE_AutoMutex m(&mCanAddCommandMutex);
+    SE_AutoMutex m(&mCanAddCommandMutex);
     return mCanAddCommand;
 }

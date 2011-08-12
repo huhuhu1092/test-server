@@ -5,6 +5,7 @@
 #include "SE_Utils.h"
 #include "SE_Log.h"
 #include <string.h>
+#include "SE_MemLeakDetector.h"
 SE_BufferOutput::SE_BufferOutput(bool netOrder)
 {
     mLen = DEFAULT_LEN;

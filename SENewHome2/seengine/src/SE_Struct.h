@@ -10,31 +10,31 @@ class SE_Spatial;
 class SE_VirtualData
 {
 public:
-	virtual ~SE_VirtualData() {};
+    virtual ~SE_VirtualData() {};
     virtual SE_VirtualData* clone() = 0;
 };
 class SE_StdString : public SE_VirtualData
 {
 public:
-	~SE_StdString() {};
-	SE_VirtualData* clone()
-	{
-		SE_StdString* str = new SE_StdString;
-		str->data = data;
-		return str;
-	}
-	std::string data;
+    ~SE_StdString() {};
+    SE_VirtualData* clone()
+    {
+        SE_StdString* str = new SE_StdString;
+        str->data = data;
+        return str;
+    }
+    std::string data;
 };
 class SE_SpatialData : public SE_VirtualData
 {
 public:
-	SE_VirtualData* clone()
-	{
-		SE_SpatialData* s = new SE_SpatialData;
-		s->spatial = spatial;
-		return s;
-	}
-	SE_Spatial* spatial;
+    SE_VirtualData* clone()
+    {
+        SE_SpatialData* s = new SE_SpatialData;
+        s->spatial = spatial;
+        return s;
+    }
+    SE_Spatial* spatial;
 };
 struct SE_DataItem
 {
@@ -105,15 +105,15 @@ public:
     void setDataItem(const SE_Matrix2f& v, int index = 0);
     void setDataItem(const SE_Matrix3f& v, int index = 0);
     void setDataItem(const SE_Matrix4f& v, int index = 0);
-	void setDataItem(SE_VirtualData* data, int index = 0);
-	SE_DataItem getDataItem(int index)
-	{
-		return mDataItemGroup.getDataItem(index);
-	}
-	int getDataItemCount()
-	{
-		return mDataItemGroup.getDataItemCount();
-	}
+    void setDataItem(SE_VirtualData* data, int index = 0);
+    SE_DataItem getDataItem(int index)
+    {
+        return mDataItemGroup.getDataItem(index);
+    }
+    int getDataItemCount()
+    {
+        return mDataItemGroup.getDataItemCount();
+    }
 private:
     SE_DataItemGroup mDataItemGroup;
 };

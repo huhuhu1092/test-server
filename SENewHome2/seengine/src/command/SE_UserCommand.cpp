@@ -24,11 +24,11 @@
 #include "SE_TextureCoordData.h"
 #include "SE_CommonNode.h"
 #include "SE_Camera.h"
+#include "SE_MemLeakDetector.h"
 
 SE_RotateSpatialCommand::SE_RotateSpatialCommand(SE_Application* app) : SE_Command(app)
 {
     mRotateAngle = 0.0;
-	mAffectGroup = false;
 }
 SE_RotateSpatialCommand::~SE_RotateSpatialCommand()
 {
@@ -57,13 +57,6 @@ void SE_RotateSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelt
         LOGI("$$ Can not get a spatial through a name or id.\n");
         return;
     }
-
-	SE_CommonNode *group = NULL;
-	if(mAffectGroup)
-	{
-		SE_Spatial *parent = spatial->getParent(); //groupNode or rootNode
-		group = (SE_CommonNode *)parent;
-	}
 
     SE_Matrix3f rotateM;
     rotateM.identity();
@@ -96,24 +89,14 @@ void SE_RotateSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelt
 
     //set new rotate matrix
     transform.set(rotateM,SE_Vector3f(0,0,0));
-    //spatial->mTransform = spatial->mTransform.mul(transform);
 
-	if(!group)
-	{
     spatial->setPostMatrix(spatial->getPostMatrix().mul(transform));
 
     //update 
     spatial->updateWorldTransform();
     spatial->updateBoundingVolume();
-	}
-	else
-	{
-		group->setPostMatrix(group->getPostMatrix().mul(transform));
 
-		//update 
-		group->updateWorldTransform();
-		group->updateBoundingVolume();
-	}
+	
 
     SE_Message* msg = new SE_Message;
     msg->type = SE_MSG_UPATEWORLD;
@@ -134,7 +117,6 @@ SE_ScaleSpatialCommand::SE_ScaleSpatialCommand(SE_Application* app) : SE_Command
     mScaledX = 1.0;
     mScaledY = 1.0;
     mScaledZ = 1.0;
-	mAffectGroup = false;
 }
 SE_ScaleSpatialCommand::~SE_ScaleSpatialCommand()
 {
@@ -164,13 +146,6 @@ void SE_ScaleSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta
         return;
     }
 
-	SE_CommonNode *group = NULL;
-	if(mAffectGroup)
-	{
-		SE_Spatial *parent = spatial->getParent(); //groupNode or rootNode
-		group = (SE_CommonNode *)parent;
-	}
-
     SE_Matrix3f scaleM;
     scaleM.identity();
 
@@ -180,24 +155,12 @@ void SE_ScaleSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta
     scaleM.setScale(mScaledX,mScaledY,mScaledZ);
     transform.set(scaleM,SE_Vector3f(0,0,0));
 
-    //satial->mTransform = spatial->mTransform.mul(transform);
-
-	if(!group)
-	{
     spatial->setPostMatrix(spatial->getPostMatrix().mul(transform));
 
     //update 
     spatial->updateWorldTransform();
     spatial->updateBoundingVolume();
-	}
-	else
-	{
-		group->setPostMatrix(group->getPostMatrix().mul(transform));
 
-		//update 
-		group->updateWorldTransform();
-		group->updateBoundingVolume();
-	}
 
     SE_Message* msg = new SE_Message;
     msg->type = SE_MSG_UPATEWORLD;
@@ -218,7 +181,6 @@ SE_TranslateSpatialCommand::SE_TranslateSpatialCommand(SE_Application* app) : SE
     mTranslatedX = 0.0;
     mTranslatedY = 0.0;
     mTranslatedZ = 0.0;
-	mAffectGroup = false;
 }
 SE_TranslateSpatialCommand::~SE_TranslateSpatialCommand()
 {
@@ -248,13 +210,6 @@ void SE_TranslateSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateD
         return;
     }
 
-	SE_CommonNode *group = NULL;
-	if(mAffectGroup)
-	{
-		SE_Spatial *parent = spatial->getParent(); //groupNode or rootNode
-		group = (SE_CommonNode *)parent;
-	}
-
 	//the spatial is a child of the root,not a child of a group
 
     SE_Matrix3f identity3;
@@ -265,25 +220,12 @@ void SE_TranslateSpatialCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateD
 
     transform.set(identity3,SE_Vector3f(mTranslatedX,mTranslatedY,mTranslatedZ));
 
-    //spatial->mTransform = spatial->mTransform.mul(transform);
-
-	if(!group)
-	{
     spatial->setPrevMatrix(spatial->getPrevMatrix().mul(transform));
-
 
     //update
     spatial->updateWorldTransform();
     spatial->updateBoundingVolume();
-	}
-	else
-	{
-		group->setPrevMatrix(group->getPrevMatrix().mul(transform));
 
-		//update
-		group->updateWorldTransform();
-		group->updateBoundingVolume();
-	}
 
     
 
@@ -907,3 +849,262 @@ void SE_CloneObjectCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
         LOGI("## The src not found! ##\n\n");
     }
 }
+
+SE_RotateSpatialByNameCommand::SE_RotateSpatialByNameCommand(SE_Application* app) : SE_Command(app)
+{
+	mRotateAngle = 0.0;
+}
+SE_RotateSpatialByNameCommand::~SE_RotateSpatialByNameCommand()
+{
+}
+void SE_RotateSpatialByNameCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+	
+	SE_Spatial * spatial = NULL;
+
+    if(!mSpatialName.empty())
+    {     
+        SE_SceneManager* scm = SE_Application::getInstance()->getSceneManager();
+
+        if(!scm)
+        {
+            return;
+        }
+        spatial = scm->findSpatialByName(mSpatialName.c_str());
+    }    
+
+	if(spatial == NULL)
+	{
+        LOGI("$$ Can not get a spatial through a name or id.\n");
+		return;
+	}	
+
+    SE_Matrix3f rotateM;
+    rotateM.identity();
+
+    SE_Matrix4f transform;
+    transform.identity(); 
+
+
+	//get current local matrix
+	SE_Quat curVector = spatial->getLocalRotate();
+
+	//generate rotate quat
+	SE_Quat rotateQ;
+
+	switch(mAxis)
+	{
+	case SE_AXIS_X:
+		rotateQ.set(mRotateAngle,SE_Vector3f(1,0,0));        
+		break;
+	case SE_AXIS_Y:
+		rotateQ.set(mRotateAngle,SE_Vector3f(0,1,0));        
+		break;
+	case SE_AXIS_Z:
+		rotateQ.set(mRotateAngle,SE_Vector3f(0,0,1));        
+		break;
+	}
+
+	//get new vector, after rotate	
+    rotateM = rotateM.mul(rotateQ.toMatrix3f());
+
+	//set new rotate matrix
+    transform.set(rotateM,SE_Vector3f(0,0,0));
+
+	spatial->setPostMatrix(spatial->getPostMatrix().mul(transform));
+
+	//update 
+	spatial->updateWorldTransform();
+	spatial->updateBoundingVolume();
+
+	
+
+	SE_Message* msg = new SE_Message;
+	msg->type = SE_MSG_UPATEWORLD;
+	SE_Struct* sestruct = new SE_Struct(1);
+	SE_StructItem* sitem = new SE_StructItem(1);
+	SE_StdString* stdString = new SE_StdString;
+	stdString->data = "update world.";
+	sitem->setDataItem(stdString);
+	sestruct->setStructItem(0, sitem);
+	msg->data = sestruct;
+	SE_Application::getInstance()->sendMessage(msg);
+
+}
+
+SE_ScaleSpatialByNameCommand::SE_ScaleSpatialByNameCommand(SE_Application* app) : SE_Command(app)
+{
+	mScaledX = 1.0;
+	mScaledY = 1.0;
+    mScaledZ = 1.0;
+}
+SE_ScaleSpatialByNameCommand::~SE_ScaleSpatialByNameCommand()
+{
+}
+void SE_ScaleSpatialByNameCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+
+    SE_Spatial * spatial = NULL;	
+     
+    if(!mSpatialName.empty())
+    {     
+        SE_SceneManager* scm = SE_Application::getInstance()->getSceneManager();
+
+        if(!scm)
+        {
+            return;
+        }
+        spatial = scm->findSpatialByName(mSpatialName.c_str());
+    }    
+
+	if(spatial == NULL)
+	{
+        LOGI("$$ Can not get a spatial through a name or id.\n");
+		return;
+	}	
+
+    SE_Matrix3f scaleM;
+    scaleM.identity();
+
+    SE_Matrix4f transform;
+    transform.identity();
+
+    scaleM.setScale(mScaledX,mScaledY,mScaledZ);
+    transform.set(scaleM,SE_Vector3f(0,0,0));
+
+	spatial->setPostMatrix(spatial->getPostMatrix().mul(transform));
+
+	//update 
+	spatial->updateWorldTransform();
+	spatial->updateBoundingVolume();
+
+
+	SE_Message* msg = new SE_Message;
+	msg->type = SE_MSG_UPATEWORLD;
+	SE_Struct* sestruct = new SE_Struct(1);
+	SE_StructItem* sitem = new SE_StructItem(1);
+	SE_StdString* stdString = new SE_StdString;
+	stdString->data = "update world.";
+	sitem->setDataItem(stdString);
+	sestruct->setStructItem(0, sitem);
+	msg->data = sestruct;
+	SE_Application::getInstance()->sendMessage(msg);
+
+}
+
+
+SE_TranslateSpatialByNameCommand::SE_TranslateSpatialByNameCommand(SE_Application* app) : SE_Command(app)
+{
+	mTranslatedX = 0.0;
+	mTranslatedY = 0.0;
+    mTranslatedZ = 0.0;
+}
+SE_TranslateSpatialByNameCommand::~SE_TranslateSpatialByNameCommand()
+{
+}
+void SE_TranslateSpatialByNameCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+	
+	SE_Spatial * spatial = NULL;	
+     
+    if(!mSpatialName.empty())
+    {     
+		SE_SceneManager* scm = SE_Application::getInstance()->getSceneManager();
+
+        if(!scm)
+        {
+            return;
+        }
+        spatial = scm->findSpatialByName(mSpatialName.c_str());
+    }    
+
+	if(spatial == NULL)
+	{
+        LOGI("$$ Can not get a spatial through a name or id.\n");
+		return;
+	}	
+
+	//the spatial is a child of the root,not a child of a group
+
+	SE_Matrix3f identity3;
+	identity3.identity();
+
+	SE_Matrix4f transform;
+	transform.identity();
+
+	transform.set(identity3,SE_Vector3f(mTranslatedX,mTranslatedY,mTranslatedZ));
+
+	spatial->setPrevMatrix(spatial->getPrevMatrix().mul(transform));
+
+	//update
+	spatial->updateWorldTransform();
+	spatial->updateBoundingVolume();
+
+
+	
+
+	SE_Message* msg = new SE_Message;
+	msg->type = SE_MSG_UPATEWORLD;
+	SE_Struct* sestruct = new SE_Struct(1);
+	SE_StructItem* sitem = new SE_StructItem(1);
+	SE_StdString* stdString = new SE_StdString;
+	stdString->data = "update world.";
+	sitem->setDataItem(stdString);
+	sestruct->setStructItem(0, sitem);
+	msg->data = sestruct;
+	SE_Application::getInstance()->sendMessage(msg);
+
+}
+
+
+SE_ResetSpatialByNameCommand::SE_ResetSpatialByNameCommand(SE_Application* app) : SE_Command(app)
+{	
+}
+SE_ResetSpatialByNameCommand::~SE_ResetSpatialByNameCommand()
+{
+}
+void SE_ResetSpatialByNameCommand::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
+{
+    SE_Spatial * spatial = NULL;	
+     
+    if(!mSpatialName.empty())
+    {     
+        SE_SceneManager* scm = SE_Application::getInstance()->getSceneManager();
+
+        if(!scm)
+        {
+            return;
+        }
+        spatial = scm->findSpatialByName(mSpatialName.c_str());
+    }    
+
+	if(spatial == NULL)
+	{
+        LOGI("$$ Can not get a spatial through a name or id.\n");
+		return;
+	}
+
+    //reset translate    
+    SE_Matrix4f transform;
+    transform.identity();
+    
+    spatial->setPostMatrix(transform);
+    spatial->setPrevMatrix(transform);
+
+    //update 
+	spatial->updateWorldTransform();
+    spatial->updateBoundingVolume();
+    
+
+    SE_Message* msg = new SE_Message;
+	msg->type = SE_MSG_UPATEWORLD;
+	SE_Struct* sestruct = new SE_Struct(1);
+	SE_StructItem* sitem = new SE_StructItem(1);
+	SE_StdString* stdString = new SE_StdString;
+	stdString->data = "update world.";
+	sitem->setDataItem(stdString);
+	sestruct->setStructItem(0, sitem);
+	msg->data = sestruct;
+	SE_Application::getInstance()->sendMessage(msg);
+}
+

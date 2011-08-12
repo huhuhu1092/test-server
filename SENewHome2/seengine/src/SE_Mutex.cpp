@@ -1,5 +1,6 @@
 #include "SE_Mutex.h"
 #include "SE_Log.h"
+#include "SE_MemLeakDetector.h"
 /////////////////////////////////
 
 SE_Mutex::SE_Mutex()
@@ -34,26 +35,26 @@ SE_MutexCondition::SE_MutexCondition() : mMutex(NULL)
 }
 void SE_MutexCondition::setMutex(SE_Mutex* m)
 {
-	mMutex = m;
+    mMutex = m;
 }
 void SE_MutexCondition::signal()
 {
-	if(!mMutex)
-	{
-		LOGE("#### condition mutex is NULL ####\n");
-		return;
-	}
+    if(!mMutex)
+    {
+        LOGE("#### condition mutex is NULL ####\n");
+        return;
+    }
 #if defined(SE_HAS_MUTEX)
     pthread_cond_signal(&mCond);
 #endif
 }
 void SE_MutexCondition::wait()
 {
-	if(!mMutex)
-	{
-		LOGE("### condition mutex is NULL ####\n");
-		return;
-	}
+    if(!mMutex)
+    {
+        LOGE("### condition mutex is NULL ####\n");
+        return;
+    }
 #if defined(SE_HAS_MUTEX)
     pthread_cond_wait(&mCond, mMutex->getMutex());
 #endif

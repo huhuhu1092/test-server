@@ -1,4 +1,5 @@
 #include "SE_Command.h"
+#include "SE_MemLeakDetector.h"
 SE_Command::~SE_Command()
 {
     if(mCondition)

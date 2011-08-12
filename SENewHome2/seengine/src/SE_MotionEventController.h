@@ -12,9 +12,9 @@ class SE_MotionEventController : public SE_Object
 {
 DECLARE_OBJECT(SE_MotionEventController)
 public:
-	SE_MotionEventController();
-	~SE_MotionEventController();
-	void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventController();
+    ~SE_MotionEventController();
+    void onMotionEvent(SE_MotionEvent* motionEvent);
 
     SE_MotionEventCameraController *getCameraController()
     {
@@ -59,9 +59,9 @@ private:
 
     const char * getCurrentGeometryName(float screenX,float screenY);
 
-	SE_MotionEvent::TYPE mPrevType;
-	float mPrevX;
-	float mPrevY;
+    SE_MotionEvent::TYPE mPrevType;
+    float mPrevX;
+    float mPrevY;
 
     std::vector<SE_MotionEventSEObjectController *> mMotionControllers;    
 

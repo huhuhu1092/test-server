@@ -4,12 +4,15 @@
 #include "SE_Application.h"
 #include "SE_SceneManager.h"
 #include "SE_Camera.h"
+#include "SE_MemLeakDetector.h"
 SE_InputManager::SE_InputManager()
 {
     //mKeyEventObserverList.clear();
    // mMotionEventObserverList.clear();
    mSceneManager = NULL;
 }
+SE_InputManager::~SE_InputManager()
+{}
 void SE_InputManager::update(SE_KeyEvent* keyEvent)
 {
     /*

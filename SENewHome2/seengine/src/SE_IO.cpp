@@ -1,21 +1,54 @@
 #include "SE_IO.h"
 #include "SE_Log.h"
 #include <stdio.h>
+#include <string>
+#include "SE_Common.h"
+#ifdef WIN32
+#include <windows.h>
+#endif
+#include "SE_MemLeakDetector.h"
 static int getFileSize(FILE* fp)
 {
-	int		pos;
-	int		end;
+    int        pos;
+    int        end;
 
-	pos = ftell (fp);
-	fseek (fp, 0, SEEK_END);
-	end = ftell (fp);
-	fseek (fp, pos, SEEK_SET);
+    pos = ftell (fp);
+    fseek (fp, 0, SEEK_END);
+    end = ftell (fp);
+    fseek (fp, pos, SEEK_SET);
 
-	return end;
+    return end;
 }
+#ifdef WIN32
 void SE_IO::readFileAll(const char* fileName, char*& outData, int& outLen)
 {
-    FILE* fin = fopen(fileName, "rb");
+    outData = NULL;
+    outLen = 0;
+    wchar_t fileWideChar[MAX_PATH];
+    memset(fileWideChar, 0, sizeof(wchar_t) * MAX_PATH);
+    MultiByteToWideChar(CP_ACP, 0, fileName, -1, fileWideChar, MAX_PATH - 1);
+    HANDLE pfile;
+    pfile = ::CreateFile(fileWideChar, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 
+                         FILE_ATTRIBUTE_NORMAL, NULL);
+    DWORD err = GetLastError();
+    if ( pfile == INVALID_HANDLE_VALUE)
+    {
+        return;
+    }
+    DWORD filesize = GetFileSize(pfile,NULL);
+    char* buffer=new char[filesize];
+    DWORD readsize;
+    ReadFile(pfile, buffer, filesize, &readsize,NULL);
+    SE_ASSERT(readsize == filesize);
+    CloseHandle(pfile);
+    outData = buffer;
+    outLen = filesize;
+}
+#else
+void SE_IO::readFileAll(const char* fileName, char*& outData, int& outLen)
+{
+    std::string filePath = fileName;
+    FILE* fin = fopen(filePath.c_str(), "rb");
     outData = NULL;
     outLen = 0;
     if(!fin)
@@ -38,4 +71,4 @@ void SE_IO::readFileAll(const char* fileName, char*& outData, int& outLen)
     }
     fclose(fin);
 }
-
+#endif

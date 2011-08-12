@@ -3,7 +3,7 @@
 #include "SE_Buffer.h"
 #include "SE_Application.h"
 #include "SE_Log.h"
-
+#include "SE_MemLeakDetector.h"
 ///////////////////////
 SE_StringID SE_StringID::INVALID("");
 /*
@@ -28,7 +28,7 @@ SE_StringID::SE_StringID(const char* id)
     SE_ASSERT(id);
     //mImpl = new SE_StringID::_Impl;
     //mImpl->id = id;
-	mStr = id;
+    mStr = id;
 }
 SE_StringID::SE_StringID(const char* id, int size)
 {
@@ -68,7 +68,7 @@ bool SE_StringID::isValid() const
 }
 void SE_StringID::print() const
 {
-	LOGI("%s\n", mStr.c_str());
+    LOGI("%s\n", mStr.c_str());
 }
 SE_StringID& SE_StringID::read(SE_BufferInput& input)
 {
@@ -89,7 +89,7 @@ bool operator==(const SE_StringID& id1, const SE_StringID& id2)
 }
 bool operator!=(const SE_StringID& id1, const SE_StringID& id2)
 {
-	return !(id1 == id2);
+    return !(id1 == id2);
 }
 bool operator<(const SE_StringID& id1, const SE_StringID& id2)
 {
@@ -181,35 +181,35 @@ bool operator!=(const SE_CommonID& lid, const SE_CommonID& rid)
 }
 SE_ImageDataID SE_ID::createImageDataID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_MeshID SE_ID::createMeshID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_SpatialID SE_ID::createSpatialID()
 {
-	return SE_Application::getInstance()->createCommonID();
+    return SE_Application::getInstance()->createCommonID();
 }
 SE_GeometryDataID SE_ID::createGeometryDataID(const char *str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_TextureCoordDataID SE_ID::createTextureCoordDataID(const char *str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_MaterialDataID SE_ID::createMaterialDataID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_SceneID SE_ID::createSceneID()
 {
-	return SE_Application::getInstance()->createCommonID();
+    return SE_Application::getInstance()->createCommonID();
 }
 SE_ProgramDataID SE_ID::createProgramDataID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_CommandID SE_ID::createCommandID(const char* str)
 {
@@ -217,11 +217,11 @@ SE_CommandID SE_ID::createCommandID(const char* str)
 }
 SE_CommandFactoryID SE_ID::createCommandFactoryID(const char* str)
 {
-	return SE_CommandFactoryID(str);
+    return SE_CommandFactoryID(str);
 }
 SE_PrimitiveID SE_ID::createPrimitiveID()
 {
-	return SE_Application::getInstance()->createCommonID();
+    return SE_Application::getInstance()->createCommonID();
 }
 SE_AnimationID SE_ID::createAnimationID()
 {
@@ -233,7 +233,7 @@ SE_SimObjectID SE_ID::createSimObjectID()
 }
 SE_ElementID SE_ID::createElementID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_SkinJointControllerID SE_ID::createSkinJointControllerID(const char* str)
 {
@@ -246,11 +246,11 @@ SE_SkeletonControllerID SE_ID::createSkeletonControllerID(const char* str)
 }
 SE_MountPointID SE_ID::createMountPointID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_RendererID SE_ID::createRendererID(const char* str)
 {
-	return SE_StringID(str);
+    return SE_StringID(str);
 }
 SE_VertexBufferID SE_ID::createVertexBufferID()
 {
@@ -273,13 +273,13 @@ std::string SE_TreeStructID::toString() const
 }
 void SE_TreeStructID::write(SE_BufferOutput& output)
 {
-	output.writeInt(id[0]);
-	output.writeInt(id[1]);
+    output.writeInt(id[0]);
+    output.writeInt(id[1]);
 }
 void SE_TreeStructID::read(SE_BufferInput& input)
 {
-	id[0] = input.readInt();
-	id[1] = input.readInt();
+    id[0] = input.readInt();
+    id[1] = input.readInt();
 }
 
 ////////////////////////////////////////////

@@ -5,6 +5,7 @@
 #else
 #include <GLES/gl.h>
 #endif
+#include <string>
 class SE_ImageDataPortion
 {
 public:
@@ -68,7 +69,7 @@ private:
 class SE_ImageData
 {
 public:
-    enum PIXELFORMAT {RGB, RGBA, RGB_565, INVALID};
+    enum PIXELFORMAT {RGB, RGBA, RGB_565,INVALID};
     enum COMPRESS_TYPE {RAW, JPEG, PNG, TGA, ETC_RGB_4BPP, OGL_PVRTC2, NVIDIA};
     SE_ImageData()
     {
@@ -193,6 +194,14 @@ public:
     {
         return mHasResized;
     }
+	const char* getName() const
+	{
+		return mName.c_str();
+	}
+	void setName(const char* name)
+	{
+		mName = name;
+	}
 private:
     int mHeight;
     int mDataSize;
@@ -206,5 +215,6 @@ private:
     char* mData;
     GLuint mTexid;
     bool mHasResized;
+	std::string mName;
 };
 #endif

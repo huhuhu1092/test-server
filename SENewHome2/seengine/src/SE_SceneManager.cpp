@@ -14,7 +14,10 @@
 #include "SE_MotionEventController.h"
 #include "SE_KeyEventController.h"
 #include "SE_InputEvent.h"
+#include "SE_DelayDestroy.h"
 #include <algorithm>
+#include "SE_MemLeakDetector.h"
+
 /////////////////////////////////////
 struct SE_Scene::SpatialIDMap
 {
@@ -178,6 +181,32 @@ public:
 
 };
 
+class _FindSpatialByNameTravel : public SE_SpatialTravel
+{
+public:
+    _FindSpatialByNameTravel()
+    {
+        result = NULL;
+    }
+	
+    int visit(SE_Spatial* spatial)
+	{
+        std::string spname = spatial->getSpatialName();
+		if(spname.compare(findName) == 0)
+        {
+            result = spatial;
+            return 1;
+        }
+		return 0;
+	}
+    int visit(SE_SimObject* simObject)
+	{
+		return 0;
+	}
+    std::string findName;
+	SE_Spatial* result;
+};
+
 SE_Scene::SE_Scene(const SE_StringID& sceneName, SE_SCENE_TYPE t)
 {
 	mSceneRoot = NULL;
@@ -220,14 +249,18 @@ void SE_Scene::renderScene(SE_RenderManager& renderManager)
 void SE_Scene::setMotionEventController(SE_MotionEventController* obj)
 {
 	if(mMotionEventController)
+    {
 		delete mMotionEventController;
+    }
 	mMotionEventController = obj;
 }
 
 void SE_Scene::releaseMotionEventController()
 {
 	if(mMotionEventController)
+    {
 		delete mMotionEventController;
+    }
 	mMotionEventController = NULL;
 }
 SE_MotionEventController* SE_Scene::getMotionEventController() const
@@ -237,13 +270,17 @@ SE_MotionEventController* SE_Scene::getMotionEventController() const
 void SE_Scene::setKeyEventController(SE_KeyEventController* obj)
 {
 	if(mKeyEventController)
+    {
 		delete mKeyEventController;
+    }
 	mKeyEventController = obj;
 }
 void SE_Scene::releaseKeyEventController()
 {
 	if(mKeyEventController)
+    {
 		delete mKeyEventController;
+    }
 	mKeyEventController = NULL;
 }
 SE_KeyEventController* SE_Scene::getKeyEventController() const
@@ -253,7 +290,9 @@ SE_KeyEventController* SE_Scene::getKeyEventController() const
 void SE_Scene::dispatchMotionEvent(SE_MotionEvent* motionEvent)
 {
 	if(mMotionEventController)
+    {
 		mMotionEventController->onMotionEvent(motionEvent);
+    }
 	else
 	{
 		if(mCamera)
@@ -392,6 +431,43 @@ void SE_Scene::unLoadScene()
     //release this after resourceManager free;
     mSpatialIDMap->clear();
 }
+void SE_Scene::releaseSpatial(SE_Spatial* spatial, int delay)
+{
+    if(spatial == NULL)
+        return;
+
+    if(delay == SE_RELEASE_NO_DELAY)
+    {
+        delete spatial;
+    }
+    else
+    {
+        SE_DelayDestroy* dd = new SE_DelayDestroyPointer<SE_Spatial>(spatial);
+        bool ret = SE_Application::getInstance()->addDelayDestroy(dd);
+        if(!ret)
+        {
+            delete dd;
+        }
+    }
+}
+SE_Spatial* SE_Scene::findSpatialByName(const char* spatialName)
+{
+	_FindSpatialByNameTravel ft;
+    ft.findName = spatialName;
+
+    if(mSceneRoot)
+    {
+	    mSceneRoot->travel(&ft, false);
+    }
+
+    if(ft.result)
+    {
+        return ft.result;
+    }
+
+    return NULL;
+}
+
 /////////////
 SE_SceneManager::SE_SceneManager()
 {
@@ -799,6 +875,23 @@ void SE_SceneManager::setMainScene(const SE_StringID& name)
 		mMainScene = scene;
 	}
 }
+
+SE_Spatial* SE_SceneManager::findSpatialByName(const char *spatialName)
+{
+    for(int i = 0 ; i < SE_SCENE_TYPE_NUM ; ++i)
+    {
+        _SceneList* sceneList = &mSceneListArray[i];
+        _SceneList::iterator it;
+        for(it = sceneList->begin() ; it != sceneList->end() ; it++)
+        {
+            SE_Scene* scene = *it;
+            SE_Spatial* s = scene->findSpatialByName(spatialName);
+            if(s != NULL)
+                return s;
+        }
+    }
+    return NULL;
+}
 void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
 {
     SE_Scene* scene = spatial->getScene();
@@ -806,4 +899,13 @@ void SE_SceneManager::setSelectedSpatial(SE_Spatial* spatial)
     {
         scene->setSelectedSpatial(spatial);
     }
+}
+SE_Spatial* SE_SceneManager::getSelectedSpatial() const
+{
+    SE_Scene* scene = getMainScene();
+    if(scene)
+    {
+        return scene->getSelectedSpatial();
+    }
+    return NULL;
 }

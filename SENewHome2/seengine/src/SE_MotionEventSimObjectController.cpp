@@ -21,6 +21,7 @@
 #include "SE_InputManager.h"
 #include "SE_MotionEventController.h"
 #include "SE_MotionEventCameraController.h"
+#include "SE_MemLeakDetector.h"
 
 SE_MotionEventClockSimObjectController::SE_MotionEventClockSimObjectController(SE_MotionEventController* c) : SE_MotionEventSEObjectController(c)
 {

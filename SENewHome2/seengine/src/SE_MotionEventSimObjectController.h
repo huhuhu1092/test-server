@@ -11,18 +11,18 @@ class SE_MotionEventClockSimObjectController : public SE_MotionEventSEObjectCont
 {
 DECLARE_OBJECT(SE_MotionEventClockSimObjectController)
 public:
-	SE_MotionEventClockSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventClockSimObjectController();
-	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventClockSimObjectController(SE_MotionEventController* c = NULL);
+    ~SE_MotionEventClockSimObjectController();
+    virtual void onMotionEvent(SE_MotionEvent* motionEvent);
 
     bool canAdjust()
     {
         return objHasMove();
     }
     void setMotionEventController(SE_MotionEventController* c)
-	{
-		mMotionEventController = c;
-	}
+    {
+        mMotionEventController = c;
+    }
 private:
     void doMoveTo(const char *objname);
 
@@ -32,9 +32,9 @@ private:
 class SE_MotionEventAdjustTimeSimObjectController : public SE_MotionEventSEObjectController
 {
 public:
-	SE_MotionEventAdjustTimeSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventAdjustTimeSimObjectController();
-	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventAdjustTimeSimObjectController(SE_MotionEventController* c = NULL);
+    ~SE_MotionEventAdjustTimeSimObjectController();
+    virtual void onMotionEvent(SE_MotionEvent* motionEvent);
     
 private:
     void rotate(float angle);
@@ -45,9 +45,9 @@ private:
 class SE_MotionEventPhoneRingOnSimObjectController : public SE_MotionEventSEObjectController
 {
 public:
-	SE_MotionEventPhoneRingOnSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventPhoneRingOnSimObjectController();
-	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventPhoneRingOnSimObjectController(SE_MotionEventController* c = NULL);
+    ~SE_MotionEventPhoneRingOnSimObjectController();
+    virtual void onMotionEvent(SE_MotionEvent* motionEvent);
     SE_Animation * getAnimation()
     {
         return mAnimation;
@@ -59,9 +59,9 @@ private:
 class SE_MotionEventPhoneAnswerCallSimObjectController : public SE_MotionEventSEObjectController
 {
 public:
-	SE_MotionEventPhoneAnswerCallSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventPhoneAnswerCallSimObjectController();
-	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventPhoneAnswerCallSimObjectController(SE_MotionEventController* c = NULL);
+    ~SE_MotionEventPhoneAnswerCallSimObjectController();
+    virtual void onMotionEvent(SE_MotionEvent* motionEvent);
     SE_Animation * getAnimation()
     {
         return mAnimation;
@@ -74,9 +74,9 @@ private:
 class SE_MotionEventCameraMoveSimObjectController : public SE_MotionEventSEObjectController
 {
 public:
-	SE_MotionEventCameraMoveSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_MotionEventCameraMoveSimObjectController();
-	virtual void onMotionEvent(SE_MotionEvent* motionEvent);
+    SE_MotionEventCameraMoveSimObjectController(SE_MotionEventController* c = NULL);
+    ~SE_MotionEventCameraMoveSimObjectController();
+    virtual void onMotionEvent(SE_MotionEvent* motionEvent);
     SE_Animation * getAnimation()
     {
         return mAnimation;
@@ -107,7 +107,7 @@ class SE_CenterMainSimObjectController : public SE_MotionEventSEObjectController
 {
 public:
     SE_CenterMainSimObjectController(SE_MotionEventController* c = NULL);
-	~SE_CenterMainSimObjectController();
+    ~SE_CenterMainSimObjectController();
 
     void fadeInAnimation();
     void fadeOutAnimation();

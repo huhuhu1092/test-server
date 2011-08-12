@@ -89,12 +89,14 @@ public:
     void setRoot(SE_Spatial* spatial);
     void createRoot(const char* sceneFileName);
     SE_Spatial* find(const SE_SpatialID& spatialID);
+	SE_Spatial* findSpatialByName(const char* spatialName);
     //add a spatial child to scene manager, it must indicate a parent
 	//the parent must be added in scene
 	//if parent is NULL , child is the child of scene root.
 	//if parent is NULL and scene root is NULL, child will be scene root
 	void addSpatial(SE_Spatial* parent, SE_Spatial* child);
 	SE_Spatial* removeSpatial(const SE_SpatialID& spatialID);
+    static void releaseSpatial(SE_Spatial* spatial, int delay = SE_RELEASE_DELAY);
     void checkSpatialIDMap();
 	SE_ERROR getError();
     void updateSpatialIDMap();
@@ -102,7 +104,7 @@ public:
     void setSkeletonState();
 
 	void setSelectedSpatial(SE_Spatial* spatial);
-	SE_Spatial* getSelectedSpatial()
+	SE_Spatial* getSelectedSpatial() const
 	{
 		return mSelectedSpatial;
 	}
@@ -160,9 +162,11 @@ public:
     _SceneSet getSceneFromRemovedList(const SE_StringID& sceneName, bool remove = true);
     SE_Scene* getSceneFromRemovedList(SE_SCENE_TYPE t, const SE_StringID& sceneName, bool remove = true);
     SE_Spatial* find(const SE_SpatialID& spatialID);
+	SE_Spatial* findSpatialByName(const char* spatialName);
 	SE_Spatial* removeSpatial(const SE_SpatialID& spatialID);
 	void releaseVBO();
     void setSelectedSpatial(SE_Spatial* spatial);
+    SE_Spatial* getSelectedSpatial() const;
 private:
     typedef std::list<SE_Scene*> _SceneList;
 private:

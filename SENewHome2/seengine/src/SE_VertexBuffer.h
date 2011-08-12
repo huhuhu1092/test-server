@@ -115,7 +115,7 @@ public:
     int addVertexData(SE_VertexFormat::PosTex0 v);
 
     int getDataStride();
-
+    int getVertexDataSize();
 	float* vertexData;
 	int vertexDataNum;
 	unsigned short* indexData;
@@ -132,7 +132,7 @@ public:
     
 	
 private:
-    int getVertexDataSize();
+    
 	unsigned int mVBS;
     std::vector<SE_VertexFormat::Pos> posDataList;
     std::vector<SE_VertexFormat::PosTex0> postex0DataList;

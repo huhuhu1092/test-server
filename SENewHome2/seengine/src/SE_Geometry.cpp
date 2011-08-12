@@ -145,6 +145,7 @@ void SE_Geometry::updateBoundingVolume()
 			SE_Vector3f* points = (*it)->getVertexArray();
 			int num = (*it)->getVertexNum();
 			mWorldBoundingVolume->createFromPoints(points, num);
+            (*it)->setCenter(mWorldBoundingVolume->getCenter());
 		}
 	}
 }
@@ -207,6 +208,18 @@ static SE_RenderUnit* createSelectedFrame(SE_Geometry* spatial)
 	}
 	return ru;
 }
+static float distanceToCameraLocation(SE_Camera* camera, const SE_Vector3f& center)
+{
+    SE_Vector3f location = camera->getLocation();
+    SE_Vector3f zAxis = camera->getAxisZ();
+    SE_Vector3f intersectP;
+    float dist;
+	if(!zAxis.isZero())
+	{
+        SE_GeometryIntersect::pointDistanceToLine(center, location, zAxis, dist, intersectP);
+	}
+    return SE_GeometryIntersect::pointDistance(intersectP, location);
+}
 void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager, SE_CULL_TYPE cullType)
 {
 	if(!isVisible())
@@ -228,7 +241,8 @@ void SE_Geometry::renderScene(SE_Camera* camera, SE_RenderManager* renderManager
         {
 			if(*itRU)
 			{
-				//(*itRU)->setWorldTransform(getWorldTransform().mul(so->getLocalMatrix()));
+                float f = distanceToCameraLocation(camera, so->getCenter());
+                (*itRU)->setDistanceToCamera(f);
 				renderManager->addRenderUnit(*itRU, (SE_RenderManager::RENDER_QUEUE)getRenderQueue());
 			}
         }

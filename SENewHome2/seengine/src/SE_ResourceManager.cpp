@@ -27,8 +27,7 @@
 #endif
 #include <map>
 #include <vector>
-
-
+#include "SE_MemLeakDetector.h"
 
 struct _MeshData
 {
@@ -40,7 +39,7 @@ static SE_ImageData* loadCommonCompressImage(const char* imageName,int type)
 #ifdef ANDROID
         return SE_ImageCodec::loadAsset(imageName,type);
 #else 
-	return SE_ImageCodec::load(imageName,type);   
+    return SE_ImageCodec::load(imageName,type);   
 #endif
 }
 
@@ -89,7 +88,7 @@ static SE_ImageData* loadImage(const char* imageName, int type)
         break;
     case SE_ImageData::JPEG:
     case SE_ImageData::PNG:
-    case SE_ImageData::TGA:
+    case SE_ImageData::TGA:        
     case SE_ImageData::ETC_RGB_4BPP:        
     case SE_ImageData::OGL_PVRTC2:
         return loadCommonCompressImage(imageName,type);
@@ -150,24 +149,24 @@ static void processTextureCoordData(SE_BufferInput& inputBuffer, SE_ResourceMana
         texCoordID.read(inputBuffer);
         int texVertexNum = inputBuffer.readInt();
         int texFaceNum = inputBuffer.readInt();
-		SE_Vector2f* texVertexArray = NULL;
+        SE_Vector2f* texVertexArray = NULL;
         SE_Vector3i* texFaceArray = NULL;
-		if(texVertexNum > 0)
-		{
-			texVertexArray = new SE_Vector2f[texVertexNum];
-			texFaceArray = new SE_Vector3i[texFaceNum];
-			for(int i = 0 ; i < texVertexNum ; i++)
-			{
-				texVertexArray[i].x = inputBuffer.readFloat();
-				texVertexArray[i].y = inputBuffer.readFloat();
-			}
-			for(int i = 0 ; i  < texFaceNum ; i++)
-			{
-				texFaceArray[i].d[0] = inputBuffer.readInt();
-				texFaceArray[i].d[1] = inputBuffer.readInt();
-				texFaceArray[i].d[2] = inputBuffer.readInt();
-			}
-		}
+        if(texVertexNum > 0)
+        {
+            texVertexArray = new SE_Vector2f[texVertexNum];
+            texFaceArray = new SE_Vector3i[texFaceNum];
+            for(int i = 0 ; i < texVertexNum ; i++)
+            {
+                texVertexArray[i].x = inputBuffer.readFloat();
+                texVertexArray[i].y = inputBuffer.readFloat();
+            }
+            for(int i = 0 ; i  < texFaceNum ; i++)
+            {
+                texFaceArray[i].d[0] = inputBuffer.readInt();
+                texFaceArray[i].d[1] = inputBuffer.readInt();
+                texFaceArray[i].d[2] = inputBuffer.readInt();
+            }
+        }
         SE_TextureCoordData* texCoordData = new SE_TextureCoordData;
         texCoordData->setTexVertexArray(texVertexArray, texVertexNum);
         texCoordData->setTexFaceArray(texFaceArray, texFaceNum);
@@ -201,34 +200,35 @@ static void processImageData(SE_BufferInput& inputBuffer, SE_ResourceManager* re
         std::string str = inputBuffer.readString();
         std::string dataPath = resourceManager->getDataPath();
         std::string imageDataPath = dataPath + SE_SEP + str;
-        SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType);
+        SE_ImageData* imageData = loadImage(imageDataPath.c_str(), imageType);        
         if (imageData)
         {
-            resourceManager->setImageData(imageDataid, imageData); 
+			imageData->setName(imageDataid.getStr());
+            resourceManager->setImageData(imageDataid, imageData);
+        }
     }
-}
 }
 static void processRendererData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-	int rendererNum = inputBuffer.readInt();
-	for(int i = 0 ; i < rendererNum ; i++)
-	{
-		std::string rendererID = inputBuffer.readString();
-		std::string rendererClassName = inputBuffer.readString();
-		SE_Renderer* renderer = (SE_Renderer*)SE_Object::create(rendererClassName.c_str());
-		if(!renderer)
-		{
-			LOGI("... error renderer %s is not define\n", rendererClassName.c_str());
-		}
-		else
-		{
+    int rendererNum = inputBuffer.readInt();
+    for(int i = 0 ; i < rendererNum ; i++)
+    {
+        std::string rendererID = inputBuffer.readString();
+        std::string rendererClassName = inputBuffer.readString();
+        SE_Renderer* renderer = (SE_Renderer*)SE_Object::create(rendererClassName.c_str());
+        if(!renderer)
+        {
+            LOGI("... error renderer %s is not define\n", rendererClassName.c_str());
+        }
+        else
+        {
             //avoid same id add to map when load second cbf file to running app.
             if(!resourceManager->getRenderer(rendererID.c_str()))
             {
-			resourceManager->setRenderer(rendererID.c_str(), renderer);
-		}
-	}
-}
+                resourceManager->setRenderer(rendererID.c_str(), renderer);
+            }
+        }
+    }
 }
 static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
@@ -238,7 +238,7 @@ static void processMeshData(SE_BufferInput& inputBuffer, SE_ResourceManager* res
         SE_MeshID meshID;
         meshID.read(inputBuffer);
         SE_MeshTransfer* meshTransfer = new SE_MeshTransfer;
-		LOGI("## process mesh i = %d ##\n", i);
+        LOGI("## process mesh i = %d ##\n", i);
         if(meshTransfer)
         {
             meshTransfer->read(inputBuffer);
@@ -270,7 +270,7 @@ static void processSkinJointController(SE_BufferInput& inputBuffer, SE_ResourceM
             SE_Bone* bone = new SE_Bone;
             skinJointController->mBoneVector[j] = bone;
             std::string boneName = inputBuffer.readString();
-			bone->setName(boneName.c_str());
+            bone->setName(boneName.c_str());
             int matrixnum = inputBuffer.readInt();
             float* mdata = NULL;
             if(matrixnum > 0)
@@ -480,25 +480,25 @@ static void processShaderProgram(SE_BufferInput& inputBuffer, SE_ResourceManager
     int spNum = inputBuffer.readInt();
     for(int i = 0 ; i < spNum ; i++)
     {
-		SE_ProgramDataID programDataID;
-		programDataID.read(inputBuffer);
+        SE_ProgramDataID programDataID;
+        programDataID.read(inputBuffer);
         std::string shaderClassName = inputBuffer.readString();
-		int vertexShaderLen = inputBuffer.readInt();
-		int fragmentShaderLen = inputBuffer.readInt();
-		char* vertexShaderBytes = new char[vertexShaderLen + 1];
-		char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
-		inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
-		inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
-		vertexShaderBytes[vertexShaderLen] = '\0';
-		fragmentShaderBytes[fragmentShaderLen] = '\0';
+        int vertexShaderLen = inputBuffer.readInt();
+        int fragmentShaderLen = inputBuffer.readInt();
+        char* vertexShaderBytes = new char[vertexShaderLen + 1];
+        char* fragmentShaderBytes = new char[fragmentShaderLen + 1];
+        inputBuffer.readBytes(vertexShaderBytes, vertexShaderLen);
+        inputBuffer.readBytes(fragmentShaderBytes, fragmentShaderLen);
+        vertexShaderBytes[vertexShaderLen] = '\0';
+        fragmentShaderBytes[fragmentShaderLen] = '\0';
 
         //avoid same id add to map when load second cbf file to running app.
         if(!resourceManager->getShaderProgram(programDataID))
         {
-        resourceManager->setShaderProgram(programDataID, shaderClassName.c_str(),vertexShaderBytes, fragmentShaderBytes);
+            resourceManager->setShaderProgram(programDataID, shaderClassName.c_str(),vertexShaderBytes, fragmentShaderBytes);
         }
-		delete[] vertexShaderBytes;
-		delete[] fragmentShaderBytes;
+        delete[] vertexShaderBytes;
+        delete[] fragmentShaderBytes;
     }
 }
 
@@ -537,15 +537,15 @@ static void processCameraData(SE_BufferInput& inputBuffer, SE_ResourceManager* r
 
 static void processPrimitive(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
 {
-	/*
-	int primitiveNum = inputBuffer.readInt();
-	for(int i = 0 ; i < primitiveNum ; i++)
-	{
-		std::string primitiveName = inputBuffer.readString();
-		SE_Primitive* primitive = SE_Object::create(primitiveName.c_str());
-		primitive->read(inputBuffer);
-	}
-	*/
+    /*
+    int primitiveNum = inputBuffer.readInt();
+    for(int i = 0 ; i < primitiveNum ; i++)
+    {
+        std::string primitiveName = inputBuffer.readString();
+        SE_Primitive* primitive = SE_Object::create(primitiveName.c_str());
+        primitive->read(inputBuffer);
+    }
+    */
 }
 
 static void processVertexBufferData(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceManager)
@@ -607,19 +607,19 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
                 processMeshData(inputBuffer, resourceManager);
                 break;
             case SE_SHADERPROGRAMDATA_ID:
-				processShaderProgram(inputBuffer, resourceManager);
+                processShaderProgram(inputBuffer, resourceManager);
                 break;
-			case SE_PRIMITIVEDATA_ID:
-				processPrimitive(inputBuffer, resourceManager);
+            case SE_PRIMITIVEDATA_ID:
+                processPrimitive(inputBuffer, resourceManager);
                 break;
-			case SE_SKINJOINTCONTROLLER_ID:
-				processSkinJointController(inputBuffer, resourceManager);
+            case SE_SKINJOINTCONTROLLER_ID:
+                processSkinJointController(inputBuffer, resourceManager);
             case SE_BIPEDCONTROLLER_ID:
-				processBipedController(inputBuffer, resourceManager);
+                processBipedController(inputBuffer, resourceManager);
                 break;
-			case SE_RENDERERINFO_ID:
-				processRendererData(inputBuffer, resourceManager);
-				break;
+            case SE_RENDERERINFO_ID:
+                processRendererData(inputBuffer, resourceManager);
+                break;
             case SE_CAMERADATA_ID:
                 processCameraData(inputBuffer, resourceManager);
             case SE_VERTEXBUFFER_ID:
@@ -628,14 +628,34 @@ static void process(SE_BufferInput& inputBuffer, SE_ResourceManager* resourceMan
     }
 }
 ///////////////////////////////////////
-template <class TID, class T>
+template <typename T>
+struct Resource
+{
+    T* data;
+    int num;
+    Resource()
+    {
+        num = 0;
+        data = NULL;
+    }
+    Resource(T* data, int n)
+    {
+        this->data = data;
+        num = n;
+    }
+};
+/////////////////////////////////////////
+template <typename TID, typename T>
 class ResourceMap
 {
 public:
-    typedef std::map<TID, T*> RMap;
+    typedef std::map<TID, Resource<T> > RMap;
     T* get(const TID& id);
+    int getNum(const TID& id);
     void set(const TID& id, T* data);
     void remove(const TID& id);
+	void inc(const TID& id);
+	void dec(const TID& id);
     ~ResourceMap();
     RMap* getMap()
     {
@@ -645,54 +665,111 @@ private:
     RMap m;
 };
 
-template <class TID, class T>
+template <typename TID, typename T>
 void ResourceMap<TID, T>::remove(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it != m.end())
     {
-        delete it->second;
+        Resource<T> res = it->second;
+        //delete it->second;
+        delete res.data;
         m.erase(it);
     }
 }
 
-template <class TID, class T>
+template <typename TID, typename T>
 T* ResourceMap<TID, T>::get(const TID& id)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())
         return NULL;
     else
-        return it->second;
+    {
+        Resource<T> res = it->second;
+        return res.data;
+        //return it->second;
+    }
 }
-template <class TID, class T>
+template <typename TID, typename T>
 void ResourceMap<TID, T>::set(const TID& id, T* data)
 {
     typename RMap::iterator it = m.find(id);
     if(it == m.end())
     {
-        m.insert(std::pair<TID, T*>(id, data));
+        Resource<T> res(data, 0);
+        m.insert(std::pair<TID, Resource<T> >(id, res));
     }
     else
     {
         SE_ASSERT(0);
-        T* oldData = it->second;
-        it->second = data;
+        Resource<T> res = it->second;
+        T* oldData = res.data;//it->second;
+        //it->second = data;
+        res.data = data;
+        it->second = res;
         delete oldData;
     }
 }
-template <class TID, class T>
+template <typename TID, typename T>
 ResourceMap<TID, T>::~ResourceMap()
 {
     typename RMap::iterator it;
     for(it = m.begin() ; it != m.end() ; it++)
     {
-        T* data = it->second;
-        delete data;
+        //T* data = it->second;
+        //delete data;
+        Resource<T> res = it->second;
+        delete res.data;
     }
 }
+template <typename TID, typename T>
+int ResourceMap<TID, T>::getNum(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+    {
+        return 0;
+    }
+    else
+    {
+        return it->second.num;
+    }
+}
+template <typename TID, typename T>
+void ResourceMap<TID, T>::inc(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+    {
+        return;
+    }
+    else
+    {
+        it->second.num++;
+    }
+}
+template <typename TID, typename T>
+void ResourceMap<TID, T>::dec(const TID& id)
+{
+    typename RMap::iterator it = m.find(id);
+    if(it == m.end())
+    {
+        return;
+    }
+    else
+    {
+        it->second.num--;
+        if(it->second.num <= 0)
+        {
+			Resource<T> res = it->second;
+            delete res.data;
+            m.erase(it); 
+        }
+    }
+}
+/////////////////////////////////////
 
-/////////////////////////////////////////
 struct SE_ResourceManager::_Impl
 {
     ResourceMap<SE_GeometryDataID, SE_GeometryData> geomDataMap;
@@ -701,7 +778,7 @@ struct SE_ResourceManager::_Impl
     ResourceMap<SE_MaterialDataID, SE_MaterialData> materialDataMap;
     ResourceMap<SE_MeshID, SE_MeshTransfer> meshMap;
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram> shaderMap;
-	ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
+    ResourceMap<SE_PrimitiveID, SE_Primitive> primitiveMap;
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController> skinJointControllerMap;
     ResourceMap<SE_SkeletonControllerID, SE_SkeletonController> skeletonControllerMap;
     ResourceMap<SE_CameraPositionID, SE_CameraPositionList> cameraPositionListMap;
@@ -716,13 +793,13 @@ struct SE_ResourceManager::_Impl
 };
 void SE_ResourceManager::_Impl::process(SE_BufferInput& inputBuffer)
 {
-	::process(inputBuffer, resourceManager);
+    ::process(inputBuffer, resourceManager);
 }
 //////////////////////
 SE_ResourceManager::SE_ResourceManager()
 {
-	mImpl = new SE_ResourceManager::_Impl;
-	mImpl->resourceManager = this;
+    mImpl = new SE_ResourceManager::_Impl;
+    mImpl->resourceManager = this;
 }
 SE_ResourceManager::SE_ResourceManager(const char* dataPath)
 {
@@ -752,15 +829,15 @@ void SE_ResourceManager::removeGeometryData(const SE_GeometryDataID& geomID)
 } 
 SE_Primitive* SE_ResourceManager::getPrimitive(const SE_PrimitiveID& primitiveID)
 {
-	return mImpl->primitiveMap.get(primitiveID);
+    return mImpl->primitiveMap.get(primitiveID);
 }
 void SE_ResourceManager::setPrimitive(const SE_PrimitiveID& primitiveID , SE_Primitive* primitive)
 {
-	mImpl->primitiveMap.set(primitiveID, primitive);
+    mImpl->primitiveMap.set(primitiveID, primitive);
 }
 void SE_ResourceManager::removePrimitive(const SE_PrimitiveID& primitiveID)
 {
-	mImpl->primitiveMap.remove(primitiveID);
+    mImpl->primitiveMap.remove(primitiveID);
 }
 SE_TextureCoordData* SE_ResourceManager::getTextureCoordData(const SE_TextureCoordDataID& texCoordID)
 {
@@ -835,7 +912,7 @@ void SE_ResourceManager::removeImageData(const SE_VertexBufferID& vbID)
 
 void SE_ResourceManager::loadBaseData(const char* baseResourceName)
 {
-    std::string resourcePath = mImpl->dataPath + "/" + baseResourceName + "_basedata.cbf";  
+    std::string resourcePath = mImpl->dataPath + SE_SEP + baseResourceName + "_basedata.cbf";  
     char* data = NULL;
     int len = 0;
 #ifndef ANDROID
@@ -857,7 +934,7 @@ bool SE_ResourceManager::checkHeader(SE_BufferInput& inputBuffer)
     int version = inputBuffer.readInt();
     if(version != SE_VERSION)
         return false;
-	int endian = inputBuffer.readInt();
+    int endian = inputBuffer.readInt();
     int dataLen = inputBuffer.readInt();
     if(dataLen != (inputBuffer.getDataLen() - 16))
         return false;
@@ -867,8 +944,8 @@ static SE_Spatial* createSpatial(std::string& spatialType, SE_Spatial* parent)
 {
     SE_Spatial* spatial = (SE_Spatial*)SE_Object::create(spatialType.c_str());
     spatial->setParent(parent);
-	if(parent)
-	    parent->addChild(spatial);
+    if(parent)
+        parent->addChild(spatial);
     return spatial;
 }
 SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_Spatial* parent)
@@ -881,14 +958,14 @@ SE_Spatial* SE_ResourceManager::createSceneNode(SE_BufferInput& inputBuffer, SE_
     {
         createSceneNode(inputBuffer, spatial);
     }
-	return spatial;
+    return spatial;
 }
 SE_ShaderProgram* SE_ResourceManager::getShaderProgram(const SE_ProgramDataID& programDataID)
 {
     SE_ShaderProgram* shader = mImpl->shaderMap.get(programDataID);
     if(shader && shader->initOK())
         return shader;
-	if(shader)
+    if(shader)
         shader->recreate();
     return shader;
 }
@@ -908,28 +985,28 @@ void SE_ResourceManager::removeShaderProgram(const SE_ProgramDataID& programData
 }
 SE_Renderer* SE_ResourceManager::getRenderer(const SE_RendererID& rendererID)
 {
-	return mImpl->rendererMap.get(rendererID);
+    return mImpl->rendererMap.get(rendererID);
 }
 void SE_ResourceManager::setRenderer(const SE_RendererID& rendererID, SE_Renderer* renderer)
 {
-	mImpl->rendererMap.set(rendererID, renderer);
+    mImpl->rendererMap.set(rendererID, renderer);
 }
 void SE_ResourceManager::removeRenderer(const SE_RendererID& rendererID)
 {
-	mImpl->rendererMap.remove(rendererID);
+    mImpl->rendererMap.remove(rendererID);
 }
- 
+    
 const char* SE_ResourceManager::getDataPath()
 {
-	return mImpl->dataPath.c_str();
+    return mImpl->dataPath.c_str();
 }
 void SE_ResourceManager::setDataPath(const char* datapath)
 {
-	mImpl->dataPath = datapath;
+    mImpl->dataPath = datapath;
 }
 SE_Spatial* SE_ResourceManager::loadScene(const char* sceneName,SE_Spatial* externalSpatial)
 {
-    std::string scenePath = mImpl->dataPath + "/" + sceneName + "_scene.cbf";
+    std::string scenePath = mImpl->dataPath + SE_SEP + sceneName + "_scene.cbf";
     char* data = NULL;
     int len = 0;
 #ifndef ANDROID
@@ -989,24 +1066,13 @@ void SE_ResourceManager::removeSkeletonController(const SE_SkeletonControllerID&
 //
 void SE_ResourceManager::releaseHardwareResource()
 {
-    //release vbo
-    //SE_Spatial* rootScene = SE_Application::getInstance()->getSceneManager()->getRoot();
-    SE_Application::getInstance()->getSceneManager()->releaseVBO();
-	/*
-    if(rootScene)
-    {
-        _ReleaseVbo relaseVbo;
-        rootScene->travel(&relaseVbo,true);
-    }
-    else
-    {
-        LOGI("\nError,vbo release fail!!!!!!!!!!!!!!!\n\n\n");
-    }
-    */
+    SE_SceneManager* scm = SE_Application::getInstance()->getSceneManager();
+    scm->releaseVBO();
+
     ResourceMap<SE_ImageDataID, SE_ImageData>::RMap::iterator it;
     for(it = mImpl->imageDataMap.getMap()->begin() ; it != mImpl->imageDataMap.getMap()->end() ; it++)
     {
-        SE_ImageData* imgData = it->second;
+		SE_ImageData* imgData = it->second.data;
         SE_ImageDataID id = it->first;
         GLuint texid = imgData->getTexID();
         if(texid != 0)
@@ -1020,25 +1086,181 @@ void SE_ResourceManager::releaseHardwareResource()
     ResourceMap<SE_PrimitiveID, SE_Primitive>::RMap::iterator itPrimitive;
     for(itPrimitive = mImpl->primitiveMap.getMap()->begin() ; itPrimitive != mImpl->primitiveMap.getMap()->end() ; itPrimitive++)
     {
-        SE_Primitive* primitive = itPrimitive->second;
-	SE_ImageData* imgData = primitive->getImageData();
-	    if (imgData != NULL)
+		SE_Primitive* primitive = itPrimitive->second.data;
+        SE_ImageData* imgData = primitive->getImageData();
+        if (imgData != NULL)
         {
-	    GLuint texid = imgData->getTexID();
-	    if(texid != 0)
+            GLuint texid = imgData->getTexID();
+            if(texid != 0)
             {
                 glDeleteTextures(1, &texid);
             }
             imgData->setTexID(0);
-	}
+        }
     }
 
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram>::RMap::iterator itShader;
     for(itShader = mImpl->shaderMap.getMap()->begin() ; itShader != mImpl->shaderMap.getMap()->end() ; itShader++)
     {
-        SE_ShaderProgram* shader = itShader->second;
+        SE_ShaderProgram* shader = itShader->second.data;
         shader->releaseHardwareResource();
     }
+}
+bool SE_ResourceManager::registerRes(RES_TYPE type, void* id)
+{
+    bool ret = true;
+	switch(type)
+	{
+	case GEOM_RES:
+		{
+			SE_GeometryDataID geomID = *(SE_GeometryDataID*)id;
+            mImpl->geomDataMap.inc(geomID);
+			break;
+		}
+	case TEXCOORD_RES:
+		{
+			SE_TextureCoordDataID texCoordID = *(SE_TextureCoordDataID*)id;
+            mImpl->texCoordDataMap.inc(texCoordID);
+			break;
+		}
+	case IMAGE_RES:
+		{
+			SE_ImageDataID imageDataID = *(SE_ImageDataID*)id;
+            mImpl->imageDataMap.inc(imageDataID);
+			break;
+		}
+	case MATERIAL_RES:
+		{
+			SE_MaterialDataID materialDataID = *(SE_MaterialDataID*)id;
+            mImpl->materialDataMap.inc(materialDataID);
+			break;
+		}
+	case SHADER_RES:
+		{
+			SE_ProgramDataID programDataID = *(SE_ProgramDataID*)id;
+            mImpl->shaderMap.inc(programDataID);
+			break;
+		}
+	case RENDERER_RES:
+		{
+			SE_RendererID rendererID = *(SE_RendererID*)id;
+            mImpl->rendererMap.inc(rendererID);
+			break;
+		}
+	case PRIMITIVE_RES:
+		{
+			SE_PrimitiveID primitiveID = *(SE_PrimitiveID*)id;
+            mImpl->primitiveMap.inc(primitiveID);
+			break;
+		}
+	case SKINJOINT_RES:
+		{
+			SE_SkinJointControllerID skinJointID = *(SE_SkinJointControllerID*)id;
+            mImpl->skinJointControllerMap.inc(skinJointID);
+			break;
+		}
+	case SKELETON_RES:
+		{
+			SE_SkeletonControllerID skeletonID = *(SE_SkeletonControllerID*)id;
+            mImpl->skeletonControllerMap.inc(skeletonID);
+			break;
+		}
+	case VERTEXBUFFER_RES:
+		{
+			SE_VertexBufferID vertexBufferID = *(SE_VertexBufferID*)id;
+            mImpl->vertexBufferMap.inc(vertexBufferID);
+			break;
+		}
+	case CAMRERAPOS_RES:
+		{
+			SE_CameraPositionID cameraPositionID = *(SE_CameraPositionID*)id;
+            mImpl->cameraPositionListMap.inc(cameraPositionID);
+			break;
+		}
+	default:
+		LOGI("## not support this res id ##\n");
+        ret = false;
+		break;
+	}
+    return ret;
+}
+bool SE_ResourceManager::unregisterRes(RES_TYPE type, void* id)
+{
+    bool ret = true;
+	switch(type)
+	{
+	case GEOM_RES:
+		{
+			SE_GeometryDataID geomID = *(SE_GeometryDataID*)id;
+            mImpl->geomDataMap.dec(geomID);
+			break;
+		}
+	case TEXCOORD_RES:
+		{
+			SE_TextureCoordDataID texCoordID = *(SE_TextureCoordDataID*)id;
+            mImpl->texCoordDataMap.dec(texCoordID);
+			break;
+		}
+	case IMAGE_RES:
+		{
+			SE_ImageDataID imageDataID = *(SE_ImageDataID*)id;
+            mImpl->imageDataMap.dec(imageDataID);
+			break;
+		}
+	case MATERIAL_RES:
+		{
+			SE_MaterialDataID materialDataID = *(SE_MaterialDataID*)id;
+            mImpl->materialDataMap.dec(materialDataID);
+			break;
+		}
+	case SHADER_RES:
+		{
+			SE_ProgramDataID programDataID = *(SE_ProgramDataID*)id;
+            mImpl->shaderMap.dec(programDataID);
+			break;
+		}
+	case RENDERER_RES:
+		{
+			SE_RendererID rendererID = *(SE_RendererID*)id;
+            mImpl->rendererMap.dec(rendererID);
+			break;
+		}
+	case PRIMITIVE_RES:
+		{
+			SE_PrimitiveID primitiveID = *(SE_PrimitiveID*)id;
+            mImpl->primitiveMap.dec(primitiveID);
+			break;
+		}
+	case SKINJOINT_RES:
+		{
+			SE_SkinJointControllerID skinJointID = *(SE_SkinJointControllerID*)id;
+            mImpl->skinJointControllerMap.dec(skinJointID);
+			break;
+		}
+	case SKELETON_RES:
+		{
+			SE_SkeletonControllerID skeletonID = *(SE_SkeletonControllerID*)id;
+            mImpl->skeletonControllerMap.dec(skeletonID);
+			break;
+		}
+	case VERTEXBUFFER_RES:
+		{
+			SE_VertexBufferID vertexBufferID = *(SE_VertexBufferID*)id;
+            mImpl->vertexBufferMap.dec(vertexBufferID);
+			break;
+		}
+	case CAMRERAPOS_RES:
+		{
+			SE_CameraPositionID cameraPositionID = *(SE_CameraPositionID*)id;
+            mImpl->cameraPositionListMap.dec(cameraPositionID);
+			break;
+		}
+	default:
+		LOGI("## not support this res id ##\n");
+        ret = false;
+		break;
+	}
+    return ret;
 }
 
 void SE_ResourceManager::unLoadScene()
@@ -1047,7 +1269,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_GeometryDataID, SE_GeometryData>::RMap::iterator geometry_it;
     for(geometry_it = mImpl->geomDataMap.getMap()->begin() ; geometry_it != mImpl->geomDataMap.getMap()->end() ; geometry_it++)
     {
-        SE_GeometryData* data = geometry_it->second;
+        SE_GeometryData* data = geometry_it->second.data;
         delete data;
     }
     mImpl->geomDataMap.getMap()->clear();
@@ -1056,7 +1278,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_ImageDataID, SE_ImageData>::RMap::iterator image_it;
     for(image_it = mImpl->imageDataMap.getMap()->begin() ; image_it != mImpl->imageDataMap.getMap()->end() ; image_it++)
     {
-        SE_ImageData* data = image_it->second;
+		SE_ImageData* data = image_it->second.data;
         delete data;
     }
     mImpl->imageDataMap.getMap()->clear();
@@ -1065,7 +1287,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_PrimitiveID, SE_Primitive>::RMap::iterator primitive_it;
     for(primitive_it = mImpl->primitiveMap.getMap()->begin() ; primitive_it != mImpl->primitiveMap.getMap()->end() ; primitive_it++)
     {
-        SE_Primitive* data = primitive_it->second;
+        SE_Primitive* data = primitive_it->second.data;
         delete data;
     }
     mImpl->primitiveMap.getMap()->clear();
@@ -1074,7 +1296,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_MaterialDataID, SE_MaterialData>::RMap::iterator material_it;
     for(material_it = mImpl->materialDataMap.getMap()->begin() ; material_it != mImpl->materialDataMap.getMap()->end() ; material_it++)
     {
-        SE_MaterialData* data = material_it->second;
+        SE_MaterialData* data = material_it->second.data;
         delete data;
     }
     mImpl->materialDataMap.getMap()->clear();
@@ -1083,7 +1305,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_TextureCoordDataID, SE_TextureCoordData> ::RMap::iterator texture_it;
     for(texture_it = mImpl->texCoordDataMap.getMap()->begin() ; texture_it != mImpl->texCoordDataMap.getMap()->end() ; texture_it++)
     {
-        SE_TextureCoordData* data = texture_it->second;
+        SE_TextureCoordData* data = texture_it->second.data;
         delete data;
     }
     mImpl->texCoordDataMap.getMap()->clear();
@@ -1092,7 +1314,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_MeshID, SE_MeshTransfer>::RMap::iterator meshtran_it;
     for(meshtran_it = mImpl->meshMap.getMap()->begin() ; meshtran_it != mImpl->meshMap.getMap()->end() ; meshtran_it++)
     {
-        SE_MeshTransfer* data = meshtran_it->second;
+        SE_MeshTransfer* data = meshtran_it->second.data;
         delete data;
     }
     mImpl->meshMap.getMap()->clear();
@@ -1101,7 +1323,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_SkinJointControllerID, SE_SkinJointController>::RMap::iterator skinjoint_it;
     for(skinjoint_it = mImpl->skinJointControllerMap.getMap()->begin() ; skinjoint_it != mImpl->skinJointControllerMap.getMap()->end() ; skinjoint_it++)
     {
-        SE_SkinJointController* data = skinjoint_it->second;
+        SE_SkinJointController* data = skinjoint_it->second.data;
         delete data;
     }
     mImpl->skinJointControllerMap.getMap()->clear();
@@ -1110,7 +1332,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_SkeletonControllerID, SE_SkeletonController>::RMap::iterator skeleton_it;
     for(skeleton_it = mImpl->skeletonControllerMap.getMap()->begin() ; skeleton_it != mImpl->skeletonControllerMap.getMap()->end() ; skeleton_it++)
     {
-        SE_SkeletonController* data = skeleton_it->second;
+        SE_SkeletonController* data = skeleton_it->second.data;
         delete data;
     }
     mImpl->skeletonControllerMap.getMap()->clear();
@@ -1119,7 +1341,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_CameraPositionID, SE_CameraPositionList>::RMap::iterator cameraposition_it;
     for(cameraposition_it = mImpl->cameraPositionListMap.getMap()->begin() ; cameraposition_it != mImpl->cameraPositionListMap.getMap()->end() ; cameraposition_it++)
     {
-        SE_CameraPositionList* data = cameraposition_it->second;
+        SE_CameraPositionList* data = cameraposition_it->second.data;
         delete data;
     }
     mImpl->cameraPositionListMap.getMap()->clear();
@@ -1128,7 +1350,7 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_RendererID, SE_Renderer> ::RMap::iterator render_it;
     for(render_it = mImpl->rendererMap.getMap()->begin() ; render_it != mImpl->rendererMap.getMap()->end() ; render_it++)
     {
-        SE_Renderer* data = render_it->second;
+        SE_Renderer* data = render_it->second.data;
         delete data;
     }
     mImpl->rendererMap.getMap()->clear();
@@ -1137,8 +1359,17 @@ void SE_ResourceManager::unLoadScene()
     ResourceMap<SE_ProgramDataID, SE_ShaderProgram> ::RMap::iterator shader_it;
     for(shader_it = mImpl->shaderMap.getMap()->begin() ; shader_it != mImpl->shaderMap.getMap()->end() ; shader_it++)
     {
-        SE_ShaderProgram* data = shader_it->second;
+        SE_ShaderProgram* data = shader_it->second.data;
         delete data;
     }
     mImpl->shaderMap.getMap()->clear();
+
+    //unload vertex buffer
+    ResourceMap<SE_VertexBufferID, SE_VertexBuffer>::RMap::iterator vb_it;
+    for(vb_it = mImpl->vertexBufferMap.getMap()->begin() ; vb_it != mImpl->vertexBufferMap.getMap()->end() ; vb_it++)
+    {
+        SE_VertexBuffer* data = vb_it->second.data;
+        delete data;
+    }
+    mImpl->vertexBufferMap.getMap()->clear();
 }

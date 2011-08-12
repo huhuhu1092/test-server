@@ -1,5 +1,5 @@
 #include "SE_PropertySet.h"
-#include <string.h>
+#include "SE_MemLeakDetector.h"
 SE_PropertySet::SE_PropertySet()
 {}
 SE_PropertySet::~SE_PropertySet()
