@@ -19,8 +19,10 @@
 #ifndef __PPM_TOOL_H
 #define __PPM_TOOL_H
 
-#include <glib.h>
-
+#include "type.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct ppm {
   int width;
   int height;
@@ -56,6 +58,8 @@ void blur(ppm_t *p, int xrad, int yrad);
 void mkgrayplasma(ppm_t *p, float turb);
 
 #define PPM_IS_INITED(ppm_ptr) ((ppm_ptr)->col != NULL)
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* #ifndef __PPM_TOOL_H */
 

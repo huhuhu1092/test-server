@@ -20,15 +20,15 @@
 #include "SE_SceneManager.h"
 #include "SE_ImageCodec.h"
 #include "SE_CommonNode.h"
-#include "SE_Physics.h"
-#include "SE_2DCommand.h"
+//#include "SE_Physics.h"
+//#include "SE_2DCommand.h"
 #include "SE_Bone.h"
 #include "SE_BipedAnimation.h"
 #include "SE_SkinJointController.h"
 #include "SE_BipedController.h"
 #include "SE_SimObjectManager.h"
 #include "SE_AnimationManager.h"
-#include "SE_TableManager.h"
+//#include "SE_TableManager.h"
 #include "SE_Config.h"
 #include "SE_IO.h"
 #include "SE_Buffer.h"
@@ -65,7 +65,7 @@ class SEDemo : public PVRShell
 public:
 	SEDemo()
 	{
-		mPhysics = NULL;
+		//mPhysics = NULL;
 	}
 	virtual bool InitApplication();
 	virtual bool InitView();
@@ -75,8 +75,8 @@ public:
 private:
 	void handleInput(int width, int height);
 private:
-	SE_Physics* mPhysics;
-	EyeData eyeData;
+	//SE_Physics* mPhysics;
+	//EyeData eyeData;
 };
 static void test()
 {

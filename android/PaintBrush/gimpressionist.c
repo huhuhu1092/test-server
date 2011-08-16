@@ -19,10 +19,9 @@
 
 #include "gimpressionist.h"
 #include <stdio.h>
+#include <math.h>
 gimpressionist_vals_t  pcvals;
-#ifndef CLAMP
-#define CLAMP(x,l,u) ((x)<(l)?(l):((x)>(u)?(u):(x)))
-#endif
+
 /*
  * The default values for the application, to be initialized at startup.
  * */
@@ -74,6 +73,12 @@ static const gimpressionist_vals_t defaultpcvals = {
 
   0, 0.0
 };
+double dist (double x, double y, double end_x, double end_y)
+{
+  double dx = end_x - x;
+  double dy = end_y - y;
+  return sqrt (dx * dx + dy * dy);
+}
 double
 getsiz_proto (double x, double y, int n, smvector_t *vec,
               double smstrexp, int voronoi)

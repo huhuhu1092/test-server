@@ -16,24 +16,82 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
-
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
-
-#include <glib/gstdio.h>
-
-#include <libgimp/gimp.h>
-#include <libgimpmath/gimpmath.h>
-
+#include "type.h"
 #include "ppmtool.h"
 #include "gimpressionist.h"
+typedef enum {
+  G_ASCII_ALNUM  = 1 << 0,
+  G_ASCII_ALPHA  = 1 << 1,
+  G_ASCII_CNTRL  = 1 << 2,
+  G_ASCII_DIGIT  = 1 << 3,
+  G_ASCII_GRAPH  = 1 << 4,
+  G_ASCII_LOWER  = 1 << 5,
+  G_ASCII_PRINT  = 1 << 6,
+  G_ASCII_PUNCT  = 1 << 7,
+  G_ASCII_SPACE  = 1 << 8,
+  G_ASCII_UPPER  = 1 << 9,
+  G_ASCII_XDIGIT = 1 << 10
+} GAsciiType;
+static const guint16 ascii_table_data[256] = {
+  0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004,
+  0x004, 0x104, 0x104, 0x004, 0x104, 0x104, 0x004, 0x004,
+  0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004,
+  0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004, 0x004,
+  0x140, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0,
+  0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0,
+  0x459, 0x459, 0x459, 0x459, 0x459, 0x459, 0x459, 0x459,
+  0x459, 0x459, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0,
+  0x0d0, 0x653, 0x653, 0x653, 0x653, 0x653, 0x653, 0x253,
+  0x253, 0x253, 0x253, 0x253, 0x253, 0x253, 0x253, 0x253,
+  0x253, 0x253, 0x253, 0x253, 0x253, 0x253, 0x253, 0x253,
+  0x253, 0x253, 0x253, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x0d0,
+  0x0d0, 0x473, 0x473, 0x473, 0x473, 0x473, 0x473, 0x073,
+  0x073, 0x073, 0x073, 0x073, 0x073, 0x073, 0x073, 0x073,
+  0x073, 0x073, 0x073, 0x073, 0x073, 0x073, 0x073, 0x073,
+  0x073, 0x073, 0x073, 0x0d0, 0x0d0, 0x0d0, 0x0d0, 0x004
+  /* the upper 128 are all zeroes */
+};
+const guint16 * const g_ascii_table = ascii_table_data;
+#define g_ascii_isspace(c) \
+  ((g_ascii_table[(guchar) (c)] & G_ASCII_SPACE) != 0)
 
-#include "libgimp/stdplugins-intl.h"
+static char* g_strchomp (char *string)
+{
+  size_t len;
 
-static int
-readline (FILE *f, char *buffer, int len)
+  if(string == NULL)
+	  return NULL;
+  len = strlen (string);
+  while (len--)
+    {
+      if (g_ascii_isspace ((guchar) string[len]))
+        string[len] = '\0';
+      else
+        break;
+    }
+
+  return string;
+}
+char* g_memdup (char* mem,
+          guint         byte_size)
+{
+  char* new_mem;
+
+  if (mem)
+    {
+      new_mem = g_malloc (byte_size);
+      memcpy (new_mem, mem, byte_size);
+    }
+  else
+    new_mem = NULL;
+
+  return new_mem;
+}
+static int readline (FILE *f, char *buffer, int len)
 {
   do
   {
@@ -245,13 +303,8 @@ fopen_from_search_path (const gchar * fn, const char * mode)
   FILE  * f;
   gchar * full_filename;
 
-  f = g_fopen (fn, mode);
-  if (!f)
-    {
-      full_filename = findfile (fn);
-      f = g_fopen (full_filename, mode);
-      g_free (full_filename);
-    }
+  f = fopen (fn, mode);
+
   return f;
 }
 
@@ -269,7 +322,7 @@ load_gimp_brush (const gchar *fn, ppm_t *p)
   if (!f)
     {
       g_printerr ("load_gimp_brush: Unable to open file \"%s\"!\n",
-                  gimp_filename_to_utf8 (fn));
+                  fn);
       ppm_new (p, 10,10);
       return;
     }
@@ -316,7 +369,7 @@ ppm_load (const char *fn, ppm_t *p)
   if (!f)
     {
       g_printerr ("ppm_load: Unable to open file \"%s\"!\n",
-                  gimp_filename_to_utf8 (fn));
+                  fn);
       ppm_new (p, 10,10);
       return;
     }
@@ -328,7 +381,7 @@ ppm_load (const char *fn, ppm_t *p)
         {
           fclose (f);
           g_printerr ("ppm_load: File \"%s\" not PPM/PGM? (line=\"%s\")%c\n",
-                      gimp_filename_to_utf8 (fn), line, 7);
+                      fn, line, 7);
           ppm_new (p, 10,10);
           return;
     }
@@ -341,7 +394,7 @@ ppm_load (const char *fn, ppm_t *p)
   if (strcmp (line, "255"))
   {
     g_printerr ("ppm_load: File \"%s\" not valid PPM/PGM? (line=\"%s\")%c\n",
-                gimp_filename_to_utf8 (fn), line, 7);
+                fn, line, 7);
     ppm_new (p, 10,10);
     return;
   }
@@ -639,7 +692,7 @@ ppm_pad (ppm_t *p, int left,int right, int top, int bottom, guchar *bg)
 void
 ppm_save (ppm_t *p, const char *fn)
 {
-  FILE *f = g_fopen (fn, "wb");
+  FILE *f = fopen (fn, "wb");
 
   if (!f)
     {
@@ -647,8 +700,8 @@ ppm_save (ppm_t *p, const char *fn)
        * gimp_filename_to_utf8 () and g_strerror () return temporary strings
        * that need not and should not be freed. So this call is OK.
        * */
-      g_message (_("Failed to save PPM file '%s': %s"),
-                  gimp_filename_to_utf8 (fn), g_strerror (errno));
+      g_message ("Failed to save PPM file '%s': %d",
+                  fn, errno);
       return;
     }
 

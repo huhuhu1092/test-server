@@ -93,6 +93,7 @@ void g_rand_set_seed (GRand* rand, guint32 seed)
 	  (rand->mt[rand->mti-1] ^ (rand->mt[rand->mti-1] >> 30)) + rand->mti; 
       break;
     default:
+		break;
     }
 }
 void g_rand_set_seed_array (GRand* rand, const guint32 *seed, guint seed_length)
@@ -162,12 +163,133 @@ GRand* g_rand_new()
   return g_rand_new_with_seed_array (seed, 4);
 }
 void g_rand_free(GRand* rand)
-{}
+{
+  if(rand == NULL)
+      return;
+  g_free (rand);
+}
 guint32 g_rand_int(GRand* rand)
-{}
+{
+  guint32 y;
+  static const guint32 mag01[2]={0x0, MATRIX_A};
+  /* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+  if(rand == NULL)
+      return 0;
+
+  if (rand->mti >= N) { /* generate N words at one time */
+    int kk;
+    
+    for (kk=0;kk<N-M;kk++) {
+      y = (rand->mt[kk]&UPPER_MASK)|(rand->mt[kk+1]&LOWER_MASK);
+      rand->mt[kk] = rand->mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1];
+    }
+    for (;kk<N-1;kk++) {
+      y = (rand->mt[kk]&UPPER_MASK)|(rand->mt[kk+1]&LOWER_MASK);
+      rand->mt[kk] = rand->mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1];
+    }
+    y = (rand->mt[N-1]&UPPER_MASK)|(rand->mt[0]&LOWER_MASK);
+    rand->mt[N-1] = rand->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1];
+    
+    rand->mti = 0;
+  }
+  
+  y = rand->mt[rand->mti++];
+  y ^= TEMPERING_SHIFT_U(y);
+  y ^= TEMPERING_SHIFT_S(y) & TEMPERING_MASK_B;
+  y ^= TEMPERING_SHIFT_T(y) & TEMPERING_MASK_C;
+  y ^= TEMPERING_SHIFT_L(y);
+  
+  return y; 
+}
+#define G_RAND_DOUBLE_TRANSFORM 2.3283064365386962890625e-10
 gint32 g_rand_int_range(GRand* rand, gint32 begin, gint32 end)
-{}
+{
+  guint32 dist = end - begin;
+  guint32 random;
+
+  if(rand == NULL)
+      return begin;
+  if(end <= begin)
+      return begin;
+  switch (get_random_version ())
+    {
+    case 20:
+      if (dist <= 0x10000L) /* 2^16 */
+	{
+	  /* This method, which only calls g_rand_int once is only good
+	   * for (end - begin) <= 2^16, because we only have 32 bits set
+	   * from the one call to g_rand_int (). */
+	  
+	  /* we are using (trans + trans * trans), because g_rand_int only
+	   * covers [0..2^32-1] and thus g_rand_int * trans only covers
+	   * [0..1-2^-32], but the biggest double < 1 is 1-2^-52. 
+	   */
+	  
+	  gdouble double_rand = g_rand_int (rand) * 
+	    (G_RAND_DOUBLE_TRANSFORM +
+	     G_RAND_DOUBLE_TRANSFORM * G_RAND_DOUBLE_TRANSFORM);
+	  
+	  random = (gint32) (double_rand * dist);
+	}
+      else
+	{
+	  /* Now we use g_rand_double_range (), which will set 52 bits for
+	     us, so that it is safe to round and still get a decent
+	     distribution */
+	  random = (gint32) g_rand_double_range (rand, 0, dist);
+	}
+      break;
+    case 22:
+      if (dist == 0)
+	random = 0;
+      else 
+	{
+	  /* maxvalue is set to the predecessor of the greatest
+	   * multiple of dist less or equal 2^32. */
+	  guint32 maxvalue;
+	  if (dist <= 0x80000000u) /* 2^31 */
+	    {
+	      /* maxvalue = 2^32 - 1 - (2^32 % dist) */
+	      guint32 leftover = (0x80000000u % dist) * 2;
+	      if (leftover >= dist) leftover -= dist;
+	      maxvalue = 0xffffffffu - leftover;
+	    }
+	  else
+	    maxvalue = dist - 1;
+	  
+	  do
+	    random = g_rand_int (rand);
+	  while (random > maxvalue);
+	  
+	  random %= dist;
+	}
+      break;
+    default:
+      random = 0;		/* Quiet GCC */
+    }      
+ 
+  return begin + random;
+}
 gdouble g_rand_double(GRand   *rand)
-{}
-gdouble g_rand_double_range(GRand   *rand_, gdouble  begin, gdouble  end)
-{}
+{
+  /* We set all 52 bits after the point for this, not only the first
+     32. Thats why we need two calls to g_rand_int */
+  gdouble retval = g_rand_int (rand) * G_RAND_DOUBLE_TRANSFORM;
+  retval = (retval + g_rand_int (rand)) * G_RAND_DOUBLE_TRANSFORM;
+
+  /* The following might happen due to very bad rounding luck, but
+   * actually this should be more than rare, we just try again then */
+  if (retval >= 1.0) 
+    return g_rand_double (rand);
+
+  return retval;    
+}
+gdouble g_rand_double_range(GRand   *rand, gdouble  begin, gdouble  end)
+{
+  gdouble r;
+
+  r = g_rand_double (rand);
+
+  return r * end - (r - 1) * begin;
+}

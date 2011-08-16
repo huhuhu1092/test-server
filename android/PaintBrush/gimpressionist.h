@@ -21,6 +21,9 @@
 
 #include "type.h"
 #include "ppmtool.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Defines */
 
 #define PLUG_IN_PROC    "plug-in-gimpressionist"
@@ -115,14 +118,43 @@ enum PRESETS_LIST_COLUMN_ENUM
   PRESETS_LIST_COLUMN_FILENAME = 0,
   PRESETS_LIST_COLUMN_OBJECT_NAME = 1,
 };
-
+enum PLACEMENT_TYPE_ENUM
+{
+    PLACEMENT_TYPE_RANDOM = 0,
+    PLACEMENT_TYPE_EVEN_DIST = 1,
+};
+enum SIZE_TYPE_ENUM
+{
+    SIZE_TYPE_VALUE = 0,
+    SIZE_TYPE_RADIUS = 1,
+    SIZE_TYPE_RANDOM = 2,
+    SIZE_TYPE_RADIAL = 3,
+    SIZE_TYPE_FLOWING = 4,
+    SIZE_TYPE_HUE = 5,
+    SIZE_TYPE_ADAPTIVE = 6,
+    SIZE_TYPE_MANUAL = 7,
+};
+enum ORIENTATION_ENUM
+{
+    ORIENTATION_VALUE = 0,
+    ORIENTATION_RADIUS = 1,
+    ORIENTATION_RANDOM = 2,
+    ORIENTATION_RADIAL = 3,
+    ORIENTATION_FLOWING = 4,
+    ORIENTATION_HUE = 5,
+    ORIENTATION_ADAPTIVE = 6,
+    ORIENTATION_MANUAL = 7,
+};
 /* Globals */
 
 extern gimpressionist_vals_t pcvals;
 double getsiz_proto (double x, double y, int n, smvector_t *vec,
                      double smstrexp, int voronoi);
-#define CLAMP_UP_TO(x, max) (CLAMP((x),(0),(max-1)))
-
+extern double dist (double x, double y, double end_x, double end_y);
+extern void repaint (ppm_t *p, ppm_t *a);
+#ifdef __cplusplus
+}
+#endif
 #endif /* #ifndef __GIMPRESSIONIST_H */
 
 
