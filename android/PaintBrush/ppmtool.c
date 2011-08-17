@@ -20,9 +20,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <math.h>
 #include "type.h"
 #include "ppmtool.h"
 #include "gimpressionist.h"
+#define MAX_LEN 512
+static char ppmpath[MAX_LEN];
 typedef enum {
   G_ASCII_ALNUM  = 1 << 0,
   G_ASCII_ALPHA  = 1 << 1,
@@ -476,8 +479,8 @@ free_rotate (ppm_t *p, double amount)
         {
           double r, d;
 
-          nx = fabs (x - p->width / 2.0);
-          ny = fabs (y - p->height / 2.0);
+          nx = fabs ((double)(x - p->width / 2.0));
+          ny = fabs ((double)(y - p->height / 2.0));
           r = sqrt (nx * nx + ny * ny);
 
           d = atan2 ((y - p->height / 2.0), (x - p->width / 2.0));
@@ -956,4 +959,9 @@ ppm_drawline (ppm_t *p, float fx, float fy, float tx, float ty, guchar *col)
       x += d;
     }
   }
+}
+void setDataPath(const char* str)
+{
+	memset(ppmpath, 0, MAX_LEN);
+	strncpy(ppmpath, str, MAX_LEN - 1);
 }

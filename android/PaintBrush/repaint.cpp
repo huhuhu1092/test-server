@@ -22,6 +22,7 @@
 #include "gimpressionist.h"
 #include "ppmtool.h"
 #include "random.h"
+#include "imageloader.h"
 static gboolean img_has_alpha = 0;
 static gint brush_from_file = 2;
 static ppm_t brushppm  = {0, 0, NULL};
@@ -110,7 +111,17 @@ void brush_reload (const gchar *fn,
 void brush_get_selected (ppm_t *p)
 {
   if (brush_from_file)
+  {
     brush_reload (pcvals.selected_brush, p);
+    //debug
+	Image image;
+	image.width = p->width;
+	image.height = p->height;
+	image.bpp = 3;
+	image.data = p->col;
+	save(image, "c:\\testbrush.jpg");
+	//endi
+  }
   else
     ppm_copy (&brushppm, p);
 }
