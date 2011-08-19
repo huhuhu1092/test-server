@@ -128,6 +128,7 @@ static void setppm()
 }
 static void init()
 {
+	setDefaultPcvals();
 	setppm();
 	pcvals.size_first = 47;
 	pcvals.size_last = 151;

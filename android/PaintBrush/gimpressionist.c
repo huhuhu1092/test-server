@@ -20,12 +20,11 @@
 #include "gimpressionist.h"
 #include <stdio.h>
 #include <math.h>
-gimpressionist_vals_t  pcvals;
 
 /*
  * The default values for the application, to be initialized at startup.
  * */
-static const gimpressionist_vals_t defaultpcvals = {
+static gimpressionist_vals_t defaultpcvals = {
   4,
   0.0,
   60.0,
@@ -73,6 +72,11 @@ static const gimpressionist_vals_t defaultpcvals = {
 
   0, 0.0
 };
+gimpressionist_vals_t  pcvals;
+void setDefaultPcvals()
+{
+	pcvals = defaultpcvals;
+}
 double dist (double x, double y, double end_x, double end_y)
 {
   double dx = end_x - x;

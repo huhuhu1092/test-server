@@ -152,6 +152,7 @@ double getsiz_proto (double x, double y, int n, smvector_t *vec,
                      double smstrexp, int voronoi);
 extern double dist (double x, double y, double end_x, double end_y);
 extern void repaint (ppm_t *p, ppm_t *a);
+extern void setDefaultPcvals();
 #ifdef __cplusplus
 }
 #endif
