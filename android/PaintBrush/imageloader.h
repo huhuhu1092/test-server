@@ -1,5 +1,8 @@
 #ifndef IMAGELOADER_H
 #define IMAGELOADER_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct Image
 {
 	int x;
@@ -17,4 +20,7 @@ typedef struct Image
 };
 extern Image load(const char* filename);
 extern void save(Image image, const char* filename);
+#ifdef __cplusplus
+}
+#endif
 #endif

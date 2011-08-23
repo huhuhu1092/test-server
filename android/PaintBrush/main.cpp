@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <math.h>
-static char filename[] = "c:\\paintbrush.jpg";
+static char filename[] = "d:\\paintbrush.jpg";
 static ppm_t         infile =  {0, 0, NULL};
 void grabarea (Image drawable)
 {
@@ -119,8 +119,8 @@ void grabarea (Image drawable)
 }
 static void setppm()
 {
-	std::string brush = std::string("c:\\backup\\Brushes\\arrow01.pgm");
-	std::string paper = std::string("c:\\backup\\Paper\\bricks.pgm");
+	std::string brush = std::string("d:\\backup\\Brushes\\arrow01.pgm");
+	std::string paper = std::string("d:\\backup\\Paper\\bricks.pgm");
 	memset(pcvals.selected_brush, 0, sizeof(pcvals.selected_brush));
 	strncpy(pcvals.selected_brush, brush.c_str(), sizeof(pcvals.selected_brush) - 1);
 	memset(pcvals.selected_paper, 0 , sizeof(pcvals.selected_paper));
@@ -153,7 +153,7 @@ int main(int argc , char** argv)
 	outImage.width = infile.width;
 	outImage.height = infile.height;
 	outImage.data = infile.col;
-	save(outImage, "c:\\testoutput.jpg");
+	save(outImage, "d:\\testoutput.jpg");
 	//save(image, "c:\\testoutput.png");
 	getchar();
 	return 0;

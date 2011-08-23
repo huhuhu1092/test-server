@@ -1,5 +1,8 @@
 #include "random.h"
-GRand* random_generator = NULL;
+#ifdef ANDROID
+#include <time.h>
+#endif
+GRand* random_generator = 0;
 #define G_GINT64_CONSTANT(val) (val##L)
 #define N 624
 #define M 397
@@ -149,7 +152,7 @@ GRand* g_rand_new()
 {
   guint32 seed[4];
   GTimeVal now;
-  static gboolean dev_urandom_exists = FALSE;
+  static gboolean dev_urandom_exists = 0;
 
   if (!dev_urandom_exists)
     {  

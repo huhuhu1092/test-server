@@ -113,6 +113,7 @@ void brush_get_selected (ppm_t *p)
   if (brush_from_file)
   {
     brush_reload (pcvals.selected_brush, p);
+	/*
     //debug
 	Image image;
 	image.width = p->width;
@@ -121,6 +122,7 @@ void brush_get_selected (ppm_t *p)
 	image.data = p->col;
 	save(image, "c:\\testbrush.jpg");
 	//endi
+	*/
   }
   else
     ppm_copy (&brushppm, p);
@@ -304,7 +306,7 @@ get_hue (guchar *rgb)
   return h * 255.0 / 6.0;
 }
 template <typename T>
-typename bool g_list_nth(std::list<T>& data, int index, T& outData)
+bool g_list_nth(std::list<T>& data, int index, T& outData)
 {
 	typename std::list<T>::iterator it = data.begin();
 	int i = 0;
