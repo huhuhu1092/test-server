@@ -6,8 +6,9 @@
 #include <string>
 class SE_Config
 {
- public:
+public:
     SE_Config(const char* fileName);
+	bool initOK();
 	int getInt(const char* id, int defaultValue = -1);
 	std::string getString(const char* id, const std::string& defaultValue);
 	float getFloat(const char* id, float defaultValue = 0);
@@ -18,6 +19,7 @@ private:
 	void parse(char* data, int dataLen);
 	void handleLine(const std::string& line);
 private:
-	std::map<std::string, SE_Value> mDataMap;	
+	std::map<std::string, SE_Value> mDataMap;
+	bool mIsInitOK;
 };
 #endif

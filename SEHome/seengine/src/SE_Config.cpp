@@ -1,7 +1,7 @@
 #include "SE_Config.h"
 #include "SE_IO.h"
 #include "SE_Utils.h"
-SE_Config::SE_Config(const char* fileName)
+SE_Config::SE_Config(const char* fileName) : mIsInitOK(false)
 {
 	char* data = NULL;
 	int dataLen = 0;
@@ -9,6 +9,7 @@ SE_Config::SE_Config(const char* fileName)
 	if(data)
 	{
 		parse(data, dataLen);
+		mIsInitOK = true;
 	}
 	delete[] data;
 }
@@ -39,7 +40,8 @@ static void stringListToTArray(SE_Util::SplitStringList& strList, T*& out, int& 
 	}
 	for(int i = 1 , j = 0; i < strList.size() ; i++, j++)
 	{
-		out[j] = stringToTFun(strList[i].c_str());
+		std::string valueStr = SE_Util::trim(strList[i].c_str());
+		out[j] = stringToTFun(valueStr.c_str());
 	}
 }
 
@@ -68,14 +70,14 @@ void SE_Config::handleLine(const std::string& line)
 	std::string right = data[1];
 	left = SE_Util::trim(left.c_str());
 	right = SE_Util::trim(right.c_str());
-	SE_Util::SplitStringList rightValue = SE_Util::splitStringRaw(right.c_str(), " \t");
+	SE_Util::SplitStringList rightValue = SE_Util::splitStringRaw(right.c_str(), " \t\n\r");
 	SE_ASSERT(rightValue.size() > 1);
-	std::string rightValueType = rightValue[0];
+	std::string rightValueType = SE_Util::trim(rightValue[0].c_str());
 	if(rightValueType == "int")
 	{
 		if(rightValue.size() == 2)
 		{
-			int i = SE_Util::stringToInt(rightValue[1].c_str());
+			int i = SE_Util::stringToInt(SE_Util::trim(rightValue[1].c_str()).c_str());
 		    SE_Value v;
 		    v.setInt(i);
 		    mDataMap[left] = v;
@@ -85,7 +87,7 @@ void SE_Config::handleLine(const std::string& line)
 	{
 		if(rightValue.size() == 2)
 		{
-		    float f = SE_Util::stringToFloat(rightValue[1].c_str());
+			float f = SE_Util::stringToFloat(SE_Util::trim(rightValue[1].c_str()).c_str());
 		    SE_Value v;
 		    v.setFloat(f);
 		    mDataMap[left] = v;

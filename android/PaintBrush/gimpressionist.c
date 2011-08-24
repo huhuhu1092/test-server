@@ -148,4 +148,52 @@ getsiz_proto (double x, double y, int n, smvector_t *vec,
   sum = sum / ssum / 100.0;
   return CLAMP (sum, 0.0, 1.0);
 }
+#define P_VAL(item, fmt) g_printerr(#item "= %" #fmt "\n", val->item)
+void print_val(gimpressionist_vals_t* val)
+{
+    P_VAL(orient_num, d);
+    P_VAL(orient_first, f);
+    P_VAL(orient_last, f);
+    P_VAL(orient_type, d);
+    P_VAL(brush_relief, f);
+    P_VAL(brush_scale, f);
+    P_VAL(brush_density, f);
+    P_VAL(brushgamma, f);
+    P_VAL(general_background_type, d);
+    P_VAL(general_dark_edge, f);
+    P_VAL(paper_relief, f);
+    P_VAL(paper_scale, f);
+    P_VAL(paper_invert, d);
+    P_VAL(run, d);
+    P_VAL(selected_brush, s);
+    P_VAL(selected_paper, s);
+    P_VAL(general_paint_edges, d);
+    P_VAL(place_type, d);
+    P_VAL(num_orient_vectors, d);
+    P_VAL(placement_center, d);
+    P_VAL(brush_aspect, f);
+    P_VAL(orient_angle_offset, f);
+    P_VAL(orient_strength_exponent, f);
+    P_VAL(general_tileable, d);
+    P_VAL(paper_overlay, d);
+    P_VAL(orient_voronoi, d);
+    P_VAL(color_brushes, d);
+    P_VAL(general_drop_shadow, d);
+    P_VAL(general_shadow_darkness, f);
+    P_VAL(size_num, d);
+    P_VAL(size_first, f);
+    P_VAL(size_last, f);
+    P_VAL(size_type, d);
+    P_VAL(devthresh, f);
+
+    P_VAL(num_size_vectors, d);
+    P_VAL(size_strength_exponent, f);
+    P_VAL(size_voronoi, d);
+
+    P_VAL(general_shadow_depth, d);
+    P_VAL(general_shadow_blur, d);
+
+    P_VAL(color_type, d);
+    P_VAL(color_noise, f); 
+}
 

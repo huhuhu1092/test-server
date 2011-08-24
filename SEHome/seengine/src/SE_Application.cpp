@@ -59,6 +59,7 @@ SE_Application::SE_Application()
 	mObjectCount = 0;
     mState = PREPARE;
 	mSeqNum = 0;
+	mScreenRotate = false;
 }
 SE_Application::~SE_Application()
 {

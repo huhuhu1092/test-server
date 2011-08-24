@@ -271,7 +271,7 @@ gint32 g_rand_int_range(GRand* rand, gint32 begin, gint32 end)
     default:
       random = 0;		/* Quiet GCC */
     }      
- 
+  g_printerr("## random int = %d ##\n",  begin + random); 
   return begin + random;
 }
 gdouble g_rand_double(GRand   *rand)

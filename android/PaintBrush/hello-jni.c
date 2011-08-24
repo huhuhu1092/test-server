@@ -18,10 +18,13 @@
 #include <jni.h>
 #include <android/log.h>
 #include <android/bitmap.h>
+#include "gimpressionist.h"
+#include "random.h"
+#include "ppmtool.h"
 #define  LOG_TAG    "libhello-jni"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-typedef struct Image
+typedef struct _Image
 {
 	int x;
 	int y;
@@ -30,12 +33,7 @@ typedef struct Image
 	int bpp; //bytes per pixel
 	int rowstride;
     unsigned char* data;
-	Image()
-	{
-		x = y = width = height = bpp = rowstride = 0;
-		data = 0;
-	}
-};
+} Image;
 static ppm_t         infile =  {0, 0, NULL};
 void grabarea (Image drawable)
 {
@@ -166,15 +164,14 @@ static void setppm(const char* dataPath)
 	std::string brush = std::string("d:\\backup\\Brushes\\arrow01.pgm");
 	std::string paper = std::string("d:\\backup\\Paper\\bricks.pgm");
 	*/
-	char fullpath[512];
-	memset(fullpath, 0, 512);
-	size_t len = strlen(dataPath);
-	strncpy(fullpath, dataPath, len);
-
+    char brush[] = "/sdcard/test/paintbrush/Brushes/defaultbrush.pgm";
+    char paper[] = "/sdcard/test/paintbrush/Paper/bricks.pgm";
 	memset(pcvals.selected_brush, 0, sizeof(pcvals.selected_brush));
-	strncpy(pcvals.selected_brush, brush.c_str(), sizeof(pcvals.selected_brush) - 1);
+	strncpy(pcvals.selected_brush, brush, sizeof(pcvals.selected_brush) - 1);
 	memset(pcvals.selected_paper, 0 , sizeof(pcvals.selected_paper));
-	strncpy(pcvals.selected_paper, paper.c_str(), sizeof(pcvals.selected_paper)  -1);
+	strncpy(pcvals.selected_paper, paper, sizeof(pcvals.selected_paper)  -1);
+    LOGI("### brush = %s ##\n", pcvals.selected_brush);
+    LOGI("### paper = %s ##\n", pcvals.selected_paper);
 }
 static void init()
 {
@@ -197,12 +194,15 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
     jboolean ok;
     int xs = 0, y = 0, xd = 0;
     Image srcImage;
-    const char* dataPath = (*env)->GetStringChars(env, brushDataPath, &ok);
+    const char* dataPath = 0;//(*env)->GetStringChars(env, brushDataPath, &ok);
+    memset(&srcImage, 0 , sizeof(Image));
     LOGI("## enter repaintPixel ##");
+    /*
     if(ok)
     {
         LOGI("## datapath = %s ##", dataPath);
     }
+    */
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
         LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
         return;
@@ -217,28 +217,35 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
     if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
         LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
     }
+    random_generator = g_rand_new ();
     init();
     setppm(dataPath);
+    srcImage.x = 0;
+    srcImage.y = 0;
     srcImage.width = info.width;
-    srcImage.height = infor.height;
+    srcImage.height = info.height;
     srcImage.bpp = 4;
     srcImage.rowstride = info.width * 4;
     srcImage.data = (char*)pixels;
-    grabarea(image);
+    grabarea(srcImage);
+    LOGI("######################### get infile ####################");
+    LOGI("## infile width = %d, height = %d ###", infile.width, infile.height);
     repaint(&infile, NULL);
+    LOGI("######################### repaint end #################");
     if(infile.width != srcImage.width || infile.height != srcImage.height)
     {
-	LOGE("### infile error ####\n");
-	return;
+	    LOGE("### infile error ####\n");
+	    return;
     }
+    int srcRowStride = infile.width * 3;
     for(y = 0 ; y < srcImage.height ; y++)
     {
-        for(xs = 0 , xd = 0; xd < srcImage.width ; xs += 3, xd += 4)
-	{
-	    srcImage.data[y * srcImage.rowstride + xd] = info.col[y * srcImage.rowstride + xs];
-	    srcImage.data[y * srcImage.rowstride + xd + 1] = info.col[y * srcImage.rowstride + xs + 1];
-	    srcImage.data[y * srcImage.rowstride + xd + 2] = info.col[y * srcImage.rowstride + xs + 2];
-	}
+        for(xs = 0 , xd = 0; xd < srcImage.width * 4 ; xs += 3, xd += 4)
+	    {
+	        srcImage.data[y * srcImage.rowstride + xd] = infile.col[y * srcRowStride  + xs];
+	        srcImage.data[y * srcImage.rowstride + xd + 1] = infile.col[y * srcRowStride + xs + 1];
+	        srcImage.data[y * srcImage.rowstride + xd + 2] = infile.col[y * srcRowStride + xs + 2];
+	    }
     }
     AndroidBitmap_unlockPixels(env, bitmap);
     LOGI("####end ##\n");

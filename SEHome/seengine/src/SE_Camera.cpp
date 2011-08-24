@@ -1,6 +1,6 @@
 #include "SE_Camera.h"
 #include "SE_Log.h"
-#include "SE_BoundingVolume.h"
+
 #include <math.h>
 IMPLEMENT_OBJECT(SE_Camera)
 ///////////////
@@ -97,25 +97,7 @@ void SE_Camera::translateLocal(const SE_Vector3f& translate)
     mLocation = mLocation + mAxisX * translate.x + mAxisY * translate.y + mAxisZ * translate.z;
     mChanged = true; 
 }
-SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
-{
-#ifdef ROTATE
-	float yp = 1 - ((float)x) / (mViewport.bottom - mViewport.top);
-	float xp = 1 - ((float)y) / (mViewport.right - mViewport.left);
-#else
-    float xp = ((float)x) / (mViewport.right - mViewport.left);
-    float yp = 1 - ((float)y) / (mViewport.bottom - mViewport.top);
-#endif
-    SE_Rect<float> nearRect = mFrustum.getNearPlaneRect();
-    float xv = (1 - xp) * nearRect.left + xp * nearRect.right;
-    float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
-    float dirLen = SE_Sqrtf(xv * xv + yv * yv + mFrustum.getNear() * mFrustum.getNear());
-    SE_Vector3f dir;
-    dir.x = mAxisX.x * xv / dirLen + mAxisY.x * yv / dirLen + mAxisZ.x * (-mFrustum.getNear()) / dirLen;
-    dir.y = mAxisX.y * xv / dirLen + mAxisY.y * yv /dirLen + mAxisZ.y * (-mFrustum.getNear()) / dirLen;
-    dir.z = mAxisX.z * xv / dirLen + mAxisY.z * yv / dirLen + mAxisZ.z * (-mFrustum.getNear()) / dirLen;
-    return SE_Ray(mLocation, dir, false);
-}
+
 void SE_Camera::getFrustumPlanes(SE_Plane planes[6]) const
 {
 	if(!mChanged)
@@ -287,4 +269,28 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, co
 SE_Matrix4f SE_Camera::getPerspectiveMatrix() const
 {
 	return mFrustum.getPerspectiveMatrix();
+}
+#include "SE_Application.h"
+SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
+{
+	float xp, yp;
+	if(SE_Application::getInstance()->isScreenRotate())
+	{
+	    yp = 1 - ((float)x) / (mViewport.bottom - mViewport.top);
+	    xp = 1 - ((float)y) / (mViewport.right - mViewport.left);
+	}
+	else
+	{
+        xp = ((float)x) / (mViewport.right - mViewport.left);
+        yp = 1 - ((float)y) / (mViewport.bottom - mViewport.top);
+	}
+    SE_Rect<float> nearRect = mFrustum.getNearPlaneRect();
+    float xv = (1 - xp) * nearRect.left + xp * nearRect.right;
+    float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
+    float dirLen = SE_Sqrtf(xv * xv + yv * yv + mFrustum.getNear() * mFrustum.getNear());
+    SE_Vector3f dir;
+    dir.x = mAxisX.x * xv / dirLen + mAxisY.x * yv / dirLen + mAxisZ.x * (-mFrustum.getNear()) / dirLen;
+    dir.y = mAxisX.y * xv / dirLen + mAxisY.y * yv /dirLen + mAxisZ.y * (-mFrustum.getNear()) / dirLen;
+    dir.z = mAxisX.z * xv / dirLen + mAxisY.z * yv / dirLen + mAxisZ.z * (-mFrustum.getNear()) / dirLen;
+    return SE_Ray(mLocation, dir, false);
 }

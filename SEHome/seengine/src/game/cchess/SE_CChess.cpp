@@ -1240,6 +1240,7 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height, bool
 	scene->setCamera(cameraID);
 	//end
 	sceneManager->show(sceneID);
+	
     if(bShowCursor)
 	{
 	    sceneManager->loadCursor("Cursor.xml/cursorroot", 100, 100);
@@ -1249,7 +1250,7 @@ void SE_CChess::loadScene(const char* sceneName, float width, float height, bool
 	{
         sceneManager->loadCursor(NULL, 100, 100);
 	}
-
+    
     if(mSceneID.isValid())
     {
         sceneManager->dismiss(mSceneID);

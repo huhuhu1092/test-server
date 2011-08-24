@@ -22,7 +22,9 @@
 #include "gimpressionist.h"
 #include "ppmtool.h"
 #include "random.h"
+#ifdef WIN32
 #include "imageloader.h"
+#endif
 static gboolean img_has_alpha = 0;
 static gint brush_from_file = 2;
 static ppm_t brushppm  = {0, 0, NULL};
@@ -97,10 +99,11 @@ void brush_reload (const gchar *fn,
       lastfn[0] = '\0';
       return;
     }
-
+  g_printerr("## brush_reload fn = %s ###\n", fn);
   if (strcmp (fn, lastfn))
     {
       g_strlcpy (lastfn, fn, sizeof (lastfn));
+      g_printerr("## lastfn = %s ##\n", lastfn);
       ppm_kill (&cache);
       ppm_load (fn, &cache);
     }
@@ -112,6 +115,7 @@ void brush_get_selected (ppm_t *p)
 {
   if (brush_from_file)
   {
+    g_printerr("#####brush_get_selected ####");
     brush_reload (pcvals.selected_brush, p);
 	/*
     //debug
@@ -578,13 +582,13 @@ repaint (ppm_t *p, ppm_t *a)
 
   int dropshadow = pcvals.general_drop_shadow;
   int shadowblur = pcvals.general_shadow_blur;
-
+  g_printerr("####running = %d ###", running);
   if (running)
     return;
   running++;
 
   runningvals = pcvals;
-
+  print_val(&runningvals);
   /* Shouldn't be necessary, but... */
   if (img_has_alpha)
     if ((p->width != a->width) || (p->height != a->height))

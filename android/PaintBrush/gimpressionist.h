@@ -153,6 +153,7 @@ double getsiz_proto (double x, double y, int n, smvector_t *vec,
 extern double dist (double x, double y, double end_x, double end_y);
 extern void repaint (ppm_t *p, ppm_t *a);
 extern void setDefaultPcvals();
+extern void print_val(gimpressionist_vals_t* val);
 #ifdef __cplusplus
 }
 #endif

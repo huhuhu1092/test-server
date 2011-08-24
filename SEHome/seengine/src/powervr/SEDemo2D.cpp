@@ -46,8 +46,8 @@
 #include <string.h>
 #include <string>
 #include <vector>
-#define SCREEN_WIDTH  480
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH  800
+#define SCREEN_HEIGHT 480
 ////////////////////////////////////////////
 
 ///////////////////////////////////
@@ -111,8 +111,8 @@ static void debugPrimitive()
 bool SEDemo::InitApplication()
 {
 	//doTest();
-	//PVRShellSet(prefWidth, SCREEN_WIDTH);
-	//PVRShellSet(prefHeight, SCREEN_HEIGHT);
+	PVRShellSet(prefWidth, SCREEN_WIDTH);
+	PVRShellSet(prefHeight, SCREEN_HEIGHT);
     //debug
     debugPrimitive();
     //end
@@ -120,7 +120,7 @@ bool SEDemo::InitApplication()
 	appid.first = 137;
 	appid.second = 18215879;
 	SE_Application::getInstance()->setAppID(appid);
-    
+	SE_Application::getInstance()->setIsScreenRotate(true);
 	SE_CChess* chessapp = new SE_CChess(30, 690, 53, 53, SE_CChess::RED, SE_CChess::BLACK);
     chessapp->setUserName("aa");
     chessapp->setPassword("aa");
@@ -135,7 +135,7 @@ bool SEDemo::InitApplication()
 	SE_Init2D* c = new SE_Init2D(SE_Application::getInstance());
 	//SE_InitAppCommand* c = (SE_InitAppCommand*)SE_Application::getInstance()->createCommand("SE_InitAppCommand");
 #ifdef WIN32
-	c->dataPath = "D:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
+	c->dataPath = "C:\\model\\newhome3";//"D:\\model\\jme\\home\\newhome3";
 #else
 	c->dataPath = "/home/luwei/model/newhome3";
 #endif
@@ -143,13 +143,16 @@ bool SEDemo::InitApplication()
 	c->chessApp = chessapp;
 	c->left = 0;
 	c->top = 0;
-#ifdef ROTATE
-	c->width = 800;
-	c->height = 480;
-#else
-	c->width = 480;
-	c->height = 800;
-#endif
+	if(SE_Application::getInstance()->isScreenRotate())
+	{
+	    c->width = 800;
+	    c->height = 480;
+	}
+	else
+	{
+	    c->width = 480;
+	    c->height = 800;
+	}
 	SE_Application::getInstance()->postCommand(c);
 	return true;
 }
@@ -263,11 +266,15 @@ void SEDemo::handleInput(int width, int height)
 	    SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
 	    if(c)
 	    {
-#ifdef ROTATE
-            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
-#else
-		    SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
-#endif
+			SE_MotionEvent* ke;
+			if(SE_Application::getInstance()->isScreenRotate())
+			{
+                ke = new SE_MotionEvent(SE_MotionEvent::DOWN , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+			}
+			else
+			{
+		        ke = new SE_MotionEvent(SE_MotionEvent::DOWN, prevPointer[0] * width, prevPointer[1] * height);
+			}
 		    c->motionEvent = ke;
 		    SE_Application::getInstance()->postCommand(c);
 	    }
@@ -278,12 +285,15 @@ void SEDemo::handleInput(int width, int height)
         SE_MotionEventCommand* c = (SE_MotionEventCommand*)SE_Application::getInstance()->createCommand("SE_MotionEventCommand");
 		if(c)
 		{
-#ifdef ROTATE
-            SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
-
-#else
-			SE_MotionEvent* ke = new SE_MotionEvent(SE_MotionEvent::UP, prevPointer[0] * width, prevPointer[1] * height);
-#endif	
+			SE_MotionEvent* ke ;
+			if(SE_Application::getInstance()->isScreenRotate())
+			{
+                ke = new SE_MotionEvent(SE_MotionEvent::UP , prevPointer[1] * height, ( 1 - prevPointer[0] ) * width);
+			}
+            else
+			{
+			    ke = new SE_MotionEvent(SE_MotionEvent::UP, prevPointer[0] * width, prevPointer[1] * height);
+			}
 			c->motionEvent = ke;
 			SE_Application::getInstance()->postCommand(c);
 		}

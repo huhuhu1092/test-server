@@ -48,26 +48,27 @@ void SE_Init2D::handle(SE_TimeMS realDelta, SE_TimeMS simulateDelta)
 
     SE_ResourceManager* resourceManager = mApp->getResourceManager();
     resourceManager->setDataPath(dataPath.c_str());
-    /*
+    
 	resourceManager->loadShader("ShaderDefine.xml");
 	resourceManager->loadRenderer("RendererDefine.xml");
 	resourceManager->loadFont("fontDefine.xml");
     //chessApp->start();
     chessApp->loadBoard();
 	SE_Application::getInstance()->setState(SE_Application::RUNNING);
-	*/
+	
 	//begin
+	/*
 	SE_ThreadManager* threadManager = SE_GET_THREADMANAGER();
 	SE_LoadThread* lthread = new SE_LoadThread(resourceManager, chessApp);
     lthread->setName("loadthread");
 	threadManager->add(lthread);
 	lthread->start();
-
+    */
 	//end
-	SE_NetAddress na("127.0.0.1", 5999);
-    SE_UieAcceptThread* uieAcceptThread = new SE_UieAcceptThread(na);
-	threadManager->add(uieAcceptThread);
-	uieAcceptThread->start();
+	//SE_NetAddress na("127.0.0.1", 5999);
+    //SE_UieAcceptThread* uieAcceptThread = new SE_UieAcceptThread(na);
+	//threadManager->add(uieAcceptThread);
+	//uieAcceptThread->start();
 
 }
 //////////////

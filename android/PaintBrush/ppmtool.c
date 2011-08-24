@@ -358,7 +358,7 @@ ppm_load (const char *fn, ppm_t *p)
   char  line[200];
   int   y, pgm = 0;
   FILE *f;
-
+  g_printerr("### fn = %s ### ", fn);
   if (!strcmp (&fn[strlen (fn)-4], ".gbr"))
     {
       load_gimp_brush(fn, p);
@@ -378,6 +378,7 @@ ppm_load (const char *fn, ppm_t *p)
     }
 
   readline (f, line, 200);
+  g_printerr("##readline = %s ##", line);
   if (strcmp (line, "P6"))
     {
       if (strcmp (line, "P5"))
@@ -416,6 +417,7 @@ ppm_load (const char *fn, ppm_t *p)
       p->col[y] = tmpcol[y / 3];
     }
   }
+  g_printerr("## ppm width = %d, height = %d , col = %p ###\n", p->width, p->height, p->col);
   fclose (f);
 }
 

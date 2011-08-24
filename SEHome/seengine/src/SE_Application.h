@@ -61,6 +61,14 @@ public:
     {
         return mAppID;
     }
+	void setIsScreenRotate(bool r)
+	{
+		mScreenRotate = r;
+	}
+	bool isScreenRotate() const
+	{
+		return mScreenRotate;
+	}
 	void setFrameRate(int frameRate)
 	{
 		mFrameRate = frameRate;
@@ -249,6 +257,7 @@ protected:
     static SE_Application* mInstance;
     typedef std::map<std::string, SE_Game*> _GameMap;
     _GameMap mGameMap;
+	bool mScreenRotate;
 };
 #define SE_GET_RESOURCEMANAGER() SE_Application::getInstance()->getResourceManager()
 #define SE_GET_ELEMENTMANAGER() SE_Application::getInstance()->getElementManager()

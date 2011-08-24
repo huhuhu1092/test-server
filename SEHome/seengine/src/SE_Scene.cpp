@@ -229,17 +229,21 @@ SE_Element* SE_2DScene::createMatrixNode()
 {
     SE_2DNodeElement* root = new SE_2DNodeElement;
 	root->setCanPointed(false);
-#ifdef ROTATE
-    SE_Vector4f c1(0, -1, 0, 0);
-    SE_Vector4f c2(-1, 0, 0, 0);
-    SE_Vector4f c3(0, 0, 1, 0);
-    SE_Vector4f c4(mWidth / 2, mHeight / 2, 0, 1);
-#else
-    SE_Vector4f c1(1, 0, 0, 0);
-    SE_Vector4f c2(0, -1, 0, 0);
-    SE_Vector4f c3(0, 0, 1, 0);
-    SE_Vector4f c4(-mWidth / 2, mHeight / 2, 0, 1);
-#endif
+	SE_Vector4f c1, c2, c3, c4;
+	if(SE_Application::getInstance()->isScreenRotate())
+	{
+        c1.set(0, -1, 0, 0);
+        c2.set(-1, 0, 0, 0);
+        c3.set(0, 0, 1, 0);
+        c4.set(mWidth / 2, mHeight / 2, 0, 1);
+	}
+	else
+	{
+        c1.set(1, 0, 0, 0);
+        c2.set(0, -1, 0, 0);
+        c3.set(0, 0, 1, 0);
+        c4.set(-mWidth / 2, mHeight / 2, 0, 1);
+	}
     SE_Matrix4f localM;
     localM.setColumn(0, c1);
     localM.setColumn(1, c2);

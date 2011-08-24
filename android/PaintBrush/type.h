@@ -1,7 +1,11 @@
 #ifndef TYPE_H
 #define TYPE_H
+#include <stdlib.h>
 #ifdef WIN32
 #include <windows.h>
+#endif
+#ifdef ANDROID
+#include <android/log.h>
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -25,10 +29,20 @@ struct _GimpRGB
 {
     gdouble r, g, b, a;
 };
+#ifdef ANDROID
+#define  LOG_TAG    "libhello-jni"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define g_warning LOGI
+#define g_printerer LOGI
+#define g_printerr LOGI
+#define g_message LOGI
+#else
 #define g_warning printf
 #define g_printerer printf
 #define g_printerr printf
 #define g_message printf
+#endif
 #define g_malloc malloc
 #define g_free free
 #define g_new(struct_type, n_structs) (struct_type*)g_malloc(sizeof(struct_type) * n_structs)
