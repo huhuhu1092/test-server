@@ -145,6 +145,16 @@ enum ORIENTATION_ENUM
     ORIENTATION_ADAPTIVE = 6,
     ORIENTATION_MANUAL = 7,
 };
+/*
+ * x == -2 && y == -2 indicate the list is at end
+ * x == -1 && y == -1 indicate there has no brush piece in list
+ * */
+typedef struct
+{
+    ppm_t data;
+    int x;
+    int y;
+} BrushPiece;
 /* Globals */
 
 extern gimpressionist_vals_t pcvals;
@@ -154,6 +164,9 @@ extern double dist (double x, double y, double end_x, double end_y);
 extern void repaint (ppm_t *p, ppm_t *a);
 extern void setDefaultPcvals();
 extern void print_val(gimpressionist_vals_t* val);
+extern BrushPiece getNextBrushPiece();
+extern void addBrushPiece(const BrushPiece& bp);
+extern int isRepaintEnd();
 #ifdef __cplusplus
 }
 #endif

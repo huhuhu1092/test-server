@@ -30,8 +30,40 @@ static gint brush_from_file = 2;
 static ppm_t brushppm  = {0, 0, NULL};
 
 static gimpressionist_vals_t runningvals;
-void
-gimp_rgb_get_uchar (const GimpRGB *rgb,
+static std::list<BrushPiece> gBrushPieceList;
+static SE_Mutex gBrushPieceMutex;
+static int isRepaintEnd = 0;
+BrushPiece getNextBrushPiece()
+{
+    BrushPiece bp;
+    gBrushPieceMutex.lock();
+    if(!gBrushPieceMutex.empty())
+    {
+        bp = gBrushPieceList.front();
+        gBrushPieceList.pop_front();
+    }
+    else
+    {
+        if(!isRepaintEnd)
+	{
+            bp.x = bp.y = -1;
+	}
+	else
+	{
+	    bp.x = bp.y = -2;
+	}
+    }
+    gBrushPieceMutex.unlock();
+    return bp;
+}
+void addBrushPiece(const BrushPiece& bp)
+{
+    gBrushPieceMutex.lock();
+    gBrushPieceList.push_back(bp);
+    gBrushPieceMutex.unlock();
+}
+///////////////////////////////////////////////////////////////////////////
+static void gimp_rgb_get_uchar (const GimpRGB *rgb,
                     guchar        *r,
                     guchar        *g,
                     guchar        *b)
@@ -1331,6 +1363,11 @@ repaint (ppm_t *p, ppm_t *a)
 	{
 		BrushProperty bp = *it;
 		apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+		BrushPiece brushPiece;
+		brushPiece.x = bp.tx;
+		brushPiece.y = bp.ty;
+	        ppm_new(&brushPiece.data, bp.brush->width, bp.brush->height);
+	        	
 	}
 	//end
   for (i = 0; i < num_brushes; i++)

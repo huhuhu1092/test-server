@@ -39,6 +39,7 @@ void resize_fast(ppm_t *p, int nx, int ny);
 void ppm_load(const char *fn, ppm_t *p);
 void ppm_save(ppm_t *p, const char *fn);
 void ppm_copy(ppm_t *s, ppm_t *p);
+void ppm_copy_xy(ppm_t *s, ppm_t *p, int srcx, int srcy, int srcw, int srch, int dstx, int dsty);
 void fill(ppm_t *p, guchar *c);
 void free_rotate(ppm_t *p, double amount);
 void ppm_pad(ppm_t *p, int left,int right, int top, int bottom, guchar *);

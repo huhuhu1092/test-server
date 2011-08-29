@@ -458,7 +458,14 @@ ppm_copy (ppm_t *s, ppm_t *p)
   p->height = s->height;
   p->col = g_memdup (s->col, p->width * 3 * p->height);
 }
-
+void ppm_copy_xy(ppm_t *s, ppm_t *p, int srcx, int srcy, int srcw, int srch, int dstx, int dsty)
+{
+    int endx = srcx + srcw;
+    int endy = srcy + srch;
+    if(endx > s->width)
+        endx = s->width;
+    if()
+}
 void
 free_rotate (ppm_t *p, double amount)
 {
