@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Message;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import android.os.SystemClock;
 public class HelloJni extends Activity
 {
     /** Called when the activity is first created. */
@@ -67,6 +68,9 @@ public class HelloJni extends Activity
      * java.lang.UnsatisfiedLinkError exception !
      */
     public native String  unimplementedStringFromJNI();
+    
+    private native void setParameter(PaintBrushParam p);
+    private native void init();
 
     /* this is used to load the 'hello-jni' library on application
      * startup. The library has already been unpacked into
@@ -82,8 +86,25 @@ public class HelloJni extends Activity
     		Runnable runnable = new Runnable() {
     			public void run()
     			{
+    	    		PaintBrushParam p = new PaintBrushParam();
+    	    		p.bg_type = 1;
+    	    		p.brush_density = 1.0f;
+    	    		p.orient_first = 1.0f;
+    	    		p.orient_last = 1.0f;
+    	    		p.orient_type = 1;
+    	    		p.orient_num = 2;
+    	    		p.placement = 3 ;
+    	    		p.size_first = 1.0f;
+    	    		p.size_last = 1.0f;
+    	    		p.size_num = 2;
+    	    		p.size_type = 2;
+    	    		init();
+    	    		//setParameter(p);
+    	    		long startTime = SystemClock.uptimeMillis();
     				repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
-    				Log.i("hellojni", "#### repaint end #######");
+    				long endTime = SystemClock.uptimeMillis();
+    				long span = (endTime - startTime) / 1000;
+    				Log.i("hellojni", "#### repaint end time = " + span + " #######");
     				/*
     				File f = new File("/sdcard/test/test.png");
     				try
@@ -119,9 +140,8 @@ public class HelloJni extends Activity
     				mH.sendMessage(msg);
     			}
     		};
-    		Thread thread = new Thread(runnable);
-    		thread.start();
-    		
+    		//Thread thread = new Thread(runnable);
+    		//thread.start();
     		//repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
     		//mImageView.setImageBitmap(mCurrBmp);
     	}
@@ -142,6 +162,7 @@ public class HelloJni extends Activity
     		}
     	}
     }
+
     private final static int REPAINT_END = 1;
     private ImageLoader mImageLoader;
     private Bitmap mCurrBmp;
