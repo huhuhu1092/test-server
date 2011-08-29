@@ -554,7 +554,28 @@ apply_brush (ppm_t *brush,
         }
     }
 }
-
+struct BrushProperty
+{
+  int tx;
+  int ty;
+  int r, g, b;
+  ppm_t* brush;
+  ppm_t* shadow;
+};
+static std::list<BrushProperty> gBrushProperties;
+class _BrushPropertyComp
+{
+public:
+	bool operator()(const BrushProperty& left, const BrushProperty& right)
+	{
+		float leftGray = left.r * 0.2126f + left.g * 0.7152f + left.b * 0.0722f;
+		float rightGray = right.r * 0.2126f + right.g * 0.7152f + right.b * 0.0722f;
+		if(leftGray < rightGray)
+			return true;
+		else
+			return false;
+	}
+};
 void
 repaint (ppm_t *p, ppm_t *a)
 {
@@ -1253,9 +1274,18 @@ repaint (ppm_t *p, ppm_t *a)
 #undef BOUNDS
 #undef MYASSIGN
         }
-
-      apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
-
+      //debug for change
+      //apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
+	  BrushProperty bp;
+	  bp.brush = brush;
+	  bp.b = b;
+	  bp.g = g;
+	  bp.r = r;
+	  bp.shadow = shadow;
+	  bp.tx = tx;
+	  bp.ty = ty;
+	  gBrushProperties.push_back(bp);
+      //end
       if (runningvals.general_tileable && runningvals.general_paint_edges)
         {
           int orig_width = tmp.width - 2 * maxbrushwidth;
@@ -1293,6 +1323,16 @@ repaint (ppm_t *p, ppm_t *a)
             }
         }
     }
+  	//debug for change
+	//apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
+	gBrushProperties.sort(_BrushPropertyComp());
+	std::list<BrushProperty>::iterator it;
+	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() ; it++)
+	{
+		BrushProperty bp = *it;
+		apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+	}
+	//end
   for (i = 0; i < num_brushes; i++)
     {
       ppm_kill (&brushes[i]);
