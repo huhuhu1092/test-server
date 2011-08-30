@@ -31,6 +31,7 @@ extern "C" {
     JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_getOutputImageWidth(JNIEnv* env, jobject thiz);
     JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_getOutputImageHeight(JNIEnv* env, jobject thiz);
     JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, jobject bitmap);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, jobject param);
 
 }
 static JavaVM* mJvm = 0;
@@ -385,4 +386,57 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
     LOGI("## paint brush end ##");
     return 2;
 }
-
+void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, jobject param)
+{
+    jfieldID orientationID;
+    jfieldID orientNumID;
+    jfieldID orientFirstID;
+    jfieldID orientLastID;
+    jfieldID sizeNumID;
+    jfieldID sizeFirstID;
+    jfieldID sizeLastID;
+    jfieldID sizeTypeID;
+    jfieldID bgTypeID;
+    jfieldID placementID;
+    jfieldID brushDensityID;
+    jclass cls = env->GetObjectClass(param);
+    orientationID = env->GetFieldID(cls, "orient_type", "I");
+    LOGI("## orientationID = %d ##", orientationID);
+    orientNumID = env->GetFieldID(cls, "orient_num", "I");
+    LOGI("## orientNumID = %d ##", orientNumID);
+    orientFirstID = env->GetFieldID(cls, "orient_first", "F");
+    LOGI("## orientFirstID = %d ##", orientFirstID);
+    orientLastID = env->GetFieldID(cls, "orient_last", "F");
+    LOGI("## orientLastID = %d ##", orientLastID);
+    sizeNumID = env->GetFieldID(cls, "size_num", "I");
+    LOGI("## sizeNumID = %d ##", sizeNumID);
+    sizeFirstID = env->GetFieldID(cls, "size_first", "F");
+    LOGI("## sizeFirstID = %d ##", sizeFirstID);
+    sizeLastID = env->GetFieldID(cls, "size_last", "F");
+    LOGI("## sizeLastID = %d ##", sizeLastID);
+    sizeTypeID = env->GetFieldID(cls, "size_type", "I");
+    LOGI("## sizeTypeID = %d ##", sizeTypeID);
+    bgTypeID = env->GetFieldID(cls, "bg_type", "I");
+    LOGI("## bgTypeID = %d ##", bgTypeID);
+    placementID = env->GetFieldID(cls, "placement", "I");
+    LOGI("## placementID = %d ##", placementID);
+    brushDensityID = env->GetFieldID(cls, "brush_density", "F");
+    LOGI("## brushDensityID = %d ##", brushDensityID);
+    pcvals.orient_type = env->GetIntField(param, orientationID);
+    pcvals.orient_num = env->GetIntField(param, orientNumID);
+    pcvals.orient_first = env->GetFloatField(param, orientFirstID);
+    pcvals.orient_last = env->GetFloatField(param, orientLastID);
+    pcvals.size_num = env->GetIntField(param, sizeNumID);
+    pcvals.size_first = env->GetFloatField(param, sizeFirstID);
+    pcvals.size_last = env->GetFloatField(param, sizeLastID);
+    pcvals.size_type = env->GetIntField(param, sizeTypeID);
+    pcvals.general_background_type = env->GetIntField(param, bgTypeID);
+    pcvals.brush_density = env->GetFloatField(param, brushDensityID);
+    LOGI("## pcvals orient_type = %d, orient_num = %d, orient_first = %f, \
+		    orient_last = %f, size_num = %d, size_first = %f, \
+		    size_last = %f, size_type = %d, bg_type = %d, \
+		    brush_density = %f ##\n", pcvals.orient_type, 
+		    pcvals.orient_num, pcvals.orient_first, pcvals.orient_last,
+		    pcvals.size_num, pcvals.size_first, pcvals.size_last, pcvals.size_type,
+		    pcvals.general_background_type, pcvals.brush_density);
+}
