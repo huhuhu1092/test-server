@@ -37,6 +37,18 @@ void save(Image image, const char* filename)
 	ilDeleteImages(1, &imgId);
 #endif
 }
+void save_ppm(ppm_t* p, const char* filename)
+{
+	Image image;
+	image.x = 0;
+	image.y = 0;
+	image.width = p->width;
+	image.height = p->height;
+	image.data = p->col;
+	image.bpp = 3;
+	image.rowstride = p->width * 3;
+	save(image, filename);
+}
 Image load(const char* filePath)
 {
 #if defined(WIN32)

@@ -1,5 +1,6 @@
 #ifndef IMAGELOADER_H
 #define IMAGELOADER_H
+#include "ppmtool.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +21,7 @@ typedef struct Image
 };
 extern Image load(const char* filename);
 extern void save(Image image, const char* filename);
+extern void save_ppm(ppm_t* p, const char* filename);
 #ifdef __cplusplus
 }
 #endif

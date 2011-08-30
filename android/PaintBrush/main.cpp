@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <math.h>
+#include <assert.h>
 static char filename[] = "c:\\paintbrush.jpg";
 static ppm_t         infile =  {0, 0, NULL};
 void grabarea (Image drawable)
@@ -140,6 +141,24 @@ static void init()
 	pcvals.orient_type = 4;
 	//pcvals.general_background_type = BG_TYPE_KEEP_ORIGINAL;
 }
+
+void createPaint()
+{
+	ppm_t out;
+	BrushPiece bp = getNextBrushPiece();
+	ppm_new(&out, bp.w, bp.h);
+	int mbw = bp.mbw;
+	int mbh = bp.mbh;
+    while(bp.x != -2 && bp.y != -2)
+	{
+		LOGI("bp.w = %d , bp.h = %d", bp.w, bp.h);
+		assert(bp.w == out.width && bp.h == out.height);
+		ppm_copy_xy(&bp.data, &out, 0, 0, bp.data.width, bp.data.height, bp.x, bp.y);
+		bp = getNextBrushPiece();
+	}
+	crop(&out, mbw, mbh, out.width - mbw, out.height - mbh);
+	save_ppm(&out, "c:\\testnewoutput.jpg");
+}
 int main(int argc , char** argv)
 {
 	double nx = fabs ((double)(0 - 191 / 2.0));
@@ -147,6 +166,7 @@ int main(int argc , char** argv)
 	init();
     Image image = load(filename);
     grabarea(image);
+	setIsRepaintEnd(0);
 	repaint(&infile, NULL);
 	Image outImage;
 	outImage.bpp = 3;
@@ -154,6 +174,9 @@ int main(int argc , char** argv)
 	outImage.height = infile.height;
 	outImage.data = infile.col;
 	save(outImage, "c:\\testoutput.jpg");
+	createPaint();
+	ppm_kill(&infile);
+
 	//save(image, "c:\\testoutput.png");
 	getchar();
 	return 0;

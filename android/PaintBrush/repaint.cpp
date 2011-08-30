@@ -22,6 +22,7 @@
 #include "gimpressionist.h"
 #include "ppmtool.h"
 #include "random.h"
+#include "SE_Mutex.h"
 #ifdef WIN32
 #include "imageloader.h"
 #endif
@@ -32,31 +33,53 @@ static ppm_t brushppm  = {0, 0, NULL};
 static gimpressionist_vals_t runningvals;
 static std::list<BrushPiece> gBrushPieceList;
 static SE_Mutex gBrushPieceMutex;
-static int isRepaintEnd = 0;
+static volatile int isRepaintEnd = 0;
+static SE_Mutex gIsRepaintEnd;
+void setIsRepaintEnd(int v)
+{
+    gIsRepaintEnd.lock();
+    isRepaintEnd = v;
+    gIsRepaintEnd.unlock();
+}
+int hasRepaintEnd()
+{
+    volatile int ret;
+    gIsRepaintEnd.lock();
+    ret = isRepaintEnd;
+    gIsRepaintEnd.unlock();
+    return ret;
+}
+void clearBrushPiece()
+{
+    gBrushPieceMutex.lock();
+	gBrushPieceList.clear();
+	gBrushPieceMutex.unlock();
+}
 BrushPiece getNextBrushPiece()
 {
     BrushPiece bp;
+    int tmpRepaintEnd = hasRepaintEnd();
     gBrushPieceMutex.lock();
-    if(!gBrushPieceMutex.empty())
+    if(!gBrushPieceList.empty())
     {
         bp = gBrushPieceList.front();
         gBrushPieceList.pop_front();
     }
     else
     {
-        if(!isRepaintEnd)
-	{
+        if(!tmpRepaintEnd)
+	    {
             bp.x = bp.y = -1;
-	}
-	else
-	{
-	    bp.x = bp.y = -2;
-	}
+   	    }
+	    else
+	    {
+	        bp.x = bp.y = -2;
+	    }
     }
     gBrushPieceMutex.unlock();
     return bp;
 }
-void addBrushPiece(const BrushPiece& bp)
+void addBrushPiece(BrushPiece bp)
 {
     gBrushPieceMutex.lock();
     gBrushPieceList.push_back(bp);
@@ -608,6 +631,26 @@ public:
 			return false;
 	}
 };
+static void createAlpha(ppm_t* brush, ppm_t* alpha)
+{
+    int brushrowstride = brush->width * 3;
+    int alpharowstride = alpha->width;
+    int x, y;
+    for(y = 0 ; y < brush->height ; y++)
+    {
+        guchar* row = brush->col + y * brushrowstride;
+        guchar* alpharow = alpha->col + y * alpharowstride;
+        for(x = 0 ; x < brush->width ; x++)
+        {
+            guchar* src = row + x * 3;
+            guchar* dst = alpharow + x;
+            if(src[0] == 0)
+                dst[0] = 0;
+            else
+                dst[0] = 255;
+        }
+    }
+}
 void
 repaint (ppm_t *p, ppm_t *a)
 {
@@ -1357,8 +1400,19 @@ repaint (ppm_t *p, ppm_t *a)
     }
   	//debug for change
 	//apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
+    
+    tmpWidth = tmp.width;
+    tmpHeight = tmp.height;
+
+    LOGI("############# start create brush piece w = %d, h = %d ##############", tmpWidth, tmpHeight);
 	gBrushProperties.sort(_BrushPropertyComp());
 	std::list<BrushProperty>::iterator it;
+	if(repaintCallBack)
+	{
+        LOGI("## call repaint callback ##");
+		(*repaintCallBack)("apply_brush", "start");
+        LOGI("## call repaint callback end ##");
+	}
 	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() ; it++)
 	{
 		BrushProperty bp = *it;
@@ -1366,9 +1420,17 @@ repaint (ppm_t *p, ppm_t *a)
 		BrushPiece brushPiece;
 		brushPiece.x = bp.tx;
 		brushPiece.y = bp.ty;
-	        ppm_new(&brushPiece.data, bp.brush->width, bp.brush->height);
-	        	
+		brushPiece.w = tmp.width;
+		brushPiece.h = tmp.height;
+        brushPiece.mbw = maxbrushwidth;
+        brushPiece.mbh = maxbrushheight;
+	    ppm_new(&brushPiece.data, bp.brush->width, bp.brush->height);
+        ppm_new_alpha(&brushPiece.alpha, bp.brush->width, bp.brush->height);
+	    ppm_copy_xy(&tmp, &brushPiece.data, bp.tx, bp.ty, bp.brush->width, bp.brush->height, 0, 0);    	
+        createAlpha(bp.brush, &brushPiece.alpha);
+        addBrushPiece(brushPiece);
 	}
+    setIsRepaintEnd(1);
 	//end
   for (i = 0; i < num_brushes; i++)
     {

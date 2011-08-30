@@ -24,6 +24,22 @@
 #define  LOG_TAG    "libhello-jni"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+extern "C" {
+    JNIEXPORT jstring JNICALL Java_com_example_hellojni_HelloJni_stringFromJNI( JNIEnv* env, jobject thiz );
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_init(JNIEnv* env, jobject thiz);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, jobject bitmap, jstring brushDataPath);
+    JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_getOutputImageWidth(JNIEnv* env, jobject thiz);
+    JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_getOutputImageHeight(JNIEnv* env, jobject thiz);
+    JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, jobject bitmap);
+
+}
+static JavaVM* mJvm = 0;
+static jobject mJavaObj;
+static jmethodID method_javaCallback;
+typedef union {
+    JNIEnv* env;
+    void* venv;
+} UnionJNIEnvToVoid;
 typedef struct _Image
 {
 	int x;
@@ -155,7 +171,7 @@ jstring
 Java_com_example_hellojni_HelloJni_stringFromJNI( JNIEnv* env,
                                                   jobject thiz )
 {
-    return (*env)->NewStringUTF(env, "Hello from JNI !");
+    return env->NewStringUTF("Hello from JNI !");
 }
 /********/
 static void setppm(const char* dataPath)
@@ -173,8 +189,58 @@ static void setppm(const char* dataPath)
     LOGI("### brush = %s ##\n", pcvals.selected_brush);
     LOGI("### paper = %s ##\n", pcvals.selected_paper);
 }
-static void init()
+
+static void invoke_javaCallback(const char* msgType, const char* msgName) 
 {
+    LOGI("### invoke_javacallback ###");
+    jstring msg_type = NULL;
+    jstring msg_name = NULL;
+    UnionJNIEnvToVoid uenv;
+    uenv.venv = NULL;
+    JNIEnv* env = NULL;
+    int detach = 0;
+    if (mJvm->GetEnv(&uenv.venv, JNI_VERSION_1_4) != JNI_OK)
+    {
+        if (mJvm->AttachCurrentThread(&env, NULL) != JNI_OK)
+        {
+           LOGE("callback_handler: failed to attach current thread\n");
+           return;
+        }
+        detach = 1;
+    } else { 
+        env = uenv.env;
+    }    
+    msg_type = env->NewStringUTF(msgType);
+    msg_name = env->NewStringUTF(msgName);
+    env->CallVoidMethod(mJavaObj, method_javaCallback, msg_type, msg_name);
+    env->DeleteLocalRef(msg_type);
+    env->DeleteLocalRef(msg_name);
+    if (detach)
+    {
+        if (mJvm->DetachCurrentThread() != JNI_OK)
+        {
+            LOGE("callback_handler: failed to detach current thread\n");
+        }
+    }
+}
+static JavaVM* jnienv_to_javavm(JNIEnv* env)
+{
+    JavaVM* vm;
+    LOGI("## get jvm ##");
+    return env->GetJavaVM(&vm) >= 0 ? vm : NULL;
+}
+
+void Java_com_example_hellojni_HelloJni_init(JNIEnv* env,
+                                                  jobject thiz)
+{
+    mJvm = jnienv_to_javavm(env);
+    mJavaObj = env->NewGlobalRef(thiz);
+    LOGI("## mJvm = %p ##" , mJvm );
+    repaintCallBack = &invoke_javaCallback;
+    jclass clazz = env->GetObjectClass(thiz);//env->FindClass("com/exmaple/hellojni/HelloJni");
+    LOGI("### clazz = %d ##", clazz);
+    method_javaCallback = env->GetMethodID(clazz, "javaCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
+    LOGI("## method id = %p ##", method_javaCallback);
 	setDefaultPcvals();
 	pcvals.size_first = 47;
 	pcvals.size_last = 151;
@@ -218,7 +284,7 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
         LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
     }
     random_generator = g_rand_new ();
-    init();
+    //init();
     setppm(dataPath);
     srcImage.x = 0;
     srcImage.y = 0;
@@ -226,7 +292,7 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
     srcImage.height = info.height;
     srcImage.bpp = 4;
     srcImage.rowstride = info.width * 4;
-    srcImage.data = (char*)pixels;
+    srcImage.data = (unsigned char*)pixels;
     grabarea(srcImage);
     LOGI("######################### get infile ####################");
     LOGI("## infile width = %d, height = %d ###", infile.width, infile.height);
@@ -250,3 +316,73 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
     AndroidBitmap_unlockPixels(env, bitmap);
     LOGI("####end ##\n");
 }
+int Java_com_example_hellojni_HelloJni_getOutputImageWidth(JNIEnv* env, jobject thiz)
+{
+    return tmpWidth;
+}
+int Java_com_example_hellojni_HelloJni_getOutputImageHeight(JNIEnv* env, jobject thiz)
+{
+    return tmpHeight;
+}
+int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, jobject bitmap)
+{
+    AndroidBitmapInfo  info;
+    void*              pixels;
+    unsigned char* data;
+    int ret;
+    jboolean ok;
+    int x = 0, y = 0, xd = 0;
+    LOGI("## enter paintBrush ##");
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return 0;
+    }
+
+    LOGI("bmp width = %d, height = %d, format = %d ", info.width, info.height, info.format);
+    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565 && info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGB_565 or RGBA!");
+        return 0;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+        return 0;
+    }    
+    data = (unsigned char*)pixels;
+    BrushPiece bp = getNextBrushPiece();
+    LOGI("## bp.x = %d, bp.y = %d ##", bp.x, bp.y);
+    if(bp.x == -2 && bp.y == -2)
+        return 0;
+    if(bp.x == -1 && bp.y == -1)
+        return 1;
+    int dstrowstride = info.width * 4;
+    int srcrowstride = bp.data.width * 3;
+    int startx = bp.x;
+    int starty = bp.y;
+    for(y = 0 ; y < bp.data.height ; y++)
+    {
+        guchar* row = bp.data.col + y * srcrowstride;
+        guchar* dstrow = data + starty * dstrowstride;
+        guchar* alpharow = bp.alpha.col + y * bp.alpha.width;
+        startx = bp.x;
+        for(x = 0 ; x < bp.data.width ; x++)
+        {
+            guchar* src = row + x * 3;
+            guchar* srcalpha = alpharow + x;
+            guchar* dst = dstrow + startx * 4;
+            if(srcalpha[0] == 255)
+            {
+                dst[0] = src[0];
+                dst[1] = src[1];
+                dst[2] = src[2];
+                dst[3] = 255;//srcalpha[0];
+            }
+            startx++;
+        }
+        starty++;
+    }
+    AndroidBitmap_unlockPixels(env, bitmap);
+    LOGI("## paint brush end ##");
+    return 2;
+}
+

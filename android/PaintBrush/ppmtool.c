@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <math.h>
+#include <assert.h>
 #include "type.h"
 #include "ppmtool.h"
 #include "gimpressionist.h"
@@ -135,7 +136,24 @@ void ppm_new (ppm_t *p, int xs, int ys)
       p->col[x+2] = bgcol[2];
     }
 }
+void ppm_new_alpha(ppm_t* p, int xs, int ys)
+{
+  int    x;
+  guchar alpha = 0;
 
+  if (xs < 1)
+    xs = 1;
+  if (ys < 1)
+    ys = 1;
+
+  p->width = xs;
+  p->height = ys;
+  p->col = g_malloc (xs * 1 * ys);
+  for (x = 0; x < xs * 1 * ys; x += 1)
+    {
+      p->col[x] = alpha;
+    }
+}
 void
 get_rgb (ppm_t *s, float xo, float yo, guchar *d)
 {
@@ -462,9 +480,32 @@ void ppm_copy_xy(ppm_t *s, ppm_t *p, int srcx, int srcy, int srcw, int srch, int
 {
     int endx = srcx + srcw;
     int endy = srcy + srch;
+    int x, y;
+	int srcrowstride,dstrowstride;
     if(endx > s->width)
         endx = s->width;
-    if()
+    if(endy > s->height)
+        endy = s->height;
+    srcrowstride = s->width * 3;
+    dstrowstride = p->width * 3;
+    for(y = srcy ; y < endy ; y++)
+    {
+        guchar* row = s->col + y * srcrowstride;
+        guchar* dstrow = p->col + dsty * dstrowstride;
+		int startdstx = dstx;
+        for(x = srcx ; x < endx ; x++)
+        {
+            guchar* src = row + x * 3;
+            guchar* dst = dstrow + startdstx * 3;
+            dst[0] =src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+            startdstx++;
+			assert(startdstx <= p->width);
+        }
+        dsty++;
+		assert(dsty <= p->height);
+    }
 }
 void
 free_rotate (ppm_t *p, double amount)

@@ -152,8 +152,13 @@ enum ORIENTATION_ENUM
 typedef struct
 {
     ppm_t data;
+	ppm_t alpha;
     int x;
     int y;
+	int w; // dst width
+	int h; // dst height
+	int mbw;
+	int mbh;
 } BrushPiece;
 /* Globals */
 
@@ -165,8 +170,14 @@ extern void repaint (ppm_t *p, ppm_t *a);
 extern void setDefaultPcvals();
 extern void print_val(gimpressionist_vals_t* val);
 extern BrushPiece getNextBrushPiece();
-extern void addBrushPiece(const BrushPiece& bp);
-extern int isRepaintEnd();
+extern void addBrushPiece(BrushPiece bp);
+extern void clearBrushPiece();
+extern int hasRepaintEnd();
+extern void setIsRepaintEnd(int v);
+typedef void (*REPAINTCALLBACK_FUN)(const char* type, const char* msg);
+extern REPAINTCALLBACK_FUN repaintCallBack;
+extern int tmpWidth;
+extern int tmpHeight;
 #ifdef __cplusplus
 }
 #endif

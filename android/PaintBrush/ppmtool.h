@@ -32,6 +32,7 @@ typedef struct ppm {
 void fatal(char *s);
 void ppm_kill(ppm_t *p);
 void ppm_new(ppm_t *p, int xs, int ys);
+void ppm_new_alpha(ppm_t* ppm, int w, int h);
 void get_rgb(ppm_t *s, float xo, float yo, unsigned char *d);
 void resize(ppm_t *p, int nx, int ny);
 void rescale(ppm_t *p, double scale);

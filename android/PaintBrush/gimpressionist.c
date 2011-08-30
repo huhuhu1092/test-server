@@ -20,7 +20,9 @@
 #include "gimpressionist.h"
 #include <stdio.h>
 #include <math.h>
-
+REPAINTCALLBACK_FUN repaintCallBack = 0;
+int tmpWidth = 0;
+int tmpHeight = 0;
 /*
  * The default values for the application, to be initialized at startup.
  * */
@@ -196,4 +198,3 @@ void print_val(gimpressionist_vals_t* val)
     P_VAL(color_type, d);
     P_VAL(color_noise, f); 
 }
-

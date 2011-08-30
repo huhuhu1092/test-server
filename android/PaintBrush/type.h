@@ -1,6 +1,7 @@
 #ifndef TYPE_H
 #define TYPE_H
 #include <stdlib.h>
+#include <stdio.h>
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -42,6 +43,8 @@ struct _GimpRGB
 #define g_printerer printf
 #define g_printerr printf
 #define g_message printf
+#define LOGI printf
+#define LOGE printf
 #endif
 #define g_malloc malloc
 #define g_free free

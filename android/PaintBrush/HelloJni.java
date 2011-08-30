@@ -78,6 +78,19 @@ public class HelloJni extends Activity
      * installation time by the package manager.
      */
     public native void repaintPixel(Bitmap bmap, String brushDataPath);
+    public native int getOutputImageWidth();
+    public native int getOutputImageHeight();
+    public native int paintBrush(Bitmap bmap);
+    public void javaCallback(String type, String msg)
+    {
+    	Log.i("hellojni", "## javaCallback ## " + type + " ## " + msg);
+    	Message m = Message.obtain();
+    	if(type.equals("apply_brush") && msg.equals("start"))
+    	{
+		    m.what = REPAINT_START;
+		    mH.sendMessage(m);
+    	}
+    }
     public boolean onTouchEvent(MotionEvent event) {
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
     	{
@@ -140,8 +153,8 @@ public class HelloJni extends Activity
     				mH.sendMessage(msg);
     			}
     		};
-    		//Thread thread = new Thread(runnable);
-    		//thread.start();
+    		Thread thread = new Thread(runnable);
+    		thread.start();
     		//repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
     		//mImageView.setImageBitmap(mCurrBmp);
     	}
@@ -154,18 +167,52 @@ public class HelloJni extends Activity
     {
     	public void handleMessage(Message msg)
     	{
-    		if(msg.what == REPAINT_END)
+    		switch(msg.what)
+    		{
+    		case REPAINT_END:
     		{
     			Log.i("hellojni", "#### handle repaint end ####");
     			mImageView.setImageBitmap(mCurrBmp);
     			
     		}
+    		break;
+    		case REPAINT_START:
+    		{
+    			Log.i("hellojni", "## handle repaint start ##");
+    			int w = getOutputImageWidth();
+    			int h = getOutputImageHeight();
+    			Log.i("hellojni", "## tmp width = " + w + ", height = " + h);
+    			mDestBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    			
+    			Message m = Message.obtain();
+    			m.what = REPAINT_LOOP;
+    			mH.sendMessage(m);
+    		}
+    		break;
+    		case REPAINT_LOOP:
+    		{
+    			int ret = paintBrush(mDestBitmap);
+    			if(ret != 0)
+    			{
+    				mImageView.setImageBitmap(mDestBitmap);
+    			    Message m = Message.obtain();
+    			    m.what = REPAINT_LOOP;
+    			    mH.sendMessageDelayed(m, 30);
+    			}
+    		}
+    		break;
+    		default:
+    			break;
+    		}
     	}
     }
 
     private final static int REPAINT_END = 1;
+    private final static int REPAINT_START = 2;
+    private final static int REPAINT_LOOP = 3;
     private ImageLoader mImageLoader;
     private Bitmap mCurrBmp;
+    private Bitmap mDestBitmap;
     private TextView mTextView;
     private ImageView mImageView;
     private Handler mH = new MyHandler();

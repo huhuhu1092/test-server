@@ -15,7 +15,7 @@ SE_Mutex::~SE_Mutex()
 bool SE_Mutex::lock()
 {
 #if defined(SE_HAS_MUTEX)
-    LOGI("mutex locked\n");
+    //LOGI("mutex locked\n");
     pthread_mutex_lock(&mMutex);
 #endif
      return true;
@@ -23,7 +23,7 @@ bool SE_Mutex::lock()
 bool SE_Mutex::unlock()
 {
 #if defined(SE_HAS_MUTEX)
-    LOGI("mutex unlock\n");
+    //LOGI("mutex unlock\n");
     pthread_mutex_unlock(&mMutex);
 #endif
     return true;
