@@ -43,7 +43,7 @@ public class HelloJni extends Activity
          * the text is retrieved by calling a native
          * function.
          */
-        mImageLoader = new ImageLoader("/sdcard/test/data");
+        mImageLoader = new ImageLoader("/sdcard/Pictures");//new ImageLoader("/sdcard/test/data");
         //TextView  tv = new TextView(this);
         mTextView = (TextView)findViewById(R.id.textview);
         mImageView = (ImageView)findViewById(R.id.imageview);
@@ -172,7 +172,7 @@ public class HelloJni extends Activity
     		case REPAINT_END:
     		{
     			Log.i("hellojni", "#### handle repaint end ####");
-    			mImageView.setImageBitmap(mCurrBmp);
+    			//mImageView.setImageBitmap(mCurrBmp);
     			
     		}
     		break;

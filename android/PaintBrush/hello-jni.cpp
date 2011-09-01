@@ -371,6 +371,13 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
             guchar* src = row + x * 3;
             guchar* srcalpha = alpharow + x;
             guchar* dst = dstrow + startx * 4;
+	    /*
+            dst[0] = src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+            dst[3] = 255;
+	    */
+	    
             if(srcalpha[0] == 255)
             {
                 dst[0] = src[0];
@@ -378,6 +385,14 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
                 dst[2] = src[2];
                 dst[3] = 255;//srcalpha[0];
             }
+	    else if(srcalpha[0] != 0)
+	    {
+                dst[0] = ((srcalpha[0]) / 256.0f) * src[0] + (1 - (srcalpha[0]) / 256.0f) * dst[0];
+                dst[1] = ((srcalpha[0]) / 256.0f) * src[1] + (1 - (srcalpha[0]) / 256.0f) * dst[1];
+		dst[2] = ((srcalpha[0]) / 256.0f) * src[0] + (1 - (srcalpha[0]) / 256.0f) * dst[2];
+		dst[3] = 255;
+	    }
+	   
             startx++;
         }
         starty++;

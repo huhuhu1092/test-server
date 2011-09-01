@@ -565,7 +565,10 @@ apply_brush (ppm_t *brush,
           int k = (tx + x) * 3;
           h = brush->col[y * brush->width * 3 + x * 3];
 
-          if (!h) continue;
+          if (!h)
+	  { 
+	      continue;
+	  }
 
           if (runningvals.color_brushes)
             {
