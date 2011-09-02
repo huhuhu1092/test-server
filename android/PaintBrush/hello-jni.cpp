@@ -32,6 +32,8 @@ extern "C" {
     JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_getOutputImageHeight(JNIEnv* env, jobject thiz);
     JNIEXPORT int JNICALL Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, jobject bitmap);
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, jobject param);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getSelectedPaperProperty(JNIEnv* env, jobject thiz, jobject p);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject thiz, jobject p, jobject bitmap);
 
 }
 static JavaVM* mJvm = 0;
@@ -251,7 +253,12 @@ void Java_com_example_hellojni_HelloJni_init(JNIEnv* env,
 	pcvals.orient_first = 35;
 	pcvals.orient_last = 96;
 	pcvals.orient_type = 4;
-	//pcvals.general_background_type = BG_TYPE_KEEP_ORIGINAL;
+	pcvals.general_background_type = BG_TYPE_FROM_PAPER;
+    pcvals.general_dark_edge = 0.0f;
+    pcvals.general_shadow_darkness = 0.0f;
+    pcvals.general_shadow_depth = 0.0f;
+    pcvals.general_shadow_blur = 0.0f;
+    pcvals.place_type = PLACEMENT_TYPE_EVEN_DIST;
 }
 void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, jobject bitmap, jstring brushDataPath)
 { 
@@ -331,7 +338,6 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
     void*              pixels;
     unsigned char* data;
     int ret;
-    jboolean ok;
     int x = 0, y = 0, xd = 0;
     LOGI("## enter paintBrush ##");
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
@@ -397,6 +403,8 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
         }
         starty++;
     }
+    ppm_kill(&bp.data);
+    ppm_kill(&bp.alpha);
     AndroidBitmap_unlockPixels(env, bitmap);
     LOGI("## paint brush end ##");
     return 2;
@@ -454,4 +462,84 @@ void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, 
 		    pcvals.orient_num, pcvals.orient_first, pcvals.orient_last,
 		    pcvals.size_num, pcvals.size_first, pcvals.size_last, pcvals.size_type,
 		    pcvals.general_background_type, pcvals.brush_density);
+}
+void Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject thiz, jobject p, jobject bitmap)
+{
+    jclass classz = env->GetObjectClass(p);
+    jfieldID widthID = env->GetFieldID(classz, "width", "I");
+    jfieldID heightID = env->GetFieldID(classz, "height", "I");
+    jfieldID ppmPointerID = env->GetFieldID(classz, "ppmPointer", "I");
+    ppm_t* paperppm = (ppm_t*)env->GetIntField(p, ppmPointerID);
+    LOGI("## paperppm col = %p ##" , paperppm->col );
+    if(paperppm->col == NULL)
+        return;
+    AndroidBitmapInfo  info;
+    void*              pixels;
+    unsigned char* data;
+    int ret;
+    LOGI("## enter getSelectedPaper ##");
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    LOGI("paper width = %d, height = %d, format = %d ", info.width, info.height, info.format);
+    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565 && info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGB_565 or RGBA!");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+        return;
+    }    
+    data = (unsigned char*)pixels;
+    int dstrowstride = info.width * 4;
+    int srcrowstride = paperppm->width * 3;
+    int startx = 0;
+    int starty = 0;
+    for(int y = 0 ; y < paperppm->height ; y++)
+    {
+        guchar* row = paperppm->col + y * srcrowstride;
+        guchar* dstrow = data + starty * dstrowstride;
+        startx = 0;
+        for(int x = 0 ; x < paperppm->width ; x++)
+        {
+            guchar* src = row + x * 3;
+            guchar* dst = dstrow + startx * 4;
+	        dst[0] = src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+            dst[3] = 255; 
+            startx++;
+        }
+        starty++;
+    }
+}
+void Java_com_example_hellojni_HelloJni_getSelectedPaperProperty(JNIEnv* env, jobject thiz, jobject p)
+{
+    ppm_t* paperppm = (ppm_t*)g_malloc(sizeof(ppm_t));
+    if(paperppm == NULL)
+        return;
+    /*
+    jboolean isCopy = false;
+    const char* paperNameStr = env->GetStringUTFChars(paperName, &isCopy);
+    if(paperNameStr == NULL)
+        return;
+    */
+    jclass classz = env->GetObjectClass(p);
+    jfieldID widthID = env->GetFieldID(classz, "width", "I");
+    jfieldID heightID = env->GetFieldID(classz, "height", "I");
+    jfieldID ppmPointerID = env->GetFieldID(classz, "ppmPointer", "I");
+    paperppm->width = paperppm->height = 0;
+    paperppm->col = NULL;
+    ppm_load(pcvals.selected_paper, paperppm);
+
+    env->SetIntField(p, widthID, paperppm->width);
+    env->SetIntField(p, heightID, paperppm->height);
+    env->SetIntField(p, ppmPointerID, (jint)paperppm);
+    /*
+END:
+    env->ReleaseStringUTFChars(paperName, paperNameStr);  
+    */
 }

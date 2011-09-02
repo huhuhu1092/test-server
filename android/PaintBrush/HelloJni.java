@@ -31,6 +31,10 @@ import android.os.Message;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import android.os.SystemClock;
+import android.graphics.drawable.BitmapDrawable;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.graphics.Canvas;
 public class HelloJni extends Activity
 {
     /** Called when the activity is first created. */
@@ -43,12 +47,18 @@ public class HelloJni extends Activity
          * the text is retrieved by calling a native
          * function.
          */
-        mImageLoader = new ImageLoader("/sdcard/Pictures");//new ImageLoader("/sdcard/test/data");
+        mImageLoader = new ImageLoader("/sdcard/test/data");
         //TextView  tv = new TextView(this);
         mTextView = (TextView)findViewById(R.id.textview);
         mImageView = (ImageView)findViewById(R.id.imageview);
         mTextView.setText( stringFromJNI() );
         mCurrBmp = mImageLoader.getNextImage();
+    }
+    public class PaperProperty
+    {
+    	public int width;
+    	public int height;
+    	private int ppmPointer;
     }
 
     /* A native method that is implemented by the
@@ -81,6 +91,8 @@ public class HelloJni extends Activity
     public native int getOutputImageWidth();
     public native int getOutputImageHeight();
     public native int paintBrush(Bitmap bmap);
+    public native void getSelectedPaperProperty(PaperProperty p);
+    public native void getSelectedPaper(PaperProperty p, Bitmap bitmap);
     public void javaCallback(String type, String msg)
     {
     	Log.i("hellojni", "## javaCallback ## " + type + " ## " + msg);
@@ -183,7 +195,21 @@ public class HelloJni extends Activity
     			int h = getOutputImageHeight();
     			Log.i("hellojni", "## tmp width = " + w + ", height = " + h);
     			mDestBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-    			
+				if(mBackgroundBitmap == null)
+				{
+					PaperProperty p = new PaperProperty();
+					getSelectedPaperProperty(p);
+					Log.i("hellojni", "## paper width = " + p.width + ", height = " + p.height + " ##");
+					if(p.width != 0 && p.height != 0)
+					{
+						Bitmap bmp = Bitmap.createBitmap(p.width, p.height, Bitmap.Config.ARGB_8888);
+						getSelectedPaper(p, bmp);
+						mBackgroundBitmap = bmp;
+						
+					}
+				}
+				if(mBackgroundBitmap != null)
+					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
     			Message m = Message.obtain();
     			m.what = REPAINT_LOOP;
     			mH.sendMessage(m);
@@ -211,6 +237,7 @@ public class HelloJni extends Activity
     private final static int REPAINT_START = 2;
     private final static int REPAINT_LOOP = 3;
     private ImageLoader mImageLoader;
+    private Bitmap mBackgroundBitmap;
     private Bitmap mCurrBmp;
     private Bitmap mDestBitmap;
     private TextView mTextView;

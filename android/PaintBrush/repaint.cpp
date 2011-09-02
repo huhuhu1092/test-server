@@ -685,7 +685,7 @@ repaint (ppm_t *p, ppm_t *a)
   if (running)
     return;
   running++;
-
+  setIsRepaintEnd(1);
   runningvals = pcvals;
   print_val(&runningvals);
   /* Shouldn't be necessary, but... */
