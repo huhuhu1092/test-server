@@ -136,6 +136,10 @@ void ppm_new (ppm_t *p, int xs, int ys)
       p->col[x+2] = bgcol[2];
     }
 }
+int ppm_empty(ppm_t* p)
+{
+    return p->width == 0 && p->height == 0 && p->col == NULL;
+}
 void ppm_new_alpha(ppm_t* p, int xs, int ys)
 {
   int    x;

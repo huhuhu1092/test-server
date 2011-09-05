@@ -54,6 +54,12 @@ public class HelloJni extends Activity
         mTextView.setText( stringFromJNI() );
         mCurrBmp = mImageLoader.getNextImage();
     }
+    @Override
+    public void onDestroy()
+    {
+    	super.onDestroy();
+    	clearBackground();
+    }
     public class PaperProperty
     {
     	public int width;
@@ -93,6 +99,9 @@ public class HelloJni extends Activity
     public native int paintBrush(Bitmap bmap);
     public native void getSelectedPaperProperty(PaperProperty p);
     public native void getSelectedPaper(PaperProperty p, Bitmap bitmap);
+    public native void getBackground(Bitmap bitmap);
+    public native void updateBackground();
+    public native void clearBackground();
     public void javaCallback(String type, String msg)
     {
     	Log.i("hellojni", "## javaCallback ## " + type + " ## " + msg);
@@ -102,12 +111,19 @@ public class HelloJni extends Activity
 		    m.what = REPAINT_START;
 		    mH.sendMessage(m);
     	}
+    	else if(type.equals("background") && msg.equals("initok"))
+    	{
+    		m.what = BG_INIT_OK;
+    		mH.sendMessage(m);
+    	}
     }
     public boolean onTouchEvent(MotionEvent event) {
+    	if(mStartPaint == true)
+    		return super.onTouchEvent(event);
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
     	{
     		Log.i("hellojni", "## before repaint ##");
-    		
+    		mStartPaint = true;
     		Runnable runnable = new Runnable() {
     			public void run()
     			{
@@ -191,6 +207,7 @@ public class HelloJni extends Activity
     		case REPAINT_START:
     		{
     			Log.i("hellojni", "## handle repaint start ##");
+    			
     			int w = getOutputImageWidth();
     			int h = getOutputImageHeight();
     			Log.i("hellojni", "## tmp width = " + w + ", height = " + h);
@@ -225,6 +242,21 @@ public class HelloJni extends Activity
     			    m.what = REPAINT_LOOP;
     			    mH.sendMessageDelayed(m, 30);
     			}
+    			else
+    			{
+    				updateBackground();
+    				mStartPaint = false;
+    			}
+    		}
+    		break;
+    		case BG_INIT_OK:
+    		{
+    			int w = getOutputImageWidth();
+    			int h = getOutputImageHeight();
+    			mBackgroundBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    			getBackground(mBackgroundBitmap);
+    			if(mBackgroundBitmap != null)
+					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
     		}
     		break;
     		default:
@@ -236,6 +268,7 @@ public class HelloJni extends Activity
     private final static int REPAINT_END = 1;
     private final static int REPAINT_START = 2;
     private final static int REPAINT_LOOP = 3;
+    private final static int BG_INIT_OK = 4;
     private ImageLoader mImageLoader;
     private Bitmap mBackgroundBitmap;
     private Bitmap mCurrBmp;
@@ -243,4 +276,5 @@ public class HelloJni extends Activity
     private TextView mTextView;
     private ImageView mImageView;
     private Handler mH = new MyHandler();
+    private boolean mStartPaint;
 }

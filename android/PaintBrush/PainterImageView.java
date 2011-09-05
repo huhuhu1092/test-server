@@ -24,6 +24,13 @@ public class PainterImageView extends ImageView
     {
     	int width = getWidth();
     	int height = getHeight();
+    	int x = (width - background.getWidth()) / 2;
+    	int y = (height - background.getHeight()) / 2;
+    	canvas.save();
+    	canvas.translate(x, y);
+    	canvas.drawBitmap(background, 0, 0, null);
+    	canvas.restore();
+    	/*
     	int yCount = height / background.getHeight() + (((height % background.getHeight()) == 0) ? 0 : 1);
     	int xCount = width / background.getWidth() + (((width % background.getWidth()) == 0) ? 0 : 1);
     	for(int i = 0 ; i < yCount ; i++)
@@ -36,6 +43,7 @@ public class PainterImageView extends ImageView
     			canvas.restore();
     		}
     	}
+    	*/
     }
     @Override 
     protected void onDraw(Canvas canvas) {

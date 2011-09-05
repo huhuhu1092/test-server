@@ -174,10 +174,13 @@ extern void addBrushPiece(BrushPiece bp);
 extern void clearBrushPiece();
 extern int hasRepaintEnd();
 extern void setIsRepaintEnd(int v);
+extern void changeBackground();
+extern void clearBackground();
 typedef void (*REPAINTCALLBACK_FUN)(const char* type, const char* msg);
 extern REPAINTCALLBACK_FUN repaintCallBack;
 extern int tmpWidth;
 extern int tmpHeight;
+extern ppm_t gBackground;
 #ifdef __cplusplus
 }
 #endif

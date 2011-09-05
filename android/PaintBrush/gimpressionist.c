@@ -23,6 +23,8 @@
 REPAINTCALLBACK_FUN repaintCallBack = 0;
 int tmpWidth = 0;
 int tmpHeight = 0;
+ppm_t gBackground = {0, 0, NULL};
+ppm_t gBackgroundBack = {0, 0, NULL};
 /*
  * The default values for the application, to be initialized at startup.
  * */
@@ -197,4 +199,13 @@ void print_val(gimpressionist_vals_t* val)
 
     P_VAL(color_type, d);
     P_VAL(color_noise, f); 
+}
+void changeBackground()
+{
+    ppm_copy(&gBackgroundBack, &gBackground);
+}
+void clearBackground()
+{
+    ppm_kill(&gBackground);
+    ppm_kill(&gBackgroundBack);
 }

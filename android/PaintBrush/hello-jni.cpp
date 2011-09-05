@@ -34,7 +34,9 @@ extern "C" {
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, jobject param);
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getSelectedPaperProperty(JNIEnv* env, jobject thiz, jobject p);
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject thiz, jobject p, jobject bitmap);
-
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getBackground(JNIEnv* env, jobject thiz, jobject bitmap);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_clearBackground(JNIEnv* env, jobject thiz);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_updateBackground(JNIEnv* env, jobject thiz);
 }
 static JavaVM* mJvm = 0;
 static jobject mJavaObj;
@@ -258,7 +260,7 @@ void Java_com_example_hellojni_HelloJni_init(JNIEnv* env,
     pcvals.general_shadow_darkness = 0.0f;
     pcvals.general_shadow_depth = 0.0f;
     pcvals.general_shadow_blur = 0.0f;
-    pcvals.place_type = PLACEMENT_TYPE_EVEN_DIST;
+    //pcvals.place_type = PLACEMENT_TYPE_EVEN_DIST;
 }
 void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, jobject bitmap, jstring brushDataPath)
 { 
@@ -304,7 +306,9 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
     grabarea(srcImage);
     LOGI("######################### get infile ####################");
     LOGI("## infile width = %d, height = %d ###", infile.width, infile.height);
+    setIsRepaintEnd(0);
     repaint(&infile, NULL);
+    setIsRepaintEnd(1);
     LOGI("######################### repaint end #################");
     if(infile.width != srcImage.width || infile.height != srcImage.height)
     {
@@ -322,6 +326,7 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
 	    }
     }
     AndroidBitmap_unlockPixels(env, bitmap);
+    g_rand_free(random_generator); 
     LOGI("####end ##\n");
 }
 int Java_com_example_hellojni_HelloJni_getOutputImageWidth(JNIEnv* env, jobject thiz)
@@ -391,14 +396,13 @@ int Java_com_example_hellojni_HelloJni_paintBrush(JNIEnv* env, jobject thiz, job
                 dst[2] = src[2];
                 dst[3] = 255;//srcalpha[0];
             }
-	    else if(srcalpha[0] != 0)
-	    {
-                dst[0] = ((srcalpha[0]) / 256.0f) * src[0] + (1 - (srcalpha[0]) / 256.0f) * dst[0];
-                dst[1] = ((srcalpha[0]) / 256.0f) * src[1] + (1 - (srcalpha[0]) / 256.0f) * dst[1];
-		dst[2] = ((srcalpha[0]) / 256.0f) * src[0] + (1 - (srcalpha[0]) / 256.0f) * dst[2];
-		dst[3] = 255;
-	    }
-	   
+	        else if(srcalpha[0] != 0)
+	        {
+                dst[0] = ((srcalpha[0]) / 255.0f) * src[0] + (1 - (srcalpha[0]) / 255.0f) * dst[0];
+                dst[1] = ((srcalpha[0]) / 255.0f) * src[1] + (1 - (srcalpha[0]) / 255.0f) * dst[1];
+		        dst[2] = ((srcalpha[0]) / 255.0f) * src[2] + (1 - (srcalpha[0]) / 255.0f) * dst[2];
+		        dst[3] = 255;
+   	        }
             startx++;
         }
         starty++;
@@ -463,6 +467,51 @@ void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, 
 		    pcvals.size_num, pcvals.size_first, pcvals.size_last, pcvals.size_type,
 		    pcvals.general_background_type, pcvals.brush_density);
 }
+static void copy_ppm_to_bitmap(ppm_t* srcppm, JNIEnv* env, jobject bitmap)
+{
+    AndroidBitmapInfo  info;
+    void*              pixels;
+    unsigned char* data;
+    int ret;
+    LOGI("## copy_ppm_to_bitmap ##");
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    LOGI("bitmap width = %d, height = %d, format = %d ", info.width, info.height, info.format);
+    if (info.format != ANDROID_BITMAP_FORMAT_RGB_565 && info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGB_565 or RGBA!");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+        return;
+    }    
+    data = (unsigned char*)pixels;
+    int dstrowstride = info.width * 4;
+    int srcrowstride = srcppm->width * 3;
+    int startx = 0;
+    int starty = 0;
+    for(int y = 0 ; y < srcppm->height ; y++)
+    {
+        guchar* row = srcppm->col + y * srcrowstride;
+        guchar* dstrow = data + starty * dstrowstride;
+        startx = 0;
+        for(int x = 0 ; x < srcppm->width ; x++)
+        {
+            guchar* src = row + x * 3;
+            guchar* dst = dstrow + startx * 4;
+	        dst[0] = src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+            dst[3] = 255; 
+            startx++;
+        }
+        starty++;
+    }
+}
 void Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject thiz, jobject p, jobject bitmap)
 {
     jclass classz = env->GetObjectClass(p);
@@ -473,6 +522,8 @@ void Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject th
     LOGI("## paperppm col = %p ##" , paperppm->col );
     if(paperppm->col == NULL)
         return;
+    copy_ppm_to_bitmap(paperppm, env, bitmap);
+    /*
     AndroidBitmapInfo  info;
     void*              pixels;
     unsigned char* data;
@@ -515,6 +566,7 @@ void Java_com_example_hellojni_HelloJni_getSelectedPaper(JNIEnv* env, jobject th
         }
         starty++;
     }
+    */
 }
 void Java_com_example_hellojni_HelloJni_getSelectedPaperProperty(JNIEnv* env, jobject thiz, jobject p)
 {
@@ -542,4 +594,21 @@ void Java_com_example_hellojni_HelloJni_getSelectedPaperProperty(JNIEnv* env, jo
 END:
     env->ReleaseStringUTFChars(paperName, paperNameStr);  
     */
+}
+void Java_com_example_hellojni_HelloJni_getBackground(JNIEnv* env, jobject thiz, jobject bitmap)
+{
+    if(!ppm_empty(&gBackground))
+    {
+        LOGI("## getBackground ##\n");
+        copy_ppm_to_bitmap(&gBackground, env, bitmap);
+    }
+}
+void Java_com_example_hellojni_HelloJni_updateBackground(JNIEnv* env, jobject thiz)
+{
+   // changeBackground();
+}
+void Java_com_example_hellojni_HelloJni_clearBackground(JNIEnv* env, jobject thiz)
+{
+   // changeBackground();
+   clearBackground();
 }

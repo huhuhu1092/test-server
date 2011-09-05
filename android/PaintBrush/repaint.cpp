@@ -685,7 +685,6 @@ repaint (ppm_t *p, ppm_t *a)
   if (running)
     return;
   running++;
-  setIsRepaintEnd(1);
   runningvals = pcvals;
   print_val(&runningvals);
   /* Shouldn't be necessary, but... */
@@ -866,13 +865,15 @@ repaint (ppm_t *p, ppm_t *a)
     }
   else
     {
-      scale = runningvals.paper_scale / 100.0;
-      ppm_new (&tmp, p->width, p->height);
-      ppm_load (runningvals.selected_paper, &paper_ppm);
-      resize (&paper_ppm, paper_ppm.width * scale, paper_ppm.height * scale);
-      if (runningvals.paper_invert)
-        ppm_apply_gamma (&paper_ppm, -1.0, 1, 1, 1);
-      for (x = 0; x < tmp.width; x++)
+      if(ppm_empty(&gBackground))
+      {
+        scale = runningvals.paper_scale / 100.0;
+        ppm_new (&tmp, p->width, p->height);
+        ppm_load (runningvals.selected_paper, &paper_ppm);
+        resize (&paper_ppm, paper_ppm.width * scale, paper_ppm.height * scale);
+        if (runningvals.paper_invert)
+          ppm_apply_gamma (&paper_ppm, -1.0, 1, 1, 1);
+        for (x = 0; x < tmp.width; x++)
         {
           int rx = x % paper_ppm.width;
 
@@ -884,8 +885,21 @@ repaint (ppm_t *p, ppm_t *a)
                       3);
             }
         }
-    }
+        ppm_copy(&tmp, &gBackground);
 
+      }
+      else
+      {
+        ppm_copy(&gBackground, &tmp);
+      }
+
+    }
+    tmpWidth = tmp.width;
+    tmpHeight = tmp.height;
+    if(repaintCallBack)
+	{
+	  (*repaintCallBack)("background", "initok");
+  	}
   cx = p->width / 2;
   cy = p->height / 2;
   maxdist = sqrtf (cx * cx + cy * cy);
@@ -1412,9 +1426,9 @@ repaint (ppm_t *p, ppm_t *a)
 	std::list<BrushProperty>::iterator it;
 	if(repaintCallBack)
 	{
-        LOGI("## call repaint callback ##");
+        LOGI("## call repaint callback ##\n");
 		(*repaintCallBack)("apply_brush", "start");
-        LOGI("## call repaint callback end ##");
+        LOGI("## call repaint callback end ##\n");
 	}
 	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() ; it++)
 	{
@@ -1433,7 +1447,8 @@ repaint (ppm_t *p, ppm_t *a)
         createAlpha(bp.brush, &brushPiece.alpha);
         addBrushPiece(brushPiece);
 	}
-    setIsRepaintEnd(1);
+    gBrushProperties.clear();
+    //setIsRepaintEnd(1);
 	//end
   for (i = 0; i < num_brushes; i++)
     {
@@ -1445,7 +1460,9 @@ repaint (ppm_t *p, ppm_t *a)
 
   g_free (xpos);
   g_free (ypos);
-
+  //update background
+  ppm_copy(&tmp, &gBackground);
+  //
   if (runningvals.general_paint_edges)
     {
       crop (&tmp,
