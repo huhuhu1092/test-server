@@ -161,6 +161,8 @@ void createPaint()
 }
 int main(int argc , char** argv)
 {
+	class _Test
+	{};
 	double nx = fabs ((double)(0 - 191 / 2.0));
 	random_generator = g_rand_new ();
 	init();

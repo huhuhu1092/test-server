@@ -19,11 +19,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import android.app.Activity;
+import android.widget.Button;
 import android.widget.TextView;
 import android.os.Bundle;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.view.MotionEvent;
+import android.view.View;
 import android.util.Log;
 import android.widget.ImageView;
 import android.os.Handler;
@@ -35,6 +37,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.graphics.Canvas;
+import android.content.Intent;
 public class HelloJni extends Activity
 {
     /** Called when the activity is first created. */
@@ -51,8 +54,20 @@ public class HelloJni extends Activity
         //TextView  tv = new TextView(this);
         mTextView = (TextView)findViewById(R.id.textview);
         mImageView = (ImageView)findViewById(R.id.imageview);
-        mTextView.setText( stringFromJNI() );
-        mCurrBmp = mImageLoader.getNextImage();
+        mTextView.setText( end_draw);
+        mSelectButton = (Button)findViewById(R.id.select_photo);
+        mSelectButton.setClickable(true);
+        mSelectButton.setOnClickListener(new ButtonClicker());
+        mDefaultBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
+        //mCurrBmp = mImageLoader.getNextImage();
+    }
+    private class ButtonClicker implements View.OnClickListener
+    {
+    	public void onClick(View v)
+    	{
+    		Intent intent = new Intent(HelloJni.this, SelectPhotoActivity.class);
+    		startActivityForResult(intent, SELECT_PHOTO_SUB_ACTIVITY);
+    	}
     }
     @Override
     public void onDestroy()
@@ -120,13 +135,19 @@ public class HelloJni extends Activity
     public boolean onTouchEvent(MotionEvent event) {
     	if(mStartPaint == true)
     		return super.onTouchEvent(event);
+    	if(mCurrBmp == null)
+    		return super.onTouchEvent(event);
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
     	{
     		Log.i("hellojni", "## before repaint ##");
     		mStartPaint = true;
+    		mSelectButton.setClickable(false);
     		Runnable runnable = new Runnable() {
     			public void run()
     			{
+    				Message msg1 = Message.obtain();
+    				msg1.what = START_COMPUTATION;
+    				mH.sendMessage(msg1);
     	    		PaintBrushParam p = new PaintBrushParam();
     	    		p.bg_type = 1;
     	    		p.brush_density = 1.0f;
@@ -146,35 +167,6 @@ public class HelloJni extends Activity
     				long endTime = SystemClock.uptimeMillis();
     				long span = (endTime - startTime) / 1000;
     				Log.i("hellojni", "#### repaint end time = " + span + " #######");
-    				/*
-    				File f = new File("/sdcard/test/test.png");
-    				try
-    				{
-    					f.createNewFile();
-    				}
-    				catch(IOException e)
-    				{
-    				    Log.i("hellojni", "can not create file");	
-    				}
-    				FileOutputStream os = null;
-    				try
-    				{
-    					os = new FileOutputStream(f);
-    				}
-    				catch(FileNotFoundException e)
-    				{
-    					Log.i("hellojni", "file not found");
-    				}
-    				mCurrBmp.compress(CompressFormat.PNG, 100, os);
-    				try
-    				{
-    				    os.close();
-    				}
-    				catch(IOException e)
-    				{
-    					Log.i("hellojni", "close stream error");
-    				}
-    				*/
     				//
     				Message msg = Message.obtain();
     				msg.what = REPAINT_END;
@@ -227,6 +219,8 @@ public class HelloJni extends Activity
 				}
 				if(mBackgroundBitmap != null)
 					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
+				mH.removeMessages(BLINK);
+				mTextView.setText(start_draw);
     			Message m = Message.obtain();
     			m.what = REPAINT_LOOP;
     			mH.sendMessage(m);
@@ -246,6 +240,8 @@ public class HelloJni extends Activity
     			{
     				updateBackground();
     				mStartPaint = false;
+    				mTextView.setText(end_draw);
+    				mSelectButton.setClickable(true);
     			}
     		}
     		break;
@@ -259,16 +255,67 @@ public class HelloJni extends Activity
 					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
     		}
     		break;
+    		case START_COMPUTATION:
+    		{
+    			mTextView.setText(start_comput);
+    			mDrawText = true;
+    			Message m = Message.obtain();
+    			m.what = BLINK;
+    			mH.sendMessageDelayed(m, 1000);
+    		}
+    		break;
+    		case BLINK:
+    		{
+    			if(mDrawText)
+    			{
+    				mTextView.setText("");
+    				mDrawText = false;
+    			}
+    			else
+    			{
+    				mDrawText = true;
+    				mTextView.setText(start_comput);
+    			}
+    			Message m = Message.obtain();
+    			m.what = BLINK;
+    			mH.sendMessageDelayed(m, 1000);
+    		}
+    		break;
     		default:
     			break;
     		}
     	}
     }
-
+    private Bitmap mDefaultBmp;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) 
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) 
+        {
+        case SELECT_PHOTO_SUB_ACTIVITY:
+        {
+        	if(resultCode == Activity.RESULT_OK)
+        	{
+        		String path = data.getStringExtra("photo_path");
+        		mCurrBmp = mImageLoader.getImage(path);
+        		clearBackground();
+        		mImageView.setImageBitmap(mDefaultBmp);
+        	}
+        }
+        break;
+        default:
+        	break;
+        }
+    }
     private final static int REPAINT_END = 1;
     private final static int REPAINT_START = 2;
     private final static int REPAINT_LOOP = 3;
     private final static int BG_INIT_OK = 4;
+    private final static int START_COMPUTATION = 5;
+    private final static int START_DRAW = 6;
+    private final static int DRAW_END = 7;
+    private final static int BLINK = 8;
     private ImageLoader mImageLoader;
     private Bitmap mBackgroundBitmap;
     private Bitmap mCurrBmp;
@@ -277,4 +324,10 @@ public class HelloJni extends Activity
     private ImageView mImageView;
     private Handler mH = new MyHandler();
     private boolean mStartPaint;
+    private boolean mDrawText = true;
+    Button mSelectButton;
+    private final static String start_comput = "start computation";
+    private final static String start_draw = "start drawing";
+    private final static String end_draw = "end draw";
+    private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;
 }

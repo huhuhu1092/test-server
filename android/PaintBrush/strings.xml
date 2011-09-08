@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HelloJni</string>
+    <string name="select_name">Select Photo</string>
+    <string name="select_photo_button_text">select photo</string>
+    <string name="next_button_text">next</string>
+    <string name="prev_button_text">previous</string>
+</resources>

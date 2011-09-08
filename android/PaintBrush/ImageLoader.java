@@ -19,7 +19,7 @@ public class ImageLoader
 	private final static String TAG = "ImageLoader";
 	private String mImagePath;
 	private String[] mFileList;
-	private int mPictureIndex = 0;
+	private int mPictureIndex = -1;
     public ImageLoader(String imagePath)
     {
     	mImagePath = imagePath;
@@ -49,55 +49,89 @@ public class ImageLoader
         Log.i(TAG, "### picture num = " + fileList.length + " ####");
         mFileList = fileList;
     }
+    public Bitmap getImage(String path)
+    {
+    	Bitmap bmp = null;
+		File f = new File(path);
+		Log.i(TAG, "current image = " + path);
+
+		if(f.exists())
+		{
+			InputStream is = null;
+			try {
+			    is = new FileInputStream(f);
+			    Log.i(TAG, "#### size : " + is.available() + " ####");
+				BitmapFactory.Options op = new BitmapFactory.Options();
+				op.inSampleSize = 4;
+			    bmp = BitmapFactory.decodeStream(is, null, op);
+			    if(bmp != null)
+			    {
+			    	Log.i(TAG, "## bmp width, height, config" + bmp.getWidth() + ", " + bmp.getHeight() + ", " + bmp.getConfig().toString());
+
+			    }
+			} catch (FileNotFoundException e){
+				Log.i(TAG, "file name found: " + path);
+			} catch (IOException e) {
+				Log.i(TAG, "IO error");
+			} catch (OutOfMemoryError e){
+				Log.i(TAG, "#### out of memory ####");
+				BitmapFactory.Options op = new BitmapFactory.Options();
+				op.inSampleSize = 4;
+				bmp = BitmapFactory.decodeStream(is, null, op);
+			} finally {
+				try {
+				    if(is != null)
+			            is.close();
+				} catch (IOException e) {
+					
+				}
+			}
+		}
+		return bmp;
+    }
+    public Bitmap getPrevImage()
+    {
+    	Bitmap bmap = null;
+    	if(mFileList.length > 0)
+		{
+    		mPictureIndex--;
+			if(mPictureIndex < 0)
+			{
+				mPictureIndex = mFileList.length - 1;
+			}
+			String path = getCurrentImagePath();;
+            bmap = getImage(path);
+		}
+	    return bmap;
+    }
     public Bitmap getNextImage()
     {
 		Bitmap bmp = null;
 		if(mFileList.length > 0)
 		{
+			mPictureIndex++;
 			if(mPictureIndex >= mFileList.length)
 			{
 				mPictureIndex = 0;
 			}
-			String fn = mFileList[mPictureIndex];
-			String path = mImagePath + "/" + fn;
-			File f = new File(path);
-			Log.i(TAG, "current image = " + path);
-
-			if(f.exists())
-			{
-				InputStream is = null;
-				try {
-				    is = new FileInputStream(f);
-				    Log.i(TAG, "#### size : " + is.available() + " ####");
-					BitmapFactory.Options op = new BitmapFactory.Options();
-					op.inSampleSize = 4;
-				    bmp = BitmapFactory.decodeStream(is, null, op);
-				    if(bmp != null)
-				    {
-				    	Log.i(TAG, "## bmp width, height, config" + bmp.getWidth() + ", " + bmp.getHeight() + ", " + bmp.getConfig().toString());
-
-				    }
-				} catch (FileNotFoundException e){
-					Log.i(TAG, "file name found: " + path);
-				} catch (IOException e) {
-					Log.i(TAG, "IO error");
-				} catch (OutOfMemoryError e){
-					Log.i(TAG, "#### out of memory ####");
-					BitmapFactory.Options op = new BitmapFactory.Options();
-					op.inSampleSize = 4;
-					bmp = BitmapFactory.decodeStream(is, null, op);
-				} finally {
-					try {
-					    if(is != null)
-				            is.close();
-					} catch (IOException e) {
-						
-					}
-				}
-				
-			}
+			String path = getCurrentImagePath();
+            bmp = getImage(path);
 		}
-		mPictureIndex++;
 	    return bmp;
+    }
+    public String getCurrentImagePath()
+    {
+    	if(mPictureIndex != -1)
+    	{
+    		String fn = mFileList[mPictureIndex];
+			String path = getPath(fn);
+			return path;
+    	}
+    	else
+    		return null;
+    }
+    private String getPath(String fn )
+    {
+    	return mImagePath + "/" + fn;
     }
 }
