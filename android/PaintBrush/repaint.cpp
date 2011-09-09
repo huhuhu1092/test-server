@@ -687,6 +687,9 @@ repaint (ppm_t *p, ppm_t *a)
   running++;
   runningvals = pcvals;
   print_val(&runningvals);
+  gImageWidth = p->width;
+  gImageHeight = p->height;
+  LOGI("## gImageWidth = %d, gImageHeight = %d ##\n", gImageWidth, gImageHeight);
   /* Shouldn't be necessary, but... */
   if (img_has_alpha)
     if ((p->width != a->width) || (p->height != a->height))
@@ -890,12 +893,58 @@ repaint (ppm_t *p, ppm_t *a)
       }
       else
       {
-        ppm_copy(&gBackground, &tmp);
+        if(gBackground.width == p->width && gBackground.height == p->height)
+        {
+            LOGI("## just copy background\n");
+          ppm_copy(&gBackground, &tmp);
+        }
+        else
+        {
+            //ppm_copy (p, &tmp);
+          ppm_new(&tmp, p->width, p->height);
+          int srcx = 0;
+          int srcy = 0;
+          int dstx = 0; 
+          int dsty = 0;
+          int width = 0;
+          int height = 0;
+          if(maxbrushwidth < gBrushMaxWidth)
+          {
+              width = maxbrushwidth * 2 + gImageWidth;
+              srcx = (gBackground.width - width) / 2;
+              dstx = 0;
+          }
+          else
+          {
+              srcx = 0;
+              dstx = ((maxbrushwidth * 2 + gImageWidth) - gBackground.width) / 2;
+              width = gBackground.width;
+          }
+
+          if(maxbrushheight < gBrushMaxHeight)
+          {
+              height = maxbrushheight * 2 + gImageHeight; 
+              srcy = (gBackground.height - height) / 2;
+              dsty = 0;
+          }
+          else
+          {
+              height = gBackground.height;
+              srcy = 0;
+              dsty = (maxbrushheight * 2 + gImageHeight - gBackground.height) / 2;
+          }
+          ppm_copy_xy(&gBackground, &tmp, srcx, srcy, width, height, dstx, dsty); 
+          LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
+          ppm_copy(&tmp, &gBackground);
+        }
       }
 
     }
     tmpWidth = tmp.width;
     tmpHeight = tmp.height;
+    gBrushMaxWidth = maxbrushwidth;
+    gBrushMaxHeight = maxbrushheight;
+    LOGI("## gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", gBrushMaxWidth, gBrushMaxHeight);
     if(repaintCallBack)
 	{
 	  (*repaintCallBack)("background", "initok");

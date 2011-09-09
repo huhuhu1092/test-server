@@ -181,6 +181,10 @@ extern REPAINTCALLBACK_FUN repaintCallBack;
 extern int tmpWidth;
 extern int tmpHeight;
 extern ppm_t gBackground;
+extern int gBrushMaxWidth;
+extern int gBrushMaxHeight;
+extern int gImageWidth;
+extern int gImageHeight;
 #ifdef __cplusplus
 }
 #endif

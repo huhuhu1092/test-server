@@ -148,20 +148,10 @@ public class HelloJni extends Activity
     				Message msg1 = Message.obtain();
     				msg1.what = START_COMPUTATION;
     				mH.sendMessage(msg1);
-    	    		PaintBrushParam p = new PaintBrushParam();
-    	    		p.bg_type = 1;
-    	    		p.brush_density = 1.0f;
-    	    		p.orient_first = 1.0f;
-    	    		p.orient_last = 1.0f;
-    	    		p.orient_type = 1;
-    	    		p.orient_num = 2;
-    	    		p.placement = 3 ;
-    	    		p.size_first = 1.0f;
-    	    		p.size_last = 1.0f;
-    	    		p.size_num = 2;
-    	    		p.size_type = 2;
     	    		init();
-    	    		//setParameter(p);
+    	    		int index = getPaintBrushParamIndex();
+    	    		setParameter(mPaintBrushParams[index]);
+    	    		mPaintBrushParamIndex++;
     	    		long startTime = SystemClock.uptimeMillis();
     				repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
     				long endTime = SystemClock.uptimeMillis();
@@ -308,6 +298,14 @@ public class HelloJni extends Activity
         	break;
         }
     }
+    private int getPaintBrushParamIndex()
+    {
+    	if(mPaintBrushParamIndex >= mPaintBrushParamNum)
+    	{
+    		mPaintBrushParamIndex = 0;
+    	}
+    	return mPaintBrushParamIndex;
+    }
     private final static int REPAINT_END = 1;
     private final static int REPAINT_START = 2;
     private final static int REPAINT_LOOP = 3;
@@ -330,4 +328,18 @@ public class HelloJni extends Activity
     private final static String start_draw = "start drawing";
     private final static String end_draw = "end draw";
     private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;
+    private final static int mPaintBrushParamNum = 10;
+    private int mPaintBrushParamIndex = 0;
+    private PaintBrushParam[] mPaintBrushParams = {
+    		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 120, 148, 4, 2, 0, 10),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 95, 116, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 6, 73, 88, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 6, 54, 64, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 6, 38, 44, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 4, 25, 28, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 2, 15, 16, 4, 2, 0, 10),
+            new PaintBrushParam(6, 8, 45, 180, 1, 8, 8, 0, 2, 0, 20)
+    };
 }

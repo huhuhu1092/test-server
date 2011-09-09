@@ -424,7 +424,7 @@ void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, 
     jfieldID sizeLastID;
     jfieldID sizeTypeID;
     jfieldID bgTypeID;
-    jfieldID placementID;
+    jfieldID placeTypeID;
     jfieldID brushDensityID;
     jclass cls = env->GetObjectClass(param);
     orientationID = env->GetFieldID(cls, "orient_type", "I");
@@ -445,8 +445,8 @@ void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, 
     LOGI("## sizeTypeID = %d ##", sizeTypeID);
     bgTypeID = env->GetFieldID(cls, "bg_type", "I");
     LOGI("## bgTypeID = %d ##", bgTypeID);
-    placementID = env->GetFieldID(cls, "placement", "I");
-    LOGI("## placementID = %d ##", placementID);
+    placeTypeID = env->GetFieldID(cls, "place_type", "I");
+    LOGI("## placementID = %d ##", placeTypeID);
     brushDensityID = env->GetFieldID(cls, "brush_density", "F");
     LOGI("## brushDensityID = %d ##", brushDensityID);
     pcvals.orient_type = env->GetIntField(param, orientationID);
@@ -459,13 +459,14 @@ void Java_com_example_hellojni_HelloJni_setParameter(JNIEnv* env, jobject thiz, 
     pcvals.size_type = env->GetIntField(param, sizeTypeID);
     pcvals.general_background_type = env->GetIntField(param, bgTypeID);
     pcvals.brush_density = env->GetFloatField(param, brushDensityID);
+    pcvals.place_type = env->GetIntField(param, placeTypeID);
     LOGI("## pcvals orient_type = %d, orient_num = %d, orient_first = %f, \
 		    orient_last = %f, size_num = %d, size_first = %f, \
 		    size_last = %f, size_type = %d, bg_type = %d, \
-		    brush_density = %f ##\n", pcvals.orient_type, 
+		    place_type = %d, brush_density = %f ##\n", pcvals.orient_type, 
 		    pcvals.orient_num, pcvals.orient_first, pcvals.orient_last,
 		    pcvals.size_num, pcvals.size_first, pcvals.size_last, pcvals.size_type,
-		    pcvals.general_background_type, pcvals.brush_density);
+		    pcvals.general_background_type, pcvals.place_type, pcvals.brush_density);
 }
 static void copy_ppm_to_bitmap(ppm_t* srcppm, JNIEnv* env, jobject bitmap)
 {
@@ -601,6 +602,7 @@ void Java_com_example_hellojni_HelloJni_getBackground(JNIEnv* env, jobject thiz,
     {
         LOGI("## getBackground ##\n");
         copy_ppm_to_bitmap(&gBackground, env, bitmap);
+        LOGI("## getBackground End ##\n");
     }
 }
 void Java_com_example_hellojni_HelloJni_updateBackground(JNIEnv* env, jobject thiz)

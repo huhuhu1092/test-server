@@ -23,6 +23,10 @@
 REPAINTCALLBACK_FUN repaintCallBack = 0;
 int tmpWidth = 0;
 int tmpHeight = 0;
+int gBrushMaxWidth = 0;
+int gBrushMaxHeight = 0;
+int gImageWidth = 0;
+int gImageHeight = 0;
 ppm_t gBackground = {0, 0, NULL};
 ppm_t gBackgroundBack = {0, 0, NULL};
 /*
@@ -208,4 +212,10 @@ void clearBackground()
 {
     ppm_kill(&gBackground);
     ppm_kill(&gBackgroundBack);
+    gBrushMaxWidth = 0;
+    gBrushMaxHeight = 0;
+    gImageWidth = 0;
+    gImageHeight = 0;
+    tmpWidth = 0;
+    tmpHeight = 0;
 }
