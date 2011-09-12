@@ -73,6 +73,12 @@ public class HelloJni extends Activity
     public void onDestroy()
     {
     	super.onDestroy();
+    	Log.i(TAG, "## main thread = " + Thread.currentThread().getName() + " ######");
+		mH.removeMessages(REPAINT_LOOP);
+    	if(mBrushPaintThread != null)
+    	{
+            mBrushPaintThread.interrupt();
+    	}
     	clearBackground();
     }
     public class PaperProperty
@@ -145,6 +151,7 @@ public class HelloJni extends Activity
     		Runnable runnable = new Runnable() {
     			public void run()
     			{
+    				Log.i(TAG, "### paint thread name = " + Thread.currentThread().getName() + " ###");
     				Message msg1 = Message.obtain();
     				msg1.what = START_COMPUTATION;
     				mH.sendMessage(msg1);
@@ -164,6 +171,7 @@ public class HelloJni extends Activity
     			}
     		};
     		Thread thread = new Thread(runnable);
+    		mBrushPaintThread = thread;
     		thread.start();
     		//repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
     		//mImageView.setImageBitmap(mCurrBmp);
@@ -324,12 +332,14 @@ public class HelloJni extends Activity
     private boolean mStartPaint;
     private boolean mDrawText = true;
     Button mSelectButton;
+    Thread mBrushPaintThread;
     private final static String start_comput = "start computation";
     private final static String start_draw = "start drawing";
     private final static String end_draw = "end draw";
     private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;
     private final static int mPaintBrushParamNum = 10;
     private int mPaintBrushParamIndex = 0;
+    private final static String TAG = "HelloJni";
     private PaintBrushParam[] mPaintBrushParams = {
     		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20),
     		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10),

@@ -2,7 +2,25 @@
 <resources>
     <string name="app_name">HelloJni</string>
     <string name="select_name">Select Photo</string>
+    <string name="set_parameter_name">Set Parameter</string>
     <string name="select_photo_button_text">select photo</string>
     <string name="next_button_text">next</string>
     <string name="prev_button_text">previous</string>
+    <string name="parameter_set_text">Parameter Set</string>
+    <string name="paper_scale_text">Paper Scale</string>
+    <string name="paper_relief_text">Paper Relief</string>
+    <string name="brush_relief_text">Brush Relief</string>
+    <string name="orient_type_text">Orient Type</string>
+    <string name="orient_num_text">Orient Num</string>
+    <string name="orient_first_text">Orient First</string>
+    <string name="orient_last_text">Orient Last</string>
+    <string name="size_type_text">Size Type</string>
+    <string name="size_num_text">Size Num</string>
+    <string name="size_first_text">Size First</string>
+    <string name="size_last_text">Size Last</string>
+    <string name="place_type_text">Place Type</string>
+    <string name="brush_density_text">Brush Density</string>
+    <string name="color_type_text">Color Type</string>
+    <string name="bg_type_text">Background Type</string>
+    <string name="set_parameter_text">Set Parameter</string>
 </resources>
