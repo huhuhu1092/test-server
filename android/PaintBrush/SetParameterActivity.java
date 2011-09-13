@@ -20,12 +20,13 @@ public class SetParameterActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.parameter);
-        Button okButton = (Button)findViewById(R.id.ok);
-        Button cancelButton = (Button)findViewById(R.id.cancel);
         Intent intent = getIntent();
         Parcelable[] pbp = intent.getParcelableArrayExtra("param_array");
         initPaintBrushParam(pbp);
+        setContentView(R.layout.parameter);
+        Button okButton = (Button)findViewById(R.id.ok);
+        Button cancelButton = (Button)findViewById(R.id.cancel);
+        
         okButton.setClickable(true);
         cancelButton.setClickable(true);
         okButton.setOnClickListener(new View.OnClickListener() {
@@ -34,7 +35,10 @@ public class SetParameterActivity extends Activity
 		public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Intent intent = new Intent();
-                				
+				saveCurrent();
+                createReturnValue(intent);
+                setResult(RESULT_OK, intent);
+                finish();
 			}
 		});
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -60,11 +64,85 @@ public class SetParameterActivity extends Activity
     }
 	void initPaintBrushParam(Parcelable[] pbp)
 	{
+		Log.i(TAG, "## pbp num = " + pbp.length);
 		mPaintBrushParamArray = new PaintBrushParam[pbp.length];
 		for(int i = 0 ; i < pbp.length ; i++)
 		{
 			mPaintBrushParamArray[i] = (PaintBrushParam)pbp[i];
 		}
+	}
+	void createReturnValue(Intent intent)
+	{
+		intent.putExtra("param_return", mPaintBrushParamArray);
+	}
+	void saveCurrent()
+	{
+		PaintBrushParam pbp = getCurrentValue();
+		mPaintBrushParamArray[mCurrentIndex] = pbp;
+	}
+	PaintBrushParam getCurrentValue()
+	{
+		PaintBrushParam pbp = new PaintBrushParam();
+		Spinner orientType = (Spinner)findViewById(R.id.orient_type_input);
+		int pos = orientType.getSelectedItemPosition();
+		pbp.orient_type = pos;
+		
+		EditText orientNum = (EditText)findViewById(R.id.orient_num_input);
+		String str = orientNum.getText().toString();
+		pbp.orient_num = Integer.parseInt(str);
+		
+		EditText orientFirst = (EditText)findViewById(R.id.orient_first_input);
+		str = orientFirst.getText().toString();
+		pbp.orient_first = Float.parseFloat(str);
+		
+		EditText orientLast = (EditText)findViewById(R.id.orient_last_input);
+		str = orientLast.getText().toString();
+		pbp.orient_last = Float.parseFloat(str);
+		
+		Spinner sizeType = (Spinner)findViewById(R.id.size_type_input);
+		pbp.size_type = sizeType.getSelectedItemPosition();
+		
+		EditText sizeNum = (EditText)findViewById(R.id.size_num_input);
+		str = sizeNum.getText().toString();
+		pbp.size_num = Integer.parseInt(str);
+		
+		EditText sizeFirst = (EditText)findViewById(R.id.size_first_input);
+		str = sizeFirst.getText().toString();
+		pbp.size_first = Float.parseFloat(str);
+		
+		EditText sizeLast = (EditText)findViewById(R.id.size_last_input);
+		str = sizeLast.getText().toString();
+		pbp.size_last = Float.parseFloat(str);
+		
+		EditText brushDensity = (EditText)findViewById(R.id.brush_density_input);
+		str = brushDensity.getText().toString();
+		pbp.brush_density = Float.parseFloat(str);
+		
+		EditText brushRelief = (EditText)findViewById(R.id.brush_relief_input);
+		str = brushRelief.getText().toString();
+		pbp.brush_relief = Float.parseFloat(str);
+		
+		EditText paperScale = (EditText)findViewById(R.id.paper_scale_input);
+		str = paperScale.getText().toString();
+		pbp.paper_scale = Float.parseFloat(str);
+		
+		EditText paperRelief = (EditText)findViewById(R.id.paper_relief_input);
+		str = paperRelief.getText().toString();
+		pbp.paper_relief = Float.parseFloat(str);
+		
+		Spinner bgType = (Spinner)findViewById(R.id.bg_type_input);
+		pbp.bg_type = bgType.getSelectedItemPosition();
+		
+		Spinner colorType = (Spinner)findViewById(R.id.color_type_input);
+		pbp.color_type = colorType.getSelectedItemPosition();
+		
+		Spinner placeType = (Spinner)findViewById(R.id.place_type_input);
+		pbp.place_type = placeType.getSelectedItemPosition();
+		
+		EditText drawSpeed = (EditText)findViewById(R.id.drawing_speed_input);
+		str = drawSpeed.getText().toString();
+		pbp.drawing_speed = Integer.parseInt(str);
+		return pbp;
 	}
 	void setOrientTypeSpinner()
 	{
@@ -122,7 +200,7 @@ public class SetParameterActivity extends Activity
        {
            placeTypeDataStr[i] = getResources().getText(placeTypeData[i]).toString();			
        }
-       Spinner sizeTypeSpinner = (Spinner)findViewById(R.id.size_type_input);
+       Spinner sizeTypeSpinner = (Spinner)findViewById(R.id.place_type_input);
        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, placeTypeDataStr);
        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
        sizeTypeSpinner.setAdapter(adapter);  
@@ -144,7 +222,7 @@ public class SetParameterActivity extends Activity
 	       {
 	           colorTypeDataStr[i] = getResources().getText(colorTypeData[i]).toString();			
 	       }
-	       Spinner colorTypeSpinner = (Spinner)findViewById(R.id.size_type_input);
+	       Spinner colorTypeSpinner = (Spinner)findViewById(R.id.color_type_input);
 	       ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, colorTypeDataStr);
 	       adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
 	       colorTypeSpinner.setAdapter(adapter);  
@@ -167,7 +245,7 @@ public class SetParameterActivity extends Activity
 	       {
 	           bgTypeDataStr[i] = getResources().getText(bgTypeData[i]).toString();			
 	       }
-	       Spinner bgTypeSpinner = (Spinner)findViewById(R.id.size_type_input);
+	       Spinner bgTypeSpinner = (Spinner)findViewById(R.id.bg_type_input);
 	       ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, bgTypeDataStr);
 	       adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
 	       bgTypeSpinner.setAdapter(adapter);  
@@ -186,10 +264,17 @@ public class SetParameterActivity extends Activity
         public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,  
                 long arg3) {  
             String str = mData[arg2];
-            Log.i("setparameter", str);
-            mCurrentIndex = Integer.parseInt(str); 
-            PaintBrushParam pbp = mPaintBrushParamArray[mCurrentIndex];
-            setTextValue(pbp);
+            Log.i(TAG, "################# " + str);
+            if(!mIsStart)
+            {
+                PaintBrushParam pbp = getCurrentValue();
+                mPaintBrushParamArray[mCurrentIndex] = pbp;
+                mIsStart = true;
+            }
+            mCurrentIndex = Integer.parseInt(str) - 1; 
+            PaintBrushParam pbp1 = mPaintBrushParamArray[mCurrentIndex];
+            setTextValue(pbp1);
+            Log.i(TAG, "#################" + "end");
         }  
   
         public void onNothingSelected(AdapterView<?> arg0) {  
@@ -203,6 +288,47 @@ public class SetParameterActivity extends Activity
 		EditText orientNum = (EditText)findViewById(R.id.orient_num_input);
 		orientNum.setText(Integer.toString(pbp.orient_num));
 		
+		EditText orientFirst = (EditText)findViewById(R.id.orient_first_input);
+		orientFirst.setText(Float.toString(pbp.orient_first));
+		
+		EditText orientLast = (EditText)findViewById(R.id.orient_last_input);
+		orientLast.setText(Float.toString(pbp.orient_last));
+		
+		Spinner sizeType = (Spinner)findViewById(R.id.size_type_input);
+		sizeType.setSelection(pbp.size_type);
+		
+		EditText sizeNum = (EditText)findViewById(R.id.size_num_input);
+		sizeNum.setText(Integer.toString(pbp.size_num));
+		
+		EditText sizeFirst = (EditText)findViewById(R.id.size_first_input);
+		sizeFirst.setText(Float.toString(pbp.size_first));
+		
+		EditText sizeLast = (EditText)findViewById(R.id.size_last_input);
+		sizeLast.setText(Float.toString(pbp.size_last));
+		
+		EditText brushDensity = (EditText)findViewById(R.id.brush_density_input);
+		brushDensity.setText(Float.toString(pbp.brush_density));
+		
+		EditText brushRelief = (EditText)findViewById(R.id.brush_relief_input);
+		brushRelief.setText(Float.toString(pbp.brush_relief));
+		
+		EditText paperScale = (EditText)findViewById(R.id.paper_scale_input);
+		paperScale.setText(Float.toString(pbp.paper_scale));
+		
+		EditText paperRelief = (EditText)findViewById(R.id.paper_relief_input);
+		paperRelief.setText(Float.toString(pbp.paper_relief));
+		
+		Spinner bgType = (Spinner)findViewById(R.id.bg_type_input);
+		bgType.setSelection(pbp.bg_type);
+		
+		Spinner colorType = (Spinner)findViewById(R.id.color_type_input);
+		colorType.setSelection(pbp.color_type);
+		
+		Spinner placeType = (Spinner)findViewById(R.id.place_type_input);
+		placeType.setSelection(pbp.place_type);
+		
+		EditText drawSpeed = (EditText)findViewById(R.id.drawing_speed_input);
+		drawSpeed.setText(Integer.toString(pbp.drawing_speed));
 		
 	}
 	private Spinner mIndexSpinner;
@@ -212,4 +338,5 @@ public class SetParameterActivity extends Activity
 	private PaintBrushParam mPaintBrushParamsCache = new PaintBrushParam();
 	private PaintBrushParam[] mPaintBrushParamArray;// = new PaintBrushParam[10];
 	private final static String TAG = "SetParameter";
+	private boolean mIsStart = true;
 }

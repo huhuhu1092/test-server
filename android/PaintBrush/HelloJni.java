@@ -39,6 +39,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.graphics.Canvas;
 import android.content.Intent;
+import android.os.Parcelable;
 public class HelloJni extends Activity
 {
     /** Called when the activity is first created. */
@@ -64,6 +65,7 @@ public class HelloJni extends Activity
         mSelectButton.setOnClickListener(new ButtonClicker());
         mDefaultBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
         startBrushPaint();
+        init();
         //mCurrBmp = mImageLoader.getNextImage();
     }
     private class ButtonClicker implements View.OnClickListener
@@ -186,7 +188,6 @@ public class HelloJni extends Activity
     				Message msg1 = Message.obtain();
     				msg1.what = START_COMPUTATION;
     				mH.sendMessage(msg1);
-    	    		init();
     	    		int index = getPaintBrushParamIndex();
     	    		setParameter(mPaintBrushParams[index]);
     	    		mPaintBrushParamIndex++;
@@ -338,7 +339,12 @@ public class HelloJni extends Activity
         {
         	if(resultCode == Activity.RESULT_OK)
         	{
-        		String path = data.getStringExtra("photo_path");
+        		Parcelable[] p = data.getParcelableArrayExtra("param_return");
+        		for(int i = 0 ; i < p.length ; i++)
+        		{
+        			PaintBrushParam pbp = (PaintBrushParam)p[i];
+        			mPaintBrushParams[i] = pbp;
+        		}
         		
         	}
         }
