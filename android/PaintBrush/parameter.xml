@@ -3,11 +3,31 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    >
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/parameter_set_text"
         />
+    
+    <Button android:id="@+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_parameter_ok"/>
+        
+    <Button android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_parameter_cancel"/>
+    <Spinner android:id="@+id/index_spinner"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
+    </LinearLayout>
     <ScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
@@ -19,7 +39,9 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    <LinearLayout android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="horizontal" 
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView  
             android:id="@+id/paper_scale"
@@ -34,7 +56,9 @@
             />
     </LinearLayout>
 
-    <LinearLayout android:layout_width="wrap_content"
+    <LinearLayout
+    android:orientation="horizontal"  
+    android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <TextView  
             android:id="@+id/paper_relief"
@@ -50,9 +74,10 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
-            android:id="@+id/brush_relief_type"
+            android:id="@+id/brush_relief"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:text="@string/brush_relief_text"
@@ -65,22 +90,23 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/orient_type"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:text="@string/orient_type_text"
             />
-        <EditText
-            android:id="@+id/orient_type_input"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            />
+        <Spinner android:id="@+id/orient_type_input"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/orient_num"
             android:layout_width="wrap_content" 
@@ -95,7 +121,8 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/orient_first"
             android:layout_width="wrap_content" 
@@ -110,7 +137,8 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/orient_last"
             android:layout_width="wrap_content" 
@@ -125,22 +153,23 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/size_type"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:text="@string/size_type_text"
             />
-        <EditText
-            android:id="@+id/size_type_input"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            />
+        <Spinner android:id="@+id/size_type_input"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/size_num"
             android:layout_width="wrap_content" 
@@ -155,7 +184,8 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/size_first"
             android:layout_width="wrap_content" 
@@ -170,7 +200,8 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/size_last"
             android:layout_width="wrap_content" 
@@ -185,22 +216,23 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/place_type"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:text="@string/place_type_text" 
             />
-        <EditText
-            android:id="@+id/place_type_input"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            />
+        <Spinner android:id="@+id/place_type_input"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/brush_density"
             android:layout_width="wrap_content" 
@@ -215,33 +247,33 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/color_type"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:text="@string/color_type_text"
             />
-        <EditText
-            android:id="@+id/color_type_input"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            />
+        <Spinner android:id="@+id/color_type_input"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
         <TextView  
             android:id="@+id/bg_type"
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
             android:text="@string/bg_type_text"
             />
-        <EditText
-            android:id="@+id/bg_type_input"
-            android:layout_width="100px"
-            android:layout_height="100px"
-            />
+        <Spinner android:id="@+id/bg_type_input"   
+           android:layout_width="wrap_content"  
+           android:layout_height="wrap_content">
+           </Spinner>
     </LinearLayout>
 </LinearLayout>
 </ScrollView>

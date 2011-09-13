@@ -20,17 +20,17 @@ public class SelectPhotoActivity extends Activity
         Button nextButton = (Button)findViewById(R.id.next);
         Button prevButton = (Button)findViewById(R.id.prev);
         Button selectButton = (Button)findViewById(R.id.select_photo1);
-        Button setParamButton = (Button)findViewById(R.id.set_parameter);
+
         mTextView = (TextView)findViewById(R.id.textview1);
         mImageView = (ImageView)findViewById(R.id.imageview1);
         nextButton.setClickable(true);
         prevButton.setClickable(true);
         selectButton.setClickable(true);
-        setParamButton.setClickable(true);
+
         nextButton.setOnClickListener(new ButtonHandler());
         prevButton.setOnClickListener(new ButtonHandler());
         selectButton.setOnClickListener(new ButtonHandler());
-        setParamButton.setOnClickListener(new ButtonHandler());
+        
     }
     private class ButtonHandler implements View.OnClickListener
     {
@@ -64,13 +64,6 @@ public class SelectPhotoActivity extends Activity
         		finish();
         	}
         	break;
-        	case R.id.set_parameter:
-        	{
-        		Log.i(TAG, "## set parameter ##");
-        		Intent intent = new Intent(SelectPhotoActivity.this, SetParameterActivity.class);
-        		startActivityForResult(intent, SET_PARAMETER_ACTIVITY);
-        	}
-        	break;
         	default:
         		break;
         	}
@@ -83,15 +76,7 @@ public class SelectPhotoActivity extends Activity
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode) 
         {
-        case SET_PARAMETER_ACTIVITY:
-        {
-        	if(resultCode == Activity.RESULT_OK)
-        	{
-        		String path = data.getStringExtra("photo_path");
-        		
-        	}
-        }
-        break;
+
         default:
         	break;
         }
@@ -100,5 +85,4 @@ public class SelectPhotoActivity extends Activity
     private ImageView mImageView;
     private static final String TAG = "SelectPhotoActivity";
     private ImageLoader mImageLoader;
-    private final static int SET_PARAMETER_ACTIVITY = 0;
 }

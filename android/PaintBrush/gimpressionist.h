@@ -176,6 +176,8 @@ extern int hasRepaintEnd();
 extern void setIsRepaintEnd(int v);
 extern void changeBackground();
 extern void clearBackground();
+extern void terminateBrushPaint();
+extern void startBrushPaint();
 typedef void (*REPAINTCALLBACK_FUN)(const char* type, const char* msg);
 extern REPAINTCALLBACK_FUN repaintCallBack;
 extern int tmpWidth;

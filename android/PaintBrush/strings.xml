@@ -23,4 +23,35 @@
     <string name="color_type_text">Color Type</string>
     <string name="bg_type_text">Background Type</string>
     <string name="set_parameter_text">Set Parameter</string>
+    <string name="set_parameter_ok">OK</string>
+    <string name="set_parameter_cancel">Cancel</string>
+    
+    <string name="orient_value">明度</string>
+    <string name="orient_radius">极距</string>
+    <string name="orient_random">随机</string>
+    <string name="orient_radial">转向</string>
+    <string name="orient_flowing">流线</string>
+    <string name="orient_hue">色调</string>
+    <string name="orient_adaptive">适应</string>
+    <string name="orient_manual">手工</string>
+    
+    <string name="size_type_value">明度</string>
+    <string name="size_type_radius">极距</string>
+    <string name="size_type_random">随机</string>
+    <string name="size_type_radial">转向</string>
+    <string name="size_type_flowing">流线</string>
+    <string name="size_type_hue">色调</string>
+    <string name="size_type_adaptive">适应</string>
+    <string name="size_type_manual">手工</string>
+    
+    <string name="place_type_random">随机</string>
+    <string name="place_type_even_dist">均匀分布</string>
+    
+    <string name="color_type_brush_avg">画笔下方平均值</string>
+    <string name="color_type_brush_center">画笔的中心</string>
+    
+    <string name="bg_type_solid">纯色</string>
+    <string name="bg_type_keep_original">保持原始</string>
+    <string name="bg_type_from_paper">来自画纸</string>
+    <string name="bg_type_transparent">透明</string>
 </resources>

@@ -35,6 +35,28 @@ static std::list<BrushPiece> gBrushPieceList;
 static SE_Mutex gBrushPieceMutex;
 static volatile int isRepaintEnd = 0;
 static SE_Mutex gIsRepaintEnd;
+static volatile int gBrushPaintRunning = 1;
+static SE_Mutex gBrushPaintRunningMutex;
+void terminateBrushPaint()
+{
+    gBrushPaintRunningMutex.lock();
+    gBrushPaintRunning = 0;
+    gBrushPaintRunningMutex.unlock();
+}
+int isBrushPaint()
+{
+    int ret = 0;
+    gBrushPaintRunningMutex.lock();
+    ret = gBrushPaintRunning ;
+    gBrushPaintRunningMutex.unlock();
+    return ret;
+}
+void startBrushPaint()
+{
+    gBrushPaintRunningMutex.lock();
+    gBrushPaintRunning = 1;
+    gBrushPaintRunningMutex.unlock();
+}
 void setIsRepaintEnd(int v)
 {
     gIsRepaintEnd.lock();
@@ -52,6 +74,13 @@ int hasRepaintEnd()
 void clearBrushPiece()
 {
     gBrushPieceMutex.lock();
+    std::list<BrushPiece>::iterator it;
+    for(it = gBrushPieceList.begin() ; it != gBrushPieceList.end(); it++)
+    {
+        BrushPiece bp = *it;
+        ppm_kill(&bp.data);
+        ppm_kill(&bp.alpha);
+    }
 	gBrushPieceList.clear();
 	gBrushPieceMutex.unlock();
 }
@@ -1202,7 +1231,7 @@ repaint (ppm_t *p, ppm_t *a)
         }
     }
 
-  for (; i; i--)
+  for (; i && isBrushPaint(); i--)
     {
       if (i % progstep == 0)
         {
@@ -1479,7 +1508,7 @@ repaint (ppm_t *p, ppm_t *a)
 		(*repaintCallBack)("apply_brush", "start");
         LOGI("## call repaint callback end ##\n");
 	}
-	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() ; it++)
+	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
 		apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
@@ -1497,6 +1526,10 @@ repaint (ppm_t *p, ppm_t *a)
         addBrushPiece(brushPiece);
 	}
     gBrushProperties.clear();
+    if(!isBrushPaint())
+    {
+        clearBrushPiece(); 
+    }
     //setIsRepaintEnd(1);
 	//end
   for (i = 0; i < num_brushes; i++)
@@ -1510,7 +1543,10 @@ repaint (ppm_t *p, ppm_t *a)
   g_free (xpos);
   g_free (ypos);
   //update background
-  ppm_copy(&tmp, &gBackground);
+  if(isBrushPaint())
+  {
+      ppm_copy(&tmp, &gBackground);
+  }
   //
   if (runningvals.general_paint_edges)
     {

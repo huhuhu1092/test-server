@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+
 import android.os.SystemClock;
 import android.graphics.drawable.BitmapDrawable;
 import android.content.Context;
@@ -56,17 +57,38 @@ public class HelloJni extends Activity
         mImageView = (ImageView)findViewById(R.id.imageview);
         mTextView.setText( end_draw);
         mSelectButton = (Button)findViewById(R.id.select_photo);
+        mSetParamButton = (Button)findViewById(R.id.set_parameter);
+        mSetParamButton.setClickable(true);
+        mSetParamButton.setOnClickListener(new ButtonClicker());
         mSelectButton.setClickable(true);
         mSelectButton.setOnClickListener(new ButtonClicker());
         mDefaultBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
+        startBrushPaint();
         //mCurrBmp = mImageLoader.getNextImage();
     }
     private class ButtonClicker implements View.OnClickListener
     {
     	public void onClick(View v)
     	{
-    		Intent intent = new Intent(HelloJni.this, SelectPhotoActivity.class);
-    		startActivityForResult(intent, SELECT_PHOTO_SUB_ACTIVITY);
+    		switch(v.getId())
+    		{
+    		case R.id.select_photo:
+    		{
+        		Intent intent = new Intent(HelloJni.this, SelectPhotoActivity.class);
+        		startActivityForResult(intent, SELECT_PHOTO_SUB_ACTIVITY);	
+    		}
+    		break;
+        	case R.id.set_parameter:
+        	{
+        		Log.i(TAG, "## set parameter ##");
+        		Intent intent = new Intent(HelloJni.this, SetParameterActivity.class);
+        		intent.putExtra("param_array", mPaintBrushParams);
+        		startActivityForResult(intent, SET_PARAMETER_SUB_ACTIVITY);
+        	}
+        	break;
+        	default:
+        		break;
+    		}
     	}
     }
     @Override
@@ -75,17 +97,24 @@ public class HelloJni extends Activity
     	super.onDestroy();
     	Log.i(TAG, "## main thread = " + Thread.currentThread().getName() + " ######");
 		mH.removeMessages(REPAINT_LOOP);
-    	if(mBrushPaintThread != null)
-    	{
-            mBrushPaintThread.interrupt();
-    	}
+        terminateBrushPaint();
     	clearBackground();
     }
+    private static native void nativeDestructor(int nativePPM);
     public class PaperProperty
     {
     	public int width;
     	public int height;
     	private int ppmPointer;
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                nativeDestructor(ppmPointer);
+            } finally {
+                super.finalize();
+            }
+        }
+
     }
 
     /* A native method that is implemented by the
@@ -123,6 +152,8 @@ public class HelloJni extends Activity
     public native void getBackground(Bitmap bitmap);
     public native void updateBackground();
     public native void clearBackground();
+    public native void terminateBrushPaint();
+    public native void startBrushPaint();
     public void javaCallback(String type, String msg)
     {
     	Log.i("hellojni", "## javaCallback ## " + type + " ## " + msg);
@@ -247,6 +278,7 @@ public class HelloJni extends Activity
     		{
     			int w = getOutputImageWidth();
     			int h = getOutputImageHeight();
+    			Log.i(TAG, "## backgroud width = " + w + ", h = " + h + " ###");
     			mBackgroundBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
     			getBackground(mBackgroundBitmap);
     			if(mBackgroundBitmap != null)
@@ -302,6 +334,15 @@ public class HelloJni extends Activity
         	}
         }
         break;
+        case SET_PARAMETER_SUB_ACTIVITY:
+        {
+        	if(resultCode == Activity.RESULT_OK)
+        	{
+        		String path = data.getStringExtra("photo_path");
+        		
+        	}
+        }
+        break;
         default:
         	break;
         }
@@ -328,6 +369,7 @@ public class HelloJni extends Activity
     private Bitmap mDestBitmap;
     private TextView mTextView;
     private ImageView mImageView;
+    private Button mSetParamButton;
     private Handler mH = new MyHandler();
     private boolean mStartPaint;
     private boolean mDrawText = true;
@@ -336,20 +378,21 @@ public class HelloJni extends Activity
     private final static String start_comput = "start computation";
     private final static String start_draw = "start drawing";
     private final static String end_draw = "end draw";
-    private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;
+    private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;    
+    private final static int SET_PARAMETER_SUB_ACTIVITY = 1;
     private final static int mPaintBrushParamNum = 10;
     private int mPaintBrushParamIndex = 0;
     private final static String TAG = "HelloJni";
     private PaintBrushParam[] mPaintBrushParams = {
-    		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 120, 148, 4, 2, 0, 10),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 95, 116, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 6, 73, 88, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 6, 54, 64, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 6, 38, 44, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 4, 25, 28, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 2, 15, 16, 4, 2, 0, 10),
-            new PaintBrushParam(6, 8, 45, 180, 1, 8, 8, 0, 2, 0, 20)
+    		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20, 30, 0, 12, 0, 1),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 120, 148, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 95, 116, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 6, 73, 88, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 6, 54, 64, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 6, 38, 44, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 4, 25, 28, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 2, 15, 16, 4, 2, 0, 10, 30, 0, 12, 0, 1),
+            new PaintBrushParam(6, 8, 45, 180, 1, 8, 8, 0, 2, 0, 20, 30, 0, 12, 0, 1)
     };
 }

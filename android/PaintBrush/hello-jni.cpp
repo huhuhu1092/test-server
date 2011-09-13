@@ -37,6 +37,9 @@ extern "C" {
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_getBackground(JNIEnv* env, jobject thiz, jobject bitmap);
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_clearBackground(JNIEnv* env, jobject thiz);
     JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_updateBackground(JNIEnv* env, jobject thiz);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_nativeDestructor(JNIEnv* env, jobject thiz, jint nativePPM);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_terminateBrushPaint(JNIEnv* env, jobject thiz);
+    JNIEXPORT void JNICALL Java_com_example_hellojni_HelloJni_startBrushPaint(JNIEnv* env, jobject thiz);
 }
 static JavaVM* mJvm = 0;
 static jobject mJavaObj;
@@ -614,3 +617,17 @@ void Java_com_example_hellojni_HelloJni_clearBackground(JNIEnv* env, jobject thi
    // changeBackground();
    clearBackground();
 }
+void Java_com_example_hellojni_HelloJni_nativeDestructor(JNIEnv* env, jobject thiz, jint nativePPM)
+{
+     ppm_t* paperppm = (ppm_t*)nativePPM;
+     delete paperppm;
+}
+void Java_com_example_hellojni_HelloJni_terminateBrushPaint(JNIEnv* env, jobject thiz)
+{
+    terminateBrushPaint();
+}
+void Java_com_example_hellojni_HelloJni_startBrushPaint(JNIEnv* env, jobject thiz)
+{
+    startBrushPaint();
+}
+
