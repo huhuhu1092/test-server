@@ -965,7 +965,7 @@ repaint (ppm_t *p, ppm_t *a)
           ppm_copy_xy(&gBackground, &tmp, srcx, srcy, width, height, dstx, dsty); 
           LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
           ppm_copy(&tmp, &gBackground);
-          ppm_copy (p, &tmp);
+          //ppm_copy (p, &tmp);
         }
       }
 
