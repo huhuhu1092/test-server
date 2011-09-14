@@ -20,6 +20,10 @@
 #include "gimpressionist.h"
 #include <stdio.h>
 #include <math.h>
+#ifdef WIN32
+#else
+#include <time.h>
+#endif
 REPAINTCALLBACK_FUN repaintCallBack = 0;
 int tmpWidth = 0;
 int tmpHeight = 0;
@@ -27,6 +31,11 @@ int gBrushMaxWidth = 0;
 int gBrushMaxHeight = 0;
 int gImageWidth = 0;
 int gImageHeight = 0;
+int gRunningTime = 0;
+#ifdef WIN32
+#else
+struct timeval gStartTime;
+#endif
 ppm_t gBackground = {0, 0, NULL};
 ppm_t gBackgroundBack = {0, 0, NULL};
 /*
@@ -218,4 +227,32 @@ void clearBackground()
     gImageHeight = 0;
     tmpWidth = 0;
     tmpHeight = 0;
+}
+void startTime()
+{
+#ifdef WIN32
+#else
+    gettimeofday(&gStartTime, NULL);
+    gRunningTime = 0;
+#endif
+}
+void endTime()
+{
+#ifdef WIN32
+#else
+    struct timeval endTime;
+    int endms, startms;
+    gettimeofday(&endTime, NULL);
+    endms = endTime.tv_sec * 1000 + endTime.tv_usec / 1000;
+    startms = gStartTime.tv_sec * 1000 + endTime.tv_usec / 1000;
+    gRunningTime = (endms - startms) / 1000;
+#endif
+}
+int getTime()
+{
+    return gRunningTime;
+}
+void clearTime()
+{
+    gRunningTime = 0;
 }

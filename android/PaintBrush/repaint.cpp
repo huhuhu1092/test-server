@@ -924,8 +924,8 @@ repaint (ppm_t *p, ppm_t *a)
       {
         if(gBackground.width == p->width && gBackground.height == p->height)
         {
-            LOGI("## just copy background\n");
-          ppm_copy(&gBackground, &tmp);
+            LOGI("## background and p has same dimension\n");
+          //ppm_copy(&gBackground, &tmp);
         }
         else
         {
@@ -965,6 +965,7 @@ repaint (ppm_t *p, ppm_t *a)
           ppm_copy_xy(&gBackground, &tmp, srcx, srcy, width, height, dstx, dsty); 
           LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
           ppm_copy(&tmp, &gBackground);
+          ppm_copy (p, &tmp);
         }
       }
 
@@ -1511,7 +1512,8 @@ repaint (ppm_t *p, ppm_t *a)
 	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
-		apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+		//apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+        apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
 		BrushPiece brushPiece;
 		brushPiece.x = bp.tx;
 		brushPiece.y = bp.ty;
@@ -1543,10 +1545,12 @@ repaint (ppm_t *p, ppm_t *a)
   g_free (xpos);
   g_free (ypos);
   //update background
+  /*
   if(isBrushPaint())
   {
       ppm_copy(&tmp, &gBackground);
   }
+  */
   //
   if (runningvals.general_paint_edges)
     {

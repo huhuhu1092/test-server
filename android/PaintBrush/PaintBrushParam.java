@@ -21,13 +21,14 @@ public class PaintBrushParam implements Parcelable
     int color_type;
     
     int drawing_speed;
+    int wait_time;
     public PaintBrushParam()
     {
     	
     }
     public PaintBrushParam(int ot, int on, float of, float ol, int sn, 
     		               float sf, float sl, int st, int bt, int p, float bd,
-    		               float ps, float pr, float br, int ct, int ds)
+    		               float ps, float pr, float br, int ct, int ds, int wt)
     {
     	orient_type = ot;
     	orient_num = on;
@@ -45,6 +46,7 @@ public class PaintBrushParam implements Parcelable
         brush_relief = br;
         color_type = ct;
         drawing_speed = ds;
+        wait_time = wt;
     }
    public int describeContents()
    {
@@ -69,6 +71,7 @@ public class PaintBrushParam implements Parcelable
     	dest.writeFloat(brush_relief);
     	dest.writeInt(color_type);
     	dest.writeInt(drawing_speed);
+    	dest.writeInt(wait_time);
     }
 
     public final static  Parcelable.Creator<PaintBrushParam> CREATOR = new Parcelable.Creator<PaintBrushParam>() {
@@ -91,6 +94,7 @@ public class PaintBrushParam implements Parcelable
         	pbp.brush_relief = source.readFloat();
         	pbp.color_type = source.readInt();
         	pbp.drawing_speed = source.readInt();
+        	pbp.wait_time = source.readInt();
         	return pbp;
         }
         

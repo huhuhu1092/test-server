@@ -152,10 +152,11 @@ public class HelloJni extends Activity
     public native void getSelectedPaperProperty(PaperProperty p);
     public native void getSelectedPaper(PaperProperty p, Bitmap bitmap);
     public native void getBackground(Bitmap bitmap);
-    public native void updateBackground();
+    public native void updateBackground(Bitmap bitmap);
     public native void clearBackground();
     public native void terminateBrushPaint();
     public native void startBrushPaint();
+    public native int getCalcTime();
     public void javaCallback(String type, String msg)
     {
     	Log.i("hellojni", "## javaCallback ## " + type + " ## " + msg);
@@ -170,6 +171,12 @@ public class HelloJni extends Activity
     		m.what = BG_INIT_OK;
     		mH.sendMessage(m);
     	}
+    	else if(type.equals("apply_brush") && msg.equals("calc_end"))
+    	{
+    		Log.i(TAG, "## calc end ##");
+    		m.what = CALC_END;
+    		mH.sendMessage(m);
+    	}
     }
     public boolean onTouchEvent(MotionEvent event) {
     	if(mStartPaint == true)
@@ -181,6 +188,9 @@ public class HelloJni extends Activity
     		Log.i("hellojni", "## before repaint ##");
     		mStartPaint = true;
     		mSelectButton.setClickable(false);
+    		TextView tv = (TextView)findViewById(R.id.index);
+    		int index = getPaintBrushParamIndex() + 1;
+    		tv.setText("    I: " + Integer.toString(index) + "    ");
     		Runnable runnable = new Runnable() {
     			public void run()
     			{
@@ -190,6 +200,11 @@ public class HelloJni extends Activity
     				mH.sendMessage(msg1);
     	    		int index = getPaintBrushParamIndex();
     	    		setParameter(mPaintBrushParams[index]);
+    	    		mCurrentPaintBrushParam = mPaintBrushParams[index];
+    	    		if(index == 0)
+    	    		{
+    	    			clearBackground();
+    	    		}
     	    		mPaintBrushParamIndex++;
     	    		long startTime = SystemClock.uptimeMillis();
     				repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
@@ -234,6 +249,7 @@ public class HelloJni extends Activity
     			int h = getOutputImageHeight();
     			Log.i("hellojni", "## tmp width = " + w + ", height = " + h);
     			mDestBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    			/*
 				if(mBackgroundBitmap == null)
 				{
 					PaperProperty p = new PaperProperty();
@@ -247,31 +263,52 @@ public class HelloJni extends Activity
 						
 					}
 				}
+				*/
+    			getBackground(mDestBitmap);
 				if(mBackgroundBitmap != null)
 					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
+				
 				mH.removeMessages(BLINK);
 				mTextView.setText(start_draw);
     			Message m = Message.obtain();
     			m.what = REPAINT_LOOP;
     			mH.sendMessage(m);
+    			mStartDrawingTime = System.currentTimeMillis();
     		}
     		break;
     		case REPAINT_LOOP:
     		{
-    			int ret = paintBrush(mDestBitmap);
+    			int ret = 0;
+    			for(int i = 0 ; i < mCurrentPaintBrushParam.drawing_speed ; i++)
+    			{
+    			    ret = paintBrush(mDestBitmap);
+    			    if(ret != 0)
+    			    {
+    			    	if(ret == 2)
+    			    	{
+    				        mImageView.setImageBitmap(mDestBitmap);
+    			    	}
+    			    	else
+    			    		break;
+    			    }
+    			    else
+    			    {
+    				    updateBackground(mDestBitmap);
+    				    mStartPaint = false;
+    				    mTextView.setText(end_draw);
+    				    mSelectButton.setClickable(true);
+    				    long endTime = System.currentTimeMillis();
+    				    long span = (endTime - mStartDrawingTime) / 1000;
+    				    TextView tv = (TextView)HelloJni.this.findViewById(R.id.drawtime);
+    				    tv.setText("  PAINT: " + Long.toString(span) + " s ");
+    				    break;
+    			    }
+    			}
     			if(ret != 0)
     			{
-    				mImageView.setImageBitmap(mDestBitmap);
-    			    Message m = Message.obtain();
-    			    m.what = REPAINT_LOOP;
-    			    mH.sendMessageDelayed(m, 30);
-    			}
-    			else
-    			{
-    				updateBackground();
-    				mStartPaint = false;
-    				mTextView.setText(end_draw);
-    				mSelectButton.setClickable(true);
+		            Message m = Message.obtain();
+		            m.what = REPAINT_LOOP;
+		            mH.sendMessageDelayed(m, mCurrentPaintBrushParam.wait_time);
     			}
     		}
     		break;
@@ -282,6 +319,7 @@ public class HelloJni extends Activity
     			Log.i(TAG, "## backgroud width = " + w + ", h = " + h + " ###");
     			mBackgroundBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
     			getBackground(mBackgroundBitmap);
+    			//mDestBitmap = mBackgroundBitmap;
     			if(mBackgroundBitmap != null)
 					mImageView.setBackgroundDrawable(new BitmapDrawable(mBackgroundBitmap));
     		}
@@ -310,6 +348,13 @@ public class HelloJni extends Activity
     			Message m = Message.obtain();
     			m.what = BLINK;
     			mH.sendMessageDelayed(m, 1000);
+    		}
+    		break;
+    		case CALC_END:
+    		{
+    			int t = getCalcTime();
+    			TextView tv = (TextView)HelloJni.this.findViewById(R.id.calctime);
+    			tv.setText("  CAL:" + Integer.toString(t) + " s  ");
     		}
     		break;
     		default:
@@ -369,6 +414,7 @@ public class HelloJni extends Activity
     private final static int START_DRAW = 6;
     private final static int DRAW_END = 7;
     private final static int BLINK = 8;
+    private final static int CALC_END = 9;
     private ImageLoader mImageLoader;
     private Bitmap mBackgroundBitmap;
     private Bitmap mCurrBmp;
@@ -389,16 +435,19 @@ public class HelloJni extends Activity
     private final static int mPaintBrushParamNum = 10;
     private int mPaintBrushParamIndex = 0;
     private final static String TAG = "HelloJni";
+    private long mStartDrawingTime;
+    private PaintBrushParam mCurrentPaintBrushParam;
     private PaintBrushParam[] mPaintBrushParams = {
-    		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20, 30, 0, 12, 0, 1),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 120, 148, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-    		new PaintBrushParam(6, 8, 45, 180, 6, 95, 116, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 6, 73, 88, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 6, 54, 64, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 6, 38, 44, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 4, 25, 28, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 2, 15, 16, 4, 2, 0, 10, 30, 0, 12, 0, 1),
-            new PaintBrushParam(6, 8, 45, 180, 1, 8, 8, 0, 2, 0, 20, 30, 0, 12, 0, 1)
+    		                    //6                         //4
+    		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20, 30, 0, 0, 0, 100, 20),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 148, 184, 4, 2, 0, 10, 30, 0, 0, 0, 500, 20),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 120, 148, 4, 2, 0, 10, 30, 0, 0, 0, 500, 10),
+    		new PaintBrushParam(6, 8, 45, 180, 6, 95, 116, 4, 2, 0, 10, 30, 0, 0, 0, 500, 10),
+            new PaintBrushParam(6, 8, 45, 180, 6, 73, 88, 4, 2, 0, 10, 30, 0, 0, 0, 500, 10),
+            new PaintBrushParam(6, 8, 45, 180, 6, 54, 64, 4, 2, 0, 10, 30, 0, 0, 0, 500, 0),
+            new PaintBrushParam(6, 8, 45, 180, 6, 38, 44, 4, 2, 0, 10, 30, 0, 0, 0, 1000, 0),
+            new PaintBrushParam(6, 8, 45, 180, 4, 25, 28, 4, 2, 0, 10, 30, 0, 0, 0, 1000, 0),
+            new PaintBrushParam(6, 8, 45, 180, 2, 15, 16, 4, 2, 0, 10, 30, 0, 0, 0, 1000, 0),
+            new PaintBrushParam(6, 8, 45, 180, 1, 8, 8, 4, 2, 0, 20, 30, 0, 0, 0, 1000, 0)
     };
 }

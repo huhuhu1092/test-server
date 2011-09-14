@@ -142,6 +142,10 @@ public class SetParameterActivity extends Activity
 		EditText drawSpeed = (EditText)findViewById(R.id.drawing_speed_input);
 		str = drawSpeed.getText().toString();
 		pbp.drawing_speed = Integer.parseInt(str);
+		
+		EditText waitTime = (EditText)findViewById(R.id.wait_time_input);
+		str = waitTime.getText().toString();
+		pbp.wait_time = Integer.parseInt(str);
 		return pbp;
 	}
 	void setOrientTypeSpinner()
@@ -269,7 +273,11 @@ public class SetParameterActivity extends Activity
             {
                 PaintBrushParam pbp = getCurrentValue();
                 mPaintBrushParamArray[mCurrentIndex] = pbp;
-                mIsStart = true;
+                mIsStart = false;
+            }
+            else
+            {
+            	mIsStart = false;
             }
             mCurrentIndex = Integer.parseInt(str) - 1; 
             PaintBrushParam pbp1 = mPaintBrushParamArray[mCurrentIndex];
@@ -329,6 +337,9 @@ public class SetParameterActivity extends Activity
 		
 		EditText drawSpeed = (EditText)findViewById(R.id.drawing_speed_input);
 		drawSpeed.setText(Integer.toString(pbp.drawing_speed));
+		
+		EditText waitTime = (EditText)findViewById(R.id.wait_time_input);
+		waitTime.setText(Integer.toString(pbp.wait_time));
 		
 	}
 	private Spinner mIndexSpinner;

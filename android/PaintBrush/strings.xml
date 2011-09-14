@@ -23,6 +23,7 @@
     <string name="color_type_text">颜色类型</string>
     <string name="bg_type_text">背景</string>
     <string name="drawing_speed_text">绘画速度</string>
+    <string name="wait_time_text">等待时间</string>
     <string name="set_parameter_text">Set Parameter</string>
     <string name="set_parameter_ok">OK</string>
     <string name="set_parameter_cancel">Cancel</string>
@@ -55,4 +56,15 @@
     <string name="bg_type_keep_original">保持原始</string>
     <string name="bg_type_from_paper">来自画纸</string>
     <string name="bg_type_transparent">透明</string>
+    
+    <string name="b1">1</string>
+    <string name="b2">2</string>
+    <string name="b3">3</string>
+    <string name="b4">4</string>
+    <string name="b5">5</string>
+    <string name="b6">6</string>
+    <string name="b7">7</string>
+    <string name="b8">8</string>
+    <string name="b9">9</string>
+    <string name="b10">10</string>
 </resources>

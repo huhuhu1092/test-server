@@ -14,6 +14,21 @@
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content" 
         />
+        <TextView  
+            android:id="@+id/index"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+        />
+        <TextView  
+            android:id="@+id/calctime"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+        />
+        <TextView  
+            android:id="@+id/drawtime"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+        />
         <Button android:id="@+id/select_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,7 +38,52 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/set_parameter_text"/>
-        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" 
+            >
+           <Button android:id="@+id/b1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"/>
+           <Button android:id="@+id/b2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2"/>
+           <Button android:id="@+id/b3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3"/>
+           <Button android:id="@+id/b4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4"/>
+           <Button android:id="@+id/b5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5"/>
+            <Button android:id="@+id/b6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6"/>
+            <Button android:id="@+id/b7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7"/>
+            <Button android:id="@+id/b8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="8"/>
+             <Button android:id="@+id/b9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9"/>
+            <Button android:id="@+id/b10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"/>
+        </LinearLayout>
     </LinearLayout>
 <com.example.hellojni.PainterImageView
     android:id="@+id/imageview"
