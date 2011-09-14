@@ -363,6 +363,7 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
 	    LOGE("### infile error ####\n");
 	    return;
     }
+    /*
     int srcRowStride = infile.width * 3;
     for(y = 0 ; y < srcImage.height ; y++)
     {
@@ -373,6 +374,7 @@ void Java_com_example_hellojni_HelloJni_repaintPixel(JNIEnv* env, jobject thiz, 
 	        srcImage.data[y * srcImage.rowstride + xd + 2] = infile.col[y * srcRowStride + xs + 2];
 	    }
     }
+    */
     AndroidBitmap_unlockPixels(env, bitmap);
     g_rand_free(random_generator); 
     LOGI("####end ##\n");
