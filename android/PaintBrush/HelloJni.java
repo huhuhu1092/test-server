@@ -66,6 +66,27 @@ public class HelloJni extends Activity
         mDefaultBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.RGB_565);
         startBrushPaint();
         init();
+        setButtonHandler();
+        setButtonNormal();
+        Button b = (Button)findViewById(R.id.reset);
+        b.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				for(int i = 0 ; i < mButtonID.length ; i++)
+				{
+				    Button b = (Button)findViewById(mButtonID[i]);
+				    setButtonColorByIndex(b.getId());
+				}
+		        mPaintBrushParamIndex = -1;
+		        mIsEnd = false;
+			}
+		});
+        for(int i = 0 ; i < PAINT_BRUSH_PARAM_NUM ; i++)
+        {
+        	mSeqButtonState[i] = new SequenceButtonState();
+        }
         //mCurrBmp = mImageLoader.getNextImage();
     }
     private class ButtonClicker implements View.OnClickListener
@@ -178,45 +199,63 @@ public class HelloJni extends Activity
     		mH.sendMessage(m);
     	}
     }
+    private class PaintRunnable implements Runnable
+    {
+			private int index;
+			public PaintRunnable(int i)
+			{
+				index = i;
+			}
+			public void run()
+			{
+	    		if(index == -1)
+	    		{
+	    			Log.i(TAG, "ASSERT index should not be equal -1");
+	    			return;
+	    		}
+				Log.i(TAG, "### paint thread name = " + Thread.currentThread().getName() + " ###");
+				Message msg1 = Message.obtain();
+				msg1.what = START_COMPUTATION;
+				mH.sendMessage(msg1);
+	    		setParameter(mPaintBrushParams[index]);
+	    		mCurrentPaintBrushParam = mPaintBrushParams[index];
+	    		if(index == 0)
+	    		{
+	    			clearBackground();
+	    		}
+	    		long startTime = SystemClock.uptimeMillis();
+				repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
+				long endTime = SystemClock.uptimeMillis();
+				long span = (endTime - startTime) / 1000;
+				Log.i("hellojni", "#### repaint end time = " + span + " #######");
+				//
+				Message msg = Message.obtain();
+				msg.what = REPAINT_END;
+				mH.sendMessage(msg);
+			}
+    }
     public boolean onTouchEvent(MotionEvent event) {
     	if(mStartPaint == true)
     		return super.onTouchEvent(event);
     	if(mCurrBmp == null)
     		return super.onTouchEvent(event);
+    	if(mIsEnd)
+    		return super.onTouchEvent(event);
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
     	{
     		Log.i("hellojni", "## before repaint ##");
+    		int index = findPaintBrushParamIndex();
+    		if(index == -1)
+    			return super.onTouchEvent(event);
     		mStartPaint = true;
+    		if(index == (PAINT_BRUSH_PARAM_NUM - 1))
+    			mIsEnd = true;
     		mSelectButton.setClickable(false);
     		TextView tv = (TextView)findViewById(R.id.index);
-    		int index = getPaintBrushParamIndex() + 1;
-    		tv.setText("    I: " + Integer.toString(index) + "    ");
-    		Runnable runnable = new Runnable() {
-    			public void run()
-    			{
-    				Log.i(TAG, "### paint thread name = " + Thread.currentThread().getName() + " ###");
-    				Message msg1 = Message.obtain();
-    				msg1.what = START_COMPUTATION;
-    				mH.sendMessage(msg1);
-    	    		int index = getPaintBrushParamIndex();
-    	    		setParameter(mPaintBrushParams[index]);
-    	    		mCurrentPaintBrushParam = mPaintBrushParams[index];
-    	    		if(index == 0)
-    	    		{
-    	    			clearBackground();
-    	    		}
-    	    		mPaintBrushParamIndex++;
-    	    		long startTime = SystemClock.uptimeMillis();
-    				repaintPixel(mCurrBmp, "/sdcard/test/paintbrush");
-    				long endTime = SystemClock.uptimeMillis();
-    				long span = (endTime - startTime) / 1000;
-    				Log.i("hellojni", "#### repaint end time = " + span + " #######");
-    				//
-    				Message msg = Message.obtain();
-    				msg.what = REPAINT_END;
-    				mH.sendMessage(msg);
-    			}
-    		};
+    		tv.setText("    I: " + Integer.toString(index + 1) + "    ");
+    		Button b = (Button)findViewById(mButtonID[index]);
+    		b.setTextColor(RUN_COLOR);
+    		Runnable runnable = new PaintRunnable(index);
     		Thread thread = new Thread(runnable);
     		mBrushPaintThread = thread;
     		thread.start();
@@ -300,7 +339,7 @@ public class HelloJni extends Activity
     				    long endTime = System.currentTimeMillis();
     				    long span = (endTime - mStartDrawingTime) / 1000;
     				    TextView tv = (TextView)HelloJni.this.findViewById(R.id.drawtime);
-    				    tv.setText("  PAINT: " + Long.toString(span) + " s ");
+    				    tv.setText("  P: " + Long.toString(span) + " s ");
     				    break;
     			    }
     			}
@@ -354,7 +393,7 @@ public class HelloJni extends Activity
     		{
     			int t = getCalcTime();
     			TextView tv = (TextView)HelloJni.this.findViewById(R.id.calctime);
-    			tv.setText("  CAL:" + Integer.toString(t) + " s  ");
+    			tv.setText(" C:" + Integer.toString(t) + " s  ");
     		}
     		break;
     		default:
@@ -362,7 +401,6 @@ public class HelloJni extends Activity
     		}
     	}
     }
-    private Bitmap mDefaultBmp;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) 
     {
@@ -398,13 +436,98 @@ public class HelloJni extends Activity
         	break;
         }
     }
-    private int getPaintBrushParamIndex()
+    private void setButtonColor(int buttonID, int color)
     {
-    	if(mPaintBrushParamIndex >= mPaintBrushParamNum)
+    	Button button = (Button)findViewById(buttonID);
+    	button.setTextColor(color);
+    }
+    private void setButtonColorByIndex(int buttonID)
+    {
+    	int buttonIndex = findButtonIndex(buttonID);
+        int state = mSeqButtonState[buttonIndex].state;
+        switch(state)
+        {
+        case SEQ_BUTTON_NORMAL:
+        	setButtonColor(buttonID, NORMAL_COLOR);
+        	break;
+        case SEQ_BUTTON_DISABLE:
+        	setButtonColor(buttonID, DISABLE_COLOR);
+        	break;
+        default:
+        	break;
+        }
+    }
+    private static int[] mButtonID = {R.id.b1, R.id.b2, R.id.b3, R.id.b4, R.id.b5, R.id.b6, R.id.b7, R.id.b8, R.id.b9, R.id.b10}; 
+    private void setButtonNormal()
+    {
+    	int[] id = mButtonID;
+    	for(int i = 0  ; i < id.length ; i++)
     	{
-    		mPaintBrushParamIndex = 0;
+    		setButtonColor(id[i], NORMAL_COLOR);
     	}
+    }
+    private class SequenceButtonState
+    {
+    	public int state;
+    }
+    private int findButtonIndex(int buttonID)
+    {
+    	for(int i = 0 ; i < mButtonID.length ; i++)
+    	{
+    		if(mButtonID[i] == buttonID)
+    			return i;
+    	}
+    	return 0;
+    }
+    private int findPaintBrushParamIndex()
+    {
+    	int start = mPaintBrushParamIndex + 1;
+    	int i;
+    	for(i = start ; i < mSeqButtonState.length ; i++)
+    	{
+    		if(mSeqButtonState[i].state == SEQ_BUTTON_NORMAL)
+    		{
+    			mPaintBrushParamIndex = i;
+    			break;
+    		}
+    	}
+    	if(i == mSeqButtonState.length)
+    		mPaintBrushParamIndex = -1;
     	return mPaintBrushParamIndex;
+    }
+    private void setButtonColorByState(int buttonID)
+    {
+        int buttonIndex = findButtonIndex(buttonID);
+        int state = mSeqButtonState[buttonIndex].state;
+        switch(state)
+        {
+        case SEQ_BUTTON_NORMAL:
+        	setButtonColor(buttonID, DISABLE_COLOR);
+        	mSeqButtonState[buttonIndex].state = SEQ_BUTTON_DISABLE;
+        	break;
+        case SEQ_BUTTON_DISABLE:
+        	setButtonColor(buttonID, NORMAL_COLOR);
+        	mSeqButtonState[buttonIndex].state = SEQ_BUTTON_NORMAL;
+        	break;
+        default:
+        	break;
+        }
+    }
+    private class SequenceButtonHandler implements View.OnClickListener
+    {
+    	public void onClick(View v)
+    	{
+            setButtonColorByState(v.getId());
+    	}
+    }
+    private void setButtonHandler()
+    {
+    	for(int i = 0 ; i < mButtonID.length; i++)
+    	{
+    		Button b = (Button)findViewById(mButtonID[i]);
+    		b.setOnClickListener(new SequenceButtonHandler());
+    		b.setClickable(true);
+    	}
     }
     private final static int REPAINT_END = 1;
     private final static int REPAINT_START = 2;
@@ -415,6 +538,11 @@ public class HelloJni extends Activity
     private final static int DRAW_END = 7;
     private final static int BLINK = 8;
     private final static int CALC_END = 9;
+    
+    private final static int SEQ_BUTTON_RUN = 2;
+    private final static int SEQ_BUTTON_DISABLE = 1;
+    private final static int SEQ_BUTTON_NORMAL = 0;
+    private Bitmap mDefaultBmp;
     private ImageLoader mImageLoader;
     private Bitmap mBackgroundBitmap;
     private Bitmap mCurrBmp;
@@ -427,16 +555,21 @@ public class HelloJni extends Activity
     private boolean mDrawText = true;
     Button mSelectButton;
     Thread mBrushPaintThread;
-    private final static String start_comput = "start computation";
-    private final static String start_draw = "start drawing";
-    private final static String end_draw = "end draw";
+    private final static String start_comput = "compute";
+    private final static String start_draw = "draw";
+    private final static String end_draw = "end";
     private final static int SELECT_PHOTO_SUB_ACTIVITY = 0;    
     private final static int SET_PARAMETER_SUB_ACTIVITY = 1;
-    private final static int mPaintBrushParamNum = 10;
-    private int mPaintBrushParamIndex = 0;
+    private final static int PAINT_BRUSH_PARAM_NUM = 10;
+    private int mPaintBrushParamIndex = -1;
     private final static String TAG = "HelloJni";
     private long mStartDrawingTime;
     private PaintBrushParam mCurrentPaintBrushParam;
+    private final static int RUN_COLOR = 0xFF0000FF;
+    private final static int NORMAL_COLOR = 0xFF00FF00;
+    private final static int DISABLE_COLOR = 0xFFFF0000;
+    private boolean mIsEnd = false;
+    private SequenceButtonState[] mSeqButtonState = new SequenceButtonState[PAINT_BRUSH_PARAM_NUM];
     private PaintBrushParam[] mPaintBrushParams = {
     		                    //6                         //4
     		new PaintBrushParam(6, 8, 120, 60, 6, 179, 224, 4, 2, 1, 20, 30, 0, 0, 0, 100, 20),
