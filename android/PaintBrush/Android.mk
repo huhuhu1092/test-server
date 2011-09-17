@@ -17,11 +17,13 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := hello-jni
-LOCAL_SRC_FILES := hello-jni.c \
-	           gimpressionist.c \
-		   plasma.c \
-		   ppmtool.c \
-		   random.c \
-		   repaint.cpp
+LOCAL_SRC_FILES := ../../streamserver_git/test-server/android/PaintBrush/hello-jni.cpp \
+	           ../../streamserver_git/test-server/android/PaintBrush/gimpressionist.c \
+		   ../../streamserver_git/test-server/android/PaintBrush/plasma.c \
+		   ../../streamserver_git/test-server/android/PaintBrush/ppmtool.c \
+		   ../../streamserver_git/test-server/android/PaintBrush/random.c \
+                   ../../streamserver_git/test-server/android/PaintBrush/SE_Mutex.cpp \
+		   ../../streamserver_git/test-server/android/PaintBrush/repaint.cpp
 LOCAL_LDLIBS    := -lm -llog -ljnigraphics
+LOCAL_CFLAGS    := -DSE_HAS_MUTEX
 include $(BUILD_SHARED_LIBRARY)
