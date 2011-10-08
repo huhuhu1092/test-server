@@ -429,7 +429,7 @@ void ASE_Loader::Write(SE_BufferOutput& output, SE_BufferOutput& outScene, const
             //}
             for(int j = 0 ; j < subMaterialHasTexV.size() ; j++)
             {
-                _MaterialData subMaterialData = materialVector[materialNum + subMaterialHasTexV[j]];
+                _MaterialData subMaterialData = materialVector[materialNum + subMaterialHasTexV[j] - 1];
                 //subMaterialStartPos++;
                 std::string texStr(subMaterialData.md.texName);
                 if(texStr != "")
