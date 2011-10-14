@@ -26,6 +26,9 @@
 #ifdef WIN32
 #include "imageloader.h"
 #endif
+#ifdef MACOS
+#include "PGMDataReader.h"
+#endif
 static gboolean img_has_alpha = 0;
 static gint brush_from_file = 2;
 static ppm_t brushppm  = {0, 0, NULL};
@@ -975,10 +978,16 @@ repaint (ppm_t *p, ppm_t *a)
     gBrushMaxWidth = maxbrushwidth;
     gBrushMaxHeight = maxbrushheight;
     LOGI("## gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", gBrushMaxWidth, gBrushMaxHeight);
+    
+#ifdef MACOS
+    SE_setBackground(&gBackground);
+#else
+    
     if(repaintCallBack)
 	{
 	  (*repaintCallBack)("background", "initok");
   	}
+#endif
   cx = p->width / 2;
   cy = p->height / 2;
   maxdist = sqrtf (cx * cx + cy * cy);
@@ -1503,12 +1512,16 @@ repaint (ppm_t *p, ppm_t *a)
     LOGI("############# start create brush piece w = %d, h = %d ##############", tmpWidth, tmpHeight);
 	gBrushProperties.sort(_BrushPropertyComp());
 	std::list<BrushProperty>::iterator it;
+#ifdef MACOS
+    //SE_startBrushPaint();
+#else
 	if(repaintCallBack)
 	{
         LOGI("## call repaint callback ##\n");
 		(*repaintCallBack)("apply_brush", "start");
         LOGI("## call repaint callback end ##\n");
 	}
+#endif
 	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
@@ -1525,7 +1538,8 @@ repaint (ppm_t *p, ppm_t *a)
         ppm_new_alpha(&brushPiece.alpha, bp.brush->width, bp.brush->height);
 	    ppm_copy_xy(&tmp, &brushPiece.data, bp.tx, bp.ty, bp.brush->width, bp.brush->height, 0, 0);    	
         createAlpha(bp.brush, &brushPiece.alpha);
-        addBrushPiece(brushPiece);
+        //addBrushPiece(brushPiece);
+        SE_startBrushPaintInMainQueue(brushPiece);
 	}
     gBrushProperties.clear();
     if(!isBrushPaint())

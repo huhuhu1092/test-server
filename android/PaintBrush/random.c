@@ -1,6 +1,7 @@
 #include "random.h"
-#ifdef ANDROID
+#ifndef WIN32
 #include <time.h>
+#include <unistd.h>
 #endif
 GRand* random_generator = 0;
 #define G_GINT64_CONSTANT(val) (val##L)
@@ -30,7 +31,7 @@ struct _GTimeVal
   glong tv_usec;
 };
 
-void g_get_current_time (GTimeVal *result)
+static void g_get_current_time (GTimeVal *result)
 {
 #ifndef WIN32
   struct timeval r;
@@ -64,7 +65,7 @@ static guint get_random_version (void)
 {
   return 22;
 }
-void g_rand_set_seed (GRand* rand, guint32 seed)
+static void g_rand_set_seed (GRand* rand, guint32 seed)
 {
   if(rand == NULL)
       return;
@@ -99,7 +100,7 @@ void g_rand_set_seed (GRand* rand, guint32 seed)
 		break;
     }
 }
-void g_rand_set_seed_array (GRand* rand, const guint32 *seed, guint seed_length)
+static void g_rand_set_seed_array (GRand* rand, const guint32 *seed, guint seed_length)
 {
   int i, j, k;
   if(rand == NULL)
@@ -142,7 +143,7 @@ void g_rand_set_seed_array (GRand* rand, const guint32 *seed, guint seed_length)
 
   rand->mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
 }
-GRand* g_rand_new_with_seed_array (const guint32 *seed, guint seed_length)
+static GRand* g_rand_new_with_seed_array (const guint32 *seed, guint seed_length)
 {
   GRand *rand = (GRand*)g_malloc(sizeof(GRand));
   g_rand_set_seed_array (rand, seed, seed_length);

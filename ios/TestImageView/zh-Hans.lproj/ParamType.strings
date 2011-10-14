@@ -1,0 +1,79 @@
+/* 
+  ParamType.strings
+  TestImageView
+
+  Created by 陈勇 on 11-10-12.
+  Copyright 2011年 __MyCompanyName__. All rights reserved.
+*/
+"paper_scale_text" = "画纸缩放";
+"paper_relief_text" = "画纸浮雕";
+"brush_relief_text" = "画笔浮雕";
+"orient_type_text" = "方向类型";
+"orient_num_text" = "方向数";
+"orient_first_text" = "起始角度";
+"orient_last_text" = "角度跨度";
+"size_type_text" = "大小类型";
+"size_num_text" = "大小数";
+"size_first_text" = "最小大小";
+"size_last_text" = "最大大小";
+"place_type_text" = "放置";
+"brush_density_text" = "笔画密度";
+
+"color_type_text" = "颜色类型";
+
+"bg_type_text" = "背景";
+
+"drawing_speed_text" = "绘画速度";
+
+"wait_time_text" = "等待时间";
+
+"orient_value" = "明度";
+
+"orient_radius" = "极距";
+
+"orient_random" = "随机";
+
+"orient_radial" = "转向";
+
+"orient_flowing" = "流线";
+
+"orient_hue" = "色调";
+
+"orient_adaptive" = "适应";
+
+"orient_manual" = "手工";
+
+"size_type_value" = "明度";
+
+"size_type_radius" = "极距";
+
+"size_type_random" = "随机";
+
+"size_type_radial" = "转向";
+
+"size_type_flowing" = "流线";
+
+"size_type_hue" = "色调";
+
+"size_type_adaptive" = "适应";
+
+"size_type_manual" = "手工";
+
+"place_type_random" = "随机";
+
+"place_type_even_dist" = "均匀分布";
+
+"color_type_brush_avg" = "画笔下方平均值";
+
+"color_type_brush_center" = "画笔的中心";
+
+"bg_type_solid" = "纯色";
+
+"bg_type_keep_original" = "保持原始";
+
+"bg_type_from_paper" = "来自画纸";
+
+"bg_type_transparent" = "透明";
+
+
+

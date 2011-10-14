@@ -25,8 +25,29 @@
 #include "type.h"
 #include "ppmtool.h"
 #include "gimpressionist.h"
+#include "PGMDataReader.h"
 #define MAX_LEN 512
 static char ppmpath[MAX_LEN];
+static int getLine(const char* data, int index, int dataLen, char* line, int lineLen)
+{
+    int i = index;
+    int n = 0;
+    char c;
+    while(n < (lineLen - 1) && i < dataLen)
+    {
+        c = line[n] = data[i];
+        n++;
+        i++;
+        if(c == '\n')
+            break;
+    }
+    int notGetReturn = (c != '\n');
+    if(notGetReturn)
+        return -1;
+    else
+        return i;
+}
+
 typedef enum {
   G_ASCII_ALNUM  = 1 << 0,
   G_ASCII_ALPHA  = 1 << 1,
@@ -80,7 +101,7 @@ static char* g_strchomp (char *string)
 
   return string;
 }
-char* g_memdup (char* mem,
+static char* g_memdup (char* mem,
           guint         byte_size)
 {
   char* new_mem;
@@ -95,6 +116,14 @@ char* g_memdup (char* mem,
 
   return new_mem;
 }
+static void readData(const char* srcData, int index, int len, unsigned char* buffer, int bufferLen)
+{
+    int readLen = len - index;
+    assert(readLen == bufferLen);
+    const char* start = srcData + index;
+    memcpy(buffer, start, bufferLen);  
+}
+#ifndef MACOS
 static int readline (FILE *f, char *buffer, int len)
 {
   do
@@ -107,7 +136,22 @@ static int readline (FILE *f, char *buffer, int len)
   g_strchomp (buffer);
   return 0;
 }
-
+#else
+static int readline(const char* data, int index, int dataLen, char* buffer, int len)
+{
+    int n = 0;
+    do 
+    {
+        memset(buffer, 0, len);
+        if((n = getLine(data, index, dataLen, buffer, len)) == -1)
+            return -1;
+        index = n;
+    } 
+    while (buffer[0] == '#');
+    g_strchomp (buffer);
+    return n;
+}
+#endif
 void
 ppm_kill (ppm_t *p)
 {
@@ -377,6 +421,7 @@ load_gimp_brush (const gchar *fn, ppm_t *p)
 void
 ppm_load (const char *fn, ppm_t *p)
 {
+#ifndef MACOS
   char  line[200];
   int   y, pgm = 0;
   FILE *f;
@@ -439,6 +484,51 @@ ppm_load (const char *fn, ppm_t *p)
     }
   }
   fclose (f);
+#else
+    const char* srcData = NULL;
+    int len = 0;
+    char line[200];
+    int pgm = 0;
+    int index = 0;
+    getPgmData(fn, &srcData, &len);
+    index = readline (srcData, index, len, line, 200);
+    if (strcmp (line, "P6"))
+    {
+        if (strcmp (line, "P5"))
+        {
+            g_printerr ("ppm_load: File \"%s\" not PPM/PGM? (line=\"%s\")%c\n",
+                        fn, line, 7);
+            ppm_new (p, 10,10);
+            return;
+        }
+        pgm = 1;
+    }
+    index = readline (srcData, index, len, line, 200);
+    p->width = atoi (line);
+    p->height = atoi (strchr (line, ' ')+1);
+    index = readline (srcData, index, len, line, 200);
+    if (strcmp (line, "255"))
+    {
+        g_printerr ("ppm_load: File \"%s\" not valid PPM/PGM? (line=\"%s\")%c\n",
+                    fn, line, 7);
+        ppm_new (p, 10,10);
+        return;
+    }
+    p->col = g_malloc (p->height * p->width * 3);
+    if (!pgm)
+    {
+        readData (srcData, index, len, p->col, p->height * 3 * p->width);
+    }
+    else
+    {
+        int y;
+        guchar *tmpcol = g_malloc (p->width * p->height);
+        readData(srcData, index, len, tmpcol, p->width * p->height);
+        for (y = 0; y < p->width * p->height * 3; y++) {
+            p->col[y] = tmpcol[y / 3];
+        }
+    }
+#endif
 }
 
 void
