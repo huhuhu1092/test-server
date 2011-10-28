@@ -1522,7 +1522,7 @@ repaint (ppm_t *p, ppm_t *a)
         LOGI("## call repaint callback end ##\n");
 	}
 #endif
-	for(it = gBrushProperties.begin() ; it != gBrushProperties.end() && isBrushPaint(); it++)
+	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
 		//apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
@@ -1534,6 +1534,7 @@ repaint (ppm_t *p, ppm_t *a)
 		brushPiece.h = tmp.height;
         brushPiece.mbw = maxbrushwidth;
         brushPiece.mbh = maxbrushheight;
+        brushPiece.last_piece = 0;
 	    ppm_new(&brushPiece.data, bp.brush->width, bp.brush->height);
         ppm_new_alpha(&brushPiece.alpha, bp.brush->width, bp.brush->height);
 	    ppm_copy_xy(&tmp, &brushPiece.data, bp.tx, bp.ty, bp.brush->width, bp.brush->height, 0, 0);    	
@@ -1541,6 +1542,9 @@ repaint (ppm_t *p, ppm_t *a)
         //addBrushPiece(brushPiece);
         SE_startBrushPaintInMainQueue(brushPiece);
 	}
+    BrushPiece bp;
+    bp.last_piece = 1;
+    SE_startBrushPaintInMainQueue(bp);
     gBrushProperties.clear();
     if(!isBrushPaint())
     {

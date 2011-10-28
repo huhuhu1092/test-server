@@ -159,6 +159,7 @@ typedef struct
 	int h; // dst height
 	int mbw;
 	int mbh;
+    int last_piece;
 } BrushPiece;
 /* Globals */
 
