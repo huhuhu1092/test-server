@@ -169,6 +169,7 @@ double getsiz_proto (double x, double y, int n, smvector_t *vec,
 extern double dist (double x, double y, double end_x, double end_y);
 extern void repaint (ppm_t *p, ppm_t *a);
 extern void setDefaultPcvals();
+extern ppm_t createBackground(gimpressionist_vals_t runningvals, int width, int height);
 extern void print_val(gimpressionist_vals_t* val);
 extern BrushPiece getNextBrushPiece();
 extern void addBrushPiece(BrushPiece bp);

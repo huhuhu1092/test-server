@@ -902,24 +902,7 @@ repaint (ppm_t *p, ppm_t *a)
     {
       if(ppm_empty(&gBackground))
       {
-        scale = runningvals.paper_scale / 100.0;
-        ppm_new (&tmp, p->width, p->height);
-        ppm_load (runningvals.selected_paper, &paper_ppm);
-        resize (&paper_ppm, paper_ppm.width * scale, paper_ppm.height * scale);
-        if (runningvals.paper_invert)
-          ppm_apply_gamma (&paper_ppm, -1.0, 1, 1, 1);
-        for (x = 0; x < tmp.width; x++)
-        {
-          int rx = x % paper_ppm.width;
-
-          for (y = 0; y < tmp.height; y++)
-            {
-              int ry = y % paper_ppm.height;
-              memcpy (&tmp.col[y * tmp.width * 3 + x * 3],
-                      &paper_ppm.col[ry*paper_ppm.width*3+rx*3],
-                      3);
-            }
-        }
+        tmp = createBackground(runningvals, p->width, p->height);
         ppm_copy(&tmp, &gBackground);
 
       }
@@ -933,38 +916,36 @@ repaint (ppm_t *p, ppm_t *a)
         else
         {
             //ppm_copy (p, &tmp);
-          ppm_new(&tmp, p->width, p->height);
+          //ppm_new(&tmp, p->width, p->height);
+            tmp = createBackground(runningvals, p->width, p->height);
           int srcx = 0;
           int srcy = 0;
           int dstx = 0; 
           int dsty = 0;
-          int width = 0;
-          int height = 0;
-          if(maxbrushwidth < gBrushMaxWidth)
-          {
-              width = maxbrushwidth * 2 + gImageWidth;
-              srcx = (gBackground.width - width) / 2;
-              dstx = 0;
-          }
-          else
-          {
-              srcx = 0;
-              dstx = ((maxbrushwidth * 2 + gImageWidth) - gBackground.width) / 2;
-              width = gBackground.width;
-          }
-
-          if(maxbrushheight < gBrushMaxHeight)
-          {
-              height = maxbrushheight * 2 + gImageHeight; 
-              srcy = (gBackground.height - height) / 2;
-              dsty = 0;
-          }
-          else
-          {
-              height = gBackground.height;
-              srcy = 0;
-              dsty = (maxbrushheight * 2 + gImageHeight - gBackground.height) / 2;
-          }
+          int width = maxbrushwidth * 2 + gImageWidth;
+          int height = maxbrushheight * 2 + gImageHeight;
+          if(width < gBackground.width)
+           {
+               srcx = (gBackground.width - width) / 2;
+               dstx = 0;
+           }
+            else
+            {
+                srcx = 0;
+                width = gBackground.width;
+                dstx = (width - gBackground.width)/2;
+            }
+            if(height < gBackground.height)
+            {
+                srcy = (gBackground.height - height) / 2;
+                dsty = 0;
+            }
+            else
+            {
+                height = gBackground.height;
+                srcy = 0;
+                dsty = (height - gBackground.height) / 2;
+            }
           ppm_copy_xy(&gBackground, &tmp, srcx, srcy, width, height, dstx, dsty); 
           LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
           ppm_copy(&tmp, &gBackground);

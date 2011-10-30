@@ -18,7 +18,9 @@
 
 
 #include "gimpressionist.h"
+#include "ppmtool.h"
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #ifdef WIN32
 #else
@@ -227,6 +229,32 @@ void clearBackground()
     gImageHeight = 0;
     tmpWidth = 0;
     tmpHeight = 0;
+}
+ppm_t createBackground(gimpressionist_vals_t runningvals, int width, int height)
+{
+    int x, y;
+    ppm_t tmp;
+    ppm_t paper_ppm;
+    float scale = runningvals.paper_scale / 100.0;
+    ppm_new (&tmp, width, height);
+    ppm_load (runningvals.selected_paper, &paper_ppm);
+    resize (&paper_ppm, paper_ppm.width * scale, paper_ppm.height * scale);
+    if (runningvals.paper_invert)
+        ppm_apply_gamma (&paper_ppm, -1.0, 1, 1, 1);
+    for (x = 0; x < tmp.width; x++)
+    {
+        int rx = x % paper_ppm.width;
+        
+        for (y = 0; y < tmp.height; y++)
+        {
+            int ry = y % paper_ppm.height;
+            memcpy (&tmp.col[y * tmp.width * 3 + x * 3],
+                    &paper_ppm.col[ry*paper_ppm.width*3+rx*3],
+                    3);
+        }
+    }
+    ppm_kill(&paper_ppm);
+    return tmp;
 }
 void startTime()
 {
