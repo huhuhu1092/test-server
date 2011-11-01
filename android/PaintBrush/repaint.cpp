@@ -23,6 +23,7 @@
 #include "ppmtool.h"
 #include "random.h"
 #include "SE_Mutex.h"
+#include "assert.h"
 #ifdef WIN32
 #include "imageloader.h"
 #endif
@@ -519,6 +520,139 @@ choose_best_brush (ppm_t *p, ppm_t *a, int tx, int ty,
   //TODO: end
   return best;
 }
+static void
+apply_brush_area (ppm_t *brush,
+             ppm_t *shadow,
+             ppm_t *p, ppm_t *a,
+             int tx, int ty, int r, int g, int b)
+{
+    ppm_t  tmp;
+    ppm_t  atmp;
+    double v, h;
+    int    x, y;
+    double edgedarken = 1.0 - runningvals.general_dark_edge;
+    double relief = runningvals.brush_relief / 100.0;
+    int    shadowdepth = pcvals.general_shadow_depth;
+    int    shadowblur = pcvals.general_shadow_blur;
+    
+    atmp.col = 0;
+    atmp.width = 0;
+    
+    tmp = *p;
+    if (img_has_alpha)
+        atmp = *a;
+    
+    if (shadow)
+    {
+        int sx = tx + shadowdepth - shadowblur * 2;
+        int sy = ty + shadowdepth - shadowblur * 2;
+        
+        for (y = 0; y < shadow->height; y++)
+        {
+            guchar *row, *arow = NULL;
+            
+            if ((sy + y) < 0)
+                continue;
+            if ((sy + y) >= tmp.height)
+                break;
+            row = tmp.col + (sy + y) * tmp.width * 3;
+            
+            if (img_has_alpha)
+                arow = atmp.col + (sy + y) * atmp.width * 3;
+            
+            for (x = 0; x < shadow->width; x++)
+            {
+                int k = (sx + x) * 3;
+                
+                if ((sx + x) < 0)
+                    continue;
+                if ((sx + x) >= tmp.width)
+                    break;
+                
+                h = shadow->col[y * shadow->width * 3 + x * 3 + 2];
+                
+                if (!h)
+                    continue;
+                v = 1.0 - (h / 255.0 * runningvals.general_shadow_darkness / 100.0);
+                
+                row[k+0] *= v;
+                row[k+1] *= v;
+                row[k+2] *= v;
+                if (img_has_alpha)
+                    arow[k] *= v;
+            }
+        }
+    }
+    
+    for (y = 0; y < brush->height; y++)
+    {
+        if((ty + y) < 0)
+            continue;
+        if((ty + y) >= 768)
+            continue;
+        
+        guchar *row = tmp.col + (ty + y) * tmp.width * 3;
+        guchar *arow = NULL;
+        
+        if (img_has_alpha)
+            arow = atmp.col + (ty + y) * atmp.width * 3;
+        
+        for (x = 0; x < brush->width; x++)
+        {
+            if((tx + x) < 0)
+                continue;
+            if((tx + x) >= 1024)
+                continue;
+            int k = (tx + x) * 3;
+            h = brush->col[y * brush->width * 3 + x * 3];
+            
+            if (!h)
+            { 
+                continue;
+            }
+            
+            if (runningvals.color_brushes)
+            {
+                v = 1.0 - brush->col[y * brush->width * 3 + x * 3 + 2] / 255.0;
+                row[k+0] *= v;
+                row[k+1] *= v;
+                row[k+2] *= v;
+                if (img_has_alpha)
+                    arow[(tx + x) * 3] *= v;
+            }
+            v = (1.0 - h / 255.0) * edgedarken;
+            row[k+0] *= v;
+            row[k+1] *= v;
+            row[k+2] *= v;
+            if(img_has_alpha) arow[k] *= v;
+            
+            v = h / 255.0;
+            row[k+0] += r * v;
+            row[k+1] += g * v;
+            row[k+2] += b * v;
+        }
+    }
+    
+    if (relief > 0.001)
+    {
+        for (y = 1; y < brush->height; y++)
+        {
+            guchar *row = tmp.col + (ty + y) * tmp.width * 3;
+            
+            for (x = 1; x < brush->width; x++)
+            {
+                int k = (tx + x) * 3;
+                h = brush->col[y * brush->width * 3 + x * 3 + 1] * relief;
+                if (h < 0.001)
+                    continue;
+                if (h > 255) h = 255;
+                row[k+0] = (row[k+0] * (255-h) + 255 * h) / 255;
+                row[k+1] = (row[k+1] * (255-h) + 255 * h) / 255;
+                row[k+2] = (row[k+2] * (255-h) + 255 * h) / 255;
+            }
+        }
+    }
+}
 
 static void
 apply_brush (ppm_t *brush,
@@ -586,6 +720,7 @@ apply_brush (ppm_t *brush,
 
   for (y = 0; y < brush->height; y++)
     {
+        
       guchar *row = tmp.col + (ty + y) * tmp.width * 3;
       guchar *arow = NULL;
 
@@ -900,14 +1035,27 @@ repaint (ppm_t *p, ppm_t *a)
     }
   else
     {
-      if(ppm_empty(&gBackground))
-      {
+#if 0
+        if(!ppm_empty(&gBackground))
+        {
+            ppm_kill(&gBackground);
+        }
         tmp = createBackground(runningvals, p->width, p->height);
         ppm_copy(&tmp, &gBackground);
+        
+#else
+      if(ppm_empty(&gBackground))
+      {
+          gBackground = createBackground(runningvals, 1024, 768);
+          tmp = createBackground(runningvals, p->width, p->height);
+          //ppm_copy(&tmp, &gBackground);
+        //ppm_copy(&tmp, &gBackground);
 
       }
       else
       {
+          tmp = createBackground(runningvals, p->width, p->height);
+/*
         if(gBackground.width == p->width && gBackground.height == p->height)
         {
             LOGI("## background and p has same dimension\n");
@@ -950,9 +1098,11 @@ repaint (ppm_t *p, ppm_t *a)
           LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
           ppm_copy(&tmp, &gBackground);
           //ppm_copy (p, &tmp);
+ 
         }
+ */
       }
-
+#endif
     }
     tmpWidth = tmp.width;
     tmpHeight = tmp.height;
@@ -961,7 +1111,12 @@ repaint (ppm_t *p, ppm_t *a)
     LOGI("## gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", gBrushMaxWidth, gBrushMaxHeight);
     
 #ifdef MACOS
-    SE_setBackground(&gBackground);
+    static int startupDrawing = 1;
+    if(startupDrawing)
+    {
+        SE_setBackground(gBackground);
+        startupDrawing = 0;
+    }
 #else
     
     if(repaintCallBack)
@@ -1489,8 +1644,8 @@ repaint (ppm_t *p, ppm_t *a)
     
     tmpWidth = tmp.width;
     tmpHeight = tmp.height;
-
-    LOGI("############# start create brush piece w = %d, h = %d ##############", tmpWidth, tmpHeight);
+    
+    LOGI("############# start create brush piece w = %d, h = %d ##############\n", tmpWidth, tmpHeight);
 	gBrushProperties.sort(_BrushPropertyComp());
 	std::list<BrushProperty>::iterator it;
 #ifdef MACOS
@@ -1503,11 +1658,67 @@ repaint (ppm_t *p, ppm_t *a)
         LOGI("## call repaint callback end ##\n");
 	}
 #endif
+    int drawing_speed = SE_GetDrawingSpeed();
+    int drawing_index = 0;
 	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
+#if 1
 		//apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
-        apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+        float startRealPicX = maxbrushwidth;
+        float startRealPicY = maxbrushheight;
+        float bpx = (float)bp.tx - startRealPicX;
+        float bpy = (float)bp.ty - startRealPicY;
+        float bpright = bpx + (float)bp.brush->width;
+        float bpbottom = bpy + (float)bp.brush->height;
+        float newtx = bpx * 1024 / gImageWidth;
+        float newty = bpy * 768 / gImageHeight;
+        float newright = bpright * 1024 / gImageWidth;
+        float newbottom = bpbottom * 768 / gImageHeight;
+        int neww = newright - newtx;
+        int newh = newbottom - newty;
+        /*
+        float ratiox = ((float)bp.tx) / p->width;
+        float ratioy = ((float)bp.ty) / p->height;
+        float ratiow = 1024.0f / p->width;
+        float ratioh = 768.0f / p->height;
+        int newtx = (int)(ratiox * 1024);
+        int newty = (int)(ratioy * 768);
+        int neww = 0;
+        int newh = 0;
+        float brush_ratio = ((float)bp.brush->width) / bp.brush->height;
+        if(ratiow < ratioh)
+        {
+            neww = bp.brush->width * 1024 / p->width;
+            newh= neww / brush_ratio;
+        }
+        else
+        {
+            newh = bp.brush->height * 768 / p->height;
+            neww = newh * brush_ratio;
+        }
+         */
+        
+        ppm_t newbrush;
+        newbrush.width = 0;
+        newbrush.height = 0;
+        newbrush.col = NULL;
+        ppm_copy(bp.brush, &newbrush);
+        resize(&newbrush, neww, newh);
+        apply_brush_area(&newbrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
+        //apply_brush_area(bp.brush, bp.shadow, &gBackground,NULL, bp.tx, bp.ty, bp.r, bp.g, bp.b);
+        //apply_brush (bp.brush, bp.shadow, &gBackground, NULL, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+        if(drawing_index == (drawing_speed - 1))
+        {
+            drawing_index = 0;
+            SE_drawBackgroundImageSync();
+        }
+        else
+            drawing_index++;
+        ppm_kill(&newbrush);
+#else
+        
+         apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
 		BrushPiece brushPiece;
 		brushPiece.x = bp.tx;
 		brushPiece.y = bp.ty;
@@ -1522,10 +1733,14 @@ repaint (ppm_t *p, ppm_t *a)
         createAlpha(bp.brush, &brushPiece.alpha);
         //addBrushPiece(brushPiece);
         SE_startBrushPaintInMainQueue(brushPiece);
+#endif 
+        
 	}
+    /*
     BrushPiece bp;
     bp.last_piece = 1;
     SE_startBrushPaintInMainQueue(bp);
+     */
     gBrushProperties.clear();
     if(!isBrushPaint())
     {
@@ -1555,7 +1770,7 @@ repaint (ppm_t *p, ppm_t *a)
     {
       crop (&tmp,
             maxbrushwidth, maxbrushheight,
-            tmp.width - maxbrushwidth, tmp.height - maxbrushheight);
+            p->width - maxbrushwidth, p->height - maxbrushheight);
       if (img_has_alpha)
         crop (&atmp,
               maxbrushwidth, maxbrushheight,
@@ -1640,16 +1855,5 @@ repaint (ppm_t *p, ppm_t *a)
   ppm_kill (&paper_ppm);
   ppm_kill (&dirmap);
   ppm_kill (&sizmap);
-
-  /*
-  if (runningvals.run)
-    {
-      gimp_progress_update (0.8);
-    }
-  else
-    {
-      preview_set_button_label (_("_Update"));
-    }
-  */
   running = 0;
 }
