@@ -198,7 +198,10 @@ void brush_reload (const gchar *fn,
   ppm_copy (&cache, p);
   set_colorbrushes (fn);
 }
-
+void brush_get(const char* ppmName, ppm_t* p)
+{
+    ppm_load(ppmName, p);
+}
 void brush_get_selected (ppm_t *p)
 {
   if (brush_from_file)
@@ -785,6 +788,7 @@ struct BrushProperty
   int ty;
   int r, g, b;
   ppm_t* brush;
+    ppm_t* destBrush;
   ppm_t* shadow;
 };
 static std::list<BrushProperty> gBrushProperties;
@@ -821,6 +825,7 @@ static void createAlpha(ppm_t* brush, ppm_t* alpha)
         }
     }
 }
+#define BRUSH_NUM 3
 void
 repaint (ppm_t *p, ppm_t *a)
 {
@@ -832,10 +837,12 @@ repaint (ppm_t *p, ppm_t *a)
   int         num_brushes, maxbrushwidth, maxbrushheight;
   guchar      back[3] = {0, 0, 0};
   ppm_t      *brushes, *shadows;
+  ppm_t      *destBrushes;
   ppm_t      *brush, *shadow = NULL;
   double     *brushes_sum;
   int         cx, cy, maxdist;
   double      scale, relief, startangle, anglespan, density, bgamma;
+    double      scales[BRUSH_NUM];
   double      thissum;
   int         max_progress;
   ppm_t       paper_ppm = {0, 0, NULL};
@@ -844,14 +851,21 @@ repaint (ppm_t *p, ppm_t *a)
   int        *xpos = NULL, *ypos = NULL;
   int         step = 1;
   int         progstep;
+    int destWidth ;
+    int destHeight;
+    int brushIndex;
+    SE_BrushSet brushSet;
   static int  running = 0;
-
+ 
   int dropshadow = pcvals.general_drop_shadow;
   int shadowblur = pcvals.general_shadow_blur;
+  
   g_printerr("####running = %d ###", running);
   if (running)
     return;
   running++;
+    SE_GetDestSize(&destWidth, &destHeight);
+    SE_GetSettingBrush(&brushSet);
   runningvals = pcvals;
   print_val(&runningvals);
   gImageWidth = p->width;
@@ -877,34 +891,65 @@ repaint (ppm_t *p, ppm_t *a)
   bgamma = runningvals.brushgamma;
 
   brushes = (ppm_t*)g_malloc (num_brushes * sizeof (ppm_t));
+    destBrushes = (ppm_t*)g_malloc(num_brushes * sizeof(ppm_t));
   brushes_sum = (double*)g_malloc (num_brushes * sizeof (double));
 
   if (dropshadow)
     shadows = (ppm_t*)g_malloc (num_brushes * sizeof (ppm_t));
   else
     shadows = NULL;
-
-  brushes[0].col = NULL;
-  brush_get_selected (&brushes[0]);
-
-  resize (&brushes[0],
-          brushes[0].width,
-          brushes[0].height * pow (10, runningvals.brush_aspect));
+    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
+    {
+       brushes[brushIndex].col = NULL;
+        destBrushes[brushIndex].col = NULL;
+       //brush_get_selected (&brushes[brushIndex]);
+        //brush_get_selected(&destBrushes[brushIndex]);
+        int k = g_rand_int_range(random_generator, 0, BRUSH_NUM);
+        brush_get(brushSet.brush[k], &brushes[brushIndex]);
+        ppm_copy(&brushes[brushIndex], &destBrushes[brushIndex]);
+        //brush_get(brushSet.brush[k], &destBrushes[brushIndex]);
+    }
+    /*
+    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
+    {
+      resize (&brushes[brushIndex],
+          brushes[brushIndex].width,
+          brushes[brushIndex].height * pow (10, runningvals.brush_aspect));
+    }
+     */
   scale = runningvals.size_last / MAX (brushes[0].width, brushes[0].height);
-
+    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
+    {
+        scales[brushIndex] = runningvals.size_last / MAX (brushes[brushIndex].width, brushes[brushIndex].height);
+    }
   if (bgamma != 1.0)
     ppm_apply_gamma (&brushes[0], 1.0 / bgamma, 1,1,1);
-
-  resize (&brushes[0], brushes[0].width * scale, brushes[0].height * scale);
-  i = 1 + sqrtf (brushes[0].width  * brushes[0].width +
-                brushes[0].height * brushes[0].height);
-  ppm_pad (&brushes[0], i-brushes[0].width, i-brushes[0].width,
-           i - brushes[0].height, i - brushes[0].height, back);
-
-  for (i = 1; i < num_brushes; i++)
+    
+    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
+    {
+      resize (&brushes[brushIndex], brushes[brushIndex].width * scales[brushIndex], brushes[brushIndex].height * scales[brushIndex]);
+    }
+    
+    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
+    {
+       i = 1 + sqrtf (brushes[brushIndex].width  * brushes[brushIndex].width +
+                brushes[brushIndex].height * brushes[brushIndex].height);
+       ppm_pad (&brushes[brushIndex], i-brushes[brushIndex].width, i-brushes[brushIndex].width,
+           i - brushes[brushIndex].height, i - brushes[brushIndex].height, back);
+        
+       i = 1 + sqrtf(destBrushes[brushIndex].width * destBrushes[brushIndex].width +
+                     destBrushes[brushIndex].height * destBrushes[brushIndex].height);
+        ppm_pad(&destBrushes[brushIndex], i - destBrushes[brushIndex].width, i - destBrushes[brushIndex].width, i - destBrushes[brushIndex].height, i - destBrushes[brushIndex].height, back);
+    }
+    assert(num_brushes > 3);
+  for (i = BRUSH_NUM; i < num_brushes; i++)
     {
       brushes[i].col = NULL;
-      ppm_copy (&brushes[0], &brushes[i]);
+        destBrushes[i].col = NULL;
+      brushIndex = g_rand_int_range (random_generator, 0, BRUSH_NUM);
+        LOGE("## brushIndex = %d ##\n", brushIndex);
+      ppm_copy (&brushes[brushIndex], &brushes[i]);
+        ppm_copy(&destBrushes[brushIndex], &destBrushes[i]);
     }
 
     for (i = 0; i < runningvals.size_num; i++)
@@ -915,13 +960,27 @@ repaint (ppm_t *p, ppm_t *a)
       else sv = 1.0;
       for (j = 0; j < runningvals.orient_num; j++)
         {
+            int times;
+           // ppm_t tmp = {0, 0, NULL};
           h = j + i * runningvals.orient_num;
           free_rotate (&brushes[h],
                        startangle + j * anglespan / runningvals.orient_num);
+            free_rotate(&destBrushes[h], startangle + j * anglespan / runningvals.orient_num); 
           rescale (&brushes[h],
                    ( sv      * runningvals.size_first +
                     (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
+            //ppm_copy(&brushes[h], &tmp);
           autocrop (&brushes[h],1);
+            times = destWidth / gImageWidth;
+            double first , last;
+            first = runningvals.size_first * times;
+            last = runningvals.size_last * times;
+            //rescale(&destBrushes[h], (sv * first + (1.0 - sv) * last) / last);
+            autocrop(&destBrushes[h], 1);
+            resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
+            //autocrop(&destBrushes[h], 1);
+            SE_SaveBrush("brush", h, brushes[h]);
+            SE_SaveBrush("destbrush", h, destBrushes[h]);
         }
     }
 
@@ -962,7 +1021,17 @@ repaint (ppm_t *p, ppm_t *a)
       xp = maxbrushwidth - brushes[i].width;
       yp = maxbrushheight - brushes[i].height;
       if (xp || yp)
+      {
+          int times = destWidth / gImageWidth;
+          int left = xp / 2;
+          int right = xp - xp / 2;
+          int top = yp / 2;
+          int bottom = yp - yp / 2;
         ppm_pad (&brushes[i], xp / 2, xp - xp / 2, yp / 2, yp - yp / 2, blk);
+          ppm_pad(&destBrushes[i], left * times, right * times, top * times, bottom * times, blk);
+      }
+        SE_SaveBrush("padbrush", i, brushes[i]);
+        SE_SaveBrush("paddestbrush", i, destBrushes[i]);
     }
 
   if (dropshadow)
@@ -1594,6 +1663,7 @@ repaint (ppm_t *p, ppm_t *a)
       //apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
 	  BrushProperty bp;
 	  bp.brush = brush;
+      bp.destBrush = &destBrushes[n];
 	  bp.b = b;
 	  bp.g = g;
 	  bp.r = r;
@@ -1660,6 +1730,7 @@ repaint (ppm_t *p, ppm_t *a)
 #endif
     int drawing_speed = SE_GetDrawingSpeed();
     int drawing_index = 0;
+    brushIndex = 0;
 	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
@@ -1705,7 +1776,11 @@ repaint (ppm_t *p, ppm_t *a)
         newbrush.col = NULL;
         ppm_copy(bp.brush, &newbrush);
         resize(&newbrush, neww, newh);
-        apply_brush_area(&newbrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
+        SE_SaveBrush("drawingbrush", brushIndex, newbrush);
+        brushIndex++;
+        //autocrop(&newbrush, 1);
+        //apply_brush_area(&newbrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
+        apply_brush_area(bp.destBrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
         //apply_brush_area(bp.brush, bp.shadow, &gBackground,NULL, bp.tx, bp.ty, bp.r, bp.g, bp.b);
         //apply_brush (bp.brush, bp.shadow, &gBackground, NULL, bp.tx,bp.ty, bp.r,bp.g,bp.b);
         if(drawing_index == (drawing_speed - 1))
@@ -1751,8 +1826,10 @@ repaint (ppm_t *p, ppm_t *a)
   for (i = 0; i < num_brushes; i++)
     {
       ppm_kill (&brushes[i]);
+        ppm_kill(&destBrushes[i]);
     }
   g_free (brushes);
+    g_free(destBrushes);
   g_free (shadows);
   g_free (brushes_sum);
 

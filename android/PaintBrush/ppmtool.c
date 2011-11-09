@@ -32,7 +32,7 @@ static int getLine(const char* data, int index, int dataLen, char* line, int lin
 {
     int i = index;
     int n = 0;
-    char c;
+    char c = '\0';
     while(n < (lineLen - 1) && i < dataLen)
     {
         c = line[n] = data[i];
@@ -527,6 +527,7 @@ ppm_load (const char *fn, ppm_t *p)
         for (y = 0; y < p->width * p->height * 3; y++) {
             p->col[y] = tmpcol[y / 3];
         }
+        g_free(tmpcol);
     }
 #endif
 }
