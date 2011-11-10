@@ -997,7 +997,10 @@ repaint (ppm_t *p, ppm_t *a)
   for (i = 0; i < num_brushes; i++)
     {
       if (!runningvals.color_brushes)
+      {
         prepare_brush (&brushes[i]);
+          prepare_brush(&destBrushes[i]);
+      }
       brushes_sum[i] = sum_brush (&brushes[i]);
     }
 
