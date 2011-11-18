@@ -490,7 +490,7 @@ ppm_load (const char *fn, ppm_t *p)
     char line[200];
     int pgm = 0;
     int index = 0;
-    getPgmData(fn, &srcData, &len);
+    SS_GetPgmData(fn, &srcData, &len);
     index = readline (srcData, index, len, line, 200);
     if (strcmp (line, "P6"))
     {

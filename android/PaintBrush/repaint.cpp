@@ -523,7 +523,7 @@ choose_best_brush (ppm_t *p, ppm_t *a, int tx, int ty,
   //TODO: end
   return best;
 }
-static void
+void
 apply_brush_area (ppm_t *brush,
              ppm_t *shadow,
              ppm_t *p, ppm_t *a,
@@ -591,7 +591,7 @@ apply_brush_area (ppm_t *brush,
     {
         if((ty + y) < 0)
             continue;
-        if((ty + y) >= 768)
+        if((ty + y) >= tmp.height)
             continue;
         
         guchar *row = tmp.col + (ty + y) * tmp.width * 3;
@@ -604,7 +604,7 @@ apply_brush_area (ppm_t *brush,
         {
             if((tx + x) < 0)
                 continue;
-            if((tx + x) >= 1024)
+            if((tx + x) >= tmp.width)
                 continue;
             int k = (tx + x) * 3;
             h = brush->col[y * brush->width * 3 + x * 3];
@@ -825,9 +825,182 @@ static void createAlpha(ppm_t* brush, ppm_t* alpha)
         }
     }
 }
+#define ROW_NUM 10
+#define COL_NUM 10
+struct GeoPaintArea
+{
+    float left, right, top, bottom;
+    int hasPainted;
+    std::list<BrushProperty> bp;
+    GeoPaintArea()
+    {
+        left = right = top = bottom = 0;
+        hasPainted = 0;
+    }
+};
+struct GeoPaintCanvas
+{
+    GeoPaintArea pa[ROW_NUM][COL_NUM];
+};
+#define QUAD_TREE_DEPTH 3
+struct QuadRect
+{
+    float left, right, top, bottom;
+    QuadRect()
+    {
+        left = right = top = bottom = 0;
+    }
+    QuadRect(float l, float r, float t, float b)
+    {
+        left = l;
+        right = r;
+        top = t;
+        bottom = b;
+    }
+};
+struct QuadTreeNode
+{
+    QuadTreeNode* child[4];
+    QuadRect rect;
+    std::list<BrushProperty> bpList;
+    QuadTreeNode()
+    {
+        for(int i = 0 ; i < 4  ; i++)
+            child[i] = NULL;
+    }
+};
+
+static QuadTreeNode* rootQuadTree = NULL;
+static QuadTreeNode* createQuadTree(float left, float right, float top, float bottom, int depth)
+{
+    QuadTreeNode* qtn = new QuadTreeNode;
+    qtn->rect = QuadRect(left, right, top, bottom);
+    if(depth == QUAD_TREE_DEPTH)
+        return qtn;
+    QuadRect rects[4];
+    float midx = left + (right - left) / 2;
+    float midy = top + (bottom - top) / 2;
+    
+    rects[0].left = left;
+    rects[0].right = midx;
+    rects[0].top = top;
+    rects[0].bottom = midy;
+    rects[1].left = left;
+    rects[1].right = midx;
+    rects[1].top = midy;
+    rects[1].bottom = bottom;
+
+    rects[2].left = midx;
+    rects[2].right = right;
+    rects[2].top = top;
+    rects[2].bottom = midy;
+
+    rects[3].left = midx;
+    rects[3].right = right;
+    rects[3].top = midy;
+    rects[3].bottom = bottom;
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        qtn->child[i] = createQuadTree(rects[i].left, rects[i].right, rects[i].top, rects[i].bottom, depth + 1);
+    }
+    return qtn;
+}
+static void releaseQuadTree(QuadTreeNode* quadTree)
+{
+    if(quadTree == NULL)
+        return;
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        releaseQuadTree(quadTree->child[i]);
+    }
+    delete quadTree;
+}
+static int pointInRect(float x, float y , QuadRect& rect)
+{
+    if(x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+        return 1;
+    else
+        return 0;
+}
+/*
+ 1: add ok
+ 0: add failed
+ */
+static int addBrushPropertyToQuadTree(BrushProperty bp, QuadTreeNode* quadTree)
+{
+    if(quadTree->child[0] == NULL)
+    {
+        if(pointInRect(bp.tx, bp.ty, quadTree->rect))
+        {
+            quadTree->bpList.push_back(bp);
+            return 1;
+        }
+        else
+            return 0;
+    }
+    else
+    {
+        if(pointInRect(bp.tx, bp.ty, quadTree->rect))
+        {
+            for(int i = 0 ; i < 4 ; i++)
+            {
+                int found = addBrushPropertyToQuadTree(bp, quadTree->child[i]);
+                if(found)
+                    return 1;
+            }
+            assert(0);
+        }
+        else
+            return 0;
+    };
+}
+#define GRAY_NUM 4
+struct GrayPaintArea
+{
+    std::list<BrushProperty> bp;
+};
+GrayPaintArea grayPaintArray[GRAY_NUM];
+static void addBrushProperty(BrushProperty bp)
+{
+    float gray = bp.r * 0.2126f + bp.g * 0.7152f + bp.b * 0.0722f;
+    float graySpan = 256.0f / GRAY_NUM;
+    if(gray >= 0 && gray < graySpan)
+    {
+        grayPaintArray[0].bp.push_back(bp);
+    }
+    else if(gray >= graySpan && gray < 2 * graySpan)
+    {
+        grayPaintArray[1].bp.push_back(bp);
+    }
+    else if(gray >= 2 * graySpan && gray < 3 * graySpan)
+    {
+        grayPaintArray[2].bp.push_back(bp);
+    }
+    else
+    {
+        grayPaintArray[3].bp.push_back(bp);
+    }
+}
+static void addBrushPropertyToGeoPaintCanvas(BrushProperty bp, GeoPaintCanvas* canvas)
+{
+    
+}
+static void separatePaintArea(GrayPaintArea* gpa, GeoPaintCanvas* outCanvas)
+{
+    std::list<BrushProperty>::iterator it;
+    for(it = gpa->bp.begin() ; it != gpa->bp.end() ; it++)
+    {
+        addBrushPropertyToGeoPaintCanvas(*it , outCanvas);
+    }
+}
+void testQuadTree()
+{
+    rootQuadTree = createQuadTree(0, 1024, 0, 768, 0);
+    releaseQuadTree(rootQuadTree);
+}
+////////////////////////
 #define BRUSH_NUM 3
-void
-repaint (ppm_t *p, ppm_t *a)
+void repaint (ppm_t *p, ppm_t *a)
 {
   int         x, y;
   int         tx = 0, ty = 0;
@@ -851,8 +1024,8 @@ repaint (ppm_t *p, ppm_t *a)
   int        *xpos = NULL, *ypos = NULL;
   int         step = 1;
   int         progstep;
-    int destWidth ;
-    int destHeight;
+  int destWidth ;
+  int destHeight;
     int brushIndex;
     SE_BrushSet brushSet;
   static int  running = 0;
@@ -860,12 +1033,12 @@ repaint (ppm_t *p, ppm_t *a)
   int dropshadow = pcvals.general_drop_shadow;
   int shadowblur = pcvals.general_shadow_blur;
   
-  g_printerr("####running = %d ###", running);
+  g_printerr("####running = %d ###\n", running);
   if (running)
     return;
   running++;
-    SE_GetDestSize(&destWidth, &destHeight);
-    SE_GetSettingBrush(&brushSet);
+    SS_GetDestSize(&destWidth, &destHeight);
+    SS_GetSettingBrush(&brushSet);
   runningvals = pcvals;
   print_val(&runningvals);
   gImageWidth = p->width;
@@ -927,7 +1100,7 @@ repaint (ppm_t *p, ppm_t *a)
     
     for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
     {
-      resize (&brushes[brushIndex], brushes[brushIndex].width * scales[brushIndex], brushes[brushIndex].height * scales[brushIndex]);
+      resize (&brushes[brushIndex], ceil(brushes[brushIndex].width * scales[brushIndex]), ceil(brushes[brushIndex].height * scales[brushIndex]));
     }
     
     for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
@@ -960,7 +1133,7 @@ repaint (ppm_t *p, ppm_t *a)
       else sv = 1.0;
       for (j = 0; j < runningvals.orient_num; j++)
         {
-            int times;
+            float times;
            // ppm_t tmp = {0, 0, NULL};
           h = j + i * runningvals.orient_num;
           free_rotate (&brushes[h],
@@ -971,7 +1144,7 @@ repaint (ppm_t *p, ppm_t *a)
                     (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
             //ppm_copy(&brushes[h], &tmp);
           autocrop (&brushes[h],1);
-            times = destWidth / gImageWidth;
+            times = ((float)destWidth) / gImageWidth;
             double first , last;
             first = runningvals.size_first * times;
             last = runningvals.size_last * times;
@@ -979,8 +1152,8 @@ repaint (ppm_t *p, ppm_t *a)
             autocrop(&destBrushes[h], 1);
             resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
             //autocrop(&destBrushes[h], 1);
-            SE_SaveBrush("brush", h, brushes[h]);
-            SE_SaveBrush("destbrush", h, destBrushes[h]);
+            SS_SaveBrush("brush", h, brushes[h]);
+            SS_SaveBrush("destbrush", h, destBrushes[h]);
         }
     }
 
@@ -1002,6 +1175,7 @@ repaint (ppm_t *p, ppm_t *a)
           prepare_brush(&destBrushes[i]);
       }
       brushes_sum[i] = sum_brush (&brushes[i]);
+        LOGE("## brush sum %d : %f ##\n", i, brushes_sum[i]);
     }
 
   brush = &brushes[0];
@@ -1025,7 +1199,7 @@ repaint (ppm_t *p, ppm_t *a)
       yp = maxbrushheight - brushes[i].height;
       if (xp || yp)
       {
-          int times = destWidth / gImageWidth;
+          float times = ((float)destWidth) / gImageWidth;
           int left = xp / 2;
           int right = xp - xp / 2;
           int top = yp / 2;
@@ -1033,8 +1207,8 @@ repaint (ppm_t *p, ppm_t *a)
         ppm_pad (&brushes[i], xp / 2, xp - xp / 2, yp / 2, yp - yp / 2, blk);
           ppm_pad(&destBrushes[i], left * times, right * times, top * times, bottom * times, blk);
       }
-        SE_SaveBrush("padbrush", i, brushes[i]);
-        SE_SaveBrush("paddestbrush", i, destBrushes[i]);
+        SS_SaveBrush("padbrush", i, brushes[i]);
+        SS_SaveBrush("paddestbrush", i, destBrushes[i]);
     }
 
   if (dropshadow)
@@ -1118,61 +1292,13 @@ repaint (ppm_t *p, ppm_t *a)
 #else
       if(ppm_empty(&gBackground))
       {
-          gBackground = createBackground(runningvals, 1024, 768);
+          gBackground = createBackground(runningvals, destWidth, destHeight);
           tmp = createBackground(runningvals, p->width, p->height);
-          //ppm_copy(&tmp, &gBackground);
-        //ppm_copy(&tmp, &gBackground);
 
       }
       else
       {
           tmp = createBackground(runningvals, p->width, p->height);
-/*
-        if(gBackground.width == p->width && gBackground.height == p->height)
-        {
-            LOGI("## background and p has same dimension\n");
-          //ppm_copy(&gBackground, &tmp);
-        }
-        else
-        {
-            //ppm_copy (p, &tmp);
-          //ppm_new(&tmp, p->width, p->height);
-            tmp = createBackground(runningvals, p->width, p->height);
-          int srcx = 0;
-          int srcy = 0;
-          int dstx = 0; 
-          int dsty = 0;
-          int width = maxbrushwidth * 2 + gImageWidth;
-          int height = maxbrushheight * 2 + gImageHeight;
-          if(width < gBackground.width)
-           {
-               srcx = (gBackground.width - width) / 2;
-               dstx = 0;
-           }
-            else
-            {
-                srcx = 0;
-                width = gBackground.width;
-                dstx = (width - gBackground.width)/2;
-            }
-            if(height < gBackground.height)
-            {
-                srcy = (gBackground.height - height) / 2;
-                dsty = 0;
-            }
-            else
-            {
-                height = gBackground.height;
-                srcy = 0;
-                dsty = (height - gBackground.height) / 2;
-            }
-          ppm_copy_xy(&gBackground, &tmp, srcx, srcy, width, height, dstx, dsty); 
-          LOGI("## scale background : maxbrushwidth = %d , maxbrushheight = %d , gBrushMaxWidth = %d, gBrushMaxHeight = %d ##\n", maxbrushwidth, maxbrushheight, gBrushMaxWidth, gBrushMaxHeight);
-          ppm_copy(&tmp, &gBackground);
-          //ppm_copy (p, &tmp);
- 
-        }
- */
       }
 #endif
     }
@@ -1186,7 +1312,7 @@ repaint (ppm_t *p, ppm_t *a)
     static int startupDrawing = 1;
     if(startupDrawing)
     {
-        SE_setBackground(gBackground);
+        SS_SetBackground(gBackground);
         startupDrawing = 0;
     }
 #else
@@ -1627,9 +1753,12 @@ repaint (ppm_t *p, ppm_t *a)
                     }
                 }
             }
-          r = r * 255.0 / thissum;
-          g = g * 255.0 / thissum;
-          b = b * 255.0 / thissum;
+            if(thissum != 0)
+            {
+               r = r * 255.0 / thissum;
+               g = g * 255.0 / thissum;
+               b = b * 255.0 / thissum;
+            }
         }
       else if (runningvals.color_type == 1)
         {
@@ -1731,9 +1860,13 @@ repaint (ppm_t *p, ppm_t *a)
         LOGI("## call repaint callback end ##\n");
 	}
 #endif
-    int drawing_speed = SE_GetDrawingSpeed();
+    int drawing_speed = SS_GetDrawingSpeed();
     int drawing_index = 0;
     brushIndex = 0;
+    BrushList* brushList = NULL;
+    if(gBrushProperties.size() > 0)
+        brushList = SS_BrushListCreate();
+    int sequence = 0;
 	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
@@ -1745,58 +1878,51 @@ repaint (ppm_t *p, ppm_t *a)
         float bpy = (float)bp.ty - startRealPicY;
         float bpright = bpx + (float)bp.brush->width;
         float bpbottom = bpy + (float)bp.brush->height;
-        float newtx = bpx * 1024 / gImageWidth;
-        float newty = bpy * 768 / gImageHeight;
-        float newright = bpright * 1024 / gImageWidth;
-        float newbottom = bpbottom * 768 / gImageHeight;
+        float newtx = bpx * destWidth / gImageWidth;
+        float newty = bpy * destHeight / gImageHeight;
+        float newright = bpright * destWidth / gImageWidth;
+        float newbottom = bpbottom * destHeight / gImageHeight;
         int neww = newright - newtx;
         int newh = newbottom - newty;
         /*
-        float ratiox = ((float)bp.tx) / p->width;
-        float ratioy = ((float)bp.ty) / p->height;
-        float ratiow = 1024.0f / p->width;
-        float ratioh = 768.0f / p->height;
-        int newtx = (int)(ratiox * 1024);
-        int newty = (int)(ratioy * 768);
-        int neww = 0;
-        int newh = 0;
-        float brush_ratio = ((float)bp.brush->width) / bp.brush->height;
-        if(ratiow < ratioh)
-        {
-            neww = bp.brush->width * 1024 / p->width;
-            newh= neww / brush_ratio;
-        }
-        else
-        {
-            newh = bp.brush->height * 768 / p->height;
-            neww = newh * brush_ratio;
-        }
-         */
-        
         ppm_t newbrush;
         newbrush.width = 0;
         newbrush.height = 0;
         newbrush.col = NULL;
         ppm_copy(bp.brush, &newbrush);
         resize(&newbrush, neww, newh);
-        SE_SaveBrush("drawingbrush", brushIndex, newbrush);
+        ppm_kill(&newbrush);
+        SE_SaveBrush("drawingnewbrush", brushIndex, newbrush);
         brushIndex++;
-        //autocrop(&newbrush, 1);
-        //apply_brush_area(&newbrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
-        apply_brush_area(bp.destBrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
-        //apply_brush_area(bp.brush, bp.shadow, &gBackground,NULL, bp.tx, bp.ty, bp.r, bp.g, bp.b);
-        //apply_brush (bp.brush, bp.shadow, &gBackground, NULL, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+         */
+        //apply_brush_area(bp.destBrush, bp.shadow, &gBackground,NULL, newtx, newty, bp.r, bp.g, bp.b);
+        
+        BrushPiece brushPiece;
+        brushPiece.data.col = NULL;
+		brushPiece.x = newtx;
+		brushPiece.y = newty;
+		brushPiece.w = tmp.width;
+		brushPiece.h = tmp.height;
+        brushPiece.mbw = maxbrushwidth;
+        brushPiece.mbh = maxbrushheight;
+        brushPiece.r = bp.r;
+        brushPiece.g = bp.g;
+        brushPiece.b = bp.b;
+        brushPiece.last_piece = 0;
+        ppm_copy(bp.destBrush, &brushPiece.data);
+        SS_AddBrushPiece(brushList, brushPiece);
         if(drawing_index == (drawing_speed - 1))
         {
             drawing_index = 0;
-            SE_drawBackgroundImageSync();
+            SS_DrawBrushList(brushList, sequence++);
+            brushList = SS_BrushListCreate();
         }
         else
             drawing_index++;
-        ppm_kill(&newbrush);
+        
 #else
         
-         apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
+        apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
 		BrushPiece brushPiece;
 		brushPiece.x = bp.tx;
 		brushPiece.y = bp.ty;
@@ -1814,6 +1940,11 @@ repaint (ppm_t *p, ppm_t *a)
 #endif 
         
 	}
+    if(brushList)
+    {
+        SS_DrawBrushList(brushList, sequence);
+        //SE_BrushListRelease(brushList);
+    }
     /*
     BrushPiece bp;
     bp.last_piece = 1;
