@@ -1028,6 +1028,8 @@ void repaint (ppm_t *p, ppm_t *a)
   int destHeight;
     int brushIndex;
     SE_BrushSet brushSet;
+    SS_PausePoint* currentPausePoint = NULL;
+    SS_Canvas* currentCanvas = NULL;
   static int  running = 0;
  
   int dropshadow = pcvals.general_drop_shadow;
@@ -1036,6 +1038,8 @@ void repaint (ppm_t *p, ppm_t *a)
   g_printerr("####running = %d ###\n", running);
   if (running)
     return;
+    currentPausePoint = SS_GetCurrentPausePoint();
+    currentCanvas = SS_GetCurrentCanvas();
   running++;
     SS_GetDestSize(&destWidth, &destHeight);
     SS_GetSettingBrush(&brushSet);
@@ -1075,8 +1079,6 @@ void repaint (ppm_t *p, ppm_t *a)
     {
        brushes[brushIndex].col = NULL;
         destBrushes[brushIndex].col = NULL;
-       //brush_get_selected (&brushes[brushIndex]);
-        //brush_get_selected(&destBrushes[brushIndex]);
         int k = g_rand_int_range(random_generator, 0, BRUSH_NUM);
         brush_get(brushSet.brush[k], &brushes[brushIndex]);
         ppm_copy(&brushes[brushIndex], &destBrushes[brushIndex]);
@@ -1100,7 +1102,15 @@ void repaint (ppm_t *p, ppm_t *a)
     
     for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
     {
-      resize (&brushes[brushIndex], ceil(brushes[brushIndex].width * scales[brushIndex]), ceil(brushes[brushIndex].height * scales[brushIndex]));
+        if(brushes[brushIndex].height < 5)
+        {
+            ppm_t tmp = {0, 0, NULL};
+            ppm_copy(&brushes[brushIndex], &tmp);
+            autocrop(&tmp, 0);
+            resize(&tmp, ceil(brushes[brushIndex].width * scales[brushIndex]), ceil(brushes[brushIndex].height * scales[brushIndex]));
+        }
+        else
+            resize (&brushes[brushIndex], ceil(brushes[brushIndex].width * scales[brushIndex]), ceil(brushes[brushIndex].height * scales[brushIndex]));
     }
     
     for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
@@ -1155,6 +1165,7 @@ void repaint (ppm_t *p, ppm_t *a)
             SS_SaveBrush("brush", h, brushes[h]);
             SS_SaveBrush("destbrush", h, destBrushes[h]);
         }
+          SS_Pause(currentPausePoint);
     }
 
   /* Brush-debugging */
@@ -1176,6 +1187,7 @@ void repaint (ppm_t *p, ppm_t *a)
       }
       brushes_sum[i] = sum_brush (&brushes[i]);
         LOGE("## brush sum %d : %f ##\n", i, brushes_sum[i]);
+        SS_Pause(currentPausePoint);
     }
 
   brush = &brushes[0];
@@ -1209,6 +1221,7 @@ void repaint (ppm_t *p, ppm_t *a)
       }
         SS_SaveBrush("padbrush", i, brushes[i]);
         SS_SaveBrush("paddestbrush", i, destBrushes[i]);
+        SS_Pause(currentPausePoint);
     }
 
   if (dropshadow)
@@ -1312,7 +1325,8 @@ void repaint (ppm_t *p, ppm_t *a)
     static int startupDrawing = 1;
     if(startupDrawing)
     {
-        SS_SetBackground(gBackground);
+        //SS_SetBackground(gBackground);
+        SS_SetCanvasBackground(currentCanvas, gBackground);
         startupDrawing = 0;
     }
 #else
@@ -1577,6 +1591,7 @@ void repaint (ppm_t *p, ppm_t *a)
 
   for (; i && isBrushPaint(); i--)
     {
+        SS_Pause(currentPausePoint);
       if (i % progstep == 0)
         {
           if(runningvals.run)
@@ -1863,13 +1878,15 @@ void repaint (ppm_t *p, ppm_t *a)
     int drawing_speed = SS_GetDrawingSpeed();
     int drawing_index = 0;
     brushIndex = 0;
-    BrushList* brushList = NULL;
+    SS_BrushList* brushList = NULL;
     if(gBrushProperties.size() > 0)
         brushList = SS_BrushListCreate();
     int sequence = 0;
+    SS_BrushListPool* brushListPool = SS_GetBrushListPool();
 	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
+        SS_Pause(currentPausePoint);
 #if 1
 		//apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
         float startRealPicX = maxbrushwidth;
@@ -1914,7 +1931,8 @@ void repaint (ppm_t *p, ppm_t *a)
         if(drawing_index == (drawing_speed - 1))
         {
             drawing_index = 0;
-            SS_DrawBrushList(brushList, sequence++);
+            //SS_DrawBrushList(brushList, sequence++);
+            SS_AddBrushList(brushListPool, brushList);
             brushList = SS_BrushListCreate();
         }
         else
