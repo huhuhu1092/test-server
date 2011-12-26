@@ -2,13 +2,10 @@
 #include "SE_Log.h"
 
 #include <math.h>
-IMPLEMENT_OBJECT(SE_Camera)
 ///////////////
 SE_Camera::~SE_Camera()
 {
 	LOGI("### destroctor ~SE_Camera ####\n");
-	if(mBoundingVolume)
-		delete mBoundingVolume;
 }
 SE_Camera* SE_Camera::create2DSceneCamera(float width, float height)
 {
@@ -23,44 +20,22 @@ SE_Camera* SE_Camera::create2DSceneCamera(float width, float height)
 SE_Camera::SE_Camera()
 {
     mChanged = true;
-	mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far)
 {
 	create(location, target, fov, ratio, near, far);
-    mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far)
 {
 	create(location, xAxis, yAxis, zAxis, fov, ratio, near, far);
-    mBoundingVolume = NULL;
 }
 SE_Camera::SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& yAxis, float fov, float ratio, float near, float far)
 {
 	create(location, zAxis, yAxis, fov, ratio, near, far);
-    mBoundingVolume = NULL;
 }
 SE_Rect<int> SE_Camera::getViewport() const
 {
     return mViewport;
-}
-int SE_Camera::cullBV(const SE_BoundingVolume& bv) const
-{
-    SE_Plane cullPlanes[6];
-    SE_Plane_Side planeSide = SE_NEGATIVE;
-    getFrustumPlanes(cullPlanes);
-    for(int i = 0 ; i < 6 ; i++)
-    {
-        SE_Plane_Side p = bv.whichSide(cullPlanes[i]);
-        if(p == SE_POSITIVE)
-            return SE_FULL_CULL;
-        if(p != SE_NEGATIVE)
-            planeSide = p;
-    }
-    if(planeSide == SE_NEGATIVE)
-        return SE_NOT_CULL;
-    else
-        return SE_PART_CULL;
 }
 void SE_Camera::setViewport(int x, int y, int w, int h)
 {
@@ -269,28 +244,4 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, co
 SE_Matrix4f SE_Camera::getPerspectiveMatrix() const
 {
 	return mFrustum.getPerspectiveMatrix();
-}
-#include "SE_Application.h"
-SE_Ray SE_Camera::screenCoordinateToRay(int x, int y)
-{
-	float xp, yp;
-	if(SE_Application::getInstance()->isScreenRotate())
-	{
-	    yp = 1 - ((float)x) / (mViewport.bottom - mViewport.top);
-	    xp = 1 - ((float)y) / (mViewport.right - mViewport.left);
-	}
-	else
-	{
-        xp = ((float)x) / (mViewport.right - mViewport.left);
-        yp = 1 - ((float)y) / (mViewport.bottom - mViewport.top);
-	}
-    SE_Rect<float> nearRect = mFrustum.getNearPlaneRect();
-    float xv = (1 - xp) * nearRect.left + xp * nearRect.right;
-    float yv = (1 - yp) * nearRect.bottom + yp * nearRect.top;
-    float dirLen = SE_Sqrtf(xv * xv + yv * yv + mFrustum.getNear() * mFrustum.getNear());
-    SE_Vector3f dir;
-    dir.x = mAxisX.x * xv / dirLen + mAxisY.x * yv / dirLen + mAxisZ.x * (-mFrustum.getNear()) / dirLen;
-    dir.y = mAxisX.y * xv / dirLen + mAxisY.y * yv /dirLen + mAxisZ.y * (-mFrustum.getNear()) / dirLen;
-    dir.z = mAxisX.z * xv / dirLen + mAxisY.z * yv / dirLen + mAxisZ.z * (-mFrustum.getNear()) / dirLen;
-    return SE_Ray(mLocation, dir, false);
 }

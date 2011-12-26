@@ -5,19 +5,14 @@
 #include "SE_Quat.h"
 #include "SE_Geometry3D.h"
 #include "SE_Common.h"
-#include "SE_Object.h"
-#include "SE_BoundingVolume.h"
-#include "SE_TreeStruct.h"
-class SE_Camera : public SE_Object, public SE_ListStruct<SE_Camera>
+class SE_Camera
 {
-DECLARE_OBJECT(SE_Camera)
 public:
     SE_Camera();
 	~SE_Camera();
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& target, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     SE_Camera(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
-    int cullBV(const SE_BoundingVolume& bv) const;
     void setViewport(int x, int y, int w, int h);
     SE_Rect<int> getViewport() const;
     SE_Matrix4f getWorldToViewMatrix() const;
@@ -52,17 +47,6 @@ public:
     void create(const SE_Vector3f& location, const SE_Vector3f& xAxis, const SE_Vector3f& yAxis, const SE_Vector3f& zAxis, float fov, float ratio, float near, float far);
     void create(const SE_Vector3f& location, const SE_Vector3f& zAxis, const SE_Vector3f& up, float fov, float ratio, float near, float far);
     SE_Matrix4f getPerspectiveMatrix() const;
-	//camera will own bv, camera will delete mBoundingVolume which is assigned by bv;
-	void setBoundingVolume(const SE_BoundingVolume* bv)
-	{
-		if(mBoundingVolume)
-			delete mBoundingVolume;
-		mBoundingVolume = bv;
-	}
-	const SE_BoundingVolume* getBoundingVolume() const
-	{
-		return mBoundingVolume;
-	}
 	static SE_Camera* create2DSceneCamera(float width, float height);
 private:
     SE_Frustum mFrustum;
@@ -73,6 +57,5 @@ private:
     SE_Vector3f mAxisZ;
 	mutable SE_Plane mPlanes[6];
     bool mChanged;
-	const SE_BoundingVolume* mBoundingVolume;
 };
 #endif

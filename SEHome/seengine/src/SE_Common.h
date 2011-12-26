@@ -12,7 +12,6 @@ typedef int SE_Result;
 
 #if !defined(WIN32)
 #include <stdint.h>
-#include <linux/stddef.h>
 #else
 typedef unsigned char uint8_t;
 typedef signed char int8_t;
