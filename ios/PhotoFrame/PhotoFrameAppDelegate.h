@@ -7,13 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreData/CoreData.h>
 #import "ppmtool.h"
+@class SEViewNavigator;
 @class ImageDisplayViewController;
 @class PhotoFrameSettingController;
 @class PainterParameterController;
 @class BrushTableController;
 @class PainterParameterPickerController;
 @class PhotoFrame3DViewController;
+@class SEResLoader;
 @interface PhotoFrameAppDelegate : NSObject <UIApplicationDelegate>
 {
     ImageDisplayViewController* imageViewController;
@@ -23,8 +26,19 @@
     PainterParameterPickerController* painterParameterPicker;
     PhotoFrame3DViewController* photoFrame3DController;
     NSArray* paramIDArray;
+    //////
+    SEViewNavigator* mViewNavigator;
+    SEResLoader* mResLoader;
+@private
+    NSManagedObjectContext* managedObjectContext_;
+    NSManagedObjectModel* managedObjectModel_;
+    NSPersistentStoreCoordinator* persistentStoreCoordinator_;
 }
 @property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (nonatomic, readonly) NSManagedObjectContext* managedObjectContext;
+@property (nonatomic, readonly) NSManagedObjectModel* managedObjectModel;
+@property (nonatomic, readonly) NSPersistentStoreCoordinator* persistentStoreCoordinator;
+
 - (void) showPhotoFrameSettingController;
 - (void) showImageDisplayController;
 - (void) showPainterParameterController;
@@ -41,5 +55,6 @@
 - (PainterParameterPickerController*) painterParameterPicker;
 - (PhotoFrame3DViewController*) photoFrame3D;
 - (void)setImageView:(UIImageView*)imageView withPPMName:(NSString*)name;
+- (void) saveContext;
 //@property (nonatomic, retain) ImageDisplayViewController* imageViewController;
 @end

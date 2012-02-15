@@ -38,7 +38,7 @@
 {
     NSLog(@"## ui image drawing rect = %@", rect);
     CGContextRef con = UIGraphicsGetCurrentContext();
-    CGImageRef imageRef = [image CGImage];
+    //CGImageRef imageRef = [image CGImage];
     if(clippingRectList)
     {
         CGContextSaveGState(con);
@@ -50,12 +50,14 @@
             CGContextAddRect(con, r);
         }
 
-        CGContextDrawImage(con, rect, imageRef);
+        //CGContextDrawImage(con, rect, imageRef);
+        [image drawInRect:rect];
         CGContextRestoreGState(con);
     }
     else
     {
-        CGContextDrawImage(con, rect, imageRef);
+        //CGContextDrawImage(con, rect, imageRef);
+        [image drawInRect:rect];
     }
 }
 - (void) clearClippingList
