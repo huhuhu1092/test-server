@@ -1,0 +1,79 @@
+/* 
+  ParamType.strings
+  TestImageView
+
+  Created by 陈勇 on 11-10-12.
+  Copyright 2011年 __MyCompanyName__. All rights reserved.
+*/
+"paper_scale_text" = "paper scale";
+"paper_relief_text" = "paper relief";
+"brush_relief_text" = "brush relief";
+"orient_type_text" = "orient type";
+"orient_num_text" = "orient num";
+"orient_first_text" = "orient first";
+"orient_last_text" = "orient last";
+"size_type_text" = "size type";
+"size_num_text" = "size num";
+"size_first_text" = "size first";
+"size_last_text" = "size_last";
+"place_type_text" = "place type";
+"brush_density_text" = "brush density";
+
+"color_type_text" = "color type";
+
+"bg_type_text" = "bg type";
+
+"drawing_speed_text" = "drawing speed";
+
+"wait_time_text" = "wait time";
+
+"orient_value" = "orient value";
+
+"orient_radius" = "orient radius";
+
+"orient_random" = "orient random";
+
+"orient_radial" = "orient radial";
+
+"orient_flowing" = "orient flowing";
+
+"orient_hue" = "orient hue";
+
+"orient_adaptive" = "orient adaptive";
+
+"orient_manual" = "orient manual";
+
+"size_type_value" = "size value";
+
+"size_type_radius" = "size radius";
+
+"size_type_random" = "size random";
+
+"size_type_radial" = "size radial";
+
+"size_type_flowing" = "size flowing";
+
+"size_type_hue" = "size hue";
+
+"size_type_adaptive" = "size adaptive";
+
+"size_type_manual" = "size manual";
+
+"place_type_random" = "place random";
+
+"place_type_even_dist" = "place dist";
+
+"color_type_brush_avg" = "brush avg";
+
+"color_type_brush_center" = "brush center";
+
+"bg_type_solid" = "bg solid";
+
+"bg_type_keep_original" = "bg keep original";
+
+"bg_type_from_paper" = "bg from paper";
+
+"bg_type_transparent" = "bg transparent";
+
+
+

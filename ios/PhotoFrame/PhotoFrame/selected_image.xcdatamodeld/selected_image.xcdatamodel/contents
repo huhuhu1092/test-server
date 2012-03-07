@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="562" systemVersion="11D50b" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="ImageList">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="selectedimage" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedImage"/>
+    </entity>
+    <entity name="MusicList">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="attachimagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
+        <relationship name="selectedmusic" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedMusic"/>
+    </entity>
+    <entity name="SelectedImage" representedClassName="SelectedImage">
+        <attribute name="filepath" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="url" optional="YES" attributeType="String"/>
+        <attribute name="urldate" optional="YES" attributeType="Date"/>
+    </entity>
+    <entity name="SelectedMusic">
+        <attribute name="album" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="singer" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="Signature" representedClassName="Signature">
+        <attribute name="data" optional="YES" attributeType="Binary"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+    </entity>
+    <entity name="UserInfo" representedClassName="UserInfo">
+        <attribute name="currentimagelist" optional="YES" attributeType="String"/>
+        <attribute name="currentimagequality" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="currentimagetimes" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="currentmusiclist" optional="YES" attributeType="String"/>
+        <attribute name="currentsignature" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="currentsignaturesite" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="currentsignaturesize" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <relationship name="imagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
+        <relationship name="musiclist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MusicList"/>
+        <relationship name="signaturelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Signature"/>
+    </entity>
+    <elements>
+        <element name="ImageList" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="MusicList" positionX="160" positionY="192" width="128" height="90"/>
+        <element name="SelectedImage" positionX="160" positionY="192" width="128" height="90"/>
+        <element name="SelectedMusic" positionX="160" positionY="192" width="128" height="105"/>
+        <element name="Signature" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="UserInfo" positionX="160" positionY="192" width="128" height="75"/>
+    </elements>
+</model>
