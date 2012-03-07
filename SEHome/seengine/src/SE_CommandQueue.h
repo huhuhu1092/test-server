@@ -1,6 +1,7 @@
 #ifndef SE_COMMANDQUEUE_H
 #define SE_COMMANDQUEUE_H
 #include "SE_Mutex.h"
+#include "SE_Time.h"
 #include <list>
 class SE_Command;
 class SE_CommandQueue

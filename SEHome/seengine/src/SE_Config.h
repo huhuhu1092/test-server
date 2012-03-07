@@ -1,7 +1,7 @@
 #ifndef SE_CONFIG_H
 #define SE_CONFIG_H
 #include "SE_Vector.h"
-#include <SE_Value.h>
+#include "SE_Value.h"
 #include <map>
 #include <string>
 class SE_Config

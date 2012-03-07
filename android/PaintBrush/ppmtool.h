@@ -24,9 +24,9 @@
 extern "C" {
 #endif
 typedef struct ppm {
-  int width;
-  int height;
-  unsigned char *col;
+    int width;
+    int height;
+    unsigned char *col;
 } ppm_t;
 
 void fatal(char *s);

@@ -98,74 +98,73 @@ void setDefaultPcvals()
 }
 double dist (double x, double y, double end_x, double end_y)
 {
-  double dx = end_x - x;
-  double dy = end_y - y;
-  return sqrt (dx * dx + dy * dy);
+    double dx = end_x - x;
+    double dy = end_y - y;
+    return sqrt (dx * dx + dy * dy);
 }
-double
-getsiz_proto (double x, double y, int n, smvector_t *vec,
+double getsiz_proto (double x, double y, int n, smvector_t *vec,
               double smstrexp, int voronoi)
 {
-  int    i;
-  double sum, ssum, dst;
-  int    first = 0, last;
+    int    i;
+    double sum, ssum, dst;
+    int    first = 0, last;
 
-  if ((x < 0.0) || (x > 1.0))
-    g_warning ("HUH? x = %f\n",x);
+    if ((x < 0.0) || (x > 1.0))
+        g_warning ("HUH? x = %f\n",x);
 
 #if 0
-  if (from == 0)
+    if (from == 0)
     {
-      n = numsmvect;
-      vec = smvector;
-      smstrexp = gtk_adjustment_get_value (GTK_ADJUSTMENT (smstrexpadjust));
-      voronoi = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (size_voronoi));
+        n = numsmvect;
+        vec = smvector;
+        smstrexp = gtk_adjustment_get_value (GTK_ADJUSTMENT (smstrexpadjust));
+        voronoi = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (size_voronoi));
     }
-  else
+    else
     {
-      n = pcvals.num_size_vectors;
-      vec = pcvals.size_vectors;
-      smstrexp = pcvals.size_strength_exponent;
-      voronoi = pcvals.size_voronoi;
+        n = pcvals.num_size_vectors;
+        vec = pcvals.size_vectors;
+        smstrexp = pcvals.size_strength_exponent;
+        voronoi = pcvals.size_voronoi;
     }
 #endif
 
-  if (voronoi)
+    if (voronoi)
     {
-      gdouble bestdist = -1.0;
-      for (i = 0; i < n; i++)
-         {
-           dst = dist (x, y, vec[i].x, vec[i].y);
-           if ((bestdist < 0.0) || (dst < bestdist))
-             {
-               bestdist = dst;
-               first = i;
-             }
-         }
-      last = first+1;
+        gdouble bestdist = -1.0;
+        for (i = 0; i < n; i++)
+        {
+            dst = dist (x, y, vec[i].x, vec[i].y);
+            if ((bestdist < 0.0) || (dst < bestdist))
+            {
+                bestdist = dst;
+                first = i;
+            }
+        }
+        last = first+1;
     }
-  else
+    else
     {
-      first = 0;
-      last = n;
+        first = 0;
+        last = n;
     }
 
-  sum = ssum = 0.0;
-  for (i = first; i < last; i++)
+    sum = ssum = 0.0;
+    for (i = first; i < last; i++)
     {
-      gdouble s = vec[i].str;
+        gdouble s = vec[i].str;
 
-      dst = dist (x,y,vec[i].x,vec[i].y);
-      dst = pow (dst, smstrexp);
-      if (dst < 0.0001)
-        dst = 0.0001;
-      s = s / dst;
+        dst = dist (x,y,vec[i].x,vec[i].y);
+        dst = pow (dst, smstrexp);
+        if (dst < 0.0001)
+            dst = 0.0001;
+        s = s / dst;
 
-      sum += vec[i].siz * s;
-      ssum += 1.0/dst;
-  }
-  sum = sum / ssum / 100.0;
-  return CLAMP (sum, 0.0, 1.0);
+        sum += vec[i].siz * s;
+        ssum += 1.0/dst;
+    }
+    sum = sum / ssum / 100.0;
+    return CLAMP (sum, 0.0, 1.0);
 }
 #define P_VAL(item, fmt) g_printerr(#item "= %" #fmt "\n", val->item)
 void print_val(gimpressionist_vals_t* val)

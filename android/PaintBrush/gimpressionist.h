@@ -38,69 +38,69 @@ extern "C" {
 
 typedef struct vector
 {
-  double x, y;
-  double dir;
-  double dx, dy;
-  double str;
-  int    type;
+    double x, y;
+    double dir;
+    double dx, dy;
+    double str;
+    int    type;
 } vector_t;
 
 typedef struct smvector
 {
-  double x, y;
-  double siz;
-  double str;
+    double x, y;
+    double siz;
+    double str;
 } smvector_t;
 
 typedef struct
 {
-  int        orient_num;
-  double     orient_first;
-  double     orient_last;
-  int        orient_type;
-  double     brush_relief;
-  double     brush_scale;
-  double     brush_density;
-  double     brushgamma;
-  int        general_background_type;
-  double     general_dark_edge;
-  double     paper_relief;
-  double     paper_scale;
-  int        paper_invert;
-  int        run;
-  char       selected_brush[200];
-  char       selected_paper[200];
-  GimpRGB    color;
-  int        general_paint_edges;
-  int        place_type;
-  vector_t   orient_vectors[MAXORIENTVECT];
-  int        num_orient_vectors;
-  int        placement_center;
-  double     brush_aspect;
-  double     orient_angle_offset;
-  double     orient_strength_exponent;
-  int        general_tileable;
-  int        paper_overlay;
-  int        orient_voronoi;
-  int        color_brushes;
-  int        general_drop_shadow;
-  double     general_shadow_darkness;
-  int        size_num;
-  double     size_first;
-  double     size_last;
-  int        size_type;
-  double     devthresh;
+    int        orient_num;
+    double     orient_first;
+    double     orient_last;
+    int        orient_type;
+    double     brush_relief;
+    double     brush_scale;
+    double     brush_density;
+    double     brushgamma;
+    int        general_background_type;
+    double     general_dark_edge;
+    double     paper_relief;
+    double     paper_scale;
+    int        paper_invert;
+    int        run;
+    char       selected_brush[200];
+    char       selected_paper[200];
+    GimpRGB    color;
+    int        general_paint_edges;
+    int        place_type;
+    vector_t   orient_vectors[MAXORIENTVECT];
+    int        num_orient_vectors;
+    int        placement_center;
+    double     brush_aspect;
+    double     orient_angle_offset;
+    double     orient_strength_exponent;
+    int        general_tileable;
+    int        paper_overlay;
+    int        orient_voronoi;
+    int        color_brushes;
+    int        general_drop_shadow;
+    double     general_shadow_darkness;
+    int        size_num;
+    double     size_first;
+    double     size_last;
+    int        size_type;
+    double     devthresh;
 
-  smvector_t size_vectors[MAXSIZEVECT];
-  int        num_size_vectors;
-  double     size_strength_exponent;
-  int        size_voronoi;
+    smvector_t size_vectors[MAXSIZEVECT];
+    int        num_size_vectors;
+    double     size_strength_exponent;
+    int        size_voronoi;
 
-  int        general_shadow_depth;
-  int        general_shadow_blur;
+    int        general_shadow_depth;
+    int        general_shadow_blur;
 
-  int        color_type;
-  double     color_noise;
+    int        color_type;
+    double     color_noise;
 } gimpressionist_vals_t;
 
 /* Enumerations */
@@ -115,8 +115,8 @@ enum GENERAL_BG_TYPE_ENUM
 
 enum PRESETS_LIST_COLUMN_ENUM
 {
-  PRESETS_LIST_COLUMN_FILENAME = 0,
-  PRESETS_LIST_COLUMN_OBJECT_NAME = 1,
+    PRESETS_LIST_COLUMN_FILENAME = 0,
+    PRESETS_LIST_COLUMN_OBJECT_NAME = 1,
 };
 enum PLACEMENT_TYPE_ENUM
 {

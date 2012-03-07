@@ -1,9 +1,16 @@
 #ifndef SE_IMAGEDATA_H
 #define SE_IMAGEDATA_H
-#ifdef GLES_20
-#include <GLES2/gl2.h>
+#ifdef MAC_OS
+#import <OpenGLES/ES2/gl.h>
+#import <OpenGLES/ES2/glext.h>
+
+
 #else
-#include <GLES/gl.h>
+    #ifdef GLES_20
+        #include <GLES2/gl2.h>
+    #else
+        #include <GLES/gl.h>
+    #endif
 #endif
 #include <string>
 class SE_ImageDataPortion
