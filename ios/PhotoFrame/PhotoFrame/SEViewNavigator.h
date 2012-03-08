@@ -112,6 +112,8 @@ struct BarViewType
 @class UserInfo;
 @class PainterManager;
 @class Signature;
+@class ImageList;
+@class MusicList;
 @interface SEViewNavigator : UIViewController <NSFetchedResultsControllerDelegate, SEHandleMultiTouchDelegate, SENextImageDisplay, SEContainerAnimationHandler>
 {
     SEContentViewContainer* mViewArray[VIEW_NUM];
@@ -173,9 +175,22 @@ struct BarViewType
 - (int) getMusicListCount;
 - (Signature*) getCurrentSignature;
 - (NSArray*) getAllSignatures;// string array
-- (NSArray*) getImageListProperty;
-- (NSArray*) getMusicListProperty;
-- (NSArray*) getSelectedMusicArray;
+- (NSArray*) getAllImageList;
+- (NSArray*) getAllMusicList;
+- (NSArray*) getCurrentSelectedMusicArray;
+- (ImageList*) getImageListByName: (NSString*)imageListName;
+//the return value is array of ImageList
+- (NSArray*) getMusicAttachedImage: (NSString*)name;
+- (void) attachImageToMusic: (NSString*)musicListName imageListName:(NSString*) imageListName;
+- (MusicList*) getMusicListByName: (NSString*)musicListName;
+- (MusicList*) addMusicList:(NSString*) musicListName;
+- (ImageList*) addImageList: (NSString*) imageListName;
+- (void) removeImageListByName : (NSString*)imageListName;
+- (void) removeMusicListByName : (NSString*)musicListName;
+- (NSArray*) getAttachedMusicListByImageListName: (NSString*)imageListName;
+- (ImageList*) getImageListBySeq:(NSNumber*)seq;
+- (MusicList*) getMusicListBySeq: (NSNumber*)seq;
+- (BOOL) musicListContainImageList: (MusicList*)musicList :(NSString*) imageListName;
 - (VIEW_SEQ_TYPE) popViewSeqType;
 - (void) pushViewSeqType:(VIEW_SEQ_TYPE)vst;
 - (NSManagedObject*)newObjectByEntityName: (NSString*)entityName;

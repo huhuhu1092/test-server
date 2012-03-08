@@ -20,6 +20,8 @@
 #import "SEMusicPickerView.h"
 #import "SESignatureView.h"
 #import "Signature.h"
+#import "MusicList.h"
+#import "ImageList.h"
 #import "SESignaturePreview.h"
 #import <QuartzCore/CALayer.h>
 
@@ -1477,6 +1479,7 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
         [newUserInfo setValue:[NSNumber numberWithInt:0] forKey:@"currentsignature"];
         NSManagedObject* imageList = [NSEntityDescription insertNewObjectForEntityForName:[imageListEntity name] inManagedObjectContext:self.managedObjectContext];
         [imageList setValue:@"default" forKey:@"name"];
+        [imageList setValue:[NSNumber numberWithInt:0] forKey:@"seq"];
         NSMutableSet* imageListSet = [newUserInfo valueForKey:@"imagelist"];
         [imageListSet addObject:imageList];
         NSMutableSet* selectedImageSet = [imageList valueForKey:@"selectedimage"];
@@ -1489,6 +1492,7 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
         }
         NSManagedObject* musicList = [NSEntityDescription insertNewObjectForEntityForName:[musicListEntity name] inManagedObjectContext:self.managedObjectContext];
         [musicList setValue:@"default" forKey:@"name"];
+        [musicList setValue:[NSNumber numberWithInt:0] forKey:@"seq"];
         NSMutableSet* musicListSet = [newUserInfo valueForKey:@"musiclist"];
         [musicListSet addObject:musicList];
         ////// init signature
@@ -1813,6 +1817,44 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
     }
     return count;
 }
+- (NSArray*) getAllImageList
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* imageListSet = userInfo.imagelist;
+    NSArray* imageListArray = [imageListSet allObjects];
+    if(imageListArray)
+    {
+        imageListArray = [imageListArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            ImageList* il1 = (ImageList*)obj1;
+            ImageList* il2 = (ImageList*)obj2;
+            return [il1.seq compare:il2.seq];
+            
+        }];
+        return imageListArray;
+    }
+    else
+        return nil;
+    
+}
+
+- (NSArray*) getAllMusicList
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    NSArray* musicListArray = [musicListSet allObjects];
+    if(musicListArray)
+    {
+        musicListArray = [musicListArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            MusicList* ml1 = (MusicList*)obj1;
+            MusicList* ml2 = (MusicList*)obj2;
+            return [ml1.seq compare: ml2.seq];
+        }];
+        return musicListArray;
+    }
+    else
+        return nil;
+}
+/*
 - (NSArray*) getImageListProperty
 {
     NSManagedObject* userInfo = [mUserInfoProperty objectAtIndex:0];
@@ -1851,6 +1893,7 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
     }
     return musicPropertyArray;
 }
+ */
 - (UserInfo*)getUserInfo
 {
     if([mUserInfoProperty count] == 1)
@@ -1870,7 +1913,7 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
     int ret = [userInfo.currentimagetimes intValue];
     return ret;
 }
-- (NSArray*) getSelectedMusicArray
+- (NSArray*) getCurrentSelectedMusicArray
 {
     NSArray* currentSelectedMusic = [NSArray array];
     UserInfo* userInfo = [mUserInfoProperty objectAtIndex:0];
@@ -1987,6 +2030,255 @@ static NSString* getViewBarBackgroundKey(VIEW_TYPE vp)
         return [seq1 compare:seq2];
     }];
     return signatureArray;
+}
+- (NSArray*) getMusicAttachedImage: (NSString*)name
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    MusicList* musicList = nil;
+    NSEnumerator* it = [musicListSet objectEnumerator];
+    while ((musicList = [it nextObject]) != nil)
+    {
+        NSString* musicListName = musicList.name;
+        if([musicListName isEqualToString:name])
+        {
+            NSSet* imageSet = musicList.attachimagelist;
+            NSArray* imageArray = [imageSet allObjects];
+            imageArray = [imageArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                ImageList* list1 = (ImageList*)obj1;
+                ImageList* list2 = (ImageList*)obj2;
+                return [list1.seq compare:list2.seq];
+            }];
+            return imageArray;
+        }
+    }
+    return nil;
+}
+- (void) attachImageToMusic: (NSString*)musicListName imageListName:(NSString*) imageListName
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    MusicList* ml = nil;
+    NSEnumerator* itMusicList = [musicListSet objectEnumerator];
+    while((ml = [itMusicList nextObject]) != nil)
+    {
+        if([ml.name isEqualToString:musicListName])
+        {
+            NSMutableSet* attachImageSet = (NSMutableSet*)ml.attachimagelist;
+            for(ImageList* i in attachImageSet)
+            {
+                if([i.name isEqualToString:imageListName])
+                    return;
+            }
+            ImageList* imageList = [self getImageListByName:imageListName];
+            [attachImageSet addObject:imageList];
+        }
+    }
+}
+- (ImageList*) getImageListByName: (NSString*)imageListName
+{
+    UserInfo* userInfo = [self getUserInfo];
+    
+    NSSet* imageListSet = userInfo.imagelist;
+    ImageList* imageList = nil;
+    NSEnumerator* it = [imageListSet objectEnumerator];
+    while((imageList = [it nextObject]) != nil)
+    {
+        if([imageList.name isEqualToString:imageListName])
+            return imageList;
+    }
+    return nil;
+}
+- (MusicList*) getMusicListByName: (NSString*)musicListName
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    NSEnumerator* it = [musicListSet objectEnumerator];
+    MusicList* musicList = nil;
+    while((musicList = [it nextObject]) != nil)
+    {
+        if([musicList.name isEqualToString:musicListName])
+            return musicList;
+    }
+    return nil;
+}
+
+- (MusicList*) addMusicList:(NSString*) musicListName
+{
+    MusicList* ml = [self getMusicListByName:musicListName];
+    if(ml)
+    {
+        return ml;
+    }
+    
+    ml = (MusicList*)[self newObjectByEntityName:@"MusicList"];
+    ml.name = musicListName;
+    NSArray* musicListArray = [self getAllMusicList];
+    if(musicListArray)
+    {
+        MusicList* lastObj = [musicListArray lastObject];
+        NSNumber* seq = [NSNumber numberWithInt:[lastObj.seq intValue] + 1];
+        ml.seq = seq;
+    }
+    else
+        ml.seq = [NSNumber numberWithInt:0];
+    UserInfo* userInfo = [self getUserInfo];
+    NSMutableSet* musicListSet = (NSMutableSet*)userInfo.musiclist;
+    [musicListSet addObject:ml];
+    return ml;
+}
+- (ImageList*) addImageList: (NSString*) imageListName
+{
+    ImageList* il = [self getImageListByName:imageListName];
+    if(il)
+        return il;
+    il = (ImageList*)[self newObjectByEntityName:@"ImageList"];
+    il.name = imageListName;
+    NSArray* imageListArray = [self getAllImageList];
+    if(imageListArray)
+    {
+        ImageList* lastObj = [imageListArray lastObject];
+        NSNumber* seq = [NSNumber numberWithInt:[lastObj.seq intValue] + 1];
+        il.seq = seq;
+    }
+    else
+        il.seq = [NSNumber numberWithInt:0];
+    UserInfo* userInfo = [self getUserInfo];
+    NSMutableSet* imageListSet = (NSMutableSet*)userInfo.imagelist;
+    [imageListSet addObject:il];
+    return il;
+}
+- (NSArray*) getAttachedMusicListByImageListName: (NSString*)imageListName
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    MusicList* ml = nil;
+    NSEnumerator* it = [musicListSet objectEnumerator];
+    NSArray* array = [NSArray array];
+    while((ml = [it nextObject]) != nil)
+    {
+        NSSet* attachImageList = ml.attachimagelist;
+        NSEnumerator* itImageList = [attachImageList objectEnumerator];
+        ImageList* imageList = nil;
+        while((imageList = [itImageList nextObject]) != nil)
+        {
+            if([imageList.name isEqualToString:imageListName])
+            {
+                array = [array arrayByAddingObject:ml];
+            }
+        }
+    }
+    return array;
+    
+}
+- (void) removeImageListByName : (NSString*)imageListName
+{
+    ImageList* il = [self getImageListByName:imageListName];
+    if(il == nil)
+        return;
+    UserInfo* userInfo = [self getUserInfo];
+    [userInfo removeImagelistObject:il];
+    NSArray* musicListArray = [self getAttachedMusicListByImageListName:imageListName];
+    if(musicListArray)
+    {
+        for(MusicList* ml in musicListArray)
+        {
+            NSMutableSet* imageSet = (NSMutableSet*)ml.attachimagelist;
+            ImageList* imageList = nil;
+            NSEnumerator* it = [imageSet objectEnumerator];
+            NSArray* deleteArray = [NSArray array];
+            while((imageList = [it nextObject]) != nil)
+            {
+                if([imageList.name isEqualToString:imageListName])
+                {
+                    deleteArray = [deleteArray arrayByAddingObject:imageList];
+                }
+            }
+            assert(deleteArray.count <= 1);
+            for(ImageList* il in deleteArray)
+            {
+                NSNumber* seq = il.seq;
+                [imageSet removeObject:il];
+                NSArray* imageArray = [imageSet allObjects];
+                for(ImageList* i in imageArray)
+                {
+                    NSComparisonResult ret = [i.seq compare:seq];
+                    if(ret == NSOrderedDescending)
+                    {
+                        i.seq = [NSNumber numberWithInt:[i.seq intValue] - 1];
+                    }
+                    else if(ret == NSOrderedSame)
+                    {
+                        assert(0);
+                        NSLog(@"the same image seq error\n");
+                    }
+                }
+
+            }
+        }
+    }
+}
+- (void) removeMusicListByName : (NSString*)musicListName
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSMutableSet* musicListSet = (NSMutableSet*)userInfo.musiclist;
+    MusicList* musicList = [self getMusicListByName:musicListName];
+    if(musicList)
+    {
+        NSNumber* seq = musicList.seq;
+        [musicListSet removeObject:musicList];
+        NSArray* allMusicList = [self getAllMusicList];
+        for(MusicList* ml in allMusicList)
+        {
+            NSComparisonResult result = [ml.seq compare:seq];
+            if(result == NSOrderedDescending)
+            {
+                ml.seq = [NSNumber numberWithInt:[ml.seq intValue] - 1];
+            }
+            else if(result == NSOrderedSame)
+            {
+                assert(0);
+                NSLog(@"the same music seq error\n");
+            }
+        }
+    }
+}
+- (ImageList*) getImageListBySeq:(NSNumber*)seq
+{
+    UserInfo* userInfo = [self getUserInfo];
+    
+    NSSet* imageListSet = userInfo.imagelist;
+    ImageList* imageList = nil;
+    NSEnumerator* it = [imageListSet objectEnumerator];
+    while((imageList = [it nextObject]) != nil)
+    {
+        if([imageList.seq isEqualToNumber:seq])
+            return imageList;
+    }
+    return nil;    
+}
+- (MusicList*) getMusicListBySeq: (NSNumber*)seq
+{
+    UserInfo* userInfo = [self getUserInfo];
+    NSSet* musicListSet = userInfo.musiclist;
+    NSEnumerator* it = [musicListSet objectEnumerator];
+    MusicList* musicList = nil;
+    while((musicList = [it nextObject]) != nil)
+    {
+        if([musicList.seq isEqualToNumber:seq])
+            return musicList;
+    }
+    return NO;
+}
+- (BOOL) musicListContainImageList: (MusicList*)musicList :(NSString*) imageListName
+{
+    NSSet* attachSet = musicList.attachimagelist;
+    for(ImageList* il in attachSet)
+    {
+        if([il.name isEqualToString:imageListName])
+            return YES;
+    }
+    return NO;
 }
 - (void) clearPlacedView
 {

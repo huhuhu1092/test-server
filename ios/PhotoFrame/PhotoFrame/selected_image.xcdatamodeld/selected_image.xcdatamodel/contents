@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="562" systemVersion="11D50b" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <entity name="ImageList">
+    <entity name="ImageList" representedClassName="ImageList">
         <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <relationship name="selectedimage" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedImage"/>
     </entity>
-    <entity name="MusicList">
+    <entity name="MusicList" representedClassName="MusicList">
         <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <relationship name="attachimagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
         <relationship name="selectedmusic" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedMusic"/>
     </entity>
