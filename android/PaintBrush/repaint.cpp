@@ -1921,9 +1921,14 @@ void repaint (ppm_t *p, ppm_t *a)
         SS_AddBrushPiece(brushList, brushPiece);
         if(drawing_index == (drawing_speed - 1))
         {
-            drawing_index = 0;
-            //SS_DrawBrushList(brushList, sequence++);
             SS_AddBrushList(brushListPool, brushList);
+            
+            //SS_MyRect* rectArray = NULL;
+            //int rectCount = 0;
+            //SS_GetBrushListRects(brushList, &rectArray, &rectCount);
+            //SS_DrawInMainThread(rectArray, rectCount);
+            
+            drawing_index = 0;
             brushList = SS_BrushListCreate();
         }
         else
@@ -1952,6 +1957,12 @@ void repaint (ppm_t *p, ppm_t *a)
     if(brushList)
     {
         SS_AddBrushList(brushListPool, brushList);
+        
+        //SS_MyRect* rectArray = NULL;
+        //int rectCount = 0;
+        //SS_GetBrushListRects(brushList, &rectArray, &rectCount);
+        //SS_DrawInMainThread(rectArray, rectCount);
+        
         //SS_DrawBrushList(brushList, sequence);
         //SE_BrushListRelease(brushList);
     }

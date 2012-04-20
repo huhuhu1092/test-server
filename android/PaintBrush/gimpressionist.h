@@ -188,7 +188,7 @@ extern void terminateBrushPaint();
 extern void startBrushPaint();
 extern void startTime();
 extern void endTime();
-extern int getTime();
+extern double getTime();
 extern void clearTime();
 typedef void (*REPAINTCALLBACK_FUN)(const char* type, const char* msg);
 extern REPAINTCALLBACK_FUN repaintCallBack;

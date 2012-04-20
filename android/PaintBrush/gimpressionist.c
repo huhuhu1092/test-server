@@ -33,7 +33,7 @@ int gBrushMaxWidth = 0;
 int gBrushMaxHeight = 0;
 int gImageWidth = 0;
 int gImageHeight = 0;
-int gRunningTime = 0;
+double gRunningTime = 0;
 #ifdef WIN32
 #else
 struct timeval gStartTime;
@@ -272,10 +272,10 @@ void endTime()
     gettimeofday(&endTime, NULL);
     endms = endTime.tv_sec * 1000 + endTime.tv_usec / 1000;
     startms = gStartTime.tv_sec * 1000 + endTime.tv_usec / 1000;
-    gRunningTime = (endms - startms) / 1000;
+    gRunningTime = (endms - startms) / 1000.0f;
 #endif
 }
-int getTime()
+double getTime()
 {
     return gRunningTime;
 }
