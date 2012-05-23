@@ -8,9 +8,9 @@
 #ifdef ANDROID
 #include <android/log.h>
 #endif
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 typedef char gchar;
 typedef unsigned char guchar;
 typedef double gdouble;
@@ -56,7 +56,7 @@ struct _GimpRGB
 #define gimp_rad_to_deg(angle) ((angle) * 360.0 / (2.0 * G_PI))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP_UP_TO(x, max) (CLAMP((x),(0),(max-1)))
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 #endif

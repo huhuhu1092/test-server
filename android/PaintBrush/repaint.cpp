@@ -47,7 +47,7 @@ void terminateBrushPaint()
     gBrushPaintRunning = 0;
     gBrushPaintRunningMutex.unlock();
 }
-int isBrushPaint()
+static int isBrushPaint()
 {
     int ret = 0;
     gBrushPaintRunningMutex.lock();
@@ -1028,13 +1028,13 @@ void repaint (ppm_t *p, ppm_t *a)
     g_printerr("####running = %d ###\n", running);
     if (running)
         return;
-    currentPausePoint = SS_GetCurrentPausePoint();
+    //currentPausePoint = SS_GetCurrentPausePoint();
     currentCanvas = SS_GetCurrentCanvas();
     running++;
     SS_GetDestSize(&destWidth, &destHeight);
     SS_GetSettingBrush(&brushSet);
     runningvals = pcvals;
-    print_val(&runningvals);
+    //print_val(&runningvals);
     gImageWidth = p->width;
     gImageHeight = p->height;
     LOGI("## gImageWidth = %d, gImageHeight = %d ##\n", gImageWidth, gImageHeight);
@@ -1155,10 +1155,10 @@ void repaint (ppm_t *p, ppm_t *a)
             autocrop(&destBrushes[h], 1);
             resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
             //autocrop(&destBrushes[h], 1);
-            SS_SaveBrush("brush", h, brushes[h]);
-            SS_SaveBrush("destbrush", h, destBrushes[h]);
+            //SS_SaveBrush("brush", h, brushes[h]);
+            //SS_SaveBrush("destbrush", h, destBrushes[h]);
         }
-        SS_Pause(currentPausePoint);
+        //SS_Pause(currentPausePoint);
     }
 
     /* Brush-debugging */
@@ -1180,7 +1180,7 @@ void repaint (ppm_t *p, ppm_t *a)
         }
         brushes_sum[i] = sum_brush (&brushes[i]);
         LOGE("## brush sum %d : %f ##\n", i, brushes_sum[i]);
-        SS_Pause(currentPausePoint);
+        //SS_Pause(currentPausePoint);
     }
 
     brush = &brushes[0];
@@ -1212,9 +1212,9 @@ void repaint (ppm_t *p, ppm_t *a)
             ppm_pad (&brushes[i], xp / 2, xp - xp / 2, yp / 2, yp - yp / 2, blk);
             ppm_pad(&destBrushes[i], left * times, right * times, top * times, bottom * times, blk);
         }
-        SS_SaveBrush("padbrush", i, brushes[i]);
-        SS_SaveBrush("paddestbrush", i, destBrushes[i]);
-        SS_Pause(currentPausePoint);
+        //SS_SaveBrush("padbrush", i, brushes[i]);
+        //SS_SaveBrush("paddestbrush", i, destBrushes[i]);
+        //SS_Pause(currentPausePoint);
     }
 
     if (dropshadow)
@@ -1584,7 +1584,7 @@ void repaint (ppm_t *p, ppm_t *a)
 
     for (; i && isBrushPaint(); i--)
     {
-        SS_Pause(currentPausePoint);
+        //SS_Pause(currentPausePoint);
         if (i % progstep == 0)
         {
             if(runningvals.run)
@@ -1877,7 +1877,7 @@ void repaint (ppm_t *p, ppm_t *a)
 	for(it = gBrushProperties.begin(); it != gBrushProperties.end() && isBrushPaint(); it++)
 	{
 		BrushProperty bp = *it;
-        SS_Pause(currentPausePoint);
+        //SS_Pause(currentPausePoint);
 #if 1
 		//apply_brush (bp.brush, bp.shadow, &tmp, &atmp, bp.tx,bp.ty, bp.r,bp.g,bp.b);
         float startRealPicX = maxbrushwidth;

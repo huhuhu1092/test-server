@@ -20,9 +20,9 @@
 #define __PPM_TOOL_H
 
 #include "type.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 typedef struct ppm {
     int width;
     int height;
@@ -66,8 +66,8 @@ void mkgrayplasma(ppm_t *p, float turb);
 
 void setDataPath(const char* str);
 #define PPM_IS_INITED(ppm_ptr) ((ppm_ptr)->col != NULL)
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 #endif /* #ifndef __PPM_TOOL_H */
 

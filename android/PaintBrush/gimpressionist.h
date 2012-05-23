@@ -21,9 +21,9 @@
 
 #include "type.h"
 #include "ppmtool.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 /* Defines */
 
 #define PLUG_IN_PROC    "plug-in-gimpressionist"
@@ -199,9 +199,9 @@ extern int gBrushMaxWidth;
 extern int gBrushMaxHeight;
 extern int gImageWidth;
 extern int gImageHeight;
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 #endif /* #ifndef __GIMPRESSIONIST_H */
 
 
