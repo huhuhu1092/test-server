@@ -377,7 +377,7 @@ static int get_hue (guchar *rgb)
      * */
     if ((rgb[0] == rgb[1]) && (rgb[0] == rgb[2])) /* Gray */
         return 0;
-    v = (rgb[0] > rgb[1] ? rgb[0] : rgb[1]);     /* v = st<F8>rste verdi */
+    v = (rgb[0] > rgb[1] ? rgb[0] : rgb[1]);     /* v = strste verdi */
     if (rgb[2] > v)
         v = rgb[2];
     temp = (rgb[0] > rgb[1] ? rgb[1] : rgb[0] ); /* temp = minste */
@@ -832,6 +832,130 @@ struct GeoPaintCanvas
 {
     GeoPaintArea pa[ROW_NUM][COL_NUM];
 };
+struct ImageHueDistribute
+{
+    float minAngle;
+    float maxAngle;
+    int num;
+};
+static int firstHue, secondHue, thirdHue;
+static ImageHueDistribute gImageHueDistribute[] = 
+{
+    {0, 60, 0},
+    {60, 120, 0},
+    {120, 180, 0},
+    {180, 240, 0},
+    {240, 300, 0},
+    {300, 360, 0}
+};
+//return the hue angle
+static float rgbToHueAngle(guchar *rgb)
+{
+    float r = rgb[0] / 255.0f;
+    float g = rgb[1] / 255.0f;
+    float b = rgb[2] / 255.0f;
+    float v = r > g ? r : g;
+    float max = v;
+    if(v < b)
+        max = b;
+    v = r < g ? r : g;
+    float min = v;
+    if(v > b)
+        v = v;
+    float delta = max - min;
+    if(max == min)
+        return 0;
+    float h = 0;
+    if(g > b)
+    {
+        h = (max - r + g - min + b - min) * 60.0f/ delta;
+    }
+    else 
+    {
+        h = 360 - (max - r + g - min + b - min) * 60 / delta;    
+    }
+    return h;
+}
+static int getImageHueDistributeIndex(float hAngle)
+{
+    int count = sizeof(gImageHueDistribute) / sizeof(ImageHueDistribute);
+    for(int i = 0 ; i < count ; i++)
+    {
+        if(gImageHueDistribute[i].minAngle <= hAngle && hAngle < gImageHueDistribute[i].maxAngle)
+            return i;
+    }
+    return -1;
+}
+static void clearImageHueDistribute()
+{
+    int count = sizeof(gImageHueDistribute) / sizeof(ImageHueDistribute);
+    for(int i = 0 ; i < count ; i++)
+    {
+        gImageHueDistribute[i].num = 0;
+    }
+}
+static void findFirstThreeHue(int& first, int& second, int& third)
+{
+    int count = sizeof(gImageHueDistribute) / sizeof(ImageHueDistribute);
+    int max = 0;
+    for(int i = 1 ; i < count ; i++)
+    {
+        if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
+        {
+            max = i;
+        }
+    }
+    first = max;
+    ImageHueDistribute secondHueDistribute[5];
+    int j = 0;
+    for(int i = 0 ; i < 6 ; i++)
+    {
+        if(i != max)
+        {
+            secondHueDistribute[j++] = gImageHueDistribute[i];
+        }
+    }
+    max = 0;
+    for(int i = 1 ; i < 5 ; i++)
+    {
+        if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
+            max = i;
+    }
+    second = max;
+    ImageHueDistribute thirdHueDistribute[4];
+    j = 0 ; 
+    for(int i = 0 ;i < 5 ; i++)
+    {
+        if(i != max)
+        {
+            thirdHueDistribute[j++] = secondHueDistribute[i];
+        }
+    }
+    max = 0;
+    for(int i = 1 ; i < 4 ; i++)
+    {
+        if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
+            max = i;
+    }
+    third = max;
+    assert(gImageHueDistribute[first].num >= gImageHueDistribute[second].num && gImageHueDistribute[second].num >= gImageHueDistribute[third].num);
+    LOGI("## firstHue = %d, secondHue = %d, thirdHue = %d ##\n", first, second, third);
+}
+static void createImageHueDistribute(ppm_t* image)
+{
+    clearImageHueDistribute();
+    for(int i = 0 ;i < image->height ; i++)
+    {
+        guchar* src = image->col + i * image->width * 3;
+        for(int j = 0 ; j < image->width ; j++)
+        {
+            float h = rgbToHueAngle(src + j * 3);
+            int index = getImageHueDistributeIndex(h);
+            assert(-1);
+            gImageHueDistribute[index].num++;
+        }
+    }
+}
 #define QUAD_TREE_DEPTH 3
 struct QuadRect
 {
@@ -912,6 +1036,96 @@ static int pointInRect(float x, float y , QuadRect& rect)
     else
         return 0;
 }
+static std::list<BrushProperty> outputBrushProperty(QuadTreeNode* quadTree)
+{
+    if(quadTree == NULL)
+    {
+        std::list<BrushProperty> bp;
+        return bp;
+    }
+    else 
+    {
+        std::list<BrushProperty> outList;
+        std::list<BrushProperty>::iterator it;
+        for(int i = 0 ;i < 4 ; i++)
+        {
+            std::list<BrushProperty> bp = outputBrushProperty(quadTree->child[i]);
+            for(it = bp.begin() ; it != bp.end(); it++)
+            {
+                outList.push_back(*it);
+            }
+        }
+        if(quadTree->child[0] == NULL)
+        {
+            std::list<BrushProperty> currentBp1;;
+            std::list<BrushProperty> currentBp2;
+            std::list<BrushProperty> currentBp3;
+            std::list<BrushProperty> currentBp4;
+            for(it = quadTree->bpList.begin() ; it != quadTree->bpList.end() ; it++)
+            {
+                //outList.push_back(*it);
+                guchar rgb[3];
+                rgb[0] = it->r;
+                rgb[1] = it->g;
+                rgb[2] = it->b;
+                float h = rgbToHueAngle(rgb);
+                if(h >= gImageHueDistribute[firstHue].minAngle && h < gImageHueDistribute[firstHue].maxAngle)
+                {
+                    currentBp1.push_back(*it);
+                }
+                else if(h >= gImageHueDistribute[secondHue].minAngle && h < gImageHueDistribute[secondHue].maxAngle)
+                {
+                    currentBp2.push_back(*it);
+                }
+                else if(h >= gImageHueDistribute[thirdHue].minAngle && h < gImageHueDistribute[thirdHue].maxAngle)
+                {
+                    currentBp3.push_back(*it);
+                }
+                else 
+                {
+                    currentBp4.push_back(*it);    
+                }
+                
+            }
+            for(it = currentBp1.begin() ; it != currentBp1.end() ; it++)
+            {
+                outList.push_back(*it);
+            }
+            for(it = currentBp2.begin() ; it != currentBp2.end() ; it++)
+            {
+                outList.push_back(*it);
+            }
+            for(it = currentBp3.begin() ; it != currentBp3.end() ; it++)
+            {
+                outList.push_back(*it);
+            }
+            for(it = currentBp4.begin() ; it != currentBp4.end(); it++)
+            {
+                outList.push_back(*it);
+            }
+        }
+        else 
+        {
+            assert(quadTree->bpList.size() == 0);
+        }
+        return outList;
+    }
+}
+static void clearQuadTree(QuadTreeNode* quadTree)
+{
+    if(quadTree == NULL)
+    {
+        return;
+    }
+    else
+    {
+        quadTree->bpList.clear();
+        for(int i = 0 ;i < 4 ; i++)
+        {
+            clearQuadTree(quadTree->child[i]);    
+        }
+    }
+}
 /*
  1: add ok
  0: add failed
@@ -944,13 +1158,20 @@ static int addBrushPropertyToQuadTree(BrushProperty bp, QuadTreeNode* quadTree)
             return 0;
     };
 }
-#define GRAY_NUM 4
+#define GRAY_NUM 5
 struct GrayPaintArea
 {
     std::list<BrushProperty> bp;
 };
 GrayPaintArea grayPaintArray[GRAY_NUM];
-static void addBrushProperty(BrushProperty bp)
+static void clearGrayPaintArea()
+{
+    for(int i = 0 ; i < GRAY_NUM ; i++)
+    {
+        grayPaintArray[i].bp.clear();
+    }
+}
+static void addBrushPropertyToGrayPaintArea(BrushProperty bp)
 {
     float gray = bp.r * 0.2126f + bp.g * 0.7152f + bp.b * 0.0722f;
     float graySpan = 256.0f / GRAY_NUM;
@@ -966,21 +1187,34 @@ static void addBrushProperty(BrushProperty bp)
     {
         grayPaintArray[2].bp.push_back(bp);
     }
-    else
+    else if(gray >= 3 * graySpan && gray < 4 * graySpan)
     {
         grayPaintArray[3].bp.push_back(bp);
+    }
+    else {
+        grayPaintArray[4].bp.push_back(bp);
     }
 }
 static void addBrushPropertyToGeoPaintCanvas(BrushProperty bp, GeoPaintCanvas* canvas)
 {
     
 }
-static void separatePaintArea(GrayPaintArea* gpa, GeoPaintCanvas* outCanvas)
+static void separatePaintArea()
 {
-    std::list<BrushProperty>::iterator it;
-    for(it = gpa->bp.begin() ; it != gpa->bp.end() ; it++)
+    gBrushProperties.clear();
+    for(int i = 0 ; i < GRAY_NUM ; i++)
     {
-        addBrushPropertyToGeoPaintCanvas(*it , outCanvas);
+        std::list<BrushProperty>::iterator it;
+        for(it = grayPaintArray[i].bp.begin() ; it != grayPaintArray[i].bp.end() ; it++)
+        {
+            addBrushPropertyToQuadTree(*it, rootQuadTree);
+        }
+        std::list<BrushProperty> outList = outputBrushProperty(rootQuadTree);
+        for(it = outList.begin() ; it != outList.end() ; it++)
+        {
+            gBrushProperties.push_back(*it);
+        }
+        clearQuadTree(rootQuadTree);
     }
 }
 void testQuadTree()
@@ -1021,14 +1255,20 @@ void repaint (ppm_t *p, ppm_t *a)
     SS_PausePoint* currentPausePoint = NULL;
     SS_Canvas* currentCanvas = NULL;
     static int  running = 0;
- 
+    
     int dropshadow = pcvals.general_drop_shadow;
     int shadowblur = pcvals.general_shadow_blur;
   
     g_printerr("####running = %d ###\n", running);
     if (running)
         return;
-    //currentPausePoint = SS_GetCurrentPausePoint();
+    currentPausePoint = SS_GetCurrentPausePoint();
+    if(rootQuadTree == NULL)
+    {
+        rootQuadTree = createQuadTree(0, 1024, 0, 768, 0);
+    }
+    createImageHueDistribute(p);
+    findFirstThreeHue(firstHue, secondHue, thirdHue);
     currentCanvas = SS_GetCurrentCanvas();
     running++;
     SS_GetDestSize(&destWidth, &destHeight);
@@ -1122,7 +1362,7 @@ void repaint (ppm_t *p, ppm_t *a)
         brushes[i].col = NULL;
         destBrushes[i].col = NULL;
         brushIndex = g_rand_int_range (random_generator, 0, BRUSH_NUM);
-        LOGE("## brushIndex = %d ##\n", brushIndex);
+        //LOGE("## brushIndex = %d ##\n", brushIndex);
         ppm_copy (&brushes[brushIndex], &brushes[i]);
         ppm_copy(&destBrushes[brushIndex], &destBrushes[i]);
     }
@@ -1179,7 +1419,7 @@ void repaint (ppm_t *p, ppm_t *a)
             prepare_brush(&destBrushes[i]);
         }
         brushes_sum[i] = sum_brush (&brushes[i]);
-        LOGE("## brush sum %d : %f ##\n", i, brushes_sum[i]);
+        //LOGE("## brush sum %d : %f ##\n", i, brushes_sum[i]);
         //SS_Pause(currentPausePoint);
     }
 
@@ -1854,8 +2094,20 @@ void repaint (ppm_t *p, ppm_t *a)
     tmpHeight = tmp.height;
     
     LOGI("############# start create brush piece w = %d, h = %d ##############\n", tmpWidth, tmpHeight);
-	gBrushProperties.sort(_BrushPropertyComp());
+    //gBrushProperties.sort(_BrushPropertyComp());
+    //use separate function to sort property
+    clearQuadTree(rootQuadTree);
+    clearGrayPaintArea();
 	std::list<BrushProperty>::iterator it;
+    for(it = gBrushProperties.begin() ; it != gBrushProperties.end(); it++)
+    {
+        addBrushPropertyToGrayPaintArea(*it);
+    }
+    separatePaintArea();
+    //end
+    LOGI("## set pause point before ##");
+    SS_SetComputationPausePoint(currentPausePoint);
+    LOGI("## set pause point end ");
 #ifdef MACOS
     //SE_startBrushPaint();
 #else
