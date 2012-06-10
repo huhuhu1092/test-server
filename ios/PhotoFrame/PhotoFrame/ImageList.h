@@ -2,7 +2,7 @@
 //  ImageList.h
 //  PhotoFrame
 //
-//  Created by 陈勇 on 12-3-7.
+//  Created by 陈勇 on 12-5-21.
 //  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
 //
 
@@ -11,9 +11,8 @@
 
 @class SelectedImage;
 
-@interface ImageList : NSManagedObject {
-@private
-}
+@interface ImageList : NSManagedObject
+
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSNumber * seq;
 @property (nonatomic, retain) NSSet *selectedimage;
@@ -25,4 +24,5 @@
 - (void)removeSelectedimageObject:(SelectedImage *)value;
 - (void)addSelectedimage:(NSSet *)values;
 - (void)removeSelectedimage:(NSSet *)values;
+
 @end

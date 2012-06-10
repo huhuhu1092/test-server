@@ -23,10 +23,6 @@ float SE_Cosf(float radian)
 {
     return cosf(radian);
 }
-float SE_ACosf(float cosv)
-{
-    return acosf(cosv);
-}
 float SE_Sqrtf(float f)
 {
     return sqrtf(f);
@@ -35,19 +31,26 @@ float SE_Fabs(float f)
 {
     return fabs(f);
 }
-int SE_Iabs(int i)
-{
-	return abs(i);
-}
 float SE_Tanf(float f)
 {
     return tanf(f);
 }
-float SE_Floor(float x)
+
+float SE_Acosf(float f)
 {
-	return floorf(x);
+    return acos(f);
 }
-float SE_Ceil(float x)
+float SE_Asinf(float f)
 {
-	return ceil(x);
+    return asin(f);
 }
+float SE_Atanf(float f)
+{
+    return atan(f);
+}
+
+float SE_Lerp(float a, float b, float t)
+{
+    return a + (b-a)*t;
+}
+

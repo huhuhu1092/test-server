@@ -21,6 +21,7 @@
 #define SELOADPHOTO_EVENT 2
 #define SERESTART_EVENT 3
 #define SEUPDATEIMAGE_EVENT 4
+#define SEUPDATEALL_EVENT 5
 ////////////
 
 /////
@@ -181,7 +182,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 }
 - (CGImageRef) getPhotoFromURL:(SEImageURL *)url
 {
-    return [SEUtil getImageFromPhotoLib:url.url withAssetLib:mAssetLibrary];
+    return [SEUtil getImageFromPhotoLib:url.url withAssetLib:mAssetLibrary fitSize:CGSizeMake(mScrollView.mPhotoWidth, mScrollView.mPhotoHeight)];
     /*
     __block CGImageRef retImage  = NULL;
     __block int accessError = 0;
@@ -230,14 +231,14 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
         [photoURLArray addObject:url];
     }
      */
-    NSMutableArray* si = [mNavView getUserImageProperty];
-    for(NSUInteger i = 0 ; i < [si count] ; i++)
+    NSArray* siSet = [mNavView getUserImageProperty];
+    for(NSUInteger i = 0 ; i < [siSet count] ; i++)
     {
-        NSManagedObject* mo = [si objectAtIndex:i];
-        NSNumber* seq = [mo valueForKey:@"seq"];
+        SelectedImage*  si = [siSet objectAtIndex:i];
+        NSNumber* seq = si.seq;
         NSLog(@"seq = %@", seq);
-        NSString* str = [mo valueForKey:@"filepath"];
-        NSString* url = [mo valueForKey:@"url"];
+        NSString* str = si.filepath;
+        NSString* url = si.url;
         NSURL* fileURL = [NSURL URLWithString:str];
         SEImageURL* imageURL = [[SEImageURL alloc] init];
         imageURL.url = [NSURL URLWithString: url];
@@ -270,7 +271,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
         NSURL* photoURL = url.url;
         if(photoURL)
         {
-            return [SEUtil getImageFromPhotoLib:photoURL withAssetLib:mAssetLibrary];
+            return [SEUtil getImageFromPhotoLib:photoURL withAssetLib:mAssetLibrary fitSize:CGSizeMake(mScrollView.mPhotoWidth, mScrollView.mPhotoHeight)];
         }
         else
         {
@@ -288,11 +289,14 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 @implementation SEUIScrollViewDelegate
 -(void) scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    //NSLog(@"content offset = %f", scrollView.contentOffset.y);
+    NSLog(@"content offset = %f", scrollView.contentOffset.y);
     SEUIScrollView* currentView = (SEUIScrollView*)scrollView;
     [currentView calculateVisibleView:scrollView.contentOffset.y];
 }
-
+- (void) scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    NSLog(@"end decelerate\n");
+}
 @end
 //////////////////////
 ////
@@ -393,9 +397,25 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 @implementation SEUpdateImageEvent
 @synthesize index;
 @end
+///
+@interface SEUpdateAllEvent : SEUIScrollViewEvent
+@end
+@implementation SEUpdateAllEvent
+- (id) init
+{
+    self = [super init];
+    if(self)
+    {
+        type = SEUPDATEALL_EVENT;
+    }
+    return self;
+}
+
+@end
 ////////
 @interface SEUIScrollView (Private)
 - (void) restartReal : (id) param;
+- (void) restartAll : (id) param;
 - (void) removeAllImageViews;
 
 - (SEUIImageView*) getImageViewByIndex: (int)index;
@@ -411,12 +431,19 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 - (int) getVisibleRowCount; 
 - (void) startupPhotoLoadThread;
 //
+- (void) initPhotoDict;
 - (void) photoThreadLoadFunc;
 - (void) addEvent: (SEUIScrollViewEvent*) event;
 - (void) getPrevPageRows: (int)start : (int) end :(int*)outStart : (int*)outEnd;
 - (void) getNextPageRows: (int)start : (int)end :(int*)outStart : (int*) outEnd;
 @end
 @implementation SEUIScrollView (Private)
+- (void) initPhotoDict
+{
+    if(mPhotoDict)
+        [mPhotoDict release];
+    mPhotoDict = [[NSMutableDictionary alloc] init];
+}
 - (void) removeAllImageViews
 {
     NSArray* subviews = [mParentView subviews];
@@ -426,7 +453,13 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
         [v removeFromSuperview];
     }
 }
-
+- (void) restartAll: (id)param
+{
+    [self removeAllImageViews];
+    [self initPhotoDict];
+    [self initPhotoLibUrl];
+    [self createContent];
+}
 - (void) restartReal: (id) param
 {
     [self removeAllImageViews];
@@ -475,7 +508,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     int count = mPhotoDict.count;
     [mPhotoDict removeObjectsForKeys:indexArray];
     int count1 = mPhotoDict.count;
-    assert(count1 < count);
+    //assert(count1 < count);
 }
 - (void) removeImageFromView : (GarbageInfo*) gbInfo
 {
@@ -755,6 +788,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     BOOL exit = NO;
     BOOL restartOccor = NO;
+    BOOL restartAll = NO;
     while(!exit)
     {
         [mEventListCondition lock];
@@ -794,6 +828,12 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
                     exitEventOccur = YES;
                     restartOccor = YES;
                     
+                }
+                    break;
+                case SEUPDATEALL_EVENT:
+                {
+                    exitEventOccur = YES;
+                    restartAll = YES;
                 }
                     break;
                 case SELOADPHOTO_EVENT:
@@ -857,6 +897,11 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     {
         [self performSelectorOnMainThread:@selector(restartReal:) withObject:nil waitUntilDone:NO];
     }
+    if(restartAll)
+    {
+        [self performSelectorOnMainThread:@selector(restartAll:) withObject:nil waitUntilDone:NO];
+    }
+    
     NSLog(@"photo load thread exit!");
     [pool release];
 }
@@ -968,6 +1013,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     hp.index = -1;
     return hp;
 }
+
 - (void) initState
 {
     mPrevStartRow = -1;
@@ -987,11 +1033,10 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     mEventListCondition = [[NSCondition alloc] init];
     mEventList = [NSMutableArray array];
     [mEventList retain];
-    mPhotoDict = [[NSMutableDictionary alloc] init];
+    //mPhotoDict = [[NSMutableDictionary alloc] init];
+    [self initPhotoDict];
     [mPhotoLoaderDelegate initState];
     UIView* v = [[UIView alloc] init];
-    //UIImage* image = [mResLoader getImage:@"ScrollViewBackground"];
-    //v.image = image;
     [self addSubview:v];
     [v release];
     mParentView = v;
@@ -1121,7 +1166,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"scroll view touch begin: %@", mName);
+    //NSLog(@"scroll view touch begin: %@", mName);
     //NSArray* pointsInScrollView = [self touchToPoints:touches];
     if(mUseMultiTouch)
     {
@@ -1149,7 +1194,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"scroll view touch move: %@", mName);
+    //NSLog(@"scroll view touch move: %@", mName);
     //NSArray* pointsInScrollView = [self touchToPoints:touches];
     if(mUseMultiTouch)
     {
@@ -1165,7 +1210,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"scroll view touch end: %@", mName);
+    //NSLog(@"scroll view touch end: %@", mName);
     if(mUseMultiTouch)
     {
         [mMultiTouchDetect touchStateChange:touches];
@@ -1181,7 +1226,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
 }
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"scroll view touch cancel: %@", mName);
+    //NSLog(@"scroll view touch cancel: %@", mName);
     //NSArray* pointsInScrollView = [self touchToPoints:touches];
     if(mUseMultiTouch)
     {
@@ -1266,6 +1311,11 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     SEUpdateImageEvent* event = [[SEUpdateImageEvent alloc] init];
     event.index = index;
     event.type = SEUPDATEIMAGE_EVENT;
+    [self addEvent:event];
+}
+- (void) update
+{
+    SEUpdateAllEvent* event = [[SEUpdateAllEvent alloc] init];
     [self addEvent:event];
 }
 /*

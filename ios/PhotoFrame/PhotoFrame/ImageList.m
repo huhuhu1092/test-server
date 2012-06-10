@@ -2,7 +2,7 @@
 //  ImageList.m
 //  PhotoFrame
 //
-//  Created by 陈勇 on 12-3-7.
+//  Created by 陈勇 on 12-5-21.
 //  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
 //
 
@@ -11,6 +11,7 @@
 
 
 @implementation ImageList
+
 @dynamic name;
 @dynamic seq;
 @dynamic selectedimage;

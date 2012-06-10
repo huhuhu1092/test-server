@@ -62,6 +62,7 @@ struct SE_SubMesh
         subMaterialIndex = 0;
     }
 };
+
 struct _VertexXYZ_UV
 {
     _Vector3f xyz;
@@ -94,6 +95,11 @@ struct SE_VertexProperty
         normalOffset = 0;
     }
 };
+struct SE_MeshVAO
+{
+    GLuint vao;
+    GLuint uvVbo;
+};
 struct SE_Mesh
 {
     enum VERTEX_TYPE {INVALID, XYZ, XYZ_UV, XYZ_COLOR, XYZ_UV1_UV2, XYZ_UV_NORMAL};
@@ -118,6 +124,10 @@ struct SE_Mesh
     int mWireFrameVertexNum;
     VERTEX_TYPE mWireFrameVertexType;
     GLuint vboID;
+    GLuint indexVboID;
+    GLuint vaoID;
+    SE_MeshVAO vaoIDArray[2][4];
+    SE_MeshVAO mirrorVaoIDArray[2][4];
     SE_Mesh()
     {
         geomDataIndex = -1;
@@ -128,11 +138,27 @@ struct SE_Mesh
         mCurrVertexType = INVALID;
         mDrawingVertexNum = 0;
         vboID = 0;
-        
+        indexVboID = 0;
+        vaoID = 0;
         mWireFrameVertex = NULL;
         mWireFrameVertexNum = 0;
         mWireFrameVertexType = XYZ;
-        
+        for(int i = 0 ; i < 2 ; i++)
+        {
+            for(int j = 0 ; j < 4 ; j++)
+            {
+                vaoIDArray[i][j].vao = 0;
+                vaoIDArray[i][j].uvVbo = 0;
+            }
+        }
+        for(int i = 0 ; i < 2 ; i++)
+        {
+            for(int j = 0 ; j < 4 ; j++)
+            {
+                mirrorVaoIDArray[i][j].vao = 0;
+                mirrorVaoIDArray[i][j].uvVbo = 0;
+            }
+        }
         mFloatSize = 0;
     }
     ~SE_Mesh()
@@ -140,8 +166,13 @@ struct SE_Mesh
         delete[] subMeshArray;
     }
     float* getDrawingVertex(VERTEX_TYPE type);
+    int getVertexNum(VERTEX_TYPE type);
+    unsigned short* getIndexBuffer(VERTEX_TYPE type);
+    int getIndexBufferNum(VERTEX_TYPE type);
     float* getWireframeVertex(const SE_Vector3f& cameraZ);
     SE_VertexProperty getVertexProperty(VERTEX_TYPE vt);
+    SE_AABB getAABB();
+    void removeGLBuffer();
 };
 
 struct SE_ImageData
@@ -166,8 +197,9 @@ struct SE_ImageData
 
 struct SE_Texture
 {
+    enum TEXTURE_LOAD_STATE {TEXTURE_LOADING, TEXTURE_LOADED, TEXTURE_NO_LOAD};
     std::string texturename;
-    GLint texture;
+    GLuint texture;
     GLint wrapS;
     GLint wrapT;
     GLint filterMin;
@@ -176,9 +208,11 @@ struct SE_Texture
     unsigned int height;
     unsigned int realWidth;
     unsigned int realHeight;
+    TEXTURE_LOAD_STATE loadstate;
     SE_Texture()
     {
-        texture = -1;
+        loadstate = TEXTURE_NO_LOAD;
+        texture = 0;
         wrapS = 0;
         wrapT = 0;
         filterMag = 0;
@@ -223,6 +257,29 @@ struct SE_LookingPoint
         this->point = point;
     }
 };
+struct SE_LookingPointTrackData
+{
+    float percent;
+    std::string lookpointname;
+    int side;//0: left 1: right
+    int frameNum;
+    SE_LookingPointTrackData()
+    {
+        percent = -1;
+        side = -1;
+        frameNum = -1;
+    }
+    friend bool operator== (const SE_LookingPointTrackData& left, const SE_LookingPointTrackData& right)
+    {
+        return left.lookpointname == right.lookpointname && left.side == right.side &&
+        left.frameNum == right.frameNum;
+    }
+};
+struct SE_LookingPointTrack
+{
+    std::string name;
+    std::vector<SE_LookingPointTrackData> lookingPointTrackDataList;
+};
 class SS_ModelManager
 {
 public:
@@ -237,10 +294,12 @@ public:
     size_t getGeometryDataNum();
     SE_Material* getMaterial(int index);
     SE_Texture* getTexture(const char* texturename);
+    int getFullTextureCount();
     void setTexture(const char* texturename, SE_Texture* texture);
     void removeTexture(const char* texturename);
     void addGeometryData(const SE_GeometryData& geomData);
     std::vector<SE_TrackPoint> getTrackPoints(const char* name);
+    std::vector<std::string> getAllTrackPointsName();
     SE_Vector3f getTrackPoint(int x, int y, int z, const SE_Vector3f& start);
     SE_Vector3f getTrackPoint(const SE_TrackPoint& tp, const SE_Vector3f& start);
     SE_Vector3f getFrameLookingPoint(const char* name);
@@ -252,6 +311,11 @@ public:
     {
         return mReferenceBoxMax;
     }
+    SE_LookingPointTrackData getLookingPointTrackData(const std::string& name, int index);
+    std::vector<SE_LookingPointTrackData> getLookingPointTrackDataList(const std::string& name);
+    int getLookingPointTrackDataNum(const std::string& name);
+    void removeAllTexture();
+    void removeAllShaderFromGL();
 private:
     void process(const char* data, int currPos, int dataLen);
 private:
@@ -262,6 +326,7 @@ private:
     typedef std::vector<SS_Shader*> ShaderArray;
     typedef std::map<std::string, SE_Texture*> TextureList;
     typedef std::vector<SE_LookingPoint> LookingPointList;
+    typedef std::vector<SE_LookingPointTrack> LookingPointTrackList;
     GeometryDataArray mGeometryDataArray;
     MaterialDataArray mMaterialArray;
     ImageDataMap mImageDataMap;
@@ -272,6 +337,7 @@ private:
     SE_Vector3f mReferenceBoxMax;
     SE_TrackPointData mTrackPointData;
     LookingPointList mLookingPointList;
+    LookingPointTrackList mLookingPointTrackList;
 };
 
 

@@ -10,6 +10,7 @@
 #include "SE_Interpolate.h"
 #include "SE_Log.h"
 #include <algorithm>
+#include "SE_Common.h"
 ///
 static bool isSamplePoint(int index, std::vector<int>& samplePointIndex)
 {
@@ -205,7 +206,7 @@ std::vector<SE_Vector3f> SE_Curve::getComposeCurvePoint(int startIndex, int endI
             else
             {
                 float dif = dist - step;
-                LOGI("## dif = %f ##\n", dif);
+                //LOGI("## dif = %f ##\n", dif);
                 break;
             }
         }
@@ -254,7 +255,7 @@ std::vector<SE_Vector3f> SE_Curve::getCurvePoint(int splineIndex, const std::vec
             else
             {
                 float dif = dist - step;
-                LOGI("## dif = %f ##\n", dif);
+                //LOGI("## dif = %f ##\n", dif);
                 break;
             }
         }
@@ -278,7 +279,11 @@ bool SE_Curve::getNextCurvePoint(SE_Vector3f& outV)
     float dist = 0;
     size_t i;
     if(mCurrentPoint == (mCurvePoints.size() - 1))
-        return false;
+    {
+        mCurrentPoint = mCurvePoints.size() - 1;
+        outV = mCurvePoints[mCurvePoints.size() - 1].point;
+        return true;
+    }
     for(i = mCurrentPoint ; i < mCurvePoints.size() ; i++)
     {
         if(dist < mForwardingStep)
@@ -286,7 +291,7 @@ bool SE_Curve::getNextCurvePoint(SE_Vector3f& outV)
         else
         {
             float dif = dist - mForwardingStep;
-            LOGI("## dif = %f ##\n", dif);
+            //LOGI("## dif = %f ##\n", dif);
             break;
         }
     }

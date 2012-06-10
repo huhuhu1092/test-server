@@ -107,8 +107,11 @@
 {
     NSLog(@"SEUITableView touches began count = %u", [touches count]);
     [mMultiTouchDetect touchStateChange:touches];
-    
-    if(mMultiTouchDetect.mTouchState == TOUCH2)
+    if(mMultiTouchDetect.mTouchState == TOUCH1)
+    {
+        
+    }
+    else if(mMultiTouchDetect.mTouchState == TOUCH2 && mSameTouchedView)
     {
         mMultiTouchBegan = YES;
     }
@@ -118,31 +121,12 @@
     }
     else
         [super touchesBegan:touches withEvent:event];
-    /*
-    [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(targetMethod:)  userInfo: nil repeats:NO];
-    mOrig = [[touches anyObject] locationInView:self];
-    mSavePoint = mOrig;
-    mHasLongPress = YES;
-     */
+
 }
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     NSLog(@"SEUITableView touches move count = %u", [touches count]);
-    /*
-    CGPoint pos = [[touches anyObject] locationInView:self];
-    float deltax = pos.x - mOrig.x;
-    float deltay = pos.y - mOrig.y;
-    if(fabsf(deltax) > 5 || fabsf(deltay) > 5)
-    {
-        mHasLongPress = NO;
-    }
-    
-    deltax = pos.x - mSavePoint.x;
-    deltay = pos.y - mSavePoint.y;
-    CGPoint deltaP = CGPointMake(deltax, deltay);
-    NSValue* vp = [NSValue valueWithCGPoint:deltaP];
-    [mTouchMoveTarget performSelector:mTouchMoveAction withObject:vp];
-     */
+
     [mMultiTouchDetect touchStateChange:touches];
     
     if(mMultiTouchBegan)
@@ -176,10 +160,17 @@
 {
     NSLog(@"SEUITableView touch cancel");
     [mMultiTouchDetect touchStateChange:touches];
-    [super touchesCancelled:touches withEvent:event];
+    
+    if(mMultiTouchBegan)
+    {
+        mMultiTouchBegan = NO;
+        [mTouchEndTarget performSelector:mTouchEndAction];
+    }
+    else
+        [super touchesEnded:touches withEvent:event];
     mSameTouchedView = NO;
     mPressedView = nil;
-    //mHasLongPress = NO;
+
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
@@ -188,13 +179,13 @@
     UIView* p = ret.superview;
     if(p != nil)
     {
-        NSLog(@"hit view = %@, %@", p, ret);
+        //NSLog(@"hit view = %@, %@", p, ret);
         if(mPressedView == nil)
         {
             mPressedView = (UITableViewCell*)p;
-            NSSet* touches = [event touchesForView:self];
+            NSSet* touches = [event touchesForView:p];
             int count = [touches count];
-            NSLog(@"hit view touch count = %d", count);
+            //NSLog(@"hit view touch count = %d", count);
             if(count == 2)
             {
                 mSameTouchedView = YES;
@@ -249,39 +240,26 @@
 }
 - (void) saveGesture
 {
-    assert(mGesture ==nil);
-    if(mGesture != nil)
-        return;
-    mGesture = [NSArray array];
-    NSArray* gesArray = self.gestureRecognizers;
-    for(UIGestureRecognizer* ges in gesArray)
-    {
-        mGesture = [mGesture arrayByAddingObject:ges];
-    }
-    [mGesture retain];
 }
-- (void) removeAllGestures
+- (void) disableAllGestures
 {
     NSArray* gesArray = self.gestureRecognizers;
     for(UIGestureRecognizer* ges in gesArray)
     {
-        NSLog(@"### ges = %@", ges);
-        //ges.cancelsTouchesInView = NO;
-        [self removeGestureRecognizer:ges];
+        ges.enabled = NO;
     }   
 }
-- (void) restoreGesture
+- (void) enableAllGestures
 {
-    NSArray* oldArray = self.gestureRecognizers;
-    assert([oldArray count] == 0);
-    if([oldArray count] > 0)
-        return;
-    for(UIGestureRecognizer* ges in mGesture)
+    NSArray* gestures = self.gestureRecognizers;
+    for(UIGestureRecognizer* ges in gestures)
     {
-        [self addGestureRecognizer:ges];
+        ges.enabled = YES;
     }
-    [mGesture release];
-    mGesture = nil;
     
 }
+- (void) handleInMid
+{}
+- (void) handleOnEdge
+{}
 @end

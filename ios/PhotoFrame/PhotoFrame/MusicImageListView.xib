@@ -63,7 +63,7 @@
 					<object class="IBUITableView" id="649485724">
 						<reference key="NSNextResponder" ref="871452541"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{507, 58}, {443, 633}}</string>
+						<string key="NSFrame">{{507, 58}, {443, 632}}</string>
 						<reference key="NSSuperview" ref="871452541"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="825792936"/>
@@ -86,10 +86,10 @@
 					<object class="IBUITableView" id="446281704">
 						<reference key="NSNextResponder" ref="871452541"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{0, 58}, {440, 633}}</string>
+						<string key="NSFrame">{{0, 58}, {440, 640}}</string>
 						<reference key="NSSuperview" ref="871452541"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="649485724"/>
+						<reference key="NSNextKeyView" ref="85314540"/>
 						<string key="NSReuseIdentifierKey">_NS:395</string>
 						<reference key="IBUIBackgroundColor" ref="327589215"/>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -106,10 +106,10 @@
 					<object class="IBUIButton" id="825792936">
 						<reference key="NSNextResponder" ref="871452541"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{180, 708}, {132, 46}}</string>
+						<string key="NSFrame">{{630, 665}, {309, 103}}</string>
 						<reference key="NSSuperview" ref="871452541"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1038245207"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:237</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">104</int>
@@ -121,25 +121,27 @@
 							<double key="NSSize">15</double>
 							<int key="NSfFlags">16</int>
 						</object>
-						<int key="IBUIButtonType">1</int>
-						<string key="IBUINormalTitle">Add Music List</string>
 						<reference key="IBUIHighlightedTitleColor" ref="327589215"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
-							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+							<bytes key="NSRGB">MC4xOTYwNzg0MzE0IDAuMzA5ODAzOTIxNiAwLjUyMTU2ODYyNzUAA</bytes>
 						</object>
 						<object class="NSColor" key="IBUINormalTitleShadowColor" id="123647312">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MC41AA</bytes>
 						</object>
+						<object class="NSCustomResource" key="IBUIHighlightedBackgroundImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">add_image_list_botton_b.png</string>
+						</object>
 					</object>
 					<object class="IBUIButton" id="1038245207">
 						<reference key="NSNextResponder" ref="871452541"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{405, 708}, {128, 46}}</string>
+						<string key="NSFrame">{{321, 665}, {293, 103}}</string>
 						<reference key="NSSuperview" ref="871452541"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="85314540"/>
+						<reference key="NSNextKeyView" ref="649485724"/>
 						<string key="NSReuseIdentifierKey">_NS:237</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">105</int>
@@ -147,8 +149,6 @@
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="912697547"/>
-						<int key="IBUIButtonType">1</int>
-						<string key="IBUINormalTitle">Remove</string>
 						<reference key="IBUIHighlightedTitleColor" ref="327589215"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
@@ -159,10 +159,10 @@
 					<object class="IBUIButton" id="85314540">
 						<reference key="NSNextResponder" ref="871452541"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{627, 708}, {133, 46}}</string>
+						<string key="NSFrame">{{20, 665}, {293, 103}}</string>
 						<reference key="NSSuperview" ref="871452541"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="1038245207"/>
 						<string key="NSReuseIdentifierKey">_NS:237</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">106</int>
@@ -170,12 +170,10 @@
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="912697547"/>
-						<int key="IBUIButtonType">1</int>
-						<string key="IBUINormalTitle">Add Image List</string>
 						<reference key="IBUIHighlightedTitleColor" ref="327589215"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
-							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+							<bytes key="NSRGB">MC4xOTYwNzg0MzE0IDAuMzA5ODAzOTIxNiAwLjUyMTU2ODYyNzUAA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="123647312"/>
 					</object>
@@ -227,9 +225,9 @@
 							<reference ref="563575163"/>
 							<reference ref="446281704"/>
 							<reference ref="649485724"/>
+							<reference ref="85314540"/>
 							<reference ref="825792936"/>
 							<reference ref="1038245207"/>
-							<reference ref="85314540"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -241,21 +239,27 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">6</int>
 						<reference key="object" ref="649485724"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+						</object>
 						<reference key="parent" ref="871452541"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">7</int>
 						<reference key="object" ref="446281704"/>
-						<reference key="parent" ref="871452541"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">8</int>
-						<reference key="object" ref="825792936"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+						</object>
 						<reference key="parent" ref="871452541"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">9</int>
 						<reference key="object" ref="1038245207"/>
+						<reference key="parent" ref="871452541"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">8</int>
+						<reference key="object" ref="825792936"/>
 						<reference key="parent" ref="871452541"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -281,6 +285,7 @@
 					<string>7.CustomClassName</string>
 					<string>7.IBPluginDependency</string>
 					<string>8.IBPluginDependency</string>
+					<string>8.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>9.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
@@ -297,6 +302,7 @@
 					<string>SEImageListTableView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
@@ -360,8 +366,17 @@
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="NS.key.0">list_background_001.png</string>
-			<string key="NS.object.0">{950, 768}</string>
+			<bool key="EncodedWithXMLCoder">YES</bool>
+			<object class="NSArray" key="dict.sortedKeys">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>add_image_list_botton_b.png</string>
+				<string>list_background_001.png</string>
+			</object>
+			<object class="NSMutableArray" key="dict.values">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{293, 103}</string>
+				<string>{950, 768}</string>
+			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">534</string>
 	</data>

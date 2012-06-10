@@ -10,12 +10,89 @@
 #include "SE_Log.h"
 #include "PGMDataReader.h"
 #include "SS_Shader.h"
+#include "SS_OpenGL.h"
 //////////
 SE_Texture::~SE_Texture()
 {
-    
+    GLuint t[1];
+    t[0] = texture;
+    glDeleteTextures(1, t);
 }
 ///////////////////////////
+void SE_Mesh::removeGLBuffer()
+{
+    if(vaoID > 0)
+    {
+        glDeleteVertexArraysOES(1, &vaoID);
+        vaoID = 0;
+    }
+    for(int i = 0 ; i < 2 ; i++)
+    {
+        for(int j = 0 ; j < 4 ; j++)
+        {
+            glDeleteVertexArraysOES(1, &vaoIDArray[i][j].vao);
+            glDeleteBuffers(1, &vaoIDArray[i][j].uvVbo);
+        }
+    }
+    for(int i = 0 ;i  < 2 ; i++)
+    {
+        for(int j = 0 ;j < 4 ; j++)
+        {
+            glDeleteVertexArraysOES(1, &mirrorVaoIDArray[i][j].vao);
+            glDeleteBuffers(1, &mirrorVaoIDArray[i][j].uvVbo);
+        }
+    }
+    if(vboID > 0)
+    {
+        glDeleteBuffers(1, &vboID);
+        vboID = 0;
+    }
+    for(int i = 0 ; i < 2 ; i++)
+    {
+        for(int j = 0 ; j < 4 ; j++)
+        {
+            vaoIDArray[i][j].vao = 0;
+            vaoIDArray[i][j].uvVbo = 0;
+        }
+    }
+    for(int i = 0 ; i < 2 ; i++)
+    {
+        for(int j = 0 ; j < 4 ; j++)
+        {
+            mirrorVaoIDArray[i][j].vao = 0;
+            mirrorVaoIDArray[i][j].uvVbo = 0;
+        }
+    }
+}
+SE_AABB SE_Mesh::getAABB()
+{
+    SS_ModelManager* mm = SS_GetModelManager();
+    SE_GeometryData* gd = mm->getGeometryData(geomDataIndex);
+    return gd->getAABB();
+}
+unsigned short* SE_Mesh::getIndexBuffer(VERTEX_TYPE type)
+{
+    if(type == XYZ_UV)
+    {
+        SS_ModelManager* mm = SS_GetModelManager();
+        SE_GeometryData* gd = mm->getGeometryData(geomDataIndex);
+        return gd->vertexBufferFaceArray;
+    }else {
+        return NULL;
+    }
+}
+int SE_Mesh::getIndexBufferNum(VERTEX_TYPE type)
+{
+    if(type == XYZ_UV)
+    {
+        SS_ModelManager* mm = SS_GetModelManager();
+        SE_GeometryData* gd = mm->getGeometryData(geomDataIndex);
+        return gd->faceNum * 3;
+    }
+    else {
+        return NULL;
+    }
+}
 float* SE_Mesh::getWireframeVertex(const SE_Vector3f& cameraZ)
 {
     if(mWireFrameVertex)
@@ -125,6 +202,8 @@ float* SE_Mesh::getDrawingVertex(VERTEX_TYPE type)
 {
     if(mCurrVertexType != type)
     {
+        if(mCurrVertexType != INVALID)
+            SE_ASSERT(0);
         delete[] mDrawingVertex;
         mDrawingVertex = NULL;
     }
@@ -141,41 +220,21 @@ float* SE_Mesh::getDrawingVertex(VERTEX_TYPE type)
             if(!gd->texVertexArray)
                 return NULL;
             int faceNum = gd->faceNum;
-            int i = 0;
-            std::list<FaceData> visibileFaceList;
-            //debug
-            for(i = 0 ; i < faceNum ; i++)
-            {
-                SE_Face f = gd->faceArray[i];
-                SE_Face fuv = gd->texFaceArray[i];
-                SE_Vector3f v0 = gd->vertexArray[f.v0];
-                SE_Vector3f v1 = gd->vertexArray[f.v1];
-                SE_Vector3f v2 = gd->vertexArray[f.v2];
-                //if(v0.x <= -8.9801 || v1.x <= -8.9801 || v2.x <= -8.9801)
-                {
-                    FaceData fd;
-                    fd.f = f;
-                    fd.fuv = fuv;
-                    visibileFaceList.push_back(fd);
-                }
-            }
-            faceNum = visibileFaceList.size();
-            std::list<FaceData>::iterator itFace;
-            //end
+            assert(faceNum == gd->texFaceNum);
+            /*
             int vertexNum = faceNum * 3;
             int floatSize = vertexNum * 5;
             //_VertexXYZ_UV* data = new _VertexXYZ_UV[vertexNum];
             float* data = new float[floatSize];
-            i = 0;
+            //i = 0;
             int j = 0;
-            //for(int i = 0; i < faceNum ; i++)
-            for(itFace = visibileFaceList.begin() ; itFace != visibileFaceList.end() ; itFace++)
+            for(int i = 0; i < faceNum ; i++)
+            //for(itFace = visibileFaceList.begin() ; itFace != visibileFaceList.end() ; itFace++)
             {
-                //SE_Face f = gd->faceArray[i];
-                SE_Face f = itFace->f;
-                SE_Face fuv = itFace->fuv;
-                //fuv = gd->texFaceArray[i];
-                //i++;
+                SE_Face f = gd->faceArray[i];
+                //SE_Face f = itFace->f;
+                //SE_Face fuv = itFace->fuv;
+                SE_Face fuv = gd->texFaceArray[i];
                 data[j++] = gd->vertexArray[f.v0].x;
                 data[j++] = gd->vertexArray[f.v0].y;
                 data[j++] = gd->vertexArray[f.v0].z;
@@ -200,6 +259,12 @@ float* SE_Mesh::getDrawingVertex(VERTEX_TYPE type)
             mDrawingVertexNum = vertexNum;
             mCurrVertexType = type;
             mFloatSize = floatSize;
+            return mDrawingVertex;
+             */
+            mDrawingVertex = (float*)gd->vertexBufferArray;
+            mDrawingVertexNum = gd->vertexBufferNum;
+            mCurrVertexType = type;
+            mFloatSize = mDrawingVertexNum * 5;
             return mDrawingVertex;
         }
         break;
@@ -320,6 +385,8 @@ static const short SHADER_ID = 0x0007;
 static const short REFERENCE_BOX_ID = 0x0008;
 static const short TRACK_POINT_ID = 0x0009;
 static const short LOOKING_POINT_ID = 0x0010;
+static const short LOOKING_POINT_TRACK_ID = 0x0011;
+
 static const int MAGIC = 0xCFCFCFCF;
 static const int VERSION = 0x01;
 static const int COORDINATE = 0x00;
@@ -464,6 +531,8 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
             int texVertexNum = readInt(data, &startPos);
             int texVertexNum2 = readInt(data, &startPos);
             int colorNum = readInt(data, &startPos);
+            int vertexBufferNum = readInt(data, &startPos);
+            int vertexBufferFaceNum = readInt(data, &startPos);
             
 			SE_Face* faceArray = NULL;
 			SE_Vector3f* vertexArray = NULL;
@@ -479,6 +548,7 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
             LOGI("... tex vertex num = %d\n", texVertexNum);
             LOGI("... tex vertex2 num = %d\n", texVertexNum2);
             LOGI("... color num = %d\n", colorNum);
+            LOGI("... vertex buffer num = %d \n", vertexBufferNum);
             SE_GeometryData* gd = &mGeometryDataArray[currGeomObj++];
             gd->type = type;
             faceArray = new SE_Face[faceNum];
@@ -602,11 +672,28 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
                     }
                 }
             }
+            SE_Vertex_XYZUV* vertexBuffer = new SE_Vertex_XYZUV[vertexBufferNum];
+            unsigned short* vertexBufferFace = new unsigned short[faceNum * 3];
+            for(int i = 0 ; i < vertexBufferNum ; i++)
+            {
+                vertexBuffer[i].x = readFloat(data, &startPos);
+                vertexBuffer[i].y = readFloat(data, &startPos);
+                vertexBuffer[i].z = readFloat(data, &startPos);
+                vertexBuffer[i].u = readFloat(data, &startPos);
+                vertexBuffer[i].v = readFloat(data, &startPos);
+            }
+            for(int i = 0 ; i < faceNum * 3  ; i++)
+            {
+                vertexBufferFace[i] = (unsigned short)readInt(data, &startPos);
+            }
             gd->setVertexes(vertexArray, vertexNum, SE_GeometryData::SE_NOCOPY);
             gd->setTexVertexes(texVertexArray, texVertexNum, SE_GeometryData::SE_NOCOPY);
             gd->setFaces(faceArray, faceNum, SE_GeometryData::SE_NOCOPY);
             gd->setTexFaces(texFaceArray, faceNum , SE_GeometryData::SE_NOCOPY);
             gd->setColors(colorArray, colorNum, SE_GeometryData::SE_NOCOPY);
+            gd->vertexBufferNum = vertexBufferNum;
+            gd->vertexBufferArray = vertexBuffer;
+            gd->vertexBufferFaceArray = vertexBufferFace;
         }
         else if(currChunckId == MESH_ID)
         {
@@ -736,6 +823,30 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
                 mLookingPointList.push_back(SE_LookingPoint(name, SE_Vector3f(x, y , z)));
             }
         }
+        else if(currChunckId == LOOKING_POINT_TRACK_ID)
+        {
+            int lookingPointTrackDataNum = readInt(data, &startPos);
+            LOGI("## looking point track num = %d ##\n", lookingPointTrackDataNum);
+            mLookingPointTrackList.resize(lookingPointTrackDataNum);
+            for(int i = 0 ; i < lookingPointTrackDataNum; i++)
+            {
+                std::string name = readString(data, &startPos);
+                mLookingPointTrackList[i].name = name;
+                int size = readInt(data, &startPos);
+                mLookingPointTrackList[i].lookingPointTrackDataList.resize(size);
+                for(int j = 0 ; j < size; j++)
+                {
+                    int percent = readInt(data, &startPos);
+                    std::string lookpointname = readString(data, &startPos);
+                    int side = readInt(data, &startPos);
+                    int frameNum = readInt(data, &startPos);
+                    mLookingPointTrackList[i].lookingPointTrackDataList[j].percent = percent;
+                    mLookingPointTrackList[i].lookingPointTrackDataList[j].side = side;
+                    mLookingPointTrackList[i].lookingPointTrackDataList[j].lookpointname = lookpointname;
+                    mLookingPointTrackList[i].lookingPointTrackDataList[j].frameNum = frameNum;
+                }
+            }
+        }
     }
     
     SE_ASSERT(startPos == dataLen);
@@ -765,7 +876,21 @@ SE_Mesh* SS_ModelManager::getMesh(const char* meshName)
     }
     return NULL;
 }
-
+int SS_ModelManager::getFullTextureCount()
+{
+    TextureList::iterator it;
+    int count = 0;
+    for(it = mTextureList.begin() ; it != mTextureList.end() ; it++)
+    {
+        std::string name = it->first;
+        std::size_t pos = name.find("_full");
+        if(pos != std::string::npos)
+        {
+            count++;
+        }
+    }
+    return count;
+}
 SE_Texture* SS_ModelManager::getTexture(const char* texturename)
 {
     return mTextureList[texturename];
@@ -783,9 +908,20 @@ void SS_ModelManager::removeTexture(const char* texturename)
     if(it != mTextureList.end())
     {
         delete it->second;
+        LOGI("## remove texture %s #\n", texturename);
         mTextureList.erase(it);
     }
-    
+}
+void SS_ModelManager::removeAllTexture()
+{
+    TextureList::iterator it;
+    for(it = mTextureList.begin() ; it != mTextureList.end(); it++)
+    {
+        std::string name = it->first;
+        LOGI("## texture name = %s ##\n", name.c_str());
+        delete  it->second;
+    }
+    mTextureList.clear();
 }
 int SS_ModelManager::getMeshNum()
 {
@@ -805,6 +941,14 @@ SS_Shader* SS_ModelManager::getShader(const char* shaderName)
     }
     return NULL;
 }
+void SS_ModelManager::removeAllShaderFromGL()
+{
+    for(size_t i = 0 ; i < mShaderArray.size() ; i++)
+    {
+        SS_Shader* s = mShaderArray[i];
+        s->removeFromGL();
+    }
+}
 SE_GeometryData* SS_ModelManager::getGeometryData(int index)
 {
     return &mGeometryDataArray[index];
@@ -816,6 +960,17 @@ SE_Material* SS_ModelManager::getMaterial(int index)
 size_t SS_ModelManager::getGeometryDataNum()
 {
     return mGeometryDataArray.size();
+}
+std::vector<std::string> SS_ModelManager::getAllTrackPointsName()
+{
+    std::vector<std::string> ret(mTrackPointData.trackPointList.size());
+    std::vector<SE_TrackPointList>::iterator it;
+    int i = 0;
+    for(it = mTrackPointData.trackPointList.begin() ; it != mTrackPointData.trackPointList.end();it++)
+    {
+        ret[i++] = it->name;
+    }
+    return ret;
 }
 std::vector<SE_TrackPoint> SS_ModelManager::getTrackPoints(const char* name)
 {
@@ -843,7 +998,8 @@ SE_Vector3f SS_ModelManager::getTrackPoint(int x, int y, int z, const SE_Vector3
     float ystep = yspan / mTrackPointData.ylen;
     float zstep = zspan / mTrackPointData.zlen;
     //SE_Vector3f start(mReferenceBoxMin.x, mReferenceBoxMax.y, mReferenceBoxMax.z);
-    return SE_Vector3f(start.x + (x - 1) * xstep + 0.5 * xstep, start.y - 0.5 * ystep - (y - 1) * ystep, start.z - 0.5 * zstep - (z - 1) * zstep);
+    //return SE_Vector3f(start.x + (x - 1) * xstep + 0.5 * xstep, start.y - 0.5 * ystep - (y - 1) * ystep, start.z - 0.5 * zstep - (z - 1) * zstep);
+    return SE_Vector3f(start.x + (x - 1) * xstep, start.y - y * ystep, start.z - z * zstep);
 }
 SE_Vector3f SS_ModelManager::getFrameLookingPoint(const char* name)
 {
@@ -856,4 +1012,36 @@ SE_Vector3f SS_ModelManager::getFrameLookingPoint(const char* name)
             return it->point;
     }
     return SE_Vector3f();
+}
+SE_LookingPointTrackData SS_ModelManager::getLookingPointTrackData(const std::string& name, int index)
+{
+    for(int i = 0 ; i < mLookingPointTrackList.size() ; i++)
+    {
+        if(mLookingPointTrackList[i].name == name)
+        {
+            return mLookingPointTrackList[i].lookingPointTrackDataList[index];
+        }
+    }
+    return SE_LookingPointTrackData();
+}
+std::vector<SE_LookingPointTrackData> SS_ModelManager::getLookingPointTrackDataList(const std::string& name)
+{
+    std::vector<SE_LookingPointTrackData> ret;
+    for(int i = 0 ; i < mLookingPointTrackList.size() ; i++)
+    {
+        if(mLookingPointTrackList[i].name == name)
+            return mLookingPointTrackList[i].lookingPointTrackDataList;
+    }
+    return ret;
+}
+int SS_ModelManager::getLookingPointTrackDataNum(const std::string& name)
+{
+    for(int i = 0 ; i < mLookingPointTrackList.size() ; i++)
+    {
+        if(mLookingPointTrackList[i].name == name)
+        {
+            return mLookingPointTrackList[i].lookingPointTrackDataList.size();
+        }
+    }
+    return 0;
 }

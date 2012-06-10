@@ -22,13 +22,13 @@
     SEUIScrollView* mScrollView;
     UIButton* mAddButton;
     UIButton* mDeleteButton;
+    UIButton* mCompleteButton;
     SEViewNavigator* mViewNav;
     NSString* mCurrentSignatureName;
     NSString* mSavedSignatureName;
     UIPopoverController* mPopup;
     SESignaturePopupViewController* mSigViewController;
     SEResLoader* mResLoader;
-    //SEUIImageView* mCurrentSelectedSignatureImageView;
     int mCurrentSeq;
     int mSignatureImageWidth;
     int mSignatureImageHeight;

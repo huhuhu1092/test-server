@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>1</key>
+	<string>Impatfont_002_1.png</string>
+	<key>0</key>
+	<string>Impatfont_002_0.png</string>
+	<key>2</key>
+	<string>Impatfont_002_2.png</string>
+	<key>3</key>
+	<string>Impatfont_002_3.png</string>
+	<key>4</key>
+	<string>Impatfont_002_4.png</string>
+	<key>5</key>
+	<string>Impatfont_002_5.png</string>
+	<key>6</key>
+	<string>Impatfont_002_6.png</string>
+	<key>7</key>
+	<string>Impatfont_002_7.png</string>
+	<key>8</key>
+	<string>Impatfont_002_8.png</string>
+	<key>9</key>
+	<string>Impatfont_002_9.png</string>
+	<key>[</key>
+	<string>Impatfont_002_[.png</string>
+	<key>]</key>
+	<string>Impatfont_002_].png</string>
+	<key>am</key>
+	<string>Impatfont_002_am.png</string>
+	<key>Monday</key>
+	<string>Impatfont_002_monday.png</string>
+	<key>Tuesday</key>
+	<string>Impatfont_002_tuesday.png</string>
+	<key>Wednesday</key>
+	<string>Impatfont_002_wednesday.png</string>
+	<key>Thursday</key>
+	<string>Impatfont_002_thursday.png</string>
+	<key>Friday</key>
+	<string>Impatfont_002_friday.png</string>
+	<key>Saturday</key>
+	<string>Impatfont_002_saturday.png</string>
+	<key>Sunday</key>
+	<string>Impatfont_002_sunday.png</string>
+	<key>:</key>
+	<string>Impatfont_002_pp.png</string>
+	<key>/</key>
+	<string>Impatfont_002_xt.png</string>
+</dict>
+</plist>

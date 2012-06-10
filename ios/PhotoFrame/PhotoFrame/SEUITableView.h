@@ -44,7 +44,9 @@
 - (void) setTouchBeganTarget: (id) obj withAction: (SEL)action;
 - (void) setTouchMoveTarget: (id) obj withAction:(SEL) action;
 - (void) setTouchEndTarget: (id) obj withAction:(SEL)action;
-- (void) saveGesture;
-- (void) restoreGesture;
-- (void) removeAllGestures;
+- (void) enableAllGestures;
+//- (void) restoreGesture;
+- (void) disableAllGestures;
+- (void) handleInMid;
+- (void) handleOnEdge;
 @end

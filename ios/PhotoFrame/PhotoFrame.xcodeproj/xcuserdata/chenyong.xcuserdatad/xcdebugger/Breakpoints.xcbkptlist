@@ -22,7 +22,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/PainterManager.m"
+         filePath = "../TestImageView/TestImageView/PainterManager.m"
          timestampString = "341557494.523631"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -36,7 +36,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/SSImageLoader.m"
+         filePath = "../TestImageView/TestImageView/SSImageLoader.m"
          timestampString = "341895985.946279"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -76,7 +76,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/SSImageLoader.m"
+         filePath = "../TestImageView/TestImageView/SSImageLoader.m"
          timestampString = "341895985.946279"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -116,7 +116,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/SSImageLoader.m"
+         filePath = "../TestImageView/TestImageView/SSImageLoader.m"
          timestampString = "341895985.946279"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -130,7 +130,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/SSImageLoader.m"
+         filePath = "../TestImageView/TestImageView/SSImageLoader.m"
          timestampString = "341895985.946279"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -170,7 +170,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/TestImageView/TestImageView/SSImageLoader.m"
+         filePath = "../TestImageView/TestImageView/SSImageLoader.m"
          timestampString = "341895985.946279"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
@@ -218,20 +218,6 @@
          endingLineNumber = "205"
          landmarkName = "-setCurrentPPM:"
          landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "0"
-         filePath = "/Users/chenyong/Programs/streamserver_git/test-server/android/PaintBrush/repaint.cpp"
-         timestampString = "342778791.546063"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "994"
-         endingLineNumber = "994"
-         landmarkName = "repaint (ppm_t *p, ppm_t *a)"
-         landmarkType = "7">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
@@ -294,20 +280,6 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "1"
-         filePath = "PhotoFrame/SS_Scene.cpp"
-         timestampString = "347008256.246967"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1249"
-         endingLineNumber = "1249"
-         landmarkName = "SE_Scene::render(SS_Shader* shader, int index, const SE_Matrix4f&amp; worldM)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         isPathRelative = "1"
          filePath = "PhotoFrame/PhotoFrameAppDelegate.m"
          timestampString = "350317060.978179"
          startingColumnNumber = "9223372036854775807"
@@ -318,59 +290,190 @@
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "PhotoFrame/PHImageView.m"
+         timestampString = "356248942.704391"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "39"
+         endingLineNumber = "39"
+         landmarkName = "-drawRect:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          isPathRelative = "1"
-         filePath = "PhotoFrame/SEMainDisplay.mm"
-         timestampString = "351481469.649998"
+         filePath = "PhotoFrame/SE_Model.cpp"
+         timestampString = "360490804.470564"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "53"
-         endingLineNumber = "53"
-         landmarkName = "-addImageRect:withBlock:"
+         startingLineNumber = "786"
+         endingLineNumber = "786"
+         landmarkName = "SS_ModelManager::process(const char* data, int currPos, int dataLen)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "PhotoFrame/SS_Scene.cpp"
+         timestampString = "360659538.281344"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1052"
+         endingLineNumber = "1052"
+         landmarkName = "SE_Scene::renderScene()"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "PhotoFrame/SEUtil.mm"
+         timestampString = "359001538.413563"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "198"
+         endingLineNumber = "198"
+         landmarkName = "+getImageFromPhotoLib:withAssetLib:fitSize:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "PhotoFrame/SEPageScrollView.mm"
+         timestampString = "360655063.231924"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1127"
+         endingLineNumber = "1127"
+         landmarkName = "-getImageSizeSumInDict"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "PhotoFrame/SESignatureView.mm"
-         timestampString = "352737209.389229"
+         filePath = "PhotoFrame/SEUtil.mm"
+         timestampString = "359001538.413563"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "248"
-         endingLineNumber = "248"
-         landmarkName = "-realAdd:"
+         startingLineNumber = "283"
+         endingLineNumber = "283"
+         landmarkName = "+fastScale:withRect:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "PhotoFrame/SESignatureView.mm"
-         timestampString = "352737209.389229"
+         filePath = "PhotoFrame/SEImageAsyncLoader.m"
+         timestampString = "358495231.737897"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "435"
-         endingLineNumber = "435"
-         landmarkName = "-alertView:clickedButtonAtIndex:"
+         startingLineNumber = "31"
+         endingLineNumber = "31"
+         landmarkName = "-loadImageHandle:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         isPathRelative = "1"
-         filePath = "PhotoFrame/SESignatureView.mm"
-         timestampString = "352737209.389229"
+         filePath = "../streamserver_git/test-server/android/PaintBrush/gimpressionist.c"
+         timestampString = "358495378.939787"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "140"
-         endingLineNumber = "140"
-         landmarkName = "-savePoints:"
+         startingLineNumber = "237"
+         endingLineNumber = "237"
+         landmarkName = "createBackground()"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SEImageAsyncLoader.m"
+         timestampString = "358504608.679198"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "94"
+         endingLineNumber = "94"
+         landmarkName = "-getFullRepresentationWithThread:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SEImageShareManager.mm"
+         timestampString = "358840811.50664"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "196"
+         endingLineNumber = "196"
+         landmarkName = "-shareWithWeiboClient"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SS_Scene.cpp"
+         timestampString = "360659538.281344"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1521"
+         endingLineNumber = "1521"
+         landmarkName = "SE_Scene::renderObject(DisplayObject* obj, const SE_Matrix4f&amp; worldM)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SEViewNavigator.mm"
+         timestampString = "360654819.451207"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "3892"
+         endingLineNumber = "3892"
+         landmarkName = "-writeDataToFile"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SE_Model.cpp"
+         timestampString = "360490804.470564"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "292"
+         endingLineNumber = "292"
+         landmarkName = "SE_Mesh::getDrawingVertex(VERTEX_TYPE type)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "PhotoFrame/SEViewNavigator.mm"
+         timestampString = "360654819.451207"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "3556"
+         endingLineNumber = "3556"
+         landmarkName = "-saveImageToCoreData:urlName:urlDate:index:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

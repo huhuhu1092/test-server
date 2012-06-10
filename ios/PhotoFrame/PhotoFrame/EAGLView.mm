@@ -197,7 +197,7 @@ static void checkGLError()
     CGPoint loc = [[touches anyObject] locationInView:self];
     CGPoint prevLoc = [[touches anyObject] previousLocationInView:self];
     NSLog(@"delta = %f", loc.y - prevLoc.y);
-    scene->moveCamera(loc.x - prevLoc.x, loc.y - prevLoc.y);
+    //scene->moveCamera(loc.x - prevLoc.x, loc.y - prevLoc.y);
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {

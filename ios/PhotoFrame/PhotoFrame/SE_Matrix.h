@@ -1,6 +1,8 @@
 #ifndef SE_MATRIX_H
 #define SE_MATRIX_H
 #include "SE_Vector.h"
+#include <string.h>
+class SE_Quat;
 class SE_Matrix2f
 {
 public:
@@ -29,13 +31,13 @@ public:
     float det() const;
     bool hasInverse() const
     {
-	    return det() != 0;
+        return det() != 0;
     }
     bool operator ==(const SE_Matrix2f& right) const;
-	bool operator !=(const SE_Matrix2f& right) const
-	{
-		return !this->operator==(right);
-	}
+    bool operator !=(const SE_Matrix2f& right) const
+    {
+        return !this->operator==(right);
+    }
 private:
     union
     {
@@ -60,6 +62,7 @@ public:
     SE_Matrix3f mul(const SE_Matrix3f& rm) const;
     SE_Matrix3f add(const SE_Matrix3f& rm) const;
     float get(int row, int column) const;
+    SE_Vector3f getScale();
     void set(int row, int column, float f)
     {
         d[row * 3 + column] = f;
@@ -88,13 +91,16 @@ public:
     void setRotateFromAxis(float angle, const SE_Vector3f& axis);
     bool hasInverse() const
     {
-	    return det() != 0;
+        return det() != 0;
     }
-	bool operator ==(const SE_Matrix3f& right) const;
-	bool operator !=(const SE_Matrix3f& right) const
-	{
-		return !this->operator==(right);
-	}
+
+    SE_Quat toQuat();
+
+    bool operator ==(const SE_Matrix3f& right) const;
+    bool operator !=(const SE_Matrix3f& right) const
+    {
+        return !this->operator==(right);
+    }
 private:
     union
     {
@@ -111,7 +117,7 @@ private:
 class SE_Matrix4f
 {
 public:
-	enum  {COL_SEQUENCE, ROW_SEQUENCE};
+    enum  {COL_SEQUENCE, ROW_SEQUENCE};
     static const SE_Matrix4f IDENTITY;
     SE_Matrix4f();
     SE_Matrix4f(float d[16], int sequence = ROW_SEQUENCE);
@@ -153,7 +159,7 @@ public:
     SE_Vector3f getTranslate() const;
     bool hasInverse() const
     {
-	    return det() != 0;
+        return det() != 0;
     }
     float get(int row, int column) const
     {
@@ -161,11 +167,11 @@ public:
     }
     void getColumnSequence(float out[16]) const;
     void getSequence(float* out, int size) const;
-	bool operator ==(const SE_Matrix4f& right) const;
+    bool operator ==(const SE_Matrix4f& right) const;
     bool operator !=(const SE_Matrix4f& right) const
-	{
-		return !this->operator==(right);
-	}
+    {
+        return !this->operator==(right);
+    }
 private:
     union
     {

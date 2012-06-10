@@ -46,9 +46,13 @@
     */
     mViewNavigator = [[SEViewNavigator alloc] initWithResLoader:mResLoader];
     mViewNavigator.managedObjectContext = self.managedObjectContext;
+    mViewNavigator.persistentStoreCoordinator = self.persistentStoreCoordinator;
     mViewNavigator.mViewPortHeight = 768;
     mViewNavigator.mViewPortWidth = 1024;
     [mViewNavigator initData];
+    UIScreen* screen = [UIScreen mainScreen];
+    CGRect frame = [screen applicationFrame];
+    CGFloat scale= [screen scale];
     /*
     SEUIImagePickerController* mImagePicker = [[SEUIImagePickerController alloc] init];
     

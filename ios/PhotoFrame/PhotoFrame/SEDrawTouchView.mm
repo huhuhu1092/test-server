@@ -120,15 +120,17 @@
     [background drawInRect:rect];
     if(pointArrayList == nil)
         return;
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(context);
     for(NSMutableArray* points in pointArrayList)
     {
         [[UIColor blackColor] set];
-        CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextSetLineWidth(context, lineWidth);
+        CGContextSetLineCap(context, kCGLineCapRound);
         if(points.count < 2)
         {
             CGPoint pt = POINT(0);
-            CGContextFillRect(context, CGRectMake(pt.x - lineWidth / 2, pt.y - lineWidth / 2, lineWidth, lineWidth));
+            CGContextFillEllipseInRect(context, CGRectMake(pt.x - lineWidth / 2, pt.y - lineWidth / 2, lineWidth, lineWidth));
             //CGContextMoveToPoint(context, pt.x, pt.y);
             //CGContextAddLineToPoint(context, pt.x, pt.y);
             //CGContextStrokePath(context);
@@ -146,5 +148,6 @@
             }
         }
     }
+    CGContextRestoreGState(context);
 }
 @end

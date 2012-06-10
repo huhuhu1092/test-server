@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="562" systemVersion="11D50b" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1171" systemVersion="11E53" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="FinishedImage" representedClassName="FinishedImage">
+        <attribute name="data" optional="YES" attributeType="Binary"/>
+        <attribute name="orientation" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="scale" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="thumbnail" optional="YES" attributeType="Binary"/>
+        <attribute name="url" optional="YES" attributeType="String"/>
+        <attribute name="urldate" optional="YES" attributeType="String"/>
+    </entity>
     <entity name="ImageList" representedClassName="ImageList">
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <relationship name="selectedimage" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedImage"/>
+    </entity>
+    <entity name="IssueReport" representedClassName="IssueReport" syncable="YES">
+        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="descript" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="devicename" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="MusicList" representedClassName="MusicList">
         <attribute name="name" optional="YES" attributeType="String"/>
@@ -13,12 +27,18 @@
     </entity>
     <entity name="SelectedImage" representedClassName="SelectedImage">
         <attribute name="filepath" optional="YES" attributeType="String"/>
+        <attribute name="height" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="orientation" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="scale" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="url" optional="YES" attributeType="String"/>
-        <attribute name="urldate" optional="YES" attributeType="Date"/>
+        <attribute name="urldate" optional="YES" attributeType="String"/>
+        <attribute name="urltype" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="width" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
     </entity>
-    <entity name="SelectedMusic">
+    <entity name="SelectedMusic" representedClassName="SelectedMusic">
         <attribute name="album" optional="YES" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="String"/>
         <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="singer" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
@@ -29,6 +49,7 @@
         <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
     </entity>
     <entity name="UserInfo" representedClassName="UserInfo">
+        <attribute name="applaststartdate" optional="YES" attributeType="Date"/>
         <attribute name="currentimagelist" optional="YES" attributeType="String"/>
         <attribute name="currentimagequality" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="currentimagetimes" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
@@ -36,17 +57,36 @@
         <attribute name="currentsignature" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="currentsignaturesite" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="currentsignaturesize" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="drawingmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
+        <attribute name="drawingpoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="exppointnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
+        <attribute name="fansmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
+        <attribute name="fanspoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="finishedcommentnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
+        <attribute name="finishedimagenum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
+        <attribute name="finishedmusicnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
+        <attribute name="lastfinishoneimagetime" optional="YES" attributeType="Date"/>
+        <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="1"/>
+        <attribute name="newpersonmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
+        <attribute name="newpersonpoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="presentondutymedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
+        <attribute name="presentondutypoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="shareimagenum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
+        <attribute name="sharemedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
+        <attribute name="sharepoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <relationship name="imagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
+        <relationship name="issuereport" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IssueReport" syncable="YES"/>
         <relationship name="musiclist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MusicList"/>
         <relationship name="signaturelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Signature"/>
     </entity>
     <elements>
+        <element name="FinishedImage" positionX="160" positionY="192" width="128" height="135"/>
         <element name="ImageList" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="IssueReport" positionX="160" positionY="192" width="128" height="105"/>
         <element name="MusicList" positionX="160" positionY="192" width="128" height="90"/>
-        <element name="SelectedImage" positionX="160" positionY="192" width="128" height="90"/>
-        <element name="SelectedMusic" positionX="160" positionY="192" width="128" height="105"/>
+        <element name="SelectedImage" positionX="160" positionY="192" width="128" height="180"/>
+        <element name="SelectedMusic" positionX="160" positionY="192" width="128" height="120"/>
         <element name="Signature" positionX="160" positionY="192" width="128" height="75"/>
-        <element name="UserInfo" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="UserInfo" positionX="160" positionY="192" width="128" height="465"/>
     </elements>
 </model>

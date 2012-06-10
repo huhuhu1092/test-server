@@ -2,6 +2,7 @@
 #define SE_GEOMETRYDATA_H
 #include "SE_Common.h"
 #include "SE_Vector.h"
+#include "SE_Geometry3D.h"
 struct SE_Face
 {
     union
@@ -25,6 +26,11 @@ struct SE_MapChannel
     int numTFaces;
     SE_Face* texFaceArray;
 };
+struct SE_Vertex_XYZUV
+{
+    float x, y, z;
+    float u, v;
+};
 struct SE_GeometryData
 {
     enum SE_GEOM_TYPE {SE_TRIANGLES, SE_TRIANGLE_FANS, SE_TRIANGLE_TRIP, SE_LINES, SE_POINTS};
@@ -43,6 +49,10 @@ struct SE_GeometryData
     SE_Vector3f* colorArray;
     int colorNum;
     
+    SE_Vertex_XYZUV* vertexBufferArray;
+    int vertexBufferNum;
+    unsigned short* vertexBufferFaceArray;
+    
     SE_MapChannel* mapChannelArray;
     int mapChannelNum;
     
@@ -51,6 +61,7 @@ struct SE_GeometryData
     
     SE_Face* texFaceArray2;
     int texFaceNum2;
+    SE_AABB* aabb;
 public:
     SE_GeometryData(bool own = true)
     {
@@ -74,6 +85,11 @@ public:
         texVertexNum2 = 0;
         texFaceArray2 = NULL;
         texFaceNum2 = 0;
+        aabb = NULL;
+        
+        vertexBufferNum = 0;
+        vertexBufferArray = NULL;
+        vertexBufferFaceArray = NULL;
     }
     ~SE_GeometryData();
     SE_GeometryData(SE_GEOM_TYPE type, SE_Vector3f* vertexArray, int vertexNum,
@@ -90,6 +106,7 @@ public:
     void setColors(SE_Vector3f* colorArray, int colorNum , COPY_TYPE copy);
     void clone(SE_GeometryData* outData);
     void release();
+    SE_AABB getAABB();
     static SE_GeometryData createZAlignRect(float width, float height, float z);
 };
 

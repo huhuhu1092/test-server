@@ -10,6 +10,7 @@
 #define SS_Shader_h
 #include "SE_Common.h"
 #include <string>
+#include <map>
 class SS_Shader
 {
 public:
@@ -22,6 +23,7 @@ public:
     {
         return mShaderName;
     }
+    void removeFromGL();
 private:
     void loadShader();
 private:
@@ -30,6 +32,8 @@ private:
     GLuint mProgram;
     char* vertexShaderSrc;
     char* fragmentShaderSrc;
+    std::map<std::string, GLint> attribMap; 
+    std::map<std::string, GLint> uniformMap;
 };
 
 

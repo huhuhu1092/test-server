@@ -92,6 +92,7 @@ void SE_GeometryData::release()
 }
 SE_GeometryData::~SE_GeometryData()
 {
+    delete aabb;
 }
 void SE_GeometryData::clone(SE_GeometryData* outData)
 {
@@ -176,4 +177,13 @@ SE_GeometryData SE_GeometryData::createZAlignRect(float width, float height, flo
     geomData.colorArray[2] = SE_Vector3f(r, g, b);
     geomData.colorArray[3] = SE_Vector3f(r, g, b);
     return geomData;
+}
+SE_AABB SE_GeometryData::getAABB()
+{
+    if(aabb == NULL)
+    {
+        aabb = new SE_AABB;;
+        aabb->createFromPoints(vertexArray, vertexNum);
+    }
+    return *aabb;
 }

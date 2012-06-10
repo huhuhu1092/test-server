@@ -40,7 +40,7 @@ static void checkGLError()
     if(self)
     {
         PainterManager* pm = [PainterManager painterManager];
-        scene = new SE_Scene((SS_ModelManager*)[pm modelManager], size.width, size.height, 10);
+        //scene = new SE_Scene((SS_ModelManager*)[pm modelManager], size.width, size.height, 10);
     }
     return self;
 }
@@ -126,6 +126,7 @@ static void checkGLError()
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
     //return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft) || (interfaceOrientation == UIInterfaceOrientationLandscapeRight);
 }
+
 - (void) drawFrame
 {
     [(EAGLView *)glView setFramebuffer];
@@ -135,18 +136,24 @@ static void checkGLError()
         s.width = glView->framebufferWidth;
         s.height = glView->framebufferHeight;
         scene = [[SS_3DScene alloc] initWithSize:s];
-        char* imageName[] = {"IMG_1839.JPG", "IMG_1840.JPG", "IMG_1841.JPG"};
+        const char* ins[] = {"IMG_1839.JPG", "IMG_1840.JPG", "IMG_1841.JPG"};
+        std::vector<SE_Scene::PictureID> imageName(3);
+        for(int i = 0 ; i < 3 ; i++)
+        {
+            imageName[i].pictureName = ins[i];
+        }
         //scene->scene->create();
         //scene->scene->createPoints();
         scene->scene->create(imageName, 3);
-        scene->scene->createTrackList();
+        //scene->scene->createTrackList();
         [glView setScene:scene->scene];
+        
     }
     checkGLError();
     //scene->scene->render();
     //scene->scene->renderPoints();
-    if(mStartMoveCamera)
-        scene->scene->startCameraMove();
+    //if(mStartMoveCamera)
+    //    scene->scene->startCameraMove();
     scene->scene->renderScene();
     [(EAGLView *)glView presentFramebuffer];
 }
@@ -256,7 +263,7 @@ static void checkGLError()
     if(scene->scene)
     {
         mStartMoveCamera = YES;
-        scene->scene->mTrackPointsIndex++;
+        //scene->scene->mTrackPointsIndex++;
     }
 }
 @end

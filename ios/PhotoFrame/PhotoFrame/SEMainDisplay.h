@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "SEProtocalDefine.h"
+#import "SEFixedView.h"
 @class SEResLoader;
 @class PHImageView;
+@class SEFontLoader;
 enum TOOLBAR_BUTTON_TYPE {PLAY_PAUSE, MUSIC_SELECT, IMAGE_SELECT, OPTION, PREVIEW, MUSIC_IMAGE_LIST, INVALID_TOOLBAR_BUTTON, TOOLBAR_BUTTON_NUM};
 @interface SEMainDisplayToolBarView : UIImageView 
 {
@@ -37,12 +39,18 @@ enum TOOLBAR_BUTTON_TYPE {PLAY_PAUSE, MUSIC_SELECT, IMAGE_SELECT, OPTION, PREVIE
 @interface SEDateTimeView : UIView 
 {
     UIImage* mDataImage;
-    SEResLoader* mResLoader;
+    SEFontLoader* mFontLoader;
     NSMutableArray* mImageRectArray;
+    SEResLoader* mResLoader;
+    UIImage* mTimeBgImage;
+    int mFontStyle;
+    NSTimer* mTimeTimer;
+    BOOL mDisplayMidPoint;
 }
-- (id) initWithFrame:(CGRect)frame withResLoader:(SEResLoader*) resLoader;
+@property (nonatomic, assign) int mFontStyle;
+@property (nonatomic, assign) SEResLoader* mResLoader;
 @end
-@interface SEMainDisplay : UIView <SEAdjustContentView>
+@interface SEMainDisplay : SEFixedView
 {
     PHImageView* mMainDispalyImageView;
     SEMainDisplayToolBarView* mToolBarView;
@@ -56,4 +64,5 @@ enum TOOLBAR_BUTTON_TYPE {PLAY_PAUSE, MUSIC_SELECT, IMAGE_SELECT, OPTION, PREVIE
 - (id) initWithResLoader: (SEResLoader*)resLoader withFrame:(CGRect)frame;
 - (void) loadView;
 - (void)tapHandler: (UITapGestureRecognizer*)tapGes;
+- (void)updateTime;
 @end

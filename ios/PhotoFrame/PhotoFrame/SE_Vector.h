@@ -1,28 +1,12 @@
 #ifndef SE_VECTOR_H
 #define SE_VECTOR_H
 #include "SE_Math.h"
-class SE_Vector2i
-{
-public:
-	SE_Vector2i()
-	{
-		x = 0;
-		y = 0;
-	}
-	SE_Vector2i(int x, int y)
-	{
-		this->x = x;
-		this->y = y;
-	}
-    int x;
-    int y;
-};
 class SE_Vector2f
 {
 public:
     SE_Vector2f()
     {
-	    x = y = 0.0f;
+        x = y = 0.0f;
     }
     SE_Vector2f(float x, float y)
     {
@@ -55,62 +39,62 @@ public:
     }
     inline float dot(const SE_Vector2f& rv) const
     {
-	    return x * rv.x + y * rv.y;
+        return x * rv.x + y * rv.y;
     }
     inline SE_Vector2f subtract(const SE_Vector2f& rv) const
     {
-	    return SE_Vector2f(x - rv.x, y - rv.y);
+        return SE_Vector2f(x - rv.x, y - rv.y);
     }
     inline SE_Vector2f add(const SE_Vector2f& rv) const
     {
-	    return SE_Vector2f(x + rv.x , y + rv.y);
+        return SE_Vector2f(x + rv.x , y + rv.y);
     }
     inline float length() const
     {
-	    return SE_Sqrtf(dot(*this));
+        return SE_Sqrtf(dot(*this));
     }
     inline SE_Vector2f normalize() const
     {
-	    float len = length();
+        float len = length();
         return SE_Vector2f(x / len, y / len);
     }
     inline bool isZero() const
     {
-	    return x == 0.0f && y == 0.0f;
+        return x == 0.0f && y == 0.0f;
     }
     inline void setZero()
     {
-	    x = 0;
-	    y = 0;
+        x = 0;
+        y = 0;
     }
     inline SE_Vector2f neg() const
     {
-	    return SE_Vector2f(-x, -y);
+        return SE_Vector2f(-x, -y);
     }
     inline void set(float x, float y)
     {
-	    this->x = x;
-	    this->y = y;
+        this->x = x;
+        this->y = y;
     }
     inline float operator[](int i)
     {
-	    return d[i];
+        return d[i];
     }
     inline float lengthSquare() const
     {
-	    return x * x + y * y;
+        return x * x + y * y;
     }
     friend SE_Vector2f operator+(const SE_Vector2f& lv, const SE_Vector2f& rv)
     {
-	    return lv.add(rv);
+        return lv.add(rv);
     }
     friend SE_Vector2f operator-(const SE_Vector2f& lv, const SE_Vector2f& rv)
     {
-	    return lv.subtract(rv);
+        return lv.subtract(rv);
     }
     friend SE_Vector2f operator*(const SE_Vector2f& v, float d)
     {
-	    return v.mul(d);
+        return v.mul(d);
     }
     friend bool operator==(const SE_Vector2f& v1, const SE_Vector2f& v2)
     {
@@ -122,83 +106,6 @@ public:
         return true;
 
     }
-	friend bool operator !=(const SE_Vector2f& v1, const SE_Vector2f& v2)
-	{
-        for(int i = 0 ; i < 2 ; i++)
-        {
-            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-                return true;
-        }
-        return false;
-	}
-	friend bool operator<(const SE_Vector2f& v1, const SE_Vector2f& v2)
-	{
-		if(v1.d[0] <= v2.d[0])
-		{
-		    if(v1.d[0] < v2.d[0])
-				return true;
-			else
-			{
-				if(v1.d[1] < v2.d[1])
-					return true;
-				else
-				    return false;
-			}
-		}
-		else 
-			return false;
-	}
-	friend bool operator>(const SE_Vector2f& v1, const SE_Vector2f& v2)
-	{
-		if(v1.d[0] >= v2.d[0])
-		{
-			if(v1.d[0] > v2.d[0])
-				return true;
-			else 
-			{
-				if(v1.d[1] > v2.d[1])
-				    return true;
-				else
-					return false;
-			}
-		}
-		else
-			return false;
-	}
-	friend bool operator <=(const SE_Vector2f& v1, const SE_Vector2f& v2)
-	{
-		if(v1.d[0] <= v2.d[0])
-		{
-			if(v1.d[0]  < v2.d[0])
-				return true;
-			else
-			{
-				if(v1.d[1] < v2.d[1])
-					return true;
-				else
-					return false;
-			}
-		}
-		else
-			return false;
-	}
-	friend bool operator >=(const SE_Vector2f& v1, const SE_Vector2f& v2)
-	{
-		if(v1.d[0] >= v2.d[0])
-		{
-			if(v1.d[0]  > v2.d[0])
-				return true;
-			else
-			{
-				if(v1.d[1] > v2.d[1])
-					return true;
-				else
-					return false;
-			}
-		}
-		else
-			return false;
-	}
     union
     {
         float d[2];
@@ -213,13 +120,13 @@ class SE_Vector3f
 public:
     SE_Vector3f()
     {
-	    x = y = z = 0.0f;
+        x = y = z = 0.0f;
     }
     SE_Vector3f(float x, float y, float z)
     {
-	    this->x = x;
-	    this->y = y;
-	    this->z = z;
+        this->x = x;
+        this->y = y;
+        this->z = z;
     }
     SE_Vector3f(const SE_Vector2f& v, float z)
     {
@@ -229,24 +136,24 @@ public:
     }
     SE_Vector3f(float d[3])
     {
-	    x = d[0];
-	    y = d[1];
-	    z = d[2];
+        x = d[0];
+        y = d[1];
+        z = d[2];
     }
     SE_Vector3f(const SE_Vector3f& rv)
     {
-	    x = rv.x;
-	    y = rv.y;
-	    z = rv.z;
+        x = rv.x;
+        y = rv.y;
+        z = rv.z;
     }
     SE_Vector3f& operator=(const SE_Vector3f& rv)
     {
-	    if(this == &rv)
-	        return *this;
+        if(this == &rv)
+            return *this;
         x = rv.x;
-	    y = rv.y;
-	    z = rv.z;
-	    return *this;
+        y = rv.y;
+        z = rv.z;
+        return *this;
     }
     friend bool operator==(const SE_Vector3f& v1, const SE_Vector3f& v2)
     {
@@ -258,116 +165,23 @@ public:
         return true;
 
     }
-    friend bool operator!=(const SE_Vector3f& v1, const SE_Vector3f& v2)
-    {
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-                return true;
-        }
-        return false;
 
-    }
-	friend bool operator>=(const SE_Vector3f& v1, const SE_Vector3f& v2)
-	{
-		int n = 0;
-		for(int i = 0 ; i < 3 ; i++)
-		{
-			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-			{
-				n = i;
-				break;
-			}
-		}
-		if(n < 3)
-		{
-			if(v1.d[n] > v2.d[n])
-				return true;
-			else
-				return false;
-		}
-		else
-			return true;
-	}
-	friend bool operator<=(const SE_Vector3f& v1, const SE_Vector3f& v2)
-	{
-		int n = 0;
-		for(int i = 0 ; i < 3 ; i++)
-		{
-			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-			{
-				n = i;
-				break;
-			}
-		}
-		if(n < 3)
-		{
-			if(v1.d[n] < v2.d[n])
-				return true;
-			else
-				return false;
-		}
-		else
-			return true;
-	}
-	friend bool operator>(const SE_Vector3f& v1, const SE_Vector3f& v2)
-	{
-		int n = 0;
-		for(int i = 0 ; i < 3 ; i++)
-		{
-			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-			{
-				n = i;
-				break;
-			}
-		}
-		if(n < 3)
-		{
-			if(v1.d[n] > v2.d[n])
-				return true;
-			else
-				return false;
-		}
-		else
-			return false;
-	}
-	friend bool operator<(const SE_Vector3f& v1, const SE_Vector3f& v2)
-	{
-		int n = 0;
-		for(int i = 0 ; i < 3 ; i++)
-		{
-			if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-			{
-				n = i;
-				break;
-			}
-		}
-		if(n < 3)
-		{
-			if(v1.d[n] < v2.d[n])
-				return true;
-			else
-				return false;
-		}
-		else
-			return false;
-	}
     inline float operator[](int i)
     {
-	    return d[i];
+        return d[i];
     }
 
     inline float dot(const SE_Vector3f& rv) const
     {
-	    return x * rv.x + y * rv.y + z * rv.z;
+        return x * rv.x + y * rv.y + z * rv.z;
     }
     inline SE_Vector3f cross(const SE_Vector3f& rv) const
     {
-	    return SE_Vector3f(y * rv.z - z * rv.y, z * rv.x - x * rv.z, x * rv.y - y * rv.x);
+        return SE_Vector3f(y * rv.z - z * rv.y, z * rv.x - x * rv.z, x * rv.y - y * rv.x);
     }
     inline SE_Vector3f mul(float f) const
     {
-	    return SE_Vector3f(x * f, y * f, z * f);
+        return SE_Vector3f(x * f, y * f, z * f);
     }
     inline SE_Vector3f mul(const SE_Vector3f& v) const
     {
@@ -375,36 +189,36 @@ public:
     }
     inline SE_Vector3f subtract(const SE_Vector3f& rv) const
     {
-	    return SE_Vector3f(x - rv.x, y - rv.y, z - rv.z);
+        return SE_Vector3f(x - rv.x, y - rv.y, z - rv.z);
     }
     inline SE_Vector3f add(const SE_Vector3f& rv) const
     {
-	    return SE_Vector3f(x + rv.x, y + rv.y , z + rv.z);
+        return SE_Vector3f(x + rv.x, y + rv.y , z + rv.z);
     }
     inline SE_Vector3f neg() const
     {
-	    return SE_Vector3f(-x, -y, -z);
+        return SE_Vector3f(-x, -y, -z);
     }
     inline SE_Vector3f normalize() const
     {
-	    float len = length();
-	    return SE_Vector3f(x / len, y / len, z / len);
+        float len = length();
+        return SE_Vector3f(x / len, y / len, z / len);
     }
     inline float length() const
     {
-    	return SE_Sqrtf(x * x + y * y + z * z);
+        return SE_Sqrtf(x * x + y * y + z * z);
     }
     inline float lengthSquare() const
     {
-	    return x * x + y * y + z * z;
+        return x * x + y * y + z * z;
     }
     inline bool isZero() const
     {
-	    return x == 0.0f && y == 0.0f && z == 0.0f;
+        return x == 0.0f && y == 0.0f && z == 0.0f;
     }
     inline void setZero()
     {
-	    x = y = z = 0;
+        x = y = z = 0;
     }
     inline void set(float x, float y, float z)
     {
@@ -427,46 +241,47 @@ public:
     }
     inline SE_Vector2f xy() const
     {
-	    return SE_Vector2f(x, y);
+        return SE_Vector2f(x, y);
     }
     inline SE_Vector2f xz() const
     {
-	    return SE_Vector2f(x, z);
+        return SE_Vector2f(x, z);
     }
     inline SE_Vector2f yz() const
     {
-	    return SE_Vector2f(y, z);
+        return SE_Vector2f(y, z);
     }
     inline SE_Vector2f yx() const
     {
-	    return SE_Vector2f(y, x);
+        return SE_Vector2f(y, x);
     }
     inline SE_Vector2f zx() const
     {
-	    return SE_Vector2f(z, x);
+        return SE_Vector2f(z, x);
     }
     friend SE_Vector3f operator+(const SE_Vector3f& lv, const SE_Vector3f& rv)
     {
-	    return lv.add(rv);
+        return lv.add(rv);
     }
     friend SE_Vector3f operator-(const SE_Vector3f& lv, const SE_Vector3f& rv)
     {
-	    return lv.subtract(rv);
+        return lv.subtract(rv);
     }
     friend SE_Vector3f operator*(const SE_Vector3f& v, float d)
     {
-	    return v.mul(d);
+        return v.mul(d);
     }
     friend float scalerTripleProduct(const SE_Vector3f& u, const SE_Vector3f& v, const SE_Vector3f& w)
     {
-	    SE_Vector3f tmp = v.cross(w);
-	    return u.dot(tmp);
+        SE_Vector3f tmp = v.cross(w);
+        return u.dot(tmp);
     }
-    friend float radianBetweenVector(const SE_Vector3f& u, const SE_Vector3f& v)
+    friend float radianBetweenVector(const SE_Vector3f& v1 , const SE_Vector3f& v2)
     {
-        float dot = u.dot(v);
-        float cosvalue = dot / (u.length() * v.length());
-        return SE_ACosf(cosvalue);
+        float dot = v1.dot(v2);
+        float len1 = v1.length();
+        float len2= v2.length();
+        return SE_Acosf(dot / (len1 * len2));
     }
     union
     {
@@ -483,7 +298,7 @@ class SE_Vector4f
 public:
     SE_Vector4f()
     {
-	    x = y = z = w = 0;
+        x = y = z = w = 0;
     }
     SE_Vector4f(float x, float y, float z, float w)
     {
@@ -533,16 +348,7 @@ public:
         return true;
 
     }
-    friend bool operator!=(const SE_Vector4f& v1, const SE_Vector4f& v2)
-    {
-        for(int i = 0 ; i < 4 ; i++)
-        {
-            if(SE_Fabs(v1.d[i] - v2.d[i]) > SE_VEC_EQUAL_EPSILON)
-                return true;
-        }
-        return false;
 
-    }
     SE_Vector3f xyz() const
     {
         return SE_Vector3f(x, y, z);
@@ -561,11 +367,11 @@ public:
     }
     bool isZero() const
     {
-	    return x == 0 && y == 0 && z == 0 && w == 0;
+        return x == 0 && y == 0 && z == 0 && w == 0;
     }
     void setZero()
     {
-	    x = y = z = w = 0;
+        x = y = z = w = 0;
     }
     void set(float x, float y, float z, float w)
     {
@@ -576,60 +382,60 @@ public:
     }
     SE_Vector4f add(const SE_Vector4f& rv) const
     {
-	    return SE_Vector4f(x + rv.x, y + rv.y , z + rv.z, w + rv.w);
+        return SE_Vector4f(x + rv.x, y + rv.y , z + rv.z, w + rv.w);
     }
     SE_Vector4f mul(float f) const
     {
-	    return SE_Vector4f(x * f, y * f, z * f, w * f);
+        return SE_Vector4f(x * f, y * f, z * f, w * f);
     }
     SE_Vector4f subtract(const SE_Vector4f& rv) const
     {
-	    return SE_Vector4f(x - rv.x, y - rv.y, z - rv.z, w - rv.w);
+        return SE_Vector4f(x - rv.x, y - rv.y, z - rv.z, w - rv.w);
     }
     float length() const
     {
-	    return SE_Sqrtf(x * x + y * y + z * z + w * w);
+        return SE_Sqrtf(x * x + y * y + z * z + w * w);
     }
     inline float lengthSquare() const
     {
-	    return x * x + y * y + z * z + w * w;
+        return x * x + y * y + z * z + w * w;
     }
     float dot(const SE_Vector4f& rv) const
     {
-	    return x * rv.x + y * rv.y + z * rv.z + w * rv.w;
+        return x * rv.x + y * rv.y + z * rv.z + w * rv.w;
     }
     void set(const SE_Vector3f& v, float w)
     {
-	    x = v.x;
-	    y = v.y;
-	    z = v.z;
-	    this->w = w;
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        this->w = w;
     }
     float distance(const SE_Vector4f& rv) const
     {
-	    SE_Vector4f dir = subtract(rv);
-	    return dir.length();
+        SE_Vector4f dir = subtract(rv);
+        return dir.length();
     }
     SE_Vector4f normalize() const
     {
-	    float len = length();
-	    return SE_Vector4f(x / len, y / len , z / len, w / len);
+        float len = length();
+        return SE_Vector4f(x / len, y / len , z / len, w / len);
     }
     float operator[](int i)
     {
-	    return d[i];
+        return d[i];
     }
     friend SE_Vector4f operator+(const SE_Vector4f& lv, const SE_Vector4f& rv)
     {
-	    return lv.add(rv);
+        return lv.add(rv);
     }
     friend SE_Vector4f operator-(const SE_Vector4f& lv, const SE_Vector4f& rv)
     {
-	    return lv.subtract(rv);
+        return lv.subtract(rv);
     }
     friend SE_Vector4f operator*(const SE_Vector4f& v, float f)
     {
-	    return v.mul(f);
+        return v.mul(f);
     }
     union
     {
@@ -670,102 +476,7 @@ public:
         return true;
 
     }
-    friend bool operator!=(const SE_Vector3i& v1, const SE_Vector3i& v2)
-    {
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(v1.d[i] == v2.d[i])
-                return false;
-        }
-        return true;
 
-    }
-    friend bool operator<(const SE_Vector3i& v1, const SE_Vector3i& v2)
-	{
-		int n = 0;
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(v1.d[i] != v2.d[i])
-			{
-                n = i;
-				break;
-			}
-        }
-		if(n == 3)
-			return false;
-		else
-		{
-			if(v1.d[n] < v2.d[n])
-				return true;
-			else
-				return false;
-		}
-
-	}
-    friend bool operator>(const SE_Vector3i& v1, const SE_Vector3i& v2)
-	{
-		int n = 0;
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(v1.d[i] != v2.d[i])
-			{
-                n = i;
-				break;
-			}
-        }
-		if(n == 3)
-			return false;
-		else
-		{
-			if(v1.d[n] > v2.d[n])
-				return true;
-			else
-				return false;
-		}
-	}
-	friend bool operator<=(const SE_Vector3i& v1, const SE_Vector3i& v2)
-	{
-		int n = 0;
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(v1.d[i] != v2.d[i])
-			{
-                n = i;
-				break;
-			}
-        }
-		if(n == 3)
-			return true;
-		else
-		{
-			if(v1.d[n] < v2.d[n])
-				return true;
-			else
-				return false;
-		}
-	}
-    friend bool operator>=(const SE_Vector3i& v1, const SE_Vector3i& v2)
-	{
-		int n = 0;
-        for(int i = 0 ; i < 3 ; i++)
-        {
-            if(v1.d[i] != v2.d[i])
-			{
-                n = i;
-				break;
-			}
-        }
-		if(n == 3)
-			return true;
-		else
-		{
-			if(v1.d[n] > v2.d[n])
-				return true;
-			else
-				return false;
-		}
-
-	}
 public:
     union
     {

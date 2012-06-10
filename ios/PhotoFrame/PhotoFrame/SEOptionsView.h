@@ -8,18 +8,49 @@
 
 #import <UIKit/UIKit.h>
 #import "SEProtocalDefine.h"
+#import "SEFixedView.h"
 @class SEViewNavigator;
 @class SEResLoader;
 @class SEOptionLeftLabel;
-enum OPTION_LEFT_BAR_TYPE {MAIN_SETTING, USER_INFO, INVALID_LEFT_BAR_VIEW, OPTION_LEFT_BAR_NUM};
-///////
-@interface SEOptionsRightViewCreator : NSObject 
+enum OPTION_LEFT_BAR_TYPE {MAIN_SETTING, USER_INFO, ISSUE_REPORT, INVALID_LEFT_BAR_VIEW, OPTION_LEFT_BAR_NUM};
+//////////////////
+@interface SEOptionsRightViewController : NSObject
 {
-
+    SEViewNavigator* mViewNav;
 }
-- (NSArray*) createViews :(UIView*) parent withResLoader: (SEResLoader*) resLoader;
+@property (nonatomic, assign) SEViewNavigator* mViewNav;
+- (void) addViewsToParent: (UIView*) parent;
+- (void) removeViewsFromParent;
+- (void) createViews: (NSString*) nibName frame: (CGRect) frame;
 @end
-@interface SEOptionsMainSettingCreator : SEOptionsRightViewCreator 
+/////////
+@interface SEIssueReportController : SEOptionsRightViewController<SEIssueReportDelegate>
+{
+    IBOutlet UITextField* title;
+    IBOutlet UILabel* titleStatic;
+    IBOutlet UILabel* descriptionStatic;
+    IBOutlet UITextView* description;
+    IBOutlet UIButton* sendButton;
+    IBOutlet UILabel* outputLabel;
+    NSMutableData* mRecvData;
+}
+@property (nonatomic, retain) IBOutlet UILabel* outputLabel;
+@property (nonatomic, retain) IBOutlet UILabel* titleStatic;
+@property (nonatomic, retain) IBOutlet UILabel* descriptionStatic;
+@property (nonatomic, retain) IBOutlet UIButton* sendButton;
+@property (nonatomic, retain) IBOutlet UITextField* title;
+@property (nonatomic, retain) IBOutlet UITextView* description;
+- (IBAction)sendAction :(id)sender;
+@end
+///////
+@interface SEOptionsUserUpgradeInfoController : SEOptionsRightViewController
+{
+@private
+    UIScrollView* mUserInfoScrollView;
+}
+@end
+///////
+@interface SEOptionsMainSettingController : SEOptionsRightViewController
 {
 @private
     IBOutlet UILabel* mQualityLabel;
@@ -30,11 +61,13 @@ enum OPTION_LEFT_BAR_TYPE {MAIN_SETTING, USER_INFO, INVALID_LEFT_BAR_VIEW, OPTIO
     IBOutlet UISlider* mQualitySlider;
     IBOutlet UISlider* mTimesSlider;
     IBOutlet UIButton* mSignature;
-    SEResLoader* mResLoader;
-    SEViewNavigator* mViewNav;
+    IBOutlet UIImageView* mImageBackground;
+    IBOutlet UIButton* mChangeConfig;
+    IBOutlet UILabel* mDownloadIndicate;
 }
-@property (nonatomic, assign) SEViewNavigator* mViewNav;
-@property (nonatomic, assign) SEResLoader* mResLoader;
+@property (nonatomic, retain) IBOutlet UILabel* mDownloadIndicate;
+@property (nonatomic, retain) IBOutlet UIButton* mChangeConfig;
+@property (nonatomic, retain) IBOutlet UIImageView* mImageBackground;
 @property (nonatomic, retain) IBOutlet UILabel* mQualityLabel;
 @property (nonatomic, retain) IBOutlet UILabel* mTimesLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* mSampleView;
@@ -46,25 +79,24 @@ enum OPTION_LEFT_BAR_TYPE {MAIN_SETTING, USER_INFO, INVALID_LEFT_BAR_VIEW, OPTIO
 - (IBAction)qualitySliderHandler:(UISlider*)sender;
 - (IBAction)timesSliderHandler:(UISlider*)sender;
 - (IBAction)signatureButtonHandler:(id)sender;
+- (IBAction)changeConfigHandler:(id)sender;
 - (void) setSampleImageWithQuality:(int)percent withResLoader:(SEResLoader*)resLoader;
+
 @end
 //////////////
 //////////
-@interface SEOptionsView : UIView <SEAdjustContentView>
+@interface SEOptionsView : SEFixedView
 {
     SEOptionLeftLabel* mLeftViewBars[OPTION_LEFT_BAR_NUM];
-    NSArray* mRightViews[OPTION_LEFT_BAR_NUM]; // right views is an arrary of view arrays
+    SEOptionsRightViewController* mRightViewController[OPTION_LEFT_BAR_NUM]; // right views
     SEViewNavigator* mViewNav;
     SEResLoader* mResLoader;
-    NSArray* mRightViewsCreator;
     float mLeftVMargin;
     OPTION_LEFT_BAR_TYPE mCurrentLeftBar;
-    UIImage* mBackground;
+    UIImage* mRightBackground;
+    UIImage* mLeftBackground;
 }
 - (id) initWithFrame:(CGRect)frame byViewNav: (SEViewNavigator*)viewNav withResLoader: (SEResLoader*)resLoader;
 - (void) initData;
-//barStrings is the left bar's string array, we will use them to create left label bar
-- (void) initLeftView: (NSArray*)barStrings withRightViewCreator: (NSArray*)rightViewCreator;
-- (void) setCurrentLeftBar: (OPTION_LEFT_BAR_TYPE) barType;
-
+- (void) setCurrentBarView: (OPTION_LEFT_BAR_TYPE) barType;
 @end

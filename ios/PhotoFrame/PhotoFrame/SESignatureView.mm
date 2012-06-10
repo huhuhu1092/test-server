@@ -16,11 +16,13 @@
 #import "SESignaturePopupViewController.h"
 #import "Signature.h"
 enum ALERT_TYPE {FOR_ADD, FOR_CHANGE};
+/*
 struct SignaturePointData
 {
     CGFloat lineWidth;
     NSMutableArray* points;
 };
+ */
 ///////
 static int convertInt(int num)
 {
@@ -33,14 +35,15 @@ static int convertInt(int num)
 - (void) removeHandler: (id)sender;
 - (void) initScrollView;
 - (void) savePoints : (NSNumber*)seq;
-- (Signature*) getSignature: (NSNumber*)seq;
+//- (Signature*) getSignature: (NSNumber*)seq;
 - (void)initSignature;
-- (SignaturePointData) getSignaturePoints:(NSNumber*)seq;
+//- (SignaturePointData) getSignaturePoints:(NSNumber*)seq;
 - (BOOL) isSignaturePointsEqual:(NSMutableArray*)src : (NSMutableArray*)dst;
 - (void) popupAlertViewForSave;
 - (void) setSignature: (NSNumber*)seq;
 - (void) setCurrentSelectedSignatureImageView;
--(SignaturePointData)getSignaturePointsWithSeqName: (NSString*)name;
+- (void) setCurrentSignatureSeq;
+//-(SignaturePointData)getSignaturePointsWithSeqName: (NSString*)name;
 @end
 /////////////////////////
 @interface SEUISignatureScrollViewDelegate : NSObject <SEUIPhotoLoaderDelegate>
@@ -82,7 +85,7 @@ static int convertInt(int num)
     {
         NSString* str = [filePath absoluteString];
         int seq = [str intValue];
-        SignaturePointData sd = [mSignatureView getSignaturePointsWithSeqName:str];
+        SignaturePointData sd = [mSignatureView.mViewNav getSignaturePointsWithSeqName:str];
         UIImage* background = nil;
         if(seq == mSignatureView.mCurrentSeq)
             background = mSignatureView.mSelectedSignatureImage;
@@ -99,13 +102,6 @@ static int convertInt(int num)
             CGImageRef imageRef = [SEUtil copyImageRef:[background CGImage]];
             return imageRef;
         }
-        /*
-        UIImage* uiImage = [UIImage imageNamed:str];
-        uiImage = [SEUtil cropUIImage:uiImage withRect:CGSizeMake(mScrollView.mPhotoWidth, mScrollView.mPhotoHeight)];
-        CGImageRef image = [uiImage CGImage];
-        CGImageRetain(image);
-         */
-        
     }
     else
         return NULL;
@@ -119,6 +115,7 @@ static int convertInt(int num)
 /////////////////////////
 
 @implementation SESignatureView (Private)
+/*
 - (Signature*) getSignature: (NSNumber*)seq
 {
     UserInfo* userInfo = [mViewNav getUserInfo];
@@ -134,6 +131,12 @@ static int convertInt(int num)
         }
     }
     return nil;
+}
+ */
+- (void) setCurrentSignatureSeq
+{
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    userInfo.currentsignature = [NSNumber numberWithInt:mCurrentSeq];
 }
 - (void) savePoints : (NSNumber*)seq;
 {
@@ -176,7 +179,7 @@ static int convertInt(int num)
     [output close];
     NSData* nsdata = [NSData dataWithBytes:data length:size];
     free(data);
-    Signature* sig = [self getSignature:seq];
+    Signature* sig = [mViewNav getSignature:seq];
     sig.data = nsdata;
     [mViewNav saveContext];
 }
@@ -272,8 +275,9 @@ static int convertInt(int num)
     //[userInfo addSignaturelistObject:object];
     NSMutableSet* signatureSet = (NSMutableSet*)userInfo.signaturelist;
     [signatureSet addObject:object];
-    [mViewNav saveContext];
+    [mViewNav saveCoreDataContext];
     [self dismissPopup];
+    mCurrentSeq = [maxseq intValue];
     
     CGRect r = mScrollView.frame;
     [mScrollView removeFromSuperview];
@@ -309,12 +313,21 @@ static int convertInt(int num)
         NSArray* dstArray = [dst objectAtIndex:i];
         if(srcArray.count != dstArray.count)
             return NO;
+        for(int j = 0 ; j < srcArray.count ; j++)
+        {
+            NSValue* v1 = [srcArray objectAtIndex:j];
+            NSValue* v2 = [dstArray objectAtIndex:j];
+            CGPoint p1 = [v1 CGPointValue];
+            CGPoint p2 = [v2 CGPointValue];
+            if(p1.x != p2.x || p1.y != p2.y)
+                return NO;
+        }
     }
     return YES;
 }
 - (void) setSignature: (NSNumber*)seq
 {
-    SignaturePointData sd = [self getSignaturePoints:seq];
+    SignaturePointData sd = [mViewNav getSignaturePoints:seq];
     if(sd.points && sd.points.count > 0)
     {
         [mDrawView setLineWidth:sd.lineWidth];
@@ -334,10 +347,30 @@ static int convertInt(int num)
     [alert release];
 
 }
+- (void) deleteButtonHandler: (id)sender
+{
+    
+}
+- (void) completeButtonHandler: (id)sender
+{
+    [self savePoints:[NSNumber numberWithInt: mCurrentSeq]];
+    NSArray* points = [mDrawView getAllNormalizedPoints];
+    if(points.count > 0)
+    {
+        CGRect r = mScrollView.frame;
+        [mScrollView removeFromSuperview];
+        mScrollView = [[SEUIScrollView alloc] init];
+        mScrollView.frame = r;
+        [self initScrollView];
+        [self addSubview:mScrollView];
+    }
+    [self setCurrentSignatureSeq];
+    [mViewNav saveCoreDataContext];
+}
 - (void) addButtonHandler:(id)sender
 {
     NSMutableArray* currPoints = [mDrawView getAllNormalizedPoints];
-    SignaturePointData sd = [self getSignaturePoints:[NSNumber numberWithInt:mCurrentSeq]];
+    SignaturePointData sd = [mViewNav getSignaturePoints:[NSNumber numberWithInt:mCurrentSeq]];
     if(![self isSignaturePointsEqual:currPoints :sd.points])
     {
         mAlertType = FOR_ADD;
@@ -352,7 +385,10 @@ static int convertInt(int num)
 - (void) setButtonHandler
 {
     [mAddButton addTarget:self action:@selector(addButtonHandler:) forControlEvents:UIControlEventTouchUpInside];
+    [mDeleteButton addTarget:self  action:@selector(deleteButtonHandler:) forControlEvents:UIControlEventTouchUpInside];
+    [mCompleteButton addTarget:self action:@selector(completeButtonHandler:) forControlEvents:UIControlEventTouchUpInside];
 }
+/*
 - (SignaturePointData) getSignaturePointsWithSeqName:(NSString*)name
 {
     UserInfo* userInfo = [mViewNav getUserInfo];
@@ -421,7 +457,7 @@ static int convertInt(int num)
         return sd;
     
 }
-
+*/
 - (void) initSignature
 {
     UserInfo* userInfo = [mViewNav getUserInfo];
@@ -497,7 +533,7 @@ static int convertInt(int num)
         mCurrentPoint = p;
         mAlertType = FOR_CHANGE;
         NSMutableArray* currPoint = [mDrawView getAllNormalizedPoints];
-        SignaturePointData sd = [self getSignaturePoints:[NSNumber numberWithInt:mCurrentSeq]];
+        SignaturePointData sd = [mViewNav getSignaturePoints:[NSNumber numberWithInt:mCurrentSeq]];
         if(![self isSignaturePointsEqual:currPoint :sd.points])
         {
             [self popupAlertViewForSave];
@@ -513,8 +549,8 @@ static int convertInt(int num)
             [self setSignature:[NSNumber numberWithInt:mCurrentSeq]];
             [mScrollView updateImage:prevIndex];
             [mScrollView updateImage:mCurrentSeq];
-            
-            //[mScrollView relayout];
+            [self setCurrentSignatureSeq];
+            [mViewNav saveCoreDataContext];
         }
     }
     
@@ -535,6 +571,7 @@ static int convertInt(int num)
     self.userInteractionEnabled = YES;
     mAddButton = (UIButton*)[self viewWithTag:103];
     mDeleteButton = (UIButton*)[self viewWithTag:104];
+    mCompleteButton = (UIButton*)[self viewWithTag:105];
     [self setButtonHandler];
     [self initSignature];
     [self initScrollView];

@@ -9,17 +9,7 @@
 #include "SS_Shader.h"
 #include "SS_OpenGL.h"
 #include "PGMDataReader.h"
-static void checkGLError()
-{
-	/*
-     GLenum error = glGetError();
-     if(error != GL_NO_ERROR)
-     {
-     LOGI("### gl error = %d ####\n", error);
-     SE_ASSERT(0);
-     }
-     */
-}
+
 static GLint loadShader(GLenum type, const char* shaderSrc)
 {
     GLuint shader;
@@ -60,6 +50,7 @@ SS_Shader::SS_Shader(const char* shadername, char* vertexShaderSrc, char* fragme
 {
     mShaderName = shadername;
     mInited = false;
+    mProgram = 0;
     this->vertexShaderSrc = vertexShaderSrc;
     this->fragmentShaderSrc = fragmentShaderSrc;
 }
@@ -127,6 +118,16 @@ void SS_Shader::loadShader()
     mProgram = programObject;
     mInited = true;
 }
+void SS_Shader::removeFromGL()
+{
+    LOGI("## remove shader name = %s ###\n", mShaderName.c_str());
+    if(mInited)
+    {
+        glDeleteProgram(mProgram);
+    }
+    mInited = false;
+    mProgram = 0;
+}
 void SS_Shader::use()
 {
     if(!mInited)
@@ -134,12 +135,35 @@ void SS_Shader::use()
         loadShader();
     }
     glUseProgram(mProgram);
+    checkGLError();
 }
 GLint SS_Shader::getAttribLocation(const char* locName)
 {
-    return glGetAttribLocation(mProgram, locName);
+    std::map<std::string, GLint>::iterator it = attribMap.find(locName);
+    if(it != attribMap.end())
+    {
+        return it->second;
+    }
+    GLint ret = glGetAttribLocation(mProgram, locName);
+    checkGLError();
+    if(ret != -1)
+    {
+        attribMap[locName] = ret;
+    }
+    return ret;
 }
 GLint SS_Shader::getUniformLocation(const char* uniName)
 {
-    return glGetUniformLocation(mProgram, uniName);
+    std::map<std::string, GLint>::iterator it = uniformMap.find(uniName);
+    if(it != uniformMap.end())
+    {
+        return it->second;
+    }
+    GLint ret = glGetUniformLocation(mProgram, uniName);
+    checkGLError();
+    if(ret != -1)
+    {
+        uniformMap[uniName] = ret;
+    }
+    return ret;
 }

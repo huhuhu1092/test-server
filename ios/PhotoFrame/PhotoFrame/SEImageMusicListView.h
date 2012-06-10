@@ -12,6 +12,8 @@
 @class SEResLoader;
 @class SEMusicImageListView;
 @class SEMusicImageListPopup;
+@class ImageList;
+@class MusicList;
 @protocol SEHandleIndicatorTouch <NSObject>
 - (void) touchBegan: (CGPoint) p;
 - (void) touchMove: (CGPoint) p;
@@ -30,7 +32,7 @@
 @property (nonatomic, assign) SEResLoader* mResLoader;
 @property (nonatomic, assign) SEMusicImageListView* mTouchHandler;
 @end
-@interface SEImageListTableView : UITableView <UITableViewDelegate, UITableViewDataSource>
+@interface SEImageListTableView : UITableView <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
 {
     SEViewNavigator* mViewNav;
     SEResLoader* mResLoader;
@@ -43,8 +45,14 @@
 @property (nonatomic, assign) SEResLoader* mResLoader;
 @property (nonatomic, retain) NSArray* mImageListPropertyArray;
 @property (nonatomic, assign) SEViewNavigator* mViewNav;
+- (void) dehighlightImageCell: (NSIndexPath*)indexPath;
+- (void) deselectImageList: (ImageList*)imageList;
+- (void) selectImageCell: (NSIndexPath*)indexPath;
+- (UIImageView*) tableViewCellBackground: (NSIndexPath*)indexPath;
+- (void) deselectImageCell: (NSIndexPath*)indexPath;
+- (void) highlightCell: (NSIndexPath*)indexPath;
 @end
-@interface SEMusicListTableView : UITableView <UITableViewDelegate, UITableViewDataSource>
+@interface SEMusicListTableView : UITableView <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
 {
     SEViewNavigator* mViewNav;
     SEResLoader* mResLoader;
@@ -56,6 +64,11 @@
 @property (nonatomic, assign) SEResLoader* mResLoader;
 @property (nonatomic, retain) NSArray* mMusicListPropertyArray;
 @property (nonatomic, assign) SEViewNavigator* mViewNav;
+- (void) deselectPrevRow : (UITableView*)tableView;
+
+- (void) selectMusicCellForImageList: (ImageList*)imageList;
+- (void) deselectMusicCellForImageList: (ImageList*)imageList;
+- (void) deselectHighlightedCell;
 @end
 @interface SEMusicImageListView : SEFixedView <UIAlertViewDelegate>
 {
@@ -67,13 +80,19 @@
 @private
     SEResLoader* mResLoader;
     CGPoint mOrig;
-    UIView* mLineView;
+    UIImageView* mLineView;
     UIImageView* mBackgroundView;
     UIButton* mAddMusicListButton;
     UIButton* mAddImageListButton;
     UIButton* mRemoveButton;
     UIImage* mMusicListBackground;
     UIImage* mImageListBackground;
+    CGPoint mImageIndicatorCenter;
+    CGPoint mMusicIndicatorCenter;
+    CGPoint mImageIndicatorPointInCell;
+    CGPoint mMusicIndicatorPointInCell;
+    CGFloat mImageCellHeight;
+    CGFloat mMusicCellHeight;
     //for running state begin
     int mAlertType;
     UIPopoverController* mPopup;
@@ -86,6 +105,7 @@
     
     int mEndIndicatorRow;
     int mEndIndicatorTable;
+    NSMutableArray* mLineViewArray;
     /// for running  state end
 }
 @property (nonatomic, readonly) SEMusicListTableView* mMusicListTableView;
@@ -98,5 +118,4 @@
 - (void) touchBegan: (CGPoint) p;
 - (void) touchMove: (CGPoint) p;
 - (void) touchEnd: (CGPoint)p;
-
 @end

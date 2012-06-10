@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SEProtocalDefine.h"
+#import "SEFixedView.h"
 #import <OpenGLES/EAGL.h>
 
 #import <OpenGLES/ES1/gl.h>
@@ -15,10 +16,11 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 @class EAGLView;
-@class SS_3DScene;
+@class SE_3DScene;
 @class SEResLoader;
-@class SS_3DData;
-@interface SE3DPreview : UIView <SEAdjustContentView>
+@class SE_3DData;
+@class SEViewNavigator;
+@interface SE3DPreview : SEFixedView
 {
 @private
     EAGLContext *context;
@@ -26,15 +28,21 @@
     NSInteger animationFrameInterval;
     CADisplayLink *displayLink;
     BOOL startDraw;
-    SS_3DScene* scene;
+    SE_3DScene* scene;
     BOOL mStartMoveCamera;
     int mViewPortWidth;
     int mViewPortHeight;
     SEResLoader* mResLoader;
-    SS_3DData* data3D;
+    SEViewNavigator* mViewNav;
+    BOOL mStart;
+    NSTimeInterval mPrevTime;
+    //SE_3DData* data3D;
 }
+@property (nonatomic, assign) SEViewNavigator* mViewNav;
 @property (nonatomic, retain) EAGLContext* context;
 @property (nonatomic, assign) int mViewPortWidth;
 @property (nonatomic, assign) int mViewPortHeight;
 @property (nonatomic, assign) SEResLoader* mResLoader;
+- (void)startDraw;
+- (void)initData;
 @end

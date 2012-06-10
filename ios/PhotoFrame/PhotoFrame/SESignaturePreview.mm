@@ -9,6 +9,8 @@
 #import "SESignaturePreview.h"
 #import "SEViewNavigator.h"
 #import "UserInfo.h"
+#import "SEUtil.h"
+#import "SEResDefine.h"
 const NSString* siteString[] = {@"Left Top", @"Left Bottom", @"Right Top", @"Right Bottom"};
 const NSString* sizeString[] = {@"Big", @"Mid", @"Little"};
 #define SITE_PICKER_TAG 102
@@ -38,11 +40,36 @@ const NSString* sizeString[] = {@"Big", @"Mid", @"Little"};
 {
     [mViewNav moveToView:SIGNATURE_SIGNATURE_PREVIEW :SIGNATURE_VIEW hasAnimation:YES isPush:YES];
 }
-- (void)initData
+- (void) updateSignatureImage
 {
     UIImageView* imageView = (UIImageView*)[self viewWithTag:101];
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    NSNumber* sigSeq = userInfo.currentsignature;
+    NSSet* signatureList = userInfo.signaturelist;
+    NSManagedObject* signature = nil;
+    NSEnumerator* sigIt = [signatureList objectEnumerator];
+    while((signature = [sigIt nextObject]) != nil)
+    {
+        NSNumber* seq = [signature valueForKey:@"seq"];
+        if([seq isEqualToNumber:sigSeq])
+        {
+            UIImage* background = [mViewNav.mResLoader getImage:@"SelectedSignatureImage"];
+            UIImage* image = background;
+            SignaturePointData spd = [mViewNav getSignaturePoints:seq];
+            if(spd.points.count > 0)
+            {
+                image = [SEUtil createSignatureInMainThread:background size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height) withLineWidth:8 drawPoints:spd.points];
+            }
+            imageView.image = image;
+        }
+    }
+}
+- (void)initData
+{
+    //UIImageView* imageView = (UIImageView*)[self viewWithTag:101];
     UIButton* changeButton = (UIButton*)[self viewWithTag:104];
     [changeButton addTarget:self action:@selector(handleChange:) forControlEvents:UIControlEventTouchUpInside];
+    /*
     UserInfo* userInfo = [mViewNav getUserInfo];
     mCurrentSite = [userInfo.currentsignaturesite intValue];
     mCurrentSize = [userInfo.currentsignaturesize intValue];
@@ -55,11 +82,18 @@ const NSString* sizeString[] = {@"Big", @"Mid", @"Little"};
         NSNumber* seq = [signature valueForKey:@"seq"];
         if([seq isEqualToNumber:sigSeq])
         {
-            //NSString* name = [signature valueForKey:@"name"];
-            UIImage* image = nil;//[UIImage imageNamed:name];
+            UIImage* background = [mViewNav.mResLoader getImage:@"SelectedSignatureImage"];
+            UIImage* image = background;
+            SignaturePointData spd = [mViewNav getSignaturePoints:seq];
+            if(spd.points.count > 0)
+            {
+                image = [SEUtil createSignatureInMainThread:background size:CGSizeMake(imageView.frame.size.width, imageView.frame.size.height) withLineWidth:8 drawPoints:spd.points];
+            }
             imageView.image = image;
         }
     }
+     */
+    [self updateSignatureImage];
     mSiteString = [NSArray arrayWithObjects:siteString count:4];
     mSizeString = [NSArray arrayWithObjects:sizeString count:3];
     [mSiteString retain];
@@ -121,5 +155,8 @@ const NSString* sizeString[] = {@"Big", @"Mid", @"Little"};
     }
     
 }
-
+- (void) update
+{
+    [self updateSignatureImage];
+}
 @end

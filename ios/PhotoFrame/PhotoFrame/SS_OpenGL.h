@@ -10,10 +10,10 @@
 #define SS_OpenGL_h
 
 #include "SE_Common.h"
-//#include <OpenGLES/ES1/gl.h>
-//#include <OpenGLES/ES1/glext.h>
+#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES1/glext.h>
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 
-
+extern void checkGLError();
 #endif

@@ -10,6 +10,9 @@
 #import "SEResDefine.h"
 #import "PHImageView.h"
 #import "SEUtil.h"
+//////////////
+const static int DATE_TIME_SPACING = 10;
+/////////////////////
 struct ToolBarButtonIcon
 {
     TOOLBAR_BUTTON_TYPE toolBarButtonType;
@@ -23,14 +26,36 @@ ToolBarButtonIcon gToolbarIcons[] = {
     {IMAGE_SELECT, @"ToolBarImageSelectIcon"},
     {MUSIC_IMAGE_LIST, @"ToolBarMusicImageListIcon"}
 };
-static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
+ToolBarButtonIcon gToolbarIconsHighlight[] = {
+    {OPTION, @"ToolBarOptionIconHighlight"},
+    {PLAY_PAUSE, @"ToolBarPlayIconHighlight"},
+    {PREVIEW, @"ToolBarPreviewIconHighlight"},
+    {MUSIC_SELECT, @"ToolBarMusicSelectIconHighlight"}, 
+    {IMAGE_SELECT, @"ToolBarImageSelectIconHighlight"},
+    {MUSIC_IMAGE_LIST, @"ToolBarMusicImageListIconHighlight"}
+};
+// 0: normal
+// 1: highlight
+static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type, int state)
 {
     int count = sizeof(gToolbarIcons)/ sizeof(ToolBarButtonIcon);
-    for(int i = 0 ; i < count ; i++)
+    if(state == 0)
     {
-        if(gToolbarIcons[i].toolBarButtonType == type)
-            return gToolbarIcons[i].iconKey;
+        for(int i = 0 ; i < count ; i++)
+        {
+            if(gToolbarIcons[i].toolBarButtonType == type)
+                return gToolbarIcons[i].iconKey;
+        }
     }
+    else if(state == 1)
+    {
+        for(int i = 0 ; i < count ; i++)
+        {
+            if(gToolbarIconsHighlight[i].toolBarButtonType == type)
+                return gToolbarIconsHighlight[i].iconKey;
+        }        
+    }
+        
     return nil;
 }
 ////////////
@@ -42,7 +67,56 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
 @synthesize block;
 @end
 //////////////
+
+@interface SEDateTimeView (Private) 
+- (id) initWithFrame:(CGRect)frame resLoader: (SEResLoader*)resLoader;
+- (CGRect) calculateDateViewFrame: (CGFloat) bottom;
+@end
+@implementation SEDateTimeView (Private)
+- (CGRect) calculateDateViewFrame: (CGFloat) bottom
+{
+    UIImage* timeBackground = [mResLoader getImage:@"DateTimeViewTimeBackground"];
+    UIImage* dateBackground = [mResLoader getImage:@"DateTimeViewDateBackground"];
+    CGFloat w = timeBackground.size.width ;
+    CGFloat h = dateBackground.size.height + timeBackground.size.height + DATE_TIME_SPACING;
+    CGRect frame = CGRectMake(0, bottom - h, w, h);
+    return frame;
+    //UIImage* amImage = [mFontLoader getImage:@"am" style:FONT_NORMALSTYLE size:FONT_BIG_SIZE];
+    //UIImage* colonImage = [mFontLoader getImage:@":" style:<#(enum FONT_STYLE)#> size:<#(enum FONT_SIZE)#>
+}
+- (void) timerUpdate: (NSTimer*)timer
+{
+    if(mDisplayMidPoint)
+        mDisplayMidPoint = NO;
+    else {
+        mDisplayMidPoint = YES;
+    }
+    [self setNeedsDisplay];
+}
+- (id) initWithFrame:(CGRect)frame resLoader: (SEResLoader*)resLoader
+{
+    self = [super initWithFrame:frame];
+    if(self)
+    {
+        mFontLoader = [[SEFontLoader alloc] init];
+        mResLoader = resLoader;
+        mImageRectArray = [NSMutableArray array];
+        [mImageRectArray retain];
+        mFontStyle = FONT_NORMALSTYLE;
+        frame = [self calculateDateViewFrame: frame.origin.y];
+        self.frame = frame;
+        //mTimeTimer = [[NSTimer timerWithTimeInterval:1 target:self selector:@selector(timerUpdate:) userInfo:nil repeats:YES] retain];
+        mDisplayMidPoint = YES;
+        //[[NSRunLoop currentRunLoop] addTimer:mTimeTimer forMode:NSDefaultRunLoopMode];
+    }
+    return self;
+}
+    
+
+@end
 @implementation SEDateTimeView
+@synthesize mResLoader;
+@synthesize mFontStyle;
 - (void) addImageRect:(SEImageRect*)inputImageRect withBlock: (int) block
 {
     BOOL needAdd = YES;
@@ -149,32 +223,88 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
     }
     CFRelease(srcData);
 }
-- (void) printImageRect
+/////////////////////////////////
+
+- (void) drawString: (NSString*) str style: (enum FONT_STYLE) fontStyle size : (enum FONT_SIZE) fontSize newLine: (BOOL) bNewLine x: (CGFloat*)startx y: (CGFloat*) starty
 {
-    for(SEImageRect* imageRect in mImageRectArray)
+    CGFloat height = 0;
+    for(int i = 0 ; i < str.length ; i++)
     {
-        NSLog(@"image rect starx = %d, starty = %d, endx = %d, endy = %d", imageRect.startx, imageRect.starty, imageRect.endx, imageRect.endy);
-    }
+        NSRange r;
+        r.location = i;
+        r.length = 1;
+        NSString* numStr = [str substringWithRange:r];
+        UIImage* image = [mFontLoader getImage:numStr style:fontStyle size:fontSize];
+        [image drawInRect:CGRectMake(*startx, *starty, image.size.width, image.size.height)];
+        *startx += image.size.width;
+        height = image.size.height;
+    } 
+    if(bNewLine)
+        *starty += height;
 }
-- (id) initWithFrame:(CGRect)frame withResLoader:(SEResLoader*) resLoader
+- (void) drawNumber: (int) num style : (enum FONT_STYLE) fontStyle size : (enum FONT_SIZE) fontSize newLine: (BOOL)bNewLine x : (CGFloat*)startx y : (CGFloat*)starty
 {
-    self = [super initWithFrame:frame];
-    if(self)
+    NSString* str = nil;
+    if(num < 10)
     {
-        mResLoader = resLoader;
-        mImageRectArray = [NSMutableArray array];
-        [mImageRectArray retain];
-        mDataImage = [mResLoader getImage:@"DateTimeDataImage"];
-        [self resolveDateTimeInfo];
-        //debug
-        //[self printImageRect];
-        //end
+        str = [NSString stringWithFormat:@"%d%d" , 0, num];
     }
-    return self;
+    else 
+    {
+        str = [NSString stringWithFormat:@"%d", num];
+    }
+    [self drawString:str style:fontStyle size:fontSize newLine:bNewLine x:startx y:starty];
 }
+
+- (void)drawRect:(CGRect)rect
+{
+    if(mTimeBgImage == nil)
+    {
+        mTimeBgImage = [mResLoader getImage:@"DateTimeViewTimeBackground"];
+    }
+    CGFloat timeBgWidth = mTimeBgImage.size.width;
+    CGFloat timeBgHeight = mTimeBgImage.size.height;
+    [mTimeBgImage drawInRect:CGRectMake(0, 0, timeBgWidth, timeBgHeight)];
+    NSDate* date = [NSDate date];
+    NSCalendar* calendar = [NSCalendar currentCalendar];
+    unsigned unitFlags = NSYearCalendarUnit | NSMonthCalendarUnit |  NSDayCalendarUnit | NSWeekdayCalendarUnit | NSHourCalendarUnit | NSMinuteCalendarUnit;
+    NSDateComponents* dateComponent = [calendar components:unitFlags fromDate:date];
+    int year = [dateComponent year];
+    int month = [dateComponent month];
+    int day = [dateComponent day];
+    int hour = [dateComponent hour];
+    int minute = [dateComponent minute];
+    CGFloat startx = 0;
+    CGFloat starty = 0;
+    static CGFloat midStartX = 0;
+    [self drawNumber: hour style: (enum FONT_STYLE)mFontStyle size : FONT_BIG_SIZE newLine: NO x : &startx y : &starty];
+    if(mDisplayMidPoint)
+    {
+        [self drawString:@":" style:(enum FONT_STYLE)mFontStyle size:FONT_BIG_SIZE newLine: NO x:&startx y:&starty];
+        midStartX = startx;
+    }
+    else 
+    {
+        startx = midStartX;
+    }
+    [self drawNumber: minute style:(enum FONT_STYLE)mFontStyle size:FONT_BIG_SIZE newLine: YES x:&startx y:&starty];
+    startx = 0;
+    starty += DATE_TIME_SPACING;
+    [self drawNumber:year style:(enum FONT_STYLE)mFontStyle size:FONT_NORMAL_SIZE newLine:NO x:&startx y:&starty];
+    [self drawString:@"/" style:(enum FONT_STYLE)mFontStyle size:FONT_NORMAL_SIZE newLine:NO x:&startx y:&starty];
+    [self drawNumber:month style:(enum FONT_STYLE)mFontStyle size:FONT_NORMAL_SIZE newLine:NO x:&startx y:&starty];
+    [self drawString:@"/" style:(enum FONT_STYLE)mFontStyle size:FONT_NORMAL_SIZE newLine:NO x:&startx y:&starty];
+    [self drawNumber:day style:(enum FONT_STYLE)mFontStyle size:FONT_NORMAL_SIZE newLine:NO x:&startx y:&starty];
+}
+
+
 - (void)dealloc
 {
+    [mTimeTimer invalidate];
+    [mTimeTimer release];
     [mImageRectArray release];
+    [mFontLoader release];
+    [mTimeBgImage release];
     [super dealloc];
 }
 @end
@@ -211,12 +341,16 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
         float startx = 0;
         for(int i = 0 ; i < TOOLBAR_BUTTON_NUM ; i++)
         {
-            NSString* iconKey = getIconKey((TOOLBAR_BUTTON_TYPE)i);
+            NSString* iconKey = getIconKey((TOOLBAR_BUTTON_TYPE)i, 0);
             UIImage* icon = [mResLoader getImage:iconKey];
             CGRect frame = CGRectMake(startx, 0, icon.size.width, icon.size.height);
             mButtons[i] = [[UIButton alloc] initWithFrame:frame];
-            //mButtons[i].imageView.image = icon;
             [mButtons[i] setBackgroundImage:icon forState:UIControlStateNormal];
+            
+            iconKey = getIconKey((TOOLBAR_BUTTON_TYPE)i, 1);
+            icon = [mResLoader getImage:iconKey];
+            [mButtons[i] setBackgroundImage:icon forState:UIControlStateHighlighted];
+            
             [mButtons[i] addTarget:self action:@selector(buttonClickHandler:) forControlEvents:UIControlEventTouchUpInside];
             startx += icon.size.width;
             [self addSubview:mButtons[i]];
@@ -269,16 +403,20 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
 }
 - (void) createDateTimeView: (CGRect) frame
 {
-    mDateTimeView = [[SEDateTimeView alloc] initWithFrame:frame withResLoader:mResLoader];
+    mDateTimeView = [[SEDateTimeView alloc] initWithFrame:frame resLoader: mResLoader];
+    mDateTimeView.backgroundColor = [UIColor clearColor];
     [self addSubview:mDateTimeView];
 }
+
 - (void)loadView
 {
     CGRect frame = CGRectMake(0, 0, mFrame.size.width, mFrame.size.height);
     mMainDispalyImageView = [[PHImageView alloc] initWithFrame:frame];
-    mMainDispalyImageView.tag = 101;
+    mMainDispalyImageView.tag = 505;
+    mMainDispalyImageView.backgroundColor = [UIColor redColor];
     mMainDispalyImageView.userInteractionEnabled = YES;
-    mMainDispalyImageView.image = [mResLoader getImage:@"MainDisplayBg"];
+    UIImage* bgImage = [mResLoader getImage:@"MainDisplayBg"];
+    mMainDispalyImageView.image = [SEUtil drawImage:bgImage inRect:frame];
     [self setTapGestureToMainDisplay];
     UIImage* toolBarBg = [mResLoader getImage:@"MainDisplayToolBarBg"];
     CGSize toolBarSize = toolBarBg.size;
@@ -289,7 +427,7 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
     mToolBarView.userInteractionEnabled = YES;
     [self addSubview:mMainDispalyImageView];
     [self addSubview:mToolBarView];
-    [self createDateTimeView:CGRectMake(20, 300, 500, 300)];
+    [self createDateTimeView:CGRectMake(0, frame.origin.y, 500, 300)];
 }
 - (void) dealloc
 {
@@ -332,11 +470,8 @@ static NSString* getIconKey(TOOLBAR_BUTTON_TYPE type)
         }
     }
 }
-- (BOOL) canAdjust
+- (void)updateTime
 {
-    return NO;
+    
 }
-- (void)relayout
-{}
-
 @end

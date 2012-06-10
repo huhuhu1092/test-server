@@ -27,24 +27,31 @@ struct DisplayObjectProperty
     int vertexType;
     char shaderName[256];
     SE_Scene::USAGE usage;
+    int displayObjectID;
 };
+
+#define FAR_DIST 100
+#define NEAR_DIST 70
+#define CAMERA_FAR_DIST 110
+#define CAMERA_FIELD_OF_VIEW 80
+#define CAMERA_RATIO (mScreenHeight / mScreenWidth)
 const static char* worldObjName[] = {"BackWall","WallFrameH_001","FrameH_001","photoH001","WallFrameV_001","FrameV_001","photoV001","thespeedsunPlatform","logo001", "floordown001"};
 static DisplayObjectProperty photoFrameH[] = {
-    {"BackWall", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"WallFrameH_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"FrameH_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"photoH001", SE_Mesh::XYZ_UV1_UV2, "picture_fog_shader", SE_Scene::PICTURE_PLACE}};
+    {"BackWall", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1001}, 
+    {"WallFrameH_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1002}, 
+    {"FrameH_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1003}, 
+    {"photoH001", SE_Mesh::XYZ_UV, "picture_fog_shader", SE_Scene::PICTURE_PLACE, 1004}};
 static DisplayObjectProperty photoFrameV[] = {
-    {"BackWall", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"WallFrameV_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"FrameV_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"photoV001", SE_Mesh::XYZ_UV1_UV2, "picture_fog_shader", SE_Scene::PICTURE_PLACE}};
+    {"BackWall", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1001}, 
+    {"WallFrameV_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1005}, 
+    {"FrameV_001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1006}, 
+    {"photoV001", SE_Mesh::XYZ_UV, "picture_fog_shader", SE_Scene::PICTURE_PLACE, 1007}};
 static DisplayObjectProperty stationObject[] = {
-    {"thespeedsunPlatform", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}, 
-    {"logo001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}};
+    {"thespeedsunPlatform", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1008}, 
+    {"logo001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 1009}};
 
 static DisplayObjectProperty staticObject[] = {
-    {"floordown001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE}
+    {"floordown001", SE_Mesh::XYZ_UV, "fog_shader", SE_Scene::NO_USE, 2000}
 };
 static const char* frameLookingPointName = "lookingPoint_frame";
 #define HAS_PICTURE 0
@@ -53,17 +60,42 @@ static const char* pictureShaderName[]= {"picture_fog_shader", "fog_shader"};
 static int photoFrameHObjectNum = sizeof(photoFrameH) / sizeof(DisplayObjectProperty);
 static int photoFrameVObjectNum = sizeof(photoFrameV) / sizeof(DisplayObjectProperty);
 static int stationObjectNum = sizeof(stationObject) / sizeof(DisplayObjectProperty);
-static void checkGLError()
+/////////
+//photo H Frame
+static float uvArrayH[4][8] = {
+    {0, 0.875, 0, 0.125, 1, 0.125, 1, 0.875}, //0
+    {1, 0.125, 1, 0.875, 0, 0.875, 0, 0.125}, //180
+    {0.875, 1, 0.125, 1, 0.125, 0, 0.875, 0},  //90, ccw
+    {0.125, 0, 0.875, 0, 0.875, 1, 0.125, 1} //90, cw
+    
+};
+//photo V Frame
+static float uvArrayV[4][8] = 
 {
+    {0.125, 0, 0.875, 0, 0.875, 1, 0.125, 1}, //0
+    {0.875, 1, 0.125, 1, 0.125, 0, 0.875, 0}, //180
+    {0, 0.875, 0, 0.125, 1, 0.125, 1, 0.875}, // 90, ccw
+    {1, 0.125, 1, 0.875, 0, 0.875, 0, 0.125} //90, cw
     
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR)
-    {
-        LOGI("### gl error = %d ####\n", error);
-        SE_ASSERT(0);
-    }
-    
-}
+};
+//mirror photo H Frame
+static float mirrorUvArrayH[4][8] = 
+{
+    {1, 0.875, 1, 0.125, 0, 0.125, 0, 0.875}, //0
+    {0, 0.125, 0, 0.875, 1, 0.875, 1, 0.125}, //180
+    {0.875, 0, 0.125, 0, 0.125, 1, 0.875, 1}, //90, ccw
+    {0.125, 1, 0.875, 1, 0.875, 0, 0.125, 0} //90, cw
+};
+//mirror photo V Frame
+static float mirrorUvArrayV[4][8] = 
+{
+    {0.875, 0, 0.125, 0, 0.125, 1, 0.875, 1}, //0
+    {0.125, 1, 0.875, 1, 0.875, 0, 0.125, 0}, //180
+    {0, 0.125, 0, 0.875, 1, 0.875, 1, 0.125}, //90, ccw
+    {1, 0.875, 1, 0.125, 0, 0.125, 0, 0.875}, //90, cw
+};
+/////////
+
 static bool isWorldObj(const char* name)
 {
     int count = sizeof(worldObjName) / sizeof(const char*);
@@ -74,6 +106,7 @@ static bool isWorldObj(const char* name)
     }
     return false;
 }
+/*
 class SE_Scene::SS_Node
 {
 public:
@@ -89,7 +122,73 @@ public:
         cullType = CCW;
     }
 };
+ */
+///
+template <typename T>
+typename std::list<T>::iterator se_list_nref(std::list<T>& data, size_t n)
+{
+    typename std::list<T>::iterator it = data.begin();
+    size_t i = 0;
+    while(it != data.end() && i < n)
+    {
+        it++;
+        i++;
+    }
+    return it;
+}
 ///////
+struct SE_Scene::CameraMoveState
+{
+    float currentTime;
+    bool moveStart;
+    SE_Scene::CurveData currentCurve;
+    float currentCurveTotalTime;
+    std::vector<SE_LookingPointTrackData> currentLookPointTrackList;
+    //set first
+    std::vector<CameraPathProperty> cameraPath;
+    int curvePathIndex;
+    //for curve select
+    bool leaveGroup; // current location is the last location in group, next we will leave this group
+    std::string startLocationName; // current location name: L1, L2, R1, R2
+    std::string endLocationName;
+    bool leftFinished;
+    bool rightFinished;
+    bool bLeavingGroup;
+    CameraMoveState()
+    {
+        currentTime = 0;
+        moveStart = false;
+        currentCurveTotalTime = 0;
+        curvePathIndex = 0;
+        leaveGroup = false;
+        startLocationName = "L1";
+        leftFinished = false;
+        rightFinished = false;
+        bLeavingGroup = false;
+    }
+    bool isLeaveGroup()
+    {
+        return leftFinished && rightFinished;
+    }
+    void checkLeftOrRightFinish()
+    {
+        if(startLocationName == "L1" && endLocationName == "L2")
+        {
+            leftFinished = true;
+        }
+        if(startLocationName == "R1" && endLocationName == "R2")
+        {
+            rightFinished = true;
+        }
+    }
+    void clearLeftRightFinish()
+    {
+        leftFinished = rightFinished = false;
+    }
+    
+};
+/*
+/////////////
 class SE_Scene::Scene
 {
 public:
@@ -97,6 +196,7 @@ public:
     std::list<SE_Scene::SS_Node*> NodesList;
     NodeList nodeList;
 };
+ */
 ////////////////////////////
 static void testInterpolate()
 {
@@ -116,41 +216,72 @@ static void testInterpolate()
         t += 0.1;
     }
 }
-SE_Scene::SE_Scene(SS_ModelManager* modelManager, int w, int h, int sceneCount)
+SE_Scene::SE_Scene(SS_ModelManager* modelManager, void* vn,int w, int h, int sceneCount)
 {
+    mViewNav = vn;
     mCamera = new SE_Camera;
+    mCameraMoveState = new CameraMoveState;
     mScreenWidth = w;
     mScreenHeight = h;
     mModelManager = modelManager;
     mMiniGroupNum = 5;
-    mTrackPointsIndex = -1;
+    //mTrackPointsIndex = -1;
+    mRenderObjectCount = 0;
+    mFogPlaneMesh = NULL;
+    mYLength = 0;
+    mCurrentGroupIndex = 0;
+    mLastPictureIndex = -1;
+    /*
     ///obsolete
     mBoundY = 0;
     mSceneCount = sceneCount;
     mSceneList.resize(sceneCount);
     //end
+     */
     initMeshMap();
     initCamera();
-    initFog();
+    //initFog();
     initRootMatrix();
     initBound();
+    initFog();
+    createPointEdges();
 }
 SE_Scene::~SE_Scene()
 {
     delete mCamera;
     delete mFogPlaneMesh;
+    delete mCameraMoveState;
+    std::list<CurveData>::iterator it;
+    for(it = mCurveData.begin(); it != mCurveData.end(); it++)
+    {
+        delete it->curve;
+    }
 }
+/*
+void SE_Scene::incTrackPointIndex()
+{
+    mTrackPointsIndex++;
+    size_t totalSize = mTrackPoints1.size() + mTrackPoints2.size();
+    if(mTrackPointsIndex > totalSize)
+        mTrackPointsIndex = 0;
+}
+ */
 void SE_Scene::initCamera()
 {
-    mCamera->create(SE_Vector3f(4, -7, 4),  SE_Vector3f(0, 0, 1), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, -1, 0), 45, mScreenHeight/ mScreenWidth, 1, 500);
+    //mCamera->create(SE_Vector3f(4, -7, 4),  SE_Vector3f(0, 0, 1), SE_Vector3f(-1, 0, 0), SE_Vector3f(0, -1, 0), 45, mScreenHeight/ mScreenWidth, 1, 500);
+    mCamera->create(SE_Vector3f(4, -7, 4),  SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, 1), SE_Vector3f(0, -1, 0), CAMERA_FIELD_OF_VIEW, CAMERA_RATIO, 1, CAMERA_FAR_DIST);
     mCamera->setViewport(0, 0, mScreenWidth, mScreenHeight);
 }
 void SE_Scene::initFog()
 {
+    /*
     SE_GeometryData geomData = SE_GeometryData::createZAlignRect(10, 10, -35);
     mModelManager->addGeometryData(geomData);
     mFogPlaneMesh = new SE_Mesh;
     mFogPlaneMesh->geomDataIndex = mModelManager->getGeometryDataNum() - 1;
+     */
+    mFirstFogPoint = SE_Vector3f(0, 0, 0.5 * (mPhotoFrameBoundMax.z + mPhotoFrameBoundMin.z));
+    mCurrentFogPoint = mFirstFogPoint;
 }
 void SE_Scene::initMeshVBO()
 {
@@ -230,6 +361,18 @@ void SE_Scene::initBound()
         mFloorDownMax = max;
         mFloorDownMin = min;
     }
+    mYLength = mFloorDownMax.y - mFloorDownMin.y;
+    //float tmpLen = mPhotoFrameBoundMax.y - mPhotoFrameBoundMin.y;
+    SE_Vector3f referenceBoxMin = mModelManager->getReferenceBoxMin();
+    SE_Vector3f referenceBoxMax = mModelManager->getReferenceBoxMax();
+    SE_Vector3f referenceBoxBound = referenceBoxMax - referenceBoxMin;
+    float pshift = mFloorDownMax.y - mFloorDownMin.y;
+    pshift = (referenceBoxBound.y - pshift) / 2;
+    SE_Vector3f startRef;
+    startRef.x = referenceBoxMin.x;
+    startRef.y = referenceBoxMax.y + pshift;
+    startRef.z = referenceBoxMax.z;
+    mStartRef = startRef;
 }
 void SE_Scene::initMeshMap()
 {
@@ -243,21 +386,31 @@ void SE_Scene::initMeshMap()
         }
     }
 }
-SE_Scene::PhotoFrameNode SE_Scene::createPhotoFrameNode(PHOTO_TYPE p, char* pictureName)
+void SE_Scene::removeAllMeshVBO()
+{
+    int meshnum = mModelManager->getMeshNum();
+    for(int i = 0 ; i < meshnum ; i++)
+    {
+        SE_Mesh* mesh = mModelManager->getMesh(i);
+        mesh->removeGLBuffer();
+    }
+}
+SE_Scene::PhotoFrameNode SE_Scene::createPhotoFrameNode(PHOTO_TYPE pt, int pictureIndex)
 {
     int count = 0; 
     PhotoFrameNode pfn;
     DisplayObjectProperty* data = NULL;
-    if(p == PHOTOV)
+    if(pt == PHOTOV)
     {
         count = sizeof(photoFrameV) / sizeof(DisplayObjectProperty);
         data = photoFrameV;
     }
-    else if(p == PHOTOH)
+    else if(pt == PHOTOH)
     {
         count = sizeof(photoFrameH) / sizeof(DisplayObjectProperty);
         data = photoFrameH;
     }
+    SE_AABB aabb(SE_Vector3f(1000, 1000, 1000), SE_Vector3f(-1000, -1000, -1000));
     for(int i = 0 ; i < count ; i++)
     {
         DisplayObjectProperty dop = data[i];
@@ -266,12 +419,21 @@ SE_Scene::PhotoFrameNode SE_Scene::createPhotoFrameNode(PHOTO_TYPE p, char* pict
         obj.vertexType = dop.vertexType;
         obj.shaderName = dop.shaderName;
         obj.bPicturePlace = dop.usage == SE_Scene::PICTURE_PLACE;
+        obj.objID = dop.displayObjectID;
         if(obj.bPicturePlace)
         {
-            if(pictureName)
+            if(pictureIndex != -1)
             {
-                obj.pictureName = pictureName;
+                obj.pictureIndex = pictureIndex;
                 obj.shaderName = pictureShaderName[HAS_PICTURE];
+                SE_Mesh* mesh = mModelManager->getMesh(obj.meshIndex);
+                SE_GeometryData* gd = mModelManager->getGeometryData(mesh->geomDataIndex);
+                int j = 0;
+                for(int i = 0 ;i < gd->texVertexNum ; i++)
+                {
+                    obj.uv[j++] = gd->texVertexArray2[i].x;
+                    obj.uv[j++] = gd->texVertexArray2[i].y;
+                }
             }
             else
             {
@@ -279,14 +441,81 @@ SE_Scene::PhotoFrameNode SE_Scene::createPhotoFrameNode(PHOTO_TYPE p, char* pict
                 obj.bPicturePlace = false;
             }
         }
+        SE_Mesh* mesh = mModelManager->getMesh(obj.meshIndex);
+        SE_AABB meshAABB = mesh->getAABB();
+        aabb = aabb.unionAABB(meshAABB);
         pfn.objList.push_back(obj);
     }
+    pfn.aabb = aabb;
     return pfn;
+    
 }
-SE_Scene::StaticNode SE_Scene::createStaticNode()
+bool SE_Scene::hasStation(int groupIndex)
+{
+    GroupList::iterator it = se_list_nref(mGroupList, groupIndex);
+    if(it->hasStationNode)
+        return true;
+    else
+        return false;
+}
+SE_Scene::EdgeList SE_Scene::getEdgeList(const std::string& point)
+{
+    PointList::iterator it;
+    for(it = mPointList.begin() ; it != mPointList.end(); it++)
+    {
+        if(it->pointName == point)
+            return it->edges;
+    }
+    EdgeList el;
+    return el;
+}
+SE_Scene::PointCurveData SE_Scene::calculatePointCurve(const std::string& point, bool leaveGroup, LOGO_STATE logoState)
+{
+    EdgeList edges = getEdgeList(point);
+    if(edges.size() == 1)
+    {
+        EdgeList::iterator edgeIt = se_list_nref(edges, 0);
+        return PointCurveData(edgeIt->pointName, edgeIt->curveName, edgeIt->time);
+    }
+    EdgeList::iterator edgeIt;
+    EdgeList edgesSameLeaveGroup;
+    for(edgeIt = edges.begin() ; edgeIt != edges.end() ; edgeIt++)
+    {
+        if(edgeIt->outGroup == leaveGroup)
+        {
+            edgesSameLeaveGroup.push_back(*edgeIt);
+        }
+    }
+    if(edgesSameLeaveGroup.size() == 1)
+    {
+        EdgeList::iterator it = se_list_nref(edgesSameLeaveGroup, 0);
+        return PointCurveData(it->pointName, it->curveName, it->time);
+    }
+    EdgeList edgesSameHasStation;
+    for(edgeIt = edgesSameLeaveGroup.begin() ; edgeIt != edgesSameLeaveGroup.end() ; edgeIt++)
+    {
+        
+        if(edgeIt->logoState == logoState || edgeIt->logoState == NO_CONCERN_LOGO)
+        {
+            edgesSameHasStation.push_back(*edgeIt);
+        }
+    }
+    if(edgesSameHasStation.size() == 1)
+    {
+        EdgeList::iterator it = se_list_nref(edgesSameHasStation, 0);
+        return PointCurveData(it->pointName, it->curveName, it->time);
+    }
+    int num = edgesSameHasStation.size();
+    assert(num > 0);
+    int index = rand() % num;
+    EdgeList::iterator it = se_list_nref(edgesSameHasStation, index);
+    return PointCurveData(it->pointName, it->curveName, it->time);
+}
+SE_Scene::StaticNode SE_Scene::createStaticNode(float nodey, STATIC_NODE_TYPE staticType)
 {
     int count = sizeof(staticObject) / sizeof(DisplayObjectProperty);
     StaticNode sn;
+    SE_AABB aabb(SE_Vector3f(1000, 1000, 1000), SE_Vector3f(-1000, -1000, -1000));
     for(int i = 0 ; i < count ; i++)
     {
         DisplayObjectProperty dop = staticObject[i];
@@ -295,21 +524,30 @@ SE_Scene::StaticNode SE_Scene::createStaticNode()
         obj.vertexType = dop.vertexType;
         obj.shaderName = dop.shaderName;
         obj.bPicturePlace = dop.usage == SE_Scene::PICTURE_PLACE;
+        obj.objID = dop.displayObjectID;
         sn.objList.push_back(obj);
+        SE_Mesh* mesh = mModelManager->getMesh(obj.meshIndex);
+        SE_AABB meshAABB = mesh->getAABB();
+        aabb = aabb.unionAABB(meshAABB);
     }   
+    sn.aabb = aabb;
+    sn.type = staticType;
+    sn.worldM.identity();
+    //float nodey = calculateStaticNodeY(groupIndex, staticType);
+    sn.worldM.setColumn(3, SE_Vector4f(0, nodey, 0, 1));
     return sn;
 }
-void SE_Scene::placeStaticNodeToWorld(StaticNode sn, int nodeIndex)
+float SE_Scene::calculateStationNodeY(int groupIndex)
 {
-    float photoFrameBoundY = mPhotoFrameBoundMax.y - mPhotoFrameBoundMin.y;
-    sn.worldM.identity();
-    sn.worldM.setColumn(3, SE_Vector4f(0, nodeIndex * photoFrameBoundY, 0, 1));
-    mStaticNodeList.push_back(sn);
+    float span = 2 * mYLength;
+    float starty = groupIndex * span;
+    return starty;
 }
-SE_Scene::StationNode SE_Scene::createStationNode()
+SE_Scene::StationNode SE_Scene::createStationNode(float nodey)
 {
     int count = sizeof(stationObject) / sizeof(DisplayObjectProperty);
     StationNode sn;
+    SE_AABB aabb(SE_Vector3f(1000, 1000, 1000), SE_Vector3f(-1000, -1000, -1000));
     for(int i = 0 ; i < count ; i++)
     {
         DisplayObjectProperty dop = stationObject[i];
@@ -318,129 +556,489 @@ SE_Scene::StationNode SE_Scene::createStationNode()
         obj.vertexType = dop.vertexType;
         obj.shaderName = dop.shaderName;
         obj.bPicturePlace = dop.usage == SE_Scene::PICTURE_PLACE;
+        obj.objID = dop.displayObjectID;
         sn.objList.push_back(obj);
+        SE_Mesh* mesh = mModelManager->getMesh(obj.meshIndex);
+        SE_AABB meshAABB = mesh->getAABB();
+        aabb = aabb.unionAABB(meshAABB);
     }   
+    sn.aabb = aabb;
+    SE_Matrix4f base;
+    base.identity();
+    //float span = 2 * mYLength;
+    //float starty = groupIndex * span;
+    base.setColumn(0, SE_Vector4f(1, 0, 0, 0));
+    base.setColumn(1, SE_Vector4f(0, 1, 0, 0));
+    base.setColumn(2, SE_Vector4f(0, 0, 1, 0));
+    base.setColumn(3, SE_Vector4f(0, nodey, 0, 1));
+    sn.worldM = base;
+    sn.worldM = mRootNodeMatrix.mul(sn.worldM);
     return sn;
 }
-void SE_Scene::placePhotoFrameNodeToWorld(PhotoFrameNode pfn, int index, bool mirror)
+float SE_Scene::calculateStaticNodeY(int groupIndex, STATIC_NODE_TYPE staticType)
 {
+    float nodey = 0;
+    switch (staticType) {
+        case DOWN:
+            nodey = groupIndex * mYLength * 2;
+            break;
+        case UP:
+            nodey = groupIndex * mYLength * 2 + mYLength;
+            break;
+        default:
+            break;
+    }
+    return nodey;
+}
+float SE_Scene::calculatePhotoFrameNodeY(int groupIndex, PHOTO_FRAME_NODE_TYPE nodeType)
+{
+    float nodey = 0;
+    switch(nodeType)
+    {
+    case SW:
+        nodey = groupIndex * mYLength * 2;
+            break;
+    case NW:
+        nodey = groupIndex * mYLength * 2 + mYLength;
+            break;
+    case SE:
+        nodey = groupIndex * mYLength * 2;
+            break;
+    case NE:
+        nodey = groupIndex * mYLength * 2 + mYLength;
+            break;
+    case INVALID_PHOTO_FRAME_NODE_TYPE:
+            nodey = 0;
+            break;
+    }
+    return nodey;
+}
+int SE_Scene::calculatePhotoFramePictureIndex(int groupIndex, PHOTO_FRAME_NODE_TYPE nodeType)
+{
+    int pictureNum = mPictureIDVector.size();
+    int pictureIndex = -1;
+    switch (nodeType) {
+        case SW:
+            pictureIndex = (pictureNum == 0) ? -1 : ((groupIndex * GROUP_OBJ_NUM) % pictureNum);
+            break;
+        case NW:
+            pictureIndex = (pictureNum == 0) ? -1 : ((groupIndex * GROUP_OBJ_NUM + 1) % pictureNum);
+            break;
+        case SE:
+            pictureIndex = (pictureNum == 0) ? -1 : ((groupIndex * GROUP_OBJ_NUM + 2) % pictureNum);
+            break;
+        case NE:
+            pictureIndex = (pictureNum == 0) ? -1 : ((groupIndex * GROUP_OBJ_NUM + 3) % pictureNum);
+            break;
+        case INVALID_PHOTO_FRAME_NODE_TYPE:
+            assert(0);
+            pictureIndex = -1;
+            break;
+        default:
+            break;
+    }
+    return pictureIndex;
+}
+bool SE_Scene::isPhotoFrameNodeMirror(PHOTO_FRAME_NODE_TYPE nodeType) const
+{
+    if(nodeType == SW || nodeType == NW)
+        return true;
+    else if(nodeType == SE || nodeType == NE)
+        return false;
+    else
+    {
+        assert(0);
+        return false;
+    }
+}
+void SE_Scene::createPhotoFrameNodeForNegativeSide()
+{
+    
+}
+SE_Scene::PhotoFrameNode SE_Scene::createPhotoFrameNode(float nodey, PHOTO_FRAME_NODE_TYPE nodeType, int op , int& lastPictureIndex)
+{
+    if(mPictureIDVector.size() > 0)
+    {
+        if(op == 0)
+        {
+            lastPictureIndex++;
+            lastPictureIndex = lastPictureIndex % mPictureIDVector.size();
+        }
+        else 
+        {
+            lastPictureIndex--;
+            if(lastPictureIndex < 0)
+            {
+                lastPictureIndex = mPictureIDVector.size() - 1;
+            }
+            lastPictureIndex = lastPictureIndex % mPictureIDVector.size();
+        }
+    }
+    else 
+    {
+        lastPictureIndex = -1;
+    }
+    int pictureIndex = lastPictureIndex;//calculatePhotoFramePictureIndex(groupIndex, nodeType);
+    LOGI("## create picture index = %d ##\n", pictureIndex);
+    bool mirror = isPhotoFrameNodeMirror(nodeType);
     SE_Matrix3f baseM;
     baseM.identity();
     if(mirror)
     {
         baseM.set(0, 0, -1);
     }
-    float photoFrameBoundY = mPhotoFrameBoundMax.y - mPhotoFrameBoundMin.y;
-    SE_Vector3f translate(0, index * photoFrameBoundY , 0);
-    pfn.worldM.set(baseM, SE_Vector3f(1, 1, 1), translate);
-    pfn.worldM = mRootNodeMatrix.mul(pfn.worldM);
-    pfn.mirror = mirror;
-    if(!mirror)
-        mPhotoFrameNodeList.push_back(pfn);
+    //float nodey = calculatePhotoFrameNodeY(groupIndex, nodeType);
+    SE_Vector3f translate(0, nodey, 0);
+    if(pictureIndex == -1)
+    {
+        LOGI("## picture index= -1 #");
+        PhotoFrameNode pfn = createPhotoFrameNode(PHOTOH, pictureIndex);
+        pfn.mirror = mirror;
+        pfn.type = nodeType;
+        pfn.worldM.set(baseM, SE_Vector3f(1, 1, 1), translate);
+        pfn.worldM = mRootNodeMatrix.mul(pfn.worldM);
+        return pfn;
+    }
     else
-        mMirrorPhotoFrameNodeList.push_back(pfn);
-
+    {
+        PHOTO_TYPE pt = mPictureIDVector[pictureIndex].photoType;
+        LOGI("## photo type = %d ##\n", pt);
+        PhotoFrameNode pfn = createPhotoFrameNode(pt, pictureIndex);
+        pfn.mirror = mirror;
+        pfn.type = nodeType;
+        pfn.worldM.set(baseM, SE_Vector3f(1, 1, 1), translate);
+        pfn.worldM = mRootNodeMatrix.mul(pfn.worldM);
+        return pfn;
+    }
 }
-void SE_Scene::placeStationNodeToWorld(StationNode sn, int groupIndex)
+int SE_Scene::calculateNegativeGroup(std::vector<PictureID>& pictures)
 {
-    SE_Matrix4f base;
-    base.identity();
-    float span = 2 * (mPhotoFrameBoundMax.y - mPhotoFrameBoundMin.y);
-    float starty = mPhotoFrameBoundMax.y;
-    base.setColumn(0, SE_Vector4f(1, 0, 0, 0));
-    base.setColumn(1, SE_Vector4f(0, 1, 0, 0));
-    base.setColumn(2, SE_Vector4f(0, 0, 1, 0));
-    base.setColumn(3, SE_Vector4f(0, starty + groupIndex * span, 0, 1));
-    sn.worldM = base;
-    sn.worldM = mRootNodeMatrix.mul(sn.worldM);
-    mStationNodeList.push_back(sn);
+    return calculateGroup(pictures, CAMERA_FAR_DIST);
+}
+int SE_Scene::calculateGroup(std::vector<PictureID>& pictures, float maxDist)
+{
+    int pictureCount = pictures.size();
+    int groupNum = pictureCount / 4;
+    int reminder = pictureCount % 4;
+    if(reminder > 0)
+        groupNum++;
+    const float groupYLen = mYLength * 2;
+    float totalGroupYLen = groupNum * groupYLen;
+    if(totalGroupYLen < maxDist)
+    {
+        float dist = maxDist - totalGroupYLen;
+        int gpCount = (int)ceilf(dist / groupYLen);
+        groupNum += gpCount;
+    }
+    else
+    {
+        totalGroupYLen = maxDist;
+        int gpCount = (int)ceilf(totalGroupYLen / groupYLen);
+        groupNum = gpCount;
+    }
+    return groupNum;
+}
+int SE_Scene::calculateGroup(std::vector<PictureID>& pictures)
+{
+    return calculateGroup(pictures, 2 * CAMERA_FAR_DIST);
 }
 int SE_Scene::getGroupNum(int pictureNum)
 {
-    int totalNum = mMiniGroupNum * SE_Scene::GROUP_OBJ_NUM;
-    if(pictureNum < totalNum)
-        return 2 * mMiniGroupNum;    
-    int base = pictureNum / totalNum;
-    int reminder = pictureNum % totalNum;
-    int groupNum = base + 1;
-    if(reminder > 0)
-    {
-        groupNum++;
-    }
-    return groupNum * mMiniGroupNum;
+    int groupNum = calculateGroup(mPictureIDVector);
+    return groupNum;
 }
-SE_Scene::PHOTO_TYPE SE_Scene::getPhotoType(const char* pictureNmae)
+
+
+
+void SE_Scene::create(std::vector<PictureID>& pictureIDs, int pictureNum)
 {
-    int width = 0;
-    int height = 0;
-    SS_GetImageSize(pictureNmae, &width, &height);
-    if(width >= height)
-        return PHOTOH;
-    else
-        return PHOTOV;
-}
-void SE_Scene::setPhotoFrameNode(char** pictureName, int pictureIndex, int pictureNum, int nodeIndex,bool mirror)
-{
-    if(pictureIndex < pictureNum)
-    {
-        PHOTO_TYPE pt = getPhotoType(pictureName[pictureIndex]);
-        PhotoFrameNode pfn = createPhotoFrameNode(pt, pictureName[pictureIndex]);
-        placePhotoFrameNodeToWorld(pfn, nodeIndex, mirror);
-    }
-    else
-    {
-        PhotoFrameNode pfn = createPhotoFrameNode(PHOTOH, NULL);
-        placePhotoFrameNodeToWorld(pfn, nodeIndex, mirror);
-    }
-}
-void SE_Scene::create(char** pictureName, int pictureNum)
-{
-    int groupNum = getGroupNum(pictureNum);
-    int pictureIndex = 0;
-    int nodeIndex = 0;
-    for(int i = 0 ; i < groupNum ; i++)
-    {
-        setPhotoFrameNode(pictureName, pictureIndex++, pictureNum, nodeIndex, false);
-        setPhotoFrameNode(pictureName, pictureIndex++, pictureNum, nodeIndex, true);
-        StaticNode sn = createStaticNode();
-        placeStaticNodeToWorld(sn, nodeIndex);
-        nodeIndex++;
-        setPhotoFrameNode(pictureName, pictureIndex++, pictureNum, nodeIndex, false);
-        setPhotoFrameNode(pictureName, pictureIndex++, pictureNum, nodeIndex, true);
-        sn = createStaticNode();
-        placeStaticNodeToWorld(sn, nodeIndex);
-        nodeIndex++;
-    }
-    int sectionNum = groupNum / mMiniGroupNum;
+    mPictureIDVector = pictureIDs;
+    mGroupNum = calculateGroup(pictureIDs);
+    int negativeGroupNum = calculateNegativeGroup(pictureIDs);
+    std::list<int> stationIndexList;
+    int sectionNum = (int)ceilf(mGroupNum / (float)mMiniGroupNum);
     for(int i = 0 ; i < sectionNum ; i++)
     {
-        int groupIndex = 2;
-        StationNode sn = createStationNode();
-        placeStationNodeToWorld(sn, groupIndex + i * mMiniGroupNum);
+        int groupIndex = rand() % mMiniGroupNum;
+        groupIndex += i * mMiniGroupNum;
+        stationIndexList.push_back(groupIndex);
+    }
+    int lastPictureIndex = -1;
+    for(int i = 0 ; i < mGroupNum ; i++)
+    {
+        Group group;
+        group.isValid = true;
+        float nodey = calculatePhotoFrameNodeY(i, SW);
+        group.photoFrameNode[SW] = createPhotoFrameNode(nodey, SW, 0, lastPictureIndex);
+        
+        nodey = calculatePhotoFrameNodeY(i, SE);
+        group.photoFrameNode[SE] = createPhotoFrameNode(nodey, SE, 0, lastPictureIndex);
+        
+        nodey = calculatePhotoFrameNodeY(i, NW);
+        group.photoFrameNode[NW] = createPhotoFrameNode(nodey, NW, 0, lastPictureIndex);
+        nodey = calculatePhotoFrameNodeY(i, NE);
+        group.photoFrameNode[NE] = createPhotoFrameNode(nodey, NE, 0 , lastPictureIndex);
+        nodey = calculateStaticNodeY(i, DOWN);
+        group.staticNode[DOWN] = createStaticNode(nodey, DOWN);
+        nodey = calculateStaticNodeY(i, UP);
+        group.staticNode[UP] = createStaticNode(nodey, UP);
+        std::list<int>::iterator it = std::find(stationIndexList.begin(), stationIndexList.end(), i);
+        if(it != stationIndexList.end())
+        {
+            float nodey = calculateStationNodeY(i);
+            group.stationNode = createStationNode(nodey);
+            group.hasStationNode = true;
+        }
+        mGroupList.push_back(group);
+    }
+    mLastPictureIndex = lastPictureIndex;
+    lastPictureIndex = mPictureIDVector.size();
+    int groupIndex = -1;
+    for(int i = 0 ; i < negativeGroupNum ; i++)
+    {
+        Group group;
+        group.isValid = true;
+        float nodey = calculatePhotoFrameNodeY(groupIndex, NE);
+        group.photoFrameNode[NE] = createPhotoFrameNode(nodey, NE, 1, lastPictureIndex);
+        
+        nodey = calculatePhotoFrameNodeY(groupIndex, NW);
+        group.photoFrameNode[NW] = createPhotoFrameNode(nodey, NW, 1, lastPictureIndex);
+        
+        nodey = calculatePhotoFrameNodeY(groupIndex, SE);
+        group.photoFrameNode[SE] = createPhotoFrameNode(nodey, SE, 1, lastPictureIndex);
+        
+        nodey = calculatePhotoFrameNodeY(groupIndex, SW);
+        group.photoFrameNode[SW] = createPhotoFrameNode(nodey, SW, 1, lastPictureIndex);
+        
+        nodey = calculateStaticNodeY(groupIndex, DOWN);
+        group.staticNode[DOWN] = createStaticNode(nodey, DOWN);
+        
+        nodey = calculateStaticNodeY(groupIndex, UP);
+        group.staticNode[UP] = createStaticNode(nodey, UP);
+        mNegativeGroupList.push_front(group);
+        groupIndex--;
+    }
+    mCurrentLookingPhotoFrameNode.prevGroupIt = mGroupList.end();
+    mCurrentLookingPhotoFrameNode.currGroupIt = mGroupList.end();
+}
+static bool pictureSort(SE_Scene::PhotoFrameNode& left, SE_Scene::PhotoFrameNode& right)
+{
+    SE_Scene::DisplayObjectList::iterator itLeft = se_list_nref(left.objList, 0);
+    SE_Scene::DisplayObjectList::iterator itRight = se_list_nref(right.objList, 0);
+    if(itLeft->pictureIndex < itRight->pictureIndex)
+    {
+        return true;
+    }
+    else 
+    {
+        return false;
     }
 }
+void SE_Scene::sortPictureByID()
+{
+    mPictureObjectList.sort(pictureSort);
+    /*
+    PhotoFrameNodeList::iterator it;
+    LOGI("\n");
+    for(it = mPictureObjectList.begin() ; it != mPictureObjectList.end() ; it++)
+    {
+        DisplayObjectList::iterator objIt = se_list_nref(it->objList, 0);
+        LOGI(" %d ", objIt->pictureIndex);
+    }
+    LOGI("\n");
+     */
+}
+static bool isPicture(SE_Scene::DisplayObject& dop)
+{
+    return dop.bPicturePlace;
+}
+void SE_Scene::seperatePictureFromPhotoFrameNode()
+{
+    PhotoFrameNodeList::iterator it;
+    for(it = mMirrorPhotoFrameNodeList.begin() ; it != mMirrorPhotoFrameNodeList.end() ; it++)
+    {
+        DisplayObjectList::iterator objIt;
+        for(objIt = it->objList.begin() ; objIt != it->objList.end() ; objIt++)
+        {
+            if(objIt->bPicturePlace)
+            {
+                PhotoFrameNode pfn = it->copyProperty();
+                DisplayObject dlo = *objIt;
+                pfn.objList.push_back(dlo);
+                mPictureObjectList.push_back(pfn);
+            }
+        }
+        it->objList.remove_if(isPicture);
+        //LOGI("## obj num = %lu ##\n", it->objList.size());
+    }
+    for(it = mPhotoFrameNodeList.begin() ; it != mPhotoFrameNodeList.end() ; it++)
+    {
+        DisplayObjectList::iterator objIt;
+        for(objIt = it->objList.begin() ; objIt != it->objList.end() ; objIt++)
+        {
+            if(objIt->bPicturePlace)
+            {
+                PhotoFrameNode pfn = it->copyProperty();
+                pfn.objList.push_back(*objIt);
+                mPictureObjectList.push_back(pfn);
+            }
+        }
+        it->objList.remove_if(isPicture);
+        //LOGI("## obj num = %lu ##\n", it->objList.size());
+    }
+    int count = mPictureObjectList.size();
+    //LOGI("## picture num = %d ##\n", count);
+}
+void SE_Scene::createDisplayObjectListForRender(PhotoFrameNode& pfn)
+{
+    DisplayObjectList::iterator objIt;
+    for(objIt = pfn.objList.begin() ; objIt != pfn.objList.end(); objIt++)
+    {
+        objIt->mirror = pfn.mirror;
+        objIt->worldM = pfn.worldM;
+        mDisplayObjectList.push_back(*objIt);
+    }
+}
+void SE_Scene::createDisplayObjectListForRender(StaticNode& sn)
+{
+    DisplayObjectList::iterator objIt;
+    for(objIt = sn.objList.begin(); objIt != sn.objList.end() ; objIt++)
+    {
+        objIt->worldM = sn.worldM;
+        mDisplayObjectList.push_back(*objIt);
+    }
+}
+void SE_Scene::createDisplayObjectListForRender(StationNode& sn)
+{
+    DisplayObjectList::iterator objIt;
+    for(objIt = sn.objList.begin(); objIt != sn.objList.end() ; objIt++)
+    {
+        objIt->worldM = sn.worldM;
+        mDisplayObjectList.push_back(*objIt);
+    }
+}
+static bool compareDisplayObjectID(const SE_Scene::DisplayObject& left, const SE_Scene::DisplayObject& right)
+{
+    return left.objID < right.objID;
+}
+void SE_Scene::sortDisplayObjectList()
+{
+    mDisplayObjectList.sort(compareDisplayObjectID);
+    /*
+    LOGI("\n");
+    for(DisplayObjectList::iterator it = mDisplayObjectList.begin() ; it != mDisplayObjectList.end(); it++)
+    {
+        LOGI("%d ", it->objID);
+    }
+    LOGI("\n");
+     */
+}
+void SE_Scene::createRenderNode(GroupList::iterator begin, GroupList::iterator end)
+{
+    GroupList::iterator it;
+    //int num = 3;
+    for(it = begin ; it != end ; it++)
+    {
+        for(int i = 0 ;i  < 4 ; i++)
+        {
+            if(isRender(&it->photoFrameNode[i]))
+            {
+                if(it->photoFrameNode[i].mirror)
+                {
+                    mMirrorPhotoFrameNodeList.push_back(it->photoFrameNode[i]);
+                    createDisplayObjectListForRender(it->photoFrameNode[i]);
+                }
+                else
+                {
+                    mPhotoFrameNodeList.push_back(it->photoFrameNode[i]);
+                    createDisplayObjectListForRender(it->photoFrameNode[i]);
+                }
+            }
+        }
+        if(isRender(&it->staticNode[0]))
+        {
+            mStaticNodeList.push_back(it->staticNode[0]);
+            createDisplayObjectListForRender(it->staticNode[0]);
+        }
+        if(isRender(&it->staticNode[1]))
+        {
+            mStaticNodeList.push_back(it->staticNode[1]);
+            createDisplayObjectListForRender(it->staticNode[1]);
+        }
+        if(it->hasStationNode)
+        {
+            if(isRender(&it->stationNode))
+            {
+                mStationNodeList.push_back(it->stationNode);
+                createDisplayObjectListForRender(it->stationNode);
+            }
+        }
+    }
+
+}
+void SE_Scene::createRenderNode()
+{    
+    createRenderNode(mGroupList.begin(), mGroupList.end());
+    createRenderNode(mNegativeGroupList.begin(), mNegativeGroupList.end());
+    //seperatePictureFromPhotoFrameNode();
+    //sortPictureByID();
+    sortDisplayObjectList();
+    //LOGI("## photo frame num = %lu\n", mPhotoFrameNodeList.size());
+    //LOGI("## mirror photo frame num = %lu\n", mMirrorPhotoFrameNodeList.size());
+}
+void SE_Scene::clearRenderNode()
+{
+    mDisplayObjectList.clear();
+    mPictureObjectList.clear();
+    mMirrorPhotoFrameNodeList.clear();
+    mPhotoFrameNodeList.clear();
+    mStaticNodeList.clear();
+    mStationNodeList.clear();
+}
+static int renderstate = 0;
 void SE_Scene::renderScene()
 {
-    glClearColor(1, 1, 1, 1);
-    checkGLError();
-    glClear(GL_COLOR_BUFFER_BIT);
-    checkGLError();
+    mRenderObjectCount = 0;
+    createRenderNode();
+    //glClearColor(1, 1, 1, 1);
+    //checkGLError();
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //checkGLError();
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    
-    glEnable(GL_DEPTH_TEST);
-    checkGLError();
-    glDepthFunc(GL_LEQUAL);
-    checkGLError();
-    glDisable(GL_BLEND);
-    checkGLError();
-    glEnable(GL_CULL_FACE);
-    checkGLError();
-    //glDisable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    checkGLError();
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    if(!renderstate)
+    {
+        glEnable(GL_DEPTH_TEST);
+        checkGLError();
+        glDepthFunc(GL_LEQUAL);
+        checkGLError();
+        glDisable(GL_BLEND);
+        checkGLError();
+        glEnable(GL_CULL_FACE);
+        checkGLError();
+        //glDisable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        checkGLError();
+        renderstate = 1;
+    }
     glFrontFace(GL_CCW);
     checkGLError();
+    //glGenerateMipmap(GL_TEXTURE_2D);
+    /*
+    SS_Shader* shader = mModelManager->getShader("picture_fog_shader");
+    shader->use();
+    PhotoFrameNodeList::iterator itPicture;
+    for(itPicture = mPictureObjectList.begin() ; 
+        itPicture != mPictureObjectList.end();
+        itPicture++)
+    {
+        PhotoFrameNode pfn = *itPicture;
+        
+        renderPhotoFrameNode(&pfn);
+    }
+    
+    SS_Shader* shader1 = mModelManager->getShader("fog_shader");
+    shader1->use();
     PhotoFrameNodeList::iterator itPhotoFrameNode;
     for(itPhotoFrameNode = mPhotoFrameNodeList.begin() ;
         itPhotoFrameNode != mPhotoFrameNodeList.end() ;
@@ -449,6 +1047,7 @@ void SE_Scene::renderScene()
         PhotoFrameNode pfn = *itPhotoFrameNode;
         renderPhotoFrameNode(&pfn);    
     }
+    
     for(itPhotoFrameNode = mMirrorPhotoFrameNodeList.begin() ; 
         itPhotoFrameNode != mMirrorPhotoFrameNodeList.end() ;
         itPhotoFrameNode++)
@@ -474,54 +1073,154 @@ void SE_Scene::renderScene()
         StationNode sn = *itStationNode;
         renderStationNode(&sn);
     }
+     */
+    
+    for(DisplayObjectList::iterator it = mDisplayObjectList.begin() ;
+        it != mDisplayObjectList.end();
+        it++)
+    {
+        if(it->mirror)
+        {
+            glFrontFace(GL_CW);
+        }
+        else 
+        {
+            glFrontFace(GL_CCW);
+        }
+        //if(it->bPicturePlace == false)
+        {
+            //if(it->objID == 1001 || it->objID == 1002 || it->objID == 1003 
+            //   || it->objID == 1004 ||it->objID == 2000)
+            renderObject(&(*it), it->worldM);
+        }
+    }
+    
+    clearRenderNode();
+    //LOGE("## render object count = %d ##\n", mRenderObjectCount);
     //renderFogPlane();
 }
 void SE_Scene::renderStaticNode(StaticNode* sn)
 {
+    //if(!isRender(sn))
+    //    return;
+    mRenderObjectCount++;
     glFrontFace(GL_CCW);
     DisplayObjectList::iterator it;
     for(it = sn->objList.begin() ; it != sn->objList.end() ; it++)
     {
         DisplayObject obj = *it;
-        SS_Shader* shader = mModelManager->getShader(obj.shaderName.c_str());
-        shader->use();
+        //if(!isRender(&obj, sn->worldM))
+        //    continue;
+        //SS_Shader* shader = mModelManager->getShader(obj.shaderName.c_str());
+        //shader->use();
         renderObject(&obj, sn->worldM);
     }    
 }
 void SE_Scene::renderStationNode(StationNode* sn)
 {
+    //if(!isRender(sn))
+    //    return;
+    mRenderObjectCount++;
     glFrontFace(GL_CCW);
     DisplayObjectList::iterator it;
     for(it = sn->objList.begin() ; it != sn->objList.end() ; it++)
     {
         DisplayObject obj = *it;
-        SS_Shader* shader = mModelManager->getShader(obj.shaderName.c_str());
-        shader->use();
+        //if(!isRender(&obj, sn->worldM))
+        //    continue;
+        //SS_Shader* shader = mModelManager->getShader(obj.shaderName.c_str());
+        //shader->use();
         renderObject(&obj, sn->worldM);
     }
 }
-void SE_Scene::renderPhotoFrameNode(PhotoFrameNode* pfn)
+
+bool SE_Scene::isRender(PhotoFrameNode* pfn)
 {
+    SE_Matrix4f worldM = pfn->worldM;
+    SE_Vector4f t = worldM.getColumn(3);
+    SE_Vector3f translate = t.xyz();
+    SE_AABB aabb = pfn->aabb;
+    SE_Vector3f min = aabb.getMin();
+    SE_Vector3f max = aabb.getMax();
     if(pfn->mirror)
     {
-        glFrontFace(GL_CW);
+        min = SE_Vector3f(-max.x, min.y, min.z);
+        max = SE_Vector3f(-min.x, max.y, max.z);
+        aabb.set(min, max);
+    }
+    aabb.move(translate);
+    SE_AABBBV aabbbv(aabb);
+    int cull = mCamera->cullBV(aabbbv);
+    if(cull == SE_FULL_CULL)
+        return false;
+    else
+        return true;
+}
+bool SE_Scene::isRender(StationNode* sn)
+{
+    SE_Matrix4f worldM = sn->worldM;
+    SE_Vector4f t = worldM.getColumn(3);
+    SE_Vector3f translate = t.xyz();
+    SE_AABB aabb = sn->aabb;
+    aabb.move(translate);
+    SE_AABBBV aabbbv(aabb);
+    int cull = mCamera->cullBV(aabbbv);
+    if(cull == SE_FULL_CULL)
+        return false;
+    else
+        return true;    
+}
+bool SE_Scene::isRender(StaticNode* sn)
+{
+    SE_Matrix4f worldM = sn->worldM;
+    SE_Vector4f t = worldM.getColumn(3);
+    SE_Vector3f translate = t.xyz();
+    SE_AABB aabb = sn->aabb;
+    aabb.move(translate);
+    SE_AABBBV aabbbv(aabb);
+    int cull = mCamera->cullBV(aabbbv);
+    if(cull == SE_FULL_CULL)
+        return false;
+    else
+        return true;
+}
+bool SE_Scene::isRender(DisplayObject* displayObject, const SE_Matrix4f& worldM)
+{
+    SE_Vector4f t = worldM.getColumn(3);
+    SE_Vector3f translate = t.xyz();
+    SE_Mesh* mesh = mModelManager->getMesh(displayObject->meshIndex);
+    SE_AABB aabb = mesh->getAABB();
+    aabb.move(translate);
+    SE_AABBBV aabbbv(aabb);
+    int cull = mCamera->cullBV(aabbbv);
+    if(cull == SE_FULL_CULL)
+        return false;
+    else
+        return true;    
+}
+
+void SE_Scene::renderPhotoFrameNode(PhotoFrameNode* pfn)
+{
+    mRenderObjectCount++;
+    if(pfn->mirror)
+    {
+        //glFrontFace(GL_CW);
     }
     else
     {
-        glFrontFace(GL_CCW);
+        //glFrontFace(GL_CCW);
     }
     DisplayObjectList::iterator itObj;
     for(itObj = pfn->objList.begin() ; 
-        itObj != pfn->objList.end() ; 
+        itObj != pfn->objList.end(); 
         itObj++)
     {
         DisplayObject obj = *itObj;
         std::string name = getMeshName(obj.meshIndex);
-        //if(name == "photoV001" || name == "photoH002")
+        //if(!isRender(&obj, pfn->worldM))
         //    continue;
-        
         SS_Shader* shader = mModelManager->getShader(obj.shaderName.c_str());
-        shader->use();
+        //shader->use();
         if(obj.bPicturePlace)
         {
             GLint mirrorLoc = shader->getUniformLocation("u_mirror");
@@ -534,10 +1233,18 @@ void SE_Scene::renderPhotoFrameNode(PhotoFrameNode* pfn)
             {
                 glUniform1i(mirrorLoc, 0);
             }
+            //obj.bConcerned = pfn->bConcerned;
         }
+        /*
+        if(obj.bConcerned)
+        {
+            LOGI("## obj be concerned = %s ##\n", obj.shaderName.c_str());
+        }
+         */
         renderObject(&obj, pfn->worldM);
     }
 }
+
 std::string SE_Scene::getMeshName(int index)
 {
     MeshMap::iterator it;
@@ -548,18 +1255,231 @@ std::string SE_Scene::getMeshName(int index)
     }
     return "";
 }
+SE_Texture* SE_Scene::getFullImageTexture(const std::string& imageName, const std::string& textureID)
+{
+    
+}
+/*
+ GLint viewMLoc = shader->getUniformLocation("u_wv_matrix");
+ checkGLError();
+ m = mCamera->getWorldToViewMatrix().mul(worldM);
+ m.getColumnSequence(matrixData);
+ glUniformMatrix4fv(viewMLoc, 1, 0, matrixData);
+ checkGLError();
+ */
+static void bindMeshVao(GLuint* vaoID, GLuint* uvVboID, float* uv, SE_Mesh* mesh, SS_Shader* shader, SE_VertexProperty vp)
+{
+    if(*vaoID == 0)
+    {
+        glGenVertexArraysOES(1, vaoID);
+        glBindVertexArrayOES(*vaoID);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->vboID);
+        GLint positionLoc = shader->getAttribLocation("a_position");
+        checkGLError();
+        
+        glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)vp.xyzOffset);
+        //glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, data);
+        checkGLError();
+        glEnableVertexAttribArray(positionLoc);
+        checkGLError();
+        GLint texCoordLoc = shader->getAttribLocation("a_tex_coord1");
+        checkGLError();
+        
+        glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+        //glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(data + 3));
+        checkGLError();
+        glEnableVertexAttribArray(texCoordLoc);
+        checkGLError();
+        
+        if(*uvVboID == 0)
+        {
+            glGenBuffers(1, uvVboID);
+            checkGLError();
+            glBindBuffer(GL_ARRAY_BUFFER, *uvVboID);
+            checkGLError();
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, uv, GL_STATIC_DRAW);
+            checkGLError();
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, *uvVboID);
+        checkGLError();
+        GLint texCoordLoc2 = shader->getAttribLocation("a_tex_coord2");
+        checkGLError();
+        glEnableVertexAttribArray(texCoordLoc2);
+        checkGLError();
+        glVertexAttribPointer(texCoordLoc2, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, 2 * sizeof(float)  , 0);
+        checkGLError();
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        checkGLError();
+        glBindVertexArrayOES(0);
+        checkGLError();
+    }
+    glBindVertexArrayOES(*vaoID);
+    checkGLError();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexVboID);
+    checkGLError();    
+}
 void SE_Scene::renderObject(DisplayObject* obj, const SE_Matrix4f& worldM)
 {
-    int meshIndex = obj->meshIndex;
-    SE_Mesh::VERTEX_TYPE vertexType = (SE_Mesh::VERTEX_TYPE)obj->vertexType;
-    bool isPicturePlace = obj->bPicturePlace;
-    SE_Mesh* mesh = mModelManager->getMesh(meshIndex);
-    float* data = mesh->getDrawingVertex(vertexType);
-    createMeshVBO(mesh);
-    SE_VertexProperty vp = mesh->getVertexProperty(vertexType);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vboID);
     SS_Shader* shader = mModelManager->getShader(obj->shaderName.c_str());
     shader->use();
+    int meshIndex = obj->meshIndex;
+    SE_Mesh* mesh = mModelManager->getMesh(meshIndex);
+    SE_Mesh::VERTEX_TYPE vertexType = (SE_Mesh::VERTEX_TYPE)obj->vertexType;
+    SE_VertexProperty vp = mesh->getVertexProperty(vertexType);
+    bool isPicturePlace = obj->bPicturePlace;
+    float* data = mesh->getDrawingVertex(vertexType);
+    if(obj->bPicturePlace)
+    {
+        PHOTO_TYPE pt =  mPictureIDVector[obj->pictureIndex].photoType;
+        int orientation = mPictureIDVector[obj->pictureIndex].orientation;
+        //float uv[] = {0.875, 1, 0.125, 1, 0.125, 0, 0.875, 0};
+        //{0.125, 1, 0.125, 0, 0.875, 0, 0.875, 1};
+        //{0.875, 0, 0.875, 1, 0.125, 1, 0.125, 0}, //180
+        //{0.875, 1, 0.125, 1, 0.125, 0, 0.875, 0}, // 90, ccw
+        //{0.125, 0, 0.875, 0, 0.875, 1, 0.125, 1} //90, cw
+        float* uv = NULL;
+        
+        if(pt == PHOTOH)
+        {
+            if(obj->mirror)
+            {
+                uv = mirrorUvArrayH[orientation];
+            }
+            else 
+            {
+                uv = uvArrayH[orientation];
+            }
+        }
+        else 
+        {
+            if(obj->mirror)
+            {
+                uv = mirrorUvArrayV[orientation];
+            }
+            else 
+            {
+                uv = uvArrayV[orientation];
+            }
+        }
+        if(mesh->vboID == 0)
+        {
+            createMeshVBO(mesh);
+        }
+        if(obj->mirror)
+        {
+            bindMeshVao(&mesh->mirrorVaoIDArray[pt][orientation].vao, &mesh->mirrorVaoIDArray[pt][orientation].uvVbo, uv, mesh, shader, vp);
+        }
+        else
+        {
+            bindMeshVao(&mesh->vaoIDArray[pt][orientation].vao, &mesh->vaoIDArray[pt][orientation].uvVbo, uv, mesh, shader, vp);
+        }
+        /*
+        if(mesh->vaoIDArray[pt][orientation].vao == 0)
+        {
+            glGenVertexArraysOES(1, &mesh->vaoIDArray[pt][orientation].vao);
+            glBindVertexArrayOES(mesh->vaoIDArray[pt][orientation].vao);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->vboID);
+            GLint positionLoc = shader->getAttribLocation("a_position");
+            checkGLError();
+            
+            glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)vp.xyzOffset);
+            //glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, data);
+            checkGLError();
+            glEnableVertexAttribArray(positionLoc);
+            checkGLError();
+            GLint texCoordLoc = shader->getAttribLocation("a_tex_coord1");
+            checkGLError();
+            
+            glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+            //glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(data + 3));
+            checkGLError();
+            glEnableVertexAttribArray(texCoordLoc);
+            checkGLError();
+
+            if(mesh->vaoIDArray[pt][orientation].uvVbo == 0)
+            {
+                glGenBuffers(1, &mesh->vaoIDArray[pt][orientation].uvVbo);
+                checkGLError();
+                glBindBuffer(GL_ARRAY_BUFFER, mesh->vaoIDArray[pt][orientation].uvVbo);
+                checkGLError();
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, uv, GL_STATIC_DRAW);
+                checkGLError();
+            }
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->vaoIDArray[pt][orientation].uvVbo);
+            checkGLError();
+            GLint texCoordLoc2 = shader->getAttribLocation("a_tex_coord2");
+            checkGLError();
+            glEnableVertexAttribArray(texCoordLoc2);
+            checkGLError();
+            glVertexAttribPointer(texCoordLoc2, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, 2 * sizeof(float)  , 0);
+            checkGLError();
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            checkGLError();
+            glBindVertexArrayOES(0);
+            checkGLError();
+        }
+        glBindVertexArrayOES(mesh->vaoIDArray[pt][orientation].vao);
+        checkGLError();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexVboID);
+        checkGLError();
+         */
+    }
+    else
+    {
+        if(mesh->vboID == 0)
+        {
+            createMeshVBO(mesh);
+        }
+        if(mesh->vaoID == 0)
+        {
+            glGenVertexArraysOES(1, &mesh->vaoID);
+            checkGLError();
+            glBindVertexArrayOES(mesh->vaoID);
+            checkGLError();
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->vboID);
+            checkGLError();
+            GLint positionLoc = shader->getAttribLocation("a_position");
+            checkGLError();
+            
+            glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)vp.xyzOffset);
+            //glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, data);
+            checkGLError();
+            glEnableVertexAttribArray(positionLoc);
+            checkGLError();
+            GLint texCoordLoc = shader->getAttribLocation("a_tex_coord");
+            checkGLError();
+            
+            glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+            //glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(data + 3));
+            checkGLError();
+            glEnableVertexAttribArray(texCoordLoc);
+            checkGLError();
+            
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            checkGLError();
+            glBindVertexArrayOES(0);
+            checkGLError();
+        }
+        glBindVertexArrayOES(mesh->vaoID);
+        checkGLError();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexVboID);
+        checkGLError();
+    }
+    /*
+    if(obj->bPicturePlace)
+    {
+        GLint mirrorLoc = shader->getUniformLocation("u_mirror");
+        checkGLError();
+        if(obj->mirror)
+        {
+            glUniform1i(mirrorLoc, 1);
+        }
+        else
+        {
+            glUniform1i(mirrorLoc, 0);
+        }
+    }
+    */    
     float matrixData[16];
     SE_Matrix4f m = mCamera->getPerspectiveMatrix().mul(mCamera->getWorldToViewMatrix().mul(worldM));
     m.getColumnSequence(matrixData);                            
@@ -568,58 +1488,85 @@ void SE_Scene::renderObject(DisplayObject* obj, const SE_Matrix4f& worldM)
     glUniformMatrix4fv(worldMLoc, 1, 0, matrixData);
     checkGLError();
     
-    GLint viewMLoc = shader->getUniformLocation("u_wv_matrix");
-    checkGLError();
-    m = mCamera->getWorldToViewMatrix().mul(worldM);
-    m.getColumnSequence(matrixData);
-    glUniformMatrix4fv(viewMLoc, 1, 0, matrixData);
-    checkGLError();
     
-    GLint densityLoc = shader->getUniformLocation("u_density");
-    checkGLError();
-    glUniform1f(densityLoc, 0.05);
+    SE_Vector4f v = obj->worldM.getColumn(3);
     
-    GLint farLoc = shader->getUniformLocation("far_dist");
+    /*
+    GLint fogPointLoc = shader->getUniformLocation("u_fogpoint");
     checkGLError();
-    glUniform1f(farLoc, -200);
+    glUniform3f(fogPointLoc, mCurrentFogPoint.x, mCurrentFogPoint.y, mCurrentFogPoint.z);
+    checkGLError();
+    */
+    static float fogProp[4];
+    fogProp[0] = 0.05;
+    fogProp[1] = FAR_DIST;
+    fogProp[2] = NEAR_DIST;
+    fogProp[3] = v.y;
     
-    GLint nearLoc = shader->getUniformLocation("near_dist");
+    GLint fogPropLoc = shader->getUniformLocation("u_fogprop");
     checkGLError();
-    glUniform1f(nearLoc, -100);
+    glUniform4f(fogPropLoc, fogProp[0], fogProp[1], fogProp[2], fogProp[3]);
+    checkGLError();
+    //GLint densityLoc = shader->getUniformLocation("u_density");
+    //checkGLError();
+    //glUniform1f(densityLoc, 0.05);
+    
+    //GLint farLoc = shader->getUniformLocation("far_dist");
+    //checkGLError();
+    //glUniform1f(farLoc, FAR_DIST);
+    
+    //GLint nearLoc = shader->getUniformLocation("near_dist");
+    //checkGLError();
+    //glUniform1f(nearLoc, NEAR_DIST);
     
     GLint fogColorLoc = shader->getUniformLocation("u_fog_color");
     checkGLError();
     glUniform3f(fogColorLoc, 1, 1, 1);
-
+    
+    /*
     GLint positionLoc = shader->getAttribLocation("a_position");
+    checkGLError();
+    
+    glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)vp.xyzOffset);
+    //glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, data);
     checkGLError();
     glEnableVertexAttribArray(positionLoc);
     checkGLError();
-    glVertexAttribPointer(positionLoc, SE_VertexProperty::XYZ_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)vp.xyzOffset);
-    checkGLError();
+     */
     if(isPicturePlace)
     {  
+        /*
         GLint texCoordLoc1 = shader->getAttribLocation("a_tex_coord1");
+        checkGLError();
+        
+        glVertexAttribPointer(texCoordLoc1, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+        //glVertexAttribPointer(texCoordLoc1, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(data + 3));
         checkGLError();
         glEnableVertexAttribArray(texCoordLoc1);
         checkGLError();
-        glVertexAttribPointer(texCoordLoc1, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+        //GLint texCoordLoc2 = shader->getAttribLocation("a_tex_coord2");
+        //checkGLError();
+        //glEnableVertexAttribArray(texCoordLoc2);
         checkGLError();
-    
-        GLint texCoordLoc2 = shader->getAttribLocation("a_tex_coord2");
-        checkGLError();
-        glEnableVertexAttribArray(texCoordLoc2);
-        checkGLError();
+         */
+        /*
         glVertexAttribPointer(texCoordLoc2, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv2Offset * sizeof(float)));
-        checkGLError();
+         */
+        //glVertexAttribPointer(texCoordLoc2, 2, GL_FLOAT, GL_FALSE, 0, obj->uv);
+        //checkGLError();
     }
     else
     {
+        /*
         GLint texCoordLoc = shader->getAttribLocation("a_tex_coord");
+        checkGLError();
+        
+        glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+        //glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(data + 3));
         checkGLError();
         glEnableVertexAttribArray(texCoordLoc);
         checkGLError();
-        glVertexAttribPointer(texCoordLoc, SE_VertexProperty::UV_SIZE, GL_FLOAT, GL_FALSE, vp.stride, (const GLvoid*)(vp.uv1Offset * sizeof(float)));
+         */
     }
     SE_Material* material = mModelManager->getMaterial(mesh->materialIndex);
     if(material)
@@ -637,28 +1584,51 @@ void SE_Scene::renderObject(DisplayObject* obj, const SE_Matrix4f& worldM)
             {
                 t = new SE_Texture;
                 loadTexture(material->materialData.texturename.c_str(), t);
+                LOGI("## load first texture ###\n");
                 checkGLError();
                 mModelManager->setTexture(material->materialData.texturename.c_str(), t);
                 
             }
-            glBindTexture(GL_TEXTURE_2D, t->texture);
-            checkGLError();
+            
+            if(t && t->texture != 0)
+            {
+                glBindTexture(GL_TEXTURE_2D, t->texture);
+                checkGLError();
+            }
+             
             if(isPicturePlace)
             {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 checkGLError();
                 glActiveTexture(GL_TEXTURE1);
                 checkGLError();
-                SE_Texture* imageTex = mModelManager->getTexture(obj->pictureName.c_str());
+                assert(obj->pictureIndex >= 0);
+                PictureID pictureID = mPictureIDVector[obj->pictureIndex];
+                SE_Texture* imageTex = NULL;
+                if(obj->bConcerned)
+                {
+                    std::string textureID = pictureID.pictureName + "_full";
+                    imageTex = mModelManager->getTexture(textureID.c_str());
+                    //LOGI("## full image texture = %s , %p ##\n", textureID.c_str(), imageTex);
+                }
+                if(imageTex == NULL)
+                {
+                    imageTex = mModelManager->getTexture(pictureID.pictureName.c_str());
+                }
                 if(!imageTex)
                 {
                     imageTex = new SE_Texture;
-                    SS_LoadTextureForImage(obj->pictureName.c_str(), imageTex);
+                    LOGI("## load texture ##\n");
+                    SS_LoadTextureForImage(mViewNav, pictureID.pictureName.c_str(), pictureID.pictureDate.c_str(), imageTex);
                     checkGLError();
-                    mModelManager->setTexture(obj->pictureName.c_str(), imageTex);
+                    mModelManager->setTexture(pictureID.pictureName.c_str(), imageTex);
                 }
-                glBindTexture(GL_TEXTURE_2D, imageTex->texture);
-                checkGLError();
+                
+                if(imageTex && imageTex->texture != 0)
+                {
+                    glBindTexture(GL_TEXTURE_2D, imageTex->texture);
+                    checkGLError();
+                }
                 
                 GLint texLoc1 = shader->getUniformLocation("u_texture1");
                 checkGLError();
@@ -679,259 +1649,821 @@ void SE_Scene::renderObject(DisplayObject* obj, const SE_Matrix4f& worldM)
         }
         
     }
-    glDrawArrays(GL_TRIANGLES, 0, mesh->mDrawingVertexNum);
+    //LOGI("mesh name = %s \n", mesh->name.c_str());
+    //assert(mesh->mDrawingVertexNum != 2061);
+    //if(mesh->mDrawingVertexNum != 2061)
+    //glDrawArrays(GL_TRIANGLES, 0, mesh->mDrawingVertexNum);
+    glDrawElements(GL_TRIANGLES, mesh->getIndexBufferNum(vertexType), GL_UNSIGNED_SHORT, 0);
+    //glDrawElements(GL_TRIANGLES, mesh->getIndexBufferNum(vertexType), GL_UNSIGNED_SHORT, mesh->getIndexBuffer(vertexType));
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     checkGLError();    
 }
-void SE_Scene::createTrackList()
+void SE_Scene::createCurve(const std::string& name, int composedPointNum, float time, float speed)
 {
-    const char* curveName = "P1L";
-    std::vector<SE_TrackPoint> trackPoint = mModelManager->getTrackPoints(curveName);
+    std::vector<SE_TrackPoint> trackPoint = mModelManager->getTrackPoints(name.c_str());
     if(trackPoint.size() > 0)
     {
         SE_Curve::SamplePoint* tp = new SE_Curve::SamplePoint[trackPoint.size()];
-        SE_Vector3f referenceBoxMin = mModelManager->getReferenceBoxMin();
-        SE_Vector3f referenceBoxMax = mModelManager->getReferenceBoxMax();
-        SE_Vector3f referenceBoxBound = referenceBoxMax - referenceBoxMin;
-        float pshift = mFloorDownMax.y - mFloorDownMin.y;
-        pshift = (referenceBoxBound.y - pshift) / 2;
-        SE_Vector3f startRef;
-        startRef.x = referenceBoxMin.x;
-        startRef.y = referenceBoxMax.y + pshift;
-        startRef.z = referenceBoxMax.z;
+        SE_Vector3f startRef = mStartRef;
         for(size_t i = 0 ; i < trackPoint.size() ; i++)
         {
             tp[i].point = mModelManager->getTrackPoint(trackPoint[i], startRef);
             LOGI("## sample point %lu = %f , %f, %f ##\n", i, tp[i].point.x, tp[i].point.y, tp[i].point.z);
         }
-        mCurve = new SE_Curve(tp, trackPoint.size(), 2000);
-        mCurve->createCurve();
-        float curveLen1 = mCurve->getSplineCurveLength(0) + mCurve->getSplineCurveLength(1);
-        float curveLen2 = mCurve->getSplineCurveLength(2) + mCurve->getSplineCurveLength(3);
-        const int stepsize = 10;
-        std::vector<float> stepvector(stepsize);
-        for(size_t i = 0 ; i < stepsize ; i++)
-        {
-            stepvector[i] = curveLen1 / stepsize;
-        }
-        mTrackPoints1 = mCurve->getCurvePoint(0, 2, stepvector);
-        for(size_t i = 0 ; i < stepsize ; i++)
-        {
-            stepvector[i] = curveLen2 / stepsize;
-        }
-        mTrackPoints2 = mCurve->getCurvePoint(2, 4, stepvector);
-        SE_ASSERT(mTrackPoints1.size() == (stepsize + 1));
-        SE_ASSERT(mTrackPoints2.size() == (stepsize + 1));
-        SE_Vector3f lookingPoint = mModelManager->getFrameLookingPoint(frameLookingPointName);
-        lookingPoint = SE_Vector3f(-lookingPoint.x, lookingPoint.y, lookingPoint.z);
-        mCameraZ= mTrackPoints1[0] - lookingPoint;
-        mCameraZ = mCameraZ.normalize();
-        mCameraY = SE_Vector3f(0, -1, 0);
-        SE_VectorInterpolate vi(mCameraZ, mCameraY);
-        float t = 0;
-        const float tstep = 1.0f / stepsize;
-        mCameraZArray.resize(stepsize + 1);
-        for(int i = 0 ; i  <= stepsize ; i++)
-        {
-            SE_Vector3f z = vi.interpolate(t);
-            t += tstep;
-            mCameraZArray[i] = z;
-            LOGI("camera %d = %f , %f, %f \n", i, z.x, z.y, z.z);
-        }
-        SE_VectorInterpolate vi2(mCameraY, mCameraZ);
-        t = 0;
-        mCameraZArray2.resize(stepsize + 1);
-        for(int i = 0 ;i < stepsize ; i++)
-        {
-            SE_Vector3f z = vi2.interpolate(t);
-            t += tstep;
-            mCameraZArray2[i] = z;
-            LOGI("camera2 %d = %f, %f, %f \n", i, z.x, z.y, z.z);
-        }
-        mCameraZArray2[stepsize] = mCameraZ;
-        //debug
-        for(size_t i = 0 ; i < mTrackPoints1.size() ; i++)
-        {
-            LOGI("## track point1 %lu = %f, %f, %f ##\n", i, mTrackPoints1[i].x, mTrackPoints1[i].y, mTrackPoints1[i].z);
-        }
-        for(size_t i = 0 ; i < mTrackPoints2.size() ; i++)
-        {
-            LOGI("## track point2 %lu = %f, %f, %f ##\n", i, mTrackPoints2[i].x, mTrackPoints2[i].y, mTrackPoints2[i].z);
-        }
-        //end
+        SE_Curve* curve = new SE_Curve(tp, trackPoint.size(), composedPointNum);
         delete[] tp;
+        curve->createCurve();
+        float curveLen = curve->getTotalCurveLength();
+        CurveData cd;
+        cd.name = name;
+        cd.curve = curve;
+        cd.time = time * 1000;
+        cd.curveLen = curveLen;
+        cd.composePointNum = composedPointNum;
+        mCurveData.push_back(cd);
+    }
+
+}
+void SE_Scene::createYInverseCurve(const std::string& curveName, const std::string& inverseCurveName,int composedPointNum, float time, float speed)
+{
+    std::vector<SE_TrackPoint> trackPoint = mModelManager->getTrackPoints(curveName.c_str());
+    if(trackPoint.size() > 0)
+    {
+        std::vector<SE_TrackPoint> newTrackPoint(trackPoint.size());
+        for(size_t i  = 0 ; i < trackPoint.size() ; i++)
+        {
+            newTrackPoint[i].x = trackPoint[i].x;
+        }
+        for(int i = trackPoint.size() - 1 , j = 0 ; i >= 0 ; i--, j++)
+        {
+            newTrackPoint[i].z = trackPoint[i].z;
+            newTrackPoint[j].y = trackPoint[i].y;
+        }
+        SE_Curve::SamplePoint* tp = new SE_Curve::SamplePoint[newTrackPoint.size()];
+        SE_Vector3f startRef = mStartRef;
+        LOGI("## curve name = %s ###\n", inverseCurveName.c_str());
+        for(size_t i = 0 ; i < newTrackPoint.size() ; i++)
+        {
+            tp[i].point = mModelManager->getTrackPoint(newTrackPoint[i], startRef);
+            LOGI("## sample point %lu = %f , %f, %f ##\n", i, tp[i].point.x, tp[i].point.y, tp[i].point.z);
+        }
+        SE_Curve* curve = new SE_Curve(tp, newTrackPoint.size(), composedPointNum);
+        delete[] tp;
+        curve->createCurve();
+        float curveLen = curve->getTotalCurveLength();
+        CurveData cd;
+        cd.name = inverseCurveName;
+        cd.curve = curve;
+        cd.time = time * 1000;
+        cd.curveLen = curveLen;
+        cd.composePointNum = composedPointNum;
+        mCurveData.push_back(cd);
     }
 }
-void SE_Scene::resetCameraMove()
+void SE_Scene::createCurve()
 {
-    mTrackPointsIndex = 0;
+    std::vector<std::string> nameV = mModelManager->getAllTrackPointsName();
+    for(int i = 0 ; i < nameV.size(); i++)
+    {
+        std::string n = nameV[i];
+        LOGI("## n = %s ##\n", n.c_str());
+        if(n != "")
+        {
+            createCurve(n, 2000, 5, 0.1);
+            /*
+            if(n == "P2L")
+            {
+                createYInverseCurve(n, "P2L_YZINVERSE", 2000, 5, 0.1);
+            }
+            else if(n == "P2R")
+            {
+                createYInverseCurve(n, "P2R_YZINVERSE", 2000, 5, 0.1);
+            }
+             */
+        }
+    }
+
+}
+SE_Scene::CurveData SE_Scene::getCurveData(const std::string& name)
+{
+    std::list<CurveData>::iterator it;
+    LOGI("## current curve name = %s ##\n", name.c_str());
+    for(it = mCurveData.begin() ; it != mCurveData.end() ; it++)
+    {
+        if(it->name == name)
+            return *it;
+    }
+    return SE_Scene::CurveData();
+}
+
+bool SE_Scene::isNeedChangeCurve(float t)
+{
+    size_t size = mCameraMoveState->currentLookPointTrackList.size();
+    float percent = mCameraMoveState->currentLookPointTrackList[size - 1].percent;
+    if(t >= (percent / 100))
+    {
+        return true;
+    }
+    else
+    {
+        if(t >= 1 && t < (percent / 100))
+        {
+            mCameraStayStatic = true;
+        }
+        else 
+        {
+            mCameraStayStatic = false;
+        }
+        return false;
+    }
+    /*
+    for(int i = 0 ; i < mCameraMoveState->currentLookPointTrackList.size() ; i++)
+    {
+        if(t <= (mCameraMoveState->currentLookPointTrackList[i].percent / 100.0f))
+            return true;
+    }
+    return false;
+     */
+}
+void SE_Scene::removeAllTexture()
+{
+    mModelManager->removeAllTexture();
+}
+void SE_Scene::removeAllShaderFromGL()
+{
+    mModelManager->removeAllShaderFromGL();
+}
+
+SE_Vector3f SE_Scene::getCurrentLookPoint(float t)
+{
+    SE_Vector3f startLookingPoint;
+    SE_Vector3f endLookingPoint;
+    float interpolatev = 0;
+    float photoFrameBoundY = mPhotoFrameBoundMax.y - mPhotoFrameBoundMin.y;
+    for(int i = 0 ; i < mCameraMoveState->currentLookPointTrackList.size() ; i++)
+    {
+        if(t == (mCameraMoveState->currentLookPointTrackList[i].percent / 100.0f))
+        {
+            startLookingPoint = endLookingPoint = mModelManager->getFrameLookingPoint(mCameraMoveState->currentLookPointTrackList[i].lookpointname.c_str());
+            startLookingPoint.y += photoFrameBoundY * (mCameraMoveState->currentLookPointTrackList[i].frameNum - 1);
+            endLookingPoint.y += photoFrameBoundY * (mCameraMoveState->currentLookPointTrackList[i].frameNum - 1);
+            int side = mCameraMoveState->currentLookPointTrackList[i].side;
+            mCurrentLookingPhotoFrameNode.side = RIGHT_SIDE;
+            if(side == 0)
+            {
+                startLookingPoint.x = -startLookingPoint.x;
+                endLookingPoint.x = -endLookingPoint.x;
+                mCurrentLookingPhotoFrameNode.side = LEFT_SIDE;
+            } 
+            if(mCameraStayStatic)
+            {
+                PHOTO_FRAME_NODE_TYPE nodeType = INVALID_PHOTO_FRAME_NODE_TYPE;
+                if(mCameraMoveState->currentLookPointTrackList[i].frameNum == 1)
+                {
+                    if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                    {
+                        nodeType = SW;
+                    }
+                    else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                    {
+                        nodeType = SE;
+                    }
+                }
+                else if(mCameraMoveState->currentLookPointTrackList[i].frameNum == 2)
+                {
+                    if(mCameraMoveState->bLeavingGroup == false)
+                    {
+                        if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                        {
+                            nodeType = NW;
+                        }
+                        else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                        {
+                            nodeType = NE;
+                        }
+                    }
+                    else {
+                        if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                        {
+                            nodeType = SW;
+                        }
+                        else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                        {
+                            nodeType = SE;
+                        }
+                    }
+                }
+                if(nodeType != INVALID_PHOTO_FRAME_NODE_TYPE && nodeType != mCurrentLookingPhotoFrameNode.nodeType)
+                {
+                    mCurrentLookingPhotoFrameNode.prevNodeType = mCurrentLookingPhotoFrameNode.nodeType;
+                    mCurrentLookingPhotoFrameNode.nodeType = nodeType;
+                    mCurrentLookingPhotoFrameNode.nodeChanged = true;
+                }
+                else {
+                    mCurrentLookingPhotoFrameNode.nodeChanged = false;
+                }
+            }
+            break;
+        }
+        else if(t < (mCameraMoveState->currentLookPointTrackList[i].percent / 100.0f))
+        {
+            float prevPercent = mCameraMoveState->currentLookPointTrackList[i - 1].percent / 100;
+            float currPercent = mCameraMoveState->currentLookPointTrackList[i].percent / 100;
+            int prevSide = mCameraMoveState->currentLookPointTrackList[i - 1].side;
+            int currSide = mCameraMoveState->currentLookPointTrackList[i].side;
+            startLookingPoint = mModelManager->getFrameLookingPoint(mCameraMoveState->currentLookPointTrackList[i - 1].lookpointname.c_str());
+            endLookingPoint = mModelManager->getFrameLookingPoint(mCameraMoveState->currentLookPointTrackList[i].lookpointname.c_str());
+            startLookingPoint.y += photoFrameBoundY * (mCameraMoveState->currentLookPointTrackList[i - 1].frameNum - 1);
+            endLookingPoint.y += photoFrameBoundY * (mCameraMoveState->currentLookPointTrackList[i].frameNum - 1);
+            mCurrentLookingPhotoFrameNode.side = RIGHT_SIDE;
+            if(prevSide == 0)
+            {
+                startLookingPoint.x = -startLookingPoint.x;
+                
+            }
+            if(currSide == 0)
+            {
+                endLookingPoint.x = -endLookingPoint.x;
+                mCurrentLookingPhotoFrameNode.side = LEFT_SIDE;
+            }
+            interpolatev = (t - prevPercent) / (currPercent - prevPercent);
+            if(mCameraStayStatic)
+            {
+                PHOTO_FRAME_NODE_TYPE nodeType = INVALID_PHOTO_FRAME_NODE_TYPE;
+                if(mCameraMoveState->currentLookPointTrackList[i].frameNum == 1)
+                {
+                    if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                    {
+                        nodeType = SW;
+                    }
+                    else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                    {
+                        nodeType = SE;
+                    }
+                }
+                else if(mCameraMoveState->currentLookPointTrackList[i].frameNum == 2)
+                {
+                    if(mCameraMoveState->bLeavingGroup == false)
+                    {
+                        if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                        {
+                            nodeType = NW;
+                        }
+                        else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                        {
+                            nodeType = NE;
+                        }
+                    }
+                    else 
+                    {
+                        if(mCurrentLookingPhotoFrameNode.side == LEFT_SIDE)
+                        {
+                            nodeType = SW;
+                        }
+                        else if(mCurrentLookingPhotoFrameNode.side == RIGHT_SIDE)
+                        {
+                            nodeType = SE;
+                        }
+                    }
+                }
+                if(nodeType != INVALID_PHOTO_FRAME_NODE_TYPE && nodeType != mCurrentLookingPhotoFrameNode.nodeType)
+                {
+                    mCurrentLookingPhotoFrameNode.prevNodeType = mCurrentLookingPhotoFrameNode.nodeType;
+                    mCurrentLookingPhotoFrameNode.nodeType = nodeType;
+                    mCurrentLookingPhotoFrameNode.nodeChanged = true;
+                }
+                else {
+                    mCurrentLookingPhotoFrameNode.nodeChanged = false;
+                }
+            }
+            break;
+        }
+    }
+    if(startLookingPoint.isZero() && endLookingPoint.isZero())
+    {
+        assert(0);
+    }
+    //LOGI("## interpoltev = %f ##\n", interpolatev);
+    //LOGI("## start p = %f, %f, %f##\n", startLookingPoint.x, startLookingPoint.y ,startLookingPoint.z);
+    //LOGI("## end p = %f, %f, %f ###\n", endLookingPoint.x, endLookingPoint.y, endLookingPoint.z);
+    SE_Vector3f p = startLookingPoint + (endLookingPoint - startLookingPoint) * interpolatev;
+    //LOGI("## look p = %f, %f, %f ##\n", p.x, p.y, p.z);
+    return p;
+}
+std::string SE_Scene::removeSufix(const std::string& name, const std::string& sufix)
+{
+    std::string::size_type pos = name.find('_');
+    if(pos == std::string::npos)
+        return name;
+    else
+        return name.substr(0, pos);
+}
+void SE_Scene::addPointEdge(std::list<std::string>& edge)
+{
+    PointList::iterator pointIt;
+    std::list<std::string>::iterator it = se_list_nref(edge, 0);
+    std::string pointName1 = *it;
+    it = se_list_nref(edge, 1);
+    std::string pointName2 = *it;
+    it = se_list_nref(edge, 2);
+    std::string curveName = *it;
+    it = se_list_nref(edge, 3);
+    std::string time = *it;
+    it = se_list_nref(edge, 4);
+    std::string outGroup = *it;
+    it = se_list_nref(edge, 5);
+    std::string logoState = *it;
+    bool found = false;
+    for(pointIt = mPointList.begin() ; pointIt != mPointList.end() ; pointIt++)
+    {
+        if(pointIt->pointName == pointName1)
+        {
+            Edge e;
+            e.pointName = pointName2;
+            e.curveName = curveName;
+            e.time = atoi(time.c_str());
+            e.outGroup = atoi(outGroup.c_str());
+            e.logoState = (LOGO_STATE)atoi(logoState.c_str());
+            pointIt->edges.push_back(e);
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+    {
+        Point p;
+        p.pointName = pointName1;
+        Edge e;
+        e.pointName = pointName2;
+        e.curveName = curveName;
+        e.time = atoi(time.c_str());
+        e.outGroup = atoi(outGroup.c_str());
+        e.logoState = (LOGO_STATE)atoi(logoState.c_str());
+        p.edges.push_back(e);
+        mPointList.push_back(p);
+    }
+}
+void SE_Scene::createPointEdges()
+{
+    /*
+    Point p;
+    Edge e;
+    
+    p.pointName = "L1";
+    e.pointName = "L2";
+    e.curveName = "P1L";
+    e.time = 12;
+    e.outGroup = false;
+    e.logoState = NO_CONCERN_LOGO;
+    p.edges.push_back(e);
+    mPointList.push_back(p);
+    
+    p.edges.clear();
+    p.pointName = "R1";
+    e.pointName = "R2";
+    e.curveName = "P1R";
+    e.time = 12;
+    e.logoState = NO_LOGO;
+    e.outGroup = false;
+    p.edges.push_back(e);
+    mPointList.push_back(p);
+    
+    p.edges.clear();
+    p.pointName = "L2";
+    e.pointName = "R1";
+    e.curveName = "P2L_YZINVERSE";
+    e.time = 12;
+    e.logoState = NO_LOGO;
+    e.outGroup = false;
+    p.edges.push_back(e);
+    
+    e.pointName = "L1";
+    e.curveName = "P1L";
+    e.outGroup = true;
+    e.logoState = NO_CONCERN_LOGO;
+    e.time = 12;
+    p.edges.push_back(e);
+    
+    e.pointName = "R1";
+    e.curveName = "P2L";
+    e.outGroup = true;
+    e.logoState = NO_LOGO;
+    e.time = 12;
+    p.edges.push_back(e);
+    
+    e.pointName = "R1";
+    e.curveName = "HP1R_XYINVERSE";
+    e.logoState = HAS_LOGO;
+    e.outGroup = false;
+    e.time = 12;
+    p.edges.push_back(e);
+    mPointList.push_back(p);
+    
+    p.edges.clear();
+    p.pointName = "R2";
+    e.pointName = "R1";
+    e.outGroup = true;
+    e.logoState = NO_CONCERN_LOGO;
+    e.curveName = "P1R";
+    e.time = 12;
+    p.edges.push_back(e);
+    e.pointName = "L1";
+    e.outGroup = true;
+    e.logoState = NO_LOGO;
+    e.curveName = "P2R";
+    e.time = 12;
+    p.edges.push_back(e);
+    e.pointName = "L1";
+    e.outGroup = false;
+    e.logoState = NO_LOGO;
+    e.curveName = "P2R_YZINVERSE";
+    e.time = 12;
+    p.edges.push_back(e);
+    e.pointName = "L1";
+    e.logoState = HAS_LOGO;
+    e.outGroup = false;
+    e.curveName = "HP1L_XYINVERSE";
+    e.time = 12;
+    p.edges.push_back(e);
+    mPointList.push_back(p);
+    */
+}
+void SE_Scene::setCurveData(int index)
+{
+    mCameraMoveState->moveStart = true;
+    std::string curveName = mCameraMoveState->cameraPath[index].name;
+    mCameraMoveState->currentCurve = getCurveData(curveName);
+    mCameraMoveState->currentCurveTotalTime = mCameraMoveState->cameraPath[index].time * 1000;
+    mCameraMoveState->currentTime = 0;
+    std::vector<SE_LookingPointTrackData> lookpointTrackData = mModelManager->getLookingPointTrackDataList(curveName);
+    mCameraMoveState->currentLookPointTrackList = lookpointTrackData;
+}
+void SE_Scene::setCurveData(const PointCurveData& pcd)
+{
+    mCameraMoveState->moveStart = true;
+    mCameraMoveState->currentCurve = getCurveData(pcd.curveName);
+    mCameraMoveState->currentTime = 0;
+    mCameraMoveState->currentCurveTotalTime = pcd.time * 1000;
+    std::vector<SE_LookingPointTrackData> lookpointTrackData = mModelManager->getLookingPointTrackDataList(pcd.curveName);
+    mCameraMoveState->currentLookPointTrackList = lookpointTrackData;
+    mCameraMoveState->endLocationName = pcd.pointName;
+}
+void SE_Scene::printPointEdge()
+{
+    PointList::iterator it;
+    for(it = mPointList.begin() ; it != mPointList.end(); it++)
+    {
+        std::list<Edge>::iterator edgeIt;
+        for(edgeIt = it->edges.begin() ; edgeIt != it->edges.end(); edgeIt++)
+        {
+            LOGI("%s , ", it->pointName.c_str());
+            LOGI("%s , ", edgeIt->pointName.c_str());
+            LOGI("%s , ", edgeIt->curveName.c_str());
+            LOGI("%d , ", edgeIt->time);
+            LOGI("%d , ", edgeIt->outGroup);
+            LOGI("%d , ", edgeIt->logoState);
+            LOGI("\n");
+        }
+        
+    }
 }
 void SE_Scene::startCameraMove()
 {
-    if(mCurve)
+    mCameraStayStatic = true;
+    createCurve();
+    std::vector<SE_TrackPoint> trackPoint = mModelManager->getTrackPoints("P1L");
+    assert(trackPoint.size() > 0);
+    SE_Vector3f startRef = mStartRef;
+    SE_Vector3f point = mModelManager->getTrackPoint(trackPoint[0], startRef);
+    SE_Vector3f lookingPoint = mModelManager->getFrameLookingPoint(frameLookingPointName);
+    lookingPoint.x = -lookingPoint.x;
+    SE_Vector3f zAxis = point - lookingPoint;
+    zAxis = zAxis.normalize();
+    SE_Vector3f yAxis = SE_Vector3f(0, 0, 1);
+    mCamera->create(point, zAxis, yAxis, CAMERA_FIELD_OF_VIEW, CAMERA_RATIO, 1, CAMERA_FAR_DIST);
+    GroupList::iterator group = locationInGroup(point.y);
+    bool bHasStation = group->hasStationNode;
+    mCurrentLookingPhotoFrameNode.currGroupIt = group;
+    mCurrentLookingPhotoFrameNode.prevGroupIt = group;
+    PointCurveData pcd = calculatePointCurve(mCameraMoveState->startLocationName, mCameraMoveState->isLeaveGroup(), (bHasStation ? HAS_LOGO : NO_LOGO));
+    setCurveData(pcd);
+    //for debug
+    printPointEdge();
+    //end
+}
+void SE_Scene::setCurvePath(const std::vector<CameraPathProperty>& paths)
+{
+    if(paths.size() == 0)
+        return;
+    createCurve();
+    mCameraMoveState->cameraPath.clear();
+    mCameraMoveState->cameraPath.resize(paths.size());
+    std::copy(paths.begin(), paths.end(), mCameraMoveState->cameraPath.begin());
+    mCameraMoveState->curvePathIndex = 0;
+    setCurveData(0);
+}
+SE_Scene::GroupList::iterator SE_Scene::locationInGroup(float y)
+{
+    //float dist = y - mFloorDownMin.y;
+    GroupList::iterator it;
+    for(it = mGroupList.begin(); it != mGroupList.end() ; it++)
     {
-        size_t totalSize = mTrackPoints1.size() + mTrackPoints2.size();
-        if(mTrackPointsIndex < totalSize)
+        PhotoFrameNode pfn = it->photoFrameNode[SW];
+        SE_Matrix4f m = pfn.worldM;
+        SE_Vector4f v = m.getColumn(3);
+        float min = mFloorDownMin.y + v.y;
+        float max = mFloorDownMax.y + v.y + mYLength;
+        if(min <= y && y <= max)
+            return it;
+    }
+    return mGroupList.end();
+}
+int SE_Scene::locationInGroup(const SE_Vector3f& loc)
+{
+    float y = loc.y - mFloorDownMin.y;
+    int index = floorf(y / (2 * mYLength));
+    if(index < 0)
+        index = 0;
+    return index;
+}
+void SE_Scene::updateFogPointByCameraPoint(const SE_Vector3f& cameraLoc)
+{
+    float y = cameraLoc.y;
+    float times = y / mYLength;
+    int a = floor(times);
+    mCurrentFogPoint.y = mFirstFogPoint.y + mFirstFogPoint.y * a;
+    //LOGI("## fogpoint = %f , %f , %f ##\n", mCurrentFogPoint.x, mCurrentFogPoint.y ,mCurrentFogPoint.z);
+}
+void SE_Scene::updateConcernPhotoFrameNode()
+{
+    if(mCameraStayStatic == false)
+        return;
+    GroupList::iterator it;
+    for(it = mGroupList.begin() ; it != mGroupList.end() ; it++)
+    {
+        for(int i = 0 ; i < 4 ; i++)
         {
-            if(mTrackPointsIndex < mTrackPoints1.size())
+            DisplayObjectList::iterator objIt;
+            for(objIt = it->photoFrameNode[i].objList.begin() ;
+                objIt != it->photoFrameNode[i].objList.end() ;
+                objIt++)
             {
-                SE_Vector3f z = mCameraZArray[mTrackPointsIndex];
-                float radian = radianBetweenVector(mCameraZ, z);
-                SE_Quat q(-SE_RadianToAngle(radian), SE_Vector3f(0, 0, 1));
-                SE_Vector3f y = q.map(mCameraY);
-                SE_Vector3f v = mTrackPoints1[mTrackPointsIndex];
-                LOGI("## camera loc = %f, %f, %f ##\n", v.x, v.y, v.z);
-                LOGI("## radian = %f ##\n", SE_RadianToAngle(radian));
-                LOGI("## camera z = %f , %f, %f ##\n", z.x, z.y, z.z);
-                LOGI("## camera y = %f, %f, %f ##\n", y.x, y.y, y.z);
-                mCamera->create(v, z, y, 45, mScreenHeight/ mScreenWidth, 1, 500);
-                //mTrackPointsIndex++;
-            }
-            else
-            {
-                int index = mTrackPointsIndex - mTrackPoints1.size();
-                if(index == 0)
-                {
-                    mCameraY = SE_Vector3f(-1, 0, 0);
-                    mCameraZ = SE_Vector3f(0, -1, 0);
-                }
-                SE_Vector3f z = mCameraZArray2[index];
-                float radian = radianBetweenVector(mCameraZ, z);
-                SE_Quat q(SE_RadianToAngle(radian), SE_Vector3f(0, 0, 1));
-                SE_Vector3f y = q.map(mCameraY);
-                SE_Vector3f v = mTrackPoints2[index];
-                mCamera->create(v, z, y, 45, mScreenHeight/ mScreenWidth, 1, 500);
-                //mTrackPointsIndex++;
+                objIt->bConcerned = false;
             }
         }
     }
-}
-/////////////// obsolete /////
-void SE_Scene::createCurveFromPoints(SE_Vector3f* points , int pointNum, int curvePointNum)
-{
-    if(pointNum < 3)
+    it = mCurrentLookingPhotoFrameNode.currGroupIt;//se_list_nref(mGroupList, mCurrentLookingPhotoFrameNode.mGroupIndex);
+    assert(mCurrentLookingPhotoFrameNode.nodeType != INVALID_PHOTO_FRAME_NODE_TYPE);
+    assert(mCurrentLookingPhotoFrameNode.currGroupIt != mGroupList.end());
+    mCurrentLookingPhotoFrameNode.currGroupIt->photoFrameNode[mCurrentLookingPhotoFrameNode.nodeType].bConcerned = true;
+    DisplayObjectList::iterator objIt;
+    for(objIt = it->photoFrameNode[mCurrentLookingPhotoFrameNode.nodeType].objList.begin() ;
+        objIt != it->photoFrameNode[mCurrentLookingPhotoFrameNode.nodeType].objList.end();
+        objIt++)
     {
-        LOGI("curve key point must be greater than 3\n");
+        if(objIt->bPicturePlace)
+        {
+            objIt->bConcerned = true;
+        }
+        if(objIt->bPicturePlace && mCurrentLookingPhotoFrameNode.nodeChanged)
+        {
+            int pictureIndex = objIt->pictureIndex;
+            PictureID pictureID = mPictureIDVector[pictureIndex];
+            std::string pictureName = pictureID.pictureName;
+            std::string textureName = pictureName + "_full";
+            LOGI("## ready to load = %d, %s ##\n", pictureIndex, textureName.c_str());
+            SS_LoadFullImageAsync(pictureName.c_str(), pictureID.pictureDate.c_str(), textureName.c_str(), mModelManager, mViewNav);
+        }
+    }
+    if(mCurrentLookingPhotoFrameNode.nodeChanged)
+    {
+        LOGI("## prev node = %d ##\n", mCurrentLookingPhotoFrameNode.prevNodeType);
+        deleteFullImageTexture();
+    }
+}
+void SE_Scene::deleteFullImageTexture()
+{
+    if(mCameraMoveState->bLeavingGroup && mCurrentLookingPhotoFrameNode.prevGroupIt == mGroupList.end())
+    {
+        assert(0);
         return;
     }
-    //int curvePointNum = 1000;//
-    float s = 0.5;
-    int curveNum = pointNum - 1;
-    float tstep = 1.0 / (float)curvePointNum;
-    mPointData.vertexNum = curvePointNum * curveNum + 1;
-    mPointData.floatSize = mPointData.vertexNum * 3;
-    mPointData.data = new float[mPointData.floatSize];
-    SE_Vector3f v = points[2] - points[0];
-    v.mul(s);
-    SE_HermiteInterpolate hip;
-    SE_Vector4f hipx = hip.interpolate(points[0].x, points[1].x, 0, v.x);
-    SE_Vector4f hipy = hip.interpolate(points[0].y, points[1].y, 0, v.y);
-    SE_Vector4f hipz = hip.interpolate(points[0].z, points[1].z, 0, v.z);
-    float t = 0;
-    int j = 0;
-    for(int i = 0 ; i < curvePointNum ; i++)
+    if(!mCameraMoveState->bLeavingGroup && mCurrentLookingPhotoFrameNode.currGroupIt == mGroupList.end())
     {
-        mPointData.data[j++] = hipx.x * t * t * t + hipx.y * t * t + hipx.z * t + hipx.w;
-        mPointData.data[j++] = hipy.x * t * t * t + hipy.y * t * t + hipy.z * t + hipy.w;
-        mPointData.data[j++] = hipz.x * t * t * t + hipz.y * t * t + hipz.z * t + hipz.w;
-        t += tstep;
+        assert(0);
+        return;
     }
-    v = points[pointNum - 1] - points[pointNum - 3];
-    v.mul(0.5);
-    hipx = hip.interpolate(points[pointNum - 2].x, points[pointNum - 1].x, v.x, 0);
-    hipy = hip.interpolate(points[pointNum - 2].y, points[pointNum - 1].y, v.y, 0);
-    hipz = hip.interpolate(points[pointNum - 2].z, points[pointNum - 1].z, v.z, 0);
-    t = 0;
-    for(int i = 0 ; i < curvePointNum ; i++)
+    GroupList::iterator it = mGroupList.end();
+    if(mCameraMoveState->bLeavingGroup)
     {
-        mPointData.data[j++] = hipx.x * t * t * t + hipx.y * t * t + hipx.z * t + hipx.w;
-        mPointData.data[j++] = hipy.x * t * t * t + hipy.y * t * t + hipy.z * t + hipy.w;
-        mPointData.data[j++] = hipz.x * t * t * t + hipz.y * t * t + hipz.z * t + hipz.w;
-        t += tstep;
+        it = mCurrentLookingPhotoFrameNode.prevGroupIt;
     }
-    
-    SE_CardinalSplineInterpolate csInterpolate;
-    for(int k = 1 ; k < (pointNum - 2) ; k++)
+    else {
+        it = mCurrentLookingPhotoFrameNode.currGroupIt;
+    }
+    PhotoFrameNode pfn = it->photoFrameNode[mCurrentLookingPhotoFrameNode.prevNodeType];
+    DisplayObjectList::iterator objIt;
+    for(objIt = pfn.objList.begin();
+        objIt != pfn.objList.end();
+        objIt++)
     {
-        SE_CardinalSplineInterpolate::Interpolator ipx = csInterpolate.getInterpolator(points[k - 1].x,     points[k].x, points[k + 1].x, points[k + 2].x, s);
-        SE_CardinalSplineInterpolate::Interpolator ipy = csInterpolate.getInterpolator(points[k - 1].y,     points[k].y, points[k + 1].y, points[k + 2].y, s);
-        SE_CardinalSplineInterpolate::Interpolator ipz =  csInterpolate.getInterpolator(points[k - 1].z, points[k].z, points[k + 1].z, points[k + 2].z, s);
-        t =  0;
-        for(int i = 0 ; i < curvePointNum ; i++)
+        if(objIt->bPicturePlace)
         {
-            mPointData.data[j++] = ipx.calc(t);
-            mPointData.data[j++] = ipy.calc(t);
-            mPointData.data[j++] = ipz.calc(t);
-            t += tstep;
+            int pictureIndex = objIt->pictureIndex;
+            LOGI("## want to delete picture = %d ##\n", pictureIndex);
+            std::string pictureName = mPictureIDVector[pictureIndex].pictureName;
+            std::string textureID = pictureName + "_full";
+            mModelManager->removeTexture(textureID.c_str());
         }
     }
-    mPointData.data[j++] = points[pointNum - 1].x;
-    mPointData.data[j++] = points[pointNum - 1].y;
-    mPointData.data[j++] = points[pointNum - 1].z;
-    SE_ASSERT(j == mPointData.floatSize);
 }
-void SE_Scene::testCurve(SE_Curve* curve)
+static float bounce(float t)
 {
-    int splineCurveNum = curve->getSplineCurveNum();
-    for(int i = 0; i < splineCurveNum ; i++)
-    {
-        float curveLen = curve->getSplineCurveLength(i);
-        LOGI("## curveLen = %f ##\n", curveLen);
-    }
-    curve->startForwarding(10);
-    bool b;
-    SE_Vector3f out;
-    std::list<SE_Vector3f> dynPointList;
-    while((b = curve->getNextCurvePoint(out)))
-    {
-        LOGI("## point = %f, %f, %f ##\n", out.x, out.y, out.z);
-        dynPointList.push_back(out);
-    }
-    mDynPointData.vertexNum = dynPointList.size();
-    mDynPointData.floatSize = mDynPointData.vertexNum * 3;
-    mDynPointData.data = new float[mDynPointData.floatSize];
-    int j = 0 ; 
-    std::list<SE_Vector3f>::iterator it;
-    for(it = dynPointList.begin() ; it != dynPointList.end() ; it++)
-    {
-        SE_Vector3f v = *it;
-        mDynPointData.data[j++] = v.x;
-        mDynPointData.data[j++] = v.y;
-        mDynPointData.data[j++] = v.z;
-    }
+    return t * t * 8.0f;
 }
-void SE_Scene::createPoints()
-{
+static float a(float t, float s) {
+    return t * t * ((s + 1) * t - s);
+}
 
-    /*
-    SE_Vector3f points[4];
-    points[0] = SE_Vector3f(0, 0, -1000);
-    points[1] = SE_Vector3f(300, 0, -1000);
-    points[2] = SE_Vector3f(300, 300, -1000);
-    points[3] = SE_Vector3f(0, 300, -1000);
-    createCurveFromPoints(points, 4, 10);
-    */
-    SE_Curve::SamplePoint points[5];
-    points[0].point = SE_Vector3f(259.84, -169.62, -1000);
-    points[1].point = SE_Vector3f(30.28, -143.04, -1000);
-    points[2].point = SE_Vector3f(24.7, -512.4, -1000);
-    points[3].point = SE_Vector3f(-142.34, -491.9, -1000);
-    points[4].point = SE_Vector3f(-79.66, -637.47, -1000);
-    
-    //createCurveFromPoints(points, 5, 10);
-    SE_Curve* curve = new SE_Curve(points, 5, 2000);
-    curve->createCurve();
-    testCurve(curve);
-    mPointData.vertexNum = curve->getVertexNum();
-    mPointData.floatSize = curve->getFloatSize();
-    mPointData.data = curve->getData();
-    float tantheta = 1024.0f / (2 * 1000.0f);
-    float theta = 2 * atanf(tantheta);
-    float angle = theta * 180.0 / 3.1415926;
-    
-    mCamera->create(SE_Vector3f(0, 0, 1000), SE_Vector3f(1, 0, 0), SE_Vector3f(0,1,0), SE_Vector3f(0, 0, 1), angle, mScreenHeight / mScreenWidth, 1 , 2000);
-    mCamera->setViewport(0, 0 , mScreenWidth, mScreenHeight);
-    
+static float o(float t, float s) {
+    return t * t * ((s + 1) * t + s);
 }
+
+
+float SE_Scene::interpolateChange(float t)
+{
+    const float pi = 3.1415926;
+
+    if(1)
+    {
+        float ret = SE_Cosf((t + 1) * pi) / 2.0 + 0.5;
+        return ret;
+    }
+    else if (0){
+        
+        t *= 1.1226f;
+        if (t < 0.3535f) 
+            return bounce(t);
+        else if (t < 0.7408f) return bounce(t - 0.54719f) + 0.7f;
+        else if (t < 0.9644f) return bounce(t - 0.8526f) + 0.9f;
+        else return bounce(t - 1.0435f) + 0.95f;
+    }
+    else if(0){
+        float tension = 3;
+        if (t < 0.5f) return 0.5f * a(t * 2.0f, tension);
+        else return 0.5f * (o(t * 2.0f - 2.0f, tension) + 2.0f);
+    }
+
+}
+void SE_Scene::changeGroupWorldTranslate()
+{
+    if(mNegativeGroupList.size() > 0)
+    {
+        mNegativeGroupList.pop_front();
+    }
+    GroupList::iterator it;
+    float deltaY = -2 * mYLength;
+    for(it = mNegativeGroupList.begin() ; it != mNegativeGroupList.end() ; it++)
+    {
+        for(int i = 0 ;i < 4 ; i++)
+        {
+            moveTranslateY(it->photoFrameNode[i], deltaY);
+        }
+        moveTranslateY(it->staticNode[DOWN], deltaY);
+        moveTranslateY(it->staticNode[UP], deltaY);
+        if(it->hasStationNode)
+        {
+            moveTranslateY(it->stationNode, deltaY);
+        }
+    }
+    for(it = mGroupList.begin() ; it != mGroupList.end() ; it++)
+    {
+        for(int i = 0 ;i < 4 ; i++)
+        {
+            moveTranslateY(it->photoFrameNode[i], deltaY);
+        }
+        moveTranslateY(it->staticNode[DOWN], deltaY);
+        moveTranslateY(it->staticNode[UP], deltaY);
+        if(it->hasStationNode)
+        {
+            moveTranslateY(it->stationNode, deltaY);
+        }
+    }
+    it = se_list_nref(mGroupList, mGroupList.size() - 1);
+    PhotoFrameNode pfn = it->photoFrameNode[SW];
+    SE_Matrix4f m = pfn.worldM;
+    SE_Vector4f v = m.getColumn(3);
+    if(v.y < CAMERA_FAR_DIST)
+    {
+        LOGI("## add new group , last picture index = %d ##", mLastPictureIndex);
+        Group group;
+        float nodey = v.y + 2 * mYLength;
+        assert(nodey >= CAMERA_FAR_DIST);
+        group.photoFrameNode[SW] = createPhotoFrameNode(nodey, SW, 0, mLastPictureIndex);
+        nodey = v.y + 2 * mYLength;
+        group.photoFrameNode[SE] = createPhotoFrameNode(nodey, SE, 0, mLastPictureIndex);
+        nodey = v.y + 2 * mYLength + mYLength;
+        group.photoFrameNode[NW] = createPhotoFrameNode(nodey, NW, 0, mLastPictureIndex);
+        nodey = v.y + 2 * mYLength + mYLength;
+        group.photoFrameNode[NE] = createPhotoFrameNode(nodey, NE, 0, mLastPictureIndex);
+        nodey = v.y + 2 * mYLength;
+        group.staticNode[DOWN] = createStaticNode(nodey, DOWN);
+        nodey = v.y + 2 * mYLength + mYLength;
+        group.staticNode[UP] = createStaticNode(nodey, UP);
+        mGroupList.pop_front();
+        mGroupList.push_back(group);
+    }
+}
+void SE_Scene::updateCameraMove(float deltaTime)
+{
+    if(!mCameraMoveState->moveStart)
+        return;
+    mCameraMoveState->currentTime += deltaTime;
+    float t = mCameraMoveState->currentTime / mCameraMoveState->currentCurveTotalTime;
+    bool needChangeCurve = isNeedChangeCurve(t);
+    if(t > 1)
+        t = 1;
+    t = interpolateChange(t);
+    if(!needChangeCurve)
+    {
+        SE_Vector3f point;
+        float step = t * mCameraMoveState->currentCurve.curveLen;
+        mCameraMoveState->currentCurve.curve->setCurrentPoint(0);
+        mCameraMoveState->currentCurve.curve->setForwardingStep(step);
+        mCameraMoveState->currentCurve.curve->getNextCurvePoint(point);
+        
+        SE_Vector3f lookpoint = getCurrentLookPoint(t);
+        if(!mCameraMoveState->bLeavingGroup)
+        {
+            point.y = point.y;// + mCurrentGroupIndex * 2 * mYLength;
+            lookpoint.y = lookpoint.y;//+ mCurrentGroupIndex * 2 * mYLength;
+        }
+        else 
+        {
+            point.y = point.y + mYLength;//(mCurrentGroupIndex - 1) * 2 * mYLength + mYLength;
+            lookpoint.y = lookpoint.y + mYLength;//(mCurrentGroupIndex -1 ) * 2 * mYLength + mYLength;
+        }
+        point.z = lookpoint.z;
+        GroupList::iterator groupIt = locationInGroup(point.y);
+        if(groupIt != mCurrentLookingPhotoFrameNode.currGroupIt)
+        {
+            LOGI("## group chage ##\n");
+            mCurrentLookingPhotoFrameNode.prevGroupIt = mCurrentLookingPhotoFrameNode.currGroupIt;
+            mCurrentLookingPhotoFrameNode.currGroupIt = groupIt;
+        }
+        /*
+        bool groupChanged = false;
+        if(groupIndex != mCurrentLookingPhotoFrameNode.mGroupIndex)
+        {
+            groupChanged = true;
+        }
+        if(groupChanged)
+        {
+            mCurrentLookingPhotoFrameNode.mPrevGroupIndex = mCurrentLookingPhotoFrameNode.mGroupIndex;
+        }
+        mCurrentLookingPhotoFrameNode.groupChanged = groupChanged;
+        mCurrentLookingPhotoFrameNode.mGroupIndex = groupIndex;
+         */
+        updateConcernPhotoFrameNode();
+        SE_Vector3f zAxis = point - lookpoint;
+        //LOGI("## current point = %f , %f, %f ###\n", point.x, point.y, point.z);
+        //LOGI("## current look point = %f , %f , %f ### \n", lookpoint.x, lookpoint.y, lookpoint.z);
+        //LOGI("## current zAxis = %f, %f, %f ###\n", zAxis.x, zAxis.y, zAxis.z);
+        zAxis = zAxis.normalize();
+        SE_Vector3f yAxis = SE_Vector3f(0, 0, 1);
+        updateFogPointByCameraPoint(point);
+        
+        mCamera->create(point, zAxis, yAxis, CAMERA_FIELD_OF_VIEW, CAMERA_RATIO, 1, CAMERA_FAR_DIST);
+    }
+    else
+    {
+        if(mCameraMoveState->bLeavingGroup)
+        {
+            mCameraMoveState->bLeavingGroup = false;
+            changeGroupWorldTranslate();
+        }
+        mCameraMoveState->checkLeftOrRightFinish();
+        LOGI("## start location name = %s, end name = %s ##\n", mCameraMoveState->startLocationName.c_str(), mCameraMoveState->endLocationName.c_str());
+        mCameraMoveState->startLocationName = mCameraMoveState->endLocationName;
+        mCameraMoveState->endLocationName = "";
+        SE_Vector3f loc = mCamera->getLocation();
+        GroupList::iterator groupIt = locationInGroup(loc.y);
+        bool hasLogo = groupIt->hasStationNode;
+        PointCurveData pcd = calculatePointCurve(mCameraMoveState->startLocationName, mCameraMoveState->isLeaveGroup(), (hasLogo ? HAS_LOGO : NO_LOGO));
+        LOGI("### curve = %s ###\n", pcd.curveName.c_str());
+        if(mCameraMoveState->isLeaveGroup())
+        {
+            LOGI("## leave group idnex = %d ##\n", mCurrentGroupIndex);
+            mCameraMoveState->clearLeftRightFinish();
+            mCameraMoveState->bLeavingGroup = true;
+            //mCurrentGroupIndex++;
+        }
+        setCurveData(pcd);
+    }
+}
+
+/*
 void SE_Scene::renderPoints()
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -962,45 +2494,8 @@ void SE_Scene::renderPoints(float* vertexData, int vertexNum, SE_Vector3f color)
     
     glDrawArrays(GL_POINTS, 0, vertexNum);
 }
-void SE_Scene::create()
-{
-    mCamera->create(SE_Vector3f(3, -10, 0),  SE_Vector3f(1, 0, 0), SE_Vector3f(0, 0, 1), SE_Vector3f(0, -1, 0), 45, mScreenHeight/ mScreenWidth, 1, 500);
-    //mCamera->create(SE_Vector3f(0, -10, 2), SE_Vector3f(0, -1, 0), SE_Vector3f(0, 0, 1), SE_Vector3f(-1, 0, 0),  45, mScreenWidth / mScreenHeight, 1, 100);
-    //mCamera->create(SE_Vector3f(0, 10, 0), SE_Vector3f(1, 0, 0), SE_Vector3f(0, 1, 0), SE_Vector3f(0, 0, 1), 45, mScreenWidth / mScreenHeight, 1, 100);
-    mCamera->setViewport(0, 0, mScreenWidth, mScreenHeight);
-    SE_GeometryData geomData = SE_GeometryData::createZAlignRect(10, 10, -35);
-    mModelManager->addGeometryData(geomData);
-    mFogPlaneMesh = new SE_Mesh;
-    mFogPlaneMesh->geomDataIndex = mModelManager->getGeometryDataNum() - 1;
-    mFogPlaneMesh->getDrawingVertex(SE_Mesh::XYZ_COLOR);
-    createMeshVBO(mFogPlaneMesh);
-    createNode();
-    createScene();
-    int meshnum = mModelManager->getMeshNum();
-    for(int i = 0 ; i < meshnum ; i++)
-    {
-        SE_Mesh* mesh = mModelManager->getMesh(i);
-        if(mesh->name == "logo001")
-        {
-            LOGI("## logo ###\n");
-        }
-        float* data = mesh->getDrawingVertex(SE_Mesh::XYZ_UV);
-        createMeshVBO(mesh);
-    }
-}
-void SE_Scene::createScene()
-{
-    for(int i = 0 ; i < mSceneCount ; i++)
-    {
-        SE_Matrix4f m;
-        m.identity();
-        m.setColumn(3, SE_Vector4f(0, mBoundY * i, 0, 1));
-        Scene* scene = new Scene;
-        scene->translate = m;
-        scene->nodeList = mNodeList;
-        mSceneList[i] = scene;
-    }
-}
+ */
+/*
 int SE_Scene::getMeshByName(const char* name)
 {
     NodeList::iterator it ;
@@ -1018,65 +2513,8 @@ int SE_Scene::getMeshByName(const char* name)
     }    
     return -1;
 }
+*/
 
-void SE_Scene::createBoundingBox()
-{
-    SE_Vector3f min(1000, 1000, 1000);
-    SE_Vector3f max(-1000, -1000, -1000);
-
-    for(int i = 0 ; i < mModelManager->getMeshNum() ; i++)
-    {
-        SE_Mesh* mesh = mModelManager->getMesh(i);
-        SE_GeometryData* gd = mModelManager->getGeometryData(mesh->geomDataIndex);
-        int vertexNum = gd->vertexNum;
-        SE_Vector3f* vertexArray = gd->vertexArray;
-        for(int i = 0 ; i < vertexNum ; i++)
-        {
-            if(vertexArray[i].x < min.x)
-                min.x = vertexArray[i].x;
-            if(vertexArray[i].y < min.y)
-                min.y = vertexArray[i].y;
-            if(vertexArray[i].z < min.z)
-                min.z = vertexArray[i].z;
-            if(vertexArray[i].x > max.x)
-                max.x = vertexArray[i].x;
-            if(vertexArray[i].y > max.y)
-                max.y = vertexArray[i].y;
-            if(vertexArray[i].z > max.z)
-                max.z = vertexArray[i].z;
-        }
-    }
-    mMin = min;
-    mMax = max;
-}
-void SE_Scene::calculateBoundingBox(int index)
-{
-    SE_Mesh* mesh = mModelManager->getMesh(index);
-    if(mesh->name == "WallFrameV_001")
-    {
-        SE_GeometryData* gd = mModelManager->getGeometryData(mesh->geomDataIndex);
-        int vertexNum = gd->vertexNum;
-        SE_Vector3f* vertexArray = gd->vertexArray;
-        SE_Vector3f min(1000, 1000, 1000);
-        SE_Vector3f max(-1000, -1000, -1000);
-        for(int i = 0 ; i < vertexNum ; i++)
-        {
-            if(vertexArray[i].x < min.x)
-                min.x = vertexArray[i].x;
-            if(vertexArray[i].y < min.y)
-                min.y = vertexArray[i].y;
-            if(vertexArray[i].z < min.z)
-                min.z = vertexArray[i].z;
-            if(vertexArray[i].x > max.x)
-                max.x = vertexArray[i].x;
-            if(vertexArray[i].y > max.y)
-                max.y = vertexArray[i].y;
-            if(vertexArray[i].z > max.z)
-                max.z = vertexArray[i].z;
-        }
-        mBoundY = max.y - min.y;
-    }
-}
 void SE_Scene::move(int axis, float v)
 {
     if(axis == 1)
@@ -1097,53 +2535,14 @@ void SE_Scene::moveCamera(float deltax, float deltay)
     SE_Rect<int> viewport = mCamera->getViewport();
     int viewportWidth = viewport.right - viewport.left;
     float ratio = -180.0f / viewportWidth;
-    float angle = ratio * deltay;
+    float angle = ratio * deltax;
     //mCamera->rotateLocal(angle, SE_AXIS_X);
     mCamera->rotateLocal(angle, SE_AXIS_Y);
-    mCamera->translateLocal(SE_Vector3f(0, 0, -deltax));
+    mCamera->translateLocal(SE_Vector3f(0, 0, deltay));
 
 }
 void SE_Scene::rotateCamera(float angle)
 {
-}
-void SE_Scene::createNode()
-{
-    int meshNum = mModelManager->getMeshNum();
-    SE_Matrix4f m;
-    m.setColumn(0, SE_Vector4f(-1, 0, 0, 0));
-    m.setColumn(1, SE_Vector4f(0, 1, 0, 0));
-    m.setColumn(2, SE_Vector4f(0, 0, 1, 0));
-    m.setColumn(3, SE_Vector4f(0, 0, 0, 1));
-    for(int i = 0 ; i <meshNum ; i++)
-    {
-        SE_Mesh* mesh = mModelManager->getMesh(i);
-        SS_Node* node = NULL;
-        
-        if(mesh->name == "WallFrameH_001" ||
-           mesh->name == "FrameH_001" ||
-           mesh->name == "WallFrameV_001" ||
-           mesh->name == "FrameV_001" ||
-           mesh->name == "BackWall" ||
-           mesh->name == "photoV001" ||
-           mesh->name == "photoH001"
-           )
-        {
-            node = new SS_Node;
-            node->meshIndex = i;
-            node->m = m;
-            node->cullType = SE_Scene::SS_Node::CW;
-        }
-        if(mesh->name != "Box003" && mesh->name != "logo001")
-        {
-            SS_Node* baseNode = new SS_Node;
-            baseNode->meshIndex = i;
-            if(node != NULL)
-                mNodeList.push_back(node);
-            mNodeList.push_back(baseNode);
-            
-        }
-        calculateBoundingBox(i);
-    }
 }
 void SE_Scene::renderWireFrame(int index)
 {
@@ -1300,55 +2699,4 @@ void SE_Scene::renderFogPlane()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDrawArrays(GL_TRIANGLES, 0, mFogPlaneMesh->mDrawingVertexNum);
     glDisable(GL_BLEND);
-}
-void SE_Scene::render()
-{
-    glClearColor(1, 1, 1, 1);
-    checkGLError();
-    glClear(GL_COLOR_BUFFER_BIT);
-    checkGLError();
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    
-    glEnable(GL_DEPTH_TEST);
-    checkGLError();
-    glDepthFunc(GL_LEQUAL);
-    glDisable(GL_BLEND);
-    checkGLError();
-    glEnable(GL_CULL_FACE);
-    checkGLError();
-    //glDisable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    checkGLError();
-    glFrontFace(GL_CCW);
-    checkGLError();
-    
-    SS_Shader* shader = mModelManager->getShader("fog_shader");
-    shader->use();
-    for(int i = 0 ; i < mSceneList.size() ; i++)
-    {
-        Scene* s = mSceneList[i];
-        NodeList::iterator it;
-        for(it = mNodeList.begin() ; it != mNodeList.end() ; it++)
-        {
-            SS_Node* node = *it;
-            if(node->cullType == SE_Scene::SS_Node::CW)
-            {
-                glFrontFace(GL_CW);
-            }
-            else 
-            {
-                glFrontFace(GL_CCW);
-            }
-            SE_Matrix4f rotateM;
-            rotateM.identity();
-            
-            SE_Matrix3f rotate3f;
-            rotate3f.setRotateY(90);
-            rotateM.set(rotate3f, SE_Vector3f(1, 1,1), SE_Vector3f(0, 0, 0));
-            rotateM = rotateM.mul(s->translate.mul(node->m));
-            render(shader, node->meshIndex, rotateM);
-        }
-    }
-    renderFogPlane();
 }

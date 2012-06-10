@@ -29,13 +29,13 @@
 	<key>SelectedImageViewWidth</key>
 	<integer>200</integer>
 	<key>PhotoWidth</key>
-	<integer>200</integer>
+	<integer>100</integer>
 	<key>PhotoHeight</key>
-	<integer>200</integer>
+	<integer>100</integer>
 	<key>HMargin</key>
-	<integer>10</integer>
+	<integer>7</integer>
 	<key>VMargin</key>
-	<integer>10</integer>
+	<integer>16</integer>
 	<key>RightBarBg</key>
 	<string>painterbackground_side.png</string>
 	<key>LevelOneImageNum</key>
@@ -43,23 +43,37 @@
 	<key>MainDisplayToolBarBg</key>
 	<string>menu_blackground.png</string>
 	<key>ToolBarOptionIcon</key>
+	<string>option_botton_001.png</string>
+	<key>ToolBarOptionIconHighlight</key>
 	<string>option_botton_002.png</string>
 	<key>ToolBarPlayIcon</key>
-	<string>playlist_botton_002.png</string>
+	<string>play_botton_001.png</string>
+	<key>ToolBarPlayIconHighlight</key>
+	<string>play_botton_002.png</string>
 	<key>ToolBarPauseIcon</key>
-	<string>play_botton_002</string>
+	<string>play_botton_002.png</string>
+	<key>ToolBarPauseIconHighlight</key>
+	<string>play_botton_002.png</string>
 	<key>ToolBarPreviewIcon</key>
+	<string>Gallery_botton_001.png</string>
+	<key>ToolBarPreviewIconHighlight</key>
 	<string>Gallery_botton_002.png</string>
 	<key>ToolBarImageSelectIcon</key>
+	<string>open_botton_001.png</string>
+	<key>ToolBarImageSelectIconHighlight</key>
 	<string>open_botton_002.png</string>
 	<key>ToolBarMusicSelectIcon</key>
-	<string>miucelist_botton_002.png</string>
+	<string>music_botton_001.png</string>
+	<key>ToolBarMusicSelectIconHighlight</key>
+	<string>music_botton_002.png</string>
 	<key>ToolBarBackIcon</key>
-	<string>back_botton_002.png</string>
+	<string>playlist_botton_001.png</string>
+	<key>ToolBarBackIconHighlight</key>
+	<string>playlist_botton_002.png</string>
 	<key>DateTimeDataImage</key>
 	<string>Impatfont_001.png</string>
 	<key>MainDisplayBg</key>
-	<string>background_001.jpg</string>
+	<string>background_001.png</string>
 	<key>SelectedSignatureImage</key>
 	<string>Signaturebackground003.png</string>
 	<key>ScrollViewBackground</key>
@@ -67,13 +81,55 @@
 	<key>NormalSignatureImage</key>
 	<string>Signaturebackground002.png</string>
 	<key>ToolBarMusicImageListIcon</key>
-	<string>back_botton_002.png</string>
+	<string>playlist_botton_001.png</string>
+	<key>ToolBarMusicImageListIconHighlight</key>
+	<string>playlist_botton_002.png</string>
 	<key>MusicImageAttachBackground</key>
 	<string>list_background_001.png</string>
-	<key>MusicImageListIndicatorImageIcon</key>
-	<string>Senior Artists.png</string>
-	<key>MusicImageListIndicatorMusicIcon</key>
-	<string>Senior Artists.png</string>
+	<key>MusicImageListIndicatorMusicNormalIcon</key>
+	<string>muisc_list_node.png</string>
+	<key>MusicImageListIndicatorMusicAttachedIcon</key>
+	<string>muisc_list_node_b.png</string>
+	<key>MusicImageMusicListItemNormalNameImage</key>
+	<string>muisc_list_name_background.png</string>
+	<key>MusicImageMusicListItemNormalNumberTitleImage</key>
+	<string>muisc_list_nmber_title.png</string>
+	<key>MusicImageMusicListItemNormalNumberImage</key>
+	<string>muisc_list_nmber_input.png</string>
+	<key>MusicImageMusicListItemAttachedNameImage</key>
+	<string>muisc_list_name_background.png</string>
+	<key>MusicImageMusicListItemAttachedNumberTitleImage</key>
+	<string>muisc_list_nmber_title.png</string>
+	<key>MusicImageMusicListItemAttachedNumberImage</key>
+	<string>muisc_list_nmber_input.png</string>
+	<key>MusicImageMusicListItemNormalBackground</key>
+	<string>muisc_list_001.png</string>
+	<key>MusicImageMusicListItemAttachedBackground</key>
+	<string>muisc_list_a001.png</string>
+	<key>MusicImageMusicNoAlbumIcon</key>
+	<string>music_list_image_01.png</string>
+	<key>MusicImageImageListNormalIndicator</key>
+	<string>image_list_node.png</string>
+	<key>MusicImageImageListAttachedIndicator</key>
+	<string>image_list_node_b.png</string>
+	<key>MusicImageImageListItemNormalNameImage</key>
+	<string>image_list_name_background.png</string>
+	<key>MusicImageImageListItemAttachedNameImage</key>
+	<string>image_list_name_background.png</string>
+	<key>MusicImageImageListItemNormalNumberTitleImage</key>
+	<string>image_list_nmber_title.png</string>
+	<key>MusicImageImageListItemAttachedNumberTitleImage</key>
+	<string>image_list_nmber_title.png</string>
+	<key>MusicImageImageListItemNormalNumberImage</key>
+	<string>image_list_nmber_input_002.png</string>
+	<key>MusicImageImageListItemAttachedNumberImage</key>
+	<string>image_list_nmber_input_002.png</string>
+	<key>MusicImageImageListNoImageIcon</key>
+	<string>image_list_image_01.png</string>
+	<key>MusicImageImageListItemNormalBackground</key>
+	<string>image_list_001.png</string>
+	<key>MusicImageImageListItemAttachedBackground</key>
+	<string>image_list_a001.png</string>
 	<key>Apple4</key>
 	<string>apple_small_004.png</string>
 	<key>Apple5</key>
@@ -91,20 +147,32 @@
 	<key>MainSettingBackground</key>
 	<string>option_background_002.png</string>
 	<key>OptionLabelSelectedBackground</key>
-	<string>selcet_state_002.png</string>
+	<string>option_object_background_002.png</string>
 	<key>OptionLabelNormalBackground</key>
-	<string>selcet_state_001.png</string>
-	<key>MainDisplayBarBackground</key>
-	<string>background_said.png</string>
-	<key>ImagePickerBarBackground</key>
+	<string>option_object_background_001.png</string>
+	<key>MainDisplayImagePickerBarBackground</key>
 	<string>painterbackground_side.png</string>
-	<key>ImageSelectedViewBarBackground</key>
+	<key>ImagePickerSelectedImageViewBarBackground</key>
+	<string>painterbackground001_side.png</string>
+	<key>SelectedImageViewMainDisplayBarBackground</key>
 	<string>painterbackground_side.png</string>
-	<key>MusicPickerBarBackground</key>
+	<key>ImagePickerViewBackground</key>
+	<string>selcetbackground.png</string>
+	<key>MainDisplayMusicPickerBarBackground</key>
+	<string>painterbackground_side.png</string>
+	<key>MusicPickerSelectedMusicViewBarBackground</key>
+	<string>painterbackground001_side.png</string>
+	<key>MusicPickerItemBackground</key>
+	<string>music_background_002.png</string>
+	<key>SelectedMusicViewItemBackground</key>
+	<string>music_background_001.png</string>
+	<key>SelectedMusicViewBackground</key>
+	<string>painterbackground001.png</string>
+	<key>SelectedMusicViewMainDisplayBarBackground</key>
 	<string>painterbackground_side.png</string>
 	<key>OptionBarBackground</key>
 	<string>painterbackground001_side.png</string>
-	<key>MusicImageAttachBarBackground</key>
+	<key>MainDisplayMusicImageAttachBarBackground</key>
 	<string>painterbackground_side.png</string>
 	<key>SliderBarThumbImage</key>
 	<string>Scrollbar_A001.png</string>
@@ -120,5 +188,147 @@
 	<string>outside_gallery_002.png</string>
 	<key>MusicImageMusicListX</key>
 	<string></string>
+	<key>MusicPickerMusicPlayIcon</key>
+	<string>music_contrlPanel_play.png</string>
+	<key>MusicPickerMusicStopIcon</key>
+	<string>music_contrlPanel_stop.png</string>
+	<key>MusicPickerMusicPauseIcon</key>
+	<string>music_contrlpanel_pause.png</string>
+	<key>OptionsLeftBackground</key>
+	<string>option_background_001.png</string>
+	<key>OptionsRightBackground</key>
+	<string>option_background_002.png</string>
+	<key>MusicPickerBackground</key>
+	<string>selcetbackground.png</string>
+	<key>ImageSelectedViewBackground</key>
+	<string>painterbackground001.png</string>
+	<key>ImagePickerScrollViewBackground</key>
+	<string>painterbackground001.png</string>
+	<key>ImagePickerPageViewBackground</key>
+	<string>selcet_block_background_001.png</string>
+	<key>SelectedImageViewPageViewBackground</key>
+	<string>selcet_block_background.png</string>
+	<key>ImagePickerFrameImage</key>
+	<string>outside_painter_001.png</string>
+	<key>MusicImageListAddMusicListImageNormal</key>
+	<string>add_music_list_a.png</string>
+	<key>MusicImageListAddMusicListImageSelected</key>
+	<string>add_music_list_b.png</string>
+	<key>MusicImageListAddImageListImageNormal</key>
+	<string>add_image_list_botton_a.png</string>
+	<key>MusicImageListAddImageListImageSelected</key>
+	<string>add_image_list_botton_b.png</string>
+	<key>OptionsUserMedalBackground</key>
+	<string>rongbu.png</string>
+	<key>OptionsUserUpgradeInfoBackground</key>
+	<string>achievement_background_001.png</string>
+	<key>UserUpgradePresentOnDutyCopper</key>
+	<string>appellation_001_a.png</string>
+	<key>UserUpgradePresentOnDutySilver</key>
+	<string>appellation_001_b.png</string>
+	<key>UserUpgradePresentOnDutyGold</key>
+	<string>appellation_001_c.png</string>
+	<key>UserUpgradePresentOnDutyNoCopper</key>
+	<string>appellation_001_a_b.png</string>
+	<key>UserUpgradePresentOnDutyNoSilver</key>
+	<string>appellation_001_b_b.png</string>
+	<key>UserUpgradePresentOnDutyNoGold</key>
+	<string>appellation_001_c_b.png</string>
+	<key>UserUpgradeNewPersonCopper</key>
+	<string>appellation_002_a.png</string>
+	<key>UserUpgradeNewPersonSilver</key>
+	<string>appellation_002_b.png</string>
+	<key>UserUpgradeNewPersonGold</key>
+	<string>appellation_002_c.png</string>
+	<key>UserUpgradeNewPersonNoCopper</key>
+	<string>appellation_002_a_b.png</string>
+	<key>UserUpgradeNewPersonNoSilver</key>
+	<string>appellation_002_b_b.png</string>
+	<key>UserUpgradeNewPersonNoGold</key>
+	<string>appellation_002_c_b.png</string>
+	<key>UserUpgradeDrawingCopper</key>
+	<string>appellation_003_a.png</string>
+	<key>UserUpgradeDrawingSilver</key>
+	<string>appellation_003_b.png</string>
+	<key>UserUpgradeDrawingGold</key>
+	<string>appellation_003_c.png</string>
+	<key>UserUpgradeDrawingNoCopper</key>
+	<string>appellation_003_a_b.png</string>
+	<key>UserUpgradeDrawingNoSilver</key>
+	<string>appellation_003_b_b.png</string>
+	<key>UserUpgradeDrawingNoGold</key>
+	<string>appellation_003_c_b.png</string>
+	<key>UserUpgradeFansCopper</key>
+	<string>appellation_004_a.png</string>
+	<key>UserUpgradeFansSilver</key>
+	<string>appellation_004_b.png</string>
+	<key>UserUpgradeFansGold</key>
+	<string>appellation_004_c.png</string>
+	<key>UserUpgradeFansNoCopper</key>
+	<string>appellation_004_a_b.png</string>
+	<key>UserUpgradeFansNoSilver</key>
+	<string>appellation_004_b_b.png</string>
+	<key>UserUpgradeFansNoGold</key>
+	<string>appellation_004_c_b.png</string>
+	<key>UserUpgradeShareCopper</key>
+	<string>appellation_005_a.png</string>
+	<key>UserUpgradeShareSilver</key>
+	<string>appellation_005_b.png</string>
+	<key>UserUpgradeShareGold</key>
+	<string>appellation_005_c.png</string>
+	<key>UserUpgradeShareNoCopper</key>
+	<string>appellation_005_a_b.png</string>
+	<key>UserUpgradeShareNoSilver</key>
+	<string>appellation_005_b_b.png</string>
+	<key>UserUpgradeShareNoGold</key>
+	<string>appellation_005_c_b.png</string>
+	<key>UserUpgradeProgressViewBackground</key>
+	<string>progress bar_001.png</string>
+	<key>UserUpgradeProgressViewForeground</key>
+	<string>progress_001.png</string>
+	<key>MusicPickerViewButtonBackgroundNormal</key>
+	<string>Filter_botton_002.png</string>
+	<key>MusicPickerViewButtonBackgroundHighlight</key>
+	<string>Filter_botton_b002.png</string>
+	<key>MusicSelectedViewButtonBackgroundNormal</key>
+	<string>Filter_botton_001.png</string>
+	<key>MusicSelectedViewButtonBackgroundHighlight</key>
+	<string>Filter_botton_b001.png</string>
+	<key>MusicImageAttachImagePickerBarBackground</key>
+	<string>painterbackground_side.png</string>
+	<key>MusicImageAttachMusicPickerBarBackground</key>
+	<string>painterbackground_side.png</string>
+	<key>SelectedImageViewMusicImageAttachBarBackground</key>
+	<string>painterbackground001_side.png</string>
+	<key>SelectedMusicViewMusicImageAttachBarBackground</key>
+	<string>painterbackground001_side.png</string>
+	<key>MusicImageListRemoveImageNormal</key>
+	<string>remove_list_a.png</string>
+	<key>MusicImageListRemoveImageSelected</key>
+	<string>remove_list_b.png</string>
+	<key>DateTimeViewTimeBackground</key>
+	<string>timebackground_003.png</string>
+	<key>DateTimeViewDateBackground</key>
+	<string>timebackground_002.png</string>
+	<key>PageScrollViewImageViewHighlighted</key>
+	<string>outside_gallery_002.png</string>
+	<key>OperationViewShareBackgroiund</key>
+	<string>botton_background_001_l_b.png</string>
+	<key>OperationViewShareForeground</key>
+	<string>Share_botton_001.png</string>
+	<key>OperationViewDeleteBackground</key>
+	<string>botton_background_001_r_b.png</string>
+	<key>OperationViewDeleteForeground</key>
+	<string>delete_botton_a.png</string>
+	<key>OperationViewShareBackgroundH</key>
+	<string>botton_background_001_l_b.png</string>
+	<key>OperationViewDeleteBackgroundH</key>
+	<string>botton_background_001_r_b.png</string>
+	<key>OperationViewShareForegroundH</key>
+	<string>Share_botton_002.png</string>
+	<key>OperationViewDeleteForegroundH</key>
+	<string>delete_botton_b.png</string>
+	<key>MusicSelectedViewCellHighlighted</key>
+	<string>music_contrlpanel_base_selcet.png</string>
 </dict>
 </plist>

@@ -53,6 +53,14 @@ public:
     float getSplineCurveLength(int index);
     
     void startForwarding(float step);
+    void setCurrentPoint(int currentPoint)
+    {
+        mCurrentPoint = currentPoint;
+    }
+    void setForwardingStep(float step)
+    {
+        mForwardingStep = step;
+    }
     bool getNextCurvePoint(SE_Vector3f& outV);
     //if splineIndex == -1 it will get curve point at total curve
     std::vector<SE_Vector3f> getCurvePoint(int splineIndex, const std::vector<float>& stepvector);

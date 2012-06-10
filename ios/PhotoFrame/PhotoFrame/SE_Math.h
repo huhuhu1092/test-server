@@ -1,6 +1,5 @@
 #ifndef SE_MATH_H
 #define SE_MATH_H
-#include "SE_Common.h"
 #include <float.h>
 #ifdef __cplusplus
 extern "C" {
@@ -14,14 +13,15 @@ extern float SE_AngleToRadian(float angle);
 extern float SE_RadianToAngle(float radian);
 extern float SE_Sinf(float radian);
 extern float SE_Cosf(float radian);
-extern float SE_ACosf(float cosv);
 extern float SE_Tanf(float radian);
+extern float SE_Asinf(float f);
+extern float SE_Acosf(float f);
+extern float SE_Atanf(float f);
 extern float SE_Sqrtf(float f);
 extern float SE_Fabs(float f);
-extern int SE_Iabs(int i);
-extern float SE_Floor(float x);
-extern float SE_Ceil(float x);	
+extern float SE_Lerp(float a,float b,float t);
 #ifdef __cplusplus
 }
 #endif
+
 #endif

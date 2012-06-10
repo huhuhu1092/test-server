@@ -19,9 +19,12 @@
 {
     NSArray* clippingRectList;
     UIImage* image;
+    NSMutableArray* pointArrayList;
+    CGFloat lineWidth;
 }
 @property (nonatomic, retain) UIImage* image;
 - (void)drawRect:(CGRect)rect;
 - (void) clearClippingList;
 - (void) setClipRectList: (const MyClipRect**) clipRect count:(int)size;
+- (void) setPoints:(NSArray*)points;
 @end

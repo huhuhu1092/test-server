@@ -9,13 +9,19 @@
 #import <UIKit/UIKit.h>
 #import "SEProtocalDefine.h"
 #import "SEFixedView.h"
+#import "SEUITableView.h"
+@class SEResLoader;
+@class MPMediaItem;
+enum {TABLE_CELL_BIG, TABLE_CELL_SMALL};
 @interface SEMusicItemProperty : NSObject {
 @private
     NSString* title;
     NSString* artist;
     NSString* album;
+    MPMediaItem* song;
     NSNumber* seq;
 }
+@property (nonatomic, retain) MPMediaItem* song;
 @property (nonatomic, retain) NSNumber* seq;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) NSString* artist;
@@ -24,51 +30,54 @@
 
 
 //////////////////////
-@class SEMusicPickerView;
 @class SEUITableView;
 @class SEViewNavigator;
-@interface SEMusicPickerDelegate : NSObject <UITableViewDelegate, UITableViewDataSource> 
-{
-    SEMusicPickerView* mMusicPickerView;
-}
-@property (nonatomic, assign) SEMusicPickerView* mMusicPickerView;
-@end
-//////
-
-@interface SEMusicSelectedViewDelegate : NSObject <UITableViewDelegate, UITableViewDataSource> 
-{
-    SEMusicPickerView* mMusicView;
-}
-@property (nonatomic, assign) SEMusicPickerView* mMusicPickerView;
-@end
-//////
+@class MPMusicPlayerController;
+@class SESelectedMusicView;
 ////////////////
-@interface SEMusicPickerView : SEFixedView
+
+@interface SEMusicPickerView : SEFixedView <UITableViewDelegate, UITableViewDataSource> 
 {
-    SEUITableView* mMusicPicker;
-    SEUITableView* mSelectedMusicView;
-    UITableViewCell* mSelectedTableViewCell;
 @private
-    SEMusicPickerDelegate* mMusicPickerDelegate;
-    SEMusicSelectedViewDelegate* mMusicSelectedViewDelegate;
-    int mMusicItemCount;
-    NSMutableArray* mMusicItemArray;
-    NSArray* mSelectedMusicItemArray;
+    
+    UIImage* mMusicPickerBackgroundImage;
+    UITableView* mMusicPicker;
     SEViewNavigator* mViewNav;
+    int mSortType;
+    NSMutableArray* mMusicItemArray;
+    UITableViewCell* mSelectedTableViewCell;
+    int mMusicItemCount;
+    int mCurrentMusicItemIndex;
+    SESelectedMusicView* mSelectedMusicView;
+    int mTableCellType;
+    CGRect mOrigRect;
+    SEMusicItemProperty* mSelectedMusciItem;
+    UIImage* mMusicCellBackgroundImage;
 }
-@property (nonatomic, readonly) NSArray* mSelectedMusicItemArray;
+@property (nonatomic, assign) SESelectedMusicView* mSelectedMusicView;
+@property (nonatomic, readonly) NSMutableArray* musicItemArray;
 @property (nonatomic, assign) SEViewNavigator* mViewNav;
-@property (nonatomic, readonly) int mMusicItemCount;
-@property (nonatomic, retain) SEUITableView* mMusicPicker;
-@property (nonatomic, retain) SEUITableView* mSelectedMusicView;
-- (void) createSelectedTableViewCell: (NSValue*) frame;
-- (void) touchBeginHandler: (UITableViewCell*) pressedView;
-- (void) touchMoveHandler: (NSValue*) vDeltap;
-- (void) touchEndHandler;
-- (void) initMusicPicker;
-- (int) getMusicItemPropertyCount;
-- (int) getSelectedMusicItemProperyCount;
-- (SEMusicItemProperty*)getMusicItemProperty: (int)index;
-- (SEMusicItemProperty*)getSelectedMusicItemProperty: (int)index;
-- (void)reloadPickerTableData;
+- (void) initData;
+- (void) handleWhenStop: (BOOL) bStopInMid;
+@end
+////////////
+@interface SESelectedMusicView : SEFixedView <UITableViewDelegate, UITableViewDataSource>
+{
+@private
+    UIImage* mSelectedMusicViewBackgroundImage;
+    UITableView* mSelectedTableView;
+    SEViewNavigator* mViewNav;
+    NSMutableArray* mSelectedMusicItemArray;
+    int mSortType;
+    int mHighlightedRow;
+    int mTableCellType;
+    CGRect mOrigRect;
+    UIImage* mSelectedCellBackgroundImage;
+}
+@property (nonatomic, readonly) NSArray* musicItemArray;
+@property (nonatomic, assign) SEViewNavigator* mViewNav;
+- (void) initData;
+- (void) addNewMusic: (SEMusicItemProperty*)item;
+- (void) handleWhenStop: (BOOL) bStopInMid;
+- (void) determineSelectedMusicRow: (UIView*)floatView;
 @end

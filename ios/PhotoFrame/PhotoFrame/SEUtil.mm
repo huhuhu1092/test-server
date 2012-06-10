@@ -8,8 +8,15 @@
 
 #import "SEUtil.h"
 #import <stdarg.h>
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <netinet6/in6.h>
+#import <arpa/inet.h>
+#import <ifaddrs.h>
+#import <netdb.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 #import <AssetsLibrary/AssetsLibrary.h>
-static CGContextRef MyCreateBitmapContext (int pixelsWide,
+CGContextRef MyCreateBitmapContext (int pixelsWide,
                                     int pixelsHigh)
 {
     CGContextRef    context = NULL;
@@ -26,6 +33,7 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     memset(bitmapData, 0, bitmapByteCount);
     if (bitmapData == NULL)
     {
+        CGColorSpaceRelease(colorSpace);
         fprintf (stderr, "Memory not allocated!");
         return NULL;
     }
@@ -38,6 +46,7 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
                                      kCGImageAlphaNoneSkipLast);
     if (context== NULL)
     {
+        CGColorSpaceRelease(colorSpace);
         free (bitmapData);// 5
         fprintf (stderr, "Context not created!");
         return NULL;
@@ -84,6 +93,8 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
         return NULL;
     if(s.width == 0 || s.height == 0)
         return NULL;
+    if(image.size.width == s.width && image.size.height == s.height)
+        return image;
     CGContextRef con = MyCreateBitmapContext(s.width, s.height);    
     CGImageRef imageRef = [image CGImage];
     CGContextDrawImage(con, CGRectMake(0, 0, s.width, s.height), imageRef);
@@ -136,11 +147,13 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     CFRelease(dstData);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGImageRef dstImageRef = CGImageCreate(width, height, 8, 32, bytesPerRow, colorSpace, kCGImageAlphaNoneSkipLast, dstDataProvider, NULL, TRUE, kCGRenderingIntentDefault);
+    CGDataProviderRelease(dstDataProvider);
     UIImage* uiImage = [UIImage imageWithCGImage:dstImageRef];
     CGImageRelease(dstImageRef);
     CGColorSpaceRelease(colorSpace);
     return uiImage;
 }
+
 + (CGImageRef) getFullRepresentationImageFromPhotoLib: (NSURL*) url withAssetLib: (ALAssetsLibrary*)assetLib
 {
     __block CGImageRef retImage  = NULL;
@@ -149,6 +162,10 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     {
         ALAssetRepresentation* rep = [asset defaultRepresentation];
         CGImageRef image = [rep fullResolutionImage];
+        UIImage* srcImage = [UIImage imageWithCGImage:image];
+        UIImage* dstImage = [SEUtil cropUIImage:srcImage withRect:CGSizeMake(1024, 768)];
+        image = [dstImage CGImage];
+        retImage = CGImageRetain(image);
         retImage = [SEUtil copyImageRef:image];
     };
     ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
@@ -165,18 +182,22 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     else
         return NULL;    
 }
-+ (CGImageRef) getImageFromPhotoLib: (NSURL*) url withAssetLib: (ALAssetsLibrary*)assetLib
++ (CGImageRef) getImageFromPhotoLib: (NSURL*) url withAssetLib: (ALAssetsLibrary*)assetLib fitSize:(CGSize)size
 {
     __block CGImageRef retImage  = NULL;
     __block int accessError = 0;
     ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
     {
-        
+        NSThread* currentThread = [NSThread currentThread];
+        NSLog(@"current thread = %@\n", currentThread);
         ALAssetRepresentation* rep = [asset defaultRepresentation];
         CGImageRef image = [rep fullResolutionImage];
         CGSize srcS = CGSizeMake(CGImageGetWidth(image), CGImageGetHeight(image));
-        CGSize s = [SEUtil computeFitSize:srcS toDst:CGSizeMake(200, 200)];
+        CGSize s = [SEUtil computeFitSize:srcS toDst:size];
         retImage = [SEUtil fastScale:image withRect:s];
+        float width = CGImageGetWidth(retImage);
+        float height = CGImageGetHeight(retImage);
+        NSLog(@"## retImage with = %f, height = %f ##\n", width, height);
         /*       
         CGImageRef image = [asset thumbnail];
         retImage = [SEUtil copyImageRef:image];
@@ -216,6 +237,8 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     int srcH = CGImageGetHeight(image);
     int srcBytesPerRow = CGImageGetBytesPerRow(image);
     int srcBpp = CGImageGetBitsPerPixel(image);
+    CGBitmapInfo srcBitmapInfo = CGImageGetBitmapInfo(image);
+    CGBitmapInfo dstBitmapInfo = srcBitmapInfo;
     switch (srcBpp) 
     {
         case 24:
@@ -261,6 +284,7 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
                     *(dstBits + 1) = *(srcBits + 1);
                     *(dstBits + 2) = *(srcBits + 2);
                     *(dstBits + 3) = 255;
+                    dstBitmapInfo = kCGImageAlphaNoneSkipLast;
                 }
                     break;
                 case 4:
@@ -281,7 +305,8 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     CGDataProviderRef dstDataProvider = CGDataProviderCreateWithCFData(dstData);
     CFRelease(dstData);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef dstImageRef = CGImageCreate(w, h, 8, 32, dstBytesPerRow, colorSpace, kCGImageAlphaNoneSkipLast, dstDataProvider, NULL, TRUE, kCGRenderingIntentDefault);
+    //kCGImageAlphaNoneSkipLast
+    CGImageRef dstImageRef = CGImageCreate(w, h, 8, 32, dstBytesPerRow, colorSpace,  dstBitmapInfo, dstDataProvider, NULL, TRUE, kCGRenderingIntentDefault);
     CGColorSpaceRelease(colorSpace);
     CGDataProviderRelease(dstDataProvider);
     CFRelease(srcData);
@@ -326,14 +351,55 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
         return CGSizeMake(w, h);
     }
 }
++ (UIImage*) createSignatureInMainThread: (UIImage*)background size: (CGSize)size withLineWidth: (CGFloat) lineWidth drawPoints:(NSMutableArray*)points
+{
+    UIGraphicsBeginImageContext(size);
+    int w = background.size.width;
+    int h = background.size.height;
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextDrawImage(context, CGRectMake(0, 0, size.width, size.height), [background CGImage]);
+    NSMutableArray* newPoints = [NSMutableArray array];
+    for(NSArray* array in points)
+    {
+        NSMutableArray* newa = [NSMutableArray array];
+        for(NSValue* v in array)
+        {
+            CGPoint p = [v CGPointValue];
+            p.x = p.x * w;
+            p.y = p.y * h;
+            [newa addObject:[NSValue valueWithCGPoint:p]];
+        }
+        [newPoints addObject:newa];
+    }
+    for(NSMutableArray* p in newPoints)
+    {
+        [[UIColor blackColor] set];
+        CGContextSetLineWidth(context, lineWidth);
+        CGContextSetLineCap(context, kCGLineCapRound);
+        if(p.count < 2)
+        {
+            CGPoint pt = [[p objectAtIndex:0] CGPointValue];
+            CGContextFillEllipseInRect(context, CGRectMake(pt.x - lineWidth / 2, pt.y - lineWidth / 2, lineWidth, lineWidth));
+        }
+        else
+        {
+            for(int i = 0 ; i < (p.count - 1) ; i++)
+            {
+                CGPoint pt1 = [[p objectAtIndex:i] CGPointValue];
+                CGPoint pt2 = [[p objectAtIndex:(i + 1)] CGPointValue];
+                CGContextMoveToPoint(context, pt1.x, pt1.y);
+                CGContextAddLineToPoint(context, pt2.x, pt2.y);
+                CGContextStrokePath(context);
+            }
+        }
+    }  
+    UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
 + (UIImage*) createUIImageFrom: (UIImage*)background withLineWidth: (CGFloat) lineWidth drawPoints:(NSMutableArray*)points
 {
-    //CGImageRef newImage = [SEUtil copyImageRef:[background CGImage]];
     CGImageRef image = [background CGImage];
-    //CGDataProviderRef srcDataProvider = CGImageGetDataProvider(image);
-    //CFDataRef srcData = CGDataProviderCopyData(srcDataProvider);
-    //const UInt8* srcDataPtr = CFDataGetBytePtr(srcData);
-    //int len = CFDataGetLength(srcData);
     size_t w = CGImageGetWidth(image);
     size_t h = CGImageGetHeight(image);
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -346,7 +412,7 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
         {
             CGPoint p = [v CGPointValue];
             p.x = p.x * w;
-            p.y = p.y * h;
+            p.y = h - p.y * h;
             [newa addObject:[NSValue valueWithCGPoint:p]];
         }
         [newPoints addObject:newa];
@@ -366,10 +432,11 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     {
         [[UIColor blackColor] set];
         CGContextSetLineWidth(context, lineWidth);
+        CGContextSetLineCap(context, kCGLineCapRound);
         if(p.count < 2)
         {
             CGPoint pt = [[p objectAtIndex:0] CGPointValue];
-            CGContextFillRect(context, CGRectMake(pt.x - lineWidth / 2, pt.y - lineWidth / 2, lineWidth, lineWidth));
+            CGContextFillEllipseInRect(context, CGRectMake(pt.x - lineWidth / 2, pt.y - lineWidth / 2, lineWidth, lineWidth));
         }
         else
         {
@@ -389,5 +456,91 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     //free(data);
     return [UIImage imageWithCGImage:retImageRef];
 }
-
++ (BOOL) isRectContain: (CGRect) rect point: (CGPoint)p
+{
+    CGFloat left = rect.origin.x;
+    CGFloat right = rect.origin.x + rect.size.width;
+    CGFloat top = rect.origin.y;
+    CGFloat bottom = rect.origin.y + rect.size.height;
+    if(p.x >= left && p.x <= right && p.y >= top && p.y <= bottom)
+        return YES;
+    else
+        return NO;
+}
++ (UIImage*) drawImage : (UIImage*)image inRect:(CGRect)rect
+{
+    if(image.size.width == rect.size.width && image.size.height == rect.size.height)
+        return image;
+    UIGraphicsBeginImageContext(CGSizeMake(rect.size.width, rect.size.height));
+    [image drawAtPoint:CGPointMake(0, 0)];
+    UIImage* i = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return i;    
+}
++ (NSString*) urlToString: (NSURL*)url
+{
+    return [url absoluteString];
+}
++ (CGImageRef) CGImageDrawInRect: (CGImageRef) image rect: (CGSize) size
+{
+    CGContextRef context = MyCreateBitmapContext(size.width, size.height);
+    CGRect rect = CGRectMake(0, 0, size.width, size.height);
+    CGContextDrawImage(context, rect, image);
+    CGImageRef newImageRef = CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    return newImageRef;
+}
++ (UIImage*) createThumbnail: (UIImage*)srcImage thumbnailSize: (CGSize) size
+{
+    CGImageRef srcCGImage = [srcImage CGImage];
+    CGSize srcSize = CGSizeMake(CGImageGetWidth(srcCGImage), CGImageGetHeight(srcCGImage));
+    CGSize dstSize = [SEUtil computeFitSize:srcSize toDst:size];
+    //CGImageRef imageRef = [SEUtil fastScale:[srcImage CGImage] withRect:dstSize];
+    CGContextRef context = MyCreateBitmapContext(size.width, size.height);
+    //CGContextSetFillColorWithColor(context, [[UIColor whiteColor] CGColor]);
+    //CGContextFillRect(context, CGRectMake(0, 0, size.width, size.height));
+    CGRect rect = CGRectMake((size.width - dstSize.width) / 2, (size.height - dstSize.height) / 2, dstSize.width, dstSize.height);
+    CGContextDrawImage(context, rect, srcCGImage);
+    CGImageRef newImageRef = CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    //CGImageRelease(imageRef);
+    UIImage* uiImage = [UIImage imageWithCGImage:newImageRef];
+    CGImageRelease(newImageRef);
+    return uiImage;
+}
++ (BOOL) reachabilityWithLocalWifi
+{
+    struct sockaddr_in localWifiAddress;
+    bzero(&localWifiAddress, sizeof(localWifiAddress));
+    localWifiAddress.sin_len = sizeof(localWifiAddress);
+    localWifiAddress.sin_family = AF_INET;
+    // IN_LINKLOCALNETNUM is defined in <netinet/in.h> as 169.254.0.0
+    localWifiAddress.sin_addr.s_addr = htonl(IN_LINKLOCALNETNUM);
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr*)&localWifiAddress);
+    if(reachability != NULL)
+    {
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
++ (BOOL) reachabilityForHostName: (NSString*)name
+{
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithName(NULL, [name UTF8String]);
+    if(reachability != NULL)
+        return YES;
+    else {
+        return NO;
+    }
+}
++ (NSString*) dateToString:(NSDate *)date
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeStyle:NSDateFormatterMediumStyle];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    NSString* str = [dateFormatter stringFromDate:date];
+    [dateFormatter release];
+    return str;
+}
 @end

@@ -2,7 +2,7 @@
 //  Signature.h
 //  PhotoFrame
 //
-//  Created by 陈勇 on 12-3-5.
+//  Created by 陈勇 on 12-5-21.
 //  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
 //
 
@@ -10,11 +10,10 @@
 #import <CoreData/CoreData.h>
 
 
-@interface Signature : NSManagedObject {
-@private
-}
+@interface Signature : NSManagedObject
+
+@property (nonatomic, retain) NSData * data;
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSNumber * seq;
-@property (nonatomic, retain) NSData * data;
 
 @end
