@@ -163,12 +163,15 @@ typedef struct
     int r, g, b;
 } BrushPiece;
 /* Globals */
-
+struct RepaintData
+{
+    bool calculateOnEdge;
+};
 extern gimpressionist_vals_t pcvals;
 double getsiz_proto (double x, double y, int n, smvector_t *vec,
                      double smstrexp, int voronoi);
 extern double dist (double x, double y, double end_x, double end_y);
-extern void repaint (ppm_t *p, ppm_t *a);
+extern void repaint (ppm_t *p, ppm_t *a, RepaintData rd);
 extern void apply_brush_area (ppm_t *brush,
                       ppm_t *shadow,
                       ppm_t *p, ppm_t *a,

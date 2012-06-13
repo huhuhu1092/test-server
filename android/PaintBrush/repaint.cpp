@@ -411,7 +411,54 @@ template <typename T> bool g_list_nth(std::list<T>& data, int index, T& outData)
 	else
 		return false;
 }
-static int choose_best_brush (ppm_t *p, ppm_t *a, int tx, int ty,
+static bool brushOnEdge(ppm_t* edgeDetectionMap, int brushWidth, int brushHeight, int tx, int ty)
+{
+    int x, y;
+    double r, g , b;
+    bool found = false;
+    int bottom = edgeDetectionMap->height;
+    int right = edgeDetectionMap->width;
+    for (y = 0; y < brushHeight; y++)
+    {
+        if((ty + y) < bottom)
+        {
+            guchar *row = edgeDetectionMap->col + (ty + y) * edgeDetectionMap->width * 3;
+            for (x = 0; x < brushWidth; x++)
+            {
+                if((tx + x) < right)
+                {
+                    int    k = (tx + x) * 3;
+                    r = row[k+0];
+                    g = row[k+1];
+                    b = row[k+2];
+                    //double gray = (r + b + g) / 3;
+                    //if(gray <= 255.0 && gray > 191)
+                    if((r <= 255 && r >= 200) || 
+                       (g <= 255 && g >= 200) ||
+                       (b <= 255 && b >= 200))
+                    {
+                        found = true;
+                        //LOGI("## gray = %f ##\n", gray);
+                        break;
+                    }
+                }
+                else 
+                {
+                    break;
+                }
+            }
+            if(found)
+                break;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return found;
+
+}
+static int choose_best_brush (ppm_t* edgeDetectionMap, ppm_t *p, ppm_t *a, int tx, int ty,
                    ppm_t *brushes, int num_brushes,
                    double *brushes_sum, int start, int step)
 {
@@ -480,22 +527,19 @@ static int choose_best_brush (ppm_t *p, ppm_t *a, int tx, int ty,
             }
         }
         dev /= thissum;
-
+        double dist = fabs(dev - bestdev);
+        //LOGI("## brush dis = %f ##\n", dist);
         if ((best == -1) || (dev < bestdev))
+        //if (best == -1)
         {
-            /*
-          if (brlist)
-            g_list_free (brlist);
-          brlist = NULL;
-          */
             brlist.clear();
         }
-
+        //LOGI("## dev = %f ##\n", dev);
         if (dev <= bestdev || best < 0)
+        //if(( dev < bestdev) || best < 0)
         {
             best = i;
             bestdev = dev;
-          //brlist = g_list_append (brlist, (void *)i);
             brlist.push_back(i);
         }
         if (dev < runningvals.devthresh)
@@ -504,16 +548,21 @@ static int choose_best_brush (ppm_t *p, ppm_t *a, int tx, int ty,
 
     if (brlist.empty())
     {
-        g_printerr("What!? No brushes?!\n");
+        LOGI("What!? No brushes?!\n");
         return 0;
     }
+    
     //TODO: need change
     i = g_rand_int_range (random_generator, 0, brlist.size());
+    //LOGI("## best brush size = %lu, i = %lu  ##\n", brlist.size(), i);
     bool ret = g_list_nth<long> (brlist,i, best);
     if(ret == 0)
-	    g_printerr("error best value\n");
+	    LOGI("error best value\n");
     //TODO: end
     return best;
+     
+    //i = g_rand_int_range(random_generator, 0, num_brushes);
+    //return i;
 }
 void apply_brush_area (ppm_t *brush,
              ppm_t *shadow,
@@ -772,6 +821,8 @@ static void apply_brush (ppm_t *brush,
         }
     }
 }
+
+////////////////////
 struct BrushProperty
 {
     int tx;
@@ -1224,7 +1275,7 @@ void testQuadTree()
 }
 ////////////////////////
 #define BRUSH_NUM 3
-void repaint (ppm_t *p, ppm_t *a)
+void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
 {
     int         x, y;
     int         tx = 0, ty = 0;
@@ -1255,6 +1306,7 @@ void repaint (ppm_t *p, ppm_t *a)
     SS_PausePoint* currentPausePoint = NULL;
     SS_Canvas* currentCanvas = NULL;
     static int  running = 0;
+    ppm_t edgeDetectionMap = {0, 0, NULL};
     
     int dropshadow = pcvals.general_drop_shadow;
     int shadowblur = pcvals.general_shadow_blur;
@@ -1274,9 +1326,10 @@ void repaint (ppm_t *p, ppm_t *a)
     SS_GetDestSize(&destWidth, &destHeight);
     SS_GetSettingBrush(&brushSet);
     runningvals = pcvals;
-    //print_val(&runningvals);
+    print_val(&runningvals);
     gImageWidth = p->width;
     gImageHeight = p->height;
+    
     LOGI("## gImageWidth = %d, gImageHeight = %d ##\n", gImageWidth, gImageHeight);
     /* Shouldn't be necessary, but... */
     if (img_has_alpha)
@@ -1287,7 +1340,10 @@ void repaint (ppm_t *p, ppm_t *a)
             return;
         }
     }
-
+    if(rd.calculateOnEdge)
+    {
+        edgeDetectionMap = edgeDetection(p);
+    }
     num_brushes = runningvals.orient_num * runningvals.size_num;
     startangle = runningvals.orient_first;
     anglespan = runningvals.orient_last;
@@ -1410,7 +1466,7 @@ void repaint (ppm_t *p, ppm_t *a)
         ppm_save (&brushes[i], tmp);
     }
 #endif
-
+    int edgeBrushNum = 0;
     for (i = 0; i < num_brushes; i++)
     {
         if (!runningvals.color_brushes)
@@ -1821,31 +1877,12 @@ void repaint (ppm_t *p, ppm_t *a)
             b = ypos[j]; ypos[j] = ypos[a]; ypos[a] = b;
         }
     }
-
+    //start calculate brush
+    clearQuadTree(rootQuadTree);
+    clearGrayPaintArea();
     for (; i && isBrushPaint(); i--)
     {
         //SS_Pause(currentPausePoint);
-        if (i % progstep == 0)
-        {
-            if(runningvals.run)
-            {
-                //TODO : change code
-                //gimp_progress_update (0.8 - 0.8 * ((double)i / max_progress));
-                //TODO : end
-            }
-            else
-            {
-                char tmps[40];
-#ifdef WIN32
-                _snprintf (tmps, sizeof (tmps),
-                          "%.1f %%", 100 * (1.0 - ((double)i / max_progress)));
-#else
-                snprintf (tmps, sizeof (tmps),
-                          "%.1f %%", 100 * (1.0 - ((double)i / max_progress)));
-#endif
-            }
-        }
-
         if (runningvals.place_type == PLACEMENT_TYPE_RANDOM)
         {
             tx = g_rand_int_range (random_generator, maxbrushwidth / 2,
@@ -1871,7 +1908,7 @@ void repaint (ppm_t *p, ppm_t *a)
           (ty + maxbrushheight / 2 >= p->height))
         {
 #if 0
-            g_printerr("Internal Error; invalid coords: (%d,%d) i=%d\n", tx, ty, i);
+            LOGI("Internal Error; invalid coords: (%d,%d) i=%d\n", tx, ty, i);
 #endif
             continue;
         }
@@ -1904,7 +1941,7 @@ void repaint (ppm_t *p, ppm_t *a)
             break; /* Handled below */
 
         default:
-            g_printerr ("Internal error; Unknown orientationtype\n");
+            LOGI ("Internal error; Unknown orientationtype\n");
             on = 0;
           break;
         }
@@ -1928,44 +1965,84 @@ void repaint (ppm_t *p, ppm_t *a)
             break; /* Handled below */
 
         default:
-            g_printerr ("Internal error; Unknown size_type\n");
+            LOGI ("Internal error; Unknown size_type\n");
             sn = 0;
             break;
         }
-
+        bool calculateEdge = rd.calculateOnEdge;
         /* Handle Adaptive selections */
+        bool onEdge = !calculateEdge;
+        if(!onEdge)
+        {
+            onEdge = brushOnEdge(&edgeDetectionMap, maxbrushwidth, maxbrushheight, tx - maxbrushwidth / 2, ty - maxbrushheight / 2);
+            if(onEdge)
+            {
+                edgeBrushNum++;
+            }
+        }
+        if(calculateEdge == true && onEdge == true)
+        {
+            //LOGI("## edge tx = %d, ty = %d ##\n", tx, ty);
+        }
         if (runningvals.orient_type == ORIENTATION_ADAPTIVE)
         {
+            
             if (runningvals.size_type == SIZE_TYPE_ADAPTIVE)
             {
-                n = choose_best_brush (p, a, tx-maxbrushwidth/2,
+
+                if(onEdge)
+                {
+                    n = choose_best_brush (&edgeDetectionMap, p, a, tx-maxbrushwidth/2,
                                   ty-maxbrushheight/2, brushes,
                                   num_brushes, brushes_sum, 0, 1);
+                }
+                else 
+                {
+                    n = -1;
+                }
             }
             else
             {
                 int st = sn * runningvals.orient_num;
-                n = choose_best_brush (p, a, tx-maxbrushwidth/2,
+                if(onEdge)
+                {
+                    n = choose_best_brush (&edgeDetectionMap, p, a, tx-maxbrushwidth/2,
                                     ty-maxbrushheight/2, brushes,
                                     st+runningvals.orient_num, brushes_sum,
                                     st, 1);
+                }
+                else 
+                {
+                    n = -1;
+                }
             }
         }
         else
         {
-            if (runningvals.size_type == SIZE_TYPE_ADAPTIVE)
+            if(onEdge)
             {
-                n = choose_best_brush (p, a, tx-maxbrushwidth/2,
+                if (runningvals.size_type == SIZE_TYPE_ADAPTIVE)
+                {
+                    n = choose_best_brush (&edgeDetectionMap, p, a, tx-maxbrushwidth/2,
                                     ty-maxbrushheight/2, brushes,
                                     num_brushes, brushes_sum,
                                     on, runningvals.orient_num);
+                }
+                else
+                    n = sn * runningvals.orient_num + on;
             }
-            else
-                n = sn * runningvals.orient_num + on;
+            else 
+            {
+                n = -1;
+            }
         }
         /* Should never happen, but hey... */
         if (n < 0)
-            n = 0;
+        {
+            //change for edge detection
+            //n = 0;
+            continue;
+        }
         else if (n >= num_brushes)
             n = num_brushes - 1;
 
@@ -2048,7 +2125,8 @@ void repaint (ppm_t *p, ppm_t *a)
 	    bp.shadow = shadow;
 	    bp.tx = tx;
 	    bp.ty = ty;
-	    gBrushProperties.push_back(bp);
+	    //gBrushProperties.push_back(bp);
+        addBrushPropertyToGrayPaintArea(bp);
         //end
         if (runningvals.general_tileable && runningvals.general_paint_edges)
         {
@@ -2087,6 +2165,7 @@ void repaint (ppm_t *p, ppm_t *a)
             }
         }
     }
+    LOGI("### edge brush num = %d ##", edgeBrushNum);
   	//debug for change
 	//apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
     
@@ -2094,15 +2173,17 @@ void repaint (ppm_t *p, ppm_t *a)
     tmpHeight = tmp.height;
     
     LOGI("############# start create brush piece w = %d, h = %d ##############\n", tmpWidth, tmpHeight);
+    /*
     //gBrushProperties.sort(_BrushPropertyComp());
+     */
     //use separate function to sort property
-    clearQuadTree(rootQuadTree);
-    clearGrayPaintArea();
+    //clearQuadTree(rootQuadTree);
+    //clearGrayPaintArea();
 	std::list<BrushProperty>::iterator it;
-    for(it = gBrushProperties.begin() ; it != gBrushProperties.end(); it++)
-    {
-        addBrushPropertyToGrayPaintArea(*it);
-    }
+    //for(it = gBrushProperties.begin() ; it != gBrushProperties.end(); it++)
+    //{
+    //    addBrushPropertyToGrayPaintArea(*it);
+    //}
     separatePaintArea();
     //end
     LOGI("## set pause point before ##");
@@ -2324,5 +2405,7 @@ void repaint (ppm_t *p, ppm_t *a)
     ppm_kill (&paper_ppm);
     ppm_kill (&dirmap);
     ppm_kill (&sizmap);
+    if(rd.calculateOnEdge)
+        ppm_kill(&edgeDetectionMap);
     running = 0;
 }

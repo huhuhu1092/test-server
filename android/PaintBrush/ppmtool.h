@@ -35,12 +35,12 @@ void ppm_kill(ppm_t *p);
  * 0: empty
  * 1: not empty
  * */
-int ppm_empty(ppm_t* p);
-void ppm_new(ppm_t *p, int xs, int ys);
-void ppm_new_alpha(ppm_t* ppm, int w, int h);
-void get_rgb(ppm_t *s, float xo, float yo, unsigned char *d);
-void resize(ppm_t *p, int nx, int ny);
-void rescale(ppm_t *p, double scale);
+extern int ppm_empty(ppm_t* p);
+extern void ppm_new(ppm_t *p, int xs, int ys);
+extern void ppm_new_alpha(ppm_t* ppm, int w, int h);
+extern void get_rgb(ppm_t *s, float xo, float yo, unsigned char *d);
+extern void resize(ppm_t *p, int nx, int ny);
+extern void rescale(ppm_t *p, double scale);
 void resize_fast(ppm_t *p, int nx, int ny);
 void ppm_load(const char *fn, ppm_t *p);
 void ppm_save(ppm_t *p, const char *fn);
@@ -63,6 +63,8 @@ void repaint(ppm_t *p, ppm_t *a);
 void blur(ppm_t *p, int xrad, int yrad);
 
 void mkgrayplasma(ppm_t *p, float turb);
+
+extern ppm_t edgeDetection(ppm_t* srcImage);
 
 void setDataPath(const char* str);
 #define PPM_IS_INITED(ppm_ptr) ((ppm_ptr)->col != NULL)

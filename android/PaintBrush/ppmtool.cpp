@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <math.h>
 #include <assert.h>
+#include <algorithm>
+#include <functional>
 #include "type.h"
 #include "ppmtool.h"
 #include "gimpressionist.h"
@@ -991,6 +993,63 @@ void blur (ppm_t *p, int xrad, int yrad)
     p->width = tmp.width;
     p->height = tmp.height;
     p->col = tmp.col;
+}
+static int redOffset(int x, int y, int w)
+{
+    return y * w * 3 + x * 3 + 0;
+}
+static int greenOffset(int x , int y, int w)
+{
+    return y * w * 3 + x * 3 + 1;
+}
+static int blueOffset(int x, int y, int w)
+{
+    return y * w * 3 + x * 3 + 2;
+}
+ppm_t edgeDetection(ppm_t* srcImage)
+{
+    ppm_t newImage;
+    ppm_new(&newImage, srcImage->width, srcImage->height);
+    int height = srcImage->height;
+    int width = srcImage->width;
+    int radius = 1;
+    unsigned char* inbits = srcImage->col;
+    unsigned char* outbits = newImage.col;
+    for(int y = radius  ; y < (height - radius) ; y++)
+    {
+        for(int x = radius  ; x < (width - radius)  ;x++)
+        {
+            int sumr1 = 0, sumr2 = 0;
+            int sumg1 = 0, sumg2 = 0;
+            int sumb1 = 0, sumb2 = 0;
+            int matrix1[9] = {-1, 0, 1, -2, 0, 2, -1, 0 , 1};
+            int matrix2[9] = {-1, -2, -1, 0, 0, 0, 1, 2 , 1};
+            int offset = 0;
+            
+            for(int j = -radius ; j <= radius ; j++)
+            {
+                for(int i = -radius ; i <= radius ; i++)
+                {
+                    sumr1 += inbits[redOffset(x + i, y + j, width)] * matrix1[offset];
+                    sumr2 += inbits[redOffset(x + i, y + j, width)] * matrix2[offset];
+                    
+                    sumg1 += inbits[greenOffset(x + i, y + j, width)] * matrix1[offset];
+                    sumg2 += inbits[greenOffset(x + i, y + j, width)] * matrix2[offset];
+                    
+                    sumb1 += inbits[blueOffset(x + i , y + j, width)] * matrix1[offset];
+                    sumb2 += inbits[blueOffset(x + i, y + j, width)] * matrix2[offset];
+                    offset++;
+                }
+            }
+            int sumr = std::min((abs(sumr1) + abs(sumr2)) / 2, 255);
+            int sumg = std::min((abs(sumg1) + abs(sumg2)) / 2, 255);
+            int sumb = std::min((abs(sumb1) + abs(sumb2)) / 2, 255);
+            outbits[redOffset(x, y, width)] = sumr;
+            outbits[greenOffset(x, y, width)] = sumg;
+            outbits[blueOffset(x, y, width)] = sumb;
+        }
+    }
+    return newImage;
 }
 
 void ppm_put_rgb_fast (ppm_t *s, float xo, float yo, guchar *d)

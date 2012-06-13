@@ -82,7 +82,7 @@ static gimpressionist_vals_t defaultpcvals = {
   10.0,
   20.0,
   0,
-  0.1,
+  0.001,
 
   { { 0.5, 0.5, 50.0, 1.0 } },
   1,
