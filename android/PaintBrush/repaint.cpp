@@ -1249,6 +1249,7 @@ static void addBrushPropertyToGrayPaintArea(BrushProperty bp)
 static void addBrushPropertyToGeoPaintCanvas(BrushProperty bp, GeoPaintCanvas* canvas)
 {
     
+    
 }
 static void separatePaintArea()
 {
