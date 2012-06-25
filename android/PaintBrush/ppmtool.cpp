@@ -289,7 +289,25 @@ void get_rgb (ppm_t *s, float xo, float yo, guchar *d)
     d[2] = b;
 }
 
-
+ppm_t resize_return (ppm_t *p, int nx, int ny)
+{
+    int   x, y;
+    float xs = p->width / (float)nx;
+    float ys = p->height / (float)ny;
+    ppm_t tmp = {0, 0, NULL};
+    
+    ppm_new (&tmp, nx, ny);
+    for (y = 0; y < ny; y++)
+    {
+        guchar *row = tmp.col + y * tmp.width * 3;
+        
+        for (x = 0; x < nx; x++)
+        {
+            get_rgb (p, x * xs, y * ys, &row[x * 3]);
+        }
+    }
+    return tmp;
+}
 void resize (ppm_t *p, int nx, int ny)
 {
     int   x, y;
@@ -312,7 +330,10 @@ void resize (ppm_t *p, int nx, int ny)
     p->height = tmp.height;
     p->col = tmp.col;
 }
-
+ppm_t rescale_return(ppm_t *p, double sc)
+{
+    return resize_return(p, p->width * sc, p->height * sc);
+}
 void rescale (ppm_t *p, double sc)
 {
     resize (p, p->width * sc, p->height * sc);
@@ -601,6 +622,38 @@ void ppm_copy_xy(ppm_t *s, ppm_t *p, int srcx, int srcy, int srcw, int srch, int
 		assert(dsty <= p->height);
     }
 }
+ppm_t free_rotate_return(ppm_t* p, double amount)
+{
+    int    x, y;
+    double nx, ny;
+    double R, a;
+    ppm_t  tmp = {0, 0, NULL};
+    double f = amount * G_PI * 2 / 360.0;
+    int    rowstride = p->width * 3;
+    
+    a = p->width / (float)p->height;
+    R = p->width < p->height ? p->width / 2 : p->height / 2;
+    
+    ppm_new (&tmp, p->width, p->height);
+    for (y = 0; y < p->height; y++)
+    {
+        for (x = 0; x < p->width; x++)
+        {
+            double r, d;
+            
+            nx = fabs ((double)(x - p->width / 2.0));
+            ny = fabs ((double)(y - p->height / 2.0));
+            r = sqrt (nx * nx + ny * ny);
+            
+            d = atan2 ((y - p->height / 2.0), (x - p->width / 2.0));
+            
+            nx = (p->width / 2.0 + cos (d - f) * r);
+            ny = (p->height / 2.0 + sin (d - f) * r);
+            get_rgb (p, nx, ny, tmp.col + y * rowstride + x * 3);
+        }
+    }
+    return tmp;
+}
 void free_rotate (ppm_t *p, double amount)
 {
     int    x, y;
@@ -773,7 +826,57 @@ void autocrop (ppm_t *p, int room)
     p->width = tmp.width;
     p->height = tmp.height;
 }
-
+ppm_t ppm_pad_return(ppm_t *p, int left,int right, int top, int bottom, guchar *bg)
+{
+    int   x, y;
+    ppm_t tmp = {0, 0, NULL};
+    
+    ppm_new (&tmp, p->width + left + right, p->height + top + bottom);
+    for (y = 0; y < tmp.height; y++)
+    {
+        guchar *row, *srcrow;
+        
+        row = tmp.col + y * tmp.width * 3;
+        if ((y < top) || (y >= tmp.height-bottom))
+        {
+            for (x = 0; x < tmp.width; x++)
+            {
+                int k = x * 3;
+                
+                row[k+0] = bg[0];
+                row[k+1] = bg[1];
+                row[k+2] = bg[2];
+            }
+            continue;
+        }
+        srcrow = p->col + (y-top) * p->width * 3;
+        for (x = 0; x < left; x++)
+        {
+            int k = x * 3;
+            
+            row[k+0] = bg[0];
+            row[k+1] = bg[1];
+            row[k+2] = bg[2];
+        }
+        for (; x < tmp.width-right; x++)
+        {
+            int k = y * tmp.width * 3 + x * 3;
+            
+            tmp.col[k+0] = srcrow[(x - left) * 3 + 0];
+            tmp.col[k+1] = srcrow[(x - left) * 3 + 1];
+            tmp.col[k+2] = srcrow[(x - left) * 3 + 2];
+        }
+        for (; x < tmp.width; x++)
+        {
+            int k = x * 3;
+            
+            row[k+0] = bg[0];
+            row[k+1] = bg[1];
+            row[k+2] = bg[2];
+        }
+    }
+    return tmp;   
+}
 void ppm_pad (ppm_t *p, int left,int right, int top, int bottom, guchar *bg)
 {
     int   x, y;

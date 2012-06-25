@@ -1609,13 +1609,11 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     double      scale, relief, startangle, anglespan, density, bgamma;
     double*      scales;//[BRUSH_NUM];
     double      thissum;
-    int         max_progress;
     ppm_t       paper_ppm = {0, 0, NULL};
     ppm_t       dirmap = {0, 0, NULL};
     ppm_t       sizmap = {0, 0, NULL};
     int        *xpos = NULL, *ypos = NULL;
     int         step = 1;
-    int         progstep;
     int destWidth ;
     int destHeight;
     int brushIndex;
@@ -1650,23 +1648,8 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     print_val(&runningvals);
     gImageWidth = p->width;
     gImageHeight = p->height;
-    /*
-    if(ppm_empty(&gBackground))
-    {
-        gBackground = createBackground(runningvals, destWidth, destHeight);
-        tmp = createBackground(runningvals, p->width, p->height);
-        
-    }
-    else
-    {
-        tmp = createBackground(runningvals, p->width, p->height);
-    }
-     */
-    //tmp.col = NULL;
-    //tmp.width = p->width;
-    //tmp.height = p->height;
+
     LOGI("## gImageWidth = %d, gImageHeight = %d ##\n", gImageWidth, gImageHeight);
-    //gBackground = createBackground(runningvals, destWidth, destHeight);
     /* Shouldn't be necessary, but... */
     if (img_has_alpha)
     {
@@ -1741,6 +1724,16 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     }
     delete[] scales;
     assert(num_brushes > BRUSH_NUM);
+    ppm_t* newBrushes = (ppm_t*)g_malloc(sizeof(ppm_t) * BRUSH_NUM);
+    ppm_t* newDestBrushes = (ppm_t*)g_malloc(sizeof(ppm_t) * BRUSH_NUM);
+    for(i = 0 ; i < BRUSH_NUM ; i++)
+    {
+        newBrushes[i].col = NULL;
+        newDestBrushes[i].col = NULL;
+        ppm_copy(&brushes[i], &newBrushes[i]);
+        ppm_copy(&destBrushes[i], &newDestBrushes[i]);
+    }
+    /*
     for (i = BRUSH_NUM; i < num_brushes; i++)
     {
         brushes[i].col = NULL;
@@ -1750,7 +1743,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
         ppm_copy (&brushes[brushIndex], &brushes[i]);
         ppm_copy(&destBrushes[brushIndex], &destBrushes[i]);
     }
-
+    */
     for (i = 0; i < runningvals.size_num; i++)
     {
         double sv;
@@ -1763,27 +1756,59 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
             float times;
             h = j + i * runningvals.orient_num;
             //ppm_copy(&brushes[h], &destBrushes[h]);
-            free_rotate (&brushes[h],
-                       startangle + j * anglespan / runningvals.orient_num);
-            free_rotate(&destBrushes[h], startangle + j * anglespan / runningvals.orient_num); 
-            rescale (&brushes[h],
-                   ( sv      * runningvals.size_first +
-                    (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
-            autocrop (&brushes[h],1);
-            times = ((float)destWidth) / gImageWidth;
-            double first , last;
-            first = runningvals.size_first * times;
-            last = runningvals.size_last * times;
-            //rescale(&destBrushes[h], (sv * first + (1.0 - sv) * last) / last);
-            autocrop(&destBrushes[h], 1);
-            resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
+            if(h < 3)
+            {
+                free_rotate (&brushes[h],
+                           startangle + j * anglespan / runningvals.orient_num);
+                rescale (&brushes[h],
+                       ( sv      * runningvals.size_first +
+                        (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
+                autocrop (&brushes[h],1);
+                times = ((float)destWidth) / gImageWidth;
+                double first , last;
+                first = runningvals.size_first * times;
+                last = runningvals.size_last * times;
+                //for test
+                //rescale(&destBrushes[h], (sv * first + (1.0 - sv) * last) / last);
+                //end
+                free_rotate(&destBrushes[h], startangle + j * anglespan / runningvals.orient_num);
+                autocrop(&destBrushes[h], 1);
+                resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
+            }
+            else
+            {
+                brushes[h].col = NULL;
+                destBrushes[h].col = NULL;
+                brushIndex = g_rand_int_range (random_generator, 0, BRUSH_NUM);
+                
+                brushes[h] = free_rotate_return(&newBrushes[brushIndex],
+                                          startangle + j * anglespan / runningvals.orient_num);
+                rescale (&brushes[h],
+                         ( sv      * runningvals.size_first +
+                          (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
+                autocrop (&brushes[h],1);
+                times = ((float)destWidth) / gImageWidth;
+                double first , last;
+                first = runningvals.size_first * times;
+                last = runningvals.size_last * times;
+                
+                destBrushes[h] = free_rotate_return(&newDestBrushes[brushIndex], startangle + j * anglespan / runningvals.orient_num);
+                autocrop(&destBrushes[h], 1);
+                resize(&destBrushes[h], brushes[h].width * times, brushes[h].height * times);
+            }
             //autocrop(&destBrushes[h], 1);
             //SS_SaveBrush("brush", h, brushes[h]);
             //SS_SaveBrush("destbrush", h, destBrushes[h]);
         }
         //SS_Pause(currentPausePoint);
     }
-
+    for(i = 0 ; i < BRUSH_NUM ; i++)
+    {
+        ppm_kill(&newBrushes[i]);
+        ppm_kill(&newDestBrushes[i]);
+    }
+    g_free(newBrushes);
+    g_free(newDestBrushes);
     /* Brush-debugging */
 #if 0
     for (i = 0; i < num_brushes; i++)
@@ -1892,58 +1917,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
             ppm_copy (a, &atmp);
         }
     }
-/*
-    if (runningvals.general_background_type == BG_TYPE_SOLID)
-    {
-        guchar tmpcol[3];
 
-        ppm_new (&tmp, p->width, p->height);
-        //TODO : change code
-        gimp_rgb_get_uchar (&runningvals.color,
-                          &tmpcol[0], &tmpcol[1], &tmpcol[2]);
-        //TODO : end
-        fill (&tmp, tmpcol);
-    }
-    else if (runningvals.general_background_type == BG_TYPE_KEEP_ORIGINAL)
-    {
-        ppm_copy (p, &tmp);
-    }
-    else
-    {
-#if 0
-        if(!ppm_empty(&gBackground))
-        {
-            ppm_kill(&gBackground);
-        }
-        tmp = createBackground(runningvals, p->width, p->height);
-        ppm_copy(&tmp, &gBackground);
-        
-#else
-        if(ppm_empty(&gBackground))
-        {
-            gBackground = createBackground(runningvals, destWidth, destHeight);
-            tmp = createBackground(runningvals, p->width, p->height);
-
-        }
-        else
-        {
-            tmp = createBackground(runningvals, p->width, p->height);
-        }
-#endif
-    }
- */
-    /*
-    if(ppm_empty(&gBackground))
-    {
-        gBackground = createBackground(runningvals, destWidth, destHeight);
-        tmp = createBackground(runningvals, p->width, p->height);
-        
-    }
-    else
-    {
-        tmp = createBackground(runningvals, p->width, p->height);
-    }
-     */
     tmp.width = p->width;
     tmp.height = p->height;
     tmpWidth = tmp.width;
@@ -2188,11 +2162,6 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     if (i < 1)
         i = 1;
 
-    max_progress = i;
-    progstep = max_progress / 30;
-    if (progstep < 10)
-    progstep = 10;
-
     if (runningvals.place_type == PLACEMENT_TYPE_EVEN_DIST)
     {
         int j;
@@ -2221,7 +2190,8 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     //start calculate brush
     clearQuadTree(rootQuadTree);
     clearGrayPaintArea();
-    for (; i && isBrushPaint(); i--)
+    LOGI("## total brush num = %d ##\n", i);
+    for (; i >= 0; i--)
     {
         //SS_Pause(currentPausePoint);
         if (runningvals.place_type == PLACEMENT_TYPE_RANDOM)
@@ -2351,6 +2321,12 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
                                     ty-maxbrushheight/2, brushes,
                                     st+runningvals.orient_num, brushes_sum,
                                     st, 1);
+                    /*
+                    n = choose_best_brush (&edgeDetectionMap, p, a, tx-maxbrushwidth/2,
+                                           ty-maxbrushheight/2, brushes,
+                                           st+runningvals.orient_num, brushes_sum,
+                                           st, 10);
+                     */
                 }
                 else 
                 {
@@ -2527,9 +2503,9 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     //}
     separatePaintArea();
     //end
-    LOGI("## set pause point before ##");
+    LOGI("## set pause point before ##\n");
     SS_SetComputationPausePoint(currentPausePoint);
-    LOGI("## set pause point end ");
+    LOGI("## set pause point end ## \n");
 #ifdef MACOS
     //SE_startBrushPaint();
 #else
