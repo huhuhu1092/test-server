@@ -24,12 +24,279 @@
 #include "random.h"
 #include "SE_Mutex.h"
 #include "assert.h"
+#include <algorithm>
 #ifdef WIN32
 #include "imageloader.h"
 #endif
 #ifdef MACOS
 #include "PGMDataReader.h"
 #endif
+#ifdef WIN32
+#else
+//extern "C"
+//{
+#include <sys/time.h>
+//}
+#endif
+REPAINTCALLBACK_FUN repaintCallBack = 0;
+int tmpWidth = 0;
+int tmpHeight = 0;
+int gBrushMaxWidth = 0;
+int gBrushMaxHeight = 0;
+int gImageWidth = 0;
+int gImageHeight = 0;
+double gRunningTime = 0;
+#ifdef WIN32
+#else
+struct timeval gStartTime;
+#endif
+ppm_t gBackground = {0, 0, NULL};
+ppm_t gBackgroundBack = {0, 0, NULL};
+/*
+ * The default values for the application, to be initialized at startup.
+ * */
+static gimpressionist_vals_t defaultpcvals = {
+    4,
+    0.0,
+    60.0,
+    0,
+    12.0,
+    20.0,
+    20.0,
+    1.0,
+    1,
+    0.1,
+    0.0,
+    30.0,
+    0,
+    0,
+    "defaultbrush.pgm",
+    "defaultpaper.pgm",
+    {0,0,0,1.0},
+    1,
+    0,
+    { { 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0 } },
+    1,
+    0,
+    0.0,
+    0.0,
+    1.0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    20.0,
+    1,
+    10.0,
+    20.0,
+    0,
+    0.001,
+    
+    { { 0.5, 0.5, 50.0, 1.0 } },
+    1,
+    1.0,
+    0,
+    
+    10,
+    4,
+    
+    0, 0.0
+};
+gimpressionist_vals_t  pcvals;
+void setDefaultPcvals()
+{
+	pcvals = defaultpcvals;
+}
+double dist (double x, double y, double end_x, double end_y)
+{
+    double dx = end_x - x;
+    double dy = end_y - y;
+    return sqrt (dx * dx + dy * dy);
+}
+double getsiz_proto (double x, double y, int n, smvector_t *vec,
+                     double smstrexp, int voronoi)
+{
+    int    i;
+    double sum, ssum, dst;
+    int    first = 0, last;
+    
+    if ((x < 0.0) || (x > 1.0))
+        g_warning ("HUH? x = %f\n",x);
+    
+#if 0
+    if (from == 0)
+    {
+        n = numsmvect;
+        vec = smvector;
+        smstrexp = gtk_adjustment_get_value (GTK_ADJUSTMENT (smstrexpadjust));
+        voronoi = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (size_voronoi));
+    }
+    else
+    {
+        n = pcvals.num_size_vectors;
+        vec = pcvals.size_vectors;
+        smstrexp = pcvals.size_strength_exponent;
+        voronoi = pcvals.size_voronoi;
+    }
+#endif
+    
+    if (voronoi)
+    {
+        gdouble bestdist = -1.0;
+        for (i = 0; i < n; i++)
+        {
+            dst = dist (x, y, vec[i].x, vec[i].y);
+            if ((bestdist < 0.0) || (dst < bestdist))
+            {
+                bestdist = dst;
+                first = i;
+            }
+        }
+        last = first+1;
+    }
+    else
+    {
+        first = 0;
+        last = n;
+    }
+    
+    sum = ssum = 0.0;
+    for (i = first; i < last; i++)
+    {
+        gdouble s = vec[i].str;
+        
+        dst = dist (x,y,vec[i].x,vec[i].y);
+        dst = pow (dst, smstrexp);
+        if (dst < 0.0001)
+            dst = 0.0001;
+        s = s / dst;
+        
+        sum += vec[i].siz * s;
+        ssum += 1.0/dst;
+    }
+    sum = sum / ssum / 100.0;
+    return CLAMP (sum, 0.0, 1.0);
+}
+#define P_VAL(item, fmt) g_printerr(#item "= %" #fmt "\n", val->item)
+void print_val(gimpressionist_vals_t* val)
+{
+    P_VAL(orient_num, d);
+    P_VAL(orient_first, f);
+    P_VAL(orient_last, f);
+    P_VAL(orient_type, d);
+    P_VAL(brush_relief, f);
+    P_VAL(brush_scale, f);
+    P_VAL(brush_density, f);
+    P_VAL(brushgamma, f);
+    P_VAL(general_background_type, d);
+    P_VAL(general_dark_edge, f);
+    P_VAL(paper_relief, f);
+    P_VAL(paper_scale, f);
+    P_VAL(paper_invert, d);
+    P_VAL(run, d);
+    P_VAL(selected_brush, s);
+    P_VAL(selected_paper, s);
+    P_VAL(general_paint_edges, d);
+    P_VAL(place_type, d);
+    P_VAL(num_orient_vectors, d);
+    P_VAL(placement_center, d);
+    P_VAL(brush_aspect, f);
+    P_VAL(orient_angle_offset, f);
+    P_VAL(orient_strength_exponent, f);
+    P_VAL(general_tileable, d);
+    P_VAL(paper_overlay, d);
+    P_VAL(orient_voronoi, d);
+    P_VAL(color_brushes, d);
+    P_VAL(general_drop_shadow, d);
+    P_VAL(general_shadow_darkness, f);
+    P_VAL(size_num, d);
+    P_VAL(size_first, f);
+    P_VAL(size_last, f);
+    P_VAL(size_type, d);
+    P_VAL(devthresh, f);
+    
+    P_VAL(num_size_vectors, d);
+    P_VAL(size_strength_exponent, f);
+    P_VAL(size_voronoi, d);
+    
+    P_VAL(general_shadow_depth, d);
+    P_VAL(general_shadow_blur, d);
+    
+    P_VAL(color_type, d);
+    P_VAL(color_noise, f); 
+}
+void changeBackground()
+{
+    ppm_copy(&gBackgroundBack, &gBackground);
+}
+static void clearBackground()
+{
+    ppm_kill(&gBackground);
+    ppm_kill(&gBackgroundBack);
+    gBrushMaxWidth = 0;
+    gBrushMaxHeight = 0;
+    gImageWidth = 0;
+    gImageHeight = 0;
+    tmpWidth = 0;
+    tmpHeight = 0;
+}
+static ppm_t createBackground(gimpressionist_vals_t runningvals, int width, int height)
+{
+    int x, y;
+    ppm_t tmp;
+    ppm_t paper_ppm;
+    float scale = runningvals.paper_scale / 100.0;
+    ppm_new (&tmp, width, height);
+    ppm_load (runningvals.selected_paper, &paper_ppm);
+    resize (&paper_ppm, paper_ppm.width * scale, paper_ppm.height * scale);
+    if (runningvals.paper_invert)
+        ppm_apply_gamma (&paper_ppm, -1.0, 1, 1, 1);
+    for (x = 0; x < tmp.width; x++)
+    {
+        int rx = x % paper_ppm.width;
+        
+        for (y = 0; y < tmp.height; y++)
+        {
+            int ry = y % paper_ppm.height;
+            memcpy (&tmp.col[y * tmp.width * 3 + x * 3],
+                    &paper_ppm.col[ry*paper_ppm.width*3+rx*3],
+                    3);
+        }
+    }
+    ppm_kill(&paper_ppm);
+    return tmp;
+}
+void startTime()
+{
+#ifdef WIN32
+#else
+    gettimeofday(&gStartTime, NULL);
+    gRunningTime = 0;
+#endif
+}
+void endTime()
+{
+#ifdef WIN32
+#else
+    struct timeval endTime;
+    int endms, startms;
+    gettimeofday(&endTime, NULL);
+    endms = endTime.tv_sec * 1000 + endTime.tv_usec / 1000;
+    startms = gStartTime.tv_sec * 1000 + endTime.tv_usec / 1000;
+    gRunningTime = (endms - startms) / 1000.0f;
+#endif
+}
+double getTime()
+{
+    return gRunningTime;
+}
+void clearTime()
+{
+    gRunningTime = 0;
+}
+
+/////////////////////////////////////////////////
 static gboolean img_has_alpha = 0;
 static gint brush_from_file = 2;
 static ppm_t brushppm  = {0, 0, NULL};
@@ -134,11 +401,11 @@ static gboolean file_is_color (const char *fn)
 {
     return fn && strstr (fn, ".ppm");
 }
-void set_colorbrushes (const gchar *fn)
+static void set_colorbrushes (const gchar *fn)
 {
     pcvals.color_brushes = file_is_color (fn);
 }
-size_t g_strlcpy (gchar       *dest,
+static size_t g_strlcpy (gchar       *dest,
            const gchar *src,
            size_t        dest_size)
 {
@@ -175,7 +442,7 @@ size_t g_strlcpy (gchar       *dest,
     return s - src - 1;  /* count does not include NUL */
 }
 
-void brush_reload (const gchar *fn, ppm_t       *p)
+static void brush_reload (const gchar *fn, ppm_t       *p)
 {
     static char  lastfn[256] = "";
     static ppm_t cache       = {0, 0, NULL};
@@ -197,11 +464,11 @@ void brush_reload (const gchar *fn, ppm_t       *p)
     ppm_copy (&cache, p);
     set_colorbrushes (fn);
 }
-void brush_get(const char* ppmName, ppm_t* p)
+static void brush_get(const char* ppmName, ppm_t* p)
 {
     ppm_load(ppmName, p);
 }
-void brush_get_selected (ppm_t *p)
+static void brush_get_selected (ppm_t *p)
 {
     if (brush_from_file)
     {
@@ -222,7 +489,7 @@ void brush_get_selected (ppm_t *p)
         ppm_copy (&brushppm, p);
 }
 
-double get_direction (double x, double y, int from)
+static double get_direction (double x, double y, int from)
 {
     gint      i;
     gint      n;
@@ -905,14 +1172,17 @@ static float rgbToHueAngle(guchar *rgb)
     float r = rgb[0] / 255.0f;
     float g = rgb[1] / 255.0f;
     float b = rgb[2] / 255.0f;
-    float v = r > g ? r : g;
-    float max = v;
+    //float v = r > g ? r : g;
+    float max = std::max(r, std::max(g, b));
+    float min = std::min(r, std::min(g, b));
+    /*
     if(v < b)
         max = b;
     v = r < g ? r : g;
     float min = v;
     if(v > b)
         v = v;
+     */
     float delta = max - min;
     if(max == min)
         return 0;
@@ -925,6 +1195,10 @@ static float rgbToHueAngle(guchar *rgb)
     {
         h = 360 - (max - r + g - min + b - min) * 60 / delta;    
     }
+    if(h < 0)
+    {
+        h = 360 + h;
+    }
     return h;
 }
 static int getImageHueDistributeIndex(float hAngle)
@@ -932,7 +1206,7 @@ static int getImageHueDistributeIndex(float hAngle)
     int count = sizeof(gImageHueDistribute) / sizeof(ImageHueDistribute);
     for(int i = 0 ; i < count ; i++)
     {
-        if(gImageHueDistribute[i].minAngle <= hAngle && hAngle < gImageHueDistribute[i].maxAngle)
+        if(gImageHueDistribute[i].minAngle <= hAngle && hAngle <= gImageHueDistribute[i].maxAngle)
             return i;
     }
     return -1;
@@ -945,10 +1219,51 @@ static void clearImageHueDistribute()
         gImageHueDistribute[i].num = 0;
     }
 }
+
 static void findFirstThreeHue(int& first, int& second, int& third)
 {
     int count = sizeof(gImageHueDistribute) / sizeof(ImageHueDistribute);
     int max = 0;
+    int minNum = INT_MIN;
+    std::list<int> hasFindIndex;
+    for(int i = 0 ;i < count ; i++)
+    {
+        std::list<int>::iterator it = find(hasFindIndex.begin(), hasFindIndex.end(), i);
+        if(gImageHueDistribute[i].num >  minNum && it == hasFindIndex.end())
+        {
+            max = i;
+            minNum = gImageHueDistribute[i].num;
+        }
+    }
+    hasFindIndex.push_back(max);
+    first = max;
+    minNum = INT_MIN;
+    max = 0;
+    for(int i = 0 ;i < count ; i++)
+    {
+        std::list<int>::iterator it = find(hasFindIndex.begin(), hasFindIndex.end(), i);
+        if(gImageHueDistribute[i].num >  minNum && it == hasFindIndex.end())
+        {
+            max = i;
+            minNum = gImageHueDistribute[i].num;
+        }
+    }
+    hasFindIndex.push_back(max);
+    second = max;
+    max = 0;
+    minNum = INT_MIN;
+    for(int i = 0 ;i < count ; i++)
+    {
+        std::list<int>::iterator it = find(hasFindIndex.begin(), hasFindIndex.end(), i);
+        if(gImageHueDistribute[i].num >  minNum && it == hasFindIndex.end())
+        {
+            max = i;
+            minNum = gImageHueDistribute[i].num;
+        }
+    }
+    third = max;
+    
+    /*
     for(int i = 1 ; i < count ; i++)
     {
         if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
@@ -969,7 +1284,7 @@ static void findFirstThreeHue(int& first, int& second, int& third)
     max = 0;
     for(int i = 1 ; i < 5 ; i++)
     {
-        if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
+        if(secondHueDistribute[max].num < secondHueDistribute[i].num)
             max = i;
     }
     second = max;
@@ -985,11 +1300,12 @@ static void findFirstThreeHue(int& first, int& second, int& third)
     max = 0;
     for(int i = 1 ; i < 4 ; i++)
     {
-        if(gImageHueDistribute[max].num < gImageHueDistribute[i].num)
+        if(thirdHueDistribute[max].num < thirdHueDistribute[i].num)
             max = i;
     }
     third = max;
     assert(gImageHueDistribute[first].num >= gImageHueDistribute[second].num && gImageHueDistribute[second].num >= gImageHueDistribute[third].num);
+     */
     LOGI("## firstHue = %d, secondHue = %d, thirdHue = %d ##\n", first, second, third);
 }
 static void createImageHueDistribute(ppm_t* image)
@@ -1002,7 +1318,7 @@ static void createImageHueDistribute(ppm_t* image)
         {
             float h = rgbToHueAngle(src + j * 3);
             int index = getImageHueDistributeIndex(h);
-            assert(-1);
+            assert(index != -1);
             gImageHueDistribute[index].num++;
         }
     }
@@ -1275,7 +1591,7 @@ void testQuadTree()
     releaseQuadTree(rootQuadTree);
 }
 ////////////////////////
-#define BRUSH_NUM 3
+//#define BRUSH_NUM 3
 void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
 {
     int         x, y;
@@ -1291,7 +1607,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     double     *brushes_sum;
     int         cx, cy, maxdist;
     double      scale, relief, startangle, anglespan, density, bgamma;
-    double      scales[BRUSH_NUM];
+    double*      scales;//[BRUSH_NUM];
     double      thissum;
     int         max_progress;
     ppm_t       paper_ppm = {0, 0, NULL};
@@ -1315,6 +1631,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     g_printerr("####running = %d ###\n", running);
     if (running)
         return;
+    
     currentPausePoint = SS_GetCurrentPausePoint();
     if(rootQuadTree == NULL)
     {
@@ -1322,16 +1639,34 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     }
     createImageHueDistribute(p);
     findFirstThreeHue(firstHue, secondHue, thirdHue);
+    
     currentCanvas = SS_GetCurrentCanvas();
     running++;
     SS_GetDestSize(&destWidth, &destHeight);
     SS_GetSettingBrush(&brushSet);
+    int BRUSH_NUM = brushSet.brush.size();
+    scales = new double[BRUSH_NUM];
     runningvals = pcvals;
     print_val(&runningvals);
     gImageWidth = p->width;
     gImageHeight = p->height;
-    
+    /*
+    if(ppm_empty(&gBackground))
+    {
+        gBackground = createBackground(runningvals, destWidth, destHeight);
+        tmp = createBackground(runningvals, p->width, p->height);
+        
+    }
+    else
+    {
+        tmp = createBackground(runningvals, p->width, p->height);
+    }
+     */
+    //tmp.col = NULL;
+    //tmp.width = p->width;
+    //tmp.height = p->height;
     LOGI("## gImageWidth = %d, gImageHeight = %d ##\n", gImageWidth, gImageHeight);
+    //gBackground = createBackground(runningvals, destWidth, destHeight);
     /* Shouldn't be necessary, but... */
     if (img_has_alpha)
     {
@@ -1369,22 +1704,13 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
         brushes[brushIndex].col = NULL;
         destBrushes[brushIndex].col = NULL;
         int k = g_rand_int_range(random_generator, 0, BRUSH_NUM);
-        brush_get(brushSet.brush[k], &brushes[brushIndex]);
+        brush_get(brushSet.brush[k].c_str(), &brushes[brushIndex]);
         ppm_copy(&brushes[brushIndex], &destBrushes[brushIndex]);
-        //brush_get(brushSet.brush[k], &destBrushes[brushIndex]);
     }
-    /*
+    scale = runningvals.size_last / std::max (brushes[0].width, brushes[0].height);
     for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
     {
-      resize (&brushes[brushIndex],
-          brushes[brushIndex].width,
-          brushes[brushIndex].height * pow (10, runningvals.brush_aspect));
-    }
-     */
-    scale = runningvals.size_last / MAX (brushes[0].width, brushes[0].height);
-    for(brushIndex = 0 ; brushIndex < BRUSH_NUM ; brushIndex++)
-    {
-        scales[brushIndex] = runningvals.size_last / MAX (brushes[brushIndex].width, brushes[brushIndex].height);
+        scales[brushIndex] = runningvals.size_last / std::max (brushes[brushIndex].width, brushes[brushIndex].height);
     }
     if (bgamma != 1.0)
         ppm_apply_gamma (&brushes[0], 1.0 / bgamma, 1,1,1);
@@ -1413,7 +1739,8 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
                      destBrushes[brushIndex].height * destBrushes[brushIndex].height);
         ppm_pad(&destBrushes[brushIndex], i - destBrushes[brushIndex].width, i - destBrushes[brushIndex].width, i - destBrushes[brushIndex].height, i - destBrushes[brushIndex].height, back);
     }
-    assert(num_brushes > 3);
+    delete[] scales;
+    assert(num_brushes > BRUSH_NUM);
     for (i = BRUSH_NUM; i < num_brushes; i++)
     {
         brushes[i].col = NULL;
@@ -1434,15 +1761,14 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
         for (j = 0; j < runningvals.orient_num; j++)
         {
             float times;
-            // ppm_t tmp = {0, 0, NULL};
             h = j + i * runningvals.orient_num;
+            //ppm_copy(&brushes[h], &destBrushes[h]);
             free_rotate (&brushes[h],
                        startangle + j * anglespan / runningvals.orient_num);
             free_rotate(&destBrushes[h], startangle + j * anglespan / runningvals.orient_num); 
             rescale (&brushes[h],
                    ( sv      * runningvals.size_first +
                     (1.0-sv) * runningvals.size_last    ) / runningvals.size_last);
-            //ppm_copy(&brushes[h], &tmp);
             autocrop (&brushes[h],1);
             times = ((float)destWidth) / gImageWidth;
             double first , last;
@@ -1566,7 +1892,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
             ppm_copy (a, &atmp);
         }
     }
-
+/*
     if (runningvals.general_background_type == BG_TYPE_SOLID)
     {
         guchar tmpcol[3];
@@ -1605,6 +1931,21 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
         }
 #endif
     }
+ */
+    /*
+    if(ppm_empty(&gBackground))
+    {
+        gBackground = createBackground(runningvals, destWidth, destHeight);
+        tmp = createBackground(runningvals, p->width, p->height);
+        
+    }
+    else
+    {
+        tmp = createBackground(runningvals, p->width, p->height);
+    }
+     */
+    tmp.width = p->width;
+    tmp.height = p->height;
     tmpWidth = tmp.width;
     tmpHeight = tmp.height;
     gBrushMaxWidth = maxbrushwidth;
@@ -1615,8 +1956,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
     static int startupDrawing = 1;
     if(startupDrawing)
     {
-        //SS_SetBackground(gBackground);
-        SS_SetCanvasBackground(currentCanvas, gBackground);
+        //SS_SetCanvasBackground(currentCanvas, gBackground);
         startupDrawing = 0;
     }
 #else
@@ -2166,7 +2506,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
             }
         }
     }
-    LOGI("### edge brush num = %d ##", edgeBrushNum);
+    LOGI("### edge brush num = %d ##\n", edgeBrushNum);
   	//debug for change
 	//apply_brush (brush, shadow, &tmp, &atmp, tx,ty, r,g,b);
     
@@ -2317,6 +2657,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
 
     g_free (xpos);
     g_free (ypos);
+    /*
     if (runningvals.general_paint_edges)
     {
         crop (&tmp,
@@ -2327,7 +2668,7 @@ void repaint (ppm_t *p, ppm_t *a, RepaintData rd)
                maxbrushwidth, maxbrushheight,
               atmp.width - maxbrushwidth, atmp.height - maxbrushheight);
     }
-
+*/
     ppm_kill (p);
     p->width = tmp.width;
     p->height = tmp.height;

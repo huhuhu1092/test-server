@@ -19,9 +19,9 @@
 
 #include "gimpressionist.h"
 #include "ppmtool.h"
-    #include <stdio.h>
-    #include <string.h>
-    #include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 #ifdef WIN32
 #else
 //extern "C"

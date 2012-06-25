@@ -54,7 +54,7 @@ struct _GimpRGB
 #define CLAMP(x,l,u) ((x)<(l)?(l):((x)>(u)?(u):(x)))
 #define ROUND(x) ((int) ((x) + 0.5))
 #define gimp_rad_to_deg(angle) ((angle) * 360.0 / (2.0 * G_PI))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+//#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP_UP_TO(x, max) (CLAMP((x),(0),(max-1)))
 //#ifdef __cplusplus
 //}

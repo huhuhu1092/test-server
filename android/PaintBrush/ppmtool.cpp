@@ -485,6 +485,12 @@ void ppm_load (const char *fn, ppm_t *p)
     char line[200];
     int pgm = 0;
     int index = 0;
+    //debug
+    if(strcmp(fn, "specialbrush_005.pgm") == 0)
+    {
+        LOGI("## pause ##\n");
+    }
+    //end
     SS_GetPgmData(fn, &srcData, &len);
     index = readline (srcData, index, len, line, 200);
     if (strcmp (line, "P6"))
