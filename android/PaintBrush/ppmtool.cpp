@@ -1156,6 +1156,7 @@ ppm_t edgeDetection(ppm_t* srcImage)
             outbits[redOffset(x, y, width)] = sumr;
             outbits[greenOffset(x, y, width)] = sumg;
             outbits[blueOffset(x, y, width)] = sumb;
+            //LOGI("## r = %d, g = %d, b = %d ##\n", sumr, sumg, sumb);
         }
     }
     return newImage;
