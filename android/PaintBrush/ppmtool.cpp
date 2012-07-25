@@ -1153,6 +1153,32 @@ ppm_t edgeDetection(ppm_t* srcImage)
             int sumr = std::min((abs(sumr1) + abs(sumr2)) / 2, 255);
             int sumg = std::min((abs(sumg1) + abs(sumg2)) / 2, 255);
             int sumb = std::min((abs(sumb1) + abs(sumb2)) / 2, 255);
+            //for test
+            
+            if(sumr <= 255 && sumr > 128)
+            {
+                sumr = 255;
+                sumg = 255;
+                sumb = 255;
+            }
+            else if(sumb <= 255 && sumb >= 128)
+            {
+                sumr = 255;
+                sumg = 255;
+                sumb = 255;
+            }
+            else if(sumg <= 255 && sumg >= 128)
+            {
+                sumr = 255;
+                sumg = 255;
+                sumb = 255;
+            }
+            else {
+                sumr = 0;
+                sumb = 0;
+                sumg = 0;
+            }
+            //end
             outbits[redOffset(x, y, width)] = sumr;
             outbits[greenOffset(x, y, width)] = sumg;
             outbits[blueOffset(x, y, width)] = sumb;
