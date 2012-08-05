@@ -50,6 +50,7 @@ void ppm_copy(ppm_t *s, ppm_t *p);
 void ppm_copy_xy(ppm_t *s, ppm_t *p, int srcx, int srcy, int srcw, int srch, int dstx, int dsty);
 void fill(ppm_t *p, guchar *c);
 void free_rotate(ppm_t *p, double amount);
+void free_rotate_fast(ppm_t *p, double amount);
 ppm_t free_rotate_return(ppm_t* p, double amount);
 void ppm_pad(ppm_t *p, int left,int right, int top, int bottom, guchar *);
 ppm_t ppm_pad_return(ppm_t *p, int left,int right, int top, int bottom, guchar *);

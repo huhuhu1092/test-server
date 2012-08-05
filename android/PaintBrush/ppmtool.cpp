@@ -631,8 +631,8 @@ ppm_t free_rotate_return(ppm_t* p, double amount)
     double f = amount * G_PI * 2 / 360.0;
     int    rowstride = p->width * 3;
     
-    a = p->width / (float)p->height;
-    R = p->width < p->height ? p->width / 2 : p->height / 2;
+    //a = p->width / (float)p->height;
+    //R = p->width < p->height ? p->width / 2 : p->height / 2;
     
     ppm_new (&tmp, p->width, p->height);
     for (y = 0; y < p->height; y++)
@@ -653,6 +653,54 @@ ppm_t free_rotate_return(ppm_t* p, double amount)
         }
     }
     return tmp;
+}
+void free_rotate_fast(ppm_t *p, double amount)
+{
+    int    x, y;
+    double nx, ny;
+    double R, a;
+    ppm_t  tmp = {0, 0, NULL};
+    double f = amount * G_PI * 2 / 360.0;
+    int    rowstride = p->width * 3;
+    
+    a = p->width / (float)p->height;
+    R = p->width < p->height ? p->width / 2 : p->height / 2;
+    
+    ppm_new (&tmp, p->width, p->height);
+    for (y = 0; y < p->height; y++)
+    {
+        for (x = 0; x < p->width; x++)
+        {
+            double r, d;
+            
+            nx = fabs ((double)(x - p->width / 2.0));
+            ny = fabs ((double)(y - p->height / 2.0));
+            r = sqrt (nx * nx + ny * ny);
+            
+            d = atan2 ((y - p->height / 2.0), (x - p->width / 2.0));
+            
+            nx = (p->width / 2.0 + cos (d - f) * r);
+            ny = (p->height / 2.0 + sin (d - f) * r);
+            if(nx < 0)
+                nx = 0;
+            if(nx >= p->width)
+                nx = p->width - 1;
+            if(ny < 0)
+                ny = 0;
+            if(ny >= p->height)
+                ny = p->height - 1;
+            //get_rgb (p, nx, ny, tmp.col + y * rowstride + x * 3);
+            guchar* dst = tmp.col + y * rowstride + x * 3;
+            guchar* src = p->col + (int)ny * rowstride + (int)nx * 3;
+            dst[0] = src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+        }
+    }
+    ppm_kill (p);
+    p->width = tmp.width;
+    p->height = tmp.height;
+    p->col = tmp.col;
 }
 void free_rotate (ppm_t *p, double amount)
 {
