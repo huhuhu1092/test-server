@@ -21,6 +21,7 @@
 
 #include "type.h"
 #include "ppmtool.h"
+#include <vector>
 //#ifdef __cplusplus
 //extern "C" {
 //#endif
@@ -149,7 +150,7 @@ enum ORIENTATION_ENUM
  * x == -2 && y == -2 indicate the list is at end
  * x == -1 && y == -1 indicate there has no brush piece in list
  * */
-typedef struct
+struct BrushPiece
 {
     ppm_t data;
 	ppm_t alpha;
@@ -161,12 +162,46 @@ typedef struct
 	int mbh;
     int last_piece;
     int r, g, b;
-} BrushPiece;
+    bool precise;
+    int startx, starty;
+    int endx, endy;
+    struct Point
+    {
+        int x;
+        int y;
+        int r,g,b;
+        Point()
+        {
+            x = 0;
+            y = 0;
+            r = g = b = 0;
+        }
+        Point(int x, int y, int r, int g, int b)
+        {
+            this->x = x;
+            this->y = y;
+            this->r = r;
+            this->g = g;
+            this->b = b;
+        }
+    };
+    std::vector<Point> pointVector;
+    BrushPiece()
+    {
+        precise = false;
+    }
+} ;
 /* Globals */
 struct RepaintData
 {
     bool calculateOnEdge;
     int pass;
+    int brushSizeComp;
+    bool mostConcisePass;
+    int adjustAngle;
+    bool lastTime;
+    int edgeDetectionStart;
+    int edgeDetectionEnd;
 };
 extern gimpressionist_vals_t pcvals;
 double getsiz_proto (double x, double y, int n, smvector_t *vec,

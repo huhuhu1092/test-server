@@ -1163,7 +1163,7 @@ static int blueOffset(int x, int y, int w)
 {
     return y * w * 3 + x * 3 + 2;
 }
-ppm_t edgeDetection(ppm_t* srcImage)
+ppm_t edgeDetection(ppm_t* srcImage, int start, int end)
 {
     ppm_t newImage;
     ppm_new(&newImage, srcImage->width, srcImage->height);
@@ -1203,19 +1203,19 @@ ppm_t edgeDetection(ppm_t* srcImage)
             int sumb = std::min((abs(sumb1) + abs(sumb2)) / 2, 255);
             //for test
             
-            if(sumr <= 255 && sumr > 100)
+            if(sumr <= end && sumr >= start)
             {
                 sumr = 255;
                 sumg = 255;
                 sumb = 255;
             }
-            else if(sumb <= 255 && sumb >= 100)
+            else if(sumb <= end && sumb >= start)
             {
                 sumr = 255;
                 sumg = 255;
                 sumb = 255;
             }
-            else if(sumg <= 255 && sumg >= 100)
+            else if(sumg <= end && sumg >= start)
             {
                 sumr = 255;
                 sumg = 255;

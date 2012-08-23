@@ -70,7 +70,7 @@ void blur(ppm_t *p, int xrad, int yrad);
 
 void mkgrayplasma(ppm_t *p, float turb);
 
-extern ppm_t edgeDetection(ppm_t* srcImage);
+extern ppm_t edgeDetection(ppm_t* srcImage, int start, int end);
 
 void setDataPath(const char* str);
 #define PPM_IS_INITED(ppm_ptr) ((ppm_ptr)->col != NULL)
