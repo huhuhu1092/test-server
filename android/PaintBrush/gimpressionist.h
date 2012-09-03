@@ -214,7 +214,7 @@ extern void repaint4 (ppm_t *p, ppm_t *a, RepaintData rd);
 extern void apply_brush_area (ppm_t *brush,
                       ppm_t *shadow,
                       ppm_t *p, ppm_t *a,
-                              int tx, int ty, int r, int g, int b);
+                              int tx, int ty, int r, int g, int b, int transparent);
 extern void setDefaultPcvals();
 //extern ppm_t createBackground(gimpressionist_vals_t runningvals, int width, int height);
 extern void print_val(gimpressionist_vals_t* val);
