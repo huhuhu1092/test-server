@@ -189,6 +189,12 @@ struct BrushPiece
     BrushPiece()
     {
         precise = false;
+        data.col = NULL;
+        data.width = 0;
+        data.height = 0;
+        alpha.col = NULL;
+        alpha.width = 0;
+        alpha.height = 0;
     }
 } ;
 /* Globals */
