@@ -153,18 +153,18 @@ enum ORIENTATION_ENUM
 struct BrushPiece
 {
     ppm_t data;
-	ppm_t alpha;
-    int x;
-    int y;
-	int w; // dst width
-	int h; // dst height
-	int mbw;
-	int mbh;
-    int last_piece;
-    int r, g, b;
+	//ppm_t alpha;
+    short x;
+    short y;
+	//int w; // dst width
+	//int h; // dst height
+	//int mbw;
+	//int mbh;
+    char last_piece;
+    unsigned char r, g, b;
     bool precise;
-    int startx, starty;
-    int endx, endy;
+    short startx, starty;
+    short endx, endy;
     struct Point
     {
         int x;
@@ -185,16 +185,16 @@ struct BrushPiece
             this->b = b;
         }
     };
-    std::vector<Point> pointVector;
+    //std::vector<Point> pointVector;
     BrushPiece()
     {
         precise = false;
         data.col = NULL;
         data.width = 0;
         data.height = 0;
-        alpha.col = NULL;
-        alpha.width = 0;
-        alpha.height = 0;
+        //alpha.col = NULL;
+        //alpha.width = 0;
+        //alpha.height = 0;
     }
 } ;
 /* Globals */
