@@ -153,7 +153,7 @@ enum ORIENTATION_ENUM
 struct BrushPiece
 {
     ppm_t data;
-	//ppm_t alpha;
+	ppm_t destData;
     short x;
     short y;
 	//int w; // dst width
