@@ -189,6 +189,9 @@ struct BrushPiece
     BrushPiece()
     {
         precise = false;
+        destData.col = NULL;
+        destData.width = 0;
+        destData.height = 0;
         data.col = NULL;
         data.width = 0;
         data.height = 0;
