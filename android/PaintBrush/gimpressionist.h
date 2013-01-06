@@ -152,19 +152,25 @@ enum ORIENTATION_ENUM
  * */
 struct BrushPiece
 {
-    ppm_t data;
-	ppm_t destData;
-    short x;
-    short y;
-	//int w; // dst width
-	//int h; // dst height
-	//int mbw;
-	//int mbh;
+    struct P1_t
+    {
+	    ppm_t destData;
+        short x;
+        short y;
+        unsigned char r, g, b;
+    };
+    struct P2_t
+    {
+        short startx, starty;
+        short endx, endy;
+    };
     char last_piece;
-    unsigned char r, g, b;
     bool precise;
-    short startx, starty;
-    short endx, endy;
+    union
+    {
+        P1_t p1;
+        P2_t p2;
+    };
     struct Point
     {
         int x;
@@ -186,19 +192,7 @@ struct BrushPiece
         }
     };
     //std::vector<Point> pointVector;
-    BrushPiece()
-    {
-        precise = false;
-        destData.col = NULL;
-        destData.width = 0;
-        destData.height = 0;
-        data.col = NULL;
-        data.width = 0;
-        data.height = 0;
-        //alpha.col = NULL;
-        //alpha.width = 0;
-        //alpha.height = 0;
-    }
+
 } ;
 /* Globals */
 struct RepaintData
@@ -211,6 +205,14 @@ struct RepaintData
     bool lastTime;
     int edgeDetectionStart;
     int edgeDetectionEnd;
+    
+    int currentGrayIndex;
+    int currentGrayBrushCount;
+    int allBrushCount;
+    //for test
+    int brushNum;
+    
+    //
 };
 extern gimpressionist_vals_t pcvals;
 double getsiz_proto (double x, double y, int n, smvector_t *vec,
