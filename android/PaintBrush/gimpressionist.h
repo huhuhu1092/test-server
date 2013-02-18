@@ -209,6 +209,10 @@ struct RepaintData
     int currentGrayIndex;
     int currentGrayBrushCount;
     int allBrushCount;
+    
+    int blurRadiusH;
+    int blurRadiusV;
+    float blurSigmaValue;
     //for test
     int brushNum;
     
