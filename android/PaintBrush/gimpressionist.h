@@ -213,6 +213,8 @@ struct RepaintData
     int blurRadiusH;
     int blurRadiusV;
     float blurSigmaValue;
+    float blurRatio;
+    int totalTimes;
     //for test
     int brushNum;
     
