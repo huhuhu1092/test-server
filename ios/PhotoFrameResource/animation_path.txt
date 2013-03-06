@@ -1,0 +1,11 @@
+S1    L1    LS1            12    0    2    
+L1    L2    P1L            12    0    2    
+R1    R2    P1R            12    0    0    
+L2    R1    P2L_YZINVERSE            12    0    0    
+L2    L1    P1L            12    1    2    
+L2    R1    P2L            12    1    0    
+L2    R1    HP1R_XYINVERSE            12    0    1    
+R2    R1    P1R            12    1    2    
+R2    L1    P2R            12    1    0    
+R2    L1    P2R_YZINVERSE            12    0    0    
+R2    L1    HP1L_XYINVERSE            12    0    1    

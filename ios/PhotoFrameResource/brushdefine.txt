@@ -1,0 +1,122 @@
+﻿[BrushTable]
+1	2	6	2	3	6	0	PA002
+2	7	50	7	1	11	0	WA008
+3	13	26	13	1	19	0	WA002
+4	5	6	5	1	24	0	WA010
+5	30	29	30	1	30	0	PA009
+6	38	44	38	2	0	3	SP005
+7	47	46	47	2	0	6	WA017
+8	41	29	41	2	0	9	PA014
+9	46	49	46	2	0	12	PA018
+10	36	37	36	2	0	15	SP003
+11	34	39	34	4	0	0	SP001
+12	33	7	33	4	0	0	PA012
+13	51	53	52	4	0	0	SP007
+14	55	57	56	4	0	0	SP015
+15	60	59	58	4	0	0	SP010
+16	66	67	66	4	0	0	SP017
+17	68	68	68	4	0	0	SP019
+18	75	61	62	4	0	0	SP020
+19	63	64	65	4	0	0	SP023
+20	70	69	71	4	0	0	SP027
+21	74	73	72	4	0	0	SP031
+
+
+[Names]
+无	0
+全勤铜奖	1
+全勤银奖	2
+全勤金奖	3
+新秀铜奖	4
+新秀银奖	5
+新秀金奖	6
+绘画铜奖	7
+绘画银奖	8
+绘画金奖	9
+快乐分享铜奖	10
+快乐分享银奖	11
+快乐分享金奖	12
+铁杆用户铜奖	13
+铁杆用户银奖	14
+铁杆用户金奖	15
+
+
+[Brushes]
+paintbrush.pgm	1
+paintingbrush_002.pgm	2
+paintingbrush_001.pgm	3
+watercolorbrush_011.pgm	4
+watercolorbrush_010.pgm	5
+watercolorbrush_009.pgm	6
+watercolorbrush_008.pgm	7
+watercolorbrush_007.pgm	8
+watercolorbrush_005.pgm	9
+watercolorbrush_006.pgm	10
+watercolorbrush_004.pgm	11
+watercolorbrush_003.pgm	12
+watercolorbrush_002.pgm	13
+unknownbrush_007.pgm	14
+unknownbrush_006.pgm	15
+unknownbrush_005.pgm	16
+unknownbrush_004.pgm	17
+unknownbrush_003.pgm	18
+unknownbrush_002.pgm	19
+unknownbrush_001.pgm	20
+paintingbrush_008.pgm	21
+paintingbrush_007.pgm	22
+paintingbrush_005.pgm	23
+paintingbrush_004.pgm	24
+paintingbrush_003.pgm	25
+watercolorbrush_014.pgm	26
+watercolorbrush_012.pgm	27
+watercolorbrush_013.pgm	28
+paintingbrush_010.pgm	29
+paintingbrush_009.pgm	30
+paintingbrush_011.pgm	31
+watercolorbrush_015.pgm	32
+paintingbrush_012.pgm	33
+specialbrush_001.pgm	34
+specialbrush_002.pgm	35
+specialbrush_003.pgm	36
+specialbrush_004.pgm	37
+specialbrush_005.pgm	38
+specialbrush_006.pgm	39
+specialbrush_007.pgm	51
+specialbrush_008.pgm	52
+specialbrush_009.pgm	53
+paintingbrush_013.pgm	40
+paintingbrush_014.pgm	41
+paintingbrush_015.pgm	42
+paintingbrush_016.pgm	43
+paintingbrush_017.pgm	44
+watercolorbrush_016.pgm	45
+paintingbrush_018.pgm	46
+watercolorbrush_017.pgm	47
+paintingbrush_019.pgm	48
+paintingbrush_020.pgm	49
+paintingbrush_006.pgm	50
+specialbrush_009.pgm	54
+specialbrush_015.pgm	55
+specialbrush_016.pgm	56
+specialbrush_014.pgm	57
+specialbrush_012.pgm	58
+specialbrush_011.pgm	59
+specialbrush_010.pgm	60
+specialbrush_021.pgm	61
+specialbrush_022.pgm	62
+specialbrush_023.pgm	63
+specialbrush_024.pgm	64
+specialbrush_025.pgm	65
+specialbrush_017.pgm	66
+specialbrush_018.pgm	67
+specialbrush_019.pgm	68
+specialbrush_026.pgm	69
+specialbrush_027.pgm	70
+specialbrush_028.pgm	71
+specialbrush_029.pgm	72
+specialbrush_030.pgm	73
+specialbrush_031.pgm	74
+specialbrush_020.pgm	75
+specialbrush_032.pgm	76
+specialbrush_033.pgm	77
+specialbrush_034.pgm	78

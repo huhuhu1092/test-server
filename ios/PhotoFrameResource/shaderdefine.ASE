@@ -1,0 +1,8 @@
+*SHADERINFO {
+    *SHADER default_shader /Users/chenyong/backup/shader/default_shader.vsh /Users/chenyong/backup/shader/default_shader.fsh 
+    *SHADER lineseg_shader /Users/chenyong/backup/shader/lineseg_shader.vsh /Users/chenyong/backup/shader/lineseg_shader.fsh
+    *SHADER fog_shader /Users/chenyong/backup/shader/fog_shader.vsh /Users/chenyong/backup/shader/fog_shader.fsh
+    *SHADER fog_plane_shader /Users/chenyong/backup/shader/fog_plane_shader.vsh /Users/chenyong/backup/shader/fog_plane_shader.fsh
+    *SHADER point_shader /Users/chenyong/backup/shader/point_shader.vsh /Users/chenyong/backup/shader/point_shader.fsh
+    *SHADER picture_fog_shader /Users/chenyong/backup/shader/picture_fog_shader.vsh /Users/chenyong/backup/shader/picture_fog_shader.fsh
+}

@@ -1,0 +1,43 @@
+## catetory first column is type of category which must has the same meaning as PRODUCT_CATETORY_TYPE
+## BASIC_FUNC and other functions are defined in usrer_default_function.txt
+## product first column is type of product which must has the same meaning as PRODUCT_TYPE
+## product has a image icon at its first column.
+## start with # indicate that is common picture which can get from SEResReader
+## start with $ indicate that is brush package name which should read from brush package
+## start with * indicate that is time package
+[CATEGORY]
+BASIC     Basic Setting
+PLAY      Play
+BRUSH     Brush
+TIME_STYLE   Time Style
+
+[PRODUCT]
+BASIC_SETTING	BASIC_FUNC	com.thespeedsun.PhotoFrame.BasicSetting24	  #OptionsStoreBasicSetting  * BASIC	2.99	Basic Setting
+
+BRUSH_SETTING	BRUSH_SETTING_FUNC	com.thespeedsun.PhotoFrame.BrushSetting31	 #OptionsStoreBrushSetting    * PLAY	1.99    Brush Setting
+
+BRUSH      BUY_BRUSHES_FUNC         com.thespeedsun.PhotoFrame.Brush.NEW1SBP002  #StoreBrush2  *PA012*SP001 BRUSH   0.99    Brush 002
+BRUSH      BUY_BRUSHES_FUNC         com.thespeedsun.PhotoFrame.Brush.NEW1SBP003  #StoreBrush3   *SP010*SP017 BRUSH   0.99    Brush 003
+BRUSH      BUY_BRUSHES_FUNC         com.thespeedsun.PhotoFrame.Brush.NEW1SBP004  #StoreBrush4   *SP007*SP015 BRUSH   0.99    Brush 004
+BRUSH      BUY_BRUSHES_FUNC         com.thespeedsun.PhotoFrame.Brush.NEW1SBP005  #StoreBrush5  *SP019*SP020 BRUSH   0.99    Brush 005
+BRUSH      BUY_BRUSHES_FUNC         com.thespeedsun.PhotoFrame.Brush.NEW1SBP006  #StoreBrush6  *SP027*SP031 BRUSH   0.99    Brush 006
+
+TIME_STYLE	BUY_TIME_STYLE_FUNC	    com.thespeedsun.PhotoFrame.TimeStyle.NEW1SFP001	 #StoreAm1 *FONT004*FONT005   TIME_STYLE	0.99	Time Style 001
+TIME_STYLE   BUY_TIME_STYLE_FUNC    com.thespeedsun.PhotoFrame.TimeStyle.NEW1SFP002  #StoreAm2 *FONT006*FONT008   TIME_STYLE  0.99    Time Style 002
+
+[PRODUCT_FUNCTION_MAP]
+BASIC_FUNC	com.thespeedsun.PhotoFrame.BasicSetting24
+BRUSH_SETTING_FUNC	com.thespeedsun.PhotoFrame.BrushSetting31
+
+[PRODUCT_ONE_TIME_BUY]
+BASIC_SETTING
+BRUSH_SETTING
+BRUSH
+TIME_STYLE
+
+[DISCOUNT]
+#BASIC_SETTING	BASIC_FUNC	com.thespeedsun.PhotoFrame.BasicSetting22_Discount	  #OptionsStoreBasicSetting  * BASIC	2.99	2013/02/24 2013/03/20 Basic Setting
+BRUSH		BUY_BRUSHES_FUNC        com.thespeedsun.PhotoFrame.Brush.NEW1SBP001_Discount	  #StoreBrush1  *SP010*SP019*SP023*SP020*SP017 BRUSH	1.99	2013/03/02 2014/04/10 Brush 001
+
+[PRODUCT_DEP]
+com.thespeedsun.PhotoFrame.Brush.NEW1SBP001_Discount  com.thespeedsun.PhotoFrame.Brush.NEW1SBP003 com.thespeedsun.PhotoFrame.Brush.NEW1SBP005 

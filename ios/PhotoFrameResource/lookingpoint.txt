@@ -1,0 +1,44 @@
+P1L			P1R	
+0	lookingPoint_frame_left_1		0 	lookingPoint_frame_right_1
+20 	lookingPoint_frame_left_1		20 	lookingPoint_frame_right_1
+40 	lookingPoint_frame_left_2		40 	lookingPoint_frame_right_2
+100 	lookingPoint_frame_left_2		100 	lookingPoint_frame_right_2
+300 	lookingPoint_frame_left_2		300 	lookingPoint_frame_right_2
+P2L			P2R	
+0 	lookingPoint_frame_left_1		0 	lookingPoint_frame_right_1
+20 	lookingPoint_frame_left_1		20 	lookingPoint_frame_right_1
+70 	lookingPoint_frame_right_2		70 	lookingPoint_frame_left_2
+100 	lookingPoint_frame_right_2		100 	lookingPoint_frame_left_2
+300 	lookingPoint_frame_right_2		300 	lookingPoint_frame_left_2
+
+P2L_YZINVERSE			P2R_YZINVERSE	
+0 	lookingPoint_frame_left_2		0 	lookingPoint_frame_right_2
+20 	lookingPoint_frame_left_2		20 	lookingPoint_frame_right_2
+70 	lookingPoint_frame_right_1		70 	lookingPoint_frame_left_1
+100 	lookingPoint_frame_right_1		100 	lookingPoint_frame_left_1
+300 	lookingPoint_frame_right_1		300 	lookingPoint_frame_left_1
+
+HP1L			HP1R	
+0 	lookingPoint_frame_left_1		0 	lookingPoint_frame_right_1
+20 	lookingPoint_frame_left_1		20 	lookingPoint_frame_right_1
+30 	LogoPoint_model_002		        30   	LogoPoint_model_002
+60 	LogoPoint_model_001		        60 	        LogoPoint_model_001
+70 	lookingPoint_frame_right_2		70 	lookingPoint_frame_left_2
+100 	lookingPoint_frame_right_2		100 	lookingPoint_frame_left_2
+300 	lookingPoint_frame_right_2		300 	lookingPoint_frame_left_2
+
+HP1L_XYINVERSE                                 HP1R_XYINVERSE
+0        lookingPoint_frame_right_2            0         lookingPoint_frame_left_2   
+20       lookingPoint_frame_right_2            20        lookingPoint_frame_left_2
+30       lookingPoint_frame_right_2            30        lookingPoint_frame_left_2
+60       LogoPoint_model_001                   60        LogoPoint_model_001
+70       LogoPoint_model_002                   70        LogoPoint_model_002
+100      lookingPoint_frame_left_1             100       lookingPoint_frame_right_1
+300      lookingPoint_frame_left_1             300       lookingPoint_frame_right_1
+
+LS1
+0	lookingPoint_start_left_1
+40 	lookingPoint_frame_left_2
+100 	lookingPoint_frame_left_2
+300 	lookingPoint_frame_left_2
+
