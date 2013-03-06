@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "1.0">
+   <FileBreakpoints>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "AseToCbf/ObjLoader.cpp"
+         timestampString = "344765917.877891"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "628"
+         endingLineNumber = "628"
+         landmarkName = "ObjLoader::loadShader(const char* shaderName, const char* vertexShaderFile, const char* fragmentShaderFile)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "AseToCbf/ObjLoader.cpp"
+         timestampString = "344765917.877891"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "615"
+         endingLineNumber = "615"
+         landmarkName = "ObjLoader::write(const char* name)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/main.cpp"
+         timestampString = "368370328.585567"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "183"
+         endingLineNumber = "183"
+         landmarkName = "main (int argc, const char * argv[])"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368358149.852205"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2028"
+         endingLineNumber = "2028"
+         landmarkName = "ASE_Loader::handleLine(size_t line, std::vector&lt;std::string&gt;&amp; tokenes)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368358149.852205"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "874"
+         endingLineNumber = "874"
+         landmarkName = "ASE_Loader::Write(const char* filename)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368369883.471656"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2076"
+         endingLineNumber = "2076"
+         landmarkName = "ASE_Loader::handleLine(size_t line, std::vector&lt;std::string&gt;&amp; tokenes)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368369883.471656"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2082"
+         endingLineNumber = "2082"
+         landmarkName = "ASE_Loader::handleLine(size_t line, std::vector&lt;std::string&gt;&amp; tokenes)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368369865.368058"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2059"
+         endingLineNumber = "2059"
+         landmarkName = "ASE_Loader::handleLine(size_t line, std::vector&lt;std::string&gt;&amp; tokenes)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368369879.861884"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2071"
+         endingLineNumber = "2071"
+         landmarkName = "ASE_Loader::handleLine(size_t line, std::vector&lt;std::string&gt;&amp; tokenes)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368370528.830413"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2139"
+         endingLineNumber = "2139"
+         landmarkName = "ASE_Loader::ASE_ProcessLine(char* buffer, size_t len)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "AseToCbf/aselib.cpp"
+         timestampString = "368370615.413251"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "2140"
+         endingLineNumber = "2140"
+         landmarkName = "ASE_Loader::ASE_ProcessLine(char* buffer, size_t len)"
+         landmarkType = "5">
+      </FileBreakpoint>
+   </FileBreakpoints>
+</Bucket>
