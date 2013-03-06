@@ -2,8 +2,8 @@
 //  Signature.m
 //  PhotoFrame
 //
-//  Created by 陈勇 on 12-5-21.
-//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//  Created by 陈勇 on 13-1-13.
+//  Copyright (c) 2013年 __MyCompanyName__. All rights reserved.
 //
 
 #import "Signature.h"
@@ -14,5 +14,6 @@
 @dynamic data;
 @dynamic name;
 @dynamic seq;
+@dynamic totaltime;
 
 @end

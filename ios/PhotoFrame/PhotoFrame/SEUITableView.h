@@ -49,4 +49,5 @@
 - (void) disableAllGestures;
 - (void) handleInMid;
 - (void) handleOnEdge;
++ (NSArray*) getFeedChar;
 @end

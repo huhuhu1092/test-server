@@ -33,21 +33,36 @@ public:
     enum LOGO_STATE {NO_LOGO, HAS_LOGO, NO_CONCERN_LOGO};
     enum LOOKING_POINT_TYPE {LEFT_SIDE, RIGHT_SIDE, NO_SIDE};
     enum MIRROR_TYPE {HAS_MIRROR_CW, HAS_MIRROR_CCW, NO_MIRROR};
+    enum VIEW_TYPE {PORTRAIT, LANDSCAPE};
+    enum {FADE_IN_FRAMR_NUM = 120};
+    enum {MIN_LOAD_THUMBNAIL_NUM = 20};
     struct PictureID
     {
         std::string pictureName;
         std::string pictureDate;
         int orientation;
         PHOTO_TYPE photoType;
+        //width and height is origin size without calculating orientation.
+        //if you want to get the actual size, you should use orientation to calculate it.
+        int width; 
+        int height;
         PictureID()
         {
             orientation = 0;
             photoType = PHOTOH;
+            width = 0;
+            height = 0;
         }
     };
     SE_Scene(SS_ModelManager* modelManager, void* vn, int w, int h, int sceneCount = 1);
     ~SE_Scene();
     void create(std::vector<PictureID>& pictureIDs, int pictureNum);
+    bool isDrawing()
+    {
+        return mIsDrawing;
+    }
+    bool isCameraMoveDrawing();
+    void updateState();
     //void clear();
     void renderScene();
     //void render();
@@ -63,10 +78,20 @@ public:
     void createCurveFromPoints(SE_Vector3f* points , int pointNum, int curvePointNum = 1000);
     //end
     //
-
+    struct LookPointPair
+    {
+        SE_Vector3f startLookingPoint;
+        SE_Vector3f endLookingPoint;
+        LookPointPair(SE_Vector3f& s, SE_Vector3f& e)
+        {
+            startLookingPoint = s;
+            endLookingPoint = e;
+        }
+    };
     struct DisplayObject
     {
         bool bConcerned;
+        bool bNeedPolygonOffset;
         int meshIndex;
         std::string shaderName;
         int vertexType;
@@ -80,6 +105,7 @@ public:
         DisplayObject()
         {
             //mirror = NO_MIRROR;
+            bNeedPolygonOffset = false;
             mirror = false;
             bConcerned = false;
             pictureIndex = -1;
@@ -101,12 +127,16 @@ public:
         bool mirror;
         SE_AABB aabb;
         PHOTO_FRAME_NODE_TYPE type;
+        PHOTO_TYPE photoType;
         bool bConcerned;
+        int pictureIndex;
         PhotoFrameNode()
         {
             mirror = false;
             bConcerned = false;
             type = INVALID_PHOTO_FRAME_NODE_TYPE;
+            photoType = PHOTOH;
+            pictureIndex = 0;
         }
         ~PhotoFrameNode()
         {
@@ -141,9 +171,11 @@ public:
         SE_Matrix4f worldM;
         SE_AABB aabb;
         STATIC_NODE_TYPE type;
+        bool needDraw;
         StaticNode()
         {
             type = INVALID_STATIC_NODE_TYPE;
+            needDraw = true;
         }
         ~StaticNode()
         {
@@ -157,13 +189,21 @@ public:
         SE_Curve* curve;
         std::string name;
         int composePointNum; // this is the point number used to make the curve, we use every line between compose point to simulate a curve, the more this number, more realistic the curve
-        //std::list<SE_Vector3f> trackPoints;
         CurveData()
         {
             time = 0;
             curveLen = 0;
             curve = NULL;
             composePointNum = 0;
+        }
+    };
+    struct TrackCurveData
+    {
+        std::string name;
+        std::vector<CurveData> curveData;
+        TrackCurveData()
+        {
+            curveData.resize(4);
         }
     };
     struct CameraPathProperty
@@ -214,6 +254,8 @@ public:
             this->curveName = curveName;
             this->time = time;
         }
+        PointCurveData()
+        {}
     };
     struct LookingPhotoFrameNode
     {
@@ -222,6 +264,7 @@ public:
         //int mGroupIndex;
         std::list<Group>::iterator currGroupIt;
         std::list<Group>::iterator prevGroupIt;
+        std::list<Group>::iterator nextGroupIt;
         bool hasFullTexture;
         PHOTO_FRAME_NODE_TYPE nodeType;
         LOOKING_POINT_TYPE side;
@@ -249,6 +292,9 @@ public:
     void removeAllShaderFromGL();
     void removeAllMeshVBO();
     void addPointEdge(std::list<std::string>& edge);
+    void setViewType(VIEW_TYPE t);
+    int getSeenThumbnailImageNum();
+    std::list<int> getSeenThumbnailImageIndex(int num);
     //int mTrackPointsIndex;
 private:
     struct CameraMoveState;
@@ -293,11 +339,26 @@ private:
     // time is the the total time traverse the curve, unit is second
     // speed unit is normalized length every second
     void createCurve(const std::string& name, int composedPointNum, float time, float speed);
-    
     //for camera move
     bool isNeedChangeCurve(float t);
     SE_Vector3f getCurrentLookPoint(float t);
-    CurveData getCurveData(const std::string& name);
+    SE_Vector3f getStartCurveLookPoint(float t);
+    PHOTO_TYPE getFirstPhotoFramePhotoType();
+    SE_Vector3f getExactLookPoint(float t);
+    PhotoFrameNode* getPhotoFrameNode(const SE_Vector3f& loc, const SE_Vector3f& lookpoint);
+    //PhotoFrameNode* getStartEndPhotoFrameNodeForCurrentCurve();
+    // set current curve forwarding distance and current curve track list photo type
+    float setCurrentCurveProperty(const std::string& curveName);
+    //LookPointPair getStartEndLookingPoint(float t);
+    SE_Vector3f getCurrentVector(const SE_Vector3f& startPoint, const SE_Vector3f& endPoint, const SE_Vector3f& currentPoint, float t);
+    CurveData getCurveData(const std::string& name, int trackListPhotoType);
+    //float getSpanEndInterpolatePoint(float t);
+    //float getSpanStartInterpolatePoint(float t);
+    std::pair<float, float> getSpanStartEndInterpolatePoint(float t);
+    SE_Vector3f getCameraLookingVector(float t, const SE_Vector3f& currentPoint, const SE_Vector3f& currentLookPoint);
+    SE_Vector3f getStartCurveCameraLookingVector(float t, const SE_Vector3f& currentPoint,  const SE_Vector3f& currentLookPoint);
+    float getForwardingPoint(const char* curveName, SE_Vector3f& startPoint, SE_Vector3f& endPoint, float& startDist, float& endDist, bool start);
+    float getForwardingDist(const char* curveName);
     void setCurveData(int index);
     void updateFogPointByCameraPoint(const SE_Vector3f& cameraLoc);
     void createYInverseCurve(const std::string& curveName, const std::string& inverseCurveName,int composedPointNum, float time, float speed);
@@ -316,11 +377,11 @@ private:
     typedef std::list<Edge> EdgeList;
     EdgeList getEdgeList(const std::string& point);
     typedef std::list<Point> PointList;
-    void setCurveData(const PointCurveData& pcd);
+    void setCurveData(const PointCurveData& pcd, int trackListPhotoType);
     void sortPictureByID();
     void seperatePictureFromPhotoFrameNode();
-    void updateConcernPhotoFrameNode();
-    SE_Texture* getFullImageTexture(const std::string& imageName, const std::string& textureID);
+    void updateConcernPhotoFrameNode(float t);
+    void updateStartCurvePhotoFrameNode(float t);
     void deleteFullImageTexture();
     float interpolateChange(float t);
     void printPointEdge();
@@ -341,7 +402,19 @@ private:
     void createDisplayObjectListForRender(StaticNode& sn);
     void createDisplayObjectListForRender(StationNode& sn);
     void sortDisplayObjectList();
+    void getFullImageIndex(GroupList::iterator prevGroupIt, GroupList::iterator currGroupIt, const std::string startLocationName, const std::string endLocationName, bool isLeaveGroup,int& startIndex, int& endIndex);
+    int photoFrameNodePictureIndex(PhotoFrameNode& photoFrameNode);
+    void loadFullImage(int pictureIndex);
+    std::string getFullImageTextureName(int pictureIndex);
+    bool isAllPhotoFrameNodeConcerned(Group& group);
+    void setStaticNodeDrawState(GroupList::iterator begin, GroupList::iterator end, bool
+                                 needDraw);//don't draw static node which has station node
     //void bindMeshVao(GLuint* vaoID, GLuint* vboID, bool mirror);
+    void setUV(int pictureIndex, float* uv);
+    void loadThumbnailImageAfterGroupChange();
+    int getPhotoFrameImageIndex(PhotoFrameNode& photoFrameNode);
+    void removeGroupTexture(std::vector<int>& indexV);
+    void findGroupTextureNotLoaded(GroupList::iterator currentGroup);
 private:
     //void createNode();
     //void calculateBoundingBox(int index);
@@ -353,7 +426,7 @@ private:
     void renderFogPlane();
     void testCurve(SE_Curve* curve);
 private:
-
+    friend class CameraMoveState;
     void* mViewNav;
     SE_Camera* mCamera;
     SS_ModelManager* mModelManager;
@@ -377,11 +450,12 @@ private:
     float mYLength;
     SE_Vector3f mFirstFogPoint;
     SE_Vector3f mCurrentFogPoint;
-    std::list<CurveData> mCurveData;
+    std::list<TrackCurveData> mCurveData;
     SE_Vector3f mStartRef;
     CameraMoveState* mCameraMoveState;
     bool mCameraStayStatic;
     LookingPhotoFrameNode mCurrentLookingPhotoFrameNode;
+    VIEW_TYPE mViewType;
     //for camera move
     SE_Curve* mCurve;
     SE_Vector3f mFloorDownMin;
@@ -400,6 +474,21 @@ private:
     int mGroupNum;
     PointList mPointList;
     int mCurrentGroupIndex;
+    bool mIsDrawing;
+    std::list<std::string> mStartFullImage;// when start camera move , we should load two full image
+    //int mStartPictureIndex;
+    //int mEndPictureIndex;
+    std::list<int> mFullImagePictureIndexList;
+    PointCurveData mNextCurveData;
+    float mCameraForwardingDist;
+    int mTrackListPhotoType;
+    bool mTimeForRotate;
+    float mRotateTime;
+    float mRotateT;
+    bool mInitRendeState;
+    bool mFirstimeStartCurveToEnd;// the first time start curve at end point, t == 1;
+    int mStartCurveCameraVectorIndex;
+    int mCurrentFadeInFrameIndex;
     //end
     //obsolete
     /*

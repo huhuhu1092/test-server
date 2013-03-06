@@ -141,6 +141,15 @@ void SE_Curve::createCurve()
     mCurvePoints[i].point.y = mData[3 * mVertexNum - 2];
     mCurvePoints[i].point.z = mData[3 * mVertexNum - 1];
     mCurvePoints[i].distanceToNext = 0;
+    for(int i = 0 ; i < mCurvePoints.size() ; i++)
+    {
+        //LOGI("%d -> %d distance = %f\n", i, i + 1, mCurvePoints[i].distanceToNext);
+        if(mCurvePoints[i].distanceToNext > 0.1)
+        {
+            LOGI("## curve distance = %f\n", mCurvePoints[i].distanceToNext);
+            assert(0);
+        }
+    }
 }
 
 float SE_Curve::getTotalCurveLength()

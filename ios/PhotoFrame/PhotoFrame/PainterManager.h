@@ -28,11 +28,12 @@ typedef enum _PARAM_COLUMN_TYPE
     P_SIZE_TYPE,
     P_BG_TYPE,
     P_PLACE_TYPE,
-    P_BRUSH_DENSITY,
+    P_BRUSH_DENSITY_MAX,
+    P_BRUSH_DENSITY_MIN,
     P_WAITING_TIME,
     P_DRAWING_SPEED,
-    P_COLOR_TYPE = 19
-    
+    P_COLOR_TYPE = 20,
+    P_EDGEDETECT_LOWVALUE = 21
 } SSParamColumnType;
 @class SS_ThreadShareData;
 @class SS_3DData;
@@ -64,7 +65,11 @@ typedef enum _PARAM_COLUMN_TYPE
     NSString* brushName1;
     NSString* brushName2;
     NSString* paperName;
+    float edgeDetectLowValue;
 }
+@property (nonatomic, assign) float brush_density_max;
+@property (nonatomic, assign) float brush_density_min;
+@property (nonatomic, assign) float edgeDetectLowValue;
 @property (nonatomic) int state;
 @property (nonatomic, retain) NSString* paintid;
 @property (nonatomic) int width;
@@ -95,6 +100,39 @@ typedef enum _PARAM_COLUMN_TYPE
 - (void)setParam:(int)ot :(int)on :(float)of :(float)ol :(int)sn :(float)sf :(float)sl :(int)st
                 :(int)bt :(int)pt :(float)bd :(float)ps :(float)pr :(float)br :(int)ct :(int)ds :(int)wt;
 @end
+///////////
+@interface BrushDefine : NSObject 
+{
+    NSMutableArray* brushNames;
+    int brushGettingWay;
+    int brushGettingLevel;
+    int brushGettingName;
+    int brushID;
+    NSString* brushOutName;
+}
+@property (nonatomic, retain) NSString* brushOutName;
+@property (nonatomic, readonly) NSMutableArray* brushNames;
+@property (nonatomic, assign) int brushGettingWay;
+@property (nonatomic, assign) int brushGettingLevel;
+@property (nonatomic, assign) int brushGettingName;
+@property (nonatomic, assign) int brushID;
+- (void) addBrushName: (NSString*) brushName;
+- (NSArray*) getBrushNames;
+@end
+/////////////
+@interface BrushPackage : NSObject
+{
+    NSMutableArray* brushDefineArray;
+    NSMutableArray* brushNameArray;
+    NSMutableArray* nameArray;
+    NSString* packageName;
+}
+@property (nonatomic, retain) NSString* packageName;
+-(void) load: (NSString*) pn;
+- (NSArray*) getBrushes: (int) currentBrushID;
+- (NSArray*) getAllBrushID;
+@end
+///////////////
 @interface PainterQuality : NSObject 
 {
     int percent;
@@ -121,7 +159,7 @@ struct _BrushPiecesList;
 @property (nonatomic) int currentSeq;
 @property (nonatomic) BOOL colorRevert;
 @property (nonatomic, retain) NSArray* painterParamIDs;
-@property (nonatomic,retain) NSArray* currentBrushSet;
+@property (retain) NSArray* currentBrushSet;
 @property (nonatomic) BOOL bSaveBrush;
 @property (nonatomic) BOOL bShowSettingUI;
 - (int) paintTimes;
@@ -143,6 +181,8 @@ struct _BrushPiecesList;
     int drawingState[PARAM_NUM];
     NSMutableArray* paramArrayFromFile;
     NSMutableArray* paramQualityArray;
+    BrushPackage* brushPackage;
+    int mCurrentBrush;
     PainterState* painterState;
     volatile int _bgWidth;
     volatile int _bgHeight;
@@ -152,10 +192,13 @@ struct _BrushPiecesList;
     NSTimer* displayTimer;
     int displayIndex;
     NSArray* imageArray; // array of image URL in photo lib
-    NSArray* dateArray; //array of image URL date
+    //int mCurrentPaintTimes; // set by nextDisplayImage in SEViewNavigator, it will not change before finished one image drawing
+    //NSArray* mCurrentPaintParamIDs;//set by nextDisplayImage in SEViewNavigater, it will not change before finish one image drawing
+    //NSArray* dateArray; //array of image URL date
     int currentImageIndex;
     BOOL isPause;
 @private
+    NSString* mCurrentComputeImageName;
     PainterProperty* painterProperty;
     SEViewNavigator* mViewNav;
     int mCurrentImageOrientation;
@@ -163,6 +206,7 @@ struct _BrushPiecesList;
     int mDrawFinishedArrayNum;
     int mDrawingIndex;
     int mChangedDrawingIndex;
+    BOOL mChangeToNewImage;
     //BOOL mDrawFinished;
     //BOOL mNeedSaveImage;
     //int mSaveImageIndex;
@@ -170,12 +214,28 @@ struct _BrushPiecesList;
     NSString* mSaveImageDate;
     int mSaveOrientation;
     int mWantToDrawIndex;
+    //BOOL mStageDrawFinished;
+    int mAdjustAngle;
+    int mBrushTransparent;
+    BOOL mComputeReady;
+    BOOL mComputeThreadEnd;
+    BOOL mFirstTimeDraw;
+    BOOL mFromStartDrawImageState;
+    BOOL mFromStopDrawImageState;
+    int mCurrentBrushIndex;
+    ////
+    int mCurrentEdgeDetectValue;
+    int mCurrentTransparentValue;
 }
+@property (nonatomic, retain) NSString* mSaveImageURL;
+@property (nonatomic, retain) NSString* mSaveImageDate;
+@property (nonatomic, readonly) int mBrushTransparent;
+//@property (nonatomic, assign) BOOL mStageDrawFinished;
 @property (nonatomic, assign) int mCurrentImageOrientation;
 @property (nonatomic, assign) SEViewNavigator* mViewNav;
 @property (nonatomic, assign) int currentImageIndex;
 @property (nonatomic, readonly) BOOL isPause;
-@property (nonatomic, retain) NSArray* dateArray;
+//@property (nonatomic, retain) NSArray* dateArray;
 @property (nonatomic, retain) NSArray* imageArray;
 @property (nonatomic, readonly) NSArray* paramArray;
 @property (nonatomic, readonly) PainterState* painterState;
@@ -196,6 +256,7 @@ struct _BrushPiecesList;
 - (void)setParam: (PainterParam*)p withID: (NSString*)sid;
 - (void) getMinMaxTimesValue: (int)percent outMin:(int*)outMin outMax:(int*)outMax;
 - (NSArray*) currentBrushSet;
+//- (void) setCurrentBrushSet: (NSArray*) brushArray;
 + (CGSize) computeFitSize: (CGSize)src toDst: (CGSize) dst;
 + (PainterManager*) painterManager;
 + (CGImageRef)createCGImage: (ppm_t) p;
@@ -203,16 +264,48 @@ struct _BrushPiecesList;
 - (void*) currentBrushListPool;
 - (void*) currentBrushCanvas;
 - (void*) currentPausePoint;
+- (void*) currentStatusPoint;
 - (void*) modelManager;
+- (void*) detectModelManager;
+- (void) releaseModelManager;
 - (void) nextDisplayStage;
 - (void) setTimer;
 - (void) updateImageView:(NSArray*)rectArray;
 - (void) pauseDrawing;
 - (void) startDrawing;
 - (void) drawFinished;
+- (void) promptNextImageDraw;
+- (void) promptNextImageDrawAfterAnimation;
 ////private
 - (void)timerUpdate:(NSTimer*)theTimer;
 - (void) displayCGImageWithName:(NSString*) name;
 - (void) saveCurrentImage: (UIImage*)image;
+//- (void) changeDisplayIndex:(int) i;
+- (void) displayNextImage;
+- (NSArray*) getAllBrushID;
+- (NSArray*) getBrushesById : (int) brushID;
+- (BrushDefine*) getBrushDefine: (int) brushID;
+- (BrushDefine*) getBrushDefineByOutName: (NSString*) outName;
+//- (int) currentBrushID;
+//- (void) setCurrentBrushID :(int) brushID;
+- (BOOL) findNextProperImageIndex;
+- (void) addLog: (NSString*) text;
+- (void) setFirstNum: (NSNumber*) num;
+- (void) setSecondNum: (NSNumber*)num;
+- (void) showLoadingView: (id) param;
+- (void) hideLoadingView: (id) param;
+- (void) computeReady: (id)param;
+- (void) paintSignatureToImage: (CGImageRef) imageRef frame: (CGRect)frame;
+- (void) displayComputeLoadingView;
+////////////////////////////////////////////////////////////////////////////
+- (void) stopDrawImage;
+- (void) startDrawImage;
+- (void) pauseDrawImage;
+- (void) releaseResourceForDraw;
+- (BOOL) isComputeEnd;
+- (void) doAction: (int)fromState toState: (int)toState;
+- (void) setFirstTimeDraw: (BOOL) b;
+- (void) drawFinishAction;
+- (void)drawFinishWhenPause;
 @end
 

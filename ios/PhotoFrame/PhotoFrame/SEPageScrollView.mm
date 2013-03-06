@@ -14,6 +14,7 @@
 #import "UserInfo.h"
 #import "SEResDefine.h"
 #import "SEMultiTouchDetect.h"
+#import "PhotoFrameAppDelegate.h"
 ////////////////
 enum {SE_NO_PRESS, SE_PRESS_READY, SE_LONGPRESS_OK};
 /////
@@ -33,6 +34,8 @@ enum {SE_NO_PRESS, SE_PRESS_READY, SE_LONGPRESS_OK};
 */
 #define  SE_INVALID_PAGE -1
 #define  SE_INVALID_IMAGE_INDEX -1
+#define  NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB @"LoadImageFromPhotoLib"
+#define NOTIFICATION_LOADIMAGE_FROM_COREDATA @"LoadImageFromCoreData"
 ////////////
 static CGImageRef createCGImageCopy(CGImageRef srcImage)
 {
@@ -47,12 +50,15 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     int col;
     int startPage;
     int endPage;
+    int index;
 }
 @property (nonatomic, assign) int startPage;
 @property (nonatomic, assign) int endPage;
 @property (nonatomic, assign) int page;
 @property (nonatomic, assign) int row;
 @property (nonatomic, assign) int col;
+@property (nonatomic, assign) int index;
+- (PageImageLoadInfo*) clone;
 @end
 @implementation PageImageLoadInfo
 @synthesize page;
@@ -60,8 +66,211 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 @synthesize col;
 @synthesize startPage;
 @synthesize endPage;
+@synthesize index;
+- (PageImageLoadInfo*) clone
+{
+    PageImageLoadInfo* info = [[[PageImageLoadInfo alloc] init] autorelease];
+    info.page = page;
+    info.row = row;
+    info.col = col;
+    info.startPage = startPage;
+    info.endPage = endPage;
+    info.index = index;
+    return info;
+}
 @end
 //////////
+@interface SELoadImageFromCoreDataOperation : NSOperation
+{
+    PageImageLoadInfo* mPageLoadInfo;
+    CGSize mFitSize;
+    UIImage* mResultImage;
+    SEPageImageURL* mURL;
+    BOOL mNeedLoadFromPhotoLib;
+    SEPageUIScrollView* mPageScrollView;
+}
+@property (nonatomic, retain) PageImageLoadInfo* mPageLoadInfo;
+@property (nonatomic, assign) CGSize mFitSize;
+@property (nonatomic, retain) UIImage* mResultImage;
+@property (nonatomic, retain) SEPageImageURL* mURL;
+@property (nonatomic, assign) BOOL mNeedLoadFromPhotoLib;
+@property (nonatomic, retain) SEPageUIScrollView* mPageScrollView;
+@end
+@implementation SELoadImageFromCoreDataOperation
+@synthesize mPageLoadInfo;
+@synthesize mResultImage;
+@synthesize mURL;
+@synthesize mFitSize;
+@synthesize mNeedLoadFromPhotoLib;
+@synthesize mPageScrollView;
+- (id) initWithURL: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageInfo
+{
+    self = [super init];
+    if(self)
+    {
+        self.mURL = url;
+        self.mPageLoadInfo = pageInfo;
+    }
+    return self;
+}
+- (void) dealloc
+{
+    //NSLog(@"SELoadImageFromCoreDataOperation dealloc");
+    [mURL release];
+    [mPageLoadInfo release];
+    [mResultImage release];
+    [mPageScrollView release];
+    [super dealloc];
+}
+
+- (void) main
+{
+    if([self isCancelled] == YES)
+        return;
+    //NSLog(@"SELoadImageFromCoreDataOperation main");
+    NSAutoreleasePool* newPool = [[NSAutoreleasePool alloc] init];
+    SEViewNavigator* viewNav = [PhotoFrameAppDelegate getViewNavigator];
+    NSManagedObjectContext* moc = [[NSManagedObjectContext alloc] init];
+    [moc setPersistentStoreCoordinator:viewNav.persistentStoreCoordinator];
+    UIImage* image = [viewNav getImageFromCoreData:[SEUtil urlToString:mURL.url] urlDate:mURL.urlDate managedObjectContext:moc];
+    if(image)
+    {
+        CGImageRef imageRef = [image CGImage];
+        //CGSize srcSize = CGSizeMake(image.size.width, image.size.height);
+        CGSize srcSize = CGSizeMake(CGImageGetWidth(imageRef), CGImageGetHeight(imageRef));
+        CGSize dstSize = mFitSize;
+        dstSize = [SEUtil computeFitSize:srcSize toDst:dstSize];
+        CGImageRef retImage = [SEUtil fastScale:imageRef withRect:dstSize];
+        NSLog(@"raw image width = %ld, height = %ld", CGImageGetWidth(retImage), CGImageGetHeight(retImage));
+        UIImage* retUIImage = [UIImage imageWithCGImage:retImage scale:1.0 orientation: (UIImageOrientation)mURL.orientation];
+        NSLog(@"image width = %f, height = %f, orientation = %d", retUIImage.size.width, retUIImage.size.height, retUIImage.imageOrientation);
+        CGImageRelease(retImage);
+        self.mResultImage = retUIImage;
+        mNeedLoadFromPhotoLib = NO;
+    }
+    else
+    {
+        self.mResultImage = nil;
+        mNeedLoadFromPhotoLib = YES;
+    }
+    [moc release];
+    if([self isCancelled] == NO)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_LOADIMAGE_FROM_COREDATA object:self];
+    }
+    [newPool drain];
+}
+
+@end
+/////////
+@interface SELoadImageOperation : NSOperation   
+{
+    SEPageImageURL* mURL;
+    PageImageLoadInfo* mPageLoadInfo;
+    CGSize mFitSize;
+    BOOL mIsFromCoreData;
+    ALAsset* mAsset;
+    UIImage* mResultImage;
+    SEPageUIScrollView* mPageScrollView;
+    
+    int mOrigWidth;
+    int mOrigHeight;
+    int mOrientation;
+}
+@property (nonatomic, assign) int mOrigWidth;
+@property (nonatomic, assign) int mOrigHeight;
+@property (nonatomic, assign) int mOrientation;
+@property (nonatomic, retain) SEPageImageURL* mURL;
+@property (nonatomic, assign) int mIndex;
+@property (nonatomic, assign) CGSize mFitSize;
+@property (nonatomic, assign) BOOL mIsFromCoreData;
+@property (nonatomic, retain) ALAsset* mAsset;
+@property (nonatomic, retain) UIImage* mResultImage;
+@property (nonatomic, retain) PageImageLoadInfo* mPageLoadInfo;
+@property (nonatomic, retain) SEPageUIScrollView* mPageScrollView;
+@end
+@implementation SELoadImageOperation
+@synthesize mURL;
+@synthesize mIndex;
+@synthesize mFitSize;
+@synthesize mIsFromCoreData;
+@synthesize mAsset;
+@synthesize mResultImage;
+@synthesize mPageLoadInfo;
+@synthesize mPageScrollView;
+@synthesize mOrientation;
+@synthesize mOrigHeight;
+@synthesize mOrigWidth;
+- (id) initWithURL: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageInfo
+{
+    self = [super init];
+    if(self)
+    {
+        mURL = [url retain];
+        mPageLoadInfo = [pageInfo retain];
+    }
+    return self;
+}
+- (void) dealloc
+{
+    //NSLog(@"dealloc of SELoadImageOperation");
+    [mURL release];
+    [mAsset release];
+    [mResultImage release];
+    [mPageLoadInfo release];
+    [mPageScrollView release];
+    [super dealloc];
+}
+- (void) main
+{
+    if([self isCancelled])
+        return;
+    //NSLog(@"SELoadImageOperation main");
+    if(mAsset == nil)
+    {
+        self.mOrigWidth = 0;
+        self.mOrigHeight = 0;
+        self.mOrientation = 0;
+        self.mResultImage = nil;
+    }
+    else
+    {
+        ALAssetRepresentation* rep = [mAsset defaultRepresentation];        
+        ALAssetOrientation orient = [rep orientation];
+        NSDictionary* metaDataDict = [rep metadata];
+        NSNumber* metaWidth = [metaDataDict objectForKey:@"PixelWidth"];
+        NSNumber* metaHeight = [metaDataDict objectForKey:@"PixelHeight"];
+        NSNumber* metaOrient = [metaDataDict objectForKey:@"Orientation"];
+        
+        CGFloat scale = [rep scale];
+        CGImageRef image = [rep fullResolutionImage];
+        //CGImageRef image = [rep fullScreenImage];
+        
+        //CGImageRef thumbnail = [asset thumbnail];
+        CGSize srcS = CGSizeMake(CGImageGetWidth(image), CGImageGetHeight(image));
+        //NSLog(@"meta orient = %d, orient = %d", [metaOrient intValue], orient);
+        //NSLog(@"meta width = %d, width = %d", [metaWidth intValue], (int)srcS.width);
+        //NSLog(@"meta height = %d, height = %d", [metaHeight intValue], (int) srcS.height);
+        CGSize s = [SEUtil computeFitSize:srcS toDst:mFitSize];
+        CGImageRef retImage = [SEUtil CGImageDrawInRect:image rect:s];
+
+        UIImageOrientation o = (UIImageOrientation)orient;
+        UIImage* uiImage = [UIImage imageWithCGImage:retImage scale:scale orientation:o];    
+        self.mOrigWidth = srcS.width;
+        self.mOrigHeight = srcS.height;
+        self.mOrientation = o;
+        CGImageRelease(retImage);
+        self.mResultImage = uiImage;
+    }
+    if([self isCancelled] == NO)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB object:self];
+    }
+}
+
+@end
+////////////
+
 
 @class SEPageUIScrollViewEvent;
 @interface SEPageUIScrollView (Private)
@@ -78,7 +287,6 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) removeImageFromPhotoDict: (SEPagePhotoDictKey*)key;
 
 - (void) clearState;
-
 - (void) initPhotoDict;
 - (void) calculateVisiblePage: (CGFloat)contentOffset;
 - (BOOL) isRunOnMainThread;
@@ -89,6 +297,27 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) insertURLToPhotoAssetArray: (NSMutableArray*)urlArray : (int) index : (int) lastURLIndex;
 - (int) lastURLIndex;
 - (BOOL) isIntervalContain: (int) srcStart : (int)srcEnd : (int) dstStart : (int) dstEnd;
+/////// new add
+- (void) assertPhotoAssert;
+- (int) getCurrentImageViewCount;
+- (void) printPhotoAssetURL;
+//////// function new
+//this function will compare url's content with array's url content
+- (BOOL) imageURLContentInArray: (NSArray*) array : (SEPageImageURL*)url;
+- (void) calculatePageRowCol: (int) index: (int*)outPage : (int*)outRow : (int*)outCol;
+- (UIImage*) getImageFromPhotoDictByIndex: (int)index;
+- (BOOL) isValidPhotoIndex: (int)index;
+- (void) getImageFromPhotoLib: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo;
+- (void) getImageFromCoreDataNew: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo;
+- (void) finishLoadImageWrapper: (NSNotification*)notify;
+- (void) finishLoadImageFromCoreData: (SELoadImageFromCoreDataOperation*) loadImageOp;
+- (void) finishLoadImage: (SELoadImageOperation*) loadImageOp;
+- (void) getImageFromURLNew:(SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo;
+- (void) loadNextImageNew;
+- (void) loadImageFromPhotoLib: (SEPageImageURL*)url size:(CGSize)size withHandler: (NSObject<SELoadedImageHandler>*) handler;
+- (void) loadFullRepresentation: (SEPageImageURL*)url withHandler: (NSObject<SELoadedImageHandler>*)handler;
+- (int) getCurrentVisibleImageViewCount;
+- (int) getVisibleImageViewCountNoneDefaultImage;
 @end
 ///////
 @implementation SEPageURLID
@@ -124,6 +353,18 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 @synthesize filepath;
 @synthesize origWidth;
 @synthesize origHeight;
+- (SEPageImageURL*) clone
+{
+    SEPageImageURL* newUrl = [[SEPageImageURL alloc] init];
+    newUrl.orientation = orientation;
+    newUrl.url = [url copy];
+    newUrl.urlDate = [urlDate copy];
+    newUrl.type = type;
+    newUrl.filepath = [filepath copy];
+    newUrl.origWidth = origWidth;
+    newUrl.origHeight = origHeight;
+    return [newUrl autorelease];
+}
 - (void) dealloc
 {
     [url release];
@@ -140,6 +381,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
     return self;
 }
+
 @end
 ////////
 @implementation SEPagePhotoDictKey
@@ -220,6 +462,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 @synthesize highlightedFrameImage = mHighlightedFrameImage;
 @synthesize frameImage = mFrameImage;
 @synthesize mScrollView;
+@synthesize mIsAnimation;
+@synthesize mOriginRect;
 - (void) dealloc
 {
     [mContentImage release];
@@ -235,12 +479,28 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 {
     return highlighted;
 }
+- (SEPageUIImageView*) copy
+{
+    SEPageUIImageView* ret = [[SEPageUIImageView alloc] init];
+    ret.frame = self.frame;
+    ret.image = self.image;
+    ret.frameImage = self.frameImage;
+    ret.highlightedFrameImage = self.highlightedFrameImage;
+    ret.contentSize = self.contentSize; // this is content size which will contain mContentImage
+    ret.alpha = self.alpha;
+    ret.highlighted = self.highlighted;
+    ret.mScrollView = self.mScrollView;
+    return ret;
+}
 - (void) setHighlighted:(BOOL)h
 {
     if(highlighted != h && mContentImage != mScrollView.mDefaultImage)
     {
-        highlighted = h;
-        [self setNeedsDisplay];
+        if(mContentImage != mScrollView.mNotFoundImage || [mScrollView.mName isEqualToString:@"image_selected_view"])
+        {
+            highlighted = h;
+            [self setNeedsDisplay];
+        }
     }
 }
 - (UIImage*) image
@@ -464,11 +724,18 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
      
 }
+- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
+{
+    NSLog(@"begin decelerate");
+    SEPageUIScrollView* currentView = (SEPageUIScrollView*)scrollView;
+    currentView.mIsScrolling = YES;
+}
 - (void) scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
     NSLog(@"end decelerate\n");
     SEPageUIScrollView* currentView = (SEPageUIScrollView*)scrollView;
     [currentView garbageClean];
+    currentView.mIsScrolling = NO;
     //[currentView calculateVisiblePage:scrollView.contentOffset.y];
     /*
     SEPageUIScrollView* currentView = (SEPageUIScrollView*)scrollView;
@@ -483,6 +750,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) scrollViewDidEndScrollingAnimation:(UIScrollView*)scrollView
 {
     SEPageUIScrollView* currentView = (SEPageUIScrollView*)scrollView;
+    NSLog(@"end scroll animation");
     if(currentView.mCurrentImageArray)
     {
         [currentView doScaleAnimationForInsert];
@@ -495,10 +763,94 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 
 ////////
 @implementation SEPageUIScrollView (Private)
+- (int) getCurrentImageViewCount
+{
+    //return [mPhotoAssetURL count] + [mViewNavigator getRemainingImageCount];
+    return mImageViewCount;
+}
+- (int) getCurrentVisibleImageViewCount
+{
+    int count = 0;
+    int pageViewCount = mPageRow * mPageCol;
+    for(int i = mStartPage ; i <= mEndPage ; i++)
+    {
+        for(int j = i * pageViewCount ; j < (i * pageViewCount + pageViewCount) ; j++)
+        {
+            if(j < mImageViewCount)
+            {
+                count++;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    return count;
+}
+
+// return the number of imageview whose image count is not default image
+// 
+- (int) getVisibleImageViewCountNoneDefaultImage
+{
+    
+    int count = 0;
+    int pageViewCount = mPageRow * mPageCol;
+    for(int i = mStartPage ; i <= mEndPage ; i++)
+    {
+        for(int j = i * pageViewCount ; j < (i * pageViewCount + pageViewCount) ; j++)
+        {
+            if(j < mImageViewCount)
+            {
+                SEPageUIImageView* v = [self imageView:j];
+                if(v.image != mDefaultImage)
+                {
+                    count++;
+                }
+            }
+            else 
+            {
+                break;
+            }
+        }
+    }
+    return count;
+}
+- (BOOL) imageURLContentInArray: (NSArray*) array : (SEPageImageURL*)url
+{
+    for(SEPageImageURL* pageURL in array)
+    {
+        BOOL urlEqual = [[url.url absoluteString] isEqualToString:[pageURL.url absoluteString]];
+        BOOL fileURLEqual = url.filepath != nil && pageURL.filepath != nil && [[url.filepath absoluteString] isEqualToString:[pageURL.filepath absoluteString]];
+        if(urlEqual || fileURLEqual)
+            return YES;
+    }
+    return NO;
+}
+- (void) printPhotoAssetURL
+{
+    NSLog(@"photo asset url count = %d", mPhotoAssetURL.count);
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        NSLog(@"photo image url = %@, %@", [url.url absoluteString], [url.filepath absoluteString]);
+    }
+}
+- (void) assertPhotoAssert
+{
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        assert(url.url != nil || url.filepath != nil);
+    }
+}
+
 - (void) initAssetLib
 {
-    mAssetIdentity[0] = ALAssetsGroupAlbum;
-    mAssetIdentity[1] = ALAssetsGroupSavedPhotos;
+    //mAssetIdentity[0] = ALAssetsGroupAlbum;
+    //mAssetIdentity[1] = ALAssetsGroupSavedPhotos;
+    mAssetIdentity[0] =  ALAssetsGroupAll;
+    mAssetIdentity[1] = 0;
     [mAssetLibrary release];
     //NSDate* date1 = [NSDate date];
     mAssetLibrary = [[ALAssetsLibrary alloc] init];
@@ -515,6 +867,30 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
     return NO;
 }
+- (void) addPhotoByDateSequent: (SEPageImageURL*)url
+{
+    int index = 0;
+    int count = mPhotoAssetURL.count;
+    for(int j = 0 ; j < mPhotoAssetURL.count ; j++, index++)
+    {
+        SEPageImageURL* urlInPhotoAsset = [mPhotoAssetURL objectAtIndex:j];
+        NSString* tmpUrlDate = urlInPhotoAsset.urlDate;
+        NSComparisonResult ret = [tmpUrlDate compare:url.urlDate];
+        if(ret == NSOrderedAscending)
+        {
+            break;
+        }
+    }
+    if(index < mPhotoAssetURL.count)
+    {
+        [mPhotoAssetURL insertObject:url atIndex:index];
+    }
+    else
+    {
+        [mPhotoAssetURL addObject:url];
+    }
+    assert(mPhotoAssetURL.count == (count + 1));
+}
 - (void) createPhotoUrlArrayFromPhotoLib
 {
     ALAssetsGroupEnumerationResultsBlock getPix =
@@ -530,12 +906,16 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];
         imageURL.url = assetURL;
         NSDate* date = [result valueForProperty: ALAssetPropertyDate];
-        imageURL.urlDate = [SEUtil dateToString: date];
-        //NSLog(@"url date = %@", imageURL.urlDate);
+        NSString* dateStr = [SEUtil dateToString: date];
+        imageURL.urlDate = dateStr;
+        
+        //NSLog(@"url date = %@", dateStr);
         imageURL.type = SEPAGE_PHOTO_LIB_URL;
         //assert([self isInPhotoAssetArray:imageURL] == NO);
         if([self isInPhotoAssetArray:imageURL] == NO)
-            [mPhotoAssetURL addObject:imageURL];
+        {
+            [self addPhotoByDateSequent:imageURL];
+        }
         [imageURL release];
         //CGImageRef im = [rep fullResolutionImage];
         //NSLog(@"asset UTI = %@", [rep UTI]);
@@ -548,7 +928,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         if(!group)
         {
             mCurrentAssetIndex++;
-            if(mCurrentAssetIndex == ASSET_NUM)
+            if(mCurrentAssetIndex == 1)//ASSET_NUM)
             {
                 [self performSelectorOnMainThread:@selector(createContent) withObject:nil waitUntilDone:NO];
             }
@@ -567,28 +947,34 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     };
     for(int i = 0 ; i < ASSET_NUM ; i++)
     {
-        [mAssetLibrary enumerateGroupsWithTypes:mAssetIdentity[i] usingBlock:getGroups failureBlock:oops];
+        if(mAssetIdentity[i] != 0)
+            [mAssetLibrary enumerateGroupsWithTypes:mAssetIdentity[i] usingBlock:getGroups failureBlock:oops];
     }
     NSLog(@"photo enumerate end");
 }
 - (void)createPhotoUrlArrayFromCoreData
 {
-    NSArray* siSet = [mViewNavigator getUserImageProperty];
+    NSArray* siSet = [mViewNavigator getSelectedImageArrayByName:mImageListName];//[mViewNavigator getUserImageProperty];
     for(NSUInteger i = 0 ; i < [siSet count] ; i++)
     {
         SelectedImage*  si = [siSet objectAtIndex:i];
         NSNumber* seq = si.seq;
         NSString* str = si.filepath;
-        NSString* url = si.url;
+        NSString* url = [si.url copy];
         NSURL* fileURL = [NSURL URLWithString:str];
         SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];
-        imageURL.url = [NSURL URLWithString: url];
+        NSURL* newURL = [NSURL URLWithString: url];
+        imageURL.url = newURL;
+        [url release];
         imageURL.urlDate = si.urldate;
         imageURL.filepath = fileURL;
         imageURL.type = (SEPAGE_URL_TYPE)[si.urltype intValue];
         imageURL.orientation = [si.orientation intValue];
+        imageURL.origWidth = [si.width intValue];
+        imageURL.origHeight = [si.height intValue];
         [mPhotoAssetURL addObject:imageURL];
         [imageURL release];
+        assert(imageURL.url != nil || imageURL.filepath != nil);
         //debug
         if(str != nil || url != nil)
         {
@@ -596,6 +982,23 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         }
         //end
     }
+    NSLog(@"### photo asset url num = %d ###", mPhotoAssetURL.count);
+    
+    //for test
+    if([siSet count] > 0)
+    {
+        for(NSUInteger i = 0 ; i < [siSet count] - 1; i++)
+        {
+            SelectedImage* firstSi = [ siSet objectAtIndex:i];
+            SelectedImage* secondSi = [siSet objectAtIndex:i + 1];
+            NSNumber* firstNum = firstSi.seq;
+            NSNumber* secondNum = secondSi.seq;
+            assert(([firstNum intValue] + 1) == [secondNum intValue]);
+        }
+    }
+    //end
+    
+    //[self checkAllSelectedImage:YES];
 }
 - (void) createPhotoUrlArray
 {
@@ -613,6 +1016,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) updateImageView
 {
     NSArray* pages = mParentView.subviews;
+    int imageViewCount = [self getCurrentImageViewCount];
+    assert(mPhotoAssetURL.count <= imageViewCount);
     for(int i = mStartPage ; i <= mEndPage ; i++)
     {
         UIView* page = [pages objectAtIndex:i];
@@ -621,17 +1026,25 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         {
             SEPageUIImageView* imageView = [page.subviews objectAtIndex:j];
             int index = i * mPageRow * mPageCol + j;
-            if(index < mPhotoAssetURL.count)
+            assert(index < imageViewCount);
+            if(index < imageViewCount)
             {
-                SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:index];
-                SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
-                UIImage* image = [self getImageFromPhotoDict:key];
-                if(image)
+                SEPageImageURL* url = [self getImageURL:index];
+                if(url != nil)
                 {
-                    if(image != imageView.image)
-                        imageView.image = image;
+                    SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+                    UIImage* image = [self getImageFromPhotoDict:key];
+                    if(image)
+                    {
+                        if(image != imageView.image)
+                            imageView.image = image;
+                    }
+                    else 
+                    {
+                        imageView.image = mDefaultImage;
+                    }
                 }
-                else 
+                else
                 {
                     imageView.image = mDefaultImage;
                 }
@@ -639,6 +1052,352 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         }
     }
 }
+//////////////////////////
+- (void) finishLoadImage: (SELoadImageOperation*) loadImageOp
+{
+    //NSLog(@"finishLoadImage");
+    assert([self isRunOnMainThread]);
+    if([self isStopLoadImage])
+    {
+        //NSLog(@"loadImageOp retain count = %d", [loadImageOp retainCount]);
+        [[NSNotificationCenter defaultCenter] removeObserver:self name: NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB object:loadImageOp];
+        [loadImageOp release];
+        mIsLoadingImage = NO;
+        return;
+    }
+    UIImage* image = loadImageOp.mResultImage;
+    int index = loadImageOp.mPageLoadInfo.index;
+    SEPageImageURL* url = loadImageOp.mURL;
+    url.origWidth = loadImageOp.mOrigWidth;
+    url.origHeight = loadImageOp.mOrigHeight;
+    url.orientation = loadImageOp.mOrientation;
+    //NSLog(@"load image width = %f, height = %f, orient = %d", url.origWidth, url.origHeight, url.orientation);
+    /*
+    if(url.origHeight == 0 && url.origWidth == 0 && mScrollViewType == COREDATA_SCROLLVIEW)
+    {
+        SEPageImageURL* photoURL = [mPhotoAssetURL objectAtIndex:index];
+        photoURL.origWidth = 0;
+        photoURL.origHeight = 0;
+        [mViewNavigator setPhotoURLToCoreData:mPhotoAssetURL];
+    }
+     */
+    if(image != nil)
+    {
+        SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+        UIImage* imageInDict = [self getImageFromPhotoDictByIndex:index];
+        assert(imageInDict == nil);
+        [self addImageToPhotoDict:key image:image];
+        SEPageUIImageView* view = [self imageView:index];
+        view.image = image;
+    }
+    else
+    {
+        SEPageImageURL* newURL = [[SEPageImageURL alloc] init];
+        newURL.url = [NSURL URLWithString:@"*EmptyImageURL*"];
+        newURL.type = SEPAGE_PHOTO_LIB_URL;
+        SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:newURL];
+        [newURL release];
+        UIImage* newImage = [self getImageFromPhotoDict:key];
+        if(newImage == nil)
+        {
+            newImage = [mViewNavigator.mResLoader getImage:@"NoImageFound"];
+            UIGraphicsBeginImageContext(CGSizeMake(80, 80));
+            [newImage drawInRect:CGRectMake(0, 0, 80, 80)];
+            UIImage* ret = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+            [self addImageToPhotoDict:key image:ret];
+        }
+        SEPageUIImageView* view = [self imageView:index];
+        if(view.image != newImage)
+        {
+            view.image = newImage;
+        }
+        
+    }
+    //NSLog(@"finishImageLoad index = %d, mNextLoadImageURLIndex = %d", index, mNextLoadImageURLIndex);
+    assert(mNextLoadImageURLIndex == index);
+    mIsLoadingImage = NO;
+    
+    if(loadImageOp.mPageLoadInfo.startPage != mStartPage || loadImageOp.mPageLoadInfo.endPage != mEndPage)
+    {
+        mNextLoadImageURLIndex = mStartPage * mPageRow * mPageCol;
+        [self loadNextImageNew];
+    }
+    else
+    {
+        mNextLoadImageURLIndex++;
+        int endIndex = mEndPage * mPageRow * mPageCol + mPageRow * mPageCol;
+        if(mNextLoadImageURLIndex < endIndex)
+            [self loadNextImageNew];
+    }
+    //NSLog(@"load image operation retain count = %d", [loadImageOp retainCount]);
+    [[NSNotificationCenter defaultCenter] removeObserver:self name: NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB object:loadImageOp];
+    [loadImageOp release];
+}
+- (void) finishLoadImageFromCoreData: (SELoadImageFromCoreDataOperation*) loadImageOp
+{
+    //NSLog(@"finishLoadImageFromCoreData");
+    if([self isStopLoadImage])
+    {
+        //NSLog(@"loadImageOp retain count = %d", [loadImageOp retainCount]);
+        [[NSNotificationCenter defaultCenter] removeObserver:self name: NOTIFICATION_LOADIMAGE_FROM_COREDATA object:loadImageOp];
+        [loadImageOp release];
+        mIsLoadingImage = NO;
+        return;
+    }
+    UIImage* image = loadImageOp.mResultImage;
+    BOOL needLoadFromPhotoLib = loadImageOp.mNeedLoadFromPhotoLib;
+    int index = loadImageOp.mPageLoadInfo.index;
+    SEPageImageURL* url = loadImageOp.mURL;
+    if(needLoadFromPhotoLib == NO)
+    {
+        NSLog(@"finishImageLoad index = %d, mNextLoadImageURLIndex = %d", index, mNextLoadImageURLIndex);
+        SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+        UIImage* imageInDict = [self getImageFromPhotoDictByIndex:index];
+        assert(imageInDict == nil);
+        [self addImageToPhotoDict:key image:image];
+        SEPageUIImageView* view = [self imageView:index];
+        view.image = image;
+
+        assert(mNextLoadImageURLIndex == index);
+        mIsLoadingImage = NO;
+        if(loadImageOp.mPageLoadInfo.startPage != mStartPage || loadImageOp.mPageLoadInfo.endPage != mEndPage)
+        {
+            mNextLoadImageURLIndex = mStartPage * mPageRow * mPageCol;
+            [self loadNextImageNew];
+        }
+        else
+        {
+            mNextLoadImageURLIndex++;
+            int endIndex = mEndPage * mPageRow * mPageCol + mPageRow * mPageCol;
+            if(mNextLoadImageURLIndex < endIndex)
+                [self loadNextImageNew];
+        }
+    }
+    else
+    {
+        SEPageImageURL* newURL = [url clone];
+        PageImageLoadInfo* loadInfo = [loadImageOp.mPageLoadInfo clone];
+        [self getImageFromPhotoLib:newURL pageInfo:loadInfo];
+    }
+    //NSLog(@"load image operation from core data retain count = %d", [loadImageOp retainCount]);
+    [[NSNotificationCenter defaultCenter] removeObserver:self name: NOTIFICATION_LOADIMAGE_FROM_COREDATA object:loadImageOp];
+    [loadImageOp release];
+}
+- (void) finishLoadImageWrapper: (NSNotification*)notify
+{
+    NSObject* obj = [notify object];
+    if([obj isMemberOfClass:[SELoadImageOperation class]])
+    {
+        [self performSelectorOnMainThread:@selector(finishLoadImage:) withObject:[notify object] waitUntilDone:NO];    
+    }
+    else if([obj isMemberOfClass:[SELoadImageFromCoreDataOperation class]])
+    {
+        [self performSelectorOnMainThread:@selector(finishLoadImageFromCoreData:) withObject:[notify object] waitUntilDone:NO];
+    }
+}
+-(void) getImageFromCoreDataNew: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo
+{
+    CGSize fitSize = CGSizeMake(mPhotoWidth - 20, mPhotoHeight - 20);
+    SELoadImageFromCoreDataOperation* loadOperation = [[SELoadImageFromCoreDataOperation alloc] initWithURL:url pageInfo:pageLoadInfo];
+    loadOperation.mFitSize = fitSize;
+    loadOperation.mPageScrollView = self;
+    mIsLoadingImage = YES;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLoadImageWrapper:) name:NOTIFICATION_LOADIMAGE_FROM_COREDATA object:loadOperation];
+    [mOperationQueue addOperation:loadOperation];
+}
+- (void) getImageFromPhotoLib: (SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo
+{
+    CGSize fitSize = CGSizeMake(mPhotoWidth - 20, mPhotoHeight - 20);
+    PageImageLoadInfo* tmpPageLoadInfo = [pageLoadInfo retain];
+    SEPageUIScrollView* retainSelf = [self retain];
+    ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
+    {
+        assert([self isRunOnMainThread]);
+        if([self isStopLoadImage])
+        {
+            [tmpPageLoadInfo release];
+            [retainSelf release];
+            return;
+        }
+        if(asset == nil)
+        {
+            NSLog(@"## image asset = nil ###");
+        }
+        //NSLog(@"load image operation index = %d, mNextLoadImageIndex = %d ", pageLoadInfo.index, mNextLoadImageURLIndex);
+        SELoadImageOperation* loadImageOperation = [[SELoadImageOperation alloc] initWithURL:url pageInfo:tmpPageLoadInfo];
+        [tmpPageLoadInfo release];
+        loadImageOperation.mAsset = asset;
+        loadImageOperation.mFitSize = fitSize;
+        loadImageOperation.mIsFromCoreData = NO;
+        loadImageOperation.mPageScrollView = retainSelf;
+        [retainSelf release];
+        //NSLog(@"before self retain count = %d", [self retainCount]);
+        //NSLog(@"before operation count = %d", [loadImageOperation retainCount]);
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLoadImageWrapper:) name:NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB object:loadImageOperation];
+        //NSLog(@"after self retain count = %d", [self retainCount]);
+        //NSLog(@"after operation retain count = %d", [loadImageOperation retainCount]);
+        [mOperationQueue addOperation:loadImageOperation];
+    };
+    ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
+    {
+        mAssetAcessError = 1;
+        //mIsLoadingImage = NO;
+        NSLog(@"read photo lib error : %@", [error localizedDescription]);
+        assert([self isRunOnMainThread]);
+        if([self isStopLoadImage])
+        {
+            [tmpPageLoadInfo release];
+            [retainSelf release];
+            return;
+        }
+        SELoadImageOperation* loadImageOperation = [[SELoadImageOperation alloc] initWithURL:url pageInfo:tmpPageLoadInfo];
+        [tmpPageLoadInfo release];
+        loadImageOperation.mAsset = nil;
+        loadImageOperation.mFitSize = fitSize;
+        loadImageOperation.mIsFromCoreData = NO;
+        loadImageOperation.mPageScrollView = retainSelf;
+        [retainSelf release];
+        //NSLog(@"before self retain count = %d", [self retainCount]);
+        //NSLog(@"before operation count = %d", [loadImageOperation retainCount]);
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLoadImageWrapper:) name:NOTIFICATION_LOADIMAGE_FROM_PHOTOLIB object:loadImageOperation];
+        //NSLog(@"after self retain count = %d", [self retainCount]);
+        //NSLog(@"after operation retain count = %d", [loadImageOperation retainCount]);
+        [mOperationQueue addOperation:loadImageOperation];
+    };
+    mIsLoadingImage = YES;
+    [mAssetLibrary assetForURL:url.url resultBlock:getAsset failureBlock:failHandler];
+}
+- (void) getImageFromURLNew:(SEPageImageURL*)url pageInfo: (PageImageLoadInfo*)pageLoadInfo
+{
+    switch (mScrollViewType) 
+    {
+        case PHOTOLIB_SCROLLVIEW:
+        {
+            [self getImageFromPhotoLib:url pageInfo:pageLoadInfo];
+        }
+            break;
+        case COREDATA_SCROLLVIEW:
+        {
+            [self getImageFromCoreDataNew: url pageInfo: pageLoadInfo];
+        }
+            break;
+        default:
+            break;
+    }
+
+}
+- (UIImage*) getImageFromPhotoDictByIndex: (int)index
+{
+    if(index < 0 || index >= mPhotoAssetURL.count)
+        return nil;
+    SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:index];
+    SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+    UIImage* image = [self getImageFromPhotoDict:key];
+    return image;
+}
+- (BOOL) canLoadImageByIndex: (int)index
+{
+    if(index < 0 || index >= mPhotoAssetURL.count)
+    {
+        return NO;
+    }
+    if(mStopLoadImage == YES)
+    {
+        return NO;
+    }
+    UIImage* image = [self getImageFromPhotoDictByIndex:index];
+    if(image == nil)
+    {
+        return YES;
+    }
+    else 
+    {
+        return NO;
+    }
+}
+- (BOOL) isValidPhotoIndex: (int)index
+{
+    return index >= 0 && index < mPhotoAssetURL.count;
+}
+- (void) loadNextImageNew
+{
+    if(mNextLoadImageURLIndex < 0 || mNextLoadImageURLIndex >= mPhotoAssetURL.count)
+    {
+        mIsLoadingImage = NO;
+        return;
+    }
+    if(mStopLoadImage == YES)
+    {
+        mIsLoadingImage = NO;
+        return;
+    }
+    SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:mNextLoadImageURLIndex];
+    SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+    UIImage* image = [self getImageFromPhotoDict:key];
+    if(image == nil)
+    {
+        //NSLog(@"loadnextimagenew mNextLoadImageURLIndex = %d", mNextLoadImageURLIndex);
+        PageImageLoadInfo* pageInfo = [[[PageImageLoadInfo alloc] init] autorelease];
+        pageInfo.startPage = mStartPage;
+        pageInfo.endPage = mEndPage;
+        pageInfo.index = mNextLoadImageURLIndex;
+        [self getImageFromURLNew:url pageInfo:pageInfo];
+    }
+    else
+    {
+        SEPageUIImageView* view = [self imageView:mNextLoadImageURLIndex];
+        if(view.image == mDefaultImage)
+            view.image = image;
+        while(image != nil)
+        {
+            mNextLoadImageURLIndex++;
+            image = [self getImageFromPhotoDictByIndex:mNextLoadImageURLIndex];
+            if(mNextLoadImageURLIndex >= 0 && mNextLoadImageURLIndex < mPhotoAssetURL.count)
+            {
+                view = [self imageView:mNextLoadImageURLIndex];
+                if(view.image == mDefaultImage && image != nil)
+                    view.image = image;
+            }
+        }
+        int endIndex = mEndPage * mPageRow * mPageCol + mPageRow * mPageCol;
+        if(mNextLoadImageURLIndex >= endIndex)
+        {
+            int startIndex = mStartPage * mPageRow * mPageCol;
+            for(int i = startIndex ; i < endIndex ; i++)
+            {
+                if(i < mPhotoAssetURL.count)
+                {
+                    image = [self getImageFromPhotoDictByIndex:i];
+                    if(image == nil)
+                    {
+                        mNextLoadImageURLIndex = i;
+                        break;
+                    }
+                    else
+                    {
+                        view = [self imageView:i];
+                        if(view.image == mDefaultImage)
+                        {
+                            view.image = image;
+                        }
+                    }
+                }
+            }
+        }
+        if(image == nil && [self isValidPhotoIndex: mNextLoadImageURLIndex] && mNextLoadImageURLIndex < endIndex)
+        {
+            //NSLog(@"2 loadnextimagenew mNextLoadImageURLIndex = %d", mNextLoadImageURLIndex);
+            url = [mPhotoAssetURL objectAtIndex:mNextLoadImageURLIndex];
+            PageImageLoadInfo* pageInfo = [[[PageImageLoadInfo alloc] init] autorelease];
+            pageInfo.startPage = mStartPage;
+            pageInfo.endPage = mEndPage;
+            pageInfo.index = mNextLoadImageURLIndex;
+            [self getImageFromURLNew: url pageInfo:pageInfo];
+        }
+    }
+}
+
 - (void) loadNextImage: (BOOL) continueLoad
 {
     assert([self isRunOnMainThread]);
@@ -654,6 +1413,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
             {
                 SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:index];
                 SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+                if(mScrollViewType == COREDATA_SCROLLVIEW)
+                    NSLog(@"## image url = %@", key.url);
                 UIImage* image = [self getImageFromPhotoDict:key];
                 if(image == nil)
                 {
@@ -666,6 +1427,12 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
                     pageInfo.page = i;
                     [self getImageFromURL:url continueLoad:continueLoad pageInfo:pageInfo];
                     return;
+                }
+                else
+                {
+                    SEPageUIImageView* view = [self imageView:index];
+                    //if(view.image != mDefaultImage)
+                    view.image = image;
                 }
             }
         }
@@ -680,12 +1447,19 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) finishedLoadImage: (id)data
 {
     assert([self isRunOnMainThread]);
+
     NSMutableArray* dataArray = (NSMutableArray*)data;
     SEPageImageURL* url = [dataArray objectAtIndex:0];
     UIImage* image = [dataArray objectAtIndex:1];
     BOOL continueLoad = [[dataArray objectAtIndex:2] boolValue];
     PageImageLoadInfo* pageInfo = [dataArray objectAtIndex:3];
     id urlData = [dataArray objectAtIndex:4];
+    if(mScrollViewType == COREDATA_SCROLLVIEW)
+    {
+        int index = pageInfo.page * mPageRow * mPageCol + pageInfo.row * mPageCol + pageInfo.col;
+        SEPageUIImageView* view = [self imageView:index];
+        NSLog(@"loaed page = %d, row = %d, col = %d, imageview = %@", pageInfo.page, pageInfo.row, pageInfo.col, view);
+    }
     if(urlData != [NSNull null])
     {
         int width = [[urlData objectAtIndex:0] intValue];
@@ -701,6 +1475,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     //[self updateImageView];
     int index = pageInfo.page * mPageRow * mPageCol + pageInfo.row * mPageCol + pageInfo.col;
     SEPageUIImageView* view = [self imageView:index];
+    assert(index < mPhotoAssetURL.count);
     view.image = image;
     //
     int startPage = pageInfo.startPage;
@@ -825,11 +1600,14 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     if(image)
     {
         CGImageRef imageRef = [image CGImage];
-        CGSize srcSize = CGSizeMake(image.size.width, image.size.height);
+        //CGSize srcSize = CGSizeMake(image.size.width, image.size.height);
+        CGSize srcSize = CGSizeMake(CGImageGetWidth(imageRef), CGImageGetHeight(imageRef));
         CGSize dstSize = CGSizeMake(mPhotoWidth - 20, mPhotoHeight - 20);
         dstSize = [SEUtil computeFitSize:srcSize toDst:dstSize];
         CGImageRef retImage = [SEUtil fastScale:imageRef withRect:dstSize];
+        NSLog(@"raw image width = %ld, height = %ld", CGImageGetWidth(retImage), CGImageGetHeight(retImage));
         UIImage* retUIImage = [UIImage imageWithCGImage:retImage scale:1.0 orientation: (UIImageOrientation)url.orientation];
+        NSLog(@"image width = %f, height = %f, orientation = %d", retUIImage.size.width, retUIImage.size.height, retUIImage.imageOrientation);
         CGImageRelease(retImage);
         NSMutableArray* retData = [NSMutableArray array];
         retData = [retData retain];
@@ -1040,36 +1818,6 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         [page removeFromSuperview];
     }
 }
-/*
-- (void) restartAll: (id)param
-{
-    [self removeAllImageViews];
-    [self initPhotoDict];
-    [self initPhotoLibUrl];
-    [self createContent];
-}
-- (void) restartReal: (id) param
-{
-    [self removeAllImageViews];
-
-    [self createContent];
-}
-*/
-/*
-- (int) getPhotoDictKey: (id)key
-{
-    assert([self isRunOnWorkderThread]);
-    NSNumber* indexNum = (NSNumber*)key;
-    return [indexNum intValue];
-}
-- (CGImageRef) getPhotoDictContent: (id)obj
-{
-    assert([self isRunOnWorkderThread]);
-    NSValue* v = (NSValue*)obj;
-    CGImageRef image = (CGImageRef)[v pointerValue];
-    return image;
-}
- */
 - (UIImage*) getImageFromPhotoDict: (SEPagePhotoDictKey*)key
 {
     for(SEPagePhotoDictItem* item in mPhotoDict)
@@ -1126,26 +1874,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
     return sum;
 }
-/*
-- (void) removeFromPhotoDictUsingBlock: (BOOL (^)(int photoIndex)) block
-{
-    assert([self isRunOnWorkderThread]);
-    NSMutableArray* indexArray = [NSMutableArray array];
-    //get the key need be deleted
-    [mPhotoDict enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        int photoIndex = [self getPhotoDictKey:key];
-        if(block(photoIndex))
-            [indexArray addObject:key];
-    }];
-    for(NSUInteger i = 0 ; i < [indexArray count] ; i++)
-    {
-        id key = [indexArray objectAtIndex:i];
-        CGImageRef image = [self getPhotoDictContent:[mPhotoDict objectForKey:key]];
-        CGImageRelease(image);
-    }
-    [mPhotoDict removeObjectsForKeys:indexArray];
-}
- */
+
 //this function run in main thread
 - (void) removeImageFromView : (PageGarbageInfo*) gbInfo
 {
@@ -1220,8 +1949,9 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         {
             if(i < assetURLCount)
             {
-                SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
-                [self removeImageFromPhotoDictByURL:url];
+                SEPageImageURL* url = [self getImageURL:i];//[mPhotoAssetURL objectAtIndex:i];
+                if(url != nil)
+                    [self removeImageFromPhotoDictByURL:url];
             }
         }
         PageGarbageInfo* gbInfo = [[PageGarbageInfo alloc] init];
@@ -1235,11 +1965,12 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     if(nextStartPageIndex < mPageCount)
     {
         int firstIndex = nextStartPageIndex * mPageCol * mPageRow;
-        for(int i = firstIndex ; i < mPhotoAssetURL.count; i++)
+        int imageViewCount = [self getCurrentImageViewCount];
+        for(int i = firstIndex ; i < imageViewCount; i++)
         {
             if(i < assetURLCount)
             {
-                SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+                SEPageImageURL* url = [self getImageURL:i];//[mPhotoAssetURL objectAtIndex:i];
                 [self removeImageFromPhotoDictByURL:url];
             }
         }
@@ -1247,9 +1978,6 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         gbInfo.index = firstIndex;
         gbInfo.op = INDEX_GREAT;
         [self removeImageFromView:gbInfo];
-        /*
-        [self performSelectorOnMainThread:@selector(removeImageFromView:) withObject:gbInfo waitUntilDone:NO];
-         */
     }
 }
 //this function run in main thread. At this time worker thread has exited. So main thread can
@@ -1324,6 +2052,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void) moveURLs: (NSMutableArray*)indexArray toIndex: (int)dstIndex
 {
     assert([self isRunOnMainThread]);
+    assert(dstIndex <= mPhotoAssetURL.count);
     for(int i = 0 ;i  < indexArray.count ; i++)
     {
         NSLog(@"## moved index  = %@", [indexArray objectAtIndex:i]);
@@ -1340,7 +2069,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     for(int i = 0 ; i < dstIndex ; i++)
     {
         SEPageImageURL* imageURL = [mPhotoAssetURL objectAtIndex:i];
-        if([self imageURLInArray:needChangeURLs :imageURL] == NO )
+        if([self imageURLInArray:needChangeURLs :imageURL] == NO)
         {
             [newPhotoURL addObject:imageURL];
         }
@@ -1349,6 +2078,13 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     {
         [newPhotoURL addObject:[needChangeURLs objectAtIndex:i]];
     }
+    /// test
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        NSLog(@"before url %d = %@ width = %f, height = %f, orient = %d", i, url.url, url.origWidth, url.origHeight, url.orientation);
+    }
+    ///
     int lastURLIndex = [self lastURLIndex];
     int lastDefaultImageViewIndex = (int)[self lastImageViewIndex];
     NSLog(@"last url index = %d, last default image view = %d ", lastURLIndex,lastDefaultImageViewIndex);
@@ -1372,19 +2108,26 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
     NSLog(@"newPhotoURL count = %d , lastURLIndex = %d", newPhotoURL.count ,lastURLIndex);
     assert(newPhotoURL.count == lastURLIndex);
-    for(int i = lastURLIndex ; i < mPhotoAssetURL.count ; i++)
-    {
-        SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];
-        [newPhotoURL addObject:imageURL];
-        [imageURL release];
-    }
-    assert(newPhotoURL.count == mPhotoAssetURL.count);
     [mPhotoAssetURL release];
     mPhotoAssetURL = [newPhotoURL retain];
+    //for test
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        NSLog(@"new url width = %f, height = %f, orient = %d", url.origWidth, url.origHeight, url.orientation);
+    }
+    //end
 }
+
+//we can prove that this function spec:
 - (void) insertURLToPhotoAssetArray: (NSMutableArray*)urlArray : (int) index : (int) lastURLIndex
 {
     assert([self isRunOnMainThread]);
+    assert(index <= lastURLIndex);
+    assert(lastURLIndex == mPhotoAssetURL.count);
+    int oldCount = mPhotoAssetURL.count;
+    NSArray* oldPhotoAssertURL = [NSArray arrayWithArray:mPhotoAssetURL];
+    [self printPhotoAssetURL];
     NSMutableArray* newPhotoURL = [NSMutableArray array];
     for(int i = 0 ; i < index ; i++)
     {
@@ -1408,16 +2151,28 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     {
         [newPhotoURL addObject:[mPhotoAssetURL objectAtIndex:i]];
     }
-    int num = mPhotoAssetURL.count - newPhotoURL.count;
-    for(int i = 0 ; i < num;  i++)
-    {
-        SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];
-        [newPhotoURL addObject:imageURL];
-        [imageURL release];
-    }
-    assert(newPhotoURL.count == mPhotoAssetURL.count);
     [mPhotoAssetURL release];
     mPhotoAssetURL = [newPhotoURL retain];
+    //for post condition
+    assert(mPhotoAssetURL.count == (oldCount + urlArray.count));
+    for(SEPageImageURL* url in oldPhotoAssertURL)
+    {
+        assert([self imageURLContentInArray:mPhotoAssetURL :url]);
+    }
+    for(SEPageURLID* urlID in urlArray)
+    {
+        SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];//
+        imageURL.url = urlID.url;
+        imageURL.urlDate = urlID.urlDate;
+        imageURL.origWidth = urlID.origWidth;
+        imageURL.origHeight = urlID.origHeight;
+        imageURL.orientation = urlID.orientation;
+        imageURL.filepath = nil;
+        imageURL.type = SEPAGE_PHOTO_LIB_URL;
+        assert([self imageURLContentInArray:mPhotoAssetURL :imageURL]);
+        [imageURL release];
+    }
+    //post condition end
 }
 //return the nil url index
 - (int) lastURLIndex
@@ -1430,6 +2185,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         if(url.url != nil || url.filepath != nil)
             index = i;
     }
+    assert(index == -1 || (index + 1)== mPhotoAssetURL.count);
     return index + 1;
 }
 - (void) setCurrentPhotoURLToCoreData
@@ -1479,15 +2235,18 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void)removeImageFromCoreData: (NSArray*)urlArray
 {
     assert([self isRunOnMainThread]);
+    //you must remove urlArray from mPhotoAssetURL first
     for(SEPageImageURL* url in urlArray)
     {
-        [mViewNavigator removeImageFromCoreDate:[url.url absoluteString] urlDate:url.urlDate];
+        if([self imageURLContentInArray:mPhotoAssetURL :url] == NO)
+            [mViewNavigator removeImageFromCoreDate:[url.url absoluteString] urlDate:url.urlDate];
     }
 }
 - (void) removeURLFromPhotoURLAsset: (NSMutableArray*)indexArray
 {
     assert([self isRunOnMainThread]);
     NSMutableArray* newArray = [NSMutableArray array];
+    int oldCount = mPhotoAssetURL.count;
     for(int i = 0 ; i < mPhotoAssetURL.count; i++)
     {
         if([self containIndex:indexArray index:i] == NO)
@@ -1495,15 +2254,9 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
             [newArray addObject:[mPhotoAssetURL objectAtIndex:i]];
         }
     }
-    int diffCount = mPhotoAssetURL.count - newArray.count;
-    for(int i = 0  ; i < diffCount ; i++)
-    {
-        SEPageImageURL* imageURL = [[SEPageImageURL alloc] init];
-        [newArray addObject:imageURL];
-        [imageURL release];
-    }
     [mPhotoAssetURL release];
     mPhotoAssetURL = [newArray retain];
+    assert(oldCount == (mPhotoAssetURL.count + indexArray.count));
 }
 
 
@@ -1576,26 +2329,13 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         if(prevStartPage != mStartPage || prevEndPage != mEndPage)
         {
             NSLog(@"## current start, end page = %d, %d", mStartPage, mEndPage);
-            [self loadNextImage : YES];
+            if(mIsLoadingImage == NO)
+            {
+                mNextLoadImageURLIndex = mStartPage * mPageRow * mPageCol;
+                [self loadNextImageNew];
+            }
         }
-        /*
-        if([self isIntervalContain:prevStartPage :prevEndPage :mStartPage :mEndPage] || 
-           [self isIntervalContain:mStartPage :mEndPage :prevStartPage :prevEndPage])
-        {
-            NSLog(@"## page intersect : not load ##");
-        }
-        else 
-        {
-            [self loadNextImage : YES];
-        }
-         */
-        //NSLog(@"page index = %d, %d\n", startPageIndex, endPageIndex);
-        //SEPageVisibaleRangeEvent* event = [[SEPageVisibaleRangeEvent alloc] initWithRange:prevStartPage : prevEndPage : startPageIndex :endPageIndex];
-        //NSDate* date1 = [NSDate date];
-        //[self addEvent:event];
-        //NSDate* date2 = [NSDate date];
-        //NSTimeInterval timeV = [date2 timeIntervalSinceDate:date1];
-        //NSLog(@"### add event time = %f ###\n", timeV);
+
     }
 }
 - (void) initPhotoDict
@@ -1607,6 +2347,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 //the last image view which image is default image
 - (int) lastImageViewIndex
 {
+    /*
     int pageIndex = 0;
     for(UIView* page in mParentView.subviews)
     {
@@ -1621,15 +2362,119 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         }
         pageIndex++;
     }
-    return -1;
+     */
+    return mPhotoAssetURL.count;
 }
 /*
 - (void) getImageFromPhotoLib:(SEPageImageURL *)url
 {}
  */
+- (void) loadImageFromPhotoLibWithThread:(NSMutableArray*)data
+{
+    SEPageImageURL* url = [data objectAtIndex:0];
+    CGSize size = [[data objectAtIndex:1] CGSizeValue];
+    NSObject<SELoadedImageHandler>* handler = [data objectAtIndex:2];
+    SEPageImageURL* passedURL = [url retain];
+    [data release];
+    ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
+    {
+        NSThread* currentThread = [NSThread currentThread];
+        //NSLog(@"current thread = %@\n", currentThread);
+        ALAssetRepresentation* rep = [asset defaultRepresentation];
+        CGImageRef image = NULL;
+        if(rep)
+        {
+            image = [rep fullResolutionImage];
+        }
+        CGSize srcS = CGSizeMake(CGImageGetWidth(image), CGImageGetHeight(image));
+        CGSize s = [SEUtil computeFitSize:srcS toDst:size];
+        CGImageRef retImage = NULL;
+        if(image)
+        {
+            retImage = [SEUtil fastScale:image withRect:s];
+        }
+        float width = CGImageGetWidth(retImage);
+        float height = CGImageGetHeight(retImage);
+        //NSLog(@"## retImage with = %f, height = %f ##\n", width, height);
+        UIImageOrientation orient = (UIImageOrientation)[rep orientation];
+        CGFloat scale = [rep scale];
+        UIImage* uiImage = nil;
+        if(retImage)
+        {
+            uiImage = [UIImage imageWithCGImage:retImage scale:scale orientation:orient] ;
+        }
+        if(retImage)
+        {
+            CGImageRelease(retImage);
+        }
+        [handler setImage:uiImage];
+        [passedURL release];
+        [self performSelectorOnMainThread:@selector(loadImageHandle:) withObject:handler waitUntilDone:NO];
+        
+    };
+    ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
+    {
+        if(error)
+        {
+            mAssetAcessError = 1;
+            NSLog(@"read photo lib error : %@", [error localizedDescription]);
+        }
+    };
+    [mAssetLibrary assetForURL:url.url resultBlock:getAsset failureBlock:failHandler];
+}
+- (void) loadImageFromPhotoLib: (SEPageImageURL*)url size:(CGSize)size withHandler: (NSObject<SELoadedImageHandler>*) handler
+{
+    NSMutableArray* data = [NSMutableArray array];
+    [data addObject:url];
+    [data addObject:[NSValue valueWithCGSize:size]];
+    [data addObject:handler];
+    data = [data retain];
+    [self performSelectorInBackground:@selector(loadImageFromPhotoLibWithThread:) withObject:data];
+}
+- (void) loadFullRepresentationWithThread:(NSMutableArray*) data
+{
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    SEPageImageURL* passedURL = [[data objectAtIndex:0] retain];
+    NSObject<SELoadedImageHandler>* handler = [data objectAtIndex:1];
+    [data release];
+    ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
+    {
+        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+        [self isRunOnWorkderThread];
+        ALAssetRepresentation* rep = [asset defaultRepresentation];
+        CGImageRef image = [rep fullResolutionImage];
+        UIImageOrientation orient = (UIImageOrientation)[rep orientation];
+        CGFloat scale = [rep scale];
+        UIImage* uiImage = [UIImage imageWithCGImage:image scale:scale orientation:orient];
+        [handler setImage:uiImage];
+        [self performSelectorOnMainThread:@selector(loadImageHandle:) withObject:handler waitUntilDone:NO];
+        [passedURL release];
+        [pool release];
+    };
+    ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
+    {
+        if(error)
+        {
+            mAssetAcessError = 1;
+            NSLog(@"read photo lib error : %@", [error localizedDescription]);
+        }
+    };
+    [mAssetLibrary assetForURL:passedURL.url resultBlock:getAsset failureBlock:failHandler];    
+    [pool release];
+}
+- (void) loadFullRepresentation: (SEPageImageURL*)url withHandler: (NSObject<SELoadedImageHandler>*)handler
+{
+    NSMutableArray* data = [NSMutableArray array];
+    [data addObject:url];
+    [data addObject:handler];
+    data = [data retain];
+    [self performSelectorInBackground:@selector(loadFullRepresentationWithThread:) withObject:data];
+}
 @end
 ////
 @implementation SEPageUIScrollView
+@synthesize mNotFoundImage;
+@synthesize mIsLoadingImage;
 @synthesize mScrollViewType;
 @synthesize mResLoader;
 @synthesize mNotStartThread;
@@ -1666,12 +2511,18 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 @synthesize mIsAnimEnd;
 @synthesize mLongPressHandler;
 @synthesize mGetImageURLInMainThread;
+@synthesize mImageListName;
+@synthesize mIsScrolling;
 - (void) dealloc
 {
+    NSLog(@"SEPageScrollView dealloc");
     [iScrollViewDelegate release];
     [self clearState];
     [mName release];
     [mOperationQueue release];
+    [mImageListName release];
+    [mBackgroundImage release];
+    [mNotFoundImage release];
     [super dealloc];
 }
 
@@ -1682,13 +2533,15 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 }
 - (SEPageHitProperty) hitRect: (CGPoint)p
 {
-    /*
-    //test operation
-    NSOperation* operation = [[SEPageLoadImageOperation alloc] init];
-    [mOperationQueue addOperation:operation];
-    [operation release];
-    //end
-     */
+
+    if(mStartPage == -1 || mEndPage == -1 || [self getCurrentImageViewCount] == 0)
+    {
+        SEPageHitProperty hp;
+        hp.rect = CGRectMake(0, 0, 0, 0);
+        hp.imageView = nil;
+        hp.index = SE_INVALID_IMAGE_INDEX;
+        return hp;
+    }
     for(int pageIndex = mStartPage ; pageIndex <= mEndPage ; pageIndex++)
     {
         UIView* pageView = [mParentView.subviews objectAtIndex:pageIndex];
@@ -1720,9 +2573,9 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     mSelectedIndex = SE_INVALID_IMAGE_INDEX;
     mIsCalculateVisibleRange = YES;
     mIsAnimEnd = YES;
-    mMultiTouchDetect = [[SEMultiTouchDetect alloc] init];
-    mMultiTouchDetect.mViewForPoint = self;
-    [mMultiTouchDetect initData];
+    //mMultiTouchDetect = [[SEMultiTouchDetect alloc] init];
+    //mMultiTouchDetect.mViewForPoint = self;
+    //[mMultiTouchDetect initData];
     iScrollViewDelegate = [[SEPageUIScrollViewDelegate alloc] init];
     self.delegate = iScrollViewDelegate;
     //
@@ -1737,12 +2590,15 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     [v release];
     mParentView = v;
     mParentView.userInteractionEnabled = YES;
-    mUseMultiTouch = YES;
+    mUseMultiTouch = NO;
     mPressMoveSpacing = 5;
+    [mNotFoundImage release];
+    mNotFoundImage = [[[PhotoFrameAppDelegate getViewNavigator] mResLoader] getImage:@"NoImageFound"];
+    [mNotFoundImage retain];
     if(mOperationQueue == nil)
     {
         mOperationQueue = [[NSOperationQueue alloc] init];
-        [mOperationQueue setMaxConcurrentOperationCount:1];
+        [mOperationQueue setMaxConcurrentOperationCount:NSOperationQueueDefaultMaxConcurrentOperationCount];
     }
 }
 
@@ -1757,13 +2613,32 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     assert(mPhotoWidth != 0);
     assert(mPhotoHeight != 0);
     int pageImageCount = mPageCol * mPageRow;
-    int totalPhotoCount = [mPhotoAssetURL count];
+    int totalPhotoCount = 0;
+    if(mScrollViewType == PHOTOLIB_SCROLLVIEW)
+    {
+        totalPhotoCount = mPhotoAssetURL.count;
+    }
+    else
+    {
+        totalPhotoCount = [mViewNavigator getRemainingImageCount] + [mPhotoAssetURL count];
+    }
+    mImageViewCount = totalPhotoCount;
     NSLog(@"## totalPhotoCount = %d ##", totalPhotoCount);
+    if(totalPhotoCount == 0)
+        return;
+    /*
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        NSString* str = url.urlDate;
+        NSLog(@"sequence url = %@", str);
+    }
+     */
     int n = totalPhotoCount / pageImageCount;
     int nReminder = totalPhotoCount % pageImageCount;
     if(mScrollViewType == PHOTOLIB_SCROLLVIEW)
     {
-        [self syncImageInCoreData];
+        //[self syncImageInCoreData];
         [mPhotoAssetURL sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
             SEPageImageURL* url1 = (SEPageImageURL*)obj1;
             SEPageImageURL* url2 = (SEPageImageURL*)obj2;
@@ -1791,8 +2666,12 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     float pagestarty;
     CGFloat pageWidth = mPageBackground.size.width;
     CGFloat pageHeight = mPageBackground.size.height;
+    assert(pageHeight == 705);
     mPageWidth = pageWidth;
     mPageHeight = pageHeight;
+    //test
+    //mPageCount = 6;
+    //
     for(int pageIndex = 0 ; pageIndex < mPageCount; pageIndex++)
     {
         if(pageIndex % 2 == 0)
@@ -1821,6 +2700,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
                 {
                     CGRect frame = CGRectMake(startx, starty, mPhotoWidth, mPhotoHeight);
                     SEPageUIImageView* imageView = [[SEPageUIImageView alloc] initWithFrame:frame];
+                    imageView.mOriginRect = frame;
                     imageView.image = mDefaultImage;
                     imageView.mScrollView = self;
                     imageView.frameImage = mFrameImage;
@@ -1849,8 +2729,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 {
     if(mPhotoAssetURL)
         [mPhotoAssetURL release];
-    mPhotoAssetURL = [NSMutableArray array];
-    [mPhotoAssetURL retain];
+    mPhotoAssetURL = [[NSMutableArray array] retain];
     [self createPhotoUrlArray];
     //[mPhotoLoaderDelegate createPhotoUrlArray:mPhotoAssetURL];
 }
@@ -1868,15 +2747,15 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 }
 - (void)longPressHandler: (id)param
 {
+    NSValue* v = (NSValue*)param;
     if(mPressState == SE_PRESS_READY)
     {
         NSLog(@"target long press");
         mPressState = SE_LONGPRESS_OK;
-        NSValue* v = (NSValue*)param;
         CGPoint p = [v CGPointValue];
         [mLongPressHandler longPressBegin:p scrollView:self];
-        [v release];
     }
+    [v release];
 }
 - (NSValue*) touchesToValue:(NSSet*)touches
 {
@@ -1890,6 +2769,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     //NSLog(@"scroll view touch begin: %@", mName);
     //NSArray* pointsInScrollView = [self touchToPoints:touches];
     //mHasLongPressed = YES;
+    if([self getCurrentImageViewCount] == 0)
+        return;
     NSValue* v = [self touchesToValue:touches];
     mPressStartPoint = [[touches anyObject] locationInView:self];
     mPressState = SE_PRESS_READY;
@@ -1924,6 +2805,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if([self getCurrentImageViewCount] == 0)
+        return;
     CGPoint p = [[touches anyObject] locationInView:self];
     if(mPressState == SE_PRESS_READY)
     {
@@ -1957,6 +2840,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     ///NSLog(@"scroll view touch end: %@", mName);
+    if([self getCurrentImageViewCount] == 0)
+        return;
     CGPoint p = [[touches anyObject] locationInView:self];
     if(mPressState == SE_LONGPRESS_OK)
     {
@@ -1984,6 +2869,8 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 }
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if([self getCurrentImageViewCount] == 0)
+        return;
     CGPoint p = [[touches anyObject] locationInView:self];
     if(mPressState == SE_LONGPRESS_OK)
     {
@@ -2005,15 +2892,61 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         [super touchesCancelled:touches withEvent:event];
      */
 }
+- (void) updateImageViewAfterRemove
+{
+    int imageViewCount = [self getCurrentImageViewCount];
+    for(int i = 0 ; i < imageViewCount ; i++)
+    {
+        SEPageUIImageView* view = [self imageView:i];
+        view.image = mDefaultImage;
+    }
+    NSArray* pages = mParentView.subviews;
+    for(int i = mStartPage ; i <= mEndPage ; i++)
+    {
+        UIView* page = [pages objectAtIndex:i];
+        int count = page.subviews.count;
+        for(int j = 0 ; j < count ; j++)
+        {
+            SEPageUIImageView* imageView = [page.subviews objectAtIndex:j];
+            int index = i * mPageRow * mPageCol + j;
+            assert(index < imageViewCount);
+            if(index < imageViewCount)
+            {
+                SEPageImageURL* url = [self getImageURL:index];
+                if(url != nil)
+                {
+                    SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
+                    UIImage* image = [self getImageFromPhotoDict:key];
+                    if(image)
+                    {
+                        imageView.image = image;
+                    }
+                    else 
+                    {
+                        imageView.image = mDefaultImage;
+                    }
+                }
+                else
+                {
+                    imageView.image = mDefaultImage;
+                }
+            }
+        }
+    }
 
+}
 - (void) removeFromPhotoURLAsset: (NSMutableArray*)indexArray
 {
+    if(mIsLoadingImage)
+        return;
+    
     for(NSNumber* num in indexArray)
     {
         int i = [num intValue];
         SEPageUIImageView* iv = [self getImageViewByIndex:i];
         iv.image = mDefaultImage;
     }
+     
     NSMutableArray* urlArray = [NSMutableArray array];
     for(int i = 0 ;i < indexArray.count ; i++)
     {
@@ -2021,15 +2954,19 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         SEPageImageURL* purl = [mPhotoAssetURL objectAtIndex:index];
         [urlArray addObject:purl];
     }
-    [self removeImageFromCoreData:urlArray];
     [self removeURLFromPhotoURLAsset: indexArray];
+    [self removeImageFromCoreData:urlArray];
     for(SEPageImageURL* url in urlArray)
     {
         SEPagePhotoDictKey* key = [SEPagePhotoDictKey createFromImageURL:url];
-        [self removeImageFromPhotoDict:key];
+        if([self imageURLContentInArray:mPhotoAssetURL :url] == NO)
+        {
+            [self removeImageFromPhotoDict:key];
+        }
     }
-    [self updateImageView];
-    [self loadNextImage : YES];
+    [self updateImageViewAfterRemove];
+    //[self loadNextImage : YES];
+    [self startLoadImage];
     [self saveCurrentPhotoURL];
     [mViewNavigator printSelectedImage];
 }
@@ -2046,7 +2983,14 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 */
 - (SEPageImageURL*) getImageURL: (int)index
 {
-    return [mPhotoAssetURL objectAtIndex:index];
+    if(index < 0 || index >= mPhotoAssetURL.count)
+    {
+        return nil;
+    }
+    else
+    {
+        return [mPhotoAssetURL objectAtIndex:index];
+    }
 }
 - (NSUInteger) getImageURLNum
 {
@@ -2110,7 +3054,11 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     
     //assert(mStartPage == mEndPage);
     if(mStartPage != mEndPage)
+    {
+        NSLog(@"scroll view is scrolling");
+        //mIsScrolling = YES;
         return;
+    }
     if(partType == LEFT_PAGE)
     {
         int currPage = mStartPage;
@@ -2142,10 +3090,11 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
             
             //NSLog(@"animEnd thread = %@", [NSThread currentThread] );
             //NSLog(@"main thread = %@", [NSThread mainThread] );
+            
+            [self createMultiColumnContent: LEFT_PAGE];
             mIsCalculateVisibleRange = NO;
             self.contentSize = CGSizeMake(self.contentSize.width, (mPageCount / 2) * mPageHeight);
             mIsCalculateVisibleRange = YES;
-            [self createMultiColumnContent: LEFT_PAGE];
             self.contentOffset = CGPointMake(0, (currPage / 2) * mPageHeight);
             mIsSingleColumn = NO;
             [self calculateVisiblePage:self.contentOffset.y];
@@ -2161,10 +3110,14 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         int currPage = mStartPage;
         UIView* currentPageView = [mParentView.subviews objectAtIndex:currPage];
         UIView* rightPage = nil;
-        if(currPage == mPageCount - 1)
+        if((currPage % 2) != 0)
+        {
             rightPage = [mParentView.subviews objectAtIndex:currPage - 1];
+        }
         else
+        {
             rightPage = [mParentView.subviews objectAtIndex:currPage + 1];
+        }
         float dist = currentViewportWidth - currentPageView.frame.size.width;
         NSLog(@"dist = %f\n", dist);
         if(dist < 0)
@@ -2178,10 +3131,11 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         void (^animEnd) (BOOL) = ^(BOOL f)
         {
             NSLog(@"2: single column = NO");
+            
+            [self createMultiColumnContent: RIGHT_PAGE];
             mIsCalculateVisibleRange = NO;
             self.contentSize = CGSizeMake(self.contentSize.width, (mPageCount / 2) * mPageHeight);
             mIsCalculateVisibleRange = YES;
-            [self createMultiColumnContent: RIGHT_PAGE];
             self.contentOffset = CGPointMake(0, (currPage / 2) * mPageHeight);
             mIsSingleColumn = NO;
             [self calculateVisiblePage:self.contentOffset.y];
@@ -2283,11 +3237,6 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 }
 - (void) insertURLToImageView: (int)index : (int) lastURLIndex : (int) newLastURLIndex
 {
-    //NSMutableArray* dataArray = (NSMutableArray*)data;
-    //int index = [[dataArray objectAtIndex:0] intValue];
-    //int lastURLIndex = [[dataArray objectAtIndex:1] intValue];
-    //int newLastURLIndex = [[dataArray objectAtIndex:2] intValue];
-    //[dataArray release];
     assert(index <= lastURLIndex);
     if(index == lastURLIndex)
     {
@@ -2337,12 +3286,6 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         
         mLastImageViewIndex = index;
         [self doScaleAnimationForInsert];
-        /*
-        for(int i = index ; i < newLastURLIndex ; i++)
-        {
-            [self updateImage:i];
-        }
-        */
     }
 }
 - (void) insertImageToPhotoDict: (NSMutableArray*)imageArray urlArray:(NSMutableArray *)urlArray
@@ -2359,22 +3302,46 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
 //index is the imageview index
 - (void) insertURLToPhotoAsset:(int)index url:(NSMutableArray *)urlIDArray image:(NSMutableArray *)imageArray
 {
+    if(mIsLoadingImage)
+        return;
     int imageCount = [mViewNavigator getCurrentAllSelectedImageCount];
     int insertCount = urlIDArray.count;
     BOOL canInsert = YES;
-    if((imageCount + insertCount) <= [mViewNavigator getMaxSelectedImageCount])
+    int maxSelectedCount = [mViewNavigator getCurrentLevelImageNum];//[mViewNavigator getMaxSelectedImageCount];
+    if((imageCount + insertCount) <= maxSelectedCount)
         canInsert = YES;
     else
-        canInsert = NO;
+    {
+        if(imageCount >= maxSelectedCount)
+        {
+            canInsert = NO;
+        }
+        else
+        {
+            canInsert = YES;
+            int count = maxSelectedCount - imageCount;
+            assert(count < insertCount);
+            NSMutableArray* newURLIDArray = [NSMutableArray array];
+            NSMutableArray* newImageArray = [NSMutableArray array];
+            for(int i = 0 ; i < count ; i++)
+            {
+                [newURLIDArray addObject:[urlIDArray objectAtIndex:i]];
+                [newImageArray addObject:[imageArray objectAtIndex:i]];
+            }
+            urlIDArray = newURLIDArray;
+            imageArray = newImageArray;
+        }
+    }
     if(canInsert == NO)
         return;
     int lastURLIndex = [self lastURLIndex];
-    if(lastURLIndex >= mPhotoAssetURL.count)
-        return;
+    assert(lastURLIndex <= mPhotoAssetURL.count);
+    //if(lastURLIndex >= mPhotoAssetURL.count)
+    //    return;
     if(index > lastURLIndex)
         index = lastURLIndex;
     mCurrentImageArray = [imageArray copy];
-    assert(index < mPhotoAssetURL.count && canInsert == YES);
+    assert(index <= mPhotoAssetURL.count && canInsert == YES);
     [self insertURLToPhotoAssetArray:urlIDArray :index :lastURLIndex];
     NSMutableArray* urlArray = [NSMutableArray array];
     for(SEPageURLID* urlID in urlIDArray)
@@ -2386,13 +3353,15 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         url.origWidth = urlID.origWidth;
         url.origHeight = urlID.origHeight;
         url.orientation = urlID.orientation;
+        NSLog(@"insertURL url width = %f, height = %f, orient = %d", url.origWidth, url.origHeight, url.orientation);
+        NSLog(@"insertURL url date = %@", url.urlDate);
         [urlArray addObject:url];
         [url release];
     }
     [self insertImageToPhotoDict: imageArray urlArray:urlArray];
     [self insertURLToImageView:index :lastURLIndex :(lastURLIndex + urlArray.count)];
     [self saveCurrentPhotoURL];
-    [self saveCurrentPhotoThumbnail: urlArray];
+    //[self saveCurrentPhotoThumbnail: urlArray];
     [mViewNavigator printSelectedImage];
     
 }
@@ -2406,28 +3375,17 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     }
     return NO;
 }
-/*
-- (UIImage*) getImageFromAfterDstImageView: (NSMutableArray*)needChangeImageView : (NSMutableArray*) allImage : (int) startIndex: (int) index
-{
-    int n = 0;
-    for(int i = startIndex ; i < allImage.count ; i++)
-    {
-        if([self imageInArray:[allImage objectAtIndex:i]:needChangeImageView] == NO)
-        {
-            if(n == index)
-                return [allImage objectAtIndex:i];
-            else if(n < index)
-                n++;
-        }
-    }
-    return nil;
-}
- */
+
 - (void) changeImageView: (NSMutableArray*) imageViewIndexArray toPos : (int)dstImageViewIndex
 {
+    if(mIsLoadingImage)
+        return;
+    
     int lastImageViewIndex = [self lastImageViewIndex];
     if(lastImageViewIndex == -1)
-        return;
+    {
+        lastImageViewIndex = mPhotoAssetURL.count;
+    }
     if(dstImageViewIndex > lastImageViewIndex)
         dstImageViewIndex = lastImageViewIndex;
 
@@ -2437,16 +3395,19 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     [self saveCurrentPhotoURL];
     
     NSMutableArray* allImage = [NSMutableArray array];
+    int pageIndex = 0;
     for(UIView* page in mParentView.subviews)
     {
         for(SEPageUIImageView* v in page.subviews)
         {
-            if(v.image != mDefaultImage)
+            if(pageIndex < mPhotoAssetURL.count)
             {
                 [allImage addObject:v];
+                pageIndex++;
             }
         }
     }
+    assert(allImage.count == mPhotoAssetURL.count);
     NSMutableArray* needChangeImageView = [NSMutableArray array];
     for(int i = 0 ;i < imageViewIndexArray.count ; i++)
     {
@@ -2492,6 +3453,7 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
         SEPageUIImageView* view = [newImageArray objectAtIndex:i];
         [imageArray addObject:view.image];
     }
+    assert(lastImageViewIndex == mPhotoAssetURL.count);
     for(int i = 0 ; i < lastImageViewIndex ; i++)
     {
         SEPageUIImageView* imageView = [self imageView:i];
@@ -2539,98 +3501,41 @@ static CGImageRef createCGImageCopy(CGImageRef srcImage)
     return -1;
 }
 
-- (void) loadImageFromPhotoLibWithThread:(NSMutableArray*)data
-{
-    SEPageImageURL* url = [data objectAtIndex:0];
-    CGSize size = [[data objectAtIndex:1] CGSizeValue];
-    NSObject<SELoadedImageHandler>* handler = [data objectAtIndex:2];
-    SEPageImageURL* passedURL = [url retain];
-    [data release];
-    ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
-    {
-        NSThread* currentThread = [NSThread currentThread];
-        //NSLog(@"current thread = %@\n", currentThread);
-        ALAssetRepresentation* rep = [asset defaultRepresentation];
-        CGImageRef image = [rep fullResolutionImage];
-        CGSize srcS = CGSizeMake(CGImageGetWidth(image), CGImageGetHeight(image));
-        CGSize s = [SEUtil computeFitSize:srcS toDst:size];
-        CGImageRef retImage = [SEUtil fastScale:image withRect:s];
-        float width = CGImageGetWidth(retImage);
-        float height = CGImageGetHeight(retImage);
-        //NSLog(@"## retImage with = %f, height = %f ##\n", width, height);
-        UIImageOrientation orient = (UIImageOrientation)[rep orientation];
-        CGFloat scale = [rep scale];
-        UIImage* uiImage = [UIImage imageWithCGImage:retImage scale:scale orientation:orient] ;
-        CGImageRelease(retImage);
-        [handler setImage:uiImage];
-        [passedURL release];
-        [self performSelectorOnMainThread:@selector(loadImageHandle:) withObject:handler waitUntilDone:NO];
-        
-    };
-    ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
-    {
-        if(error)
-        {
-            mAssetAcessError = 1;
-            NSLog(@"read photo lib error : %@", [error localizedDescription]);
-        }
-    };
-    [mAssetLibrary assetForURL:url.url resultBlock:getAsset failureBlock:failHandler];
-}
-- (void) loadImageFromPhotoLib: (SEPageImageURL*)url size:(CGSize)size withHandler: (NSObject<SELoadedImageHandler>*) handler
-{
-    NSMutableArray* data = [NSMutableArray array];
-    [data addObject:url];
-    [data addObject:[NSValue valueWithCGSize:size]];
-    [data addObject:handler];
-    data = [data retain];
-    [self performSelectorInBackground:@selector(loadImageFromPhotoLibWithThread:) withObject:data];
-}
 
 - (void)relayout
 {}
-- (void) loadFullRepresentationWithThread:(NSMutableArray*) data
+
+- (void) startLoadImage
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    SEPageImageURL* passedURL = [[data objectAtIndex:0] retain];
-    NSObject<SELoadedImageHandler>* handler = [data objectAtIndex:1];
-    [data release];
-    ALAssetsLibraryAssetForURLResultBlock getAsset = ^(ALAsset *asset)
-    {
-        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-        [self isRunOnWorkderThread];
-        ALAssetRepresentation* rep = [asset defaultRepresentation];
-        CGImageRef image = [rep fullResolutionImage];
-        UIImageOrientation orient = (UIImageOrientation)[rep orientation];
-        CGFloat scale = [rep scale];
-        UIImage* uiImage = [UIImage imageWithCGImage:image scale:scale orientation:orient];
-        [handler setImage:uiImage];
-        [self performSelectorOnMainThread:@selector(loadImageHandle:) withObject:handler waitUntilDone:NO];
-        [passedURL release];
-        [pool release];
-    };
-    ALAssetsLibraryAccessFailureBlock failHandler = ^(NSError *error)
-    {
-        if(error)
-        {
-            mAssetAcessError = 1;
-            NSLog(@"read photo lib error : %@", [error localizedDescription]);
-        }
-    };
-    [mAssetLibrary assetForURL:passedURL.url resultBlock:getAsset failureBlock:failHandler];    
-    [pool release];
-}
-- (void) loadFullRepresentation: (SEPageImageURL*)url withHandler: (NSObject<SELoadedImageHandler>*)handler
-{
-    NSMutableArray* data = [NSMutableArray array];
-    [data addObject:url];
-    [data addObject:handler];
-    data = [data retain];
-    [self performSelectorInBackground:@selector(loadFullRepresentationWithThread:) withObject:data];
+    NSLog(@"start load image");
+    mStopLoadImage = NO;
+    if(mIsLoadingImage == NO)
+        [self loadNextImageNew];
 }
 - (void) stopLoadImage
 {
+    NSLog(@"stop load image");
+    //[mOperationQueue cancelAllOperations];
     mStopLoadImage = YES;
+}
+- (BOOL) isStopLoadImage
+{
+    return mStopLoadImage;
+}
+- (void) updateImageViewByScroll
+{
+    for(int i = 0 ; i < mPhotoAssetURL.count ; i++)
+    {
+        SEPageImageURL* url = [mPhotoAssetURL objectAtIndex:i];
+        [self removeImageFromPhotoDictByURL: url];
+        SEPageUIImageView* view = [self imageView:i];
+        view.image = mDefaultImage;
+    }
+    CGPoint currentOffset = self.contentOffset;
+    CGPoint newOffset = CGPointMake(currentOffset.x, currentOffset.y + 1);
+    self.contentOffset = newOffset;
+    self.contentOffset = currentOffset;
+    [self startLoadImage];
 }
 - (void) printPhotoDict
 {

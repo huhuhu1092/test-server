@@ -150,6 +150,7 @@ GLint SS_Shader::getAttribLocation(const char* locName)
     {
         attribMap[locName] = ret;
     }
+    LOGI("## getAtribLocation ##\n");
     return ret;
 }
 GLint SS_Shader::getUniformLocation(const char* uniName)
@@ -165,5 +166,6 @@ GLint SS_Shader::getUniformLocation(const char* uniName)
     {
         uniformMap[uniName] = ret;
     }
+    LOGI("## getUniformLocation ##\n");
     return ret;
 }

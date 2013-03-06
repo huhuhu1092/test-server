@@ -10,6 +10,7 @@
 
 //#import <OpenGLES/ES1/gl.h>
 //#import <OpenGLES/ES1/glext.h>
+#import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
@@ -28,6 +29,8 @@ class SE_Scene;
     // The OpenGL ES names for the framebuffer and renderbuffer used to render to this view.
     GLuint defaultFramebuffer, colorRenderbuffer;
     GLuint depthBuffer;
+    
+    GLuint msaaFramebuffer, msaaRenderbuffer, msaaDepthbuffer;
     float prevY;
 }
 

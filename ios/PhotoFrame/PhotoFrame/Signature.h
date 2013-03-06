@@ -2,8 +2,8 @@
 //  Signature.h
 //  PhotoFrame
 //
-//  Created by 陈勇 on 12-5-21.
-//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//  Created by 陈勇 on 13-1-13.
+//  Copyright (c) 2013年 __MyCompanyName__. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -15,5 +15,6 @@
 @property (nonatomic, retain) NSData * data;
 @property (nonatomic, retain) NSString * name;
 @property (nonatomic, retain) NSNumber * seq;
+@property (nonatomic, retain) NSNumber * totaltime;
 
 @end

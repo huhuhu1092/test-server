@@ -63,7 +63,7 @@ struct SE_GeometryData
     int texFaceNum2;
     SE_AABB* aabb;
 public:
-    SE_GeometryData(bool own = true)
+    void resetData()
     {
         type = SE_TRIANGLES;
         vertexArray = NULL;
@@ -90,6 +90,10 @@ public:
         vertexBufferNum = 0;
         vertexBufferArray = NULL;
         vertexBufferFaceArray = NULL;
+    }
+    SE_GeometryData(bool own = true)
+    {
+        resetData();
     }
     ~SE_GeometryData();
     SE_GeometryData(SE_GEOM_TYPE type, SE_Vector3f* vertexArray, int vertexNum,

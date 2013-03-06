@@ -88,11 +88,18 @@ void SE_GeometryData::release()
         delete[] mapChannelArray[i].texVertexArray;
         delete[] mapChannelArray[i].texFaceArray;
     }
-    delete[] mapChannelArray;    
+    delete[] mapChannelArray;
+    
+    delete[] vertexBufferArray;
+    delete [] vertexBufferFaceArray;
+    
+    delete [] texVertexArray2;
+    delete[] texFaceArray2;
+    delete aabb;
+    resetData();
 }
 SE_GeometryData::~SE_GeometryData()
 {
-    delete aabb;
 }
 void SE_GeometryData::clone(SE_GeometryData* outData)
 {

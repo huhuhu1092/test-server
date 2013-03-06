@@ -16,12 +16,26 @@
 #import "PainterManager.h"
 #import "SEViewNavigator.h"
 #import "SEResDefine.h"
+#import "SEUserDefaultManager.h"
+#import "SEInAppPurchaseManager.h"
+#import "SEKeyChainHelper.h"
+//#import "GooglePlusShare.h"
+//#import "GooglePlusSignInButton.h"
+//#import "GTMOAuth2Authentication.h"
+//NSString * const KEY_USERNAME = @"com.company.app.username";  
+//NSString * const KEY_PASSWORD = @"com.company.app.password";  
 @implementation PhotoFrameAppDelegate
+@synthesize mViewNavigator;
 //@synthesize imageViewController;
 @synthesize window = _window;
 @synthesize managedObjectModel = managedObjectModel_;
 @synthesize managedObjectContext = managedObjectContext_;
 @synthesize persistentStoreCoordinator = persistentStoreCoordinator_;
+@synthesize mProductManager;
+@synthesize mProductTransaction;
+//@synthesize signInButton = signInButton_;
+//@synthesize share = share_;
+//@synthesize auth = auth_;
 - (void) setParamIDArray: (NSArray*) paramArray
 {
     if(paramIDArray)
@@ -38,12 +52,36 @@
 {
     // Override point for customization after application launch.
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    //application.idleTimerDisabled = YES;
+    NSLog(@"### application finished launched ####");
+    //for keychain test
+    //NSString* userName = [SEKeyChainHelper getUserNameWithService:KEY_USERNAME];
+    //NSString* password = [SEKeyChainHelper getPasswordWithService:KEY_PASSWORD];
+    int v = 12;
+    NSData* vStr = [SEKeyChainHelper createMyStringFromIntValue:v];
+    int newV = 0;
+    BOOL r = [SEKeyChainHelper getIntValueFromString:vStr :&newV];
+    assert(r && newV == 12);
+    
+    float v1 = 34.0;
+    vStr = [SEKeyChainHelper createMyStringFromFloatValue:v1];
+    float newV1;
+    r = [SEKeyChainHelper getFloatValueFromString:vStr :&newV1];
+    assert(r && newV1 == v1);
+    
+    BOOL v2 = NO;
+    vStr = [SEKeyChainHelper createMyStringFromBoolValue:v2];
+    BOOL newV2 ;
+    r = [SEKeyChainHelper getBoolValueFromString:vStr :&newV2];
+    assert(r && v2 == newV2);
+    //end
     mResLoader = [[SEResLoader alloc] init];
     /*
     imageViewController = [[ImageDisplayViewController alloc] initWithNibName:@"ImageViewDisplay" bundle:nil];
     imageViewController.appDelegate = self;
      self.window.rootViewController = imageViewController;
     */
+    [SEUserDefaultManager load:@"user_default_function.txt"];
     mViewNavigator = [[SEViewNavigator alloc] initWithResLoader:mResLoader];
     mViewNavigator.managedObjectContext = self.managedObjectContext;
     mViewNavigator.persistentStoreCoordinator = self.persistentStoreCoordinator;
@@ -68,7 +106,15 @@
     NSLog(@"longlong size = %lu", sizeof(long long));
     self.window.rootViewController = mViewNavigator;
     [self.window makeKeyAndVisible];
+    self.window.multipleTouchEnabled = NO;
     
+    //[SEUserDefaultManager test];
+    mProductManager = [[SEProductManager createFromFile:@"product_define.txt"] retain];
+    mProductTransaction = [[SEInAppPurchaseTransactionObserver alloc] init];
+    [mProductTransaction loadStore];
+    [mViewNavigator syncSelectedImageWithImageLib];
+    [mViewNavigator startUpgradeTimer];
+    //[mViewNavigator testSuite];
     return YES;
 }
 
@@ -96,6 +142,22 @@
      Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
      */
     NSLog(@"## application goto foreground ###");
+    BOOL isPlay = [mViewNavigator isInPlayState];
+    mViewNavigator.mStartLaunch = YES;
+    if(isPlay && mViewNavigator.mCurrView == MAIN_DISPLAY)
+    {
+        [[PhotoFrameAppDelegate getViewNavigator] playMusicByState];
+    }
+    if(mViewNavigator.mCurrView == IMAGE_PICKER || mViewNavigator.mCurrView == SELECTED_IMAGE_VIEW)
+    {
+        [mViewNavigator updateImageInSelectedImageView];
+        [mViewNavigator updateImageInImagePickerView];
+    }
+    if(mViewNavigator.mCurrView == MUSIC_PICKER || mViewNavigator.mCurrView == SELECTED_MUSIC_VIEW)
+    {
+        [mViewNavigator updateMusicInSelectedImageView];
+        [mViewNavigator updateMusicInMusicPickerView];
+    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -115,6 +177,40 @@
     NSLog(@"## application terminate ###");
     
 }
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    NSLog(@"click ok button");
+}
+- (void) applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
+    NSLog(@"get memory warning");
+    /*
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Warning!" message:@"memory warning!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+    [alert show];
+    [alert release];
+     */
+}
+/*
+- (BOOL) application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSLog(@"## openURL = %@", url);
+    NSLog(@"source application = %@", sourceApplication);
+    // Handle Google+ share dialog URL.
+    if ([share_ handleURL:url
+        sourceApplication:sourceApplication
+               annotation:annotation]) {
+        return YES;
+    }
+    
+    // Handle Google+ sign-in button URL.
+    if ([signInButton_ handleURL:url
+               sourceApplication:sourceApplication
+                      annotation:annotation]) {
+        return YES;
+    }
+    return NO;
+}
+*/
 - (void) saveContext
 {
     [mViewNavigator saveContext];
@@ -128,7 +224,7 @@
     NSString* modelPath = [[NSBundle mainBundle] pathForResource:@"selected_image" ofType:@"momd"];
     NSURL* modelURL = [NSURL fileURLWithPath:modelPath];
     managedObjectModel_ = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
-    managedObjectModel_ = [[NSManagedObjectModel mergedModelFromBundles:nil] retain];
+    //managedObjectModel_ = [[NSManagedObjectModel mergedModelFromBundles:nil] retain];
     return managedObjectModel_;
 }
 - (NSManagedObjectContext*) managedObjectContext
@@ -173,6 +269,11 @@
     [managedObjectModel_ release];
     [managedObjectContext_ release];
     [persistentStoreCoordinator_ release];
+    [mProductManager release];
+    [mProductTransaction release];
+    //[signInButton_ release];
+    //[share_ release];
+    //[auth_ release];
     [super dealloc];
 }
 - (void) showPhotoFrameSettingController
@@ -305,5 +406,23 @@
     CGImageRelease(imageRef);
     imageView.image = image;
     ppm_kill(&ppm);
+}
++ (SEViewNavigator*) getViewNavigator
+{
+    UIApplication* app = [UIApplication sharedApplication];
+    PhotoFrameAppDelegate* appDelegate = (PhotoFrameAppDelegate*)app.delegate;
+    return appDelegate.mViewNavigator;
+}
++(SEProductManager*) getProductManager
+{
+    UIApplication* app = [UIApplication sharedApplication];
+    PhotoFrameAppDelegate* appDelegate = (PhotoFrameAppDelegate*)app.delegate;
+    return appDelegate.mProductManager;
+}
++ (SEInAppPurchaseTransactionObserver*) getPurchaseTransactionObserver
+{
+    UIApplication* app = [UIApplication sharedApplication];
+    PhotoFrameAppDelegate* appDelegate = (PhotoFrameAppDelegate*)app.delegate;
+    return appDelegate.mProductTransaction;
 }
 @end

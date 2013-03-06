@@ -318,4 +318,121 @@
         NSLog(@"## send message has been in sending queue ##");
     }
 }
+- (void) sendOneComment: (NSString*)text
+{
+    
+}
+@end
+//////////
+@implementation SECommentSender
+- (void) dealloc
+{
+    [mContent release];
+    [mOutTextLabel release];
+    [mRecvData release];
+    [super dealloc];
+}
+
+- (id) initWithComment:(NSString *)text  label: (UILabel*)label
+{
+    self = [super init];
+    if(self )
+    {
+        mContent = [text retain];
+        mOutTextLabel = [label retain];
+    }
+    return self;
+}
+- (void) setOutputText: (NSString*) text
+{
+    mOutTextLabel.text = text;
+}
+- (void) sendWith: (id) target finishedAction: (SEL)action
+{
+    mFinishedTarget = target;
+    mFinishedAction = action;
+    if([SEUtil reachabilityWithLocalWifi] == NO || [SEUtil reachabilityForHostName:@"http://mobilefly.sinaapp.com"] == NO)
+    {
+        NSNumber* num = [NSNumber numberWithInt:0];
+        [mFinishedTarget performSelector:mFinishedAction withObject:num];
+        return;
+    }
+    NSString* strURL = @"http://mobilefly.sinaapp.com/sendmessage.php";
+    NSURL* url = [NSURL URLWithString:strURL];
+    NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:url];
+    [req setHTTPMethod:@"POST"];
+    //NSString* contentType = @"application/x-www-form-urlencoded";
+    //[req setValue:contentType forHTTPHeaderField:@"Content-Type"];
+    NSMutableData* postBody = [NSMutableData data];
+    NSDate* date = [NSDate date];
+    NSTimeInterval timeInterv = [date timeIntervalSince1970];
+    NSString* deviceName = [[UIDevice currentDevice] systemVersion];
+    NSString* title = @"comment";
+    [postBody appendData:[[NSString stringWithFormat:@"devname=%@&", deviceName] dataUsingEncoding:NSUTF8StringEncoding]];
+    [postBody appendData:[[NSString stringWithFormat:@"date=%f&", timeInterv] dataUsingEncoding:NSUTF8StringEncoding]];
+    [postBody appendData:[[NSString stringWithFormat:@"title=%@&", title] dataUsingEncoding:NSUTF8StringEncoding]];
+    [postBody appendData:[[NSString stringWithFormat:@"description=%@", mContent] dataUsingEncoding:NSUTF8StringEncoding]];
+    [req setHTTPBody:postBody];
+    mRecvData = [[NSMutableData data] retain];
+    NSURLConnection* conn = [NSURLConnection connectionWithRequest:req delegate:self];
+    [conn retain];
+}
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
+{
+    NSLog(@"start response");
+    NSThread* currentThread = [NSThread currentThread];
+    NSThread* mainThread = [NSThread mainThread];
+    assert(currentThread == mainThread);
+    if([response isMemberOfClass:[NSHTTPURLResponse class]])
+    {
+        mStatusCode = ((NSHTTPURLResponse*)response).statusCode;
+    }
+}
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    NSLog(@"receive data");
+    NSThread* currentThread = [NSThread currentThread];
+    NSThread* mainThread = [NSThread mainThread];
+    assert(currentThread == mainThread);
+    [mRecvData appendData:data];
+}
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    NSLog(@"error response");
+    [connection release];
+    NSThread* currentThread = [NSThread currentThread];
+    NSThread* mainThread = [NSThread mainThread];
+    assert(currentThread == mainThread);
+    NSNumber* data = [NSNumber numberWithInt:0];
+    NSLog(@"status code = %d", mStatusCode);
+    [mFinishedTarget performSelector:mFinishedAction withObject:data];
+}
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+    NSLog(@"finished connection\n");
+    NSThread* currentThread = [NSThread currentThread];
+    NSThread* mainThread = [NSThread mainThread];
+    assert(currentThread == mainThread);
+    int len = [mRecvData length];
+    const char* bytes = (const char*)[mRecvData bytes];
+    char* data = (char*)malloc(len + 1);
+    memset(data, 0, len + 1);
+    memcpy(data, bytes, len);
+    NSString* str = [NSString stringWithCString:data encoding:NSUTF8StringEncoding];
+    NSLog(@"str = %@", str);
+    NSLog(@"status code = %d", mStatusCode);
+    [connection release];
+    free(data);
+    NSNumber* num = nil;
+    if([str isEqualToString:@"OK"] && mStatusCode == 200)
+    {
+        num = [NSNumber numberWithInt:1];
+    }
+    else
+    {
+        num = [NSNumber numberWithInt:0];
+    }
+    [mFinishedTarget performSelector:mFinishedAction withObject:num];
+}  
+
 @end

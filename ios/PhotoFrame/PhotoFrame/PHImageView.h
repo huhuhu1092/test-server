@@ -14,17 +14,33 @@
 }
 @property (nonatomic) CGRect clipRect;
 @end
-
+@class SEViewNavigator;
 @interface PHImageView : UIView
 {
     NSArray* clippingRectList;
     UIImage* image;
     NSMutableArray* pointArrayList;
     CGFloat lineWidth;
+    UIImageView* left;
+    UIImageView* right;
+    UIImageView* top;
+    UIImageView* bottom;
+    SEViewNavigator* mViewNav;
+    BOOL animFinished[4];
+    BOOL needDrawFrame;
+    UIImage* blockImage;
+    BOOL mRotateScreen;
+    UIImage* mSignatureImage;
 }
+
+@property (nonatomic, assign) SEViewNavigator* mViewNav;
+@property (nonatomic, assign) BOOL mRotateScreen;
 @property (nonatomic, retain) UIImage* image;
 - (void)drawRect:(CGRect)rect;
 - (void) clearClippingList;
 - (void) setClipRectList: (const MyClipRect**) clipRect count:(int)size;
 - (void) setPoints:(NSArray*)points;
+- (void) playFrameAnim;
+- (void) paintSignatureImage: (CGImageRef)imageRef frame: (CGRect)frame;
+- (CGImageRef) createSignatureImage: (CGImageRef)imageRef frame: (CGRect) frame;
 @end

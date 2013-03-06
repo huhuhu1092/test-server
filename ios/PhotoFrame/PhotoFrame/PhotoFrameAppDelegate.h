@@ -17,7 +17,12 @@
 @class PainterParameterPickerController;
 @class PhotoFrame3DViewController;
 @class SEResLoader;
-@interface PhotoFrameAppDelegate : NSObject <UIApplicationDelegate>
+@class SEProductManager;
+@class SEInAppPurchaseTransactionObserver;
+@class GooglePlusShare;
+@class GooglePlusSignInButton;
+@class GTMOAuth2Authentication;
+@interface PhotoFrameAppDelegate : NSObject <UIApplicationDelegate, UIAlertViewDelegate>
 {
     ImageDisplayViewController* imageViewController;
     PhotoFrameSettingController* photoFrameSettingController;
@@ -29,16 +34,30 @@
     //////
     SEViewNavigator* mViewNavigator;
     SEResLoader* mResLoader;
+    SEProductManager* mProductManager;
+    SEInAppPurchaseTransactionObserver* mProductTransaction;
+    
+    //GooglePlusShare* share_;
+    //GooglePlusSignInButton* signInButton_;
+   // GTMOAuth2Authentication* auth_;
 @private
     NSManagedObjectContext* managedObjectContext_;
     NSManagedObjectModel* managedObjectModel_;
     NSPersistentStoreCoordinator* persistentStoreCoordinator_;
 }
+// The Google+ sign-in button to handle the URL redirect.
+//@property (retain, nonatomic) GooglePlusSignInButton *signInButton;
+// The OAuth 2.0 authentication used in the application.
+//@property (retain, nonatomic) GTMOAuth2Authentication *auth;
+// The Google+ share object to handle the URL redirect.
+//@property (retain, nonatomic) GooglePlusShare *share;
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, readonly) NSManagedObjectContext* managedObjectContext;
 @property (nonatomic, readonly) NSManagedObjectModel* managedObjectModel;
 @property (nonatomic, readonly) NSPersistentStoreCoordinator* persistentStoreCoordinator;
-
+@property (nonatomic, readonly) SEViewNavigator* mViewNavigator;
+@property (nonatomic, readonly) SEProductManager* mProductManager;
+@property (nonatomic, readonly) SEInAppPurchaseTransactionObserver* mProductTransaction;
 - (void) showPhotoFrameSettingController;
 - (void) showImageDisplayController;
 - (void) showPainterParameterController;
@@ -56,5 +75,8 @@
 - (PhotoFrame3DViewController*) photoFrame3D;
 - (void)setImageView:(UIImageView*)imageView withPPMName:(NSString*)name;
 - (void) saveContext;
++ (SEViewNavigator*) getViewNavigator;
++ (SEProductManager*) getProductManager;
++ (SEInAppPurchaseTransactionObserver*) getPurchaseTransactionObserver;
 //@property (nonatomic, retain) ImageDisplayViewController* imageViewController;
 @end

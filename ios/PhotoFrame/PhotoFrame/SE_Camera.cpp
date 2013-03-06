@@ -316,7 +316,8 @@ void SE_Camera::create(const SE_Vector3f& location, const SE_Vector3f& zAxis, co
 }
 SE_Matrix4f SE_Camera::getPerspectiveMatrix() const
 {
-    return mFrustum.getPerspectiveMatrix();
+    SE_Matrix4f m = mFrustum.getPerspectiveMatrix();
+    return m;
 }
 void SE_Camera::onKeyEvent(SE_KeyEvent* keyEvent)
 {}

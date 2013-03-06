@@ -33,6 +33,11 @@ struct SE_Material
     SE_MaterialData materialData;
     SE_MaterialData* subMaterialArray;
     int subMaterialNum;
+    SE_Material()
+    {
+        subMaterialArray = NULL;
+        subMaterialNum = 0;
+    }
 } ;
 struct SE_FaceList
 {
@@ -125,6 +130,7 @@ struct SE_Mesh
     VERTEX_TYPE mWireFrameVertexType;
     GLuint vboID;
     GLuint indexVboID;
+    GLuint uvVboID;
     GLuint vaoID;
     SE_MeshVAO vaoIDArray[2][4];
     SE_MeshVAO mirrorVaoIDArray[2][4];
@@ -138,6 +144,7 @@ struct SE_Mesh
         mCurrVertexType = INVALID;
         mDrawingVertexNum = 0;
         vboID = 0;
+        uvVboID = 0;
         indexVboID = 0;
         vaoID = 0;
         mWireFrameVertex = NULL;
@@ -164,6 +171,8 @@ struct SE_Mesh
     ~SE_Mesh()
     {
         delete[] subMeshArray;
+        //delete[] mDrawingVertex;
+        delete[] mWireFrameVertex;
     }
     float* getDrawingVertex(VERTEX_TYPE type);
     int getVertexNum(VERTEX_TYPE type);
@@ -209,6 +218,8 @@ struct SE_Texture
     unsigned int realWidth;
     unsigned int realHeight;
     TEXTURE_LOAD_STATE loadstate;
+    float uv[8];
+    float uvMirror[8];
     SE_Texture()
     {
         loadstate = TEXTURE_NO_LOAD;
@@ -223,22 +234,33 @@ struct SE_Texture
 };
 struct SE_TrackPoint
 {
-    int x, y, z;
+    float x, y, z;
     SE_TrackPoint()
     {
         x = y = z = 0;
     }
-    SE_TrackPoint(int x, int y, int z)
+    SE_TrackPoint(float x, float y, float z)
     {
         this->x = x;
         this->y = y;
         this->z = z;
     }
 };
+// this is the num for vertical and horizontal photo frame point adjust
+#define TRACK_LIST_PHOTO_NUM 4 
+struct SE_AdjustTrackPointList
+{
+    float adjustx, adjusty, adjustz;
+    std::vector<SE_TrackPoint> trackList;
+    SE_AdjustTrackPointList()
+    {
+        adjustx = adjusty = adjustz = 0;
+    }
+};
 struct SE_TrackPointList
 {
     std::string name;
-    std::vector<SE_TrackPoint> points;
+    SE_AdjustTrackPointList points[TRACK_LIST_PHOTO_NUM];
 };
 struct SE_TrackPointData
 {
@@ -283,6 +305,8 @@ struct SE_LookingPointTrack
 class SS_ModelManager
 {
 public:
+    enum VIEW_TYPE {PORTRAIT, LANDSCAPE};
+    enum TRACK_LIST_FOR_PHOTO_TYPE {HH, HV, VV, VH};
     SS_ModelManager();
     ~SS_ModelManager();
     void loadModel(const char* filename);
@@ -294,14 +318,19 @@ public:
     size_t getGeometryDataNum();
     SE_Material* getMaterial(int index);
     SE_Texture* getTexture(const char* texturename);
+    SE_Texture* getFullImageTexture(const char* textureName);
+    void setFullImageTexture(const char* textureName, SE_Texture* t);
+    void removeFullImageTexture(const char* textureName);
     int getFullTextureCount();
+    int getTextureCount() const;
     void setTexture(const char* texturename, SE_Texture* texture);
     void removeTexture(const char* texturename);
     void addGeometryData(const SE_GeometryData& geomData);
-    std::vector<SE_TrackPoint> getTrackPoints(const char* name);
-    std::vector<std::string> getAllTrackPointsName();
-    SE_Vector3f getTrackPoint(int x, int y, int z, const SE_Vector3f& start);
-    SE_Vector3f getTrackPoint(const SE_TrackPoint& tp, const SE_Vector3f& start);
+    std::vector<SE_TrackPoint> getTrackPoints(VIEW_TYPE viewType, TRACK_LIST_FOR_PHOTO_TYPE trackPhotoType,const char* name);
+    std::vector<std::string> getAllTrackPointsName(VIEW_TYPE viewType);
+    SE_TrackPoint getTrackPointAdjust(VIEW_TYPE viewType, TRACK_LIST_FOR_PHOTO_TYPE trackPhotoType,const char* name);
+    SE_Vector3f getTrackPoint(VIEW_TYPE viewType, float x, float y, float z, const SE_Vector3f& start);
+    SE_Vector3f getTrackPoint(VIEW_TYPE viewType, const SE_TrackPoint& tp, const SE_Vector3f& start);
     SE_Vector3f getFrameLookingPoint(const char* name);
     SE_Vector3f getReferenceBoxMin() const
     {
@@ -317,14 +346,19 @@ public:
     void removeAllTexture();
     void removeAllShaderFromGL();
 private:
+    typedef std::map<std::string, SE_Texture*> TextureList;
     void process(const char* data, int currPos, int dataLen);
+    SE_Texture* getTexture(TextureList& textureList, const char* textureName);
+    void setTexture(TextureList& textureList, const char* textureName, SE_Texture* texture);
+    void removeTexture(TextureList& textureList, const char* textureName);
+    void readTrackPointData(SE_TrackPointData& trackPointData, const char* data, int& currPos);
 private:
     typedef std::vector<SE_GeometryData> GeometryDataArray;
     typedef std::vector<SE_Material> MaterialDataArray;
     typedef std::map<std::string, SE_ImageData> ImageDataMap;
     typedef std::vector<SE_Mesh> MeshArray;
     typedef std::vector<SS_Shader*> ShaderArray;
-    typedef std::map<std::string, SE_Texture*> TextureList;
+    
     typedef std::vector<SE_LookingPoint> LookingPointList;
     typedef std::vector<SE_LookingPointTrack> LookingPointTrackList;
     GeometryDataArray mGeometryDataArray;
@@ -333,9 +367,11 @@ private:
     MeshArray mMeshArray;
     ShaderArray mShaderArray;
     TextureList mTextureList;
+    TextureList mFullImageTextureList;
     SE_Vector3f mReferenceBoxMin;
     SE_Vector3f mReferenceBoxMax;
     SE_TrackPointData mTrackPointData;
+    SE_TrackPointData mVerticalTrackPointData;
     LookingPointList mLookingPointList;
     LookingPointTrackList mLookingPointTrackList;
 };

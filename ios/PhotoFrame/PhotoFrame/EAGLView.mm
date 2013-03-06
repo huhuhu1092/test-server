@@ -12,17 +12,7 @@
 #import "SS_Scene.h"
 #import "SE_Common.h"
 #import "SE_Log.h"
-static void checkGLError()
-{
-    
-    GLenum error = glGetError();
-    if(error != GL_NO_ERROR)
-    {
-        LOGI("### gl error = %d ####\n", error);
-        SE_ASSERT(0);
-    }
-    
-}
+#import "SS_OpenGL.h"
 
 @interface EAGLView (PrivateMethods)
 - (void)createFramebuffer;
@@ -55,10 +45,42 @@ static void checkGLError()
     
     return self;
 }
-
+- (id) initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if(self)
+    {
+        CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
+        
+        eaglLayer.opaque = TRUE;
+        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                        [NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+                                        kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                        nil];
+        EAGLContext *aContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        NSLog(@"scale = %f", self.contentScaleFactor);
+        self.contentScaleFactor = [[UIScreen mainScreen] scale];
+        if (!aContext)
+        {
+            NSLog(@"## can not initial opengl es 2.0 context ###");
+            [self release];
+            return nil;
+        }
+        self.context = aContext;
+        [aContext release];
+        BOOL ret = [EAGLContext setCurrentContext:context];
+        if(!ret)
+        {
+            [self release];
+            return nil;
+        }
+    }
+    return self;
+}
 - (void)dealloc
 {
-    [self deleteFramebuffer];    
+    [self deleteFramebuffer]; 
+    [EAGLContext setCurrentContext:nil];
     [context release];
     
     [super dealloc];
@@ -66,7 +88,8 @@ static void checkGLError()
 
 - (void)setContext:(EAGLContext *)newContext
 {
-    if (context != newContext) {
+    if (context != newContext) 
+    {
         [self deleteFramebuffer];
         
         [context release];
@@ -78,7 +101,8 @@ static void checkGLError()
 
 - (void)createFramebuffer
 {
-    if (context && !defaultFramebuffer) {
+    if (context && !defaultFramebuffer) 
+    {
         BOOL ret = [EAGLContext setCurrentContext:context];
         SE_ASSERT(ret == YES);
         // Create default framebuffer object.
@@ -92,22 +116,38 @@ static void checkGLError()
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
         checkGLError();
         [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer];
-        //glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, 4, GL_RGBA8_OES, 768, 1024);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
+        checkGLError();
+        
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &framebufferWidth);
         checkGLError();
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &framebufferHeight);
         checkGLError();
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
-        checkGLError();
-        
+
+        NSLog(@"framebufferwidth = %d, framebufferheight = %d", framebufferWidth, framebufferHeight);
         //create depth buffer
-        glGenRenderbuffers(1, &depthBuffer);
+        
+        glGenFramebuffers(1 , &msaaFramebuffer);
         checkGLError();
-        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+        glGenRenderbuffers(1, &msaaRenderbuffer);
         checkGLError();
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+        glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
         checkGLError();
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, msaaRenderbuffer);
+        checkGLError();
+        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, 4, GL_RGBA8_OES, framebufferWidth, framebufferHeight);
+        checkGLError();
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaRenderbuffer);
+        checkGLError();
+        glGenRenderbuffers(1, &msaaDepthbuffer);
+        checkGLError();
+        glBindRenderbuffer(GL_RENDERBUFFER, msaaDepthbuffer);
+        checkGLError();
+        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, framebufferWidth, framebufferHeight);
+        checkGLError();
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, msaaDepthbuffer);
         checkGLError();
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
@@ -129,7 +169,8 @@ static void checkGLError()
 
 - (void)deleteFramebuffer
 {
-    if (context) {
+    if (context) 
+    {
         BOOL ret = [EAGLContext setCurrentContext:context];
         SE_ASSERT(ret == YES);
         if (defaultFramebuffer) {
@@ -146,18 +187,34 @@ static void checkGLError()
             glDeleteRenderbuffers(1, &depthBuffer);
             depthBuffer = 0;
         }
+        if(msaaFramebuffer)
+        {
+            glDeleteFramebuffers(1, &msaaFramebuffer);
+            msaaFramebuffer = 0;
+        }
+        if(msaaRenderbuffer)
+        {
+            glDeleteRenderbuffers(1, &msaaRenderbuffer);
+            msaaRenderbuffer = 0;
+        }
+        if(msaaDepthbuffer)
+        {
+            glDeleteRenderbuffers(1, &msaaDepthbuffer);
+            msaaDepthbuffer = 0;
+        }
     }
 }
 
 - (void)setFramebuffer
 {
-    if (context) {
+    if (context) 
+    {
         BOOL ret = [EAGLContext setCurrentContext:context];
         SE_ASSERT(ret == YES);
         if (!defaultFramebuffer)
             [self createFramebuffer];
         checkGLError();
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
         checkGLError();
         glViewport(0, 0, framebufferWidth, framebufferHeight);
         checkGLError();
@@ -168,9 +225,19 @@ static void checkGLError()
 {
     BOOL success = FALSE;
     
-    if (context) {
+    if (context)
+    {
         BOOL ret = [EAGLContext setCurrentContext:context];
         SE_ASSERT(ret == YES);
+        GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE, 2, attachments);
+        checkGLError();
+        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE, msaaFramebuffer);
+        checkGLError();
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE, defaultFramebuffer);
+        checkGLError();
+        glResolveMultisampleFramebufferAPPLE();
+        checkGLError();
         glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
         checkGLError();
         success = [context presentRenderbuffer:GL_RENDERBUFFER];
@@ -183,6 +250,7 @@ static void checkGLError()
 {
     // The framebuffer will be re-created at the beginning of the next setFramebuffer method call.
     [self deleteFramebuffer];
+    [self setFramebuffer];
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/95/trunk/Source
+END
+GTMOAuth2Authentication.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/85/trunk/Source/GTMOAuth2Authentication.h
+END
+GTMOAuth2Authentication.m
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/95/trunk/Source/GTMOAuth2Authentication.m
+END
+ReleaseNotes.txt
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/92/trunk/Source/ReleaseNotes.txt
+END
+GTMOAuth2SignIn.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/90/trunk/Source/GTMOAuth2SignIn.h
+END
+GTMOAuth2SignIn.m
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/90/trunk/Source/GTMOAuth2SignIn.m
+END

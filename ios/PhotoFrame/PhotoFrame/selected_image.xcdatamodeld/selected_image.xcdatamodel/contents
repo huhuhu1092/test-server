@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1171" systemVersion="11E53" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="2057" systemVersion="11G63" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="FinishedImage" representedClassName="FinishedImage">
-        <attribute name="data" optional="YES" attributeType="Binary"/>
+        <attribute name="data" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
         <attribute name="orientation" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="scale" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="thumbnail" optional="YES" attributeType="Binary"/>
-        <attribute name="url" optional="YES" attributeType="String"/>
-        <attribute name="urldate" optional="YES" attributeType="String"/>
+        <attribute name="thumbnail" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="url" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="urldate" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <userInfo/>
     </entity>
     <entity name="ImageList" representedClassName="ImageList">
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <relationship name="selectedimage" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedImage"/>
+        <attribute name="name" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <relationship name="selectedimage" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SelectedImage">
+            <userInfo/>
+        </relationship>
+        <userInfo/>
     </entity>
     <entity name="IssueReport" representedClassName="IssueReport" syncable="YES">
         <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
@@ -20,73 +36,203 @@
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="MusicList" representedClassName="MusicList">
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <relationship name="attachimagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
-        <relationship name="selectedmusic" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="SelectedMusic"/>
+        <attribute name="name" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <relationship name="attachimagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList">
+            <userInfo/>
+        </relationship>
+        <relationship name="selectedmusic" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SelectedMusic">
+            <userInfo/>
+        </relationship>
+        <userInfo/>
     </entity>
     <entity name="SelectedImage" representedClassName="SelectedImage">
-        <attribute name="filepath" optional="YES" attributeType="String"/>
-        <attribute name="height" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="filepath" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="height" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
         <attribute name="orientation" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="scale" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="url" optional="YES" attributeType="String"/>
-        <attribute name="urldate" optional="YES" attributeType="String"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="url" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="urldate" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
         <attribute name="urltype" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
-        <attribute name="width" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="width" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <userInfo/>
     </entity>
     <entity name="SelectedMusic" representedClassName="SelectedMusic">
-        <attribute name="album" optional="YES" attributeType="String"/>
-        <attribute name="date" optional="YES" attributeType="String"/>
-        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="singer" optional="YES" attributeType="String"/>
-        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="album" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="date" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="singer" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="title" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <userInfo/>
     </entity>
     <entity name="Signature" representedClassName="Signature">
-        <attribute name="data" optional="YES" attributeType="Binary"/>
-        <attribute name="name" optional="YES" attributeType="String"/>
-        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="data" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="name" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="totaltime" optional="YES" attributeType="Integer 32" defaultValueString="10" syncable="YES"/>
+        <userInfo/>
+    </entity>
+    <entity name="UpgradeInfo" representedClassName="UpgradeInfo" syncable="YES">
+        <attribute name="achievementtype" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="fromlevel" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="medal" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="seq" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="tolevel" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
     <entity name="UserInfo" representedClassName="UserInfo">
-        <attribute name="applaststartdate" optional="YES" attributeType="Date"/>
-        <attribute name="currentimagelist" optional="YES" attributeType="String"/>
-        <attribute name="currentimagequality" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="currentimagetimes" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="currentmusiclist" optional="YES" attributeType="String"/>
-        <attribute name="currentsignature" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="currentsignaturesite" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="currentsignaturesize" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="drawingmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
-        <attribute name="drawingpoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="exppointnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
-        <attribute name="fansmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
-        <attribute name="fanspoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="finishedcommentnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
-        <attribute name="finishedimagenum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
-        <attribute name="finishedmusicnum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
-        <attribute name="lastfinishoneimagetime" optional="YES" attributeType="Date"/>
-        <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="1"/>
-        <attribute name="newpersonmedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
-        <attribute name="newpersonpoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="presentondutymedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
-        <attribute name="presentondutypoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <attribute name="shareimagenum" optional="YES" attributeType="Integer 32" defaultValueString="0"/>
-        <attribute name="sharemedal" optional="YES" attributeType="Integer 16" defaultValueString="3"/>
-        <attribute name="sharepoint" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
-        <relationship name="imagelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ImageList"/>
-        <relationship name="issuereport" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IssueReport" syncable="YES"/>
-        <relationship name="musiclist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MusicList"/>
-        <relationship name="signaturelist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Signature"/>
+        <attribute name="applaststartdate" optional="YES" attributeType="Date">
+            <userInfo/>
+        </attribute>
+        <attribute name="autofilterimage" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="brushdensity" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="brushedgedetect" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="currentangle" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="currentbrushid" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="currentbrushtransparent" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="currentimagelist" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentimagequality" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentimagetimes" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentmusiclist" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentsignature" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentsignaturesite" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="currentsignaturesize" optional="YES" attributeType="Integer 16" defaultValueString="0">
+            <userInfo/>
+        </attribute>
+        <attribute name="drawbrushmode" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="drawimagetime" optional="YES" attributeType="Double" defaultValueString="0" syncable="YES"/>
+        <attribute name="drawingmedal" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="drawingpoint" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="exppointnum" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="fansmedal" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="fanspoint" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="finishedcommentnum" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="finishedimagenum" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="finishedmusicnum" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="imageplaymode" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="imageplaywaitingtime" optional="YES" attributeType="Integer 16" defaultValueString="12" syncable="YES"/>
+        <attribute name="imagesizefilter" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="lastfinishoneimagetime" optional="YES" attributeType="Date">
+            <userInfo/>
+        </attribute>
+        <attribute name="level" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="newpersonmedal" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="newpersonpoint" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="powerviewsize" optional="YES" attributeType="Integer 16" defaultValueString="3" syncable="YES"/>
+        <attribute name="presentondutymedal" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="presentondutypoint" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="rotatescreen" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
+        <attribute name="shareimagenum" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="sharemedal" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="sharepoint" optional="YES" attributeType="Binary">
+            <userInfo/>
+        </attribute>
+        <attribute name="showpowerview" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
+        <attribute name="showsignatureview" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
+        <attribute name="showtime" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
+        <attribute name="signatureautocolor" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
+        <attribute name="signaturecolorindex" optional="YES" attributeType="Integer 16" defaultValueString="3" syncable="YES"/>
+        <attribute name="signaturelinewidth" optional="YES" attributeType="Float" defaultValueString="15" syncable="YES"/>
+        <attribute name="signaturesize" optional="YES" attributeType="Integer 16" defaultValueString="3" syncable="YES"/>
+        <attribute name="sleep" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="sleepautocontrol" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="timetextstyle" optional="YES" attributeType="Binary" syncable="YES"/>
+        <relationship name="imagelist" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageList">
+            <userInfo/>
+        </relationship>
+        <relationship name="issuereport" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="IssueReport" syncable="YES"/>
+        <relationship name="musiclist" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="MusicList">
+            <userInfo/>
+        </relationship>
+        <relationship name="signaturelist" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Signature">
+            <userInfo/>
+        </relationship>
+        <relationship name="upgradelist" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="UpgradeInfo" syncable="YES"/>
+        <userInfo/>
     </entity>
     <elements>
         <element name="FinishedImage" positionX="160" positionY="192" width="128" height="135"/>
-        <element name="ImageList" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="ImageList" positionX="160" positionY="192" width="128" height="90"/>
         <element name="IssueReport" positionX="160" positionY="192" width="128" height="105"/>
-        <element name="MusicList" positionX="160" positionY="192" width="128" height="90"/>
+        <element name="MusicList" positionX="160" positionY="192" width="128" height="105"/>
         <element name="SelectedImage" positionX="160" positionY="192" width="128" height="180"/>
         <element name="SelectedMusic" positionX="160" positionY="192" width="128" height="120"/>
-        <element name="Signature" positionX="160" positionY="192" width="128" height="75"/>
-        <element name="UserInfo" positionX="160" positionY="192" width="128" height="465"/>
+        <element name="Signature" positionX="160" positionY="192" width="128" height="105"/>
+        <element name="UpgradeInfo" positionX="160" positionY="192" width="128" height="120"/>
+        <element name="UserInfo" positionX="160" positionY="192" width="128" height="840"/>
     </elements>
 </model>

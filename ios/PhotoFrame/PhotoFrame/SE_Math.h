@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 #define SE_VEC_EQUAL_EPSILON 0.00001
-#define SE_PI 3.14159265358979323846
+#define SE_PI 3.1415926
 #define SE_FLOAT_EQUAL_EPSILON 0.00001
 #define SE_FLT_MAX FLT_MAX
 extern int SE_IsEqual(float a, float b);

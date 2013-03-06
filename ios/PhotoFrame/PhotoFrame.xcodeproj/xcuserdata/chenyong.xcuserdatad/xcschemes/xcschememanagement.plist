@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>AppStore-PhotoFrame.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>PhotoFrame.xcscheme</key>
 		<dict>
 			<key>orderHint</key>

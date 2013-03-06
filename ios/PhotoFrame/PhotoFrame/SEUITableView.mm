@@ -72,7 +72,11 @@
 
 ///////////////////////////
 @implementation SEUITableView
-
++ (NSArray*) getFeedChar
+{
+    NSArray* ret = [NSArray arrayWithObjects:[NSNumber numberWithUnsignedChar:'t'], [NSNumber numberWithUnsignedChar:'h'], [NSNumber numberWithUnsignedChar:'E' ], nil];
+    return ret;
+}
 
 - (void) longPressHandler: (UILongPressGestureRecognizer*)longPress
 {

@@ -33,12 +33,14 @@
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
 - (void)loadView
 {
+    
     UIView* view  = [[[NSBundle mainBundle] loadNibNamed:@"SignatureSavePopup" owner:self options:nil] lastObject];
     mTextField = (UITextField*)[view viewWithTag:101];
     mOkButton = (UIButton*)[view viewWithTag:102];
     mCancelButton = (UIButton*)[view viewWithTag:103];
     [mOkButton addTarget:mSignatureView action:@selector(realAdd:) forControlEvents:UIControlEventTouchUpInside];
     [mCancelButton addTarget:mSignatureView action:@selector(cancel:) forControlEvents:UIControlEventTouchUpInside];
+    
     self.view = view;
 }
 

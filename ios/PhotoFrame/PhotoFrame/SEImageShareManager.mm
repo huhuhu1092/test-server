@@ -7,12 +7,16 @@
 //
 
 #import "SEImageShareManager.h"
-#import "OAuthEngine.h"
-#import "WeiboClient.h"
+//#import "OAuthEngine.h"
+//#import "WeiboClient.h"
 #import "SEViewNavigator.h"
-#define kOAuthConsumerKey	@"440606512"
-#define kOAuthConsumerSecret	@"72dfe0879a2e730ecc36574a4fefd467"
+#import "SA_OAuthTwitterEngine.h"
 
+//#define kOAuthConsumerKey	@"440606512"
+//#define kOAuthConsumerSecret	@"72dfe0879a2e730ecc36574a4fefd467"
+
+#define kOAuthConsumerKey				@"3oBm0t8FFMca3mjl6EQQuQ"		//REPLACE ME
+#define kOAuthConsumerSecret			@"L1ge1p2p8U7RkBTJGTGZEDr9hrn8Kd1C5l9XBbLWq"		//REPLACE ME
 
 @implementation SEImageShareManager
 - (id) init
@@ -41,7 +45,7 @@
     [super dealloc];
 }
 @end
-
+/*
 @implementation SEWeiboClientData
 @synthesize weiboClient;
 @synthesize statuses;
@@ -217,4 +221,180 @@
         [self shareWithWeiboClient];
     }
 }
+@end
+ */
+///////////
+
+@implementation SETwitterImageShare
+- (void) handleResponse: (id) response
+{
+    
+    NSLog(@"handle response : r");
+    [response release];
+}
+- (void) performTwitter
+{
+    NSLog(@"perform twitter");
+    ACAccountType* twitterType = [mStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    NSArray* accounts = [mStore accountsWithAccountType:twitterType];
+    for(ACAccount* account in accounts)
+    {
+        NSLog(@"account username : %@", [account username]);
+        NSLog(@"account description : %@", [account description]);
+    }
+    NSURL* url = [NSURL URLWithString:@"https://upload.twitter.com/1/statuses/update_with_media.json"];
+    UIImage* image = [mShareImageArray objectAtIndex:0];//[UIImage imageNamed:@"info_botton_001.png"];
+    NSData* imageData = UIImageJPEGRepresentation(image, 1.0);
+    //[imageData retain];
+    //NSDictionary* dic = [NSDictionary dictionaryWithObjectsAndKeys:imageData, @"media[]",@"test1", @"status", nil];
+    
+    TWRequest* request = [[TWRequest alloc] initWithURL:url parameters:nil requestMethod:TWRequestMethodPOST];
+    ACAccount* account = [accounts objectAtIndex:0];
+    [request setAccount:account];
+    [request addMultiPartData:imageData withName:@"media[]" type:@"multipart/form-data"];
+    NSString *status = @"From TheSpeedSun PhotoFrame";
+    [request addMultiPartData:[status dataUsingEncoding:NSUTF8StringEncoding] 
+                     withName:@"status" 
+                         type:@"multipart/form-data"];
+    [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) 
+    {
+        NSError* jsonError = nil;
+        NSLog(@"url response status = %d ", urlResponse.statusCode);
+        if(responseData == nil)
+        {
+            NSLog(@"## has no response data ##");
+            return;
+        }
+        id response = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&jsonError];
+        if(jsonError == nil)
+        {
+            NSLog(@" response ok ");
+            [response retain];
+            [self performSelectorOnMainThread:@selector(handleResponse:) withObject:response waitUntilDone:NO];
+        }
+        else
+        {
+            NSLog(@"response error");
+        }
+        
+        
+    }];
+    /*
+     
+    TWTweetComposeViewController* tweet = [[TWTweetComposeViewController alloc] init];
+    if(![tweet setInitialText:@"iOS 5 Core framework"])
+    {
+        NSLog(@"Unable to add text");
+    }
+    UIImage* image = [UIImage imageNamed:@"info_botton_001.png"];
+    if(![tweet addImage:image])
+    {
+        NSLog(@"Unable to add image");
+    }
+    TWTweetComposeViewControllerCompletionHandler handler = ^(TWTweetComposeViewControllerResult result)
+    {
+        switch (result) {
+            case TWTweetComposeViewControllerResultCancelled:
+                NSLog(@"tweet canceled");
+                break;
+            case TWTweetComposeViewControllerResultDone:
+                NSLog(@"tweet complete");
+                break;
+            default:
+                break;
+        }
+        [tweet dismissViewControllerAnimated:YES completion:nil];
+    };
+    [tweet setCompletionHandler:handler];
+    [mViewNav presentViewController:tweet animated:YES completion:nil];
+     */
+}
+- (id) initWithViewNav: (SEViewNavigator*)viewNav
+{
+    self = [super init];
+    if(self)
+    {
+        mViewNav = viewNav;
+        mStore = [[ACAccountStore alloc] init];
+    }
+    return self;
+}
+- (void) dealloc
+{
+    [mStore release];
+    [_engine release];
+    [super dealloc];
+}
+- (void)share
+{
+    /*
+    ACAccountType* twitterType = [mStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    [mStore requestAccessToAccountsWithType:twitterType withCompletionHandler:^(BOOL granted, NSError *error) {
+        if(granted)
+        {
+            NSLog(@"can access twitter acount");
+            [self performSelectorOnMainThread:@selector(performTwitter) withObject:nil waitUntilDone:NO];
+        }
+        else
+        {
+            NSLog(@"can not access twitter account : %@", [error localizedDescription]);    
+        }
+        
+    }];
+     */
+    if (_engine) return;
+	_engine = [[SA_OAuthTwitterEngine alloc] initOAuthWithDelegate: self];
+	_engine.consumerKey = kOAuthConsumerKey;
+	_engine.consumerSecret = kOAuthConsumerSecret;
+	
+	UIViewController			*controller = [SA_OAuthTwitterController controllerToEnterCredentialsWithTwitterEngine: _engine delegate: self];
+	
+	if (controller) 
+		[mViewNav presentModalViewController: controller animated: YES];
+	else {
+		[_engine sendUpdate: [NSString stringWithFormat: @"Already Updated. %@", [NSDate date]]];
+        //NSString* sss = [_engine getPublicTimeline];
+        //NSString* sss = [_engine sendUpdate: @"test API"];
+        //NSLog(@"ss = %@", sss);
+	}
+}
+- (void) storeCachedTwitterOAuthData: (NSString *) data forUsername: (NSString *) username {
+	NSUserDefaults			*defaults = [NSUserDefaults standardUserDefaults];
+    
+	[defaults setObject: data forKey: @"authData"];
+	[defaults synchronize];
+}
+
+- (NSString *) cachedTwitterOAuthDataForUsername: (NSString *) username {
+	return [[NSUserDefaults standardUserDefaults] objectForKey: @"authData"];
+}
+
+//=============================================================================================================================
+#pragma mark SA_OAuthTwitterControllerDelegate
+- (void) OAuthTwitterController: (SA_OAuthTwitterController *) controller authenticatedWithUsername: (NSString *) username {
+	NSLog(@"Authenicated for %@", username);
+}
+
+- (void) OAuthTwitterControllerFailed: (SA_OAuthTwitterController *) controller {
+	NSLog(@"Authentication Failed!");
+}
+
+- (void) OAuthTwitterControllerCanceled: (SA_OAuthTwitterController *) controller {
+	NSLog(@"Authentication Canceled.");
+    NSString* sss = [_engine testService];
+    NSLog(@"sss = %@" , sss);
+}
+
+//=============================================================================================================================
+#pragma mark TwitterEngineDelegate
+- (void) requestSucceeded: (NSString *) requestIdentifier {
+	NSLog(@"Request %@ succeeded", requestIdentifier);
+}
+
+- (void) requestFailed: (NSString *) requestIdentifier withError: (NSError *) error {
+	NSLog(@"Request %@ failed with error: %@", requestIdentifier, error);
+}
+
+
+
 @end

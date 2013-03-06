@@ -1088,7 +1088,7 @@ enum REMOVE_OP {LESS, GREAT, EQUAL};
     int realWidth = mViewWidth - mLeftPadding - mRightPadding;
     int n = (realWidth + mHMargin) / (mPhotoWidth + mHMargin);
     int nReminder = (realWidth + mHMargin) % (mPhotoWidth + mHMargin);
-    
+    NSLog(@"### all image count = %d ###", mPhotoAssetURL.count);
     if(nReminder > 0)
     {
         n++;

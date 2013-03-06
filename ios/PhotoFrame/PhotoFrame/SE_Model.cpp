@@ -11,6 +11,7 @@
 #include "PGMDataReader.h"
 #include "SS_Shader.h"
 #include "SS_OpenGL.h"
+#include "SEShaderDefine.h"
 //////////
 SE_Texture::~SE_Texture()
 {
@@ -47,6 +48,11 @@ void SE_Mesh::removeGLBuffer()
         glDeleteBuffers(1, &vboID);
         vboID = 0;
     }
+    if(indexVboID > 0)
+    {
+        glDeleteBuffers(1, &indexVboID);
+        indexVboID = 0;
+    }
     for(int i = 0 ; i < 2 ; i++)
     {
         for(int j = 0 ; j < 4 ; j++)
@@ -63,6 +69,7 @@ void SE_Mesh::removeGLBuffer()
             mirrorVaoIDArray[i][j].uvVbo = 0;
         }
     }
+    //glFinish();
 }
 SE_AABB SE_Mesh::getAABB()
 {
@@ -386,7 +393,7 @@ static const short REFERENCE_BOX_ID = 0x0008;
 static const short TRACK_POINT_ID = 0x0009;
 static const short LOOKING_POINT_ID = 0x0010;
 static const short LOOKING_POINT_TRACK_ID = 0x0011;
-
+static const short VERTICAL_TRACK_POINT_ID = 0x0012;
 static const int MAGIC = 0xCFCFCFCF;
 static const int VERSION = 0x01;
 static const int COORDINATE = 0x00;
@@ -446,6 +453,44 @@ void SS_ModelManager::addGeometryData(const SE_GeometryData& geomData)
     }
     newGeomData[i] = geomData;
     mGeometryDataArray = newGeomData;
+}
+void SS_ModelManager::readTrackPointData(SE_TrackPointData& trackPointData, const char* data, int& startPos)
+{
+    trackPointData.xlen = readInt(data, &startPos);
+    trackPointData.ylen = readInt(data, &startPos);
+    trackPointData.zlen = readInt(data, &startPos);
+    int trackPointListCount = readInt(data, &startPos);
+    LOGI("... track point dimension = %d, %d, %d\n", trackPointData.xlen, trackPointData.ylen, trackPointData.zlen);
+    trackPointData.trackPointList.resize(trackPointListCount);
+    LOGI("... track point list num = %d\n", trackPointListCount);
+    for(int i = 0 ; i < trackPointListCount ; i++)
+    {
+        trackPointData.trackPointList[i].name = readString(data, &startPos);
+        LOGI("... track point list name = %s\n", trackPointData.trackPointList[i].name.c_str());
+        int adjustTrackPointCount = readInt(data, &startPos);
+        assert(adjustTrackPointCount == 4);
+        for(int j = 0 ; j < adjustTrackPointCount ; j++)
+        {
+            trackPointData.trackPointList[i].points[j].adjustx = readFloat(data, &startPos);
+            trackPointData.trackPointList[i].points[j].adjusty = readFloat(data, &startPos);
+            trackPointData.trackPointList[i].points[j].adjustz = readFloat(data, &startPos);
+            LOGI("... adjust point = %f, %f, %f\n", trackPointData.trackPointList[i].points[j].adjustx, trackPointData.trackPointList[i].points[j].adjusty ,
+                 trackPointData.trackPointList[i].points[j].adjustz);
+            int trackPointCount = readInt(data, &startPos);
+            LOGI("... track point count = %d\n", trackPointCount);
+            trackPointData.trackPointList[i].points[j].trackList.resize(trackPointCount);
+            for(int k = 0 ; k < trackPointCount ; k++)
+            {
+                
+                trackPointData.trackPointList[i].points[j].trackList[k].x = readFloat(data, &startPos);
+                trackPointData.trackPointList[i].points[j].trackList[k].y = readFloat(data, &startPos);
+                trackPointData.trackPointList[i].points[j].trackList[k].z = readFloat(data, &startPos);
+                LOGI("... track point = %f, %f, %f\n", trackPointData.trackPointList[i].points[j].trackList[k].x, trackPointData.trackPointList[i].points[j].trackList[k].y,
+                     trackPointData.trackPointList[i].points[j].trackList[k].z);
+            }
+        }
+    }
+
 }
 void SS_ModelManager::process(const char* data, int currPos, int dataLen)
 {
@@ -761,10 +806,11 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
                 } 
             }
         }
+        
         else if(currChunckId == SHADER_ID)
         {
             int shaderNum = readInt(data, &startPos);
-            mShaderArray.resize(shaderNum);
+            //mShaderArray.resize(shaderNum);
             for(int i = 0 ; i < shaderNum ; i++)
             {
                 std::string shaderid = readString(data, &startPos);
@@ -774,8 +820,10 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
                 char* outDataFragment = NULL;
                 int lenFragment = 0;
                 readCharArray(data, &startPos, &outDataFragment, &lenFragment);
-                SS_Shader* s = new SS_Shader(shaderid.c_str(), outDataVertex, outDataFragment);
-                mShaderArray[i] = s;
+                delete[] outDataVertex;
+                delete[] outDataFragment;
+                //SS_Shader* s = new SS_Shader(shaderid.c_str(), outDataVertex, outDataFragment);
+                //mShaderArray[i] = s;
             }
         }
         else if(currChunckId == REFERENCE_BOX_ID)
@@ -792,23 +840,30 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
         }
         else if(currChunckId == TRACK_POINT_ID)
         {
-            mTrackPointData.xlen = readInt(data, &startPos);
-            mTrackPointData.ylen = readInt(data, &startPos);
-            mTrackPointData.zlen = readInt(data, &startPos);
+            readTrackPointData(mTrackPointData, data, startPos);
+        }
+        else if(currChunckId == VERTICAL_TRACK_POINT_ID)
+        {
+            readTrackPointData(mVerticalTrackPointData, data, startPos);
+            /*
+            mVerticalTrackPointData.xlen = readInt(data, &startPos);
+            mVerticalTrackPointData.ylen = readInt(data, &startPos);
+            mVerticalTrackPointData.zlen = readInt(data, &startPos);
             int trackPointListCount = readInt(data, &startPos);
-            mTrackPointData.trackPointList.resize(trackPointListCount);
+            mVerticalTrackPointData.trackPointList.resize(trackPointListCount);
             for(int i = 0 ; i < trackPointListCount ; i++)
             {
-                mTrackPointData.trackPointList[i].name = readString(data, &startPos);
+                mVerticalTrackPointData.trackPointList[i].name = readString(data, &startPos);
                 int trackPointCount = readInt(data, &startPos);
-                mTrackPointData.trackPointList[i].points.resize(trackPointCount);
+                mVerticalTrackPointData.trackPointList[i].points.resize(trackPointCount);
                 for(int j = 0 ; j < trackPointCount ; j++)
                 {
-                    mTrackPointData.trackPointList[i].points[j].x = readInt(data, &startPos);
-                    mTrackPointData.trackPointList[i].points[j].y = readInt(data, &startPos);
-                    mTrackPointData.trackPointList[i].points[j].z = readInt(data, &startPos);
+                    mVerticalTrackPointData.trackPointList[i].points[j].x = readFloat(data, &startPos);
+                    mVerticalTrackPointData.trackPointList[i].points[j].y = readFloat(data, &startPos);
+                    mVerticalTrackPointData.trackPointList[i].points[j].z = readFloat(data, &startPos);
                 }
             }
+             */
         }
         else if(currChunckId == LOOKING_POINT_ID)
         {
@@ -848,7 +903,17 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
             }
         }
     }
-    
+    SEShaderDefine* shaderDefine = new SEShaderDefine;
+    std::vector<std::string> allShaderId = shaderDefine->getAllShaderID();
+    mShaderArray.resize(allShaderId.size());
+    for(int i = 0 ; i < allShaderId.size() ; i++)
+    {
+        std::string shaderid = allShaderId[i];
+        SEShaderDefine::ShaderSrcData shaderData = shaderDefine->getShaderSrc(shaderid);
+        SS_Shader* s = new SS_Shader(shaderid.c_str(), shaderData.vertexShaderSrc, shaderData.fragmentShaderSrc);
+        mShaderArray[i] = s;
+    }
+    delete shaderDefine;
     SE_ASSERT(startPos == dataLen);
 }
 
@@ -856,7 +921,23 @@ void SS_ModelManager::process(const char* data, int currPos, int dataLen)
 SS_ModelManager::SS_ModelManager()
 {}
 SS_ModelManager::~SS_ModelManager()
-{}
+{
+    GeometryDataArray::iterator itGeomData;
+    for(itGeomData = mGeometryDataArray.begin() ; itGeomData != mGeometryDataArray.end(); itGeomData++)
+    {
+        itGeomData->release();
+    }
+    
+    MaterialDataArray::iterator itMaterial;
+    for(itMaterial = mMaterialArray.begin() ; itMaterial != mMaterialArray.end() ; itMaterial++)
+    {
+        delete[] itMaterial->subMaterialArray;
+    }
+    for(int i = 0 ; i < mShaderArray.size() ; i++)
+    {
+        delete mShaderArray[i];
+    }
+}
 void SS_ModelManager::loadModel(const char* filename)
 {
     const char* data;
@@ -880,30 +961,90 @@ int SS_ModelManager::getFullTextureCount()
 {
     TextureList::iterator it;
     int count = 0;
-    for(it = mTextureList.begin() ; it != mTextureList.end() ; it++)
+    LOGI("########################\n");
+    for(it = mFullImageTextureList.begin() ; it != mFullImageTextureList.end() ; it++)
     {
         std::string name = it->first;
-        std::size_t pos = name.find("_full");
-        if(pos != std::string::npos)
+        //std::size_t pos = name.find("_full");
+        //if(pos != std::string::npos)
         {
+            LOGI("## full texture = %s , %p ##\n", name.c_str(), it->second);
             count++;
         }
     }
+    LOGI("##########################\n");
+    LOGI("## full image texture count = %d ##\n", count);
     return count;
+}
+SE_Texture* SS_ModelManager::getTexture(TextureList& textureList, const char* textureName)
+{
+    TextureList::iterator it;
+    for(it = textureList.begin() ; it != textureList.end() ; it++)
+    {
+        if(it->first == textureName)
+            return it->second;
+    }
+    return  NULL;
+}
+void SS_ModelManager::setTexture(TextureList& textureList, const char* textureName, SE_Texture* texture)
+{
+    for(TextureList::iterator it = textureList.begin() ; it != textureList.end() ; it++)
+    {
+        if(it->first == textureName)
+        {
+            delete it->second;
+            it->second = texture;
+            return;
+        }
+    }
+    textureList[textureName] = texture;
+}
+void SS_ModelManager::removeTexture(TextureList& textureList, const char* textureName)
+{
+    TextureList::iterator it = textureList.find(textureName);
+    if(it != textureList.end())
+    {
+        delete it->second;
+        LOGI("## remove texture %s #\n", textureName);
+        textureList.erase(it);
+    }
+}
+SE_Texture* SS_ModelManager::SS_ModelManager::getFullImageTexture(const char* textureName)
+{
+    //return mFullImageTextureList[textureName];
+    return getTexture(mFullImageTextureList, textureName);
+}
+void SS_ModelManager::setFullImageTexture(const char* textureName, SE_Texture* t)
+{
+    setTexture(mFullImageTextureList, textureName, t);
+}
+void SS_ModelManager::removeFullImageTexture(const char* textureName)
+{
+    removeTexture(mFullImageTextureList, textureName);
 }
 SE_Texture* SS_ModelManager::getTexture(const char* texturename)
 {
-    return mTextureList[texturename];
+    //return mTextureList[texturename];
+    return getTexture(mTextureList, texturename);
+}
+int SS_ModelManager::getTextureCount() const
+{
+    return mTextureList.size();
 }
 void SS_ModelManager::setTexture(const char* texturename, SE_Texture* texture)
 {
+    /*
+    assert(texture != NULL);
     SE_Texture* t = mTextureList[texturename];
     if(t)
         delete t;
     mTextureList[texturename] = texture;
+     */
+    setTexture(mTextureList, texturename, texture);
 }
 void SS_ModelManager::removeTexture(const char* texturename)
 {
+    /*
     TextureList::iterator it = mTextureList.find(texturename);
     if(it != mTextureList.end())
     {
@@ -911,6 +1052,8 @@ void SS_ModelManager::removeTexture(const char* texturename)
         LOGI("## remove texture %s #\n", texturename);
         mTextureList.erase(it);
     }
+     */
+    removeTexture(mTextureList, texturename);
 }
 void SS_ModelManager::removeAllTexture()
 {
@@ -922,6 +1065,13 @@ void SS_ModelManager::removeAllTexture()
         delete  it->second;
     }
     mTextureList.clear();
+    for(it = mFullImageTextureList.begin() ; it != mFullImageTextureList.end() ; it++)
+    {
+        std::string name = it->first;
+        LOGI("full image texture name = %s \n", name.c_str());
+        delete it->second;
+    }
+    mFullImageTextureList.clear();
 }
 int SS_ModelManager::getMeshNum()
 {
@@ -961,45 +1111,130 @@ size_t SS_ModelManager::getGeometryDataNum()
 {
     return mGeometryDataArray.size();
 }
-std::vector<std::string> SS_ModelManager::getAllTrackPointsName()
+std::vector<std::string> SS_ModelManager::getAllTrackPointsName(VIEW_TYPE viewType)
 {
-    std::vector<std::string> ret(mTrackPointData.trackPointList.size());
-    std::vector<SE_TrackPointList>::iterator it;
-    int i = 0;
-    for(it = mTrackPointData.trackPointList.begin() ; it != mTrackPointData.trackPointList.end();it++)
+    if(viewType == LANDSCAPE)
     {
-        ret[i++] = it->name;
+        std::vector<std::string> ret(mTrackPointData.trackPointList.size());
+        std::vector<SE_TrackPointList>::iterator it;
+        int i = 0;
+        for(it = mTrackPointData.trackPointList.begin() ; it != mTrackPointData.trackPointList.end();it++)
+        {
+            ret[i++] = it->name;
+        }
+        return ret;
     }
-    return ret;
-}
-std::vector<SE_TrackPoint> SS_ModelManager::getTrackPoints(const char* name)
-{
-    std::vector<SE_TrackPoint> ret;
-    std::vector<SE_TrackPointList>::iterator it;
-    for(it = mTrackPointData.trackPointList.begin();
-        it != mTrackPointData.trackPointList.end();
-        it++)
+    else
     {
-        if(it->name == name)
-            return it->points;
+        std::vector<std::string> ret(mVerticalTrackPointData.trackPointList.size());
+        std::vector<SE_TrackPointList>::iterator it;
+        int i = 0;
+        for(it = mVerticalTrackPointData.trackPointList.begin() ; it != mVerticalTrackPointData.trackPointList.end();it++)
+        {
+            ret[i++] = it->name;
+        }
+        return ret;
     }
-    return ret;
 }
-SE_Vector3f SS_ModelManager::getTrackPoint(const SE_TrackPoint& tp, const SE_Vector3f& start)
+SE_TrackPoint SS_ModelManager::getTrackPointAdjust(VIEW_TYPE viewType, TRACK_LIST_FOR_PHOTO_TYPE trackPhotoType, const char* name)
 {
-    return getTrackPoint(tp.x, tp.y, tp.z, start);
+    if(viewType == LANDSCAPE)
+    {
+        std::vector<SE_TrackPointList>::iterator it;
+        SE_TrackPoint ret;
+        for(it = mTrackPointData.trackPointList.begin();
+            it != mTrackPointData.trackPointList.end();
+            it++)
+        {
+            if(it->name == name)
+            {
+                ret.x = it->points[trackPhotoType].adjustx;
+                ret.y = it->points[trackPhotoType].adjusty;
+                ret.z = it->points[trackPhotoType].adjustz;
+                return ret;
+            }
+        }
+        return ret;
+    }
+    else {
+
+        std::vector<SE_TrackPointList>::iterator it;
+        SE_TrackPoint ret;
+        for(it = mVerticalTrackPointData.trackPointList.begin();
+            it != mVerticalTrackPointData.trackPointList.end();
+            it++)
+        {
+            if(it->name == name)
+            {
+
+                ret.x = it->points[trackPhotoType].adjustx;
+                ret.y = it->points[trackPhotoType].adjusty;
+                ret.z = it->points[trackPhotoType].adjustz;
+                return ret;
+            }
+        }
+        return ret;
+    }
+
 }
-SE_Vector3f SS_ModelManager::getTrackPoint(int x, int y, int z, const SE_Vector3f& start)
+std::vector<SE_TrackPoint> SS_ModelManager::getTrackPoints(VIEW_TYPE viewType, TRACK_LIST_FOR_PHOTO_TYPE trackPhotoType, const char* name)
 {
-    float xspan = mReferenceBoxMax.x - mReferenceBoxMin.x;
-    float yspan = mReferenceBoxMax.y - mReferenceBoxMin.y;
-    float zspan = mReferenceBoxMax.z - mReferenceBoxMin.z;
-    float xstep = xspan / mTrackPointData.xlen;
-    float ystep = yspan / mTrackPointData.ylen;
-    float zstep = zspan / mTrackPointData.zlen;
-    //SE_Vector3f start(mReferenceBoxMin.x, mReferenceBoxMax.y, mReferenceBoxMax.z);
-    //return SE_Vector3f(start.x + (x - 1) * xstep + 0.5 * xstep, start.y - 0.5 * ystep - (y - 1) * ystep, start.z - 0.5 * zstep - (z - 1) * zstep);
-    return SE_Vector3f(start.x + (x - 1) * xstep, start.y - y * ystep, start.z - z * zstep);
+    if(viewType == LANDSCAPE)
+    {
+        std::vector<SE_TrackPoint> ret;
+        std::vector<SE_TrackPointList>::iterator it;
+        for(it = mTrackPointData.trackPointList.begin();
+            it != mTrackPointData.trackPointList.end();
+            it++)
+        {
+            if(it->name == name)
+                return it->points[trackPhotoType].trackList;
+        }
+        return ret;
+    }
+    else {
+        std::vector<SE_TrackPoint> ret;
+        std::vector<SE_TrackPointList>::iterator it;
+        for(it = mVerticalTrackPointData.trackPointList.begin();
+            it != mVerticalTrackPointData.trackPointList.end();
+            it++)
+        {
+            if(it->name == name)
+                return it->points[trackPhotoType].trackList;
+        }
+        return ret;
+    }
+}
+SE_Vector3f SS_ModelManager::getTrackPoint(VIEW_TYPE viewType, const SE_TrackPoint& tp, const SE_Vector3f& start)
+{
+    return getTrackPoint(viewType, tp.x, tp.y, tp.z, start);
+}
+SE_Vector3f SS_ModelManager::getTrackPoint(VIEW_TYPE viewType, float x, float y, float z, const SE_Vector3f& start)
+{
+    if(viewType == LANDSCAPE)
+    {
+        float xspan = mReferenceBoxMax.x - mReferenceBoxMin.x;
+        float yspan = mReferenceBoxMax.y - mReferenceBoxMin.y;
+        float zspan = mReferenceBoxMax.z - mReferenceBoxMin.z;
+        float xstep = xspan / mTrackPointData.xlen;
+        float ystep = yspan / mTrackPointData.ylen;
+        float zstep = zspan / mTrackPointData.zlen;
+        //SE_Vector3f start(mReferenceBoxMin.x, mReferenceBoxMax.y, mReferenceBoxMax.z);
+        //return SE_Vector3f(start.x + (x - 1) * xstep + 0.5 * xstep, start.y - 0.5 * ystep - (y - 1) * ystep, start.z - 0.5 * zstep - (z - 1) * zstep);
+        return SE_Vector3f(start.x + (x - 1) * xstep, start.y - y * ystep, start.z - z * zstep);
+    }
+    else
+    {
+        float xspan = mReferenceBoxMax.x - mReferenceBoxMin.x;
+        float yspan = mReferenceBoxMax.y - mReferenceBoxMin.y;
+        float zspan = mReferenceBoxMax.z - mReferenceBoxMin.z;
+        float xstep = xspan / mVerticalTrackPointData.xlen;
+        float ystep = yspan / mVerticalTrackPointData.ylen;
+        float zstep = zspan / mVerticalTrackPointData.zlen;
+        //SE_Vector3f start(mReferenceBoxMin.x, mReferenceBoxMax.y, mReferenceBoxMax.z);
+        //return SE_Vector3f(start.x + (x - 1) * xstep + 0.5 * xstep, start.y - 0.5 * ystep - (y - 1) * ystep, start.z - 0.5 * zstep - (z - 1) * zstep);
+        return SE_Vector3f(start.x + (x - 1) * xstep, start.y - y * ystep, start.z - z * zstep);
+    }
 }
 SE_Vector3f SS_ModelManager::getFrameLookingPoint(const char* name)
 {

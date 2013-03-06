@@ -9,6 +9,7 @@
 #import "SEOperationView.h"
 #import "SEViewNavigator.h"
 #import "SEResDefine.h"
+#import "PhotoFrameAppDelegate.h"
 //////////
 NSString* gOperationBgImages[] = {@"OperationViewShareBackgroiund", @"OperationViewDeleteBackground"};
 NSString* gOperationBgHImages[] = {@"OperationViewShareBackgroundH", @"OperationViewDeleteBackgroundH"};
@@ -20,11 +21,37 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
 @synthesize mBgImage;
 @synthesize mType;
 @synthesize mViewNav;
-- (id)initWithFrame:(CGRect)frame
+@synthesize foregroundImageNormalStr;
+@synthesize foregroundImageHighlightedStr;
+@synthesize backgroundImageNormalStr;
+@synthesize backgroundImageHighlightedStr;
+- (id)initWithFrame:(CGRect)frame resources: (NSArray*) resourceArray
 {
     self = [super initWithFrame:frame];
-    if (self) {
+    if (self) 
+    {
         // Initialization code
+        mViewNav = [PhotoFrameAppDelegate getViewNavigator];
+        self.backgroundImageNormalStr = [resourceArray objectAtIndex:0];
+        self.foregroundImageNormalStr = [resourceArray objectAtIndex:1];
+        self.backgroundImageHighlightedStr = [resourceArray objectAtIndex:2];
+        self.foregroundImageHighlightedStr = [resourceArray objectAtIndex:3];
+        mHighlighted = YES;
+        [self setHighlighted:NO];
+        float bgViewWidth = mBgImage.size.width;
+        float bgViewHeight = mBgImage.size.height;
+        mBackgroundView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, bgViewWidth, bgViewHeight)];
+        float foreImageWidth = mForeImage.size.width / 2;
+        float foreImageHeight = mForeImage.size.height / 2;
+        CGFloat startx = (bgViewWidth - foreImageWidth) / 2;
+        CGFloat starty = (bgViewHeight - foreImageHeight) / 2;
+        mForegroundView = [[UIImageView alloc] initWithFrame:CGRectMake(startx, starty, foreImageWidth, foreImageHeight)];
+        mBackgroundView.image = mBgImage;
+        mForegroundView.image = mForeImage;
+        [self addSubview:mBackgroundView];
+        [self addSubview:mForegroundView];
+        [mBackgroundView release];
+        [mForegroundView release];
     }
     return self;
 }
@@ -43,23 +70,14 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
 }
 - (void)dealloc
 {
-    [mBackgroundView release];
-    [mForegroundView release];
-    [mBgImage release];
-    [mForeImage release];
+    [mType release];
+    [backgroundImageHighlightedStr release];
+    [backgroundImageNormalStr release];
+    [foregroundImageHighlightedStr release];
+    [foregroundImageNormalStr release];
     [super dealloc];
 }
-- (void) initData
-{
-    mBackgroundView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, mBgImage.size.width, mBgImage.size.height)];
-    CGFloat startx = (mBgImage.size.width - mForeImage.size.width) / 2;
-    CGFloat starty = (mBgImage.size.height - mForeImage.size.height) / 2;
-    mForegroundView = [[UIImageView alloc] initWithFrame:CGRectMake(startx, starty, mForeImage.size.width, mForeImage.size.height)];
-    mBackgroundView.image = mBgImage;
-    mForegroundView.image = mForeImage;
-    [self addSubview:mBackgroundView];
-    [self addSubview:mForegroundView];
-}
+
 - (BOOL) highlighted
 {
     return mHighlighted;
@@ -71,16 +89,16 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
         mHighlighted = h;
         if(mHighlighted)
         {
-            mBgImage = [mViewNav.mResLoader getImage:gOperationBgHImages[(int)mType]];
+            mBgImage = [mViewNav.mResLoader getImage:backgroundImageHighlightedStr];
             mBackgroundView.image = mBgImage;
             
-            mForeImage = [mViewNav.mResLoader getImage:gOperationForeHImages[(int)mType]];
+            mForeImage = [mViewNav.mResLoader getImage:foregroundImageHighlightedStr];
             mForegroundView.image = mForeImage;
         }
         else
         {
-            mBgImage = [mViewNav.mResLoader getImage:gOperationBgImages[mType]];
-            mForeImage = [mViewNav.mResLoader getImage:gOperationForeImages[mType]];
+            mBgImage = [mViewNav.mResLoader getImage:backgroundImageNormalStr];
+            mForeImage = [mViewNav.mResLoader getImage:foregroundImageNormalStr];
             mBackgroundView.image = mBgImage;
             mForegroundView.image = mForeImage;
         }
@@ -90,43 +108,39 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
 
 @implementation SEOperationViewGroup
 @synthesize mOperationHandler;
-@synthesize mViewNav;
-- (CGRect)calculateFrame
-{
-    CGFloat width = 0;
-    CGFloat height = 0;
-    for(int i = 0 ; i < OPERATION_NUM ; i++)
-    {
-        NSString* str = gOperationBgImages[i];
-        UIImage* image = [mViewNav.mResLoader getImage:str];
-        width += image.size.width;
-        height = image.size.height;
-    }
-    return CGRectMake(0, 0, width, height);
-}
+//@synthesize mViewNav;
 - (void) initData
 {
     CGFloat startx = 0;
-    for(int i = 0 ; i < OPERATION_NUM ; i++)
+    CGFloat height = 0;
+    for(int i = 0 ; i < mOperators.count ; i++)
     {
-        SEOperationView* opv = [[SEOperationView alloc] init];
-        opv.mType = (OPERATION_TYPE)i;
-        opv.mViewNav = mViewNav;
-        NSString* strBg = gOperationBgImages[i];
-        UIImage* bgImage = [mViewNav.mResLoader getImage:strBg];
-        NSString* strFore = gOperationForeImages[i];
-        UIImage* foreImage = [mViewNav.mResLoader getImage:strFore];
-        opv.mBgImage = bgImage;
-        opv.mForeImage = foreImage;
-        [opv initData];
+        SEOperationView* opv = [[SEOperationView alloc] initWithFrame:CGRectMake(0, 0, 10, 10) resources:[mImageResources objectAtIndex:i]];
+        opv.mType = [mOperators objectAtIndex: i];
         CGRect frame = [opv calculateFrame];
         opv.frame = CGRectMake(startx, 0, frame.size.width, frame.size.height);
         startx += frame.size.width;
+        height = frame.size.height;
         [self addSubview:opv];
-        //[opv release];
-        mOperationViews[i] = opv;
+        [mOperationViews addObject: opv];
+        [opv release];
     }
+    self.frame = CGRectMake(0, 0, startx, height);
 }
+- (id) initWithOperators:(NSArray*) operators  withImageResource: (NSArray*) resources
+{
+    self = [super init];
+    if(self)
+    {
+        mOperators = [[NSMutableArray arrayWithArray:operators] retain];
+        mOperationViews = [[NSMutableArray arrayWithArray:[NSArray array]] retain];
+        mImageResources = [[NSMutableArray arrayWithArray:resources] retain];
+        assert(mOperators.count == mImageResources.count);
+        [self initData];
+    }
+    return self;
+}
+
 - (BOOL) intersectRect: (CGRect) r1 withRect: (CGRect) r2
 {
     if((r1.origin.x + r1.size.width) < r2.origin.x)
@@ -139,12 +153,12 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
         return NO;
     return YES;
 }
-- (void) intersectOperationView: (CGRect) rect
+- (BOOL) intersectOperationView: (CGRect) rect
 {
     BOOL found = NO;
-    for(int i = 0 ; i < OPERATION_NUM ; i++)
+    for(int i = 0 ; i < mOperationViews.count ; i++)
     {
-        SEOperationView* opv = mOperationViews[i];
+        SEOperationView* opv = [mOperationViews objectAtIndex:i];
         CGRect r = [self convertRect:rect toView:opv];
         CGRect bounds = opv.bounds;
         //NSLog(@"r = %f, %f, %f, %f", r.origin.x, r.origin.y, r.size.width, r.size.height);
@@ -159,22 +173,24 @@ NSString* gOperationForeHImages[] = {@"OperationViewShareForegroundH" , @"Operat
         else
             opv.highlighted = NO;
     }
+    return found;
 }
 - (void) dealloc
 {
-    for(int i = 0 ; i < OPERATION_NUM ; i++)
-    {
-        [mOperationViews[i] release];
-    }
+    [mOperators release];
+    [mOperationViews release];
+    [mImageResources release];
+    [mOperationHandler release];
     [super dealloc];
 }
 - (void) operate
 {
-    for(int i = 0 ; i < OPERATION_NUM ; i++)
+    for(int i = 0 ; i < mOperationViews.count ; i++)
     {
-        if(mOperationViews[i].highlighted)
+        SEOperationView* opView = [mOperationViews objectAtIndex:i];
+        if([opView highlighted])
         {
-            [mOperationHandler handleOperation:(OPERATION_TYPE)i view:mOperationViews[i]];
+            [mOperationHandler handleOperation: opView.mType view:opView];
             break;
         }
     }

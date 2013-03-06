@@ -16,5 +16,5 @@ void checkGLError()
         LOGI("### gl error = %d ####\n", error);
         SE_ASSERT(0);
     }
-     */
+    */
 }

@@ -7,7 +7,8 @@
 //
 
 #import "PhotoFrameTests.h"
-
+#import "SEUtil.h"
+#import "SESystemConfig.h"
 @implementation PhotoFrameTests
 
 - (void)setUp
@@ -26,7 +27,9 @@
 
 - (void)testExample
 {
-    STFail(@"Unit tests are not implemented yet in PhotoFrameTests");
+    //STFail(@"Unit tests are not implemented yet in PhotoFrameTests");
+    int v = [SESystemConfig getMaxEdgeDetectValue];
+    assert(v == 10);
 }
 
 @end

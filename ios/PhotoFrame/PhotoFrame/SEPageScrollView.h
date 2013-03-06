@@ -15,7 +15,7 @@ enum {SEPAGE_ASSET_NUM = 2};
 enum SEPAGE_URL_TYPE {SEPAGE_FILE_PATH, SEPAGE_PHOTO_LIB_URL};
 enum SEPAGE_PART_TYPE {LEFT_PAGE, RIGHT_PAGE};
 enum SEPAGE_REMOVE_OP {INDEX_LESS, INDEX_GREAT, INDEX_EQUAL};
-enum SEPAGE_SCROLLVIEW_TYPE {PHOTOLIB_SCROLLVIEW, COREDATA_SCROLLVIEW};
+enum SEPAGE_SCROLLVIEW_TYPE {PHOTOLIB_SCROLLVIEW, COREDATA_SCROLLVIEW, INVALID_SCROLLVIEW};
 #define SE_INVALID_IMAGE_INDEX -1
 @class SEPageUIImageView;
 @class SEViewNavigator;
@@ -84,6 +84,7 @@ struct SEPageHitProperty
 @property (nonatomic, retain) NSURL* url;
 @property (nonatomic, assign) SEPAGE_URL_TYPE type;
 @property (nonatomic, retain) NSURL* filepath;
+- (SEPageImageURL*) clone;
 @end
 ///////////////////////
 @interface SEPageUIImageView : UIView 
@@ -96,7 +97,11 @@ struct SEPageHitProperty
     CGFloat alpha;
     BOOL highlighted;
     SEPageUIScrollView* mScrollView;
+    BOOL mIsAnimation;
+    CGRect mOriginRect;
 }
+@property (nonatomic, assign) CGRect mOriginRect;
+@property (nonatomic, assign) BOOL mIsAnimation;
 @property (nonatomic, assign) SEPageUIScrollView* mScrollView;
 @property (nonatomic, retain) UIImage* image;
 @property (nonatomic, retain) UIImage* frameImage;
@@ -105,6 +110,7 @@ struct SEPageHitProperty
 @property (nonatomic, assign) CGFloat alpha;
 @property (nonatomic, assign) BOOL highlighted;
 - (BOOL) isDefaultImage;
+- (SEPageUIImageView*) copy;
 @end
 ///////////////////////
 @class ALAssetsLibrary;
@@ -171,6 +177,7 @@ struct SEPageHitProperty
     ALAssetsLibrary* mAssetLibrary;
     int mAssetAcessError;
     BOOL mStopLoadImage;
+    UIImage* mNotFoundImage;
     ////////////////////////////////////
     NSMutableArray* mEventList;
     NSCondition* mEventListCondition;
@@ -200,16 +207,26 @@ struct SEPageHitProperty
     //NSURL* mCurrentURL;
     BOOL mIsCalculateVisibleRange;
     BOOL mIsAnimEnd;
+    NSString* mImageListName;
+    BOOL mIsScrolling;
     
     int mPressState;
     CGFloat mPressMoveSpacing;
     CGPoint mPressStartPoint;
     
     BOOL mGetImageURLInMainThread;
+    int mImageViewCount;//this count is used to maintain image view count, it is initialized in createContent. After initialized , it will not be changed.
+    BOOL mIsLoadingImage;
+    int mNextLoadImageURLIndex;
+    //NSOperationQueue* mImageLoadingOperationQueue;
     //property for debug
     BOOL mNotStartThread;
     //end
 }
+@property (nonatomic, retain) UIImage* mNotFoundImage;
+@property (nonatomic, assign) BOOL mIsLoadingImage;
+@property (nonatomic, assign) BOOL mIsScrolling;
+@property (nonatomic, retain) NSString* mImageListName;
 @property (nonatomic, assign) SEPAGE_SCROLLVIEW_TYPE mScrollViewType;
 @property (nonatomic, assign) BOOL mGetImageURLInMainThread;
 @property (nonatomic, readonly) BOOL mIsAnimEnd;
@@ -272,13 +289,15 @@ struct SEPageHitProperty
 - (void) changeContentToSingleColumn: (CGFloat) currentViewportWidth movePart: (SEPAGE_PART_TYPE)partType;
 - (void) insertURLToPhotoAsset: (int) index url: (NSMutableArray*)urlArray image: (NSMutableArray*)imageArray;
 - (NSArray*) getHighlightedImageView;
-- (void) loadImageFromPhotoLib: (SEPageImageURL*)url size:(CGSize)size withHandler: (NSObject<SELoadedImageHandler>*) handler;
-- (void) loadFullRepresentation: (SEPageImageURL*)url withHandler: (NSObject<SELoadedImageHandler>*)handler;
+
 - (int) getIndexForImageView:(SEPageUIImageView*)imageView;
 //- (void) getImageURL: (int) index withBlock: (ImageURLHandlerBlock) block;
 - (void) changeImageView: (NSMutableArray*) imageViewIndexArray toPos : (int)dstImageViewIndex;
 //stop will remove the read photo thread, and then send event to delete SEPageScrollView
 //- (void) stopAsync: (id) target withAction: (SEL)action withObject: (id) obj;
 - (void) stopLoadImage;
+- (void) startLoadImage;
 - (void) printPhotoDict;
+- (BOOL) isStopLoadImage;
+- (void) updateImageViewByScroll;
 @end

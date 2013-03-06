@@ -14,6 +14,8 @@
 class SS_Shader
 {
 public:
+    //SS_Shader will own the vertexShaderSrc and fragmentShaderSrc , it will release them 
+    //at destructor function
     SS_Shader(const char* shadername, char* vertexShaderSrc, char* fragmentShaderSrc);
     ~SS_Shader();
     void use();

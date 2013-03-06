@@ -60,5 +60,19 @@ enum SE_DATA_UPLOAD_STATE {NO_UPLOAD, UPLOADING, UPLOAD_OK, UPLOAD_FAILED, PENDD
 }
 @property (nonatomic, readonly) enum SE_DATA_UPLOAD_STATE mCurrentUploadState;
 - (void) upload: (SEDataForUpload*)data;
+//- (void) sendOneComment: (NSString*)text;
+@end
 
+@interface SECommentSender : NSObject
+{
+    NSString* mContent;
+    id mFinishedTarget;
+    SEL mFinishedAction;
+    NSMutableData* mRecvData;
+    int mStatusCode;
+    UILabel* mOutTextLabel;
+}
+- (id) initWithComment: (NSString*)text label: (UILabel*)label;
+- (void) sendWith: (id) target finishedAction: (SEL)action;
+- (void) setOutputText: (NSString*) text;
 @end

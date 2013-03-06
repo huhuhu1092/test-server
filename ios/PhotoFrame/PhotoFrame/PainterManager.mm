@@ -15,8 +15,17 @@
 #import "PHImageView.h"
 #import "SEImageAsyncLoader.h"
 #import "SEViewNavigator.h"
+#import "UserInfo.h"
+#import "SelectedImage.h"
+#import "SEResDefine.h"
+#import "SESystemConfig.h"
+#import "Signature.h"
+#import "PhotoFrameAppDelegate.h"
+#import "SEUserDefaultManager.h"
+#import "SESystemDataManager.h"
 #import <list>
 #import <algorithm>
+#import <sys/time.h>
 typedef struct _Image
 {
 	int x;
@@ -66,7 +75,34 @@ static CGContextRef MyCreateBitmapContext (int pixelsWide,
     return context;// 7
 }
 */
+#define IMAGE_HORIZON 1
+#define IMAGE_VERTICAL 0
 static PainterManager* sPainterManager;
+static float calculateDensity(float brush_density_max, float brush_density_min)
+{
+    //float sliderMin = [SESystemConfig getMinDensityValue];
+    float sliderMax = [SESystemConfig getMaxDensityValue];
+    UserInfo* userInfo = [[PhotoFrameAppDelegate getViewNavigator] getUserInfo];
+    SEViewNavigator* viewNav = [PhotoFrameAppDelegate getViewNavigator];
+    float currentSelectDensity = [viewNav.mSystemDataManager.brushdensity intValue];
+    float ratio = currentSelectDensity / sliderMax;
+    float ret = brush_density_min + ratio * (brush_density_max - brush_density_min);
+    NSLog(@"density value = %f", ret);
+    return ret;
+}
+static float calculateEdgeDetectValue(float edgeDetectValue, float currentSelect)
+{
+    //float sliderMin = [SESystemConfig getMinEdgeDetectValue];
+    float sliderMax = [SESystemConfig getMaxEdgeDetectValue];
+    //UserInfo* userInfo = [[PhotoFrameAppDelegate getViewNavigator] getUserInfo];
+    //float currentSelect = mCurrentEdgeDetectValue;//[userInfo.brushedgedetect intValue];
+    //currentSelect = 10 - currentSelect;
+    currentSelect = sliderMax - currentSelect;
+    float ratio = 2 * currentSelect / sliderMax;
+    float ret = edgeDetectValue * ratio;
+    NSLog(@"edge detect value = %f", ret);
+    return ret;
+}
 static ppm_t grabarea (Image drawable)
 {
     Image  src_rgn;
@@ -78,6 +114,7 @@ static ppm_t grabarea (Image drawable)
     gint          rowstride;
     ppm_t infile = {0, 0, NULL};
     BOOL colorRevert = sPainterManager.painterState.colorRevert;
+    //NSLog(@"color revert = %d", colorRevert);
     //gimp_drawable_mask_bounds (drawable->drawable_id, &x1, &y1, &x2, &y2);
     x1 = drawable.x;
     y1 = drawable.y;
@@ -185,7 +222,9 @@ static ppm_t grabarea (Image drawable)
                         tmprow[k + 1] = s[1];
                         tmprow[k + 2] = s[2];
                     }
-                    
+                    //assert(s[0] == 255);
+                    //assert(s[1] == 255);
+                    //assert(s[2] == 255);
                     s += 4;
                 }
                 
@@ -205,18 +244,16 @@ static CFDataRef getImageData(CGImageRef inImage)
     return dataRef;
 }
 ///////
-@interface SEPainterManagerLoadPhoto : NSObject<SELoadedImageHandler>
+@interface SEPainterManagerLoadPhoto : SEImageAsyncLoadHandler
 {
-    SEImageAsyncLoader* imageLoader;
     UIImage* currentImage;
     PainterManager* pm;
 }
 @property (nonatomic, assign) PainterManager* pm;
-@property (nonatomic, retain) SEImageAsyncLoader* imageLoader;
+//@property (nonatomic, retain) SEImageAsyncLoader* imageLoader;
 @end
 @implementation SEPainterManagerLoadPhoto
 @synthesize pm;
-@synthesize imageLoader;
 -(void) setImage:(UIImage *)image
 {
     [currentImage release];
@@ -224,39 +261,75 @@ static CFDataRef getImageData(CGImageRef inImage)
 }
 - (void)dealloc
 {
-    NSUInteger count1 = [imageLoader retainCount];
     NSUInteger count2 = [currentImage retainCount];
     [currentImage release];
-    [imageLoader release];
-
     [super dealloc];
 }
 - (void) preHandleImage
 {}
+/*
+- (CGSize) calculateImageSizeByRatio: (CGSize) size dstSize: (CGSize) dstSize
+{
+    if(dstSize.width > dstSize.height)
+    {
+        float ratio = size.width / size.height;
+        float width = ratio * dstSize.height;
+        if(width < dstSize.width)
+        {
+            float height = dstSize.width / ratio;
+            return CGSizeMake(dstSize.width, height);
+        }
+        else
+        {
+            return CGSizeMake(width, dstSize.height);    
+        }
+    }
+    else
+    {
+        float ratio = size.width / size.height;
+        float height = dstSize.width / ratio;
+        if(height < dstSize.height)
+        {
+            float width = dstSize.height * ratio;
+            return CGSizeMake(width, dstSize.height);
+        }
+        else 
+        {
+            return CGSizeMake(dstSize.width, height);
+        }
+    }
+}
+*/
 - (void)handleImage
 {
     //// for test
     /*
-    CGImageRef im = [currentImage CGImage];
+    UIGraphicsBeginImageContext(CGSizeMake(1024, 768));
+    [currentImage drawInRect:CGRectMake(0, 0, 1024, 768)];
+    UIImage* retImage1 = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    //CGImageRef im = [currentImage CGImage];
+    CGImageRef im = [retImage1 CGImage];
     CFDataRef imageData = getImageData(im);
     size_t bbb = CGImageGetBitsPerPixel(im);
     size_t bytesPerRow = CGImageGetBytesPerRow(im);
     CFIndex len = CFDataGetLength(imageData);
-    size_t width = CGImageGetWidth(im);
-    size_t height = CGImageGetHeight(im);
-    NSLog(@"CFDataRef data size = %ld", len );
+    size_t width1 = CGImageGetWidth(im);
+    size_t height1 = CGImageGetHeight(im);
+    NSLog(@"CFDataRef data size = %ld, width = %lu, height = %lu", len ,width1, height1);
     
     random_generator = g_rand_new ();
     Image srcImage;
     srcImage.x = 0;
     srcImage.y = 0;
-    srcImage.width = width;
-    srcImage.height = height;
+    srcImage.width = width1;
+    srcImage.height = height1;
     srcImage.bpp = bbb / 8;
     srcImage.rowstride = bytesPerRow;
     srcImage.data = CFDataGetBytePtr(imageData);
     ppm_t infile = grabarea(srcImage);
-    ppm_t edgeD = edgeDetection(&infile);
+    ppm_t edgeD = edgeDetection(&infile, 128, 255);
     CGImageRef newImage = [PainterManager createCGImage:edgeD];
     ppm_kill(&infile);
     UIImage* uiImage = [UIImage imageWithCGImage:newImage];
@@ -264,17 +337,216 @@ static CFDataRef getImageData(CGImageRef inImage)
     PHImageView* imageView = [[PainterManager painterManager] getImageView];
     imageView.image = uiImage;
     [imageView setNeedsDisplay];
-     */
-    ////
+    //NSDate* date = [NSDate date];
+    //NSString* str = [date description];
+    //NSLog(@"date = %@", str);
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    NSString* str = [NSString stringWithFormat:@"%s%ld%ld", "test-", time.tv_sec, time.tv_usec];
+    [SEUtil savePNGImageToDocument:imageView.image withName:str];
+     
+    return;
+    */
     
     const float pi = 3.1415926;
     CGImageRef imageRef = [currentImage CGImage];
-    int width = CGImageGetWidth(imageRef);
-    int height = CGImageGetHeight(imageRef);
+    /*
+    size_t currentImageWidth = CGImageGetWidth(imageRef);
+    size_t currentImageHeight = CGImageGetHeight(imageRef);
+    size_t currentBPP = CGImageGetBitsPerPixel(imageRef);
+    currentBPP /= 8;
+    CGDataProviderRef currentDataProvider = CGImageGetDataProvider(imageRef);
+    CFDataRef currentDataRef = CGDataProviderCopyData(currentDataProvider);
+    const uint8_t* currentData = CFDataGetBytePtr(currentDataRef);
+    for(int i = 0 ; i < currentImageHeight ; i++)
+    {
+        for(int j = 0 ; j < currentImageWidth ; j++)
+        {
+            int r = currentData[i * currentBPP * currentImageWidth + j * currentBPP];
+            int g = currentData[i * currentBPP * currentImageWidth + j * currentBPP + 1];
+            int b = currentData[i * currentBPP * currentImageWidth + j * currentBPP + 2];
+            if((r > 171 || r < 168) || (g > 171 || g < 168) || (b > 171 || b < 168))
+            {
+                NSLog(@"current r = %d, g = %d, b = %d", r, g, b);
+            }
+        }
+    }
+     CFRelease(currentDataRef);
+     */
+    
+    /////////////////////////////////////////////
+    int width = currentImage.size.width;//CGImageGetWidth(imageRef);
+    int height = currentImage.size.height;//CGImageGetHeight(imageRef);
     UIImageOrientation orientation = currentImage.imageOrientation;
+    NSLog(@"## %s : full image width = %d, height = %d, orientation = %d", __FUNCTION__, width, height, orientation);
     CGSize dsts = [pm currentPainterImageSize];
+    CGSize tmpSize = dsts;
+    if(width < height)
+    {
+        tmpSize.width = dsts.height;
+        tmpSize.height = dsts.width;
+    }
+    CGSize actualSize = [SEUtil calculateImageSizeByRatio:CGSizeMake(width, height) dstSize:tmpSize];
+    UIImage* newImage = [SEUtil drawImage:currentImage toSize:actualSize]; 
+    imageRef = [newImage CGImage];//[SEUtil fastScale:[currentImage CGImage] withRect:actualSize ];//[newImage CGImage];
+    //width = CGImageGetWidth(imageRef);
+    //height = CGImageGetHeight(imageRef);
+    orientation = newImage.imageOrientation;
+    NSLog(@"## %s : new full image width = %d, height = %d, orientation = %d", __FUNCTION__, width, height, orientation);
     CGContextRef context = MyCreateBitmapContext(dsts.width, dsts.height);
-    pm.mCurrentImageOrientation = 0;
+    //CGRect drawRect = CGRectMake((dsts.width - actualSize.width) / 2, (dsts.height - actualSize.height) / 2, actualSize.width, actualSize.height);
+    if(width >= height)
+    {
+        CGRect drawRect = CGRectMake((dsts.width - actualSize.width) / 2, (dsts.height - actualSize.height) / 2, actualSize.width, actualSize.height);
+        switch (orientation) {
+            case UIImageOrientationUp:
+            {
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationDown:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi);
+                CGContextTranslateCTM(context, -dsts.width / 2, -dsts.height / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationLeft:
+            {
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationLeft;
+            }
+                break;
+            case UIImageOrientationRight:
+            {
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRight;
+            }
+                break;
+            case UIImageOrientationUpMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextScaleCTM(context, -1, 1);
+                CGContextTranslateCTM(context, -dsts.width / 2, -dsts.height / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+                
+            case UIImageOrientationDownMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextScaleCTM(context, 1, -1);
+                CGContextTranslateCTM(context, -dsts.width / 2, -dsts.height / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationLeftMirrored:
+            {
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationLeftMirrored;
+            }
+                break;
+            case UIImageOrientationRightMirrored:
+            {
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRightMirrored;
+            }
+                break;
+            
+            default:
+                break;
+        }
+    }
+    else 
+    {
+        CGRect drawRect = CGRectMake((dsts.height - actualSize.width) / 2, (dsts.width - actualSize.height) / 2, actualSize.width, actualSize.height);
+        switch (orientation) 
+        {
+            case UIImageOrientationUp:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRight;
+            }
+                break;
+            case UIImageOrientationDown:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, -pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRight;
+            }
+                break;
+            case UIImageOrientationLeft:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationRight:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, -pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationUpMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRight;
+            }
+                break;
+            case UIImageOrientationDownMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi / 2);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationRight;
+            }
+                break;
+            case UIImageOrientationLeftMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, pi / 2);
+                CGContextScaleCTM(context, -1, 1);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            case UIImageOrientationRightMirrored:
+            {
+                CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
+                CGContextRotateCTM(context, -pi / 2);
+                CGContextScaleCTM(context, -1, 1);
+                CGContextTranslateCTM(context, -dsts.height / 2, -dsts.width / 2);
+                CGContextDrawImage(context, drawRect, imageRef);
+                pm.mCurrentImageOrientation = UIImageOrientationUp;
+            }
+                break;
+            default:
+                break;
+        }
+    }
+    /*
+    pm.mCurrentImageOrientation = orientation;
     if(width < height)
     {
         CGContextTranslateCTM(context, dsts.width / 2, dsts.height / 2);
@@ -297,13 +569,52 @@ static CFDataRef getImageData(CGImageRef inImage)
         
         CGContextDrawImage(context, CGRectMake(0, 0, dsts.width, dsts.height), imageRef);
     }
+     */
     CGImageRef theCGImage = CGBitmapContextCreateImage(context);
     CGContextRelease(context);
     UIImage* retImage = [UIImage imageWithCGImage:theCGImage];
     CGImageRelease(theCGImage);
     retImage = [retImage retain];
+    //for test
+    /*
+    CGDataProviderRef retDataProvider = CGImageGetDataProvider(theCGImage);
+    size_t retBpp = CGImageGetBitsPerPixel(theCGImage);
+    size_t retWidth = CGImageGetWidth(theCGImage);
+    size_t retHeight = CGImageGetHeight(theCGImage);
+    retBpp /= 8;
+    CFDataRef retDataRef = CGDataProviderCopyData(retDataProvider);
+    const uint8_t* retData = CFDataGetBytePtr(retDataRef);
+    
+    for(int i = 0 ; i < retHeight ; i++)
+    {
+        for(int j = 0 ; j < retWidth ; j++)
+        {
+            int r = retData[i * retBpp * retWidth + j * retBpp];
+            int g = retData[i * retBpp * retWidth + j * retBpp + 1];
+            int b = retData[i * retBpp * retWidth + j * retBpp  + 2];
+            if((r > 171 || r < 168) || (g > 171 || g < 168) || (b > 171 || b < 168))
+            {
+                NSLog(@"r = %d, g = %d, b = %d", r, g, b);
+            }
+        }
+    }
+    
+    CFRelease(retDataRef);
+     */
+    //end
+    
+    //for test
+    //PHImageView* imageView = [[PainterManager painterManager] getImageView];
+    //imageView.image = newImage;
+    //[imageView setNeedsDisplay];
+    //[SEUtil savePNGImageToDocument:retImage withName:@"inputImage"];
+    //end
+    
+    
     [pm performSelectorInBackground:@selector(displayUIImageWithThread:) withObject:retImage];
-     
+    [currentImage release];
+    currentImage = nil;
+    
 }
 @end
 ///////////
@@ -321,7 +632,6 @@ static CFDataRef getImageData(CGImageRef inImage)
     {
         modelManager = new SS_ModelManager;
         modelManager->loadModel("photoframe.cbf");
-        //modelManager->loadModel("MyFrame.cbf");
     }
     return self;
 }
@@ -337,6 +647,7 @@ static CFDataRef getImageData(CGImageRef inImage)
     SS_BrushListPool* brushListPool;
     SS_Canvas* brushCanvas;
     SS_PausePoint* pausePoint;
+    SS_AtomicCounter* statusPoint;
 }
 - (id)init;
 @end
@@ -351,6 +662,7 @@ static CFDataRef getImageData(CGImageRef inImage)
         brushListPool = SS_BrushListPoolCreate();
         brushCanvas = SS_CanvasCreate();
         pausePoint = SS_PausePointCreate();
+        statusPoint = SS_CreateAtomicConter();
     }
     return self;
 }
@@ -368,6 +680,10 @@ static CFDataRef getImageData(CGImageRef inImage)
     {
         SS_PausePointRelease(pausePoint);
     }
+    if(statusPoint)
+    {
+        SS_ReleaseAtomicCounter(statusPoint);
+    }
     [super dealloc];
 }
 @end
@@ -379,8 +695,8 @@ static CFDataRef getImageData(CGImageRef inImage)
 @synthesize height;
 @synthesize orient_type;
 @synthesize orient_num;
-@synthesize  orient_first;
-@synthesize  orient_last;
+@synthesize orient_first;
+@synthesize orient_last;
 @synthesize size_num;
 @synthesize size_first;
 @synthesize size_last;
@@ -398,6 +714,41 @@ static CFDataRef getImageData(CGImageRef inImage)
 @synthesize brushName1;
 @synthesize brushName2;
 @synthesize paperName;
+@synthesize brush_density_max;
+@synthesize brush_density_min;
+@synthesize edgeDetectLowValue;
+- (void) print
+{
+    NSLog(@"#### param value #######");
+    NSLog(@"state = %d", state );
+    NSLog(@"paintid = %@", paintid);
+    NSLog(@"sid = %d, %d, %d, %d", sid[0], sid[1], sid[2], sid[3]);
+    NSLog(@"width = %d ", width);
+    NSLog(@"height = %d ", height);
+    NSLog(@"orient_type = %d ", orient_type);
+    NSLog(@"orient_num = %d", orient_num);
+    NSLog(@"orient_first = %f", orient_first);
+    NSLog(@"orient_last = %f", orient_last);
+    NSLog(@"size_num = %d", size_num);
+    NSLog(@"size_first = %f", size_first);
+    NSLog(@"size_last = %f", size_last);
+    NSLog(@"size_type = %d", size_type);
+    NSLog(@"bg_type = %d", bg_type);
+    NSLog(@"place_type = %d", place_type);
+    NSLog(@"brush_density = %f", brush_density);
+    NSLog(@"paper_scale = %f", paper_scale);
+    NSLog(@"paper_relief = %f", paper_relief);
+    NSLog(@"brush_relief = %f", brush_relief);
+    NSLog(@"color_type = %d", color_type);
+    NSLog(@"drawing_speed = %d", drawing_speed);
+    NSLog(@"wait_time = %d", wait_time);
+    NSLog(@"brushName = %@", brushName);
+    NSLog(@"brushName1 = %@", brushName1);
+    NSLog(@"brushName2 = %@", brushName2);
+    NSLog(@"paperName = %@", paperName);
+    NSLog(@"edgeDetectLowValue = %f", edgeDetectLowValue);
+    NSLog(@"#### end #####");
+}
 - (id)init
 {
     self = [super init];
@@ -456,6 +807,221 @@ static CFDataRef getImageData(CGImageRef inImage)
 }
 @end
 
+@implementation BrushDefine
+@synthesize brushGettingWay;
+@synthesize brushID;
+@synthesize brushGettingName;
+@synthesize brushGettingLevel;
+@synthesize brushNames;
+@synthesize brushOutName;
+- (id) init
+{
+    self = [super init];
+    if(self)
+    {
+        brushNames = [[NSMutableArray alloc] initWithArray:[NSArray array]];
+    }
+    return self;
+}
+- (void) dealloc
+{
+    [brushNames release];
+    [brushOutName release];
+    [super dealloc];
+}
+- (void) addBrushName: (NSString*) brushName
+{
+    [brushNames addObject:brushName];
+}
+- (NSArray*) getBrushNames
+{
+    return [NSArray arrayWithArray:brushNames];
+}
+@end
+@implementation BrushPackage
+@synthesize packageName;
+- (id) init
+{
+    self = [super init];
+    if(self)
+    {
+        brushDefineArray = [[NSMutableArray alloc] initWithArray:[NSArray array]];
+        brushNameArray = [[NSMutableArray alloc] initWithArray:[NSArray array]];
+        nameArray = [[NSMutableArray alloc] initWithArray:[NSArray array]];
+    }
+    return self;
+}
+- (void) dealloc
+{
+    [brushDefineArray release];
+    [brushNameArray release];
+    [nameArray release];
+    [packageName release];
+    [super dealloc];
+}
+- (void) load:(NSString *)pn
+{
+    self.packageName = pn;
+    NSString* data = [SEUtil readDataFromDocumentDir:pn];
+    if(data == nil)
+    {
+        data = [SEUtil readDataFromBundle:pn];
+    }
+    if(data == nil)
+    {
+        NSLog(@"## can not find brush package : %@ ##\n", pn);
+        return;
+    }
+    NSArray* dataLines = [data componentsSeparatedByString:@"\n"];
+    enum BLOCK_TYPE {NO_BLOCK, BRUSH_TABLE_BLOCK, NAME_BLOCK, BRUSH_NAME_BLOCK};
+    BLOCK_TYPE blockType = NO_BLOCK;
+    for(int i = 0 ; i < dataLines.count ; i++)
+    {
+        NSString* line = [dataLines objectAtIndex:i];
+        if([SEUtil isWhitespaceLine:line])
+            continue;
+        line = [SEUtil stringTrim:line];
+        NSUInteger len = line.length;
+        unichar firstC = [line characterAtIndex:0];
+        unichar lastC = [line characterAtIndex:len - 1];
+        if(firstC == '[' && lastC == ']')
+        {
+            if([line isEqualToString:@"[BrushTable]"])
+            {
+                blockType = BRUSH_TABLE_BLOCK;
+            }
+            else if([line isEqualToString:@"[Names]"])
+            {
+                blockType = NAME_BLOCK;
+            }
+            else if([line isEqualToString:@"[Brushes]"])
+            {
+                blockType = BRUSH_NAME_BLOCK;
+            }
+            continue;
+        }
+        NSCharacterSet* cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+        NSArray* tokens = [line componentsSeparatedByCharactersInSet:cs];
+        NSArray* newTokens = [NSArray array];
+        for(NSString* str in tokens)
+        {
+            if([SEUtil isWhitespaceLine:str] == NO)
+            {
+                newTokens = [newTokens arrayByAddingObject:str];
+            }
+        }
+        tokens = newTokens;
+        NSString* s = nil;
+        BrushDefine* bd = nil;
+        NSMutableArray* data = nil;
+        switch (blockType)
+        {
+            case BRUSH_NAME_BLOCK:
+                data = [NSMutableArray array];
+                s = [tokens objectAtIndex:0];
+                [data addObject:s];
+                s = [tokens objectAtIndex:1];
+                [data addObject:[NSNumber numberWithInt:[s intValue]]];
+                [brushNameArray addObject:data];
+                break;
+            case NAME_BLOCK:
+                data = [NSMutableArray array];
+                s = [tokens objectAtIndex:0];
+                [data addObject:s];
+                s = [tokens objectAtIndex:1];
+                [data addObject:[NSNumber numberWithInt:[s intValue]]];
+                [nameArray addObject:data];
+                break;
+            case BRUSH_TABLE_BLOCK:
+                bd = [[BrushDefine alloc] init];
+                s = [[tokens objectAtIndex:0] stringByTrimmingCharactersInSet:cs];
+                bd.brushID = [s intValue];
+                s = [[tokens objectAtIndex:1] stringByTrimmingCharactersInSet:cs];
+                [bd.brushNames addObject:[NSNumber numberWithInt:[s intValue]]];
+                s = [[tokens objectAtIndex:2] stringByTrimmingCharactersInSet:cs];
+                [bd.brushNames addObject:[NSNumber numberWithInt:[s intValue]]];
+                s = [[tokens objectAtIndex:3] stringByTrimmingCharactersInSet:cs];
+                [bd.brushNames addObject:[NSNumber numberWithInt:[s intValue]]];
+                s = [[tokens objectAtIndex:4] stringByTrimmingCharactersInSet:cs];
+                bd.brushGettingWay = [s intValue];
+                s = [[tokens objectAtIndex:5] stringByTrimmingCharactersInSet:cs];
+                bd.brushGettingLevel = [s intValue];
+                s = [[tokens objectAtIndex:6] stringByTrimmingCharactersInSet:cs];
+                bd.brushGettingName = [s intValue];
+                s = [[tokens objectAtIndex:7] stringByTrimmingCharactersInSet:cs];
+                bd.brushOutName = s;
+                NSLog(@"brush out name = %@", s);
+                [brushDefineArray addObject:bd];
+                [bd release];
+                break;
+            default:
+                assert(0);
+                break;
+        }
+        
+    }
+}
+- (NSString*) getBrushString: (int) index
+{
+    for(int i = 0 ; i < brushNameArray.count ; i++)
+    {
+        NSArray* data = [brushNameArray objectAtIndex:i];
+        int tmpIndex = [[data objectAtIndex:1] intValue];
+        if(tmpIndex == index)
+            return [data objectAtIndex:0];
+    }
+    return nil;
+}
+- (BrushDefine*) getBrushDefineByOutName: (NSString*)outName
+{
+    for(int i = 0 ;i < brushDefineArray.count ; i++)
+    {
+        BrushDefine* bd = [brushDefineArray objectAtIndex:i];
+        if([bd.brushOutName isEqualToString:outName])
+            return bd;
+    }
+    return nil;
+}
+- (BrushDefine*) getBrushDefine: (int) currentBrushId
+{
+    for(int i = 0 ;i < brushDefineArray.count ; i++)
+    {
+        BrushDefine* bd = [brushDefineArray objectAtIndex:i];
+        if(bd.brushID == currentBrushId)
+            return bd;
+    }
+    return nil;
+}
+- (NSArray*) getAllBrushID
+{
+    NSMutableArray* idArray = [NSMutableArray array];
+    for(int i = 0 ; i < brushDefineArray.count ; i++)
+    {
+        BrushDefine* bd = [brushDefineArray objectAtIndex:i];
+        [idArray addObject:[NSNumber numberWithInt:bd.brushID]];
+    }
+    return idArray;
+}
+
+- (NSArray*) getBrushes: (int) currentBrushID
+{
+    BrushDefine* bd = [self getBrushDefine:currentBrushID];
+    if(bd == nil)
+        return nil;
+    NSMutableArray* brushes = bd.brushNames;
+    NSMutableArray* retBrushes = [NSMutableArray array];
+    for(NSNumber* n in brushes)
+    {
+        int i = [n intValue];
+        NSString* str = [self getBrushString:i];
+        assert(str != nil);
+        if(str != nil)
+            [retBrushes addObject: str];
+    }
+    return retBrushes;
+}
+@end
+//////
 struct ParamColumn
 {
     char name[32];
@@ -479,7 +1045,8 @@ static struct ParamColumn paramColumnSet[] = {
     {"大小", P_SIZE_TYPE},
     {"背景", P_BG_TYPE},
     {"放置", P_PLACE_TYPE},
-    {"比划密度", P_BRUSH_DENSITY},
+    {"最大比划密度", P_BRUSH_DENSITY_MAX},
+    {"最小笔画密度", P_BRUSH_DENSITY_MIN},
     {"时间", P_WAITING_TIME},
     {"速度", P_DRAWING_SPEED}
 };
@@ -531,7 +1098,7 @@ struct _BrushPiecesList
         currentSeq = 0;
         bSaveBrush = YES;
         bShowSettingUI = YES;
-        currentBrushSet = [[NSArray alloc] initWithObjects:@"paintbrush.pgm", @"defaultbrush.pgm", @"paintbrush02.pgm", nil];
+        //currentBrushSet = [[NSArray alloc] initWithObjects:@"paintbrush.pgm", @"defaultbrush.pgm", @"paintbrush02.pgm", nil];
     }
     return self;
 }
@@ -560,9 +1127,12 @@ struct _BrushPiecesList
 - (void) displayCGImage:(CGImageRef)im;
 - (void) setParam: (PainterParam*)p atType:(SSParamColumnType)index withContent:(NSString*)token;
 - (void) computeFinished : (NSObject*) data;
-- (void) saveCurrentPass;
+- (void) saveCurrentPass: (BOOL) hasSignature;
+- (BOOL) isSelectedImageValid: (NSString*) url : (NSString*) date;
 - (PHImageView*)getImageView;
 - (void) drawSignature;
+- (void) readBrushDefine;
+- (NSString*) readDataFromDocumentDir:(NSString*) fileName;
 @end
 @implementation PainterManager (PrivateMethod)
 - (void) displayCGImage:(CGImageRef)im
@@ -613,6 +1183,38 @@ struct _BrushPiecesList
     srcImage.rowstride = bytesPerRow;
     srcImage.data = CFDataGetBytePtr(imageData);
     ppm_t infile = grabarea(srcImage);
+    CFRelease(imageData);
+    CGImageRelease(im);
+    static BOOL firstBg = YES;
+    if(firstBg)
+    {
+        firstBg = NO;
+        UIImage* image = [mViewNav.mResLoader getImage:@"MainDisplayBg"];
+        //UIImage* image = [UIImage imageNamed:@"whitecolor.png"];
+        CGImageRef imageRef = [image CGImage];
+        CFDataRef bgData = getImageData(imageRef);
+        size_t imageBits = CGImageGetBitsPerPixel(imageRef);
+        size_t imageWidth = CGImageGetWidth(imageRef);
+        size_t imageHeight = CGImageGetHeight(imageRef);
+        CFIndex imagelen = CFDataGetLength(bgData);
+        size_t imageBytesPerRow = CGImageGetBytesPerRow(imageRef);
+        Image bgImage;
+        bgImage.x = 0;
+        bgImage.y = 0;
+        bgImage.width = imageWidth;
+        bgImage.height = imageHeight;
+        bgImage.bpp = imageBits / 8;
+        bgImage.rowstride = imageBytesPerRow;
+        bgImage.data = CFDataGetBytePtr(bgData);
+        ppm_t bgPPM = grabarea(bgImage);
+        CFRelease(bgData);
+        SS_Canvas* currentCanvas = SS_GetCurrentCanvas();
+        SS_SetCanvasBackground(currentCanvas, bgPPM);
+    }
+    else
+    {
+            
+    }
     //debug
     /*
     for(int i = 0 ; i < infile.height * infile.width * 3; i++)
@@ -628,7 +1230,7 @@ struct _BrushPiecesList
     //SE_setBackground(infile);
     //end
     
-    CFRelease(imageData);
+    
     //CGImageRelease(im);
     
     NSLog(@"######################### get infile ####################\n");
@@ -639,43 +1241,129 @@ struct _BrushPiecesList
     startTime();
     RepaintData rd;
     PainterParam* myCurrentParam = [self currentParam];
+    [myCurrentParam print];
+    rd.pass = displayIndex;
+    rd.adjustAngle = mAdjustAngle;
+    rd.edgeDetectionEnd = 255;
+    rd.edgeDetectionStart = 80;
+    int times = [painterState paintTimes];
+    static int edgeDetectionPassStartPos[] = {-1, -1, -1, 2, 2, 3, 4, 5, 6, 7, 7};
+    rd.brushNum = 0;
+    rd.currentGrayIndex = 0;
     rd.calculateOnEdge = [myCurrentParam getSid:3] == 2;
-    NSLog(@"### calculate edge = %d ###", rd.calculateOnEdge);
-    repaint(&infile, NULL, rd);
+    NSLog(@"## mCurrentEdgeDetectValue = %d ##", mCurrentEdgeDetectValue);
+    rd.edgeDetectionStart = calculateEdgeDetectValue(myCurrentParam.edgeDetectLowValue, mCurrentEdgeDetectValue);
+    float minBrushTransparent = [SESystemConfig getMinBrushTransparentValue];
+    float maxBrushTransparent = [SESystemConfig getMaxBrushTransparentValue];
+    float radiusRatio = (mCurrentTransparentValue - minBrushTransparent) / (maxBrushTransparent - minBrushTransparent);
+    float maxRadiusH = 100 * radiusRatio;
+    float maxRadiusV = 100 * radiusRatio;
+    float minRadius = 50 * radiusRatio;
+    float maxSigma = 120;
+    int radiusH = (int)(maxRadiusH + (minRadius - maxRadiusH) * displayIndex / (times - 1));
+    int radiusV = (int)(maxRadiusV + (minRadius - maxRadiusV) * displayIndex / (times - 1));
+    float sigma = (maxSigma + (1 - maxSigma) * displayIndex / (times - 1));
+    if(displayIndex == (times - 1))
+    {
+        radiusH = 0;
+        radiusV = 0;
+    }
+    rd.blurRadiusH = radiusH;
+    rd.blurRadiusV = radiusV;
+    rd.blurSigmaValue = sigma;
+    rd.blurRatio = radiusRatio;
+    rd.totalTimes = times;
+
+    if(displayIndex == times - 1)
+    {
+        rd.lastTime = true;
+    }
+    else
+    {
+        rd.lastTime = false;
+    }
+    if(times % 2 == 0)
+    {
+        times = times / 2;
+    }
+    else
+    {
+        times = times / 2 + 1;
+    }
+    int step = 10 / times;
+    if(displayIndex < times)
+    {
+        rd.brushSizeComp = 10 - displayIndex * step;
+    }
+    else 
+    {
+        rd.brushSizeComp = 0;
+    }
+    
+    if(myCurrentParam.width == 1024 && myCurrentParam.height == 768)
+    {
+        rd.mostConcisePass = true;
+    }
+    else 
+    {
+        rd.mostConcisePass = false;
+    }
+        
+    NSLog(@"### calculate edge = %d ###\n", rd.calculateOnEdge);
+    //repaint4(&infile, NULL, rd);
+    if(infile.width == 1024 && infile.height == 768)
+    {
+        SS_Canvas* currentCanvas = SS_GetCurrentCanvas();
+        SS_SetCanvasOriginMap(currentCanvas, &infile);
+    }
+    repaint3(&infile, NULL, rd);
     endTime();
     double t = getTime();
     NSLog(@"### consume time is %f ###\n", t);
     ppm_kill(&infile);
     g_rand_free(random_generator);
+    
 
+    //[NSThread sleepForTimeInterval:120];
+    [self performSelectorOnMainThread:@selector(computeFinished:) withObject:nil waitUntilDone:NO];
+}
+- (void) computeFinished : (NSObject*) data
+{
+    // make last piece added in main thread
     BrushPiece bp;
     bp.last_piece = 1;
     SS_BrushList* bl = SS_BrushListCreate();
     SS_AddBrushPiece(bl, bp);
     SS_BrushListPool* blp = SS_GetBrushListPool();
     SS_AddBrushList(blp, bl);
-    [self performSelectorOnMainThread:@selector(computeFinished:) withObject:nil waitUntilDone:NO];
-    //SS_DrawInMainThread(NULL, 0);
-}
-- (void) computeFinished : (NSObject*) data
-{
+    
     if(mDrawFinishedArray[displayIndex] == NO)
     {
         SS_Pause((SS_PausePoint*)[self currentPausePoint]);
         
     }
+    //SS_AddLog("###### compute end ########\n");
+    NSLog(@"###### compute end ########\n");
+    mComputeThreadEnd = YES;
+    [mViewNav computeEnd];
     /*
-    if(displayIndex == ([painterState paintTimes] - 1))
+    DRAW_IMAGE_STATE currentDrawImageState = [mViewNav getDrawImageState];
+    if(currentDrawImageState == STOPPING_DRAWING_IMAGE)
     {
-        BrushPiece bp;
-        bp.last_piece = 2;
-        SS_BrushList* bl = SS_BrushListCreate();
-        SS_AddBrushPiece(bl, bp);
-        SS_BrushListPool* blp = SS_GetBrushListPool();
-        SS_AddBrushList(blp, bl);
+        [self releaseResourceForDraw];
+        [mViewNav setDrawImageState:STOP_DRAW_IMAGE];
+    }
+    else if(currentDrawImageState == START_DRAW_IMAGE)
+    {
+        [self nextDisplayStage];
+    }
+    else if(currentDrawImageState == START_DRAW_IMAGE_PENDING)
+    {
+        [mViewNav setDrawImageState:START_DRAW_IMAGE];
+        [self releaseResourceForDraw];
+        [mViewNav displayNextImage];
     }
      */
-    [self nextDisplayStage];
 }
 - (PainterParam*) getPainterParam:(NSString*)paramID
 {
@@ -738,7 +1426,12 @@ struct _BrushPiecesList
 }
 - (BOOL) readPainterQuality : (NSString*)fileName
 {
-    NSString* dataContent = [self readDataFile:fileName];
+    NSString* dataContent = nil;
+    dataContent = [self readDataFromDocumentDir:@"paramid_url.txt"];
+    if(dataContent == nil)
+    {
+        dataContent = [self readDataFile:fileName];
+    }
     if(dataContent)
     {
         NSArray* dataLines = [dataContent componentsSeparatedByString:@"\n"];
@@ -750,6 +1443,7 @@ struct _BrushPiecesList
                 continue;
             NSCharacterSet* cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
             NSArray* tokens = [line componentsSeparatedByCharactersInSet:cs];
+            tokens = [SEUtil removeWhiteLineStringFrom:tokens];
             NSUInteger j;
             PainterQuality* pq = [[PainterQuality alloc] init];
             [pq autorelease];
@@ -812,6 +1506,7 @@ struct _BrushPiecesList
         }
         NSCharacterSet* cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
         NSArray* tokens = [line componentsSeparatedByCharactersInSet:cs];
+        tokens = [SEUtil removeWhiteLineStringFrom:tokens];
         NSUInteger j;
         PainterParam* p = [[PainterParam alloc] init];
         
@@ -828,6 +1523,40 @@ struct _BrushPiecesList
     }
 
 }
+- (NSString*) readDataFromDocumentDir:(NSString*) fileName
+{
+    NSArray* dirArray = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* dirPath = [dirArray objectAtIndex:0];
+    NSString* filePath = [dirPath stringByAppendingFormat:@"/", fileName];
+    NSString* dataContent = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+    return dataContent;
+}
+/*
+- (void) addBrushDefine : (NSArray*) tokens
+{
+    BrushDefine* bd = [[BrushDefine alloc] init];
+    [brushDefineArray addObject:bd];
+    [bd release];
+    if(tokens.count == 3)
+    {
+        for(NSString* s in tokens)
+        {
+            [bd addBrushName:s];
+        }
+    }
+    else
+    {
+        //TO-DO: add full brush define property
+        assert(0);
+    }
+}
+ */
+- (void) readBrushDefine
+{
+    brushPackage = [[BrushPackage alloc] init];
+    [brushPackage load:@"brushdefine.txt"];
+}
+
 - (BOOL) readParamFromDataFile: (NSString*)fileName;
 {
     NSString* dataContent = [self readDataFile:fileName];
@@ -849,6 +1578,7 @@ struct _BrushPiecesList
             }
             NSCharacterSet* cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
             NSArray* tokens = [line componentsSeparatedByCharactersInSet:cs];
+            tokens = [SEUtil removeWhiteLineStringFrom:tokens];
             NSUInteger j;
             PainterParam* p = [[PainterParam alloc] init];
             int ct = 0;
@@ -894,7 +1624,7 @@ struct _BrushPiecesList
         {
             const char* data = [token cStringUsingEncoding:NSUTF8StringEncoding];
             p.paintid = token;
-            if(strlen(data) == 10)
+            if(strlen(data) == 13)
             {
                 char buf[3];
                 memset(buf, 0, 3);
@@ -907,7 +1637,11 @@ struct _BrushPiecesList
                 buf[0] = data[7];
                 buf[1] = data[8];
                 int times = atoi(buf);
-                buf[0] = data[9];
+                
+                buf[0] = data[10];
+                buf[1] = data[11];
+                
+                buf[0] = data[12];
                 buf[1] = 0;
                 int c = atoi(buf);
                 int ret[4];
@@ -1011,11 +1745,25 @@ struct _BrushPiecesList
             }
         }
             break;
+        case P_BRUSH_DENSITY_MAX:
+        {
+            float f = [token floatValue];
+            p.brush_density_max = f;
+        }
+            break;
+        case P_BRUSH_DENSITY_MIN:
+        {
+            float f = [token floatValue];
+            p.brush_density_min = f;
+        }
+            break;
+            /*
         case P_BRUSH_DENSITY:
         {
             float f = [token floatValue];
             p.brush_density = f;
         }
+             */
             break;
         case P_WAITING_TIME:
         {
@@ -1040,15 +1788,56 @@ struct _BrushPiecesList
                 p.color_type = 1;
             }
         }
+        case P_EDGEDETECT_LOWVALUE:
+        {
+            float v = [token floatValue];
+            p.edgeDetectLowValue = v;
+        }
+            break;
         default:
             break;
     }
 }
-- (void) saveCurrentPass
+- (BOOL) isSelectedImageValid: (NSString*) url : (NSString*) date
 {
-    PHImageView* imageView = [self getImageView];
-    [self drawSignature];
-    [self saveCurrentImage: imageView.image];
+    if(url == nil || date == nil)
+        return NO;
+    SelectedImage* si = [mViewNav getSelectedImageByUrl:url andDate:date];
+    if(si == nil)
+        return NO;
+    else 
+    {
+        return YES;
+    }
+}
+- (void) saveCurrentPass: (BOOL) hasSignature
+{
+    NSLog(@"save URL: %@", self.mSaveImageURL);
+    if([self isSelectedImageValid:self.mSaveImageURL :self.mSaveImageDate])
+    {
+        if(hasSignature)
+        {
+            Signature* sig = [mViewNav getCurrentSignature];
+            if(sig != nil)
+            {
+                NSString* str = [NSString stringWithFormat:@"%d", [sig.seq intValue]];
+                SignaturePointData sd = [mViewNav getSignaturePointsWithSeqName:str];
+                CGImageRef image = [mViewNav createSignatureImageWithPoints:sd.points colors:sd.colors];
+                CGRect dstRect = [mViewNav getSignatureViewRect];
+                PHImageView* imageView = [self getImageView];
+                CGImageRef totalImage = [imageView createSignatureImage:image frame:dstRect];
+                UIImage* retImage = [UIImage imageWithCGImage:totalImage];
+                CGImageRelease(image);
+                CGImageRelease(totalImage);
+                [self saveCurrentImage:retImage];
+            }
+        }
+        else
+        {
+            PHImageView* imageView = [self getImageView];
+           [self saveCurrentImage: imageView.image];
+        }
+    }
 }
 - (PHImageView*)getImageView
 {
@@ -1066,12 +1855,7 @@ struct _BrushPiecesList
 }
 - (void) drawSignature
 {
-    PHImageView* imageView = [self getImageView];
-    SignaturePointData spd = [mViewNav getCurrentSignaturePoints];
-    if(spd.points.count == 0)
-        return;
-    [imageView setPoints: spd.points];
-    [imageView setNeedsDisplay];
+    [mViewNav drawSignatureAnim];
 }
 
 @end
@@ -1083,11 +1867,15 @@ struct _BrushPiecesList
 @synthesize bgHeight = _bgHeight;
 @synthesize painterProperty;
 @synthesize imageArray;
-@synthesize dateArray;
+//@synthesize dateArray;
 @synthesize isPause;
 @synthesize currentImageIndex;
 @synthesize mViewNav;
 @synthesize mCurrentImageOrientation;
+//@synthesize mStageDrawFinished;
+@synthesize mBrushTransparent;
+@synthesize mSaveImageURL;
+@synthesize mSaveImageDate;
 - (void)initParams
 {
     PainterParam* p1 = [[PainterParam alloc] init];
@@ -1146,12 +1934,14 @@ struct _BrushPiecesList
         painterState = [[PainterState alloc] init];
         paramArrayFromFile = [[NSMutableArray alloc] initWithArray:[NSArray array]];
         paramQualityArray = [[NSMutableArray alloc] initWithArray:[NSArray array]];
+        [self readBrushDefine];
+        mCurrentBrush = 13;
         BOOL ret = [self readParamDataFileFromDocuments:@"paramset_url.txt"];
         if(ret == NO)
             [self readParamFromDataFile:@"paramset.txt"];
         [self readPainterQuality:@"paintiddefine.txt"];
         painterProperty = [[PainterProperty alloc] init];
-        painterProperty.percent = 7;
+        painterProperty.percent = 9;
         painterProperty.times = 5;
         painterProperty.paper = [NSString stringWithString:@"bricks.ppgm"];
         threadShareData = [[SS_ThreadShareData alloc] init];
@@ -1159,8 +1949,11 @@ struct _BrushPiecesList
         displayIndex = -1;
         isPause = YES;
         mChangedDrawingIndex = -1;
+        mFirstTimeDraw = YES;
+        //mStageDrawFinished = YES;
         /////
-        data3D = [[SS_3DData alloc] init];
+        //data3D = [[SS_3DData alloc] init];
+        data3D = nil;
     }
     
     return self;
@@ -1177,7 +1970,10 @@ struct _BrushPiecesList
 {
     return threadShareData->pausePoint;
 }
-
+- (void*) currentStatusPoint
+{
+    return threadShareData->statusPoint;
+}
 - (void)dealloc
 {
     [painterState release];
@@ -1187,7 +1983,10 @@ struct _BrushPiecesList
     [painterProperty release];
     [threadShareData release];
     [imageArray release];
-    [dateArray release];
+    [mSaveImageDate release];
+    [mSaveImageURL release];
+    //[dateArray release];
+    [brushPackage release];
     ///
     [data3D release];
     [super dealloc];
@@ -1259,6 +2058,83 @@ struct _BrushPiecesList
     PainterParam* p = [self getPainterParam:sid];
     return CGSizeMake(p.width, p.height);
 }
+- (NSArray*) getAllGottenBrush
+{
+    NSArray* currentLevelBrushIDArray = [[mViewNav getUserUpgrade] getAllBrushIDByUserCurrentLevel];
+    NSArray* currentAchieveBrushIDArray = [[mViewNav getUserUpgrade] getAllBrushIDByUserCurrentAchieve];
+    NSArray* allBrushID = [brushPackage getAllBrushID];
+    NSMutableArray* retArray = [NSMutableArray array];
+    for(int i = 0 ; i < allBrushID.count ; i++)
+    {
+        int brushID = [[allBrushID objectAtIndex:i] intValue];
+        BrushDefine* bd = [self getBrushDefine:brushID];
+        switch (bd.brushGettingWay)
+        {
+            case ITEM_DEFAULT:
+            {
+                [retArray addObject:[NSNumber numberWithInt:brushID]];
+            }
+                break;
+            case ITEM_LEVELUP:
+            {
+                NSUInteger index = [currentLevelBrushIDArray indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) 
+                                    {
+                                        NSNumber* num = (NSNumber*)obj;
+                                        *stop = NO;
+                                        if([num intValue] == brushID)
+                                        {
+                                            return YES;
+                                        }
+                                        else 
+                                        {
+                                            return NO;
+                                        }
+                                        
+                                    }];
+                if(index != NSNotFound)
+                {
+                    [retArray addObject:[NSNumber numberWithInt:brushID]];
+                }
+            }
+                break;
+            case ITEM_ARCHIEVE:
+            {
+                NSUInteger index = [currentAchieveBrushIDArray indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) 
+                                    {
+                                        NSNumber* num = (NSNumber*)obj;
+                                        *stop = NO;
+                                        if([num intValue] == brushID)
+                                        {
+                                            return YES;
+                                        }
+                                        else 
+                                        {
+                                            return NO;
+                                        }
+                                        
+                                    }];
+                if(index != NSNotFound)
+                {
+                    [retArray addObject:[NSNumber numberWithInt:brushID]];
+                }
+            }
+                break;
+            case ITEM_BUY:
+            {
+                NSString* brushOutName = bd.brushOutName;
+                NSString* productId = [[PhotoFrameAppDelegate getProductManager] getProductIdByBrushOutName:brushOutName];
+                NSString* discountId = [[PhotoFrameAppDelegate getProductManager] getDiscountIdByBrushOutName:brushOutName];
+                BOOL isBuied = [SEUserDefaultManager isProductBuied:productId] || [SEUserDefaultManager isProductBuied:discountId];
+                if(isBuied == YES)
+                {
+                    [retArray addObject:[NSNumber numberWithInt:brushID]];
+                }
+            }
+                break;
+        }
+    }
+    return retArray;
+}
 - (void)setCurrentParamToGlobal
 {
     int index = painterState.currentSeq;
@@ -1276,7 +2152,11 @@ struct _BrushPiecesList
     pcvals.size_type = p.size_type;
     pcvals.general_background_type = p.bg_type;
     pcvals.place_type = p.place_type;
-    pcvals.brush_density = p.brush_density;
+    //just for debug
+    //pcvals.place_type = PLACEMENT_TYPE_EVEN_DIST;
+    //end
+    pcvals.brush_density = calculateDensity(p.brush_density_max, p.brush_density_min);
+    
     pcvals.paper_scale = p.paper_scale;
     pcvals.paper_relief = p.paper_relief;
     pcvals.brush_relief = p.brush_relief;
@@ -1287,7 +2167,53 @@ struct _BrushPiecesList
 	strncpy(pcvals.selected_brush, brush, sizeof(pcvals.selected_brush) - 1);
 	memset(pcvals.selected_paper, 0 , sizeof(pcvals.selected_paper));
 	strncpy(pcvals.selected_paper, paper, sizeof(pcvals.selected_paper)  -1);
-    painterState.currentBrushSet = [[NSArray alloc] initWithObjects:p.brushName, p.brushName1, p.brushName2, nil];
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    int currentBrushID = [mViewNav.mSystemDataManager.currentbrushid intValue];
+    int drawBrushMode = [[[mViewNav getUserInfo] drawbrushmode] intValue];
+    if(drawBrushMode != 0)
+    {
+        if(drawBrushMode == 2)
+        {
+            NSArray* allBrushID = [self getAllGottenBrush];
+            int index = abs(rand() % allBrushID.count);
+            currentBrushID = [[allBrushID objectAtIndex:index] intValue];
+        }
+        else
+        {
+            NSArray* allBrushID = [self  getAllGottenBrush];
+            if(displayIndex == 0)
+            {
+                int index = abs(rand() % allBrushID.count);
+                mCurrentBrushIndex = index;
+            }
+            if(mCurrentBrushIndex < allBrushID.count)
+            {
+                currentBrushID = [[allBrushID objectAtIndex:mCurrentBrushIndex] intValue];
+            }
+        }
+    }
+    NSArray* currentBrushArray = [brushPackage getBrushes:currentBrushID];
+    NSMutableArray* newBrushArray = [NSMutableArray array];
+    for(int i = 0 ; i < currentBrushArray.count ; i++)
+    {
+        [newBrushArray addObject:[currentBrushArray objectAtIndex:0]];
+        NSLog(@"brush %d = %@", i, [currentBrushArray objectAtIndex:i]);
+    }
+    assert(newBrushArray.count == 3);
+    /*
+    for(int i = 0 ; i < currentBrushArray.count ; i++)
+    {
+        NSString* s = [currentBrushArray objectAtIndex:i];
+        NSLog(@"brush %d = %@", i, s);
+    }
+    NSString* s1 = [currentBrushArray objectAtIndex:0];
+    NSArray* newArray = [NSArray array];
+    for(int i = 0 ; i < currentBrushArray.count ; i++)
+    {
+        newArray = [newArray arrayByAddingObject:s1];
+    }
+     */
+    painterState.currentBrushSet = newBrushArray;//currentBrushArray;//[[NSArray alloc] initWithObjects:p.brushName, p.brushName1, p.brushName2, nil];
     //painterState->wait_time = p.wait_time;
 }
 - (void) setCurrentPainterParamID:(NSArray*)paramIDArray
@@ -1441,8 +2367,9 @@ struct _BrushPiecesList
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     CGImageRef imageRef = [image CGImage];
-    [self displayCGImage:imageRef];
+    imageRef = CGImageRetain(imageRef);
     [image release];
+    [self displayCGImage:imageRef];
     [pool release];
 }
 - (void) displayCGImageWithName:(NSString*) name
@@ -1451,19 +2378,15 @@ struct _BrushPiecesList
     SEPainterManagerLoadPhoto* loadPhotoHandler = [[SEPainterManagerLoadPhoto alloc] init];
     ALAssetsLibrary* assetLib = [[ALAssetsLibrary alloc] init];
     loadPhotoHandler.pm = self;
-    SEImageAsyncLoader* imageLoader =  [[SEImageAsyncLoader alloc] init];
-    [imageLoader setAssetLibOwn:assetLib];
+    [loadPhotoHandler setAssetLibOwn:assetLib];
+    //SEImageAsyncLoader* imageLoader =  [[SEImageAsyncLoader alloc] init];
+    //[imageLoader setAssetLibOwn:assetLib];
     [assetLib release];
-    loadPhotoHandler.imageLoader = imageLoader;
-    [imageLoader release];
+    //loadPhotoHandler.imageLoader = imageLoader;
+    //[imageLoader release];
     NSURL* url = [NSURL URLWithString:name];
-    [imageLoader loadFullRepresentation:url withHandler:loadPhotoHandler];
-    /*
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    CGImageRef imageRef = [self getCGImageRef:name];
-    [self displayCGImage:imageRef];
-    [pool release];
-     */
+    [loadPhotoHandler loadFullRepresentation:url];
+    //[imageLoader loadFullRepresentation:url withHandler:loadPhotoHandler];
 
 }
 
@@ -1515,73 +2438,382 @@ struct _BrushPiecesList
     pcvals.general_shadow_blur = 0.0f;
 
 }
-- (void) nextDisplayStage
+- (BOOL) isHorizonPhoto: (float) width : (float)height : (int) o
 {
-    if(imageArray == nil || imageArray.count == 0)
+    if(width > height)
+    {
+        if(o == UIImageOrientationDown || o == UIImageOrientationUp || o == UIImageOrientationUpMirrored || o == UIImageOrientationDownMirrored)
+        {
+            return YES;
+        }
+        else
+        {
+            return NO;        
+        }
+    }
+    else
+    {
+        if(o == UIImageOrientationUp || o == UIImageOrientationDown || o == UIImageOrientationUpMirrored || o == UIImageOrientationDownMirrored)
+        {
+            return NO;
+        }
+        else 
+        {
+            return YES;
+        }
+    }    
+}
+- (NSArray*) getImageIndexByOrientation: (int) orient
+{
+    NSMutableArray* horizonArray = [NSMutableArray array];
+    NSMutableArray* verticalArray = [NSMutableArray array];
+    for(int i = 0 ; i < imageArray.count ; i++)
+    {
+        SelectedImage* si = [imageArray objectAtIndex:i];
+        BOOL isH = [self isHorizonPhoto: [si.width intValue]: [si.height intValue]: [si.orientation intValue]];
+        if(isH)
+        {
+            [horizonArray addObject:[NSNumber numberWithInt:i]];
+        }
+        else
+        {
+            [verticalArray addObject:[NSNumber numberWithInt:i]];
+        }
+    }
+    if(orient == IMAGE_HORIZON)
+    {
+        return horizonArray;
+    }
+    else if(orient == IMAGE_VERTICAL)
+    {
+        return verticalArray;
+    }
+    else 
+    {
+        return nil;
+    }
+}
+- (int) findNextImageIndex: (int)fromIndex withOrientation: (int)hv
+{
+    
+}
+- (int) advanceImageIndex : (int) inputIndex
+{
+    UserInfo* userInfo = [[PhotoFrameAppDelegate getViewNavigator] getUserInfo];
+    int sequenceMode = [userInfo.imageplaymode intValue];
+    BOOL isImageFilter = [userInfo.imagesizefilter boolValue] == NO;
+    if(sequenceMode == 0)//SEQUENCE
+    {
+        if(isImageFilter == NO)
+        {
+            inputIndex++;
+            int imageCount = [imageArray count];
+            if(inputIndex >= imageCount)
+            {
+                inputIndex = 0;
+            }
+            return inputIndex;
+        }
+        else
+        {
+            if(UIInterfaceOrientationIsPortrait(mViewNav.interfaceOrientation))
+            {
+                
+            }
+            else 
+            {
+                
+            }
+        }
+    }
+    else if(sequenceMode == 1)//random
+    {
+        int imageCount = [imageArray count];
+        int random = rand();
+        if(random < 0)
+            random = -random;
+        int index = random % imageCount;
+        if(isImageFilter)
+        {
+            return index;
+        }
+        NSArray* horizontalArray = [self getImageIndexByOrientation:IMAGE_HORIZON];
+        NSArray* verticalArray = [self getImageIndexByOrientation:IMAGE_VERTICAL];
+        if(UIInterfaceOrientationIsPortrait(mViewNav.interfaceOrientation))
+        {
+            if(verticalArray.count == 0)
+            {
+                return imageCount - 1;
+            }
+            else
+            {
+                index = random % verticalArray.count;
+                return index;
+            }
+        }
+        else
+        {
+            if(horizontalArray.count == 0)
+            {
+                return imageCount - 1;
+            }
+            else
+            {
+                index = random % horizontalArray.count;
+                return index;
+            }
+        }
+    }
+    else if(sequenceMode == 2)
+    {
+        return inputIndex;
+        /*
+        NSArray* horizontalArray = [self getImageIndexByOrientation:IMAGE_HORIZON];
+        NSArray* verticalArray = [self getImageIndexByOrientation:IMAGE_VERTICAL];
+        if(UIInterfaceOrientationIsPortrait(mViewNav.interfaceOrientation))
+        {
+            if([userInfo.imagesizefilter boolValue] == NO)
+            {
+                
+            }
+        }
+        else
+        {
+            
+        }
+         */
+    }
+    else 
+    {
+        NSLog(@"## error sequence mode ##\n");
+        return inputIndex;
+    }
+}
+- (BOOL) findNextProperImageIndex
+{
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    if([userInfo.imagesizefilter boolValue] == NO)
+    {
+        return YES;
+    }
+    int inputIndex = currentImageIndex;
+    SelectedImage* si = [imageArray objectAtIndex:inputIndex];
+    int imageCount = [imageArray count];
+    if(UIInterfaceOrientationIsPortrait(mViewNav.interfaceOrientation))
+    {
+        int count = 0;
+        while([self isHorizonPhoto: [si.width intValue]: [si.height intValue]: [si.orientation intValue]] && count < imageCount)
+        {
+            inputIndex = [self advanceImageIndex:inputIndex];
+            si = [imageArray objectAtIndex:inputIndex];
+            count++;
+        }
+        if(count == imageCount)
+            return NO;
+        currentImageIndex = inputIndex;
+    }
+    else
+    {
+        int count = 0;
+        while([self isHorizonPhoto: [si.width intValue]: [si.height intValue]: [si.orientation intValue]] == NO && count < imageCount)
+        {
+            inputIndex = [self advanceImageIndex:inputIndex];
+            si = [imageArray objectAtIndex:inputIndex];
+            count++;
+        }
+        if(count == imageCount)
+            return NO;
+        currentImageIndex = inputIndex;
+    }
+    return YES;
+}
+- (void) displayNextImage
+{
+    SelectedImage* si = nil;
+    if(imageArray.count > 0)
+    {
+        si = [imageArray objectAtIndex:currentImageIndex];
+    }
+    self.mSaveImageURL = si.url;
+    self.mSaveImageDate = si.urldate;
+    for(int i = 0 ; i < PARAM_NUM ; i++)
+    {
+        mDrawFinishedArray[i] = NO;
+    }
+    mChangedDrawingIndex = displayIndex - 1;
+    mSaveOrientation = mCurrentImageOrientation;
+    displayIndex = -1;
+    //currentImageIndex = [self advanceImageIndex:currentImageIndex];
+    [mViewNav performSelectorOnMainThread:@selector(displayNextImage) withObject:nil waitUntilDone:NO];
+}
+
+- (void) realNextDisplayStage: (NSMutableArray*)data
+{
+    if([mViewNav isInMainDisplay] == NO)
+    {
+        [data release];
         return;
+    }
+    SelectedImage* si = [data objectAtIndex:1];
+    BOOL isExist = [[data objectAtIndex:2] boolValue];
+    NSString* currentImageName = si.url;
+    BOOL isDefaultImage = [SESystemConfig isDefaultSelectedImageURL:currentImageName];
+    if(isExist == NO && isDefaultImage == NO)
+    {
+        NSLog(@"image is not in selected image list: %@, %@", si.url, si.urldate);
+        si.width = [NSNumber numberWithInt:0];
+        si.height = [NSNumber numberWithInt:0];
+        [data release];
+        [self displayNextImage];
+        return;
+    }
     displayIndex++;
-    //BOOL drawFinished = mWantToDrawIndex >= [painterState paintTimes];
-    //mDrawFinished = NO;
+    //for test
+    //[self setFirstNum:[NSNumber numberWithInt:displayIndex]];
+    //end
     if(mViewNav.mNewConfig)
     {
         mViewNav.mNewConfig = NO;
         [paramArrayFromFile release];
         paramArrayFromFile = [NSMutableArray array];
         [paramArrayFromFile retain];
-        BOOL ret = [self readParamFromDataFile:@"paramset_url.txt"];
+        BOOL ret = [self readParamDataFileFromDocuments:@"paramset_url.txt"];
         if(ret == NO)
         {
             [self readParamFromDataFile:@"paramset.txt"];
         }
     }
-
     if(displayIndex >= [painterState paintTimes])
     {
         NSLog(@"## all compute pass end ###");
-        //mSaveImageIndex = currentImageIndex;
-        mSaveImageURL = [imageArray objectAtIndex:currentImageIndex];
-        mSaveImageDate = [dateArray objectAtIndex:currentImageIndex];
-        for(int i = 0 ; i < PARAM_NUM ; i++)
-        {
-            mDrawFinishedArray[i] = NO;
-        }
-        mChangedDrawingIndex = displayIndex - 1;
-        mSaveOrientation = mCurrentImageOrientation;
-        //mNeedSaveImage = YES;
-        /*
-        if(drawFinished == YES)
-        {
-            [self saveCurrentPass];
-            mNeedSaveImage = NO;
-            mWantToDrawIndex = 0;
-        }
-        else 
-        {
-            mNeedSaveImage = YES;
-            mWantToDrawIndex = -1;
-        }
-         */
-        displayIndex = -1;
-        currentImageIndex++;
-        int imageCount = [imageArray count];
-        if(currentImageIndex >= imageCount)
-        {
-            currentImageIndex = 0;
-        }
-        [mViewNav performSelectorOnMainThread:@selector(displayNextImage) withObject:nil waitUntilDone:NO];
+        [data release];
+        [self displayNextImage];
         return;
     }
     painterState.currentSeq = displayIndex;
     NSArray* paramID = painterState.painterParamIDs;
     NSString* sid = [paramID objectAtIndex:displayIndex];
+    NSLog(@"sid = %@", sid);
     PainterParam* p = [self getPainterParam:sid];
+    [p print];
     painterState->wait_time = p.wait_time;
     [self initPcVals];
     [self setCurrentParamToGlobal];
-    NSString* currentImageName = [imageArray objectAtIndex:currentImageIndex];
-    //[self performSelectorInBackground:@selector(displayCGImageWithName:) withObject:currentImageName];
+    NSLog(@"## current image index: %d , pass : %d ##\n", currentImageIndex, displayIndex);
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    mAdjustAngle = [mViewNav.mSystemDataManager.currentangle intValue];
+    mBrushTransparent = [mViewNav.mSystemDataManager.currentbrushtransparent intValue];
+    //mStageDrawFinished = NO;
+    mComputeReady = NO;
+    mComputeThreadEnd = NO;
+    mCurrentEdgeDetectValue = [mViewNav.mSystemDataManager.brushedgedetect intValue];
+    mCurrentTransparentValue = [mViewNav.mSystemDataManager.currentbrushtransparent intValue];
     [self displayCGImageWithName:currentImageName];
-    [self startDrawing];
+    if(displayIndex == 0)
+    {
+        [self startDrawing];
+    }
+    if(mFirstTimeDraw)
+    {
+        mFirstTimeDraw = NO;
+        [self showLoadingView:nil];
+    }
+    [data release];
+}
+- (void) checkSelectedImageValid: (SelectedImage*)si
+{
+    ALAssetsLibrary* lib = [[ALAssetsLibrary alloc] init];
+    NSString* urlStr = si.url;
+    NSURL* url = [NSURL URLWithString:urlStr];
+    NSMutableArray* data = [[NSMutableArray array] retain];
+    [data addObject:lib];
+    [lib release];
+    [data addObject:si];
+    ALAssetsLibraryAssetForURLResultBlock result = ^(ALAsset* asset)
+    {
+        BOOL isExist = NO;
+        if(asset != NULL)
+        {
+            isExist = YES;
+        }
+        if(isExist)
+        {
+            isExist = [self isSelectedImageValid: si.url : si.urldate];
+        }
+        [data addObject:[NSNumber numberWithBool:isExist]];
+        [self performSelectorOnMainThread:@selector(realNextDisplayStage:) withObject:data waitUntilDone:NO];
+    };
+    ALAssetsLibraryAccessFailureBlock fail = ^(NSError* error)
+    {
+        NSLog(@"error");
+        [data addObject:[NSNumber numberWithBool:NO]];
+        [self performSelectorOnMainThread:@selector(realNextDisplayStage:) withObject:data waitUntilDone:NO];
+    };
+    [lib assetForURL:url resultBlock:result failureBlock:fail];
+}
+
+- (void) nextDisplayStage
+{
+    if(imageArray == nil || imageArray.count == 0)
+        return;
+    SelectedImage* si = [imageArray objectAtIndex:currentImageIndex];
+    [self checkSelectedImageValid:si];
+    return;
+    NSString* currentImageName = si.url;
+    if([self isSelectedImageValid:si.url :si.urldate] == NO && [SESystemConfig isDefaultSelectedImageURL:si.url] == NO)
+    {
+        NSLog(@"image is not in selected image list: %@, %@", si.url, si.urldate);
+        [self displayNextImage];
+        return;
+    }
+    displayIndex++;
+    //for test
+    [self setFirstNum:[NSNumber numberWithInt:displayIndex]];
+    //end
+    if(mViewNav.mNewConfig)
+    {
+        mViewNav.mNewConfig = NO;
+        [paramArrayFromFile release];
+        paramArrayFromFile = [NSMutableArray array];
+        [paramArrayFromFile retain];
+        BOOL ret = [self readParamDataFileFromDocuments:@"paramset_url.txt"];
+        if(ret == NO)
+        {
+            [self readParamFromDataFile:@"paramset.txt"];
+        }
+    }
+    if(displayIndex >= [painterState paintTimes])
+    {
+        NSLog(@"## all compute pass end ###");
+        [self displayNextImage];
+        return;
+    }
+    painterState.currentSeq = displayIndex;
+    NSArray* paramID = painterState.painterParamIDs;
+    NSString* sid = [paramID objectAtIndex:displayIndex];
+    NSLog(@"sid = %@", sid);
+    PainterParam* p = [self getPainterParam:sid];
+    [p print];
+    painterState->wait_time = p.wait_time;
+    [self initPcVals];
+    [self setCurrentParamToGlobal];
+    NSLog(@"## current image index: %d , pass : %d ##\n", currentImageIndex, displayIndex);
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    mAdjustAngle = [mViewNav.mSystemDataManager.currentangle intValue];
+    mBrushTransparent = [mViewNav.mSystemDataManager.currentbrushtransparent intValue];
+    //mStageDrawFinished = NO;
+    mComputeReady = NO;
+    mComputeThreadEnd = NO;
+    [self displayCGImageWithName:currentImageName];
+    if(displayIndex == 0)
+    {
+        [self startDrawing];
+    }
+    if(mFirstTimeDraw)
+    {
+        mFirstTimeDraw = NO;
+        [self showLoadingView:nil];
+    }
 }
 
 - (void)initPainterState: (int)quality withTimes:(int)times
@@ -1603,18 +2835,47 @@ struct _BrushPiecesList
         }
     }
     timesList.sort();
+    for(std::list<int>::iterator it = timesList.begin(); it != timesList.end(); it++)
+    {
+        NSLog(@"times = %d", *it);
+    }
     std::list<int>::iterator min = std::min_element(timesList.begin(), timesList.end());
     *outMin = *min;
     std::list<int>::iterator max = std::max_element(timesList.begin(), timesList.end());
     *outMax = *max;
 }
+- (void*) detectModelManager
+{
+    if(data3D == nil)
+        return nil;
+    else {
+        return data3D->modelManager;
+    }
+}
 - (void*) modelManager
 {
+    if(data3D == nil)
+    {
+        data3D = [[SS_3DData alloc] init];
+    }
     return data3D->modelManager;
+}
+- (void) releaseModelManager
+{
+    if(data3D != nil)
+    {
+        [data3D release];
+        data3D = nil;
+    }
 }
 - (NSArray*) currentBrushSet
 {
     return painterState.currentBrushSet;
+}
+- (void) setCurrentBrushSet: (NSArray*) brushArray
+{
+    NSArray* newArray = [NSArray arrayWithArray:brushArray];
+    painterState.currentBrushSet = newArray;
 }
 + (CGImageRef)createCGImage: (ppm_t) p
 {
@@ -1647,16 +2908,22 @@ struct _BrushPiecesList
 }
 - (void) saveCurrentImage: (UIImage*)image
 {
-    //NSString* url = [imageArray objectAtIndex:mSaveImageIndex];
-    //NSString* urlDate = [dateArray objectAtIndex:mSaveImageIndex];
-    NSString* url = mSaveImageURL;
-    NSString* urlDate = mSaveImageDate;
+    NSString* url = self.mSaveImageURL;
+    NSString* urlDate = self.mSaveImageDate;
     SelectedImage* si = [mViewNav getSelectedImageByUrl:url andDate:urlDate];
     if(si != nil)
     {
         NSLog(@"## save orientation = %d ##", mSaveOrientation);
         [mViewNav setSelectedImageProperty: url urlDate: urlDate orientation: mSaveOrientation image:image];
-        [mViewNav saveImageAndThumbnailToCoreData:image urlName:url urlDate:urlDate index:0];    
+        /*
+        BOOL isHoriz = [si.width intValue] > [si.height intValue];
+        int orient = [si.orientation intValue];
+        if(isHoriz == NO)
+        {
+            orient = UIImageOrientationRight;
+        }
+         */
+        [mViewNav saveImageAndThumbnailToCoreData:image urlName:url urlDate:urlDate orientation: [si.orientation intValue] index:0];    
     }
 }
 - (void) pauseDrawing
@@ -1671,37 +2938,662 @@ struct _BrushPiecesList
     [self setTimer];
     isPause = NO;
 }
-- (void) drawFinished
+- (void) displayDrawFinishAnim
 {
-    NSLog(@"## draw finished ##");
-    /*
-    if(mNeedSaveImage == YES)
+    
+}
+- (void) promptNextImageDraw
+{
+    [self displayComputeLoadingView];
+    [mViewNav playDrawFrameHideAnim];
+    //[self startDrawing];
+    SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+}
+- (void) calculateSignatureAutoColor
+{
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    if([[userInfo signatureautocolor] boolValue])
     {
-        [self saveCurrentPass];
-        mNeedSaveImage = NO;
+        PHImageView* imageView = [self getImageView];
+        CGRect rect = [mViewNav getSignatureViewRect];
+        int startx = rect.origin.x;
+        int starty = rect.origin.y;
+        int endx = rect.origin.x + rect.size.width;
+        int endy = rect.origin.y + rect.size.height;
+        UIImage* image = imageView.image;
+        CGImageRef imageRef = image.CGImage;
+        CGDataProviderRef pv = CGImageGetDataProvider(imageRef);
+        CFDataRef imageData = CGDataProviderCopyData(pv);;
+        size_t bbb = CGImageGetBitsPerPixel(imageRef);
+        size_t bytesPerRow = CGImageGetBytesPerRow(imageRef);
+        //CFIndex len = CFDataGetLength(imageData);
+        size_t width = CGImageGetWidth(imageRef);
+        size_t height = CGImageGetHeight(imageRef);
+        assert(width == 1024 && height == 768);
+        bbb /= 8;
+        assert(bbb == 3);
+        const UInt8* data = CFDataGetBytePtr(imageData);
+        double gray = 0;
+        int count = 0;
+        float cr = 0, cg = 0, cb = 0;
+        for(int i = starty ; i < endy ; i++)
+        {
+            for(int j = startx ; j < endx ; j++)
+            {
+                const UInt8* src = data + i * bytesPerRow + j * 3;
+                cr += src[0];
+                cg += src[1];
+                cb += src[2];
+                double g = src[0] * 0.2126f + src[1] * 0.7152f + src[2] * 0.0722f;
+                gray += g;
+                count++;
+            }
+        }
+        float avgGray = gray / count;
+        avgGray /= 255;
+        avgGray = 1.0 - avgGray;
+        float avgR = cr / count;
+        float avgG = cg / count;
+        float avgB = cb / count;
+        avgR = 1.0 - avgR / 255;
+        avgG = 1.0 - avgG / 255;
+        avgB = 1.0 - avgB / 255;
+        NSLog(@"avgR = %f, avgG = %f, avgB = %f", avgR, avgG, avgB);
+        //mViewNav.mSignatureAutoColor = [UIColor colorWithRed:avgGray green:avgGray blue:avgGray alpha:1.0];
+        mViewNav.mSignatureAutoColor = [UIColor colorWithRed:avgR green:avgG blue:avgB alpha:1.0];
+        CFRelease(imageData);
+        //[SEUtil savePNGImageToDocument:image withName:@"autocolorimage"];
     }
-     */
+    else
+    {
+        mViewNav.mSignatureAutoColor = nil;
+    }
+    
+}
+- (BOOL) hasSignature
+{
+    BOOL hasSigature = NO;
+    Signature* sig = [mViewNav getCurrentSignature];
+    if(sig != nil)
+    {
+        NSString* str = [NSString stringWithFormat:@"%d", [sig.seq intValue]];
+        SignaturePointData sd = [mViewNav getSignaturePointsWithSeqName:str];
+        if(sd.points.count > 0)
+        {
+            hasSigature = YES;
+        }
+    }
+    return hasSigature;
+}
+- (void)drawFinishWhenPause
+{
+    BOOL drawpassFinish = NO;
     if(mDrawingIndex == 0)
     {
         mDrawFinishedArrayNum = [painterState paintTimes];
+        NSLog(@"## %s : drawing times = %d", __FUNCTION__, mDrawFinishedArrayNum);
     }
+    SS_BrushListPool* brushListPool = SS_GetBrushListPool();
+    //brushListPool->clearDrawingBrushes();
+    SS_ClearDrawingBrushes(brushListPool, mDrawingIndex);
     if(mChangedDrawingIndex == -1)
     {
         mDrawFinishedArray[mDrawingIndex] = YES;
         mDrawingIndex++;
+        NSLog(@"## %s: next drawing index = %d, all drawing num = %d ##", __FUNCTION__, mDrawingIndex, mDrawFinishedArrayNum);
         if(mDrawingIndex == mDrawFinishedArrayNum)
         {
-            [self saveCurrentPass];
+            SelectedImage* si = [imageArray objectAtIndex:currentImageIndex];
+            self.mSaveImageURL = si.url;
+            self.mSaveImageDate = si.urldate;
+            mSaveOrientation = mCurrentImageOrientation;
+            /*
+            if([si.width intValue] > 0 && [si.height intValue] > 0)
+            {
+                [self saveCurrentPass];
+            }
+             */
+            [self calculateSignatureAutoColor];
+            [mViewNav finishOneImageDrawing];
+            mDrawingIndex = 0;
+            mDrawFinishedArrayNum = 0;
+            drawpassFinish = YES;
+        }
+        else
+        {
+            [self startDrawing];
         }
     }
     else 
     {
-        assert(mDrawingIndex == mChangedDrawingIndex);
+        NSLog(@"# %s: mDrawingIndex = %d, mChangeDrawingIndex = %d ##", __FUNCTION__,  mDrawingIndex, mChangedDrawingIndex);
+        /*
+        if([self isSelectedImageValid:mSaveImageURL :mSaveImageDate] == YES)
+        {
+            assert(mDrawingIndex == mChangedDrawingIndex);
+        }
+         */
         mDrawingIndex = 0;
         mChangedDrawingIndex = -1; 
         mDrawFinishedArrayNum = 0;
-        [self saveCurrentPass];
+        /*
+        if([self isSelectedImageValid:mSaveImageURL :mSaveImageDate])
+        {
+            [self saveCurrentPass];
+        }
+         */
+        [self calculateSignatureAutoColor];
+        [mViewNav finishOneImageDrawing];
+        drawpassFinish = YES;
     }
-    SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+    if(drawpassFinish == YES)
+    {
+        [mViewNav playDrawFrameShowAnim];
+        UserInfo* userInfo = [mViewNav getUserInfo];
+        BOOL hasSig = [self hasSignature];
+        if([userInfo.showsignatureview boolValue] == YES && hasSig)
+        {
+            [self saveCurrentPass : YES];
+            //[self pauseDrawing];
+            [self drawSignature];
+        }
+        else 
+        {
+            [self saveCurrentPass: NO];
+            UserInfo* userInfo = [mViewNav getUserInfo];
+            int waitTime = [userInfo.imageplaywaitingtime intValue];
+            NSLog(@"wait time = %d", waitTime);
+            if(waitTime == 0)
+                waitTime = 5;
+            [self performSelector:@selector(promptNextImageDraw) withObject:nil afterDelay:waitTime];
+        }
+    }
+    else
+    {
+        SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+    }
+}
+- (void) drawFinishAction
+{
+    BOOL drawpassFinish = NO;
+    if(mDrawingIndex == 0)
+    {
+        mDrawFinishedArrayNum = [painterState paintTimes];
+        NSLog(@"## %s : drawing times = %d", __FUNCTION__, mDrawFinishedArrayNum);
+    }
+    SS_BrushListPool* brushListPool = SS_GetBrushListPool();
+    SS_ClearDrawingBrushes(brushListPool, mDrawingIndex);
+    if(mChangedDrawingIndex == -1)
+    {
+        mDrawFinishedArray[mDrawingIndex] = YES;
+        mDrawingIndex++;
+        NSLog(@"## %s: next drawing index = %d, all drawing num = %d ##", __FUNCTION__, mDrawingIndex, mDrawFinishedArrayNum);
+        if(mDrawingIndex == mDrawFinishedArrayNum)
+        {
+            SelectedImage* si = [imageArray objectAtIndex:currentImageIndex];
+            self.mSaveImageURL = si.url;
+            self.mSaveImageDate = si.urldate;
+            mSaveOrientation = mCurrentImageOrientation;
+            /*
+            if([self isSelectedImageValid:mSaveImageURL :mSaveImageDate])
+            {
+                [self saveCurrentPass];
+            }
+             */
+            [self calculateSignatureAutoColor];
+            [mViewNav finishOneImageDrawing];
+            mDrawingIndex = 0;
+            mDrawFinishedArrayNum = 0;
+            drawpassFinish = YES;
+        }
+        else 
+        {
+            [self startDrawing];
+        }
+    }
+    else 
+    {
+        NSLog(@"# %s: mDrawingIndex = %d, mChangeDrawingIndex = %d ##", __FUNCTION__,  mDrawingIndex, mChangedDrawingIndex);
+        /*
+        if([self isSelectedImageValid:mSaveImageURL :mSaveImageDate] == YES)
+        {
+            assert(mDrawingIndex == mChangedDrawingIndex);
+        }
+         */
+        mDrawingIndex = 0;
+        mChangedDrawingIndex = -1; 
+        mDrawFinishedArrayNum = 0;
+        /*
+        if([self isSelectedImageValid:mSaveImageURL :mSaveImageDate])
+        {
+            [self saveCurrentPass];
+        }
+         */
+        [self calculateSignatureAutoColor];
+        [mViewNav finishOneImageDrawing];
+        drawpassFinish = YES;
+    }
+    if(drawpassFinish == YES)
+    {
+        [mViewNav playDrawFrameShowAnim];
+        UserInfo* userInfo = [mViewNav getUserInfo];
+        BOOL hasSig = [self hasSignature];
+        if([userInfo.showsignatureview boolValue] == YES && hasSig)
+        {
+            [self saveCurrentPass: YES];
+            [self drawSignature];
+        }
+        else 
+        {
+            [self saveCurrentPass: NO];
+            UserInfo* userInfo = [mViewNav getUserInfo];
+            int waitTime = [userInfo.imageplaywaitingtime intValue];
+            NSLog(@"wait time = %d", waitTime);
+            if(waitTime == 0)
+                waitTime = 5;
+            [self performSelector:@selector(promptNextImageDraw) withObject:nil afterDelay:waitTime];
+        }
+    }
+    else
+    {
+        SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+    }
+    if(drawpassFinish == NO)
+    {
+        [self displayComputeLoadingView];
+    }
+}
+- (void) drawFinished
+{
+    NSLog(@"## draw finished ##");
+    //[self drawFinishAction];
+    [mViewNav drawFinished];
+}
+- (void) displayComputeLoadingView
+{
+    if(mComputeReady == NO)
+    {
+        [self showLoadingView:nil];
+    }
+}
+- (void) promptNextImageDrawAfterAnimation
+{
+    //[self saveCurrentPass];
+    UserInfo* userInfo = [mViewNav getUserInfo];
+    int waitTime = [userInfo.imageplaywaitingtime intValue];
+    NSLog(@"wait time = %d", waitTime);
+    if(waitTime == 0)
+        waitTime = 5;
+    [self performSelector:@selector(promptNextImageDraw) withObject:nil afterDelay:waitTime];
+}
+/*
+- (void) changeDisplayIndex:(int) i
+{
+    displayIndex = i;
+}
+ */
+- (NSArray*) getAllBrushID
+{
+    return [brushPackage getAllBrushID];
+}
+- (NSArray*) getBrushesById: (int) brushID
+{
+    return [brushPackage getBrushes:brushID];
+}
+- (BrushDefine*) getBrushDefine: (int) brushID
+{
+    return [brushPackage getBrushDefine:brushID];
+}
+- (BrushDefine*) getBrushDefineByOutName: (NSString*) outName
+{
+    return [brushPackage getBrushDefineByOutName:outName];
+}
+/*
+- (int) currentBrushID
+{
+    return mCurrentBrush;
+}
+- (void) setCurrentBrushID: (int) brushID
+{
+    mCurrentBrush = brushID;
+    
+}
+ */
+- (void) addLog: (NSString*) text
+{
+    [mViewNav addLog:text];
+}
+- (void) setFirstNum: (NSNumber*) num
+{
+    [mViewNav setFirstViewNum:[num intValue]];
+}
+- (void) setSecondNum: (NSNumber*)num
+{
+    [mViewNav setSecondViewNum:[num intValue]];
+}
+- (void) computeReady: (id)param
+{
+    mComputeReady = YES;
+    NSLog(@"### compte ready ####");
+    [self hideLoadingView:nil];
+}
+- (void) showLoadingView: (id)param
+{
+    [mViewNav showDrawingWaitingView];
+}
+- (void) hideLoadingView: (id)param
+{
+    [mViewNav hideDrawingWaitingView];
+}
+- (void) paintSignatureToImage: (CGImageRef) imageRef frame:(CGRect)frame
+{
+    PHImageView* imageView = [self getImageView];
+    [imageView paintSignatureImage:imageRef frame:frame];
+}
+- (void) releaseResourceForDraw
+{
+    SS_ClearBrushListPool(threadShareData->brushListPool);
+    [displayTimer invalidate];
+    [displayTimer release];
+    displayTimer = nil;
+    SS_AtomicCounter* statusPoint = threadShareData->statusPoint;
+    SS_SetAtomicCounterValue(statusPoint, 1);
+    displayIndex = -1;
+    self.mSaveImageURL = nil;
+    self.mSaveImageDate = nil;
+    mChangedDrawingIndex = -1;
+    mDrawingIndex = 0;
+    for(int i = 0 ; i < PARAM_NUM ; i++)
+    {
+        mDrawFinishedArray[i] = NO;
+    }
+    mDrawFinishedArrayNum = 0;
+}
+- (void) stopDrawImage
+{
+    DRAW_IMAGE_STATE currentDrawImageState = [mViewNav getDrawImageState];
+    if(currentDrawImageState == START_DRAW_IMAGE || currentDrawImageState == PAUSE_DRAW_IMAGE)
+    {
+        if(currentDrawImageState == START_DRAW_IMAGE)
+        {
+            mFromStartDrawImageState = YES;
+        }
+        else
+        {
+            mFromStartDrawImageState = NO;    
+        }
+        if(mComputeThreadEnd == NO)
+        {
+            SS_AtomicCounter* statusPoint = threadShareData->statusPoint;
+            SS_SetAtomicCounterValue(statusPoint, 0);
+            SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+            [mViewNav setDrawImageState:STOPPING_DRAWING_IMAGE];
+        }
+        else
+        {
+            [mViewNav setDrawImageState:STOP_DRAW_IMAGE];
+            [self releaseResourceForDraw];
+        }
+    }
+    else if(currentDrawImageState == START_DRAW_IMAGE_PENDING)
+    {
+        if(mComputeThreadEnd == NO)
+        {
+            [mViewNav setDrawImageState:STOPPING_DRAWING_IMAGE];
+        }
+        else
+        {
+            [mViewNav setDrawImageState:STOP_DRAW_IMAGE];
+            [self releaseResourceForDraw];
+        }
+    }
+}
+- (void) startDrawImage
+{
+    DRAW_IMAGE_STATE currentDrawImageState = [mViewNav getDrawImageState];
+    if(currentDrawImageState == INIT_DRAW_IMAGE_STATE)
+    {
+        [mViewNav setDrawImageState:START_DRAW_IMAGE];
+        SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+        [mViewNav displayNextImage];
+    }
+    else if(currentDrawImageState == STOPPING_DRAWING_IMAGE)
+    {
+        if(mComputeThreadEnd == NO)
+        {
+            [mViewNav setDrawImageState:START_DRAW_IMAGE_PENDING];
+        }
+        else 
+        {
+            if(mFromStartDrawImageState)
+            {
+                [mViewNav setDrawImageState:START_DRAW_IMAGE];
+                SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+                [mViewNav displayNextImage];
+                //set the interface with start state
+            }
+            else
+            {
+                // set interface with start state
+            }
+        }
+    }
+    else if(currentDrawImageState == STOP_DRAW_IMAGE)
+    {
+        if(mFromStartDrawImageState)
+        {
+            [mViewNav setDrawImageState:START_DRAW_IMAGE];
+            SS_NoPause((SS_PausePoint*)[self currentPausePoint]);
+            [mViewNav displayNextImage];
+            //set interface with start state
+        }
+        else
+        {
+            
+        }
+    }
+    else if(currentDrawImageState == PAUSE_DRAW_IMAGE)
+    {
+        [mViewNav setDrawImageState:START_DRAW_IMAGE];
+        mFromStartDrawImageState = YES;
+        [self startDrawImage];
+    }
+    
+}
+- (void) pauseDrawImage
+{
+    DRAW_IMAGE_STATE currentDrawImageState = [mViewNav getDrawImageState];
+    if(currentDrawImageState == START_DRAW_IMAGE)
+    {
+        [mViewNav setDrawImageState:PAUSE_DRAW_IMAGE];
+        mFromStartDrawImageState = NO;
+        [self pauseDrawing];
+    }
+    else
+    {
+            
+    }
+}
+- (void) setFirstTimeDraw: (BOOL) b
+{
+    mFirstTimeDraw = b;
+}
+- (void) doAction: (int)fromState toState: (int)toState
+{
+
+    switch (fromState) {
+        case INIT_DRAW_IMAGE_STATE:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {
+                    [mViewNav displayNextImage];
+                }
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {}
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        case START_DRAW_IMAGE:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {}
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {
+                    
+                }
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        case STOPPING_DRAWING_IMAGE:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {}
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {}
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        case STOP_DRAW_IMAGE:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {}
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {}
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        case START_DRAW_IMAGE_PENDING:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {}
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {}
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        case PAUSE_DRAW_IMAGE:
+        {
+            switch (toState) 
+            {
+                case INIT_DRAW_IMAGE_STATE:
+                {}
+                    break;
+                case START_DRAW_IMAGE:
+                {}
+                    break;
+                case STOPPING_DRAWING_IMAGE:
+                {}
+                    break;
+                case STOP_DRAW_IMAGE:
+                {}
+                    break;
+                case START_DRAW_IMAGE_PENDING:
+                {}
+                    break;
+                case PAUSE_DRAW_IMAGE:
+                {}
+                    break;
+                default:
+                    break;
+            }
+        }
+            break;
+        default:
+            break;
+    }
+}
+- (BOOL) isComputeEnd
+{
+    return mComputeThreadEnd;
 }
 @end
